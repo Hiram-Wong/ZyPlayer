@@ -30,7 +30,7 @@
     "key": "39kan",
     "name": "39影视",
     "api": "https://www.39kan.com/api.php/provide/vod/",
-	  "type": 1,
+    "type": 1,
     "jiexiUrl": "",
     "group": "影视",
     "isActive": true,
