@@ -12,9 +12,8 @@
 
 ### ✨特性
 
-- 全平台支持. Windows, Mac, Linux
+- 全平台支持. Windows, Mac
 - 支持 资源站cms、IPTV(含epg), 视频解析
-- 显示豆瓣评分
 
 ### 🌴 声明
 
@@ -31,7 +30,7 @@
     "key": "39kan",
     "name": "39影视",
     "api": "https://www.39kan.com/api.php/provide/vod/",
-	"type": 1,
+	  "type": 1,
     "jiexiUrl": "",
     "group": "影视",
     "isActive": true,
