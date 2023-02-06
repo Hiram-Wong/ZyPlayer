@@ -1,0 +1,73 @@
+[{
+  "id": 0,
+  "theme": "auto",
+  "shortcut": true,
+  "externalPlayer": "",
+  "searchGroup": "全站",
+  "excludeRootClasses": true,
+  "excludeR18Films": true,
+  "forwardTimeInSec": 5,
+  "waitingTimeInSec": 15,
+  "password": "",
+  "proxy": {
+    "type": "disable",
+    "scheme": "",
+    "url": "",
+    "port": ""
+  },
+  "allowPassWhenIptvCheck": true,
+  "autocleanWhenIptvCheck": false,
+  "autoChangeSourceWhenIptvStalling": true,
+  "shortcutModified": false,
+  "sitesDataURL": "https://raw.iqiq.io/Hunlongyu/ZY-Player-Resources/main/Sites/20220713.json",
+  "rootClassFilter": [
+    "电影",
+    "电影片",
+    "电视剧",
+    "连续剧",
+    "综艺",
+    "动漫",
+    "公告头条",
+    "电影资讯",
+    "电视资讯",
+    "综艺资讯",
+    "动漫资讯",
+    "新闻资讯",
+    "娱乐新闻"
+  ],
+  "r18ClassFilter": [
+    "伦理",
+    "论理",
+    "倫理",
+    "福利",
+    "激情",
+    "理论",
+    "写真",
+    "情色",
+    "美女",
+    "街拍",
+    "赤足",
+    "性感",
+    "里番",
+    "VIP"
+  ],
+  "windowPositionAndSize": {
+    "x": 420,
+    "y": 150,
+    "width": 840,
+    "height": 650
+  },
+  "defaultHot": "site",
+  "defaultCheckModel": true,
+  "defaultIptvEpg": "https://epg.112114.xyz/",
+  "iptvSkipIpv6": true,
+  "iptvThumbnail": false,
+  "restoreWindowPositionAndSize": false,
+  "pauseWhenMinimize": true,
+  "defaultSite": {
+    "name": "",
+    "key": ""
+  },
+  "defaultIptv": "",
+  "defaultAnalyze": ""
+}]

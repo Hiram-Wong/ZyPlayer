@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "jsx": "preserve",
+    "allowJs": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["esnext", "dom"],
+    "types": ["vite/client"],
+    "noEmit": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include":[
+    "**/*.ts",
+    "src/**/*.d.ts",
+    "src/types/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "node_modules/tdesign-vue-next/global.d.ts",
+    "src/lib/dexie/initData.ts",
+    "src/lib/dexie/init/index.js",
+    "src/lib/dexie/index.js",
+    "src/lib/dexie/mini.js",
+    "src/lib/dexie/star.js",
+    "src/lib/dexie/sites.js",
+    "src/lib/dexie/shortcut.js",
+    "src/lib/dexie/setting.js",
+    "src/lib/dexie/search.js",
+    "src/lib/dexie/recommendation.js",
+    "src/lib/dexie/iptv.js",
+    "src/lib/dexie/history.js",
+    "src/lib/dexie/channelList.js",
+    "src/lib/dexie/cachedMovies.js",
+    "src/lib/dexie/dexie.js"
+  ],
+  "compileOnSave":false,
+}

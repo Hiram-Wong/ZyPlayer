@@ -1,0 +1,71 @@
+/** 公共前缀 */
+@starter-prefix: zy;
+
+// 组件库本身只有色彩相关的css token 扩展其他css token使用 待组件库扩充其他token后再做替换 这里使用less vars 避免两种css token让使用者混淆
+// tdesign 只保持一套token即可
+
+// Spacer
+@spacer: 8px;
+@spacer-s: calc(@spacer * 0.5); // 间距-4
+@spacer-l: calc(@spacer * 1.5); // 间距-12
+@spacer-1: @spacer; // 间距-8
+@spacer-2: calc(@spacer * 2); // 间距-16
+@spacer-3: calc(@spacer * 3); // 间距-24
+@spacer-4: calc(@spacer * 4); // 间距-32
+@spacer-5: calc(@spacer * 5); // 间距-大-40
+@spacer-6: calc(@spacer * 6); // 间距-大-48
+@spacer-7: calc(@spacer * 7); // 间距-大-48
+@spacer-8: calc(@spacer * 8); // 间距-大-48
+@spacer-9: calc(@spacer * 9); // 间距-大-48
+@spacer-10: calc(@spacer * 10); // 间距-大-80
+
+// Font
+@font-size: 10px;
+@font-size-s: calc(@font-size * 1.2); // 字号-五级字号
+@font-size-base: calc(@font-size * 1.4); // 字号-四级字号
+@font-size-l: calc(@font-size * 1.6); // 字号-三级字号
+@font-size-xl: calc(@font-size * 2); // 字号-二级字号
+@font-size-xxl: calc(@font-size * 3.6); // 字号-一级字号
+
+// Line Height
+@line-height: 1.5; // 行高-常规
+@line-height-s: 20px; // 行高-对应五级文字
+@line-height-base: 22px; // 行高-对应四级文字
+@line-height-l: 24px; // 行高-对应三级文字
+@line-height-xl: 28px; // 行高-对应二级文字
+@line-height-xxl: 44px; //行高-对应一级文字
+
+@font-family: PingFang SC, Microsoft YaHei, Arial Regular; // 字体-磅数-常规
+@font-family-medium: PingFang SC, Microsoft YaHei, Arial Medium; // 字体-磅数-粗体
+
+// Border Radius
+@border-radius: 3px; // 圆角-全局
+@border-radius-10: 10px; // 圆角-全局
+@border-radius-50: 50%; // 圆角-全圆角
+
+// Box Shadow
+@box-shadow-light-1: 0 2px 14px -6px rgb(0 0 0 / 15%);
+@box-shadow-dark-1: 0 2px 14px -6px rgb(0 0 0 / 15%);
+
+// 响应式断点
+@screen-sm: 768px;
+@screen-md: 992px;
+@screen-lg: 1200px;
+@screen-xl: 1400px;
+
+@screen-sm-min: @screen-sm;
+@screen-md-min: @screen-md;
+@screen-lg-min: @screen-lg;
+@screen-xl-min: @screen-xl;
+
+@screen-sm-max: calc(@screen-md-min - 1px);
+@screen-md-max: calc(@screen-lg-min - 1px);
+@screen-lg-max: calc(@screen-xl-min - 1px);
+
+// 动画
+@anim-time-fn-easing: cubic-bezier(0.38, 0, 0.24, 1);
+@anim-time-fn-ease-out: cubic-bezier(0, 0, 0.15, 1);
+@anim-time-fn-ease-in: cubic-bezier(0.82, 0, 1, 0.9);
+@anim-duration-base: 0.2s;
+@anim-duration-moderate: 0.24s;
+@anim-duration-slow: 0.28s;
