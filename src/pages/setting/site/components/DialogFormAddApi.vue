@@ -105,7 +105,8 @@
 import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { uuid } from 'vue3-uuid';
-import { sites, setting } from '@/lib/dexie';
+import { sites } from '@/lib/dexie';
+import zy from '@/lib/site/tools';
 
 const props = defineProps({
   visible: {
@@ -151,7 +152,7 @@ const onSubmit = ({ result, firstError }, type) => {
       formData.value.file.file = [];
     } else {
       console.log('api');
-      configSitesDataURL();
+      urlEvent();
     }
     formVisible.value = false;
   } else {
@@ -167,7 +168,6 @@ watch(
   () => formVisible.value,
   (val) => {
     emit('update:visible', val);
-    if (!val) emit('refreshTableData');
   },
 );
 watch(
@@ -193,14 +193,17 @@ const rulesApi = {
   sitesDataURL: [{ required: true, message: '请输入接口url', type: 'error' }],
 };
 
-const configSitesDataURL = () => {
-  setting
-    .update(formData.value.url)
-    .then(() => {
-      MessagePlugin.success('添加成功');
+// url导入
+const urlEvent = async (url) => {
+  const config = await zy.getConfig(url);
+  sites
+    .bulkAdd(config)
+    .then((res) => {
+      MessagePlugin.success('导入成功');
+      if (res) emit('refreshTableData');
     })
     .catch((error) => {
-      MessagePlugin.error(`添加失败${error}`);
+      MessagePlugin.error(`导入失败：${error}`);
     });
 };
 
@@ -213,8 +216,8 @@ const addSite = () => {
   sites
     .add(JSON.parse(JSON.stringify(formData.value.siteInfo)))
     .then((res) => {
-      console.log(res);
       MessagePlugin.success('添加成功');
+      if (res) emit('refreshTableData');
     })
     .catch((error) => {
       MessagePlugin.error(`添加失败: ${error}`);
@@ -252,8 +255,9 @@ const importEvent = (file) => {
     if (addSiteData.length !== 0) {
       sites
         .bulkAdd(addSiteData)
-        .then(() => {
+        .then((res) => {
           MessagePlugin.success('导入成功');
+          if (res) emit('refreshTableData');
         })
         .catch((error) => {
           MessagePlugin.error(`导入失败：${error}`);

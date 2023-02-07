@@ -143,7 +143,6 @@ watch(
   () => formVisible.value,
   (val) => {
     emit('update:visible', val);
-    if (!val) emit('refreshTableData');
   },
 );
 watch(
@@ -176,8 +175,8 @@ const addEvent = (data) => {
   analyze
     .add(data)
     .then((res) => {
-      console.log(res);
       MessagePlugin.success('添加成功');
+      if (res) emit('refreshTableData');
     })
     .catch((error) => {
       MessagePlugin.error(`添加失败: ${error}`);
@@ -203,8 +202,9 @@ const importEvent = (file) => {
     if (addData.length !== 0) {
       analyze
         .bulkAdd(addData)
-        .then(() => {
+        .then((res) => {
           MessagePlugin.success('导入成功');
+          if (res) emit('refreshTableData');
         })
         .catch((error) => {
           MessagePlugin.error(`导入失败：${error}`);
@@ -235,8 +235,9 @@ const urlEvent = async (url) => {
   const config = await zy.getConfig(url);
   analyze
     .bulkAdd(config)
-    .then(() => {
+    .then((res) => {
       MessagePlugin.success('导入成功');
+      if (res) emit('refreshTableData');
     })
     .catch((error) => {
       MessagePlugin.error(`导入失败：${error}`);

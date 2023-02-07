@@ -5,6 +5,7 @@
         <t-radio-group v-model="selectWay" variant="default-filled" style="width: auto">
           <t-radio-button value="add-single">订阅配置</t-radio-button>
           <t-radio-button value="add-file">文件导入</t-radio-button>
+          <t-radio-button value="add-api">源站接口</t-radio-button>
         </t-radio-group>
         <!-- 表单内容-单个添加 -->
         <t-form
@@ -58,6 +59,26 @@
             </t-form-item>
           </div>
         </t-form>
+        <t-form
+          v-if="selectWay == 'add-api'"
+          colon
+          :data="formData.url"
+          :rules="rulesApi"
+          :label-width="100"
+          @submit="onSubmit($event, 'api')"
+        >
+          <t-form-item label="接口地址" name="sitesDataURL">
+            <t-input v-model="formData.url.sitesDataURL" class="input-item" placeholder="请输入接口url" />
+          </t-form-item>
+          <div class="optios">
+            <t-form-item style="float: right">
+              <t-space>
+                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+                <t-button theme="primary" type="submit">确定</t-button>
+              </t-space>
+            </t-form-item>
+          </div>
+        </t-form>
       </t-space>
     </template>
   </t-dialog>
@@ -67,6 +88,7 @@
 import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { iptv } from '@/lib/dexie';
+import zy from '@/lib/site/tools';
 
 const props = defineProps({
   visible: {
@@ -86,6 +108,7 @@ const formData = ref({
     isActive: true,
   },
   file: { file: [] },
+  url: { sitesDataURL: '' },
 });
 const onSubmit = ({ result, firstError }, type) => {
   if (!firstError) {
@@ -96,8 +119,10 @@ const onSubmit = ({ result, firstError }, type) => {
       console.log('file');
       importEvent(formData.value.file.file[0].raw);
       formData.value.file.file = [];
+    } else {
+      console.log('api');
+      urlEvent();
     }
-    emit('refreshTableData');
     formVisible.value = false;
   } else {
     console.log('Errors: ', result);
@@ -133,14 +158,17 @@ const rulesSingle = {
 const rulesFile = {
   file: [{ required: true, message: '请上传文件', type: 'error' }],
 };
+const rulesApi = {
+  sitesDataURL: [{ required: true, message: '请输入接口url', type: 'error' }],
+};
 
 const addEvent = () => {
   if (!checkIptvName()) return;
   iptv
     .add(JSON.parse(JSON.stringify(formData.value.IptvInfo)))
     .then((res) => {
-      console.log(res);
       MessagePlugin.success('添加成功');
+      if (res) emit('refreshTableData');
     })
     .catch((error) => {
       MessagePlugin.error(`添加失败: ${error}`);
@@ -175,8 +203,9 @@ const importEvent = (file) => {
     if (addIptvData.length !== 0) {
       iptv
         .bulkAdd(addIptvData)
-        .then(() => {
+        .then((res) => {
           MessagePlugin.success('导入成功');
+          if (res) emit('refreshTableData');
         })
         .catch((error) => {
           MessagePlugin.error(`导入失败：${error}`);
@@ -199,6 +228,20 @@ const requestMethod = (file) => {
       clearTimeout(timer);
     }, 1000);
   });
+};
+
+// url导入
+const urlEvent = async (url) => {
+  const config = await zy.getConfig(url);
+  iptv
+    .bulkAdd(config)
+    .then((res) => {
+      MessagePlugin.success('导入成功');
+      if (res) emit('refreshTableData');
+    })
+    .catch((error) => {
+      MessagePlugin.error(`导入失败：${error}`);
+    });
 };
 </script>
 <style lang="less" scoped>

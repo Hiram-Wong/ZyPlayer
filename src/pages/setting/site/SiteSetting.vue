@@ -82,10 +82,10 @@ const rehandleSelectChange = (val) => {
 };
 
 // Business Processing
-const getSites = () => {
+const getSites = async () => {
   dataLoading.value = true;
   try {
-    sites.all().then((res) => {
+    await sites.all().then((res) => {
       if (!res) emptyData.value = true;
       res.forEach((element) => {
         if (element.reverseOrder === null || element.reverseOrder === undefined) {
@@ -93,6 +93,7 @@ const getSites = () => {
         }
       });
       data.value = res;
+      console.log(data.value);
     });
   } catch (e) {
     console.log(e);
