@@ -128,7 +128,7 @@ onMounted(() => {
 // 获取解析接口及默认接口
 const getAnalysisApi = async () => {
   await analyze.all().then((res) => {
-    analysisApi.value = res;
+    analysisApi.value = res.filter((item) => item.isActive);
     if (res) analysisApiLoading.value = false;
   });
   await setting.get('defaultAnalyze').then((res) => {
