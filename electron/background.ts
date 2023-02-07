@@ -178,6 +178,13 @@ ipcMain.on('openPlayWindow', () => {
   playWindow.on('ready-to-show', () => {
     playWindow.show();
   });
+  playWindow.on('closed', () => {
+    if (mainWindow.isDestroyed()) {
+      createWindow();
+    } else {
+      mainWindow.show();
+    }
+  });
 });
 
 ipcMain.on('showMainWin', async () => {
