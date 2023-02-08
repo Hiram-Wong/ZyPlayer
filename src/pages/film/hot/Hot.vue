@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="热榜" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="热榜" :footer="false" placement="center">
     <template #body>
       <div class="hot-container mx-auto">
         <div class="hot-heading">
@@ -114,6 +114,12 @@ const detailEvent = async (item) => {
 @import '@/style/variables';
 @import '@/style/index.less';
 
+:deep(.t-dialog) {
+  background-image: url(../../../assets/bg-left-circle.svg), url(../../../assets/bg-right-circle.svg);
+  background-position: 0 0, 100% 280px;
+  background-repeat: no-repeat;
+}
+
 .hot-container {
   .hot-heading {
     .hot-heading-tip {
@@ -122,6 +128,9 @@ const detailEvent = async (item) => {
     }
   }
   .hot-main {
+    height: 400px;
+    overflow-x: hidden;
+    overflow-y: scroll;
     .hot-paper-item-main {
       padding: 10px 0;
       margin: 0 10px;
