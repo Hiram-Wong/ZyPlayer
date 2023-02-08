@@ -69,5 +69,6 @@
     "key": ""
   },
   "defaultIptv": "",
-  "defaultAnalyze": ""
+  "defaultAnalyze": "",
+  "agreementMask": false
 }]

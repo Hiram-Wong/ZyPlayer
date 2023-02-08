@@ -178,6 +178,7 @@
     </div>
     <detail-view v-model:visible="formDialogDetail" :info="formDetailData" :site="FilmSiteSetting.basic" />
     <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
+    <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
   </div>
 </template>
 <script setup lang="jsx">
@@ -196,6 +197,7 @@ import { unionWith, isEqual, size } from 'lodash';
 
 import DetailView from './film/detail/Detail.vue';
 import HotView from './film/hot/Hot.vue';
+import PrivacyPolicyView from './film/privacyPolicy/PrivacyPolicy.vue';
 
 import { sites, setting } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
@@ -216,6 +218,7 @@ const filterData = ref({
 const formDialogDetail = ref(false); // dialog是否显示详情
 const formDetailData = ref(); // 详情组件传参
 const formDialogHot = ref(false); // dialog是否显示热播榜
+const formDialogPrivacyPolicy = ref(false); // dialog是否显示用户协议
 const pagination = ref({
   pageIndex: 0,
   pageSize: 36,
@@ -284,6 +287,7 @@ watch(
 );
 
 onMounted(async () => {
+  await getAgreementMask();
   await getFilmSetting();
   await getClass();
   await getFilmList();
@@ -497,6 +501,13 @@ const detailEvent = (item) => {
 
 const hotEvent = () => {
   formDialogHot.value = true;
+};
+
+const getAgreementMask = async () => {
+  await setting.get('agreementMask').then((res) => {
+    formDialogPrivacyPolicy.value = !res;
+    console.log(res, formDialogPrivacyPolicy.value);
+  });
 };
 </script>
 
