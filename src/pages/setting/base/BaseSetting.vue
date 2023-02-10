@@ -102,19 +102,27 @@
       </t-form-item>
       <t-form-item label="直播" name="iptv">
         <div class="iptv">
-          <t-space>
-            <t-switch v-model="formData.iptvSkipIpv6" size="large">
-              <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-            </t-switch>
-            <span>跳过ipv6</span>
-            <t-switch v-model="formData.iptvStatus" size="large">
-              <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-            </t-switch>
-            <span>检测可用性</span>
-            <!-- <t-switch v-model="formData.iptvThumbnail" size="large">
+          <t-space direction="vertical">
+            <t-space>
+              <t-switch v-model="formData.iptvSkipIpv6" size="large">
+                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
+              </t-switch>
+              <span>跳过ipv6</span>
+              <t-switch v-model="formData.iptvStatus" size="large">
+                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
+              </t-switch>
+              <span>检测可用性</span>
+              <!-- <t-switch v-model="formData.iptvThumbnail" size="large">
               <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
             </t-switch>
             <span>缩略图</span> -->
+            </t-space>
+            <t-input
+              v-model="formData.defaultIptvEpg"
+              label="默认EPG："
+              placeholder="仅支持DIYP"
+              :style="{ width: '300px' }"
+            />
           </t-space>
         </div>
       </t-form-item>

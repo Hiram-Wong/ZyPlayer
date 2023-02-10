@@ -115,7 +115,7 @@ const defaultEvent = async (row) => {
       MessagePlugin.success('设置成功');
     }
   });
-  setting.update({ defaultIptv: row.row.name });
+  setting.update({ defaultIptv: row.row.id });
 };
 
 const updateChannelList = (data) => {

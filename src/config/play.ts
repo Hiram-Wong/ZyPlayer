@@ -10,5 +10,6 @@ export default {
     seasons: {},
     key: '',
     img: '',
+    epg: '',
   },
 };

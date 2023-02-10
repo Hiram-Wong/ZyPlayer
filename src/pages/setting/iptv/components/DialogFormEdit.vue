@@ -7,8 +7,11 @@
           <t-form-item label="直播源名" name="name">
             <t-input v-model="formData.name" placeholder="请输入内容" />
           </t-form-item>
-          <t-form-item label="直播源地址" name="url">
+          <t-form-item label="订阅地址" name="url">
             <t-input v-model="formData.url" placeholder="请输入内容" />
+          </t-form-item>
+          <t-form-item label="节目单地址" name="epg">
+            <t-input v-model="formData.epg" placeholder="请输入内容" />
           </t-form-item>
         </div>
         <div class="optios">

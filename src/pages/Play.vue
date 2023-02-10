@@ -250,7 +250,7 @@ const timer = ref(); // 定时器 用于刷新历史进度
 const isBinge = ref(true); // true未收藏 false收藏
 const isPin = ref(true); // true未置顶 false置顶
 const qrCodeUrl = ref(); // 二维码图片流
-const iswideBtn = ref(false); // 视频划过显示按钮
+// const iswideBtn = ref(false); // 视频划过显示按钮
 const isMax = ref(false); // 视频划过显示按钮
 const shareUrl = computed(() => {
   const soureUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
@@ -285,24 +285,20 @@ const initSetting = () => {
 const initPlayer = async () => {
   console.log(type.value, data.value);
 
+  config.value.url = data.value.url;
   if (xg.value) xg.value.destroy(); // 存在播放器则摧毁
   if (type.value === 'iptv') {
-    config.value.url = data.value.url;
-    let epg;
-    epg = await iptv.get(data.value.id).epg;
-    if (!epg) epg = await setting.get('defaultIptvEpg');
-    if (epg) {
+    if (data.value.epg) {
       const date = `${new Date().getFullYear()}-${
         new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1
       }-${new Date().getDate() < 10 ? `0${new Date().getDate()}` : new Date().getDate()}`;
-      epgData.value = await zy.iptvEpg(epg, data.value.title, date);
+      epgData.value = await zy.iptvEpg(data.value.epg, data.value.title, date);
     }
     xg.value = new HlsJsPlayer(config.value);
   } else if (type.value === 'film') {
     if (!data.value.url.endsWith('m3u8')) {
       data.value.url = await zy.parserFilmUrl(data.value.url);
     }
-    config.value.url = data.value.url;
     xg.value = new HlsJsPlayer(config.value);
     await timerUpdatePlayProcess();
   }

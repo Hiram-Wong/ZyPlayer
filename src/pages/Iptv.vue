@@ -111,7 +111,7 @@ import { usePlayStore } from '@/store';
 import 'vue-waterfall-plugin-next/style.css';
 import 'v3-infinite-loading/lib/style.css';
 
-import { channelList, setting } from '@/lib/dexie';
+import { channelList, setting, iptv } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
 
 const { ipcRenderer } = require('electron');
@@ -131,6 +131,7 @@ const renderLoading = (
 
 const iptvSetting = ref({
   name: '',
+  epg: '',
   skipIpv6: true,
   thumbnail: false,
 });
@@ -197,9 +198,13 @@ onMounted(() => {
 });
 
 const getIptvSetting = () => {
-  setting.get('defaultIptv').then((res) => {
-    if (!res) MessagePlugin.warning('请设置默认数据源');
-    iptvSetting.value.name = res;
+  setting.get('defaultIptv').then(async (id) => {
+    if (!id) MessagePlugin.warning('请设置默认数据源');
+    await iptv.get(id).then(async (res) => {
+      iptvSetting.value.name = res.name;
+      iptvSetting.value.epg = res.epg;
+      if (!res.epg) iptvSetting.value.epg = await setting.get('defaultIptvEpg');
+    });
   });
   setting.get('iptvSkipIpv6').then((res) => {
     iptvSetting.value.skipIpv6 = res;
@@ -311,6 +316,7 @@ const playEvent = (item) => {
       url: item.url,
       title: item.name,
       id: item.id,
+      epg: iptvSetting.value.epg,
     },
   });
 

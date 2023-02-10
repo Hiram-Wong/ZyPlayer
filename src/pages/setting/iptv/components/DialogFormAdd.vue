@@ -22,6 +22,9 @@
           <t-form-item label="订阅接口" name="url">
             <t-input v-model="formData.IptvInfo.url" class="input-item" placeholder="请输入内容" />
           </t-form-item>
+          <t-form-item label="节目单接口" name="epg">
+            <t-input v-model="formData.IptvInfo.epg" class="input-item" placeholder="请输入内容" />
+          </t-form-item>
           <div class="optios">
             <t-form-item style="float: right">
               <t-space>
@@ -105,6 +108,7 @@ const formData = ref({
   IptvInfo: {
     name: '',
     url: '',
+    epg: '',
     isActive: true,
   },
   file: { file: [] },
