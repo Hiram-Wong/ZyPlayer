@@ -188,12 +188,8 @@ const exportEvent = () => {
 };
 
 const defaultEvent = async (row) => {
-  console.log(row.row.name, row.row.key);
   setting.update({
-    defaultSite: {
-      name: row.row.name,
-      key: row.row.key,
-    },
+    defaultSite: row.row.id,
   });
   MessagePlugin.success('设置成功');
 };

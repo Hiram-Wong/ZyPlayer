@@ -7,9 +7,20 @@
             <t-space>
               <div class="header-title-wrap">
                 <div class="title">
-                  <span class="data-item source">{{
+                  <t-select
+                    v-model="sitesListSelect"
+                    placeholder="暂无选择源"
+                    size="small"
+                    :show-arrow="false"
+                    style="max-width: 80px"
+                    class="data-item source"
+                    @change="changeSitesEvent"
+                  >
+                    <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
+                  </t-select>
+                  <!-- <span class="data-item source">{{
                     FilmSiteSetting.basic.name ? FilmSiteSetting.basic.name : '暂无选择源'
-                  }}</span>
+                  }}</span> -->
                   <span class="data-item data"
                     >共{{ FilmSiteSetting.basic.recordcount ? FilmSiteSetting.basic.recordcount : 0 }}资源</span
                   >
@@ -61,7 +72,7 @@
                     class="search-input-item"
                     @keyup.enter="searchEvent"
                   />
-                  <div class="hot-search-button" @click="hotEvent">
+                  <div class="hot-search-button" @click="formDialogHot = true">
                     <chart-bar-icon size="14" class="hot-search-button-icon" />
                     <span>热榜</span>
                   </div>
@@ -229,6 +240,7 @@ const FilmSiteSetting = ref({
     name: '',
     key: '',
     recordcount: 0,
+    change: false,
   },
   class: {
     id: 0,
@@ -237,6 +249,8 @@ const FilmSiteSetting = ref({
 }); // 当前站点源
 const FilmDataList = ref({}); // Waterfall
 const FilmSiteList = ref(); // 站点
+const sitesList = ref({});
+const sitesListSelect = ref();
 
 const options = reactive({
   // 唯一key值
@@ -346,8 +360,13 @@ const filterEvent = () => {
 
 const getFilmSetting = async () => {
   await nextTick(async () => {
-    await setting.get('defaultSite').then((res) => {
-      FilmSiteSetting.value.basic = res;
+    await setting.get('defaultSite').then(async (id) => {
+      if (!id) MessagePlugin.warning('请设置默认数据源');
+      await sites.get(id).then(async (res) => {
+        sitesListSelect.value = res.id;
+        FilmSiteSetting.value.basic.name = res.name;
+        FilmSiteSetting.value.basic.key = res.key;
+      });
     });
     await setting.get('excludeRootClasses').then((res) => {
       FilmSiteSetting.value.excludeRootClasses = res;
@@ -360,6 +379,12 @@ const getFilmSetting = async () => {
     });
     await setting.get('excludeR18Films').then((res) => {
       FilmSiteSetting.value.excludeR18Films = res;
+    });
+    await setting.get('defaultChangeModel').then((res) => {
+      FilmSiteSetting.value.change = res;
+    });
+    await sites.all().then((res) => {
+      sitesList.value = res.filter((item) => item.isActive);
     });
   });
 };
@@ -493,16 +518,31 @@ const refreshEvnent = async () => {
   await getFilmArea();
 };
 
+// 详情
 const detailEvent = (item) => {
   formDetailData.value = item;
-  console.log(formDetailData.value);
   formDialogDetail.value = true;
 };
 
-const hotEvent = () => {
-  formDialogHot.value = true;
+const changeSitesEvent = async (event) => {
+  if (FilmSiteSetting.value.change) await setting.update({ defaultSite: event });
+  await sites.get(event).then(async (res) => {
+    sitesListSelect.value = res.id;
+    FilmSiteSetting.value.basic.name = res.name;
+    FilmSiteSetting.value.basic.key = res.key;
+  });
+  await getClass();
+  FilmDataList.value = {};
+  // if (!_.size(iptvDataList.value.list)) infiniteId.value++;
+  if (!size(FilmDataList.value.list)) infiniteId.value++;
+  // $state.loaded();
+  pagination.value.pageIndex = 0;
+  await getFilmList();
+  await getFilmSite();
+  await getFilmArea();
 };
 
+// 用户协议
 const getAgreementMask = async () => {
   await setting.get('agreementMask').then((res) => {
     formDialogPrivacyPolicy.value = !res;
@@ -535,8 +575,18 @@ const getAgreementMask = async () => {
           line-height: 1rem;
         }
         .source {
-          font-weight: bold;
-          font-size: 0.8rem;
+          // font-weight: bold;
+          // font-size: 0.8rem;
+          :deep(.t-input) {
+            padding: 0;
+            border-style: none !important;
+            font-size: 0.8rem;
+            font-weight: bold;
+          }
+          :deep(.t-input--focused) {
+            border-color: rgba(255, 255, 255, 0) !important;
+            box-shadow: none !important;
+          }
         }
         .data {
           font-size: 0.7rem;

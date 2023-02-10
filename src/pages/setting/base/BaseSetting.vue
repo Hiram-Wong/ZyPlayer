@@ -56,7 +56,11 @@
                 <t-switch v-model="formData.defaultCheckModel" size="large">
                   <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
                 </t-switch>
-                <span>站点源检查状态变更启用状态</span>
+                <span>检查源变更状态</span>
+                <t-switch v-model="formData.defaultChangeModel" size="large">
+                  <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
+                </t-switch>
+                <span>切换源设置默认</span>
               </t-space>
             </div>
             <div class="filter site-item">
