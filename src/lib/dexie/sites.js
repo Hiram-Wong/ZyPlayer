@@ -16,6 +16,9 @@ export default {
   async find (doc) {
     return await sites.get(doc)
   },
+  async get (id) {
+    return await sites.get(id)
+  },
   async add (doc) {
     return await sites.add(doc)
   },
