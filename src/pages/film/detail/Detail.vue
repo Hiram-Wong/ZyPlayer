@@ -36,7 +36,7 @@
               <t-image
                 class="card-main-item"
                 :src="info.vod_pic"
-                :style="{ width: '140px', height: '196px', 'border-radius': '5px' }"
+                :style="{ width: '140px', height: '213px', 'border-radius': '5px' }"
                 :lazy="true"
                 fit="cover"
               />
@@ -485,7 +485,7 @@ const detailEvent = (event) => {
         margin-right: 12px;
         background-size: 100%;
         background-color: #25252b;
-        width: 142px;
+        width: 140px;
         border-radius: 8px;
       }
       .content-wrap {
