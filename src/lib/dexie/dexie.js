@@ -108,7 +108,7 @@ db.version(12).stores({
 db.version(13).stores({
   channelList: '++id, name, logo, url, group',
   analyze: '++id, name, url, isActive',
-  history: '++id, [siteKey+videoId], date, siteKey, siiteSource, duration, playType, playEnd, videoId, videoImage, videoName, videoIndex, watchTime',
+  history: '++id, [siteKey+videoId], date, siteKey, siteSource, duration, playType, playEnd, videoId, videoImage, videoName, videoIndex, watchTime',
   star: '++id, [siteKey+videoId], siteKey, videoId, videoImage, videoName',
   iptv: '++id, name, url, epg, isActive',
 })
