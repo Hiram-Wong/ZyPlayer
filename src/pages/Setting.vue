@@ -10,12 +10,9 @@
       <t-tab-panel value="siteSource" label="站点源">
         <site-view class="container-item" />
       </t-tab-panel>
-      <t-tab-panel value="analyze" label="解析接口">
+      <t-tab-panel value="analyze" label="解析源">
         <analyze-view class="container-item" />
       </t-tab-panel>
-      <!-- <t-tab-panel value="hotKey" label="快捷键">
-        <hotkey-view class="container-item" />
-      </t-tab-panel> -->
     </t-tabs>
   </div>
 </template>
@@ -26,7 +23,6 @@ import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
 import analyzeView from './setting/analyze/AnalyzeSetting.vue';
-// import hotkeyView from './setting/hotkey/HotKeySetting.vue';
 
 const settingTag = ref('ConfigBase');
 </script>
