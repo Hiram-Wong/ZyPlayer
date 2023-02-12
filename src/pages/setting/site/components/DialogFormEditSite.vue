@@ -43,7 +43,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { uuid } from 'vue3-uuid';
+import getUuid from 'uuid-by-string';
 import { sites } from '@/lib/dexie';
 
 const props = defineProps({
@@ -63,7 +63,7 @@ const formData = ref(props.data);
 const onSubmit = ({ result, firstError }) => {
   console.log(result, firstError);
   if (!firstError) {
-    if (!formData.value.key) formData.value.key = uuid.v4();
+    if (!formData.value.key) formData.value.key = getUuid(formData.value.name, 5);
     sites
       .update(formData.value.id, formData.value)
       .then(() => {

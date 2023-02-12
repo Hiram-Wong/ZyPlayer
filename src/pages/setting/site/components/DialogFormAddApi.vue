@@ -104,7 +104,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { uuid } from 'vue3-uuid';
+import getUuid from 'uuid-by-string';
 import { sites } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
 
@@ -211,7 +211,7 @@ const addSite = () => {
   if (formData.value.siteInfo.key) {
     if (!checkSiteKey()) return;
   } else {
-    formData.value.siteInfo.key = uuid.v4();
+    formData.value.siteInfo.key = getUuid(formData.value.siteInfo.name, 5);
   }
   sites
     .add(JSON.parse(JSON.stringify(formData.value.siteInfo)))
