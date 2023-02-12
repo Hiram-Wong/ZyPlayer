@@ -26,6 +26,7 @@
       :data="emptyData ? [] : data"
       :columns="COLUMNS"
       :hover="true"
+      stripe
       :loading="dataLoading"
       :selected-row-keys="selectedRowKeys"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-iptv-container` }"
@@ -47,18 +48,17 @@
     <dialog-form-edit-iptv v-model:visible="formDialogVisibleEditIptv" :data="formData" />
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { MessagePlugin } from 'tdesign-vue-next';
 import iptvPlaylistParser from 'iptv-playlist-parser';
-import { forEach, split, filter, trim, isEqual, isEmpty, startsWith, uniqWith } from 'lodash';
+import _ from 'lodash';
 import DialogFormAddIptv from './components/DialogFormAdd.vue';
 import DialogFormEditIptv from './components/DialogFormEdit.vue';
 import { iptv, channelList, setting } from '@/lib/dexie';
 import { COLUMNS } from './constants';
-// import _ from 'lodash';
 
 // Define item form data & dialog status
 const formDialogVisibleAddIptv = ref(false);
@@ -124,27 +124,20 @@ const updateChannelList = (data) => {
 
   console.log(result);
   const format = /\.(m3u8|flv)$/;
-  // _.forEach(result, function (item, index) {
-  forEach(result, (item, index) => {
-    // _.split(item.url, '#', 1); // 网址带#时自动分割
-
-    // _.filter(_.split(item.url, '#'), function (o) {
-    filter(split(item.url, '#'), (o) => {
-      // return _.startsWith(o, 'http') && format.test(o) && _.isEmpty(o.name);
-      return startsWith(o, 'http') && format.test(o) && isEmpty(o.name);
+  _.forEach(result, (item, index) => {
+    _.filter(_.split(item.url, '#'), (o) => {
+      return _.startsWith(o, 'http') && format.test(o) && _.isEmpty(o.name);
     }); // 网址带#时自动分割
     const doc = {
       id: index,
-      // name: _.trim(item.tvg.name) || _.split(_.trim(item.name), ',')[1] || _.trim(item.name),
-      name: split(trim(item.name), ',')[1] || trim(item.tvg.name) || trim(item.name),
+      name: _.split(_.trim(item.name), ',')[1] || _.trim(item.tvg.name) || _.trim(item.name),
       url: item.url,
       logo: item.tvg.logo,
       group: item.group.title,
     };
     docs.push(doc);
   });
-  // _.uniqWith(docs, _.isEqual); //去重
-  uniqWith(docs, isEqual); // 去重
+  _.uniqWith(docs, _.isEqual); // 去重
   console.log(docs);
   // 同频道处理
   channelList.clear().then((res) => {
