@@ -4,7 +4,17 @@
       <t-row justify="space-between">
         <div class="left-operation-container">
           <div class="title">
-            <span class="data-item source">{{ iptvSetting.name ? iptvSetting.name : '暂无选择源' }}</span>
+            <t-select
+              v-model="iptvListSelect"
+              placeholder="暂无选择源"
+              size="small"
+              :show-arrow="false"
+              style="max-width: 8em"
+              @change="changeDefaultIptvEvent"
+            >
+              <t-option v-for="item in iptvList" :key="item.id" :label="item.name" :value="item.id" />
+            </t-select>
+            <!-- <span class="data-item source">{{ iptvSetting.name ? iptvSetting.name : '暂无选择源' }}</span> -->
             <span class="data-item data">共{{ pagination.count ? pagination.count : 0 }}频道</span>
           </div>
         </div>
@@ -102,8 +112,9 @@ import { ref, reactive, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { Icon, LoadingIcon, LinkUnlinkIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 
-// import _ from 'lodash';
-import { unionWith, isEqual, size } from 'lodash';
+import iptvPlaylistParser from 'iptv-playlist-parser';
+import axios from 'axios';
+import _ from 'lodash';
 
 import InfiniteLoading from 'v3-infinite-loading';
 import { Waterfall } from 'vue-waterfall-plugin-next';
@@ -118,16 +129,20 @@ const { ipcRenderer } = require('electron');
 
 const store = usePlayStore();
 
-const renderError = (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-    <LinkUnlinkIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
-  </div>
-);
-const renderLoading = (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-    <LoadingIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
-  </div>
-);
+const renderError = () => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+      <LinkUnlinkIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
+    </div>
+  );
+};
+const renderLoading = () => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+      <LoadingIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
+    </div>
+  );
+};
 
 const iptvSetting = ref({
   name: '',
@@ -135,6 +150,8 @@ const iptvSetting = ref({
   skipIpv6: true,
   thumbnail: false,
 });
+const iptvList = ref({});
+const iptvListSelect = ref();
 const iptvDataList = ref({});
 const iptvClassList = ref([
   {
@@ -197,10 +214,12 @@ onMounted(() => {
   getIptvClass();
 });
 
-const getIptvSetting = () => {
+// 获取配置
+const getIptvSetting = async () => {
   setting.get('defaultIptv').then(async (id) => {
     if (!id) MessagePlugin.warning('请设置默认数据源');
     await iptv.get(id).then(async (res) => {
+      iptvListSelect.value = res.id;
       iptvSetting.value.name = res.name;
       iptvSetting.value.epg = res.epg;
       if (!res.epg) iptvSetting.value.epg = await setting.get('defaultIptvEpg');
@@ -212,21 +231,26 @@ const getIptvSetting = () => {
   setting.get('iptvStatus').then((res) => {
     iptvSetting.value.iptvStatus = res;
   });
+  await iptv.all().then((res) => {
+    iptvList.value = res.filter((item) => item.isActive);
+  });
 };
 
+// 获取直播列表个数
 const getChannelCount = () => {
   channelList.total().then((res) => {
     pagination.value.count = res;
   });
 };
 
+// 获取分类
 const getIptvClass = () => {
   channelList.class().then((res) => {
-    // iptvClassList.value = _.unionWith(iptvClassList.value, res, _.isEqual);
-    iptvClassList.value = unionWith(iptvClassList.value, res, isEqual);
+    iptvClassList.value = _.unionWith(iptvClassList.value, res, _.isEqual);
   });
 };
 
+// 获取直播列表
 const getChannelList = async () => {
   const res = await channelList.pagination(
     searchTxt.value,
@@ -238,8 +262,7 @@ const getChannelList = async () => {
   console.log(res.list);
   if (iptvSetting.value.skipIpv6) res.list = res.list.filter((item) => !isIpv6(item.url));
   const restultLength = res.list.length;
-  // iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
-  iptvDataList.value.list = unionWith(iptvDataList.value.list, res.list, isEqual);
+  iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
   if (iptvSetting.value.iptvStatus) await checkChannelList(pagination.value.pageIndex, pagination.value.pageSize);
 
   // 判断是否开启检查；判断原数据；判断原和目的
@@ -278,37 +301,38 @@ const load = async ($state) => {
   }
 };
 
+// 刷新
 const refreshEvnent = () => {
   console.log('refresh');
   getIptvSetting();
   getChannelCount();
   getIptvClass();
   iptvDataList.value = {};
-  // if (!_.size(iptvDataList.value.list)) infiniteId.value++;
-  if (!size(iptvDataList.value.list)) infiniteId.value++;
+  if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   // $state.loaded();
   pagination.value.pageIndex = 0;
   getChannelList();
 };
 
+// 搜索
 const searchEvent = async () => {
   console.log('search');
   iptvDataList.value = {};
-  // if (!_.size(iptvDataList.value.list)) infiniteId.value++;
-  if (!size(iptvDataList.value.list)) infiniteId.value++;
+  if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
   await getChannelList();
 };
 
+// 分类
 const classEvent = async () => {
   console.log('class');
   iptvDataList.value = {};
-  // if (!_.size(iptvDataList.value.list)) infiniteId.value++;
-  if (!size(iptvDataList.value.list)) infiniteId.value++;
+  if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
   await getChannelList();
 };
 
+// 播放
 const playEvent = (item) => {
   store.updateConfig({
     type: 'iptv',
@@ -320,11 +344,7 @@ const playEvent = (item) => {
     },
   });
 
-  ipcRenderer.send('openPlayWindow');
-  // router.push({
-  //   name: 'PlayIndex',
-  //   query: { type: 'iptv', url: item.url, name: item.name, id: item.id },
-  // });
+  ipcRenderer.send('openPlayWindow', item.name);
 };
 
 // 检查状态
@@ -340,6 +360,50 @@ const checkChannelList = (pageIndex, pageSize) => {
     });
   }
 };
+
+// 修改源
+const changeDefaultIptvEvent = async (event) => {
+  console.log(event);
+  const { url } = await iptv.get(event);
+  await axios.get(url).then((res) => {
+    if (res.data) {
+      updateChannelList(res.data);
+    }
+  });
+  await setting.update({ defaultIptv: event });
+  refreshEvnent();
+};
+
+const updateChannelList = (data) => {
+  const docs = [];
+  const result = iptvPlaylistParser.parse(data).items;
+
+  console.log(result);
+  const format = /\.(m3u8|flv)$/;
+  _.forEach(result, (item, index) => {
+    _.filter(_.split(item.url, '#'), (o) => {
+      return _.startsWith(o, 'http') && format.test(o) && _.isEmpty(o.name);
+    }); // 网址带#时自动分割
+    const doc = {
+      id: index,
+      name: _.split(_.trim(item.name), ',')[1] || _.trim(item.tvg.name) || _.trim(item.name),
+      url: item.url,
+      logo: item.tvg.logo,
+      group: item.group.title,
+    };
+    docs.push(doc);
+  });
+  _.uniqWith(docs, _.isEqual); // 去重
+  console.log(docs);
+  // 同频道处理
+  channelList.clear().then((res) => {
+    channelList.bulkAdd(docs).then((e) => {
+      // 支持导入同名频道，群里反馈
+      // updateChannelList()
+      console.log(res, e);
+    });
+  });
+};
 </script>
 
 <style lang="less" scoped>
@@ -351,6 +415,14 @@ const checkChannelList = (pageIndex, pageSize) => {
     height: 50px;
     padding: 0 30px !important;
     .left-operation-container {
+      :deep(.t-input) {
+        padding: 0;
+        border-style: none !important;
+      }
+      :deep(.t-input--focused) {
+        border-color: rgba(255, 255, 255, 0) !important;
+        box-shadow: none !important;
+      }
       .title {
         height: 32px;
         padding: 0 5px;
@@ -375,12 +447,12 @@ const checkChannelList = (pageIndex, pageSize) => {
   }
   .main {
     overflow-y: auto;
-    height: calc(100vh - 75px);
+    height: calc(100vh - 55px - var(--td-comp-size-l));
     .wrap-item {
       .tv-wrap {
         position: relative;
         .tv-content {
-          height: calc(100vh - 105px);
+          height: calc(100vh - 85px - var(--td-comp-size-l));
           overflow-y: auto;
           .card {
             box-sizing: border-box;

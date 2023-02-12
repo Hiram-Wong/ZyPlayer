@@ -4,7 +4,7 @@
       <div class="header">
         <t-row justify="space-between">
           <div class="left-operation-container">
-            <t-space>
+            <t-space align="center">
               <div class="header-title-wrap">
                 <div class="title">
                   <t-select
@@ -18,12 +18,9 @@
                   >
                     <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
                   </t-select>
-                  <!-- <span class="data-item source">{{
-                    FilmSiteSetting.basic.name ? FilmSiteSetting.basic.name : '暂无选择源'
-                  }}</span> -->
-                  <span class="data-item data"
-                    >共{{ FilmSiteSetting.basic.recordcount ? FilmSiteSetting.basic.recordcount : 0 }}资源</span
-                  >
+                  <span class="data-item data">
+                    共{{ FilmSiteSetting.basic.recordcount ? FilmSiteSetting.basic.recordcount : 0 }}资源
+                  </span>
                 </div>
               </div>
               <div v-if="classKeywords" class="head-center">
@@ -48,22 +45,6 @@
           </div>
           <div class="right-operation-container">
             <t-space align="center">
-              <!-- 源站 -->
-              <!-- <t-select placeholder="源站" v-model="filterData.site" autoWidth>
-              <t-option v-for="item in FilmSiteList" :key="item.key" :label="item.name" :value="item.name" />
-            </t-select> -->
-              <!-- <t-input-adornment :prepend="protocolSelect">
-                <t-input v-model.trim="searchTxt" clearable placeholder="请输入关键词搜索" @enter="searchEvent">
-                  <template #prefix-icon>
-                    <t-icon name="search" />
-                  </template>
-                </t-input>
-              </t-input-adornment> -->
-              <!-- <t-input v-model.trim="searchTxt" clearable placeholder="请输入关键词搜索" @enter="searchEvent">
-                <template #prefix-icon>
-                  <t-icon name="search" />
-                </template>
-              </t-input> -->
               <div class="search-box">
                 <div class="search-input">
                   <input
@@ -141,10 +122,10 @@
             >
               <template #item="{ item }">
                 <div class="card" @click="detailEvent(item)">
-                  <div class="card-header">
-                    <t-tag v-show="item.vod_remarks" disabled size="small" variant="light-outline" theme="success">
-                      <span>{{ item.vod_remarks }}</span>
-                    </t-tag>
+                  <div v-if="item.vod_remarks || item.vod_remark" class="card-header">
+                    <span class="card-header-tag card-header-tag-orange">
+                      <span class="card-header-tag-tagtext">{{ item.vod_remarks || item.vod_remark }}</span>
+                    </span>
                   </div>
                   <div class="card-main">
                     <t-image
@@ -154,27 +135,16 @@
                       :lazy="true"
                       fit="cover"
                     >
-                      <!-- <template #overlayContent>
+                      <template #overlayContent>
                         <div class="op">
-                          <t-space>
-                            <span class="o-play" @click="playEvent(item.site, item)">播放</span>
-                            <span class="o-star" @click="starEvent(item.site, item)">收藏</span>
-                            <span class="o-share" @click="shareEvent(item.site, item)">分享</span>
-                          </t-space>
+                          <span v-if="item.siteName"> {{ item.siteName }}</span>
                         </div>
-                      </template> -->
+                      </template>
                     </t-image>
                   </div>
                   <div class="card-footer">
                     <p class="card-footer-title">{{ item.vod_name }}</p>
                     <p class="card-footer-desc">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
-                    <!-- <div class="card-footer-desc">
-                      <t-space>
-                        <span>{{ item.vod_area }}</span>
-                        <span>{{ item.vod_year }}</span>
-                        <span>{{ item.vod_type }}</span>
-                      </t-space>
-                    </div> -->
                   </div>
                 </div>
               </template>
@@ -187,8 +157,8 @@
         </div>
       </div>
     </div>
-    <detail-view v-model:visible="formDialogDetail" :info="formDetailData" :site="FilmSiteSetting.basic" />
-    <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
+    <detail-view v-model:visible="formDialogDetail" :info="formDetailData" :site="formSiteData" />
+    <!-- <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" /> -->
     <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
   </div>
 </template>
@@ -203,8 +173,7 @@ import { Waterfall } from 'vue-waterfall-plugin-next';
 import 'vue-waterfall-plugin-next/style.css';
 import 'v3-infinite-loading/lib/style.css';
 
-// import _ from 'lodash';
-import { unionWith, isEqual, size } from 'lodash';
+import _ from 'lodash';
 
 import DetailView from './film/detail/Detail.vue';
 import HotView from './film/hot/Hot.vue';
@@ -214,7 +183,7 @@ import { sites, setting } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
 
 const infiniteId = ref(+new Date()); // infinite-loading此属性更改重置组件
-const showToolbar = ref(false); // 是否显示过滤框 true显示 false隐藏
+const showToolbar = ref(false); // 是否显示筛选框 true显示 false隐藏
 const searchTxt = ref(''); // 搜索框
 const sortKeywords = ['按片名', '按上映年份', '按更新时间']; // 过滤排序条件
 const areasKeywords = ref([]); // 过滤地区
@@ -227,7 +196,8 @@ const filterData = ref({
   date: [],
 }); // 过滤选择值
 const formDialogDetail = ref(false); // dialog是否显示详情
-const formDetailData = ref(); // 详情组件传参
+const formDetailData = ref(); // 详情组件影片传参
+const formSiteData = ref({}); // 详情组件源传参
 const formDialogHot = ref(false); // dialog是否显示热播榜
 const formDialogPrivacyPolicy = ref(false); // dialog是否显示用户协议
 const pagination = ref({
@@ -239,18 +209,21 @@ const FilmSiteSetting = ref({
   basic: {
     name: '',
     key: '',
+    group: '',
     recordcount: 0,
-    change: false,
   },
   class: {
     id: 0,
     name: '最新',
   },
-}); // 当前站点源
+  change: false,
+  searchType: 'site',
+  searchGroup: [],
+}); // 站点源设置
 const FilmDataList = ref({}); // Waterfall
 const FilmSiteList = ref(); // 站点
-const sitesList = ref({});
-const sitesListSelect = ref();
+const sitesList = ref({}); // 全部源
+const sitesListSelect = ref(); // 选择的源
 
 const options = reactive({
   // 唯一key值
@@ -309,10 +282,6 @@ onMounted(async () => {
   await getFilmArea();
 });
 
-// const protocolSelect = ref(() => (
-//   <t-select autoWidth options={['站内', '组内', '全部'].map((value) => ({ label: value, value }))} />
-// ));
-
 const filterEvent = () => {
   let filteredData = FilmDataList.value.list;
   console.log(filteredData);
@@ -366,6 +335,7 @@ const getFilmSetting = async () => {
         sitesListSelect.value = res.id;
         FilmSiteSetting.value.basic.name = res.name;
         FilmSiteSetting.value.basic.key = res.key;
+        FilmSiteSetting.value.basic.group = res.group;
       });
     });
     await setting.get('excludeRootClasses').then((res) => {
@@ -385,6 +355,15 @@ const getFilmSetting = async () => {
     });
     await sites.all().then((res) => {
       sitesList.value = res.filter((item) => item.isActive);
+    });
+    await setting.get('defaultSearch').then((res) => {
+      FilmSiteSetting.value.searchType = res;
+      if (res === 'site') FilmSiteSetting.value.searchGroup = [{ ...FilmSiteSetting.value.basic }];
+      if (res === 'group')
+        FilmSiteSetting.value.searchGroup = sitesList.value.filter(
+          (item) => item.group === FilmSiteSetting.value.basic.group,
+        );
+      if (res === 'all') FilmSiteSetting.value.searchGroup = sitesList.value;
     });
   });
 };
@@ -445,12 +424,9 @@ const getFilmList = async () => {
   const t = FilmSiteSetting.value.class.id;
   let length;
   await zy.list(key, pg, t).then((res) => {
-    // console.log(res);
-    // FilmDataList.value.list = _.unionWith(FilmDataList.value.list, res, _.isEqual);
-    FilmDataList.value.list = unionWith(FilmDataList.value.list, res, isEqual);
+    FilmDataList.value.list = _.unionWith(FilmDataList.value.list, res, _.isEqual);
     pagination.value.pageIndex++;
-    // length = _.size(res);
-    length = size(res);
+    length = _.size(res);
   });
   if (showToolbar.value) filterEvent();
   return length;
@@ -481,27 +457,27 @@ const load = async ($state) => {
 const searchEvent = async () => {
   console.log('search');
   FilmDataList.value.list = [];
-  // if (!_.size(FilmDataList.value.list)) infiniteId.value++;
-  if (!size(FilmDataList.value.list)) infiniteId.value++;
+  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
 
   const wd = searchTxt.value;
-  const { key } = FilmSiteSetting.value.basic;
   if (wd) {
-    await zy.search(key, wd).then((res) => {
-      console.log(res);
-      if (res) {
-        res.forEach(async (item) => {
-          await zy.detail(key, item.vod_id).then((res) => {
-            FilmDataList.value.list.push(res);
+    FilmSiteSetting.value.searchGroup.forEach((site) => {
+      zy.search(site.key, wd).then((res) => {
+        if (res) {
+          res.forEach(async (item) => {
+            await zy.detail(site.key, item.vod_id).then((res) => {
+              res.siteKey = site.key; // 添加站点标识
+              res.siteName = site.name; // 添加站点名称
+              res.siteId = site.id; // 添加站点id
+              FilmDataList.value.list.push(res);
+            });
           });
-        });
-      } else MessagePlugin.warning('暂无在本源搜索到相关资源');
+        }
+      });
     });
-    console.log(FilmDataList.value.list);
-  } else {
-    await getFilmList();
-  }
+    console.log('complete');
+  } else await getFilmList();
 };
 
 const refreshEvnent = async () => {
@@ -509,8 +485,7 @@ const refreshEvnent = async () => {
   await getFilmSetting();
   await getClass();
   FilmDataList.value = {};
-  // if (!_.size(iptvDataList.value.list)) infiniteId.value++;
-  if (!size(FilmDataList.value.list)) infiniteId.value++;
+  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
   // $state.loaded();
   pagination.value.pageIndex = 0;
   await getFilmList();
@@ -520,6 +495,17 @@ const refreshEvnent = async () => {
 
 // 详情
 const detailEvent = (item) => {
+  if (item.siteName) {
+    formSiteData.value = {
+      name: item.siteName,
+      key: item.siteKey,
+    };
+  } else {
+    formSiteData.value = {
+      name: FilmSiteSetting.value.basic.name,
+      key: FilmSiteSetting.value.basic.key,
+    };
+  }
   formDetailData.value = item;
   formDialogDetail.value = true;
 };
@@ -533,8 +519,7 @@ const changeSitesEvent = async (event) => {
   });
   await getClass();
   FilmDataList.value = {};
-  // if (!_.size(iptvDataList.value.list)) infiniteId.value++;
-  if (!size(FilmDataList.value.list)) infiniteId.value++;
+  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
   // $state.loaded();
   pagination.value.pageIndex = 0;
   await getFilmList();
@@ -546,7 +531,6 @@ const changeSitesEvent = async (event) => {
 const getAgreementMask = async () => {
   await setting.get('agreementMask').then((res) => {
     formDialogPrivacyPolicy.value = !res;
-    console.log(res, formDialogPrivacyPolicy.value);
   });
 };
 </script>
@@ -575,8 +559,6 @@ const getAgreementMask = async () => {
           line-height: 1rem;
         }
         .source {
-          // font-weight: bold;
-          // font-size: 0.8rem;
           :deep(.t-input) {
             padding: 0;
             border-style: none !important;
@@ -662,7 +644,6 @@ const getAgreementMask = async () => {
             .search-button {
               display: inline-block;
               font-size: 14px;
-              vertical-align: middle;
               background-color: #ff008c;
               margin: 0 0 0 12px;
               width: 28px;
@@ -691,11 +672,11 @@ const getAgreementMask = async () => {
   }
 
   .main-ext {
-    height: calc(100vh - 115px) !important;
+    height: calc(100vh - 95px - var(--td-comp-size-l)) !important;
   }
   .main {
     overflow-y: auto;
-    height: calc(100vh - 75px);
+    height: calc(100vh - 55px - var(--td-comp-size-l));
     .card {
       box-sizing: border-box;
       width: 196px;
@@ -703,33 +684,62 @@ const getAgreementMask = async () => {
       position: relative;
       cursor: pointer;
       .card-header {
-        color: #fbfbfb;
         position: absolute;
-        z-index: 2222;
-        .t-tag {
-          position: absolute;
-          top: 5px;
-          left: 5px;
-          font-size: 10px;
+        color: #fff;
+        font-size: 12px;
+        z-index: 15;
+        height: 18px;
+        line-height: 18px;
+        right: 0;
+        top: 0;
+        &-tag {
+          height: 18px;
+          line-height: 18px;
+          padding: 1px 6px;
+          border-radius: 0 7px 0 7px;
+          background: #03c8d4;
+          display: block;
+          &-tagtext {
+            display: inline-block;
+            font-size: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 100px;
+          }
+        }
+        &-tag-orange {
+          background: #ffdd9a;
+          color: #4e2d03;
         }
       }
       .card-main {
         width: 100%;
-        // height: 100%;
         .card-main-item {
           border-radius: 7px;
           .op {
-            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: saturate(180%) blur(20px);
+            background-color: rgba(22, 22, 23, 0.8);
+            border-radius: 0 0 7px 7px;
             width: 100%;
-            color: #f2f2f2;
+            color: rgba(255, 255, 255, 0.8);
             position: absolute;
             bottom: 0px;
             display: flex;
             justify-content: center;
           }
-          :hover {
-            transform: scale(1.05);
+        }
+      }
+      .card-main:hover {
+        .card-main-item {
+          :deep(img) {
             transition: all 0.25s ease-in-out;
+            transform: scale(1.05);
+          }
+          .op {
+            transition: all 0.25s ease-in-out;
+            transform: scale(1.05);
+            bottom: -6px;
           }
         }
       }
@@ -758,12 +768,9 @@ const getAgreementMask = async () => {
           font-size: 13px;
           color: #999;
           font-weight: normal;
-          // display: flex;
-          // justify-content: center;
         }
       }
     }
-
     .card:hover {
       .card-footer-title {
         color: #ed6a2c;
