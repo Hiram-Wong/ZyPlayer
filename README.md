@@ -78,9 +78,9 @@
 
 |                      影视 (首页)                       |                      影视 (播放)                       |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| ![影视.png](https://s2.loli.net/2023/02/05/TsVWZX8l4noyAcr.png) | ![影视播放.png](https://s2.loli.net/2023/02/05/14GkXsrREcCgVd3.png) |
+| ![影视.png](https://s2.loli.net/2023/02/11/A9x8hzm6QvPtdug.png) | ![影视播放.png](https://s2.loli.net/2023/02/05/14GkXsrREcCgVd3.png) |
 |                            热榜                            |                            详情                            |
-| ![热榜.png](https://s2.loli.net/2023/02/05/pkwsKzb9MAiDmZu.png) | ![详情.png](https://s2.loli.net/2023/02/05/G9UPHy3M4ZiNAWd.png) |
+| ![热榜.png](https://s2.loli.net/2023/02/11/uqC4XxJHcEhjdzD.png) | ![详情.png](https://s2.loli.net/2023/02/05/G9UPHy3M4ZiNAWd.png) |
 |                      直播(首页)                       |                      直播(播放)                       |
 | ![直播首页.png](https://s2.loli.net/2023/02/05/4mAFrboezVD1KNt.png) | ![直播播放.png](https://s2.loli.net/2023/02/05/pBnAQYg49bwZDlr.png) |
 |                          历史记录                          |                           解析(播放)                           |

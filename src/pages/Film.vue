@@ -158,7 +158,7 @@
       </div>
     </div>
     <detail-view v-model:visible="formDialogDetail" :info="formDetailData" :site="formSiteData" />
-    <!-- <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" /> -->
+    <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
     <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
   </div>
 </template>

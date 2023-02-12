@@ -2,14 +2,10 @@
   <div class="container mx-auto">
     <div class="container-header">
       <div class="player-top">
-        <div
-          class="player-top-left"
-          :style="{ 'padding-left': platform === 'darwin' ? '50px' : '10px' }"
-          @click="openMainWinEvent"
-        >
-          <div class="open-main-win">
+        <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' ? '60px' : '0' }">
+          <div class="open-main-win player-center" @click="openMainWinEvent">
             <home-icon size="1.5em" />
-            <span style="vertical-align: middle">打开主界面</span>
+            <span class="tip-gotomain">回到主界面</span>
           </div>
         </div>
         <div class="player-top-spacer">
@@ -17,15 +13,15 @@
           <span v-else>{{ data.title }}</span>
         </div>
         <div class="player-top-right">
-          <div v-if="type === 'film'" class="player-top-popup player-top-item" @click="bingeEvnet">
+          <div v-if="type === 'film'" class="player-top-right-popup player-top-right-item" @click="bingeEvnet">
             <heart-icon v-if="isBinge" size="1.5em" />
             <heart-filled-icon v-else size="1.5em" />
           </div>
-          <div class="player-top-popup player-top-item player-top-share">
+          <div class="player-top-right-popup player-top-right-item player-top-right-share">
             <t-popup
               placement="bottom-right"
               :overlay-inner-style="{ background: '#2a2a31', boxShadow: 'none' }"
-              attach=".player-top-share"
+              attach=".player-top-right-share"
             >
               <share-icon size="1.5em" />
               <template #content>
@@ -62,25 +58,16 @@
               </template>
             </t-popup>
           </div>
-          <!-- <div class="player-top-popup player-top-item" @click="downloadEvent" v-if="type === 'film'">
+          <!-- <div class="player-top-right-popup player-top-right-item" @click="downloadEvent" v-if="type === 'film'">
             <DownloadIcon size="1.5em"/>
           </div> -->
-          <div v-if="!isMax" class="player-top-popup player-top-item" @click="showEpisode = !showEpisode">
-            <relativity-icon size="1.5em" />
-          </div>
-          <div class="player-top-popup player-top-item" @click="winStickyEvnet">
+          <div class="player-top-right-popup player-top-right-item" @click="winStickyEvnet">
             <pin-icon v-if="isPin" size="1.5em" />
             <pin-filled-icon v-else size="1.5em" />
           </div>
-          <div class="player-top-popup player-top-item player-top-tip">
-            <t-popup
-              placement="bottom-right"
-              content="请勿相信视频中的广告,资源均来自互联网，谨防上当受骗!"
-              :overlay-inner-style="{ background: '#2a2a31', color: '#fdfdfd', boxShadow: 'none' }"
-              attach=".player-top-tip"
-            >
-              <tips-icon size="1.5em" />
-            </t-popup>
+          <div class="player-top-right-window">
+            <span v-show="platform !== 'darwin'" class="window-separator"></span>
+            <window-view />
           </div>
         </div>
       </div>
@@ -164,9 +151,8 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, onDeactivated } from 'vue';
-
 import { MessagePlugin } from 'tdesign-vue-next';
 import {
   HomeIcon,
@@ -175,21 +161,21 @@ import {
   HeartFilledIcon,
   ShareIcon,
   // DownloadIcon,
-  RelativityIcon,
   PinIcon,
   PinFilledIcon,
-  TipsIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from 'tdesign-icons-vue-next';
+
 import QRCode from 'qrcode';
 import useClipboard from 'vue-clipboard3';
+import HlsJsPlayer from 'xgplayer-hls.js';
 
 // import Player from 'xgplayer';
-import HlsJsPlayer from 'xgplayer-hls.js';
 // import FlvJsPlayer from 'xgplayer-flv.js';
+import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
-import { setting, history, iptv, star } from '@/lib/dexie';
+import { setting, history, star } from '@/lib/dexie';
 import { usePlayStore } from '@/store';
 
 // 用于窗口管理
@@ -214,8 +200,8 @@ const config = ref({
   id: 'xgplayer',
   url: 'https://live.v1.mk/aishang/cctv1hd',
   autoplay: true,
-  // lastPlayTime: 10, //视频起播时间（单位：秒）
-  // lastPlayTimeHideDelay: 5, //提示文字展示时长（单位：秒）
+  lastPlayTime: data.value.watchTime,
+  lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
   lang: 'zh-cn',
   pip: true,
   videoInit: true, // 初始化显示视频首帧
@@ -230,7 +216,7 @@ const config = ref({
   },
   volume: 0.5,
   width: '100%',
-  height: 'calc(100vh - 45px)',
+  height: 'calc(100vh - 50px)',
   screenShot: {
     saveImg: true,
     quality: 0.92,
@@ -238,6 +224,11 @@ const config = ref({
     format: '.png',
   },
 }); // 西瓜播放器参数
+
+const skip = ref({
+  start: 0,
+  end: 0,
+});
 
 const PlaySetting = ref({
   pauseWhenMinimize: false,
@@ -264,7 +255,7 @@ onMounted(() => {
   initPlayer();
   minMaxEvent();
   wideEvent();
-  getbinge();
+  getBinge();
   qrCodeImg();
 });
 
@@ -279,6 +270,31 @@ const initSetting = () => {
   setting.get('pauseWhenMinimize').then((res) => {
     PlaySetting.value.pauseWhenMinimize = res;
   });
+
+  // let historyPlayTime;
+  // history.get(parseInt(data.value.historyId, 10)).then((res) => {
+  //   console.log(res);
+  //   // 仅支持到秒
+  //   historyPlayTime = Math.trunc(res.watchTime);
+  //   console.log(historyPlayTime);
+  // });
+
+  // let skipPlayTime;
+  // setting.get('skipStartEnd').then((isSkip) => {
+  //   if (isSkip) {
+  //     setting.get('skipTimeInStart').then((res) => {
+  //       console.log(res);
+  //       skipPlayTime = res;
+  //       skip.value.start = res;
+  //       console.log(skipPlayTime);
+  //     });
+  //     setting.get('skipTimeInEnd').then((res) => {
+  //       console.log(res);
+  //       skip.value.end = res;
+  //     });
+  //   }
+  // });
+  // console.log(historyPlayTime, skipPlayTime);
 };
 
 // 初始化播放器
@@ -297,7 +313,7 @@ const initPlayer = async () => {
     xg.value = new HlsJsPlayer(config.value);
   } else if (type.value === 'film') {
     if (!data.value.url.endsWith('m3u8')) {
-      data.value.url = await zy.parserFilmUrl(data.value.url);
+      data.value.url = zy.parserFilmUrl(data.value.url);
     }
     xg.value = new HlsJsPlayer(config.value);
     await timerUpdatePlayProcess();
@@ -369,7 +385,6 @@ const bingeEvnet = async () => {
         .add(doc)
         .then((res) => {
           console.log(res);
-          MessagePlugin.success('加入追剧列表');
         })
         .catch((error) => {
           MessagePlugin.error(`加入追剧列表失败:${error}`);
@@ -377,12 +392,11 @@ const bingeEvnet = async () => {
     }
   } else {
     star.remove(db.id);
-    MessagePlugin.warning('移除追剧列表');
   }
 };
 
 // 获取是否追剧
-const getbinge = async () => {
+const getBinge = async () => {
   const { key, id } = data.value;
   await star.find({ siteKey: key, videoId: id }).then((res) => {
     if (res) {
@@ -473,12 +487,10 @@ const winStickyEvnet = () => {
     win.setAlwaysOnTop(false);
     BrowserWindow.getFocusedWindow().webContents.send('alwaysOnTop', 'no');
     isPin.value = true;
-    MessagePlugin.warning('取消置顶');
   } else {
     win.setAlwaysOnTop(true);
     BrowserWindow.getFocusedWindow().webContents.send('alwaysOnTop', 'yes');
     isPin.value = false;
-    MessagePlugin.success('置顶');
   }
 };
 </script>
@@ -490,35 +502,56 @@ const winStickyEvnet = () => {
   height: calc(100vh);
   .container-header {
     -webkit-app-region: drag;
-    height: 45px;
+    height: 50px;
     flex-shrink: 0;
-    background: #151625;
+    background: #1e2022;
     .player-top {
-      line-height: 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       white-space: nowrap;
       color: #fff;
-      padding: 0 15px;
+      padding: 10px 15px;
+      .player-center {
+        align-items: center;
+      }
       .player-top-left {
-        position: relative;
-        flex: 1 1 auto;
-        z-index: 1200;
-        white-space: normal;
+        -webkit-app-region: no-drag;
         .open-main-win {
-          border-radius: 10px;
+          height: 30px;
+          width: 120px;
+          border-radius: 5px;
+          background-color: #2f3134;
+          padding: 2px 10px;
+          .tip-gotomain {
+            display: inline-block;
+            margin-left: 5px;
+          }
+        }
+        :hover {
+          background-color: #47494d;
         }
       }
       .player-top-spacer {
         flex: 1 1 auto;
+        overflow: hidden;
+        width: 100px;
+        text-align: center;
+        span {
+          text-align: center;
+          display: inline-block;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
       .player-top-right {
+        -webkit-app-region: no-drag;
         display: flex;
         justify-content: flex-start;
         align-items: center;
         height: 100%;
-        .player-top-popup {
+        &-popup {
+          line-height: 20px;
           position: relative;
           width: 100%;
           height: 100%;
@@ -529,11 +562,18 @@ const winStickyEvnet = () => {
           font-weight: 400;
           margin: 0 8px;
         }
-        .player-top-item {
-          margin: 0 4px 0 16px;
+        &-item {
           cursor: pointer;
+          width: 30px;
+          height: 30px;
+          border-radius: 5px;
+          text-align: center;
+          line-height: 25px;
+          &:hover {
+            background-color: #2f3134;
+          }
         }
-        .player-top-share {
+        &-share {
           .share-container {
             width: 350px;
             padding: 20px;
@@ -643,11 +683,22 @@ const winStickyEvnet = () => {
             }
           }
         }
+        &-window {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          .window-separator {
+            display: block;
+            border: 0.5px solid #47494d;
+            border-radius: 2px;
+            height: 15px;
+          }
+        }
       }
     }
   }
   .container-main {
-    height: calc(100vh - 45px);
+    height: calc(100vh - 50px);
     color: #fff;
     display: flex;
     justify-content: space-between;
@@ -684,7 +735,7 @@ const winStickyEvnet = () => {
         transform: translateY(-50%);
         .player-wide-btn-box {
           border-radius: 5px 0 0 5px;
-          background: #202225;
+          background: rgba(0, 0, 0, 0.5);
           width: 20px;
           height: 120px;
         }
@@ -707,12 +758,10 @@ const winStickyEvnet = () => {
         right: 0;
         bottom: 0;
         top: 0;
-        z-index: 1;
         box-sizing: border-box;
-        // overflow: hidden;
         flex-shrink: 0;
         height: 100%;
-        background: #26262b;
+        background: #18191c;
         .episode-panel-wrapper {
           width: 100%;
           height: 100%;
@@ -828,7 +877,7 @@ const winStickyEvnet = () => {
               width: 100%;
               overflow-y: scroll;
               .film-tabs {
-                background-color: #26262b !important;
+                background-color: rgba(0, 0, 0, 0) !important;
                 :deep(.t-tabs__nav-item-text-wrapper) {
                   color: rgba(255, 255, 255, 0.9) !important;
                 }

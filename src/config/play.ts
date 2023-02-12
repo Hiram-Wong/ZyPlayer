@@ -11,5 +11,6 @@ export default {
     key: '',
     img: '',
     epg: '',
+    watchTime: 0,
   },
 };

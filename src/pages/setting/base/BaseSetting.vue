@@ -47,7 +47,7 @@
       <t-form-item label="快捷键" name="shortcutKey">
         <t-space direction="vertical">
           <t-space>
-            <t-switch v-model="formData.bossKey" size="large">
+            <t-switch v-model="formData.bossKey" size="large" @change="bossKeyEvent">
               <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
             </t-switch>
             <span>老板键</span>
@@ -61,7 +61,7 @@
               placeholder="设置快捷键(组合键)"
               tabindex="0"
               @keydown="handleShortcutKeydown"
-              @click="!formData.bossKey ? null : readyToRecordShortcut"
+              @click.stop="!formData.bossKey ? null : readyToRecordShortcut"
             />
           </div>
         </t-space>
@@ -267,12 +267,9 @@ watchEffect(() => {
   settingStore.updateConfig({ mode: formData.value.theme });
 });
 
-watch(
-  () => formData.value.bossKey,
-  (val) => {
-    if (!val) ipcRenderer.send('switchGlobalShortcutStatusTemporary', 'disable');
-  },
-);
+const bossKeyEvent = () => {
+  if (!formData.value.bossKey) ipcRenderer.send('switchGlobalShortcutStatusTemporary', 'disable');
+};
 
 onMounted(() => {
   getSetting();
@@ -330,7 +327,7 @@ const formatShortcut = (shortcut) => {
 
 const validShortcutCodes = ['=', '-', '~', '[', ']', ';', "'", ',', '.', '/'];
 const handleShortcutKeydown = (_, event) => {
-  const { e } = event.value;
+  const { e } = event;
   e.preventDefault();
   if (recordedShortcut.value.find((s) => s.keyCode === e.keyCode)) return;
   recordedShortcut.value.push(e);

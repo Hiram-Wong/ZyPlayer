@@ -3,7 +3,7 @@ import axios from 'axios';
 import { XMLParser } from 'fast-xml-parser';
 import * as cheerio from 'cheerio';
 import { Parser as M3u8Parser } from 'm3u8-parser';
-import { forEach, zipObject } from 'lodash';
+import _ from 'lodash';
 const { getCurrentWindow } = window.require('@electron/remote');
 // // import FLVDemuxer from 'xgplayer-flv.js/src/flv/demux/flv-demuxer.js'
 // import SocksProxyAgent from 'socks-proxy-agent'
@@ -251,7 +251,6 @@ const zy = {
           if (json && jsondata.total > 0) {
             let videoList = jsondata.list
             if (Object.prototype.toString.call(videoList) === '[object Object]') videoList = [].concat(videoList)
-            // videoList = videoList?.filter(e => e.name.toLowerCase().includes(wd.toLowerCase()))
             if (videoList?.length) {
               resolve(videoList)
             } else {
@@ -285,8 +284,6 @@ const zy = {
           if (jsondata|| jsondata?.list) {
             let videoList = jsondata.list
             if (Object.prototype.toString.call(videoList) === '[object Object]') videoList = [].concat(videoList)
-            // videoList = videoList?.filter(e => e.vod_name.toLowerCase().includes(wd.toLowerCase()))
-            // console.log(videoList)
             if (videoList?.length) {
               this.detail(key, videoList[0].vod_id).then(detailRes => {
                 resolve(detailRes)
@@ -329,7 +326,7 @@ const zy = {
             const playUrl  = videoList.vod_play_url;
             const playUrlDiffPlaySource = playUrl.split('$$$') // 分离不同播放源
             let playEpisodes = []
-            forEach(playUrlDiffPlaySource, (item) => {
+            _.forEach(playUrlDiffPlaySource, (item) => {
               const playContont = item
               .replace(/\$+/g, '$')
               .split('#')
@@ -339,51 +336,8 @@ const zy = {
             });
 
             // 合并播放源和剧集
-            const fullList= zipObject(playSource, playEpisodes)
+            const fullList= _.zipObject(playSource, playEpisodes)
             videoList.fullList = fullList
-          // let fullList = []
-          // let index = 0
-          // const supportedFormats = ['m3u8', 'mp4']
-          // const dd = videoList.dl.dd
-          // const type = Object.prototype.toString.call(dd)
-          // if (type === '[object Array]') {
-          //   for (const i of dd) {
-          //     i._t = i._t.replace(/\$+/g, '$')
-          //     const ext = Array.from(new Set(...i._t.split('#').map(e => e.includes('$') ? e.split('$')[1].match(/\.\w+?$/) : e.match(/\.\w+?$/)))).map(e => e.slice(1))
-          //     if (ext.length && ext.length <= supportedFormats.length && ext.every(e => supportedFormats.includes(e))) {
-          //       if (ext.length === 1) {
-          //         i._flag = ext[0]
-          //       } else {
-          //         i._flag = index ? 'ZY支持-' + index : 'ZY支持'
-          //         index++
-          //       }
-          //     }
-          //     fullList.push(
-          //       {
-          //         flag: i._flag,
-          //         list: i._t.split('#').filter(e => e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http'))))
-          //       }
-          //     )
-          //   }
-          // } else {
-          //   fullList.push(
-          //     {
-          //       flag: dd._flag,
-          //       list: dd._t.replace(/\$+/g, '$').split('#').filter(e => e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http'))))
-          //     }
-          //   )
-          // }
-          // fullList.forEach(item => {
-          //   if (item.list.every(e => e.includes('$') && /^\s*\d+\s*$/.test(e.split('$')[0]))) item.list.sort((a, b) => { return a.split('$')[0] - b.split('$')[0] })
-          // })
-          // if (fullList.length > 1) { // 将ZY支持的播放列表前置
-          //   index = fullList.findIndex(e => supportedFormats.includes(e.flag) || e.flag.startsWith('ZY支持'))
-          //   if (index !== -1) {
-          //     const first = fullList.splice(index, 1)
-          //     fullList = first.concat(fullList)
-          //   }
-          // }
-          // videoList.fullList = fullList
           resolve(videoList)
         }).catch(err => {
           reject(err)

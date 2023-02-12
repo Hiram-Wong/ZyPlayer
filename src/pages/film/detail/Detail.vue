@@ -107,15 +107,13 @@
   </t-dialog>
 </template>
 
-<script setup scoped>
+<script setup lang="ts">
 import { ref, watch } from 'vue';
 
 import { MessagePlugin } from 'tdesign-vue-next';
 import { HeartIcon } from 'tdesign-icons-vue-next';
 
-// import _ from 'lodash';
-import { forEach, zipObject, replace } from 'lodash';
-// import { ipcRenderer } from 'electron';
+import _ from 'lodash';
 
 import { usePlayStore } from '@/store';
 
@@ -128,12 +126,6 @@ const props = defineProps({
   visible: {
     type: Boolean,
     default: false,
-  },
-  data: {
-    type: Object,
-    default: () => {
-      return {};
-    },
   },
   info: {
     type: Object,
@@ -151,7 +143,6 @@ const props = defineProps({
 const store = usePlayStore();
 const selectPlayableSource = ref([]);
 const formVisible = ref(false);
-// const formData = ref(props.data);
 const info = ref(props.info);
 const formData = ref(props.site);
 const videoFullList = ref([]);
@@ -196,6 +187,7 @@ const gotoPlay = async (item) => {
   const id = info.value.vod_id;
   const db = await history.find({ siteKey: key, videoId: id });
   let historyId;
+  let watchTime = 0;
   const doc = {
     date: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`,
     siteKey: key,
@@ -211,6 +203,7 @@ const gotoPlay = async (item) => {
   if (db) {
     await history.update(db.id, doc);
     historyId = db.id;
+    watchTime = db.watchTime;
   } else historyId = await history.add(doc);
   console.log(historyId);
 
@@ -226,6 +219,7 @@ const gotoPlay = async (item) => {
       seasons: { ...videoFullList.value },
       key: formData.value.key,
       img: info.value.vod_pic,
+      watchTime,
     },
   });
 
@@ -294,7 +288,7 @@ const getDetailInfo = async () => {
   const playUrl = videoList.vod_play_url;
   const playUrlDiffPlaySource = playUrl.split('$$$'); // 分离不同播放源
   const playEpisodes = [];
-  forEach(playUrlDiffPlaySource, (item) => {
+  _.forEach(playUrlDiffPlaySource, (item) => {
     const playContont = item
       .replace(/\$+/g, '$')
       .split('#')
@@ -305,7 +299,7 @@ const getDetailInfo = async () => {
   // console.log(playEpisodes)
 
   // 合并播放源和剧集
-  const fullList = zipObject(playSource, playEpisodes);
+  const fullList = _.zipObject(playSource, playEpisodes);
   // console.log(fullList)
 
   videoList.fullList = fullList;
@@ -390,8 +384,7 @@ const getDoubanRecommend = async () => {
   const year = info.value.vod_year;
   const id = info.value.vod_douban_id;
   await zy.doubanRecommendations(id, name, year).then((resName) => {
-    // _.forEach(resName, async (element) => {
-    forEach(resName, async (element) => {
+    _.forEach(resName, async (element) => {
       await zy.searchFirstDetail(key, element).then((res) => {
         if (res) {
           if (recommendationsList.value.length < 8) recommendationsList.value.push(res);
@@ -403,7 +396,7 @@ const getDoubanRecommend = async () => {
 
 // 替换style
 const filterContent = (item) => {
-  return replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
+  return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
 };
 
 // 推荐详情-刷新数据
