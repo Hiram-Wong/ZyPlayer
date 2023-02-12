@@ -97,7 +97,7 @@ const filterPlayProgress = (start, all) => {
 .history-container {
   .main {
     overflow-y: auto;
-    height: calc(100vh - 75px);
+    height: calc(100vh - 55px - var(--td-comp-size-l));
     .card {
       position: relative;
       display: inline-block;

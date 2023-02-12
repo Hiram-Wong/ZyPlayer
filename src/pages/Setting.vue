@@ -41,5 +41,11 @@ const settingTag = ref('ConfigBase');
     overflow: auto;
     padding: 20px 0;
   }
+  .t-tabs {
+    background-color: rgba(0, 0, 0, 0) !important;
+    :deep(.t-tabs__nav-container.t-is-top:after) {
+      background-color: rgba(0, 0, 0, 0) !important;
+    }
+  }
 }
 </style>

@@ -159,7 +159,7 @@ const analysisEvent = async () => {
 
 .analysis-container {
   width: 100%;
-  height: calc(100vh - 30px);
+  height: calc(100vh - var(--td-comp-size-l));
   .analysis-main {
     .analysis-main-header {
       line-height: 42px;

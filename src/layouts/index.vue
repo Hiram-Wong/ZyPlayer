@@ -1,7 +1,7 @@
 <template>
   <div>
     <t-layout>
-      <t-header height="20px" :class="`${prefix}-header`">
+      <t-header height="36px" :class="`${prefix}-header`">
         <layout-header />
       </t-header>
       <t-layout :class="`${prefix}-layout`">

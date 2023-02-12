@@ -28,6 +28,7 @@
       :data="emptyData ? [] : data"
       :columns="COLUMNS"
       :hover="true"
+      stripe
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
       @select-change="rehandleSelectChange"

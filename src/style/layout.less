@@ -98,7 +98,7 @@
   }
 
   &-layout {
-    height: calc(100vh - var(--td-comp-size-xxs));
+    height: calc(100vh - var(--td-comp-size-l));
     overflow-y: scroll;
     &-tabs-nav {
       max-width: 100%;
@@ -245,4 +245,14 @@
   border: 2px solid transparent;
   background-clip: content-box;
   background-color: var(--td-scrollbar-color);
+}
+
+.window-item:hover {
+  background-color: #e3e5e7 !important;
+}
+
+:root[theme-mode='dark'] {
+  .window-item:hover {
+    background-color: #2f3134 !important;
+  }
 }

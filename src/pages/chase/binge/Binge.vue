@@ -46,11 +46,10 @@
   </div>
 </template>
 
-<script setup lang="jsx">
+<script setup lang="tsx">
 import { ref } from 'vue';
 import { LinkUnlinkIcon, LoadingIcon } from 'tdesign-icons-vue-next';
-// import _ from 'lodash';
-import { unionWith, isEqual, size } from 'lodash';
+import _ from 'lodash';
 import { Waterfall } from 'vue-waterfall-plugin-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { star } from '@/lib/dexie';
@@ -97,11 +96,9 @@ const getBingeList = async () => {
   let length;
   await star.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
     console.log(res);
-    // bingeList.value.list = _.unionWith(bingeList.value.list, res.list, _.isEqual);
-    bingeList.value.list = unionWith(bingeList.value.list, res.list, isEqual);
+    bingeList.value.list = _.unionWith(bingeList.value.list, res.list, _.isEqual);
     pagination.value.pageIndex++;
-    // length = _.size(res.list);
-    length = size(res.list);
+    length = _.size(res.list);
   });
   return length;
 };
@@ -135,7 +132,7 @@ const detailEvent = async (item) => {
 .binge-container {
   .main {
     overflow-y: auto;
-    height: calc(100vh - 75px);
+    height: calc(100vh - 55px - var(--td-comp-size-l));
     .card {
       position: relative;
       display: inline-block;
