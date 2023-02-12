@@ -1,10 +1,11 @@
-// import { app, shell, BrowserWindow, protocol, session, ipcMain } from 'electron';
-// import * as path from 'path';
-// import { electronApp } from '@electron-toolkit/utils';
+/* eslint-disable @typescript-eslint/no-var-requires */
 
-const { app, shell, BrowserWindow, protocol, session, ipcMain } = require('electron');
-const path = require('path');
+const { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } = require('electron');
+const Store = require('electron-store');
 const { electronApp } = require('@electron-toolkit/utils');
+
+const path = require('path');
+const url = require('url');
 
 const remote = require('@electron/remote/main');
 
@@ -17,10 +18,12 @@ protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: tru
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
 const { NODE_ENV } = process.env;
-console.log(NODE_ENV);
+
+const store = new Store();
 
 let mainWindow; // 主窗口
 let playWindow; // 播放窗口
+let isHidden = true;
 
 function createWindow() {
   // 创建浏览器窗口
@@ -29,9 +32,11 @@ function createWindow() {
     minWidth: 840,
     height: 650,
     minHeight: 650,
-    titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
+    titleBarStyle: 'hiddenInset',
     show: false,
+    frame: false,
     autoHideMenuBar: true,
+    title: 'ZyPlayer',
     ...(process.platform === 'linux'
       ? {
           icon: path.join(__dirname, '../../build/icon.png'),
@@ -42,8 +47,8 @@ function createWindow() {
       sandbox: false,
       nodeIntegration: true,
       contextIsolation: false,
-      webSecurity: false, // 允许跨域
-      allowRunningInsecureContent: false,
+      webSecurity: false, // 禁用同源策略
+      allowRunningInsecureContent: false, // 允许一个 https 页面运行来自http url的JavaScript, CSS 或 plugins
     },
   });
 
@@ -68,51 +73,38 @@ function createWindow() {
   mainWindow.loadURL(
     NODE_ENV === 'development' ? 'http://localhost:3000' : `file://${path.join(__dirname, '../dist/index.html')}`,
   );
-
-  // 去掉默认菜单栏
-  // Menu.setApplicationMenu(null);
-
-  // 修改request headers
-  // Sec-Fetch下禁止修改，浏览器自动加上请求头 https://www.cnblogs.com/fulu/p/13879080.html 暂时先用index.html的meta referer policy替代
-  const filter = {
-    urls: ['http://*/*', 'http://*/*'],
-  };
-
-  mainWindow.webContents.session.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    const url = new URL(details.url);
-    details.requestHeaders.Origin = url.origin;
-    console.log(details.requestHeaders.Origin);
-    if (
-      !details.url.includes('//localhost') &&
-      details.requestHeaders.Referer &&
-      details.requestHeaders.Referer.includes('//localhost')
-    ) {
-      details.requestHeaders.Referer = url.origin;
-      console.log(details.requestHeaders.Origin);
-    }
-    callback({
-      // https://github.com/electron/electron/issues/23988 回调似乎无法修改headers，暂时先用index.html的meta referer policy替代
-      cancel: false,
-      requestHeaders: details.requestHeaders,
-    });
-  });
 }
 
 // 这段程序将会在 Electron 结束初始化和创建浏览器窗口的时候调用
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(() => {
   // 为 Windows 设置应用程序用户模型 ID
-  electronApp.setAppUserModelId('com.electron');
+  electronApp.setAppUserModelId('com.zyplayer');
 
-  // CSP
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': ["connect-src * ws: http: https: 'self'"],
-      },
+  // register global shortcuts
+  // 初始化数据
+  const shortcuts = store.get('settings.shortcuts');
+  if (shortcuts === undefined) {
+    store.set('settings.shortcuts', 'Shift+Command+Z');
+  }
+  const enableGlobalShortcut = store.get('settings.enableGlobalShortcut');
+  if (enableGlobalShortcut === undefined) {
+    store.set('settings.enableGlobalShortcut', true);
+  }
+  console.log(enableGlobalShortcut, shortcuts);
+  if (enableGlobalShortcut === true) {
+    globalShortcut.register(shortcuts, () => {
+      // Do stuff when Y and either Command/Control is pressed.
+      if (isHidden) {
+        if (mainWindow) mainWindow.hide();
+        if (playWindow) playWindow.hide();
+      } else {
+        if (mainWindow) mainWindow.show();
+        if (playWindow) playWindow.show();
+      }
+      isHidden = !isHidden;
     });
-  });
+  }
 
   // 开发中默认按F12打开或关闭Dev Tools
   // 并在生产中忽略 Command 或 Control + R。
@@ -134,6 +126,8 @@ app.whenReady().then(() => {
 // 任务栏上的图标来说，应当保持活跃状态，直到用户使用 Cmd + Q 退出。
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  // unregister all global shortcuts
+  globalShortcut.unregisterAll();
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -146,17 +140,23 @@ app.on('browser-window-created', (_, window) => {
   remote.enable(window.webContents);
 });
 
-ipcMain.on('openPlayWindow', () => {
-  const url = require('url');
+ipcMain.on('openPlayWindow', (_, arg) => {
   if (playWindow) playWindow.destroy();
   playWindow = new BrowserWindow({
     width: 850,
     minWidth: 850,
     height: 550,
     minHeight: 550,
-    titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
+    titleBarStyle: 'hiddenInset',
     show: false,
+    frame: false,
     autoHideMenuBar: true,
+    backgroundColor: '#18191c',
+    title: arg,
+    trafficLightPosition: {
+      x: 10,
+      y: 15,
+    },
     webPreferences: {
       sandbox: false,
       nodeIntegration: true,
@@ -190,4 +190,27 @@ ipcMain.on('openPlayWindow', () => {
 ipcMain.on('showMainWin', async () => {
   console.log('显示主窗口');
   mainWindow.show();
+});
+
+ipcMain.on('switchGlobalShortcutStatusTemporary', (_, status) => {
+  console.log('switchGlobalShortcutStatusTemporary');
+  if (status === 'disable') {
+    store.set('settings.enableGlobalShortcut', false);
+    globalShortcut.unregisterAll();
+  } else {
+    store.set('settings.enableGlobalShortcut', true);
+  }
+});
+
+ipcMain.on('updateShortcut', (_, { shortcut }) => {
+  globalShortcut.register(shortcut, () => {
+    if (isHidden) {
+      if (mainWindow) mainWindow.hide();
+      if (playWindow) playWindow.hide();
+    } else {
+      if (mainWindow) mainWindow.show();
+      if (playWindow) playWindow.show();
+    }
+    isHidden = !isHidden;
+  });
 });

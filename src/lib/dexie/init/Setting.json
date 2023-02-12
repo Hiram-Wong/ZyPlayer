@@ -58,17 +58,19 @@
     "height": 650
   },
   "defaultHot": "site",
+  "defaultSearch": "site",
   "defaultCheckModel": true,
+  "defaultChangeModel": false,
   "defaultIptvEpg": "https://epg.112114.xyz/",
   "iptvSkipIpv6": true,
   "iptvThumbnail": false,
   "restoreWindowPositionAndSize": false,
   "pauseWhenMinimize": true,
-  "defaultSite": {
-    "name": "",
-    "key": ""
-  },
+  "defaultSite": "",
   "defaultIptv": "",
   "defaultAnalyze": "",
-  "agreementMask": false
+  "skipStartEnd": false,
+  "agreementMask": false,
+  "bossKey": true,
+  "ecordedShortcut": "Shift+Command+Z"
 }]

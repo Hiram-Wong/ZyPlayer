@@ -15,6 +15,8 @@
         <t-space>
           <t-button theme="default" variant="base" @click="clearDBEvent">重置数据库</t-button>
           <t-button theme="default" variant="base" @click="clearCache">清理缓存</t-button>
+          <!-- <t-button theme="default" variant="base" @click="checkUpdate">检查更新</t-button> -->
+          <!-- <t-button theme="default" variant="base" @click="easyToConfig">一键配置</t-button> -->
         </t-space>
       </t-form-item>
       <t-form-item label="代理" name="proxy">
@@ -42,6 +44,28 @@
           </div>
         </t-space>
       </t-form-item>
+      <t-form-item label="快捷键" name="shortcutKey">
+        <t-space direction="vertical">
+          <t-space>
+            <t-switch v-model="formData.bossKey" size="large">
+              <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
+            </t-switch>
+            <span>老板键</span>
+          </t-space>
+          <div class="shortcut-container">
+            <t-input
+              v-model="formData.ecordedShortcut"
+              :disabled="!formData.bossKey"
+              :format="formatShortcut(recordedShortcutComputed)"
+              class="shortcut-content"
+              placeholder="设置快捷键(组合键)"
+              tabindex="0"
+              @keydown="handleShortcutKeydown"
+              @click="!formData.bossKey ? null : readyToRecordShortcut"
+            />
+          </div>
+        </t-space>
+      </t-form-item>
       <t-form-item label="站点" name="site">
         <div class="site">
           <t-space direction="vertical">
@@ -49,6 +73,13 @@
               <t-radio-group v-model="formData.defaultHot">
                 <t-radio value="site">站内推荐</t-radio>
                 <t-radio value="douban">豆瓣推荐</t-radio>
+              </t-radio-group>
+            </div>
+            <div class="hot-recommend site-item">
+              <t-radio-group v-model="formData.defaultSearch">
+                <t-radio value="site">站内搜索</t-radio>
+                <t-radio value="group">组内搜索</t-radio>
+                <t-radio value="all">全站搜索</t-radio>
               </t-radio-group>
             </div>
             <div class="check-status site-item">
@@ -134,10 +165,6 @@
         <div class="shortcut">
           <t-space direction="vertical">
             <t-space>
-              <!-- <t-switch v-model="formData.shortcut" size="large">
-                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-              </t-switch>
-              <span>快捷键</span> -->
               <t-switch v-model="formData.pauseWhenMinimize" size="large">
                 <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
               </t-switch>
@@ -147,27 +174,15 @@
               </t-switch>
               <span>跳过开始结尾</span> -->
             </t-space>
-            <!-- <t-space>
-              <t-input-number
-                v-model="formData.forwardTimeInSec"
-                theme="normal"
-                align="center"
-                :min="0"
-                style="width: 150px"
-              >
-                <template #label><span>定位：</span></template>
-                <template #suffix><span>秒</span></template>
-              </t-input-number>
-            </t-space> -->
-            <!-- <div class="" v-if="formData.skipStartEnd">
+            <!-- <div v-if="formData.skipStartEnd" class="">
               <div class="">
                 <span>开始</span>
-                <t-slider v-model="formData.skipTimeInStart" :show-tooltip="true" :marks="MASKS" :max="180"/>
+                <t-slider v-model="formData.skipTimeInStart" :show-tooltip="true" :marks="MASKS" :max="180" />
               </div>
-              <br>
-              <div class="" >
+              <br />
+              <div class="">
                 <span>结尾</span>
-                <t-slider v-model="formData.skipTimeInEnd" :show-tooltip="true" :marks="MASKS" :max="180"/>
+                <t-slider v-model="formData.skipTimeInEnd" :show-tooltip="true" :marks="MASKS" :max="180" />
               </div>
             </div> -->
           </t-space>
@@ -178,13 +193,12 @@
 </template>
 
 <script setup>
-import { ref, watchEffect, computed, onMounted } from 'vue';
+import { ref, watch, watchEffect, computed, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { join, split } from 'lodash';
+import _ from 'lodash';
 import db from '@/lib/dexie/dexie';
 import { setting } from '@/lib/dexie';
 import { useSettingStore } from '@/store';
-// import _ from 'lodash';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
@@ -195,12 +209,10 @@ const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
 
 const MODE_OPTIONS = [
-  { type: 'light', text: '明亮' },
-  { type: 'dark', text: '暗黑' },
+  { type: 'light', text: '浅色' },
+  { type: 'dark', text: '深色' },
   { type: 'auto', text: '跟随系统' },
 ];
-const start = ref();
-const end = ref();
 const MASKS = {
   0: '0s',
   30: '30s',
@@ -210,6 +222,8 @@ const MASKS = {
   150: '150s',
   180: '180s',
 };
+
+const recordedShortcut = ref([]);
 
 const getModeIcon = (mode) => {
   if (mode === 'light') {
@@ -227,23 +241,19 @@ const formData = ref({});
 
 const rootClassFilter = computed({
   get() {
-    // return _.join(formData.value.rootClassFilter, ',');
-    return join(formData.value.rootClassFilter, ',');
+    return _.join(formData.value.rootClassFilter, ',');
   },
   set(val) {
-    // formData.value.rootClassFilter = _.split(val, '-');
-    formData.value.rootClassFilter = split(val, '-');
+    formData.value.rootClassFilter = _.split(val, '-');
   },
 });
 
 const r18ClassFilter = computed({
   get() {
-    // return _.join(formData.value.r18ClassFilter, ',');
-    return join(formData.value.r18ClassFilter, ',');
+    return _.join(formData.value.r18ClassFilter, ',');
   },
   set(val) {
-    // formData.value.r18ClassFilter = _.split(val, '-');
-    formData.value.r18ClassFilter = split(val, '-');
+    formData.value.r18ClassFilter = _.split(val, '-');
   },
 });
 
@@ -254,10 +264,15 @@ watchEffect(() => {
   setting.find().then((res) => {
     console.log(res);
   });
-  // setting.clear();
-  // setting.bulkAdd(formData.value);
   settingStore.updateConfig({ mode: formData.value.theme });
 });
+
+watch(
+  () => formData.value.bossKey,
+  (val) => {
+    if (!val) ipcRenderer.send('switchGlobalShortcutStatusTemporary', 'disable');
+  },
+);
 
 onMounted(() => {
   getSetting();
@@ -288,15 +303,108 @@ const clearCache = async () => {
   await ses.clearCache();
   MessagePlugin.success(`清除缓存成功, 共清理 ${mb} MB`);
 };
+
+const readyToRecordShortcut = () => {
+  recordedShortcut.value = [];
+  ipcRenderer.send('switchGlobalShortcutStatusTemporary', 'disable');
+};
+
+const formatShortcut = (shortcut) => {
+  shortcut = shortcut
+    .replaceAll('+', ' + ')
+    .replace('Up', '↑')
+    .replace('Down', '↓')
+    .replace('Right', '→')
+    .replace('Left', '←')
+    .replace('Space', '空格');
+  if (process.platform === 'darwin') {
+    return shortcut
+      .replace('CommandOrControl', '⌘')
+      .replace('Command', '⌘')
+      .replace('Alt', '⌥')
+      .replace('Control', '⌃')
+      .replace('Shift', '⇧');
+  }
+  return shortcut.replace('CommandOrControl', 'Ctrl');
+};
+
+const validShortcutCodes = ['=', '-', '~', '[', ']', ';', "'", ',', '.', '/'];
+const handleShortcutKeydown = (_, event) => {
+  const { e } = event.value;
+  e.preventDefault();
+  if (recordedShortcut.value.find((s) => s.keyCode === e.keyCode)) return;
+  recordedShortcut.value.push(e);
+  if (
+    (e.keyCode >= 65 && e.keyCode <= 90) || // A-Z
+    (e.keyCode >= 48 && e.keyCode <= 57) || // 0-9
+    (e.keyCode >= 112 && e.keyCode <= 123) || // F1-F12
+    ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'].includes(e.key) || // Arrows
+    validShortcutCodes.includes(e.key)
+  ) {
+    saveShortcut();
+  }
+};
+
+const saveShortcut = () => {
+  formData.value.ecordedShortcut = recordedShortcutComputed.value;
+  ipcRenderer.send('updateShortcut', { shortcut: recordedShortcutComputed.value });
+};
+
+const recordedShortcutComputed = computed(() => {
+  let shortcut = [];
+  recordedShortcut.value.map((e) => {
+    if (e.keyCode >= 65 && e.keyCode <= 90) {
+      // A-Z
+      shortcut.push(e.code.replace('Key', ''));
+    } else if (e.key === 'Meta') {
+      // ⌘ Command on macOS
+      shortcut.push('Command');
+    } else if (['Alt', 'Control', 'Shift'].includes(e.key)) {
+      shortcut.push(e.key);
+    } else if (e.keyCode >= 48 && e.keyCode <= 57) {
+      // 0-9
+      shortcut.push(e.code.replace('Digit', ''));
+    } else if (e.keyCode >= 112 && e.keyCode <= 123) {
+      // F1-F12
+      shortcut.push(e.code);
+    } else if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+      // Arrows
+      shortcut.push(e.code.replace('Arrow', ''));
+    } else if (validShortcutCodes.includes(e.key)) {
+      shortcut.push(e.key);
+    }
+    return shortcut;
+  });
+  const sortTable = {
+    Control: 1,
+    Shift: 2,
+    Alt: 3,
+    Command: 4,
+  };
+  shortcut = shortcut.sort((a, b) => {
+    if (!sortTable[a] || !sortTable[b]) return 0;
+    if (sortTable[a] - sortTable[b] <= -1) {
+      return -1;
+    }
+    if (sortTable[a] - sortTable[b] >= 1) {
+      return 1;
+    }
+    return 0;
+  });
+  shortcut = shortcut.join('+');
+  return shortcut;
+});
 </script>
 
 <style lang="less" scoped>
 @import '@/style/variables';
 
-:deep(.t-form__controls-content) {
-  justify-content: start !important;
-}
-.textarea {
-  width: 60vw;
+.setting-base-container {
+  :deep(.t-form__controls-content) {
+    justify-content: start !important;
+  }
+  .textarea {
+    width: 60vw;
+  }
 }
 </style>
