@@ -53,7 +53,6 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { MessagePlugin } from 'tdesign-vue-next';
-import iptvPlaylistParser from 'iptv-playlist-parser';
 import _ from 'lodash';
 import DialogFormAddIptv from './components/DialogFormAdd.vue';
 import DialogFormEditIptv from './components/DialogFormEdit.vue';
@@ -100,50 +99,67 @@ const exportEvent = () => {
     const blob = new Blob([str], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, `iptv.json`);
   });
-  // const str = JSON.stringify(arr, null, 2);
-  // const blob = new Blob([str], { type: 'text/plain;charset=utf-8' });
-  // saveAs(blob, `iptv.json`);
-  // MessagePlugin.success('导出成功');
 };
 
 const defaultEvent = async (row) => {
-  // console.log(row.row.url);
   const m3uUrl = row.row.url;
   await axios.get(m3uUrl).then((res) => {
-    if (res.data) {
-      updateChannelList(res.data);
+    const { data } = res;
+    // console.log(data);
+    if (data) {
+      if (data.trim().startsWith('#EXTM3U')) m3u(data);
+      else txt(data);
       MessagePlugin.success('设置成功');
     }
   });
   setting.update({ defaultIptv: row.row.id });
 };
 
-const updateChannelList = (data) => {
-  const docs = [];
-  const result = iptvPlaylistParser.parse(data).items;
+const m3u = (text) => {
+  const GROUP = /.*group-title="(.?|.+?)".*/i;
+  const LOGO = /.*tvg-logo="(.?|.+?)".*/i;
+  const NAME = /.*,(.+?)$/i;
 
-  console.log(result);
-  const format = /\.(m3u8|flv)$/;
-  _.forEach(result, (item, index) => {
-    _.filter(_.split(item.url, '#'), (o) => {
-      return _.startsWith(o, 'http') && format.test(o) && _.isEmpty(o.name);
-    }); // 网址带#时自动分割
-    const doc = {
-      id: index,
-      name: _.split(_.trim(item.name), ',')[1] || _.trim(item.tvg.name) || _.trim(item.name),
-      url: item.url,
-      logo: item.tvg.logo,
-      group: item.group.title,
-    };
-    docs.push(doc);
+  const docs = [];
+  let doc;
+  const splitList = text.split('\n');
+  splitList.forEach((line) => {
+    if (line.startsWith('#EXTINF:')) {
+      doc = {}; // 切断指针的联系
+      doc.name = line.match(NAME) ? line.match(NAME)[1] : '';
+      doc.logo = line.match(LOGO) ? line.match(LOGO)[1] : '';
+      doc.group = line.match(GROUP) ? line.match(GROUP)[1] : '';
+    } else if (line.indexOf('://') > -1) {
+      doc.url = line;
+      docs.push(doc);
+    }
   });
-  _.uniqWith(docs, _.isEqual); // 去重
-  console.log(docs);
-  // 同频道处理
   channelList.clear().then((res) => {
     channelList.bulkAdd(docs).then((e) => {
-      // 支持导入同名频道，群里反馈
-      // updateChannelList()
+      console.log(res, e);
+    });
+  });
+};
+
+const txt = (text) => {
+  const docs = [];
+  let group;
+  const splitList = text.split('\n');
+  splitList.forEach((line) => {
+    const split = line.split(',');
+    if (split.length < 2) return;
+    if (line.indexOf('#genre#') > -1) [group] = split;
+    if (split[1].indexOf('://') > -1) {
+      const doc = {
+        name: split[0],
+        url: split[1],
+        group,
+      };
+      docs.push(doc);
+    }
+  });
+  channelList.clear().then((res) => {
+    channelList.bulkAdd(docs).then((e) => {
       console.log(res, e);
     });
   });
