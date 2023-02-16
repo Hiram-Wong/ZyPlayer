@@ -203,6 +203,7 @@ ipcMain.on('switchGlobalShortcutStatusTemporary', (_, status) => {
 });
 
 ipcMain.on('updateShortcut', (_, { shortcut }) => {
+  store.set('settings.shortcuts', shortcut);
   globalShortcut.register(shortcut, () => {
     if (isHidden) {
       if (mainWindow) mainWindow.hide();

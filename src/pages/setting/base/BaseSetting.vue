@@ -213,6 +213,7 @@ const MODE_OPTIONS = [
   { type: 'dark', text: '深色' },
   { type: 'auto', text: '跟随系统' },
 ];
+
 const MASKS = {
   0: '0s',
   30: '30s',
@@ -269,6 +270,7 @@ watchEffect(() => {
 
 const bossKeyEvent = () => {
   if (!formData.value.bossKey) ipcRenderer.send('switchGlobalShortcutStatusTemporary', 'disable');
+  else ipcRenderer.send('switchGlobalShortcutStatusTemporary', 'enable');
 };
 
 onMounted(() => {
