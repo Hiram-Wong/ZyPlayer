@@ -1,7 +1,7 @@
 <template>
   <div class="analysis-container mx-auto">
     <div class="analysis-main">
-      <div class="analysis-main-header">
+      <div class="analysis-main-header" @dblclick="showSupportEvent">
         <span class="play_title">{{ urlTitle ? urlTitle : '暂无播放内容' }}</span>
       </div>
       <div class="analysis-main-play">
@@ -9,6 +9,7 @@
           ref="iframeRef"
           :key="key"
           class="analysis-play-box"
+          :class="isSupport ? 'analysis-play-box-hidden' : 'analysis-play-box-show'"
           :src="url"
           allowtransparency="true"
           frameborder="0"
@@ -39,7 +40,7 @@
           </div>
         </div>
       </div>
-      <div class="analysis-main-bottom">
+      <div v-if="isSupport" class="analysis-main-bottom">
         <div class="support-title">
           <span class="support-separator"></span>
           <p class="support-tip">支持平台</p>
@@ -70,6 +71,7 @@ import logoSohu from '@/assets/sohu.png';
 import logoPptv from '@/assets/pptv.png';
 import logoBilibili from '@/assets/bilibili.png';
 
+const isSupport = ref(false);
 const urlTitle = ref(); // 播放地址的标题
 const analysisApi = ref([]); // 解析接口api列表
 const analysisApiLoading = ref(true);
@@ -134,6 +136,9 @@ const getAnalysisApi = async () => {
   await setting.get('defaultAnalyze').then((res) => {
     selectAnalysisApi.value = res;
   });
+  await setting.get('analyzeSupport').then((res) => {
+    isSupport.value = res;
+  });
 };
 
 // 解析
@@ -151,6 +156,13 @@ const analysisEvent = async () => {
     MessagePlugin.error('请选择解析接口或输入需要解析的地址');
   }
 };
+
+const showSupportEvent = async () => {
+  isSupport.value = !isSupport.value;
+  await setting.update({
+    analyzeSupport: isSupport.value,
+  });
+};
 </script>
 
 <style lang="less" scoped>
@@ -167,9 +179,14 @@ const analysisEvent = async () => {
       font-weight: 500;
     }
     .analysis-main-play {
+      .analysis-play-box-show {
+        height: calc(100vh - 10em);
+      }
+      .analysis-play-box-hidden {
+        height: calc(100vh - 15em);
+      }
       .analysis-play-box {
         width: 100%;
-        height: calc(100vh - 15em);
         background-color: #f5f5f7;
         border-radius: 10px;
       }
