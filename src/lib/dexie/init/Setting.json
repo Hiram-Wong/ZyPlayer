@@ -69,6 +69,7 @@
   "defaultSite": "",
   "defaultIptv": "",
   "defaultAnalyze": "",
+  "analyzeSupport": false,
   "skipStartEnd": false,
   "agreementMask": false,
   "bossKey": true,
