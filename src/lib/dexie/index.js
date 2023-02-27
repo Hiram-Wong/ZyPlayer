@@ -1,6 +1,5 @@
 import history from './history'
 import setting from './setting'
-import shortcut from './shortcut'
 import star from './star'
 import sites from './sites'
 import search from './search'
@@ -11,7 +10,6 @@ import analyze from './analyze'
 export {
   history,
   setting,
-  shortcut,
   star,
   sites,
   iptv,

@@ -4,6 +4,7 @@ import STYLE_CONFIG from '@/config/style';
 export interface MenuRoute {
   path: string;
   title?: string;
+  name?: string;
   icon?:
     | string
     | {
@@ -42,6 +43,7 @@ export interface TRouterInfo {
   name?: RouteRecordName;
   isAlive?: boolean;
   isHome?: boolean;
+  meta?: any;
 }
 
 export interface TTabRouterType {

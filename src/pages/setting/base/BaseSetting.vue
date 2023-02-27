@@ -13,8 +13,7 @@
       </t-form-item>
       <t-form-item label="软件" name="data">
         <t-space>
-          <t-button theme="default" variant="base" @click="clearDBEvent">重置数据库</t-button>
-          <t-button theme="default" variant="base" @click="clearCache">清理缓存</t-button>
+          <t-button theme="default" variant="base" @click="resetEvent">重置应用</t-button>
           <!-- <t-button theme="default" variant="base" @click="checkUpdate">检查更新</t-button> -->
           <!-- <t-button theme="default" variant="base" @click="easyToConfig">一键配置</t-button> -->
         </t-space>
@@ -162,29 +161,33 @@
         </div>
       </t-form-item>
       <t-form-item label="播放器" name="player">
-        <div class="shortcut">
+        <div class="player">
           <t-space direction="vertical">
             <t-space>
               <t-switch v-model="formData.pauseWhenMinimize" size="large">
                 <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
               </t-switch>
               <span>最小化暂停播放</span>
-              <!-- <t-switch v-model="formData.skipStartEnd" size="large">
+              <t-switch v-model="formData.softSolution" size="large">
                 <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
               </t-switch>
-              <span>跳过开始结尾</span> -->
+              <span>软解</span>
+              <t-switch v-model="formData.skipStartEnd" size="large">
+                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
+              </t-switch>
+              <span>跳过开头</span>
             </t-space>
-            <!-- <div v-if="formData.skipStartEnd" class="">
-              <div class="">
+            <div v-if="formData.skipStartEnd" class="">
+              <div class="skip">
                 <span>开始</span>
                 <t-slider v-model="formData.skipTimeInStart" :show-tooltip="true" :marks="MASKS" :max="180" />
               </div>
               <br />
-              <div class="">
+              <!-- <div class="skip">
                 <span>结尾</span>
                 <t-slider v-model="formData.skipTimeInEnd" :show-tooltip="true" :marks="MASKS" :max="180" />
-              </div>
-            </div> -->
+              </div> -->
+            </div>
           </t-space>
         </div>
       </t-form-item>
@@ -193,12 +196,12 @@
 </template>
 
 <script setup>
-import { ref, watch, watchEffect, computed, onMounted } from 'vue';
+import { ref, watchEffect, computed, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
 import db from '@/lib/dexie/dexie';
 import { setting } from '@/lib/dexie';
-import { useSettingStore } from '@/store';
+import { useSettingStore, usePlayStore } from '@/store';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
@@ -236,7 +239,8 @@ const getModeIcon = (mode) => {
   return SettingAutoIcon;
 };
 
-const settingStore = useSettingStore();
+const storePlayer = usePlayStore();
+const storeSetting = useSettingStore();
 
 const formData = ref({});
 
@@ -262,10 +266,16 @@ watchEffect(() => {
   const res = JSON.parse(JSON.stringify(formData.value));
   setting.update(res);
 
-  setting.find().then((res) => {
-    console.log(res);
+  storeSetting.updateConfig({ mode: formData.value.theme });
+  storePlayer.updateConfig({
+    setting: {
+      pauseWhenMinimize: formData.value.pauseWhenMinimize,
+      softSolution: formData.value.softSolution,
+      skipStartEnd: formData.value.skipStartEnd,
+      skipTimeInStart: formData.value.skipTimeInStart,
+      skipTimeInEnd: formData.value.skipTimeInEnd,
+    },
   });
-  settingStore.updateConfig({ mode: formData.value.theme });
 });
 
 const bossKeyEvent = () => {
@@ -283,8 +293,9 @@ const getSetting = async () => {
   });
 };
 
-const clearDBEvent = () => {
+const resetEvent = () => {
   clearDB();
+  clearCache();
 };
 
 const clearDB = () => {

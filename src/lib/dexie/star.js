@@ -27,7 +27,7 @@ export default {
   },
   async pagination(pageIndex = 0, pageSize = 10) {
     const jumpCount = pageIndex > 0 ? pageIndex*pageSize : 0
-    const list = await star.offset(jumpCount).limit(pageSize).toArray()
+    const list = await star.offset(jumpCount).limit(pageSize).reverse().toArray()
     const total = await star.count()
     return {
       list: list,

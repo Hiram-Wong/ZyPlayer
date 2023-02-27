@@ -36,8 +36,9 @@ const settingTag = ref('ConfigBase');
 
 .setting-container {
   overflow: hidden;
+  height: calc(100vh - var(--td-comp-size-l));
   .container-item {
-    height: calc(86vh);
+    height: calc(100vh - var(--td-comp-size-l) - var(--td-comp-size-xxl));
     overflow: auto;
     padding: 20px 0;
   }

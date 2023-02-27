@@ -1,16 +1,14 @@
 export default {
   type: 'film',
+  setting: {
+    pauseWhenMinimize: true,
+    softSolution: false,
+    skipStartEnd: false,
+    skipTimeInStart: '',
+    skipTimeInEnd: '',
+  },
   data: {
-    url: '',
-    title: '',
-    index: '',
-    source: '',
-    id: 0,
-    historyId: 0,
-    seasons: {},
-    key: '',
-    img: '',
-    epg: '',
-    watchTime: 0,
+    info: {},
+    ext: [],
   },
 };

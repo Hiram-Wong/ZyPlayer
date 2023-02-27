@@ -29,12 +29,14 @@
     </div>
     <t-table
       row-key="id"
+      vertical-align="top"
       :data="emptyData ? [] : data"
       :columns="COLUMNS"
       :hover="true"
-      stripe
+      :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
+      @page-change="rehandlePageChange"
       @select-change="rehandleSelectChange"
     >
       <template #isActive="{ row }">
@@ -76,6 +78,11 @@ const isCheckStatusChangeActive = ref();
 // Define table
 const emptyData = ref(false);
 const dataLoading = ref(false);
+const pagination = ref({
+  defaultPageSize: 20,
+  total: 0,
+  defaultCurrent: 1,
+});
 const data = ref([]);
 const selectedRowKeys = ref([]);
 const rehandleSelectChange = (val) => {
@@ -86,15 +93,10 @@ const rehandleSelectChange = (val) => {
 const getSites = async () => {
   dataLoading.value = true;
   try {
-    await sites.all().then((res) => {
+    await sites.pagination().then((res) => {
       if (!res) emptyData.value = true;
-      res.forEach((element) => {
-        if (element.reverseOrder === null || element.reverseOrder === undefined) {
-          element.reverseOrder = false;
-        }
-      });
-      data.value = res;
-      console.log(data.value);
+      data.value = res.list;
+      pagination.value.total = res.total;
     });
   } catch (e) {
     console.log(e);
@@ -199,6 +201,9 @@ const defaultEvent = async (row) => {
 <style lang="less" scoped>
 @import '@/style/variables';
 .setting-site-container {
+  height: calc(100vh - var(--td-comp-size-l));
+  overflow: auto;
+
   .header {
     margin-bottom: 20px;
   }

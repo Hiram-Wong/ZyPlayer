@@ -56,7 +56,8 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
+// TODO：JXU1NzI4JXU2NzJDJXU0RTFBJXU2NDFDJXU3RDIyc2hvd1N1cHBvcnRFdmVudCV1RkYwQyV1NjdFNSV1NzcwQiV1NjcyQyV1NjVCOSV1NkNENSV1NzY4NCV1ODlFNiV1NTNEMSV1N0M3QiV1NTc4Qg==
 import { ref, reactive, onMounted } from 'vue';
 import { MessagePlugin, NotifyPlugin } from 'tdesign-vue-next';
 import { setting, analyze } from '@/lib/dexie';
@@ -220,7 +221,7 @@ const showSupportEvent = async () => {
             color: #99999a;
           }
           :deep(.t-input-adornment__append) {
-            background: linear-gradient(90deg, #ff5f00, #ffa000);
+            background: linear-gradient(90deg, var(--td-brand-color-4), var(--td-brand-color));
             border-radius: 20px;
             .analysis-play {
               cursor: pointer;
@@ -228,7 +229,7 @@ const showSupportEvent = async () => {
               width: 82px;
               .analysis-tip {
                 display: block;
-                color: #fbfbfb;
+                color: hsl(0deg 0% 0% / 60%);
                 font-size: 15px;
                 line-height: 40px;
                 text-align: center;
@@ -241,8 +242,8 @@ const showSupportEvent = async () => {
     .analysis-main-bottom {
       .support-title {
         .support-separator {
-          border: 2px solid #f09937;
-          border-radius: 2px;
+          border: 0.1rem solid var(--td-brand-color);
+          border-radius: var(--td-radius-default);
         }
         .support-tip {
           margin-left: 5px;
@@ -257,8 +258,8 @@ const showSupportEvent = async () => {
       }
       .logo-item {
         margin-right: 8px;
-        border-radius: 4px;
-        background: #fbfbfb;
+        border-radius: var(--td-radius-default);
+        background: var(--td-text-color-anti);
         img {
           width: 80px;
         }
@@ -268,10 +269,10 @@ const showSupportEvent = async () => {
 }
 :root[theme-mode='dark'] {
   .analysis-play-box {
-    background-color: #161616 !important;
+    background-color: var(--td-bg-color-container) !important;
   }
   .analysis-setting-group {
-    background-color: #161616 !important;
+    background-color: var(--td-bg-color-container) !important;
   }
 }
 </style>

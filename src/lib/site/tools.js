@@ -515,6 +515,22 @@ const zy = {
     })
   },
   /**
+  * 判断 m3u8 文件是否为直播流
+  * @param {*} url m3u8地址
+  * @returns 是否是直播流
+  */
+  isLiveM3U8(url)  {
+    return new Promise((resolve, reject) => {
+      axios.get(url).then(res => {
+        const data = res.data
+        const isLive = !data.includes('#EXT-X-ENDLIST');
+        resolve(isLive)
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
+  /**
    * 获取豆瓣页面链接
    * @param {*} id 视频唯一标识
    * @param {*} name 视频名称

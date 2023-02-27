@@ -9,16 +9,16 @@ const getSite = (key) => {
 import sites from './init/Sites.json';
 import iptv from './init/Iptv.json';
 import setting from './init/Setting.json';
-import localKey from './init/LocalKey.json';
 import channelList from './init/channelList.json';
 import analyze from './init/Analyze.json';
+import history from './init/History.json';
 
 export {
   sites,
   iptv,
   setting,
-  localKey,
   channelList,
   analyze,
+  history,
   getSite
 }

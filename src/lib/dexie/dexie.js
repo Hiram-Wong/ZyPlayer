@@ -1,11 +1,10 @@
 import Dexie from 'dexie'
-import { sites, localKey, iptv, setting, channelList, analyze } from './initData'
+import { sites, iptv, setting, channelList, analyze,history } from './initData'
 
 const db = new Dexie('zy')
 db.version(4).stores({
   search: '++id, keywords',
   setting: 'id, theme, site, shortcut, view, volume, externalPlayer, searchGroup, excludeRootClasses, excludeR18Films, forwardTimeInSec, starViewMode, recommandationViewMode, searchViewMode, password, proxy, allowPassWhenIptvCheck, autocleanWhenIptvCheck',
-  shortcut: 'name, key, desc',
   star: '++id, [key+ids], site, name, detail, index, rate, hasUpdate',
   sites: '++id, key, name, api, download, isActive, group',
   history: '++id, [site+ids], name, type, year, index, time, duration, detail',
@@ -18,15 +17,6 @@ db.version(4).stores({
 // https://dexie.org/docs/Version/Version.stores()
 // https://dexie.org/docs/Version/Version.upgrade()
 // https://ahuigo.github.io/b/ria/js-indexedDB#/  比较旧，适当参考
-db.version(5).stores({
-  shortcut: null
-})
-
-db.version(6).stores({
-  shortcut: '++id, name, key, desc'
-}).upgrade(async tx => {
-  await tx.shortcut.bulkAdd(localKey)
-})
 
 db.version(7).stores({
   sites: '++id, key, name, api, download, jiexiUrl, isActive, group',
@@ -109,17 +99,17 @@ db.version(13).stores({
   channelList: '++id, name, logo, url, group',
   analyze: '++id, name, url, isActive',
   history: '++id, [siteKey+videoId], date, siteKey, siteSource, duration, playType, playEnd, videoId, videoImage, videoName, videoIndex, watchTime',
-  star: '++id, [siteKey+videoId], siteKey, videoId, videoImage, videoName',
+  star: '++id, [siteKey+videoId], siteKey, videoId, videoImage, videoName, videoType, videoRemarks', 
   iptv: '++id, name, url, epg, isActive',
 })
 
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)
-  db.shortcut.bulkAdd(localKey)
   db.iptv.bulkAdd(iptv)
   db.channelList.bulkAdd(channelList)
   db.analyze.bulkAdd(analyze)
+  db.history.bulkAdd(history)
 })
 
 db.open()

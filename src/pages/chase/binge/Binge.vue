@@ -1,86 +1,60 @@
 <template>
   <div class="binge-container mx-auto">
     <div class="main" infinite-wrapper>
-      <div class="wrap-item">
-        <div class="tv-wrap">
-          <div class="tv-content">
-            <waterfall
-              ref="bingeWaterfall"
-              :list="bingeList.list"
-              :breakpoints="BREAK_POINTS"
-              :gutter="20"
-              :width="190"
-              animation-effect="fadeIn"
-              background-color="rgba(0, 0, 0, 0)"
-            >
-              <template #item="{ item }">
-                <div class="card" @click="detailEvent(item)">
-                  <div class="card-header"></div>
-                  <div class="card-main">
-                    <t-image
-                      class="card-main-item"
-                      :src="item.videoImage"
-                      :style="{ width: '170px', height: '105px', borderRadius: '4px' }"
-                      :lazy="true"
-                      :loading="renderLoading"
-                      :error="renderError"
-                    >
-                    </t-image>
+      <div class="main-flow-wrap">
+        <div v-for="item in bingeList" :key="item.id" class="card-wrap">
+          <div class="card" @click="playEvent(item)">
+            <div class="card-header"></div>
+            <div class="card-main">
+              <t-image
+                class="card-main-item"
+                :src="item.videoImage"
+                :style="{ width: '170px', height: '105px', borderRadius: '4px' }"
+                :lazy="true"
+                fit="cover"
+                overlay-trigger="hover"
+              >
+                <template #overlayContent>
+                  <div class="op" @click.stop="removeEvent(item)">
+                    <delete-icon size="small" style="color: #fdfdfd" />
                   </div>
-                  <div class="card-footer">
-                    <span class="card-footer-title card-footer-item">{{ item.videoName }}</span>
-                    <p class="card-footer-desc card-footer-item"></p>
-                  </div>
-                </div>
-              </template>
-            </waterfall>
-            <infinite-loading ref="infiniteLoading" :distance="200" style="text-align: center" @infinite="load">
-              <template #complete>没有更多内容了</template>
-              <template #error>哎呀，出了点差错</template>
-            </infinite-loading>
+                </template>
+              </t-image>
+            </div>
+            <div class="card-footer">
+              <div class="card-footer-title">
+                <t-tag v-if="item.videoType" class="card-footer-title-type" variant="outline" size="small">
+                  {{ item.videoType }}
+                </t-tag>
+                <span class="card-footer-title-name">{{ item.videoName }}</span>
+              </div>
+              <p class="card-footer-desc">{{ item.videoRemarks }}</p>
+            </div>
           </div>
         </div>
       </div>
+      <infinite-loading style="text-align: center; margin-bottom: 2em" :distance="200" @infinite="load">
+        <template #complete>人家是有底线的</template>
+        <template #error>哎呀，出了点差错</template>
+      </infinite-loading>
     </div>
-    <detail v-model:visible="formDialogDetail" :info="formDetailData" :site="site" />
   </div>
 </template>
 
-<script setup lang="tsx">
+<script setup lang="jsx">
 import { ref } from 'vue';
-import { LinkUnlinkIcon, LoadingIcon } from 'tdesign-icons-vue-next';
+import { DeleteIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
-import { Waterfall } from 'vue-waterfall-plugin-next';
+import { useIpcRenderer } from '@vueuse/electron';
 import InfiniteLoading from 'v3-infinite-loading';
+import { usePlayStore } from '@/store';
 import { star } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
-import Detail from '../../film/detail/Detail.vue';
-import 'vue-waterfall-plugin-next/style.css';
 import 'v3-infinite-loading/lib/style.css';
 
-const renderError = (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-    <LinkUnlinkIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
-  </div>
-);
-const renderLoading = (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-    <LoadingIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
-  </div>
-);
+const ipcRenderer = useIpcRenderer();
 
-const BREAK_POINTS = {
-  1200: {
-    rowPerView: 4, // 当屏幕宽度小于等于1200
-  },
-  800: {
-    rowPerView: 3, // 当屏幕宽度小于等于800
-  },
-  500: {
-    rowPerView: 2, // 当屏幕宽度小于等于500
-  },
-};
-
+const store = usePlayStore();
 const pagination = ref({
   pageIndex: 0,
   pageSize: 32,
@@ -88,15 +62,12 @@ const pagination = ref({
 });
 
 const bingeList = ref([]);
-const formDialogDetail = ref(false); // dialog是否显示详情
-const formDetailData = ref(); // 详情组件传参
-const site = ref(); // 详情组件传参
 
 const getBingeList = async () => {
   let length;
   await star.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
-    console.log(res);
-    bingeList.value.list = _.unionWith(bingeList.value.list, res.list, _.isEqual);
+    bingeList.value = _.unionWith(bingeList.value, res.list, _.isEqual);
+    pagination.value.count = res.total;
     pagination.value.pageIndex++;
     length = _.size(res.list);
   });
@@ -107,87 +78,124 @@ const load = async ($state) => {
   console.log('loading...');
   try {
     const resLength = await getBingeList();
-    if (resLength < pagination.value.pageSize) $state.complete();
+    if (resLength === 0) $state.complete();
     else {
-      // $state.loaded();
+      $state.loaded();
     }
   } catch (error) {
     $state.error();
-    console.log(error);
   }
 };
 
-// 详情
-const detailEvent = async (item) => {
-  formDetailData.value = await zy.detail(item.siteKey, item.videoId);
-  console.log(formDetailData.value);
-  site.value = { key: item.siteKey };
-  formDialogDetail.value = true;
+// 播放
+const playEvent = async (item) => {
+  const info = await zy.detail(item.siteKey, item.videoId);
+  store.updateConfig({
+    type: 'film',
+    data: {
+      info,
+      ext: { site: { key: item.siteKey } },
+    },
+  });
+
+  ipcRenderer.send('openPlayWindow', item.videoName);
 };
+
+// 删除
+const removeEvent = async (item) => {
+  const { id } = item;
+  await star.remove(id);
+  _.pull(bingeList.value, _.find(bingeList.value, { ...item }));
+  pagination.value.count--;
+};
+
+// 清空
+const clearEvent = () => {
+  bingeList.value = [];
+  getBingeList();
+};
+
+// 对父组件暴露
+defineExpose({
+  clearEvent,
+});
 </script>
 
 <style lang="less" scoped>
 @import '@/style/variables';
 @import '@/style/index.less';
 .binge-container {
+  overflow: hidden;
+  position: relative;
+  height: inherit;
   .main {
+    height: calc(100% - 10px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
     overflow-y: auto;
-    height: calc(100vh - 55px - var(--td-comp-size-l));
-    .card {
-      position: relative;
-      display: inline-block;
-      vertical-align: top;
-      width: 170px;
-      height: 150px;
-      .card-header {
-        color: #fbfbfb;
-        position: absolute;
-        z-index: 2222;
-        .t-tag {
+    width: 100%;
+    &-flow-wrap {
+      display: grid;
+      padding: 10px 0;
+      grid-template-columns: repeat(auto-fill, 170px);
+      grid-column-gap: 20px;
+      grid-row-gap: 10px;
+      justify-content: center;
+      width: inherit;
+      .card {
+        position: relative;
+        display: inline-block;
+        vertical-align: top;
+        width: 170px;
+        height: 150px;
+        .card-header {
+          color: #fbfbfb;
           position: absolute;
-          top: 5px;
-          left: 5px;
-          font-size: 10px;
-        }
-      }
-      .card-main {
-        width: 100%;
-        // height: 100%;
-        .card-main-item {
-          .op {
-            background-color: rgba(0, 0, 0, 0.5);
-            width: 100%;
-            color: #f2f2f2;
+          z-index: 2222;
+          .t-tag {
             position: absolute;
-            bottom: 0px;
-            display: flex;
-            justify-content: center;
+            top: 5px;
+            left: 5px;
+            font-size: 10px;
           }
         }
-      }
-      .card-footer {
-        height: 52px;
-        padding-top: 10px;
-        overflow: hidden;
-        height: auto;
-        line-height: 26px;
-        .card-footer-title {
-          height: auto;
-          line-height: 26px;
-          font-size: 14px;
-          font-weight: 700;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
+        .card-main {
+          width: 100%;
+          .card-main-item {
+            .op {
+              background: rgba(0, 0, 0, 0.8);
+              position: absolute;
+              bottom: 5px;
+              right: 5px;
+              padding: 0 3px 3px;
+              border-radius: 5px;
+            }
+          }
         }
-        .card-footer-desc {
+        .card-footer {
+          overflow: hidden;
           height: auto;
           line-height: 26px;
-          font-size: 13px;
-          color: #999;
-          font-weight: normal;
-          display: flex;
-          justify-content: center;
+          .card-footer-title {
+            display: flex;
+            align-items: center;
+            &-type {
+              margin-right: 5px;
+            }
+            &-name {
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
+            }
+          }
+          .card-footer-desc {
+            line-height: 20px;
+            font-size: 13px;
+            color: #999;
+            font-weight: normal;
+          }
         }
       }
     }

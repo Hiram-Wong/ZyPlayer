@@ -28,7 +28,7 @@
       :data="emptyData ? [] : data"
       :columns="COLUMNS"
       :hover="true"
-      stripe
+      :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
       @select-change="rehandleSelectChange"
@@ -73,6 +73,11 @@ const formData = ref();
 const emptyData = ref(false);
 const dataLoading = ref(false);
 const data = ref([]);
+const pagination = ref({
+  defaultPageSize: 20,
+  total: 0,
+  defaultCurrent: 1,
+});
 const selectedRowKeys = ref([]);
 const rehandleSelectChange = (val) => {
   selectedRowKeys.value = val;
@@ -86,10 +91,10 @@ onMounted(() => {
 const getAnalyze = () => {
   dataLoading.value = true;
   try {
-    analyze.all().then((res) => {
-      console.log(res);
+    analyze.pagination().then((res) => {
       if (!res) emptyData.value = true;
-      data.value = res;
+      data.value = res.list;
+      pagination.value.total = res.total;
     });
   } catch (e) {
     console.log(e);

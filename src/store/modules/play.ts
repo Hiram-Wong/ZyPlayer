@@ -15,14 +15,26 @@ export const usePlayStore = defineStore('play', {
     getType: (state) => {
       return state.type;
     },
+    getSetting: (state) => {
+      return state.setting;
+    },
     getData: (state) => {
       return state.data;
     },
   },
   actions: {
     updateConfig(payload: Partial<PlayState>) {
-      this.type = payload.type;
-      this.data = payload.data;
+      for (const key in payload) {
+        if (key === 'type') {
+          this.type = payload.type;
+        }
+        if (key === 'data') {
+          this.data = payload.data;
+        }
+        if (key === 'setting') {
+          this.setting = payload.setting;
+        }
+      }
     },
   },
 });

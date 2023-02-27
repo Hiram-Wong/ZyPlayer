@@ -25,7 +25,11 @@
               </div>
               <div v-if="classKeywords" class="head-center">
                 <p class="head-center-class">{{ FilmSiteSetting.class.name }}</p>
-                <t-popup placement="bottom-right" :overlay-style="{ maxWidth: '60%', width: 'auto' }">
+                <t-popup
+                  placement="bottom-left"
+                  :overlay-inner-style="{ marginTop: '16px', maxWidth: '60%' }"
+                  attach=".head-center"
+                >
                   <more-icon size="1.5rem" style="transform: rotate(90deg)" />
                   <template #content>
                     <div class="content">
@@ -68,9 +72,6 @@
               <div class="quick_item quick_filter">
                 <view-module-icon size="large" @click="showToolbar = !showToolbar" />
               </div>
-              <div class="quick_item quick_refresh">
-                <refresh-icon size="large" @click="refreshEvnent" />
-              </div>
             </t-space>
           </div>
         </t-row>
@@ -102,86 +103,66 @@
         <!-- </t-space> -->
       </div>
     </div>
-    <div class="main" :class="{ 'main-ext': showToolbar }" infinite-wrapper>
-      <div class="wrap-item">
-        <div class="tv-wrap">
-          <div class="tv-content">
-            <waterfall
-              :list="FilmDataList.list"
-              :row-key="options.rowKey"
-              :gutter="options.gutter"
-              :has-around-gutter="options.hasAroundGutter"
-              :width="options.width"
-              :breakpoints="options.breakpoints"
-              :img-selector="options.imgSelector"
-              :background-color="options.backgroundColor"
-              :animation-effect="options.animationEffect"
-              :animation-duration="options.animationDuration"
-              :animation-delay="options.animationDelay"
-              :lazyload="options.lazyload"
-            >
-              <template #item="{ item }">
-                <div class="card" @click="detailEvent(item)">
-                  <div v-if="item.vod_remarks || item.vod_remark" class="card-header">
-                    <span class="card-header-tag card-header-tag-orange">
-                      <span class="card-header-tag-tagtext">{{ item.vod_remarks || item.vod_remark }}</span>
-                    </span>
+    <div class="main" :class="{ 'main-ext': showToolbar }">
+      <div class="main-flow-wrap">
+        <div v-for="item in FilmDataList.list" :key="item.id" class="card-wrap">
+          <div class="card" @click="playEvent(item)">
+            <div v-if="item.vod_remarks || item.vod_remark" class="card-header">
+              <span class="card-header-tag card-header-tag-orange">
+                <span class="card-header-tag-tagtext">{{ item.vod_remarks || item.vod_remark }}</span>
+              </span>
+            </div>
+            <div class="card-main">
+              <t-image
+                class="card-main-item"
+                :src="item.vod_pic"
+                :style="{ width: '100%', height: '245px', background: 'none' }"
+                :lazy="true"
+                fit="cover"
+              >
+                <template #overlayContent>
+                  <div class="op">
+                    <span v-if="item.siteName"> {{ item.siteName }}</span>
                   </div>
-                  <div class="card-main">
-                    <t-image
-                      class="card-main-item"
-                      :src="item.vod_pic"
-                      :style="{ width: '100%', height: '245px', background: 'none' }"
-                      :lazy="true"
-                      fit="cover"
-                    >
-                      <template #overlayContent>
-                        <div class="op">
-                          <span v-if="item.siteName"> {{ item.siteName }}</span>
-                        </div>
-                      </template>
-                    </t-image>
-                  </div>
-                  <div class="card-footer">
-                    <p class="card-footer-title">{{ item.vod_name }}</p>
-                    <p class="card-footer-desc">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
-                  </div>
-                </div>
-              </template>
-            </waterfall>
-            <infinite-loading :identifier="infiniteId" style="text-align: center" top :distance="200" @infinite="load">
-              <template #complete>没有更多内容了</template>
-              <template #error>哎呀，出了点差错</template>
-            </infinite-loading>
+                </template>
+              </t-image>
+            </div>
+            <div class="card-footer">
+              <p class="card-footer-title">{{ item.vod_name }}</p>
+              <p class="card-footer-desc">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
+            </div>
           </div>
         </div>
       </div>
+      <infinite-loading :identifier="infiniteId" style="text-align: center" top :distance="200" @infinite="load">
+        <template #complete>没有更多内容了</template>
+        <template #error>哎呀，出了点差错</template>
+      </infinite-loading>
     </div>
-    <detail-view v-model:visible="formDialogDetail" :info="formDetailData" :site="formSiteData" />
     <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
-    <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
   </div>
 </template>
 <script setup lang="jsx">
-import { ref, reactive, watch, nextTick, onMounted } from 'vue';
+import { ref, watch, nextTick, onMounted } from 'vue';
 
-import { MoreIcon, ChartBarIcon, ViewModuleIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { MoreIcon, ChartBarIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 
 import InfiniteLoading from 'v3-infinite-loading';
-import { Waterfall } from 'vue-waterfall-plugin-next';
-import 'vue-waterfall-plugin-next/style.css';
 import 'v3-infinite-loading/lib/style.css';
 
 import _ from 'lodash';
 
-import DetailView from './film/detail/Detail.vue';
+import { useIpcRenderer } from '@vueuse/electron';
 import HotView from './film/hot/Hot.vue';
-import PrivacyPolicyView from './film/privacyPolicy/PrivacyPolicy.vue';
 
 import { sites, setting } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
+import { usePlayStore } from '@/store';
 
+const ipcRenderer = useIpcRenderer();
+
+const store = usePlayStore();
 const infiniteId = ref(+new Date()); // infinite-loading此属性更改重置组件
 const showToolbar = ref(false); // 是否显示筛选框 true显示 false隐藏
 const searchTxt = ref(''); // 搜索框
@@ -195,11 +176,8 @@ const filterData = ref({
   area: '',
   date: [],
 }); // 过滤选择值
-const formDialogDetail = ref(false); // dialog是否显示详情
-const formDetailData = ref(); // 详情组件影片传参
 const formSiteData = ref({}); // 详情组件源传参
 const formDialogHot = ref(false); // dialog是否显示热播榜
-const formDialogPrivacyPolicy = ref(false); // dialog是否显示用户协议
 const pagination = ref({
   pageIndex: 0,
   pageSize: 36,
@@ -225,44 +203,6 @@ const FilmSiteList = ref(); // 站点
 const sitesList = ref({}); // 全部源
 const sitesListSelect = ref(); // 选择的源
 
-const options = reactive({
-  // 唯一key值
-  rowKey: 'id',
-  // 卡片之间的间隙
-  gutter: 30,
-  // 是否有周围的gutter
-  hasAroundGutter: true,
-  // 卡片在PC上的宽度
-  width: 196,
-  // 自定义行显示个数，主要用于对移动端的适配
-  breakpoints: {
-    1200: {
-      // 当屏幕宽度小于等于1200
-      rowPerView: 4,
-    },
-    800: {
-      // 当屏幕宽度小于等于800
-      rowPerView: 3,
-    },
-    500: {
-      // 当屏幕宽度小于等于500
-      rowPerView: 2,
-    },
-  },
-  // 动画效果
-  animationEffect: 'animate__fadeInUp',
-  // 动画时间
-  animationDuration: 1000,
-  // 动画延迟
-  animationDelay: 300,
-  // 背景色
-  backgroundColor: 'rgba(0,0,0,0)',
-  // imgSelector
-  imgSelector: 'src.original',
-  // 是否懒加载
-  lazyload: true,
-});
-
 // 深度监听过滤条件变更
 watch(
   () => filterData.value,
@@ -274,7 +214,6 @@ watch(
 );
 
 onMounted(async () => {
-  await getAgreementMask();
   await getFilmSetting();
   await getClass();
   await getFilmList();
@@ -331,12 +270,13 @@ const getFilmSetting = async () => {
   await nextTick(async () => {
     await setting.get('defaultSite').then(async (id) => {
       if (!id) MessagePlugin.warning('请设置默认数据源');
-      await sites.get(id).then(async (res) => {
-        sitesListSelect.value = res.id;
-        FilmSiteSetting.value.basic.name = res.name;
-        FilmSiteSetting.value.basic.key = res.key;
-        FilmSiteSetting.value.basic.group = res.group;
-      });
+      else
+        await sites.get(id).then(async (res) => {
+          sitesListSelect.value = res.id;
+          FilmSiteSetting.value.basic.name = res.name;
+          FilmSiteSetting.value.basic.key = res.key;
+          FilmSiteSetting.value.basic.group = res.group;
+        });
     });
     await setting.get('excludeRootClasses').then((res) => {
       FilmSiteSetting.value.excludeRootClasses = res;
@@ -441,12 +381,10 @@ const load = async ($state) => {
     } else {
       resLength = 0;
     }
-    // resLength = await getFilmList();
     await getFilmArea();
-    console.log(resLength);
     if (resLength === 0) $state.complete();
     else {
-      // $state.loaded();
+      $state.loaded();
     }
   } catch (error) {
     $state.error();
@@ -480,36 +418,6 @@ const searchEvent = async () => {
   } else await getFilmList();
 };
 
-const refreshEvnent = async () => {
-  console.log('refresh');
-  await getFilmSetting();
-  await getClass();
-  FilmDataList.value = {};
-  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
-  // $state.loaded();
-  pagination.value.pageIndex = 0;
-  await getFilmList();
-  await getFilmSite();
-  await getFilmArea();
-};
-
-// 详情
-const detailEvent = (item) => {
-  if (item.siteName) {
-    formSiteData.value = {
-      name: item.siteName,
-      key: item.siteKey,
-    };
-  } else {
-    formSiteData.value = {
-      name: FilmSiteSetting.value.basic.name,
-      key: FilmSiteSetting.value.basic.key,
-    };
-  }
-  formDetailData.value = item;
-  formDialogDetail.value = true;
-};
-
 const changeSitesEvent = async (event) => {
   if (FilmSiteSetting.value.change) await setting.update({ defaultSite: event });
   await sites.get(event).then(async (res) => {
@@ -527,11 +435,27 @@ const changeSitesEvent = async (event) => {
   await getFilmArea();
 };
 
-// 用户协议
-const getAgreementMask = async () => {
-  await setting.get('agreementMask').then((res) => {
-    formDialogPrivacyPolicy.value = !res;
+const playEvent = (item) => {
+  if (item.siteName) {
+    formSiteData.value = {
+      name: item.siteName,
+      key: item.siteKey,
+    };
+  } else {
+    formSiteData.value = {
+      name: FilmSiteSetting.value.basic.name,
+      key: FilmSiteSetting.value.basic.key,
+    };
+  }
+  store.updateConfig({
+    type: 'film',
+    data: {
+      info: item,
+      ext: { site: formSiteData.value },
+    },
   });
+
+  ipcRenderer.send('openPlayWindow', item.vod_name);
 };
 </script>
 
@@ -540,12 +464,14 @@ const getAgreementMask = async () => {
 @import '@/style/index.less';
 
 .film-container {
+  overflow: hidden;
+  position: relative;
   .tool-ext {
     height: 90px !important;
   }
   .tool {
     height: 50px;
-    padding: 0 30px !important;
+    padding: 0 10px 0 0;
     .header,
     .toolbar {
       margin-bottom: 10px;
@@ -585,6 +511,20 @@ const getAgreementMask = async () => {
           float: left;
           margin-right: 5px;
         }
+
+        .content {
+          padding: 10px 0 10px 25px;
+          span {
+            display: inline-block;
+            line-height: 20px;
+            margin-right: 25px;
+            width: 60px;
+            overflow: hidden;
+            text-overflow: inherit;
+            white-space: nowrap;
+            text-align: center;
+          }
+        }
       }
     }
     .right-operation-container {
@@ -598,9 +538,9 @@ const getAgreementMask = async () => {
           border: 1px solid hsla(0, 0%, 100%, 0);
           background: linear-gradient(
             90deg,
-            rgba(114, 214, 245, 0.2),
-            rgba(200, 193, 221, 0.2) 50%,
-            rgba(255, 148, 179, 0.2)
+            rgba(85, 187, 56, 0.2),
+            rgba(216, 244, 222, 0.2) 50%,
+            rgba(124, 212, 118, 0.2)
           );
           border-radius: 100px;
           width: 100%;
@@ -623,7 +563,7 @@ const getAgreementMask = async () => {
             line-height: 13px;
             cursor: pointer;
             :hover {
-              color: #ed6a2c;
+              color: var(--td-brand-color);
             }
             .hot-search-button-icon {
               width: 14px;
@@ -644,7 +584,7 @@ const getAgreementMask = async () => {
             .search-button {
               display: inline-block;
               font-size: 14px;
-              background-color: #ff008c;
+              background-color: var(--td-brand-color);
               margin: 0 0 0 12px;
               width: 28px;
               height: 28px;
@@ -677,118 +617,120 @@ const getAgreementMask = async () => {
   .main {
     overflow-y: auto;
     height: calc(100vh - 55px - var(--td-comp-size-l));
-    .card {
-      box-sizing: border-box;
-      width: 196px;
-      height: 310px;
-      position: relative;
-      cursor: pointer;
-      .card-header {
-        position: absolute;
-        color: #fff;
-        font-size: 12px;
-        z-index: 15;
-        height: 18px;
-        line-height: 18px;
-        right: 0;
-        top: 0;
-        &-tag {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow-y: auto;
+    width: 100%;
+    &-flow-wrap {
+      display: grid;
+      padding: 10px 0;
+      grid-template-columns: repeat(auto-fill, 196px);
+      grid-column-gap: 20px;
+      grid-row-gap: 15px;
+      justify-content: center;
+      width: inherit;
+      .card {
+        box-sizing: border-box;
+        width: 196px;
+        height: 310px;
+        position: relative;
+        cursor: pointer;
+        .card-header {
+          position: absolute;
+          color: #fff;
+          font-size: 12px;
+          z-index: 15;
           height: 18px;
           line-height: 18px;
-          padding: 1px 6px;
-          border-radius: 0 7px 0 7px;
-          background: #03c8d4;
-          display: block;
-          &-tagtext {
-            display: inline-block;
-            font-size: 12px;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: 100px;
+          right: 0;
+          top: 0;
+          &-tag {
+            height: 18px;
+            line-height: 18px;
+            padding: 1px 6px;
+            border-radius: 0 7px 0 7px;
+            background: #03c8d4;
+            display: block;
+            &-tagtext {
+              display: inline-block;
+              font-size: 12px;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              max-width: 100px;
+            }
+          }
+          &-tag-orange {
+            background: #ffdd9a;
+            color: #4e2d03;
           }
         }
-        &-tag-orange {
-          background: #ffdd9a;
-          color: #4e2d03;
-        }
-      }
-      .card-main {
-        width: 100%;
-        .card-main-item {
-          border-radius: 7px;
-          .op {
-            backdrop-filter: saturate(180%) blur(20px);
-            background-color: rgba(22, 22, 23, 0.8);
-            border-radius: 0 0 7px 7px;
-            width: 100%;
-            color: rgba(255, 255, 255, 0.8);
-            position: absolute;
-            bottom: 0px;
-            display: flex;
-            justify-content: center;
-          }
-        }
-      }
-      .card-main:hover {
-        .card-main-item {
-          :deep(img) {
-            transition: all 0.25s ease-in-out;
-            transform: scale(1.05);
-          }
-          .op {
-            transition: all 0.25s ease-in-out;
-            transform: scale(1.05);
-            bottom: -6px;
-          }
-        }
-      }
-      .card-footer {
-        height: 52px;
-        padding-top: 10px;
-        overflow: hidden;
-        height: auto;
-        line-height: 26px;
-        .card-footer-title {
-          height: auto;
-          line-height: 26px;
-          font-size: 14px;
-          font-weight: 700;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
-        }
-        .card-footer-desc {
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
-          height: auto;
+        .card-main {
           width: 100%;
+          .card-main-item {
+            border-radius: 7px;
+            .op {
+              backdrop-filter: saturate(180%) blur(20px);
+              background-color: rgba(22, 22, 23, 0.8);
+              border-radius: 0 0 7px 7px;
+              width: 100%;
+              color: rgba(255, 255, 255, 0.8);
+              position: absolute;
+              bottom: 0px;
+              display: flex;
+              justify-content: center;
+            }
+          }
+        }
+        .card-main:hover {
+          .card-main-item {
+            :deep(img) {
+              transition: all 0.25s ease-in-out;
+              transform: scale(1.05);
+            }
+            .op {
+              transition: all 0.25s ease-in-out;
+              transform: scale(1.05);
+              bottom: -6px;
+            }
+          }
+        }
+        .card-footer {
+          height: 52px;
+          padding-top: 10px;
+          overflow: hidden;
+          height: auto;
           line-height: 26px;
-          font-size: 13px;
-          color: #999;
-          font-weight: normal;
+          .card-footer-title {
+            height: auto;
+            line-height: 26px;
+            font-size: 14px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+          }
+          .card-footer-desc {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            height: auto;
+            width: 100%;
+            line-height: 26px;
+            font-size: 13px;
+            color: #999;
+            font-weight: normal;
+          }
+        }
+      }
+      .card:hover {
+        .card-footer-title {
+          color: var(--td-brand-color);
         }
       }
     }
-    .card:hover {
-      .card-footer-title {
-        color: #ed6a2c;
-      }
-    }
-  }
-}
-.content {
-  padding: 10px 0 10px 25px;
-  span {
-    display: inline-block;
-    line-height: 20px;
-    margin-right: 25px;
-    width: 60px;
-    overflow: hidden;
-    text-overflow: inherit;
-    white-space: nowrap;
-    text-align: center;
   }
 }
 

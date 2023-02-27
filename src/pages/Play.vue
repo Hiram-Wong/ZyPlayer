@@ -2,25 +2,21 @@
   <div class="container mx-auto">
     <div class="container-header">
       <div class="player-top">
-        <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' ? '60px' : '0' }">
+        <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' && !isMacFull ? '60px' : '0' }">
           <div class="open-main-win player-center" @click="openMainWinEvent">
             <home-icon size="1.5em" />
             <span class="tip-gotomain">回到主界面</span>
           </div>
         </div>
         <div class="player-top-spacer">
-          <span v-if="type === 'film'">{{ `${data.title}  ${data.index}` }}</span>
-          <span v-else>{{ data.title }}</span>
+          <span v-if="type === 'film'">{{ `${info.vod_name}  ${selectPlayIndex}` }}</span>
+          <span v-else>{{ info.name }}</span>
         </div>
         <div class="player-top-right">
-          <div v-if="type === 'film'" class="player-top-right-popup player-top-right-item" @click="bingeEvnet">
-            <heart-icon v-if="isBinge" size="1.5em" />
-            <heart-filled-icon v-else size="1.5em" />
-          </div>
           <div class="player-top-right-popup player-top-right-item player-top-right-share">
             <t-popup
               placement="bottom-right"
-              :overlay-inner-style="{ background: '#2a2a31', boxShadow: 'none' }"
+              :overlay-inner-style="{ background: '#2a2a31', boxShadow: 'none', marginTop: '16px' }"
               attach=".player-top-right-share"
             >
               <share-icon size="1.5em" />
@@ -37,8 +33,10 @@
                       </div>
                       <t-divider dashed style="margin: 5px 0" />
                       <div class="share-container-main-left-bottom">
-                        <div v-if="type === 'film'" class="bottom-title">{{ `${data.title}  ${data.index}` }}</div>
-                        <div v-else class="bottom-title">{{ data.title }}</div>
+                        <div v-if="type === 'film'" class="bottom-title">
+                          {{ `${info.vod_name}  ${selectPlayIndex}` }}
+                        </div>
+                        <div v-else class="bottom-title">{{ info.name }}</div>
                       </div>
                     </div>
                     <div class="share-container-main-right">
@@ -52,7 +50,7 @@
                     <span class="bottom-copy-url">
                       <input id="bottom-copy-url-input" v-model="shareUrl" type="text" disabled />
                     </span>
-                    <span class="bottom-copy-btn" @click="copyEvent">复制地址</span>
+                    <span v-if="isSupported" class="bottom-copy-btn" @click="copy(shareUrl)">复制地址</span>
                   </div>
                 </div>
               </template>
@@ -92,7 +90,7 @@
           <div class="episode-panel-wrapper">
             <div v-if="type == 'iptv'" class="epg">
               <div class="epg-wrap-title">
-                <p class="title">{{ data.title }}</p>
+                <p class="title">{{ info.name }}</p>
               </div>
               <div class="epg-wrap-info">
                 <p class="info">节目单</p>
@@ -119,30 +117,140 @@
               </div>
             </div>
             <div v-if="type == 'film'" class="film">
-              <div class="film-wrap-title">
-                <p class="title">{{ data.title }}</p>
-              </div>
-              <div class="film-wrap-info">
-                <p class="info">选集</p>
-              </div>
-              <div class="film-scroll">
-                <t-tabs v-model="selectPlayableSource" class="film-tabs">
-                  <t-tab-panel v-for="(value, key, index) in data.seasons" :key="index" :value="key" :label="key">
-                    <div style="padding-top: 25px">
-                      <t-space break-line size="small" align="center">
-                        <t-tag
-                          v-for="item in value"
-                          :key="item"
-                          class="tag"
-                          :class="{ select: formatName(item) === data.index && data.source === key }"
-                          @click="gotoPlay(item)"
-                        >
-                          {{ formatName(item) }}
-                        </t-tag>
+              <div v-if="!isProfile" class="contents-wrap">
+                <div class="title-wrap">
+                  <h3 class="title-name nowrap">{{ info.vod_name }}</h3>
+                  <div class="title-binge">
+                    <div v-if="isBinge" class="video-subscribe-text" @click="bingeEvnet">
+                      <t-space :size="8">
+                        <heart-icon size="1.2em" class="icon" />
+                        <span class="tip">追</span>
                       </t-space>
                     </div>
-                  </t-tab-panel>
-                </t-tabs>
+                    <div v-else class="video-subscribe-text" @click="bingeEvnet">
+                      <span class="tip">在追</span>
+                    </div>
+                  </div>
+                  <div class="title-feature">
+                    <span v-show="info.vod_douban_score" class="rate">
+                      {{
+                        info.vod_douban_score === '0.0' && info.vod_score === '0.0'
+                          ? '暂无评分'
+                          : info.vod_douban_score === '0.0'
+                          ? info.vod_score
+                          : info.vod_douban_score
+                      }}
+                    </span>
+                    <span v-show="info.type_name">{{ info.type_name }}</span>
+                    <span v-show="info.vod_area">{{ info.vod_area }}</span>
+                    <span v-show="info.vod_year">{{ info.vod_year }}</span>
+                    <p class="title-unfold" @click="isProfile = true">简介</p>
+                  </div>
+                </div>
+                <div class="anthology-contents-scroll">
+                  <h4 class="box-anthology-title">选集</h4>
+                  <div class="box-anthology-items">
+                    <t-tabs v-model="selectPlaySource" class="film-tabs">
+                      <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key">
+                        <template #label> {{ key }} </template>
+                        <div style="padding-top: 25px">
+                          <t-space break-line size="small" align="center">
+                            <t-tag
+                              v-for="item in value"
+                              :key="item"
+                              class="tag"
+                              :class="{
+                                select:
+                                  formatName(item) ===
+                                    (dataHistory.videoIndex ? dataHistory.videoIndex : selectPlayIndex) &&
+                                  (dataHistory.siteSource ? dataHistory.siteSource : selectPlaySource) === key,
+                              }"
+                              @click="changeEvent(item)"
+                            >
+                              {{ formatName(item) }}
+                            </t-tag>
+                          </t-space>
+                        </div>
+                      </t-tab-panel>
+                    </t-tabs>
+                  </div>
+                  <div v-show="recommend.length != 0">
+                    <div class="component-title">猜你喜欢</div>
+                    <div class="anthology-content">
+                      <div v-for="content in recommend" :key="content.id" class="pic-text-item">
+                        <div class="cover" @click="recommendEvent(content)">
+                          <t-image
+                            class="card-main-item"
+                            :src="content.vod_pic"
+                            :style="{ width: '126px', height: '70px', 'border-radius': '10px' }"
+                            :lazy="true"
+                            fit="cover"
+                          >
+                            <template #overlayContent>
+                              <span
+                                class="nowrap"
+                                :style="{
+                                  position: 'absolute',
+                                  right: '2px',
+                                  bottom: '2px',
+                                  borderRadius: '10px',
+                                  backgroundColor: '#25252a',
+                                  padding: '0 5px',
+                                  textAlign: 'right',
+                                  maxWidth: '90%',
+                                  fontSize: '10px',
+                                }"
+                              >
+                                {{ content.vod_remarks }}
+                              </span>
+                            </template>
+                          </t-image>
+                        </div>
+                        <div class="anthology-title-wrap">
+                          <div class="title">{{ content.vod_name }}</div>
+                          <div class="subtitle nowrap">
+                            {{ content.vod_blurb ? content.vod_blurb.trim() : content.vod_blurb }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="profile">
+                <h3>简介</h3>
+                <p class="intro-exit" @click="isProfile = false"></p>
+                <div class="intro-content">
+                  <div class="intro-img">
+                    <div class="img-wrap">
+                      <t-image
+                        class="card-main-item"
+                        :src="info.vod_pic"
+                        :style="{ width: '100%', height: '100%', 'border-radius': '5px' }"
+                        :lazy="true"
+                        fit="cover"
+                      />
+                    </div>
+                  </div>
+                  <h4>{{ info.vod_name }}</h4>
+                  <div class="intro-detail">
+                    <div class="intro-title">概述</div>
+                    <div class="intro-desc">
+                      <span v-html="filterContent(info.vod_content)" />
+                    </div>
+                    <div class="intro-title second">演职人员</div>
+                    <div class="intro-desc">
+                      <div v-show="info.vod_director">
+                        <span class="title">导演：</span>
+                        <span class="info">{{ info.vod_director }}</span>
+                      </div>
+                      <div v-show="info.vod_actor">
+                        <span class="title">主演：</span>
+                        <span class="info">{{ info.vod_actor }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -152,13 +260,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, computed, onDeactivated } from 'vue';
+import { ref, onMounted, computed, watch, onDeactivated } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import {
   HomeIcon,
   HeartIcon,
   PhotoIcon,
-  HeartFilledIcon,
   ShareIcon,
   // DownloadIcon,
   PinIcon,
@@ -166,13 +273,16 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from 'tdesign-icons-vue-next';
-
+import _ from 'lodash';
+import moment from 'moment';
 import QRCode from 'qrcode';
-import useClipboard from 'vue-clipboard3';
-import HlsJsPlayer from 'xgplayer-hls.js';
-
-// import Player from 'xgplayer';
-// import FlvJsPlayer from 'xgplayer-flv.js';
+import { useClipboard } from '@vueuse/core';
+import Player from 'xgplayer';
+import HlsPlugin from 'xgplayer-hls';
+import HlsJSPlugin from 'xgplayer-hls.js';
+import 'xgplayer/dist/xgplayer.min.css';
+import 'xgplayer-livevideo';
+import LivePreset from 'xgplayer/es/presets/live';
 import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
 import { setting, history, star } from '@/lib/dexie';
@@ -195,45 +305,40 @@ const type = computed(() => {
 const data = computed(() => {
   return store.getData;
 });
+const set = computed(() => {
+  return store.getSetting;
+});
+const info = ref(data.value.info);
+const ext = ref(data.value.ext);
+
+const { text, isSupported, copy } = useClipboard();
 
 const config = ref({
   id: 'xgplayer',
-  url: 'https://live.v1.mk/aishang/cctv1hd',
+  url: '',
   autoplay: true,
-  lastPlayTime: data.value.watchTime,
-  lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
-  lang: 'zh-cn',
   pip: true,
-  videoInit: true, // 初始化显示视频首帧
-  controlPlugins: [],
-  playbackRate: [0.5, 0.75, 1, 1.5, 2],
-  ignores: ['error'],
-  keyShortcut: 'on',
-  keyShortcutStep: {
-    // 设置调整步长
-    currentTime: 15, // 播放进度调整步长，默认10秒
-    volume: 0.2, // 音量调整步长，默认0.1
+  screenShot: true,
+  cssFullscreen: false,
+  lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
+  plugins: [HlsPlugin],
+  hls: {
+    retryCount: 3, // 重试 3 次，默认值
+    retryDelay: 1000, // 每次重试间隔 1 秒，默认值
+    loadTimeout: 10000, // 请求超时时间为 10 秒，默认值
+    fetchOptions: {
+      // 该参数会透传给 fetch，默认值为 undefined
+      mode: 'cors',
+    },
   },
-  volume: 0.5,
   width: '100%',
   height: 'calc(100vh - 50px)',
-  screenShot: {
-    saveImg: true,
-    quality: 0.92,
-    type: 'image/png',
-    format: '.png',
-  },
 }); // 西瓜播放器参数
 
-const skip = ref({
-  start: 0,
-  end: 0,
-});
-
-const PlaySetting = ref({
-  pauseWhenMinimize: false,
-}); // 是否启用最小化暂停
-const selectPlayableSource = ref(data.value.source); // 选择的播放源
+const recommend = ref([]); // 推荐
+const season = ref(); // 选集
+const selectPlaySource = ref(); // 选择的播放源
+const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
@@ -241,145 +346,136 @@ const timer = ref(); // 定时器 用于刷新历史进度
 const isBinge = ref(true); // true未收藏 false收藏
 const isPin = ref(true); // true未置顶 false置顶
 const qrCodeUrl = ref(); // 二维码图片流
+const dataHistory = ref({}); // 历史
+const isMacFull = ref(false); // mac最大化
 // const iswideBtn = ref(false); // 视频划过显示按钮
-const isMax = ref(false); // 视频划过显示按钮
+const isProfile = ref(false); // 简介
+
 const shareUrl = computed(() => {
   const soureUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
-  let params = `${data.value.url}&name=${data.value.title}`;
-  if (type.value === 'film') params = `${data.value.url}&name=${data.value.title}  ${data.value.index}`;
+  let params = `${config.value.url}&name=${info.value.name}`;
+  if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name}  ${selectPlayIndex.value}`;
   return soureUrl + params;
 }); // 分享地址
 
+// 更新二维码
+watch(
+  () => selectPlayIndex.value,
+  () => {
+    qrCodeImg();
+  },
+);
+
 onMounted(() => {
-  initSetting();
   initPlayer();
   minMaxEvent();
-  wideEvent();
-  getBinge();
-  qrCodeImg();
+  macFullScreenEvent();
+  // wideEvent();
 });
 
 onDeactivated(() => {
   clearInterval(timer.value);
 });
 
-const initSetting = () => {
-  setting.get('shortcut').then((res) => {
-    config.value.keyShortcut = res ? 'on' : 'off';
+const getHistoryData = async (type = false) => {
+  const { key } = ext.value.site;
+  const id = info.value.vod_id;
+  await history.find({ siteKey: key, videoId: id }).then((res) => {
+    let doc = {
+      date: moment().format('YYYY-MM-DD'),
+      siteKey: key,
+      siteSource: selectPlaySource.value,
+      playEnd: 0,
+      videoId: id,
+      videoImage: info.value.vod_pic,
+      videoName: info.value.vod_name,
+      videoIndex: selectPlayIndex.value,
+      watchTime: 0,
+      duration: null,
+    };
+    if (res) {
+      if (!type) {
+        selectPlaySource.value = res.siteSource;
+        selectPlayIndex.value = res.videoIndex;
+      }
+      if (res.siteSource === selectPlaySource.value && res.videoIndex === selectPlayIndex.value) {
+        doc = res;
+      } else {
+        history.update(res.id, doc);
+      }
+      dataHistory.value = doc;
+      dataHistory.value.id = res.id;
+    } else {
+      dataHistory.value = doc;
+      dataHistory.value.id = history.add(doc);
+    }
   });
-  setting.get('pauseWhenMinimize').then((res) => {
-    PlaySetting.value.pauseWhenMinimize = res;
-  });
-
-  // let historyPlayTime;
-  // history.get(parseInt(data.value.historyId, 10)).then((res) => {
-  //   console.log(res);
-  //   // 仅支持到秒
-  //   historyPlayTime = Math.trunc(res.watchTime);
-  //   console.log(historyPlayTime);
-  // });
-
-  // let skipPlayTime;
-  // setting.get('skipStartEnd').then((isSkip) => {
-  //   if (isSkip) {
-  //     setting.get('skipTimeInStart').then((res) => {
-  //       console.log(res);
-  //       skipPlayTime = res;
-  //       skip.value.start = res;
-  //       console.log(skipPlayTime);
-  //     });
-  //     setting.get('skipTimeInEnd').then((res) => {
-  //       console.log(res);
-  //       skip.value.end = res;
-  //     });
-  //   }
-  // });
-  // console.log(historyPlayTime, skipPlayTime);
 };
 
 // 初始化播放器
-const initPlayer = async () => {
-  console.log(type.value, data.value);
-
-  config.value.url = data.value.url;
+const initPlayer = async (firstInit = false) => {
+  if (set.value.softSolution) config.value.mediaType = 'live-video'; // 软解支持
   if (xg.value) xg.value.destroy(); // 存在播放器则摧毁
   if (type.value === 'iptv') {
-    if (data.value.epg) {
-      const date = `${new Date().getFullYear()}-${
-        new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1
-      }-${new Date().getDate() < 10 ? `0${new Date().getDate()}` : new Date().getDate()}`;
-      epgData.value = await zy.iptvEpg(data.value.epg, data.value.title, date);
-    }
-    xg.value = new HlsJsPlayer(config.value);
+    console.log(info.value.url);
+    config.value.url = info.value.url; // 初始化播放链接
+    await zy.isLiveM3U8(info.value.url).then((res) => {
+      config.value.isLive = res;
+      config.value.presets = [LivePreset];
+    }); // 判断是否直播
+    if (data.value.ext.epg) {
+      epgData.value = await zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
+    } // 处理电子节目单
+    xg.value = new Player(config.value);
   } else if (type.value === 'film') {
-    if (!data.value.url.endsWith('m3u8')) {
-      data.value.url = zy.parserFilmUrl(data.value.url);
+    getDetailInfo();
+    // await getDoubanRate();
+    await getDoubanRecommend();
+    await getBinge();
+    if (!firstInit) {
+      config.value.url = season.value[selectPlaySource.value][0].split('$')[1]; // 初始化播放链接
+      await getHistoryData().then(async () => {
+        if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
+        if (set.value.skipStartEnd) {
+          if (dataHistory.value.watchTime < set.value.skipTimeInStart)
+            config.value.startTime = set.value.skipTimeInStart;
+        }
+        if (!config.value.url.endsWith('m3u8')) {
+          config.value.url = zy.parserFilmUrl(config.value.url);
+        } // 判断是否做解析
+        xg.value = new Player(config.value);
+      });
+    } else {
+      if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
+      if (set.value.skipStartEnd) {
+        if (dataHistory.value.watchTime < set.value.skipTimeInStart) config.value.startTime = set.value.skipTimeInStart;
+      }
+      if (!config.value.url.endsWith('m3u8')) {
+        config.value.url = zy.parserFilmUrl(config.value.url);
+      } // 判断是否做解析
+      xg.value = new Player(config.value);
     }
-    xg.value = new HlsJsPlayer(config.value);
+
     await timerUpdatePlayProcess();
   }
-};
-
-// 最小化暂停播放
-const minMaxEvent = () => {
-  win.on('minimize', () => {
-    if (xg.value && xg.value.hasStart && PlaySetting.value.pauseWhenMinimize) {
-      xg.value.pause();
-    }
-  });
-  win.on('restore', () => {
-    if (xg.value && xg.value.hasStart) {
-      xg.value.play();
-    }
-  });
-};
-
-const openMainWinEvent = () => {
-  ipcRenderer.send('showMainWin');
-};
-
-// 最小化暂停播放
-const wideEvent = () => {
-  win.on('maximize', () => {
-    console.log(1);
-    isMax.value = true;
-  });
-  win.on('restore', () => {
-    console.log(2);
-    isMax.value = false;
-  });
-};
-
-// 定时更新播放进度
-const timerUpdatePlayProcess = () => {
-  timer.value = setInterval(async () => {
-    const id = parseInt(data.value.historyId, 10);
-    const db = await history.get(id);
-    if (db) {
-      const doc = { ...db };
-      doc.watchTime = xg.value.currentTime;
-      doc.duration = xg.value.duration;
-      delete doc.id;
-      await history.update(db.id, doc);
-    }
-    console.log(timer.value);
-  }, 10000);
 };
 
 // 在追
 const bingeEvnet = async () => {
   isBinge.value = !isBinge.value;
-  const { key, id, img, name } = data.value;
+  const { key } = ext.value.site;
+  const id = info.value.vod_id;
   const db = await star.find({ siteKey: key, videoId: id });
   console.log(db);
   if (!isBinge.value) {
     const doc = {
       siteKey: key,
       videoId: id,
-      videoImage: img,
-      videoName: name,
+      videoImage: info.value.vod_pic,
+      videoName: info.value.vod_name,
+      videoType: info.value.type_name,
+      videoRemarks: info.value.vod_remarks,
     };
-    console.log(doc);
     if (!db) {
       star
         .add(doc)
@@ -390,71 +486,143 @@ const bingeEvnet = async () => {
           MessagePlugin.error(`加入追剧列表失败:${error}`);
         });
     }
-  } else {
-    star.remove(db.id);
-  }
-};
-
-// 获取是否追剧
-const getBinge = async () => {
-  const { key, id } = data.value;
-  await star.find({ siteKey: key, videoId: id }).then((res) => {
-    if (res) {
-      isBinge.value = false;
-    }
-  });
-};
-
-// 过滤epg播放状态
-const filterEpgStatus = (start, end) => {
-  const date = `${new Date().getFullYear()}-${
-    new Date().getMonth() + 1 < 10 ? `0${new Date().getMonth() + 1}` : new Date().getMonth() + 1
-  }-${new Date().getDate() < 10 ? `0${new Date().getDate()}` : new Date().getDate()}`;
-  const startTimestamp = new Date(`${date} ${start}`).getTime();
-  const endTimestamp = new Date(`${date} ${end}`).getTime();
-  const nowTimestamp = new Date().getTime();
-  if (nowTimestamp > startTimestamp && nowTimestamp < endTimestamp) {
-    return '正在直播';
-  }
-  if (nowTimestamp < endTimestamp) {
-    return '未播放';
-  }
-  return '已播放';
+  } else star.remove(db.id);
 };
 
 // 格式化剧集名称
-const formatName = (e, n) => {
-  // console.log(e, n);
+const formatName = (e) => {
   const num = e.split('$');
   if (num.length > 1) {
     return e.split('$')[0];
   }
-  return `第${n + 1}集`;
+  return `正片`;
 };
 
-// 刷新播放页面
-const gotoPlay = async (item) => {
-  const num = item.split('$');
-  const [index, url] = num;
+// 获取播放源及剧集
+const getDetailInfo = async () => {
+  const videoList = info.value;
 
-  // 刷新历史 source index
-  const doc = {
-    date: `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDate()}`,
-    siiteSource: selectPlayableSource.value,
-    videoIndex: index,
-  };
-  await history.update(data.value.id, doc);
+  // 播放源
+  const playFrom = videoList.vod_play_from;
+  const playSource = playFrom.split('$').filter((e) => e);
+  const [source] = playSource;
+  if (!selectPlaySource.value) selectPlaySource.value = source;
 
-  // 刷新pinia数据
-  const newStore = data.value;
-  newStore.source = selectPlayableSource.value;
-  newStore.url = url;
-  newStore.index = index;
-  store.updateConfig({
-    type: 'film',
-    data: newStore,
+  // 剧集
+  const playUrl = videoList.vod_play_url;
+  const playUrlDiffPlaySource = playUrl.split('$$$'); // 分离不同播放源
+  const playEpisodes = [];
+  _.forEach(playUrlDiffPlaySource, (item) => {
+    const playContont = item
+      .replace(/\$+/g, '$')
+      .split('#')
+      .filter((e) => e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http'))));
+    playEpisodes.push(playContont);
   });
-  initPlayer();
+  if (!selectPlayIndex.value) selectPlayIndex.value = playEpisodes[0][0].split('$')[0];
+
+  // 合并播放源和剧集
+  const fullList = _.zipObject(playSource, playEpisodes);
+
+  videoList.fullList = fullList;
+  info.value = videoList;
+  season.value = fullList;
+  // console.log(info.value, season.value);
+};
+
+// 切换选集
+const changeEvent = async (e) => {
+  const [index, url] = e.split('$');
+  selectPlayIndex.value = index;
+  config.value.url = url;
+  const doc = {
+    watchTime: xg.value.currentTime,
+    duration: null,
+    siteSource: selectPlaySource.value,
+    videoIndex: selectPlayIndex.value,
+  };
+  if (dataHistory.value.videoIndex === index) {
+    delete doc.watchTime;
+    delete doc.duration;
+  }
+  for (const key in doc) {
+    dataHistory.value[key] = doc[key];
+  }
+  await history.update(dataHistory.value.id, doc);
+  await initPlayer();
+
+  await getHistoryData(true);
+};
+
+// 获取豆瓣评分
+// const getDoubanRate = async () => {
+//   const rate = info.value.vod_douban_score;
+//   const id = info.value.vod_douban_id;
+//   if (rate && rate === '0.0') {
+//     const name = info.value.vod_name;
+//     const { year } = info.value;
+//     info.value.rate = await zy.doubanRate(id, name, year);
+//   }
+// };
+
+// 获取豆瓣影片推荐
+const getDoubanRecommend = async () => {
+  const { key } = ext.value.site;
+  const name = info.value.vod_name;
+  const year = info.value.vod_year;
+  const id = info.value.vod_douban_id;
+  await zy.doubanRecommendations(id, name, year).then((resName) => {
+    _.forEach(resName, async (element) => {
+      await zy.searchFirstDetail(key, element).then((res) => {
+        if (res) {
+          if (recommend.value.length < 10) recommend.value.push(res);
+        }
+      });
+    });
+  });
+};
+
+// 替换style
+const filterContent = (item) => {
+  return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
+};
+
+// 自动隐藏wide
+// const wideEvent = () => {};
+
+// 定时更新播放进度
+const timerUpdatePlayProcess = () => {
+  timer.value = setInterval(async () => {
+    const doc = {
+      watchTime: xg.value.currentTime,
+      duration: xg.value.duration,
+    };
+    await history.update(dataHistory.value.id, doc);
+
+    console.log(timer.value);
+  }, 10000);
+};
+
+// 获取是否追剧
+const getBinge = async () => {
+  console.log(ext.value.site.key, info.value.vod_id);
+  await star.find({ siteKey: ext.value.site.key, videoId: info.value.vod_id }).then((res) => {
+    if (res) isBinge.value = false;
+  });
+};
+
+// 电子节目单播放状态
+const filterEpgStatus = (start, end) => {
+  const nowTimestamp = moment();
+  const startTimestamp = moment(`${moment().format('YYYY-MM-DD')} ${start}`);
+  const endTimestamp = moment(`${moment().format('YYYY-MM-DD')} ${end}`);
+  if (nowTimestamp.isBetween(startTimestamp, endTimestamp)) {
+    return '正在直播';
+  }
+  if (nowTimestamp === moment.min(nowTimestamp, endTimestamp)) {
+    return '未播放';
+  }
+  return '已播放';
 };
 
 // 生成二维码
@@ -470,12 +638,23 @@ const qrCodeImg = () => {
   });
 };
 
-// 复制
-const copyEvent = async () => {
-  const { toClipboard } = useClipboard();
-  await toClipboard(shareUrl.value).then((res) => {
-    if (res.text) MessagePlugin.success('复制成功');
+// 推荐刷新数据
+const recommendEvent = (e) => {
+  info.value = e;
+  recommend.value = [];
+  dataHistory.value = {};
+  selectPlaySource.value = '';
+  selectPlayIndex.value = '';
+  season.value = '';
+  isBinge.value = false;
+  store.updateConfig({
+    type: 'film',
+    data: {
+      info: e,
+      ext: ext.value,
+    },
   });
+  initPlayer();
 };
 
 // 下载
@@ -493,6 +672,35 @@ const winStickyEvnet = () => {
     isPin.value = false;
   }
 };
+
+// 最小化暂停播放
+const minMaxEvent = () => {
+  win.on('minimize', () => {
+    if (xg.value && xg.value.hasStart && setting.value.pauseWhenMinimize) {
+      xg.value.pause();
+    }
+  });
+  win.on('restore', () => {
+    if (xg.value && xg.value.hasStart) {
+      xg.value.play();
+    }
+  });
+};
+
+// 最小化暂停播放
+const macFullScreenEvent = () => {
+  win.on('maxmize', () => {
+    isMacFull.value = true;
+  });
+  win.on('restore', () => {
+    isMacFull.value = false;
+  });
+};
+
+// 打开主窗口
+const openMainWinEvent = () => {
+  ipcRenderer.send('showMainWin');
+};
 </script>
 
 <style lang="less" scoped>
@@ -500,6 +708,16 @@ const winStickyEvnet = () => {
 @import '@/style/index.less';
 .container {
   height: calc(100vh);
+  overflow-y: hidden;
+  .nowrap {
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    height: auto;
+    width: auto;
+    font-weight: normal;
+  }
   .container-header {
     -webkit-app-region: drag;
     height: 50px;
@@ -538,6 +756,7 @@ const winStickyEvnet = () => {
         width: 100px;
         text-align: center;
         span {
+          font-weight: 900;
           text-align: center;
           display: inline-block;
           text-overflow: ellipsis;
@@ -720,6 +939,7 @@ const winStickyEvnet = () => {
         display: flex;
         justify-content: space-between;
         flex-direction: column;
+        z-index: 0;
         .player-container {
           position: relative;
           width: 100%;
@@ -734,6 +954,7 @@ const winStickyEvnet = () => {
         right: 0;
         transform: translateY(-50%);
         .player-wide-btn-box {
+          z-index: 999;
           border-radius: 5px 0 0 5px;
           background: rgba(0, 0, 0, 0.5);
           width: 20px;
@@ -842,60 +1063,261 @@ const winStickyEvnet = () => {
 
           .film {
             width: 100%;
-            height: 100%;
             padding-top: 20px;
-            &-wrap-title {
-              height: 26px;
-              line-height: 26px;
-              .title {
+            overflow-y: hidden;
+            .contents-wrap {
+              .title-wrap {
+                position: relative;
+                .title-name {
+                  max-width: 190px;
+                  font-size: 20px;
+                  min-height: 32px;
+                  line-height: 32px;
+                  font-weight: 500;
+                  color: #fff;
+                  position: relative;
+                }
+                .title-binge {
+                  position: absolute;
+                  right: 0;
+                  top: 0;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: hsla(0, 0%, 100%, 0.6);
+                  background-color: hsla(0, 0%, 100%, 0.08);
+                  border-radius: 36px;
+                  width: 74px;
+                  height: 32px;
+                }
+                .title-feature {
+                  position: relative;
+                  font-size: 14px;
+                  line-height: 18px;
+                  padding: 12px 45px 9px 0;
+                  color: hsla(0, 0%, 100%, 0.9);
+                  font-weight: 400;
+                  .rate {
+                    color: #65d444;
+                    font-weight: bold;
+                  }
+                  span {
+                    margin-right: 6px;
+                  }
+                }
+                .title-unfold {
+                  position: absolute;
+                  right: 0;
+                  top: 12px;
+                  display: inline-block;
+                  line-height: 20px;
+                  color: hsla(0, 0%, 100%, 0.6);
+                  cursor: pointer;
+                  padding-right: 15px;
+                  &:after {
+                    content: '';
+                    width: 6px;
+                    height: 6px;
+                    border: 2px solid hsla(0, 0%, 100%, 0.6);
+                    border-bottom: none;
+                    border-left: none;
+                    position: absolute;
+                    right: 5px;
+                    top: 6px;
+                    -webkit-transform: rotate(45deg);
+                    -ms-transform: rotate(45deg);
+                    transform: rotate(45deg);
+                  }
+                }
+              }
+              .anthology-contents-scroll {
+                position: relative;
+                height: calc(100vh - 160px);
+                margin-top: 5px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                .box-anthology-title {
+                  position: relative;
+                  font-size: 18px;
+                  line-height: 25px;
+                  color: hsla(0, 0%, 100%, 0.9);
+                  font-weight: 600;
+                }
+                .box-anthology-items {
+                  padding-bottom: 18px;
+                  overflow: hidden;
+                  .film-tabs {
+                    background-color: rgba(0, 0, 0, 0) !important;
+                    :deep(.t-tabs__nav-item-text-wrapper) {
+                      color: rgba(255, 255, 255, 0.9) !important;
+                    }
+                    :deep(.tag) {
+                      color: rgba(255, 255, 255, 0.9) !important;
+                      background-color: #393939 !important;
+                    }
+                    .select {
+                      color: #85d46e !important;
+                    }
+                    :deep(.t-tabs__nav-item:not(.t-is-disabled):not(.t-is-active):hover .t-tabs__nav-item-wrapper) {
+                      background-color: #393939 !important;
+                    }
+                    :deep(.t-tabs__nav-container.t-is-top:after) {
+                      background-color: rgba(0, 0, 0, 0) !important;
+                    }
+                    :deep(.t-tabs__bar) {
+                      background-color: var(--td-brand-color) !important;
+                    }
+                  }
+                }
+                .component-title {
+                  font-size: 18px;
+                  height: 25px;
+                  line-height: 25px;
+                  display: block;
+                  margin: 18px 0 9px;
+                  font-weight: 600;
+                  color: hsla(0, 0%, 100%, 0.9);
+                }
+                .anthology-content {
+                  .pic-text-item {
+                    position: relative;
+                    display: block;
+                    margin-bottom: 18px;
+                    overflow: hidden;
+                    height: 70px;
+                    .cover {
+                      position: relative;
+                      float: left;
+                      margin-right: 10px;
+                      font-size: 12px;
+                      height: 100%;
+                      overflow: hidden;
+                    }
+                    .anthology-title-wrap {
+                      margin-left: 138px;
+                      height: 70px;
+                      position: relative;
+                      overflow: hidden;
+                      display: flex;
+                      flex-direction: column;
+                      justify-content: center;
+                      .title {
+                        font-size: 14px;
+                        line-height: 20px;
+                        max-height: 40px;
+                        overflow: hidden;
+                        -o-text-overflow: ellipsis;
+                        text-overflow: ellipsis;
+                        word-break: break-all;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 2;
+                        color: #fff;
+                      }
+                      .subtitle {
+                        color: #797979;
+                        font-size: 10px;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            .profile {
+              position: absolute;
+              height: 100%;
+              width: 100%;
+              box-sizing: border-box;
+              left: 0;
+              top: 0;
+              z-index: 100;
+              animation: previewIn 0.3s cubic-bezier(0.86, 0, 0.07, 1);
+              animation-fill-mode: forwards;
+              h3 {
+                font-size: 20px;
+                height: 49px;
+                line-height: 49px;
+                color: #fbfbfb;
+                font-weight: 600;
+                text-align: left;
+                border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
+              }
+              .intro-exit {
+                cursor: pointer;
                 display: block;
-                float: left;
-                width: 180px;
-                font-size: 16px;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                color: hsla(0, 0%, 100%, 0.87);
+                width: 24px;
+                height: 24px;
+                position: absolute;
+                right: 0;
+                top: 13px;
+                &:before {
+                  content: '';
+                  width: 2px;
+                  height: 16px;
+                  background: #fff;
+                  transform: rotate(45deg);
+                  position: absolute;
+                  left: 11px;
+                  top: 4px;
+                }
+                &:after {
+                  content: '';
+                  width: 2px;
+                  height: 16px;
+                  background: #fff;
+                  transform: rotate(-45deg);
+                  position: absolute;
+                  left: 11px;
+                  top: 4px;
+                }
               }
-            }
-            &-wrap-info {
-              max-height: 34px;
-              width: 100%;
-              font-size: 12px;
-              line-height: 17px;
-              overflow: hidden;
-              margin-top: 10px;
-              padding-bottom: 20px;
-              .info {
-                font-size: 12px;
-                line-height: 17px;
-                color: hsla(0, 0%, 100%, 0.6);
-              }
-            }
-            &-scroll {
-              height: calc(100% - 90px);
-              width: 100%;
-              overflow-y: scroll;
-              .film-tabs {
-                background-color: rgba(0, 0, 0, 0) !important;
-                :deep(.t-tabs__nav-item-text-wrapper) {
-                  color: rgba(255, 255, 255, 0.9) !important;
+              .intro-content {
+                width: 100%;
+                height: calc(100% - 50px);
+                overflow-y: scroll;
+                .intro-img {
+                  margin-top: 20px;
+                  .img-wrap {
+                    width: 120px;
+                    height: 165px;
+                    margin: 0 auto;
+                    border-radius: 13px;
+                    position: relative;
+                    overflow: hidden;
+                  }
                 }
-                :deep(.tag) {
-                  color: rgba(255, 255, 255, 0.9) !important;
-                  background-color: #393939 !important;
+                h4 {
+                  margin-top: 10px;
+                  font-size: 15px;
+                  font-weight: 500;
+                  color: #fff;
+                  height: 33px;
+                  line-height: 33px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  text-align: center;
                 }
-                .select {
-                  color: #f09736 !important;
+                .intro-detail {
+                  margin-top: 15px;
+                  padding-bottom: 18px;
+                  padding-right: 3px;
                 }
-                :deep(.t-tabs__nav-item:not(.t-is-disabled):not(.t-is-active):hover .t-tabs__nav-item-wrapper) {
-                  background-color: #393939 !important;
+                .intro-title {
+                  font-size: 15px;
+                  line-height: 21px;
+                  font-weight: 800;
                 }
-                :deep(.t-tabs__nav-container.t-is-top:after) {
-                  background-color: rgba(0, 0, 0, 0) !important;
+                .intro-desc {
+                  margin-top: 7px;
+                  line-height: 24px;
+                  color: hsla(0, 0%, 100%, 0.5);
+                  font-size: 15px;
+                  font-weight: 400;
                 }
-                :deep(.t-tabs__bar) {
-                  background-color: var(--td-brand-color) !important;
+                .second {
+                  margin-top: 27px;
                 }
               }
             }

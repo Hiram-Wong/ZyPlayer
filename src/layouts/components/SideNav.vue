@@ -20,6 +20,11 @@
           {{ item.title }}
         </t-menu-item>
       </template>
+      <template #operations>
+        <t-menu-item @click="refreshEvent">
+          <template #icon><refresh-icon /></template>
+        </t-menu-item>
+      </template>
     </t-menu>
   </div>
 </template>
@@ -27,6 +32,8 @@
 <script setup lang="tsx">
 import { computed } from 'vue';
 import type { PropType } from 'vue';
+import { RefreshIcon } from 'tdesign-icons-vue-next';
+import { useEventBus } from '@vueuse/core';
 import { getActive } from '@/router';
 import type { MenuRoute } from '@/types/interface';
 import { prefix } from '@/config/global';
@@ -60,7 +67,7 @@ const menuIcon = (item: ListItemType) => {
 };
 
 const getMenuList = (list: MenuRoute[], basePath?: string): ListItemType[] => {
-  if (!list) {
+  if (!list || list.length === 0) {
     return [];
   }
   // 如果meta中有orderNo则按照从小到大排序
@@ -70,11 +77,11 @@ const getMenuList = (list: MenuRoute[], basePath?: string): ListItemType[] => {
 
   return list
     .map((item) => {
-      const path = basePath ? `${basePath}/${item.path}` : item.path;
+      const path = basePath && !item.path.includes(basePath) ? `${basePath}/${item.path}` : item.path;
       return {
         path,
         title: item.meta?.title,
-        icon: item.meta?.icon || '',
+        icon: item.meta?.icon,
         children: getMenuList(item.children, path),
         meta: item.meta,
         redirect: item.redirect,
@@ -101,6 +108,18 @@ const getPath = (item: ListItemType) => {
 const openHref = (url: string) => {
   window.open(url);
 };
+
+const emitReload = useEventBus<string>('reload');
+const refreshEvent = () => {
+  console.log('reload');
+  // 声明具有局部刷新钩子的模块
+  const reloadHookModules = ['/film/index', '/iptv/index', '/analysis/index', '/chase/index'];
+  if (active.value && reloadHookModules.includes(active.value)) {
+    emitReload.emit('reload');
+  } else {
+    window?.location.reload();
+  }
+};
 </script>
 
 <style lang="less" scoped>
@@ -113,8 +132,8 @@ const openHref = (url: string) => {
   .t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
     background-color: #fff;
     color: #000;
-    box-shadow: @box-shadow-light-1;
-    border-radius: @border-radius-10;
+    box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
+    border-radius: var(--td-radius-large);
   }
   .t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon {
     color: #000;
@@ -130,8 +149,8 @@ const openHref = (url: string) => {
   }
   .t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) {
     color: #fff;
-    box-shadow: @box-shadow-dark-1;
-    border-radius: @border-radius-10;
+    box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
+    border-radius: var(--td-radius-large);
   }
   .t-default-menu.t-menu--dark .t-menu__item.t-is-active:not(.t-is-opened) {
     background-color: #161616;
@@ -144,12 +163,14 @@ const openHref = (url: string) => {
   }
 }
 
-:deep(.t-default-menu.t-is-collapsed .t-menu .t-menu__item) {
+:deep(.t-default-menu.t-is-collapsed .t-menu .t-menu__item),
+:deep(.t-menu__item) {
   padding: 0;
   width: 42px;
   height: 42px;
   margin-bottom: 21px;
-  border-radius: @border-radius-10 !important;
+  border-radius: var(--td-radius-large);
+  justify-content: center;
 }
 
 .tdesign-block-column {

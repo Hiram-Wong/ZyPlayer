@@ -24,5 +24,13 @@ export default {
   },
   async remove (id) {
     return await iptv.delete(id)
-  }
+  },
+  async pagination() {
+    const list = await iptv.toArray()
+    const total = await iptv.count()
+    return {
+      list: list,
+      total: total
+    }
+  },
 }

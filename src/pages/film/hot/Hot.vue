@@ -22,16 +22,19 @@
       </div>
     </template>
   </t-dialog>
-  <detail-view v-model:visible="formDialogDetail" :info="formDetailData" :site="formData" />
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ChevronRightIcon } from 'tdesign-icons-vue-next';
+import { useIpcRenderer } from '@vueuse/electron';
 import { setting } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
-import detailView from '../detail/Detail.vue';
+
+import { usePlayStore } from '@/store';
+
+const ipcRenderer = useIpcRenderer();
 
 const props = defineProps({
   visible: {
@@ -46,13 +49,14 @@ const props = defineProps({
   },
 });
 
+const store = usePlayStore();
+
 const loading = ref(true); // 骨架屏是否显示热播
 
 const formVisible = ref(false); // dialog是否显示热播
 const formData = ref(props.site); // 接受父组件参数
 const HotList = ref([]); // 热播列表
 
-const formDialogDetail = ref(false); // dialog是否显示详情
 const formDetailData = ref({}); // 详情组件传参
 const emit = defineEmits(['update:visible']);
 
@@ -106,7 +110,17 @@ const detailEvent = async (item) => {
       }
     });
   }
-  if (isExist) formDialogDetail.value = true;
+  if (isExist) {
+    store.updateConfig({
+      type: 'film',
+      data: {
+        info: formDetailData.value,
+        ext: { site: formData.value },
+      },
+    });
+
+    ipcRenderer.send('openPlayWindow', item.vod_name);
+  }
 };
 </script>
 

@@ -26,7 +26,7 @@
       :data="emptyData ? [] : data"
       :columns="COLUMNS"
       :hover="true"
-      stripe
+      :pagination="pagination"
       :loading="dataLoading"
       :selected-row-keys="selectedRowKeys"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-iptv-container` }"
@@ -65,6 +65,11 @@ const formDialogVisibleEditIptv = ref(false);
 const formData = ref();
 const rowKey = 'id';
 const dataLoading = ref(false);
+const pagination = ref({
+  defaultPageSize: 20,
+  total: 0,
+  defaultCurrent: 1,
+});
 const selectedRowKeys = ref([]);
 
 // Define table table
@@ -77,14 +82,10 @@ const rehandleSelectChange = (val) => {
 // Business Processing
 const getIptv = () => {
   dataLoading.value = true;
-  iptv.all().then((res) => {
+  iptv.pagination().then((res) => {
     if (!res) emptyData.value = true;
-    res.forEach((element) => {
-      if (element.reverseOrder === null || element.reverseOrder === undefined) {
-        element.reverseOrder = false;
-      }
-    });
-    data.value = res;
+    data.value = res.list;
+    pagination.value.total = res.total;
   });
   dataLoading.value = false;
 };

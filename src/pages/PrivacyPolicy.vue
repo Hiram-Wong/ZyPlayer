@@ -11,7 +11,6 @@
         cancel-btn="不同意"
         :on-confirm="confirmEvent"
         :on-close="cancelEvent"
-        attach=".privacy-policy-confirm"
         placement="center"
         width="480px"
       >
@@ -34,7 +33,7 @@
         </div>
       </t-dialog>
     </div>
-    <div class="exit-confirm">
+    <div id="exit" class="exit-confirm">
       <t-dialog
         v-model:visible="exitConfirmVisible"
         :close-btn="false"
@@ -45,11 +44,10 @@
         cancel-btn="退出"
         :on-confirm="cancelExitEvent"
         :on-close="exitEvent"
-        attach=".exit-confirm"
         placement="center"
         width="200px"
       >
-        <span>确认退出ZyPlayer</span>
+        <span>确认退出</span>
       </t-dialog>
     </div>
   </div>

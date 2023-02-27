@@ -21,5 +21,13 @@ export default {
   },
   async remove (id) {
     return await analyze.delete(id)
-  }
+  },
+  async pagination() {
+    const list = await analyze.toArray()
+    const total = await analyze.count()
+    return {
+      list: list,
+      total: total
+    }
+  },
 }

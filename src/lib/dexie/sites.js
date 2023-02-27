@@ -24,5 +24,13 @@ export default {
   },
   async remove (id) {
     return await sites.delete(id)
-  }
+  },
+  async pagination() {
+    const list = await sites.toArray()
+    const total = await sites.count()
+    return {
+      list: list,
+      total: total
+    }
+  },
 }

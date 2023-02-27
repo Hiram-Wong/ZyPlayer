@@ -1,4 +1,4 @@
 export default {
   mode: 'light',
-  brandTheme: '"#EBB105',
+  brandTheme: '#85d46e',
 };

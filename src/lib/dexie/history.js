@@ -24,5 +24,14 @@ export default {
   },
   async clear () {
     return await history.clear()
-  }
+  },
+  async pagination(pageIndex = 0, pageSize = 10) {
+    const jumpCount = pageIndex > 0 ? pageIndex*pageSize : 0
+    const list = await history.offset(jumpCount).limit(pageSize).reverse().toArray()
+    const total = await history.count()
+    return {
+      list: list,
+      total: total
+    }
+  },
 }
