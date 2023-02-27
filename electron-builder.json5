@@ -18,8 +18,7 @@
     "target": [
       {
         "target":"dmg",
-        "arch": ["arm64"],
-        // "arch": ["x64", "arm64", "universal"]
+        "arch": ["x64", "arm64", "universal"]
       }
     ],
     "darkModeSupport": true,
