@@ -16,8 +16,10 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3.4.1
         with:
-          node-version: '16.x'
-          cache: 'npm'
+          node-version: 16
+      - run: |
+          yarn
+          yarn release
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
         with:
