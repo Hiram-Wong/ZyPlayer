@@ -3,22 +3,33 @@
 </p>
 <p align="center">
 <a href="http://zyplayer.fun/" target="_blank">官网</a>
-<a href="https://github.com/Hunlongyu/ZY-Player/issues" target="_blank">反馈</a>
+<a href="https://github.com/Hiram-Wong/ZyPlayer/issues" target="_blank">反馈</a>
+<a href="https://github.com/Hiram-Wong/ZyPlayer/releases" target="_blank">下载</a>
 </p>
 
-<h1 align="center">ZY Player 资源播放器</h1>
+<h1 align="center">ZYPlayer</h1>
 
+### Introduction
 
+基于 vue 全家桶 + tdesign + electron 开发；主题色：薄荷绿。
 
-### ✨特性
+🎨 已有功能
 
-- 全平台支持. Windows, Mac
-- 支持 资源站cms、IPTV(含epg), 视频解析
+- 全平台支持 Windows、Mac、Linux
+- 适配黑暗模式
+- 支持资源站cms（json接口）
+- 支持IPTV（m3u、genre）及电子节目单
+- 支持主流视频平台解析（解析页面有个小彩蛋，可在代码里自行探索）
+- 老板键，一键隐藏
+- 播放器软解
+- ...
 
 ### 🌴 声明
 
-- 请大家支持正版. 所有资源来自网上, 该软件不参与任何制作, 上传, 储存等内容, 禁止传播违法资源. 该软件仅供学习参考, 请于安装后24小时内删除.
-- 核心代码来源于ZY-Player，此为空壳播放器，不带源，请自行寻找。
+- 请大家支持正版. 所有资源来自网上, 该软件不参与任何制作, 上传, 储存等内容, 禁止传播违法资源. 
+- 该软件仅供学习交流使用，禁止个人用于非法商业用途, 请于安装后24小时内删除.
+- 核软件为空壳播放器，不带源。
+- 核软件部分代码参考[ZY-Player](https://github.com/Hunlongyu/ZY-Player)
 - icon来源于[ZY Player Issues 737](https://github.com/Hunlongyu/ZY-Player/issues/737)
 
 ### 🧤 格式
@@ -46,8 +57,8 @@
     "id": 1,
     "name": "APTV",
     "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
-    "isActive": true,
-    "epg": ""
+    "epg": "",
+    "isActive": true
   }
 ]
 ```
@@ -55,8 +66,8 @@
 ```json
 [
   {
-    "id":3,
-    "name":"爱豆",
+    "id":1,
+    "name":"xxx",
     "url":"https://jx.aidouer.net/?url=",
     "isActive": true
   }
@@ -76,13 +87,15 @@
 
 ### 🎨 截图
 
-|                      影视 (首页)                       |                      影视 (播放)                       |
+|                      影视 (首页)                       |                      影视 (搜索)                       |
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| ![影视.png](https://s2.loli.net/2023/02/11/A9x8hzm6QvPtdug.png) | ![影视播放.png](https://s2.loli.net/2023/02/05/14GkXsrREcCgVd3.png) |
-|                            热榜                            |                            详情                            |
-| ![热榜.png](https://s2.loli.net/2023/02/11/uqC4XxJHcEhjdzD.png) | ![详情.png](https://s2.loli.net/2023/02/05/G9UPHy3M4ZiNAWd.png) |
-|                      直播(首页)                       |                      直播(播放)                       |
-| ![直播首页.png](https://s2.loli.net/2023/02/05/4mAFrboezVD1KNt.png) | ![直播播放.png](https://s2.loli.net/2023/02/05/pBnAQYg49bwZDlr.png) |
-|                          历史记录                          |                           解析(播放)                           |
-| ![历史.png](https://s2.loli.net/2023/02/05/dB34mynfV2ESx8b.png) | ![解析播放.png](https://s2.loli.net/2023/02/05/eCKiOcdN1oBbua6.png) |
+| ![影视.png](https://s2.loli.net/2023/02/27/fQb9HhwlKtLTYRj.png) | ![影视搜素.png](https://s2.loli.net/2023/02/27/Feb1wdrLxNqi9Ju.png) |
+|                      影视 (播放)                       |                      影视 (介绍)                       |
+| ![影视播放](https://s2.loli.net/2023/02/27/k4omTLsg178tfyV.png) | ![影视详情](https://s2.loli.net/2023/02/27/gsIiHVk32WNeFml.png) |
+|                            影视 (热榜）                            |                            直播(首页)                            |
+| ![热榜.png](https://s2.loli.net/2023/02/27/q1lbRejL9pYKOZF.png) | ![直播首页](https://s2.loli.net/2023/02/27/JztFEq8xKHSsGXZ.png) |
+|                      直播(播放)                     |                      解析                       |
+| ![直播播放](https://s2.loli.net/2023/02/28/SVzaNq21yhTZFQH.png) | ![解析](https://s2.loli.net/2023/02/28/Djtb5ArKwuMgUlx.png) |
+|                          历史记录                          |                           在追                           |
+| ![历史.png](https://s2.loli.net/2023/02/27/CdR7Wo2nK6ZjOyI.png) | ![在追](https://s2.loli.net/2023/02/27/SH53tleP9o8mX4Q.png) |
 
