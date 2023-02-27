@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+// import { initUpdater } from './auto-update/auto-update';
+
 const { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } = require('electron');
 const Store = require('electron-store');
 const { electronApp } = require('@electron-toolkit/utils');
@@ -12,7 +14,6 @@ const remote = require('@electron/remote/main');
 remote.initialize(); // 主进程初始化
 
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
-app.commandLine.appendSwitch('disable-site-isolation-trials');
 app.commandLine.appendSwitch('--ignore-certificate-errors', 'true'); // 忽略证书相关错误
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
@@ -21,15 +22,16 @@ const { NODE_ENV } = process.env;
 
 const store = new Store();
 
-let mainWindow; // 主窗口
+// 保持window对象的: BrowserWindow | null全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
+let mainWindow;
 let playWindow; // 播放窗口
 let isHidden = true;
 
 function createWindow() {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
-    width: 840,
-    minWidth: 840,
+    width: 950,
+    minWidth: 950,
     height: 650,
     minHeight: 650,
     titleBarStyle: 'hiddenInset',
@@ -57,7 +59,7 @@ function createWindow() {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
   });
-
+  // initUpdater(mainWindow);
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
@@ -143,8 +145,8 @@ app.on('browser-window-created', (_, window) => {
 ipcMain.on('openPlayWindow', (_, arg) => {
   if (playWindow) playWindow.destroy();
   playWindow = new BrowserWindow({
-    width: 850,
-    minWidth: 850,
+    width: 890,
+    minWidth: 890,
     height: 550,
     minHeight: 550,
     titleBarStyle: 'hiddenInset',

@@ -1,5 +1,7 @@
 snapshot*
 dist
+release
+dist-electron
 dist_electron
 lib
 es

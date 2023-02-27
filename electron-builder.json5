@@ -1,0 +1,58 @@
+/**
+ * @see https://www.electron.build/configuration/configuration
+ */
+{
+  "productName": "ZYPlayer",
+  "appId": "com.zyplayer.app",
+  "copyright": "Copyright © 2023 ZyPlayer Team Inc.",
+  "asar": true,
+  "directories": {
+    "output": "release/${version}"
+  },
+  "files": [
+    "dist-electron",
+    "dist"
+  ],
+  "mac": {
+    "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+    "target": [
+      {
+        "target":"dmg",
+        "arch": ["arm64"],
+        // "arch": ["x64", "arm64", "universal"]
+      }
+    ],
+    "darkModeSupport": true,
+    "category": "public.app-category.utilities"
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+  },
+  "linux": {
+    "target": [
+      "AppImage",
+      "snap",
+      "deb",
+      "rpm",
+      "freebsd",
+      "pacman",
+      "tar.xz",
+    ],
+    "category": "Audio"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "deleteAppDataOnUninstall": false
+  }
+}
