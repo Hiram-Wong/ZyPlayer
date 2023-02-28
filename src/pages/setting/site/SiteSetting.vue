@@ -36,7 +36,6 @@
       :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
-      @page-change="rehandlePageChange"
       @select-change="rehandleSelectChange"
     >
       <template #isActive="{ row }">
@@ -55,8 +54,18 @@
         <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
       </template>
     </t-table>
-    <dialog-form-add-api v-model:visible="formDialogVisibleAddApi" :data="data" @refresh-table-data="getSites" />
-    <dialog-form-edit-site v-model:visible="formDialogVisibleEditSite" :data="formData" />
+    <dialog-form-add-api
+      v-model:visible="formDialogVisibleAddApi"
+      :data="data"
+      :group="formGroup"
+      @refresh-table-data="refreshEvent"
+    />
+    <dialog-form-edit-site
+      v-model:visible="formDialogVisibleEditSite"
+      :data="formData"
+      :group="formGroup"
+      @refresh-table-data="refreshEvent"
+    />
   </div>
 </template>
 <script setup>
@@ -74,6 +83,7 @@ const formDialogVisibleAddApi = ref(false);
 const formDialogVisibleEditSite = ref(false);
 const formData = ref();
 const isCheckStatusChangeActive = ref();
+const formGroup = ref();
 
 // Define table
 const emptyData = ref(false);
@@ -105,6 +115,14 @@ const getSites = async () => {
   }
 };
 
+// 获取分类
+const getGroup = () => {
+  sites.group().then((res) => {
+    console.log(res);
+    formGroup.value = res;
+  });
+};
+
 const getCheckStatusChangeActive = () => {
   setting.get('defaultCheckModel').then((res) => {
     isCheckStatusChangeActive.value = res;
@@ -113,9 +131,14 @@ const getCheckStatusChangeActive = () => {
 
 onMounted(() => {
   getSites();
+  getGroup();
   getCheckStatusChangeActive();
 });
 
+const refreshEvent = () => {
+  getSites();
+  getGroup();
+};
 // op
 const propChangeEvent = (row) => {
   console.log(row.isActive);
@@ -160,6 +183,7 @@ const removeEvent = (row) => {
     .remove(row.row.id)
     .then(() => {
       getSites();
+      getGroup();
       MessagePlugin.success('删除成功');
     })
     .catch((err) => {
@@ -179,6 +203,7 @@ const removeAllEvent = () => {
     });
   });
   getSites();
+  getGroup();
   MessagePlugin.success('批量删除成功');
 };
 
