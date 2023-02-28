@@ -114,7 +114,7 @@ const exitEvent = () => {
 .privacy-policy-container {
   .privacy-policy-confirm {
     :deep(.t-dialog) {
-      background-image: url(../../../assets/bg-left-circle.svg), url(../../../assets/bg-right-circle.svg);
+      background-image: url(../assets/bg-left-circle.svg), url(../assets/bg-right-circle.svg);
       background-position: 0 0, 100% 280px;
       background-repeat: no-repeat;
     }
