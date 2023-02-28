@@ -374,22 +374,24 @@ const getFilmList = async () => {
 
 const load = async ($state) => {
   console.log('loading...');
-  let resLength;
-  try {
-    if (!searchTxt.value) {
-      resLength = await getFilmList();
-    } else {
-      resLength = 0;
+  if (!FilmSiteSetting.value.basic.key) $state.complete();
+  else
+    try {
+      let resLength;
+      if (!searchTxt.value) {
+        resLength = await getFilmList();
+      } else {
+        resLength = 0;
+      }
+      await getFilmArea();
+      if (resLength === 0) $state.complete();
+      else {
+        $state.loaded();
+      }
+    } catch (error) {
+      $state.error();
+      console.log(error);
     }
-    await getFilmArea();
-    if (resLength === 0) $state.complete();
-    else {
-      $state.loaded();
-    }
-  } catch (error) {
-    $state.error();
-    console.log(error);
-  }
 };
 
 const searchEvent = async () => {
