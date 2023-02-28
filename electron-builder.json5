@@ -25,27 +25,21 @@
     "category": "public.app-category.utilities"
   },
   "win": {
+    "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64"]
+        "arch": ["x64", "ia32", "arm64"]
       },
       {
         "target": "portable",
-        "arch": ["x64"]
+        "arch": ["x64", "ia32", "arm64"]
       }
     ],
   },
   "linux": {
-    "target": [
-      "AppImage",
-      "snap",
-      "deb",
-      "rpm",
-      "freebsd",
-      "pacman",
-      "tar.xz",
-    ],
+    "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+    "target": ["AppImage", "snap", "deb", "rpm"],
     "category": "Audio"
   },
   "nsis": {
