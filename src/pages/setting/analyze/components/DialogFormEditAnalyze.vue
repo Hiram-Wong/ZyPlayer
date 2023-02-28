@@ -12,7 +12,7 @@
           </t-form-item>
         </div>
         <div class="optios">
-          <t-form-item style="float: right">
+          <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
             <t-space>
               <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
               <t-button theme="primary" type="submit">确定</t-button>
@@ -91,7 +91,4 @@ const rules = {
 </script>
 <style lang="less" scoped>
 @import '@/style/variables';
-:deep(.t-form:not(.t-form-inline) .t-form__item:last-of-type) {
-  margin-bottom: var(--td-comp-margin-xxl);
-}
 </style>
