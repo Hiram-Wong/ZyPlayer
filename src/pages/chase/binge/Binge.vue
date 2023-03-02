@@ -33,7 +33,7 @@
           </div>
         </div>
       </div>
-      <infinite-loading style="text-align: center; margin-bottom: 2em" :distance="200" @infinite="load">
+      <infinite-loading style="text-align: center" :distance="200" @infinite="load">
         <template #complete>人家是有底线的</template>
         <template #error>哎呀，出了点差错</template>
       </infinite-loading>
