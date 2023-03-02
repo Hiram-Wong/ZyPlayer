@@ -277,7 +277,7 @@ const importEvent = (file) => {
       ) {
         // 不含相同key、名字、url
         if (ele.isActive === undefined) ele.isActive = true;
-        if (ele.group === undefined) ele.group = '导入';
+        if (ele.group === undefined) ele.group = '默认';
         if (ele.id) delete ele.id;
         addSiteData.push(ele);
       }
