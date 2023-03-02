@@ -29,7 +29,7 @@
             <t-input v-model="formData.siteInfo.jiexiUrl" class="input-item" placeholder="请输入内容" />
           </t-form-item>
           <t-form-item label="分组" name="type">
-            <t-select v-model="formData.type" class="input-item" clearable>
+            <t-select v-model="formData.siteInfo.group" class="input-item" clearable>
               <t-option v-for="item in siteGroup" :key="item.value" :value="item.value" :label="item.label"></t-option>
               <template #panelBottomContent>
                 <div class="select-panel-footer">
@@ -196,7 +196,7 @@ watch(
   (val) => {
     formVisible.value = val;
     newOption.value = '';
-    if (val) emit('refreshTableData');
+    if (!val) emit('refreshTableData');
   },
 );
 watch(
@@ -242,6 +242,7 @@ const addSite = () => {
   } else {
     formData.value.siteInfo.key = getUuid(formData.value.siteInfo.name, 5);
   }
+  if (!formData.value.siteInfo.group) formData.value.siteInfo.group = '默认';
   sites
     .add(JSON.parse(JSON.stringify(formData.value.siteInfo)))
     .then((res) => {

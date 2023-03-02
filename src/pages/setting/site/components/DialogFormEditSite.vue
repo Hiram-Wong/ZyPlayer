@@ -114,7 +114,7 @@ watch(
   (val) => {
     formVisible.value = val;
     newOption.value = '';
-    if (val) emit('refreshTableData');
+    if (!val) emit('refreshTableData');
   },
 );
 watch(

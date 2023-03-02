@@ -37,6 +37,7 @@
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
       @select-change="rehandleSelectChange"
+      @page-change="rehandlePageChange"
     >
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
@@ -48,7 +49,7 @@
         <t-tag v-else theme="danger" variant="light">失效</t-tag>
       </template>
       <template #op="slotProps">
-        <a class="t-button-link" @click="defaultEvent(slotProps)">默认</a>
+        <a class="t-button-link" @click="defaultEvent(slotProps)"><span>默认</span></a>
         <a class="t-button-link" @click="checkSingleEvent(slotProps)">检测</a>
         <a class="t-button-link" @click="editEvent(slotProps)">编辑</a>
         <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
@@ -173,8 +174,12 @@ const checkSingleEvent = async (row, all = false) => {
   return res.status;
 };
 
+const rehandlePageChange = (curr) => {
+  pagination.value.defaultCurrent = curr.current;
+};
+
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex];
+  formData.value = data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
   formDialogVisibleEditSite.value = true;
 };
 
