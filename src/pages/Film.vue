@@ -269,7 +269,7 @@ const filterEvent = () => {
 const getFilmSetting = async () => {
   await nextTick(async () => {
     await setting.get('defaultSite').then(async (id) => {
-      if (!id) MessagePlugin.warning('请设置默认数据源');
+      if (!id) MessagePlugin.warning({ content: '请设置影视默认数据源', duration: 0, closeBtn: true });
       else
         await sites.get(id).then(async (res) => {
           sitesListSelect.value = res.id;
