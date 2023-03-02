@@ -138,7 +138,6 @@ defineExpose({
     width: 100%;
     &-flow-wrap {
       display: grid;
-      padding: 10px 0;
       grid-template-columns: repeat(auto-fill, 170px);
       grid-column-gap: 20px;
       grid-row-gap: 10px;
