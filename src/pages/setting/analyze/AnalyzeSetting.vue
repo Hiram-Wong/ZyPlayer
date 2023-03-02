@@ -1,5 +1,5 @@
 <template>
-  <div class="setting-site-container">
+  <div class="setting-analyze-container">
     <div class="header">
       <t-row justify="space-between">
         <div class="left-operation-container">
@@ -31,7 +31,9 @@
       :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
+      height="100%"
       @select-change="rehandleSelectChange"
+      @page-change="rehandlePageChange"
     >
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
@@ -87,6 +89,10 @@ onMounted(() => {
   getAnalyze();
 });
 
+const rehandlePageChange = (curr) => {
+  pagination.value.defaultCurrent = curr.current;
+};
+
 // 获取列表
 const getAnalyze = () => {
   dataLoading.value = true;
@@ -110,7 +116,7 @@ const propChangeEvent = (row) => {
 
 // 编辑
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex];
+  formData.value = data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
   formDialogVisibleEditAnalyze.value = true;
 };
 
@@ -163,7 +169,8 @@ const defaultEvent = async (row) => {
 
 <style lang="less" scoped>
 @import '@/style/variables';
-.setting-site-container {
+.setting-analyze-container {
+  height: calc(100vh - var(--td-comp-size-l));
   .header {
     margin-bottom: 20px;
   }

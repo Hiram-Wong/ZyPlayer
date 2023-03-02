@@ -31,6 +31,7 @@
       :selected-row-keys="selectedRowKeys"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-iptv-container` }"
       @select-change="rehandleSelectChange"
+      @page-change="rehandlePageChange"
     >
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
@@ -79,6 +80,10 @@ const rehandleSelectChange = (val) => {
   selectedRowKeys.value = val;
 };
 
+const rehandlePageChange = (curr) => {
+  pagination.value.defaultCurrent = curr.current;
+};
+
 // Business Processing
 const getIptv = () => {
   dataLoading.value = true;
@@ -89,6 +94,7 @@ const getIptv = () => {
   });
   dataLoading.value = false;
 };
+
 onMounted(() => {
   getIptv();
 });
@@ -167,7 +173,7 @@ const txt = (text) => {
 };
 
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex];
+  formData.value = data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
   formDialogVisibleEditIptv.value = true;
 };
 
