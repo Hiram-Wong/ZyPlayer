@@ -1,8 +1,11 @@
 {
   "name": "zy-player",
-  "author": "ZyPlayer Team",
+  "author":  {
+    "name" : "hiram",
+    "email" : "admin@catni.cn"
+  },
   "private": true,
-  "version": "3.1.0",
+  "version": "3.1.1",
   "license": "MIT",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -55,9 +58,9 @@
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
     "vue-waterfall-plugin-next": "^2.1.11",
-    "xgplayer": "^3.0.0-next.49",
+    "xgplayer": "^3.0.0-alpha.110",
     "xgplayer-flv.js": "^2.3.0",
-    "xgplayer-hls": "^3.0.0-next.32",
+    "xgplayer-hls": "^3.0.0-next.33-0",
     "xgplayer-hls.js": "^2.6.4",
     "xgplayer-livevideo": "^3.0.0-alpha.136"
   },

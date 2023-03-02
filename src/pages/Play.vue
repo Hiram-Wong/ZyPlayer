@@ -549,7 +549,7 @@ const changeEvent = async (e) => {
   // 2. 同源 同集 不变   return true
   // 3. 不同源 不同集 变 return true
   // 4. 不同源 同集 不变 return true
-  // bug 不同源的index不同，要重新索引
+  // 代优化 不同源的index不同，要重新索引  但是 综艺不对应
   if (dataHistory.value.siteSource === selectPlaySource.value) {
     if (dataHistory.value.videoIndex !== index) {
       doc.watchTime = 0;

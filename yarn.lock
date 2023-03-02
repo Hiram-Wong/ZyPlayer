@@ -5818,7 +5818,7 @@ xgplayer-hls.js@^2.6.4:
     eventemitter3 "^4.0.7"
     hls.js "^1.2.9"
 
-xgplayer-hls@^3.0.0-next.32:
+xgplayer-hls@^3.0.0-next.33-0:
   version "3.0.0-rc.5"
   resolved "https://registry.npmmirror.com/xgplayer-hls/-/xgplayer-hls-3.0.0-rc.5.tgz#f3204f32581ce043a4d86a0b967da37bf1e73f7d"
   integrity sha512-hhrKjh5m+sgHHGbz1ZsdGK/A+VtDE6HbM8iiBY1h/w31vzcHuHBdTxfyGBPbQV6qNHF+9ASJHdZFJyww8AZ+Xw==
@@ -5839,7 +5839,7 @@ xgplayer-livevideo@^3.0.0-alpha.136:
     xgplayer-helper-transmuxers "3.0.0-rc.3-1"
     xgplayer-helper-utils "3.0.0-rc.3-1"
 
-xgplayer@^3.0.0-next.49:
+xgplayer@^3.0.0-alpha.110:
   version "3.0.0-rc.2"
   resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.0-rc.2.tgz#fd479d3fc80314ef29593ba6a21f916a135f4077"
   integrity sha512-rXH5oUxVPxjNlWM1Vam/GUaY77rZIPx45VOaBfC2KH27gdInEBfckaGb3yvZLkOGw6tFpsuxUAOiFjvvoVJGZQ==

@@ -19,8 +19,30 @@
           <t-form-item label="直播源名" name="name">
             <t-input v-model="formData.IptvInfo.name" class="input-item" placeholder="请输入内容" />
           </t-form-item>
-          <t-form-item label="订阅接口" name="url">
+          <t-form-item label="订阅配置" name="url">
             <t-input v-model="formData.IptvInfo.url" class="input-item" placeholder="请输入内容" />
+            <!-- <t-space direction="vertical">
+              <t-space>
+                <t-radio-group v-model="urlType">
+                  <t-radio value="text">手动输入</t-radio>
+                  <t-radio value="local">本地</t-radio>
+                </t-radio-group>
+              </t-space>
+              <t-input
+                v-if="urlType === 'text'"
+                v-model="formData.IptvInfo.url"
+                class="input-item"
+                placeholder="请输入内容"
+              />
+              <t-upload
+                v-if="urlType === 'local'"
+                v-model="formData.IptvInfo.url"
+                class="input-item"
+                theme="file"
+                :draggable="true"
+                :request-method="requestMethod"
+              />
+            </t-space> -->
           </t-form-item>
           <t-form-item label="节目单接口" name="epg">
             <t-input v-model="formData.IptvInfo.epg" class="input-item" placeholder="请输入内容" />
@@ -102,7 +124,7 @@ const props = defineProps({
 });
 const iptvData = ref(props.data);
 const selectWay = ref('add-single');
-
+const urlType = ref('text');
 const formVisible = ref(false);
 const formData = ref({
   IptvInfo: {

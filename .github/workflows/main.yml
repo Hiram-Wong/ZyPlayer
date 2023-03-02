@@ -1,12 +1,6 @@
 name: Build/release
 
-on:
-  push:
-    branches:
-      - main
-    tags:
-      - v*
-  workflow_dispatch:
+on: push
 
 jobs:
   release:
@@ -14,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       - name: Check out Git repository
@@ -23,7 +17,6 @@ jobs:
         uses: actions/setup-node@v3.4.1
         with:
           node-version: 16
-          cache: 'yarn'
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
         with:
@@ -34,15 +27,3 @@ jobs:
           # If the commit is tagged with a version (e.g. "v1.0.0"),
           # release the app after building
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: zyplayer-macos
-          path: release/*/zyplayer-mac-*-universal.dmg
-          if-no-files-found: ignore
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: zyplayer-windows
-          path: release/*/*Setup*.exe
-          if-no-files-found: ignore
