@@ -33,4 +33,16 @@ export default {
       total: total
     }
   },
+  async group(){
+    const groupListLabel = []
+    const groupListValue = []
+    for (const i of await this.all()) {
+      if (groupListLabel.indexOf(i.group) < 0) {
+        groupListLabel.push(i.group)
+        groupListValue.push(i.group)
+      }
+    }
+    const res = groupListLabel.map((label, i) => ({ label, value: groupListValue[i] }))
+    return res
+  }
 }
