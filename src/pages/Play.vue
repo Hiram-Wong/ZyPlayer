@@ -532,6 +532,8 @@ const getDetailInfo = async () => {
 
 // 切换选集
 const changeEvent = async (e) => {
+  if (timer.value) clearInterval(timer.value);
+  console.log(timer.value);
   const [index, url] = e.split('$');
   selectPlayIndex.value = index;
   config.value.url = url;
@@ -541,14 +543,28 @@ const changeEvent = async (e) => {
     siteSource: selectPlaySource.value,
     videoIndex: selectPlayIndex.value,
   };
-  if (dataHistory.value.videoIndex === index) {
-    delete doc.watchTime;
+
+  // 当前源dataHistory.value.siteSource 选择源selectPlaySource.value；当前集dataHistory.value.videoIndex 选择源index
+  // 1. 同源 不同集 变   return true
+  // 2. 同源 同集 不变   return true
+  // 3. 不同源 不同集 变 return true
+  // 4. 不同源 同集 不变 return true
+  // bug 不同源的index不同，要重新索引
+  if (dataHistory.value.siteSource === selectPlaySource.value) {
+    if (dataHistory.value.videoIndex !== index) {
+      doc.watchTime = 0;
+      delete doc.duration;
+    }
+  } else if (dataHistory.value.videoIndex !== index) {
+    doc.watchTime = 0;
     delete doc.duration;
   }
+
+  console.log(doc);
   for (const key in doc) {
     dataHistory.value[key] = doc[key];
   }
-  await history.update(dataHistory.value.id, doc);
+  history.update(dataHistory.value.id, doc);
   await initPlayer(true);
 
   await getHistoryData(true);
