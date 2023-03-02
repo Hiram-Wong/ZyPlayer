@@ -741,6 +741,7 @@ const openMainWinEvent = () => {
           border-radius: 5px;
           background-color: #2f3134;
           padding: 2px 10px;
+          cursor: pointer;
           .tip-gotomain {
             display: inline-block;
             margin-left: 5px;
@@ -1155,6 +1156,7 @@ const openMainWinEvent = () => {
                     :deep(.tag) {
                       color: rgba(255, 255, 255, 0.9) !important;
                       background-color: #393939 !important;
+                      cursor: pointer;
                     }
                     .select {
                       color: #85d46e !important;
@@ -1186,6 +1188,7 @@ const openMainWinEvent = () => {
                     margin-bottom: 18px;
                     overflow: hidden;
                     height: 70px;
+                    cursor: pointer;
                     .cover {
                       position: relative;
                       float: left;
