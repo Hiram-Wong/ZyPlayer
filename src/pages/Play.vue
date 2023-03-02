@@ -549,7 +549,7 @@ const changeEvent = async (e) => {
     dataHistory.value[key] = doc[key];
   }
   await history.update(dataHistory.value.id, doc);
-  await initPlayer();
+  await initPlayer(true);
 
   await getHistoryData(true);
 };
