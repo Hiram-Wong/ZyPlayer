@@ -31,7 +31,6 @@
       :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
-      height="100%"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
