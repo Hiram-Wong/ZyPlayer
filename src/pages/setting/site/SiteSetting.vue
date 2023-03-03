@@ -40,7 +40,7 @@
       @page-change="rehandlePageChange"
     >
       <template #name="{ row }">
-        <t-badge v-if="row.id === defaultSite" size="small" :offset="[-5, 0]" count="默认" dot>{{ row.name }}</t-badge>
+        <t-badge v-if="row.id === defaultSite" size="small" :offset="[-5, 0]" count="默认">{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
