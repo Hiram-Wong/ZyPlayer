@@ -5,11 +5,11 @@ on: push
 jobs:
   release:
     runs-on: ${{ matrix.os }}
-    container: node:16.16.0
 
     strategy:
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
+        container: node:16.16.0
 
     steps:
       - name: Check out Git repository
