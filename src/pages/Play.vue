@@ -13,7 +13,7 @@
           <span v-else>{{ info.name }}</span>
         </div>
         <div class="player-top-right">
-          <div class="player-top-right-popup player-top-right-item player-top-right-share">
+          <div v-if="type === 'film'" class="player-top-right-popup player-top-right-item player-top-right-share">
             <t-popup
               placement="bottom-right"
               :overlay-inner-style="{ background: '#2a2a31', boxShadow: 'none', marginTop: '16px' }"
