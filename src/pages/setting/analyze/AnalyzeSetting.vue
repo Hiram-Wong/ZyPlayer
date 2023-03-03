@@ -30,16 +30,16 @@
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
-      :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
+      :header-affixed-top="{ offsetTop: 0, container: `.setting-analyze-container` }"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
-      <template #name="{ row }">
+      <!-- <template #name="{ row }">
         <t-badge v-if="row.id === defaultAnalyze" size="small" :offset="[-5, 0]" count="默认" dot>{{
           row.name
         }}</t-badge>
         <span v-else>{{ row.name }}</span>
-      </template>
+      </template> -->
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
