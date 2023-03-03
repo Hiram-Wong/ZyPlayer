@@ -419,13 +419,13 @@ const initPlayer = async (firstInit = false) => {
   if (type.value === 'iptv') {
     console.log(info.value.url);
     config.value.url = info.value.url; // 初始化播放链接
+    if (data.value.ext.epg) {
+      epgData.value = await zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
+    } // 处理电子节目单
     await zy.isLiveM3U8(info.value.url).then((res) => {
       config.value.isLive = res;
       config.value.presets = [LivePreset];
     }); // 判断是否直播
-    if (data.value.ext.epg) {
-      epgData.value = await zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
-    } // 处理电子节目单
     xg.value = new Player(config.value);
   } else if (type.value === 'film') {
     getDetailInfo();
