@@ -34,6 +34,12 @@
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
+      <template #name="{ row }">
+        <t-badge v-if="row.id === defaultAnalyze" size="small" :offset="[-5, 0]" count="默认" dot>{{
+          row.name
+        }}</t-badge>
+        <span v-else>{{ row.name }}</span>
+      </template>
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
@@ -69,6 +75,7 @@ import { COLUMNS } from './constants';
 const formDialogVisibleAddAnalyze = ref(false);
 const formDialogVisibleEditAnalyze = ref(false);
 const formData = ref();
+const defaultAnalyze = ref();
 
 // Define table
 const emptyData = ref(false);
@@ -93,8 +100,9 @@ const rehandlePageChange = (curr) => {
 };
 
 // 获取列表
-const getAnalyze = () => {
+const getAnalyze = async () => {
   dataLoading.value = true;
+  defaultAnalyze.value = await setting.get('defaultAnalyze');
   try {
     analyze.pagination().then((res) => {
       if (!res) emptyData.value = true;
@@ -160,8 +168,9 @@ const exportEvent = () => {
 // 设置默认接口
 const defaultEvent = async (row) => {
   setting.update({
-    defaultAnalyze: row.row.url,
+    defaultAnalyze: row.row.id,
   });
+  defaultAnalyze.value = row.row.id;
   MessagePlugin.success('设置成功');
 };
 </script>

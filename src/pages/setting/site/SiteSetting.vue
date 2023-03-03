@@ -39,17 +39,21 @@
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
+      <template #name="{ row }">
+        <t-badge v-if="row.id === defaultSite" size="small" :offset="[-5, 0]" count="默认" dot>{{ row.name }}</t-badge>
+        <span v-else>{{ row.name }}</span>
+      </template>
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
         </t-switch>
       </template>
       <template #status="{ row }">
-        <t-tag v-if="row.status" theme="success" variant="light">可用</t-tag>
-        <t-tag v-else theme="danger" variant="light">失效</t-tag>
+        <t-tag v-if="row.status" shape="round" theme="success" variant="light-outline">可用</t-tag>
+        <t-tag v-else theme="danger" shape="round" variant="light-outline">失效</t-tag>
       </template>
       <template #op="slotProps">
-        <a class="t-button-link" @click="defaultEvent(slotProps)"><span>默认</span></a>
+        <a class="t-button-link" @click="defaultEvent(slotProps)">默认</a>
         <a class="t-button-link" @click="checkSingleEvent(slotProps)">检测</a>
         <a class="t-button-link" @click="editEvent(slotProps)">编辑</a>
         <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
@@ -99,10 +103,12 @@ const selectedRowKeys = ref([]);
 const rehandleSelectChange = (val) => {
   selectedRowKeys.value = val;
 };
+const defaultSite = ref();
 
 // Business Processing
 const getSites = async () => {
   dataLoading.value = true;
+  defaultSite.value = await setting.get('defaultSite');
   try {
     await sites.pagination().then((res) => {
       if (!res) emptyData.value = true;
@@ -224,6 +230,7 @@ const defaultEvent = async (row) => {
   setting.update({
     defaultSite: row.row.id,
   });
+  defaultSite.value = row.row.id;
   MessagePlugin.success('设置成功');
 };
 </script>
@@ -239,6 +246,13 @@ const defaultEvent = async (row) => {
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
+  }
+  .default-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--td-radius-circle);
+    background-color: var(--td-error-color);
   }
 }
 .component-op {

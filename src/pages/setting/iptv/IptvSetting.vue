@@ -33,6 +33,10 @@
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
+      <template #name="{ row }">
+        <t-badge v-if="row.id === defaultIptv" size="small" :offset="[-5, 0]" count="默认" dot>{{ row.name }}</t-badge>
+        <span v-else>{{ row.name }}</span>
+      </template>
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
@@ -72,6 +76,7 @@ const pagination = ref({
   defaultCurrent: 1,
 });
 const selectedRowKeys = ref([]);
+const defaultIptv = ref();
 
 // Define table table
 const emptyData = ref(false);
@@ -85,8 +90,9 @@ const rehandlePageChange = (curr) => {
 };
 
 // Business Processing
-const getIptv = () => {
+const getIptv = async () => {
   dataLoading.value = true;
+  defaultIptv.value = await setting.get('defaultIptv');
   iptv.pagination().then((res) => {
     if (!res) emptyData.value = true;
     data.value = res.list;
@@ -120,6 +126,7 @@ const defaultEvent = async (row) => {
     }
   });
   setting.update({ defaultIptv: row.row.id });
+  defaultIptv.value = row.row.id;
 };
 
 const m3u = (text) => {

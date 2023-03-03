@@ -27,7 +27,7 @@
                   size="large"
                   style="width: 10em"
                 >
-                  <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.url" />
+                  <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.id" />
                 </t-select>
               </template>
               <input v-model="analysisUrl" class="analysis-url" placeholder="请在此处粘贴视频网址" />
@@ -60,6 +60,7 @@
 // TODO：JXU1NzI4JXU2NzJDJXU0RTFBJXU2NDFDJXU3RDIyc2hvd1N1cHBvcnRFdmVudCV1RkYwQyV1NjdFNSV1NzcwQiV1NjcyQyV1NjVCOSV1NkNENSV1NzY4NCV1ODlFNiV1NTNEMSV1N0M3QiV1NTc4Qg==
 import { ref, reactive, onMounted } from 'vue';
 import { MessagePlugin, NotifyPlugin } from 'tdesign-vue-next';
+import _ from 'lodash';
 import { setting, analyze } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
 
@@ -146,8 +147,7 @@ const getAnalysisApi = async () => {
 const analysisEvent = async () => {
   if (selectAnalysisApi.value && analysisUrl.value) {
     urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
-    url.value = `${selectAnalysisApi.value}${analysisUrl.value}`;
-
+    url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
     NotifyPlugin.info({
       title: '提醒',
       content: '正在加载当前视频，如遇解析失败请切换线路!',
