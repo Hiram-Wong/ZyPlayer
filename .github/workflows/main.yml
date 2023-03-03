@@ -5,6 +5,7 @@ on: push
 jobs:
   release:
     runs-on: ${{ matrix.os }}
+    container: node:16.16.0
 
     strategy:
       matrix:
