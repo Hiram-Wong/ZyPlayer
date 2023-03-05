@@ -143,7 +143,7 @@
   </div>
 </template>
 <script setup lang="jsx">
-import { ref, watch, nextTick, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 
 import { MoreIcon, ChartBarIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -267,44 +267,43 @@ const filterEvent = () => {
 };
 
 const getFilmSetting = async () => {
-  await nextTick(async () => {
-    await setting.get('defaultSite').then(async (id) => {
-      if (!id) MessagePlugin.warning({ content: '请设置影视默认数据源', duration: 0, closeBtn: true });
-      else
-        await sites.get(id).then(async (res) => {
-          sitesListSelect.value = res.id;
-          FilmSiteSetting.value.basic.name = res.name;
-          FilmSiteSetting.value.basic.key = res.key;
-          FilmSiteSetting.value.basic.group = res.group;
-        });
-    });
-    await setting.get('excludeRootClasses').then((res) => {
-      FilmSiteSetting.value.excludeRootClasses = res;
-    });
-    await setting.get('rootClassFilter').then((res) => {
-      FilmSiteSetting.value.rootClassFilter = res;
-    });
-    await setting.get('r18ClassFilter').then((res) => {
-      FilmSiteSetting.value.r18ClassFilter = res;
-    });
-    await setting.get('excludeR18Films').then((res) => {
-      FilmSiteSetting.value.excludeR18Films = res;
-    });
-    await setting.get('defaultChangeModel').then((res) => {
-      FilmSiteSetting.value.change = res;
-    });
-    await sites.all().then((res) => {
-      sitesList.value = res.filter((item) => item.isActive);
-    });
-    await setting.get('defaultSearch').then((res) => {
-      FilmSiteSetting.value.searchType = res;
-      if (res === 'site') FilmSiteSetting.value.searchGroup = [{ ...FilmSiteSetting.value.basic }];
-      if (res === 'group')
-        FilmSiteSetting.value.searchGroup = sitesList.value.filter(
-          (item) => item.group === FilmSiteSetting.value.basic.group,
-        );
-      if (res === 'all') FilmSiteSetting.value.searchGroup = sitesList.value;
-    });
+  setting.get('defaultSite').then((id) => {
+    if (!id) {
+      MessagePlugin.warning({ content: '请设置影视默认数据源', duration: 0, closeBtn: true });
+    } else
+      sites.get(id).then((res) => {
+        sitesListSelect.value = res.id;
+        FilmSiteSetting.value.basic.name = res.name;
+        FilmSiteSetting.value.basic.key = res.key;
+        FilmSiteSetting.value.basic.group = res.group;
+      });
+  });
+  await setting.get('excludeRootClasses').then((res) => {
+    FilmSiteSetting.value.excludeRootClasses = res;
+  });
+  await setting.get('rootClassFilter').then((res) => {
+    FilmSiteSetting.value.rootClassFilter = res;
+  });
+  await setting.get('r18ClassFilter').then((res) => {
+    FilmSiteSetting.value.r18ClassFilter = res;
+  });
+  await setting.get('excludeR18Films').then((res) => {
+    FilmSiteSetting.value.excludeR18Films = res;
+  });
+  await setting.get('defaultChangeModel').then((res) => {
+    FilmSiteSetting.value.change = res;
+  });
+  await sites.all().then((res) => {
+    sitesList.value = res.filter((item) => item.isActive);
+  });
+  await setting.get('defaultSearch').then((res) => {
+    FilmSiteSetting.value.searchType = res;
+    if (res === 'site') FilmSiteSetting.value.searchGroup = [{ ...FilmSiteSetting.value.basic }];
+    if (res === 'group')
+      FilmSiteSetting.value.searchGroup = sitesList.value.filter(
+        (item) => item.group === FilmSiteSetting.value.basic.group,
+      );
+    if (res === 'all') FilmSiteSetting.value.searchGroup = sitesList.value;
   });
 };
 
@@ -374,24 +373,26 @@ const getFilmList = async () => {
 
 const load = async ($state) => {
   console.log('loading...');
-  if (!FilmSiteSetting.value.basic.key) $state.complete();
-  else
-    try {
-      let resLength;
-      if (!searchTxt.value) {
-        resLength = await getFilmList();
-      } else {
-        resLength = 0;
-      }
-      await getFilmArea();
-      if (resLength === 0) $state.complete();
-      else {
-        $state.loaded();
-      }
-    } catch (error) {
-      $state.error();
-      console.log(error);
+  // 暂时使用定时器修复onMounted中没执行完就触发load
+  setTimeout(() => {
+    if (!FilmSiteSetting.value.basic.key) $state.complete();
+  }, 1000);
+  try {
+    let resLength;
+    if (!searchTxt.value) {
+      resLength = await getFilmList();
+    } else {
+      resLength = 0;
     }
+    await getFilmArea();
+    if (resLength === 0) $state.complete();
+    else {
+      $state.loaded();
+    }
+  } catch (error) {
+    $state.error();
+    console.log(error);
+  }
 };
 
 const searchEvent = async () => {
