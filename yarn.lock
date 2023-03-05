@@ -3363,10 +3363,10 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-hls.js@^1.2.9:
-  version "1.3.3"
-  resolved "https://registry.npmmirror.com/hls.js/-/hls.js-1.3.3.tgz#834db077b5aa9d9b31d13e01c5dce4153b5e3214"
-  integrity sha512-4Efu6g90HfFGDuQrkquhDoRpA/4iVpSMcfK9zguJ2qXEUfo5VknZt6rziwwFPHmC2DU3crZ0NtPD0eUqOhFyqg==
+hls.js@^1.1.1:
+  version "1.3.4"
+  resolved "https://registry.npmmirror.com/hls.js/-/hls.js-1.3.4.tgz#8212a3f95c3321f64a586f20e67876f3a9d09488"
+  integrity sha512-iFEwVqtEDk6sKotcTwtJ5OMo/nuDTk9PrpB8FI2J2WYf8EriTVfR4FaK0aNyYtwbYeRSWCXJKlz23xeREdlNYg==
 
 hosted-git-info@^2.1.4:
   version "2.8.9"
@@ -5274,10 +5274,10 @@ tdesign-icons-vue-next@^0.1.7:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.0.9:
-  version "1.0.9"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.0.9.tgz#9fb967b7beba25c0a545292cfac39a7fa053d363"
-  integrity sha512-XRac1fXfGxoF2ZibCXvVouv/LXtS3KkB65QLtLpR/c7oMAypL1UwjFvCO4Elk4HkwjRMCUKpzGZ0pOya4ASA8g==
+tdesign-vue-next@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.1.1.tgz#80074e3a9fca68f78ec3ae5a9e19df7cbb3eb72d"
+  integrity sha512-KtXQ4Ll8z82CD/btqJ1H+NmNcGvUDlf9SK89abZW8CjzqRpsf4yZ+bH0UcKpOyOK6XxasLh/KhiFO4CkZQGERA==
   dependencies:
     "@babel/runtime" "^7.14.8"
     "@popperjs/core" "^2.9.3"
@@ -5739,14 +5739,26 @@ wrappy@1:
   resolved "https://registry.npmmirror.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
 
-xgplayer-flv.js@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.npmmirror.com/xgplayer-flv.js/-/xgplayer-flv.js-2.3.0.tgz#7f3b0f319c091b613141163913e3b5c281c50c3e"
-  integrity sha512-5ZC1J3EJSnQgSxYqJUc+DtjHysFQCfC5iN93KCUGg4w2laK8Hm6AcHzkuwUULc97hV/E1D0s3q+y/TPe5fxUaQ==
+xgplayer-flv.js@^3.0.0-alpha.1:
+  version "3.0.0-alpha.1"
+  resolved "https://registry.npmmirror.com/xgplayer-flv.js/-/xgplayer-flv.js-3.0.0-alpha.1.tgz#7c09a08183e71dd529a95c99f9d088e59f3a69eb"
+  integrity sha512-NBfCsQ1KRndIpqRVigvQ6Q8vdbLiUALmXpnLqS38nmCSPoVIqHmHg8QKAy4hhiCeBpQlYS4nim3wr1W3CIde+w==
   dependencies:
     es6-promise "^4.2.4"
     glob "^7.1.2"
     webworkify "^1.5.0"
+
+xgplayer-flv@^3.0.0-next.19:
+  version "3.0.0-rc.3-1"
+  resolved "https://registry.npmmirror.com/xgplayer-flv/-/xgplayer-flv-3.0.0-rc.3-1.tgz#f1b86e140d91bba417c03ea1a3667b2f66f633bb"
+  integrity sha512-MBN7VAa2KJ9GaCDuBsleM3nDbKr2LZHb0Pn5cfSnWyU/RqZTuqX1cG+HxcartqzGDzmDYjWr//rb5xgelgGY1Q==
+  dependencies:
+    "@babel/runtime" "^7.15.3"
+    core-js "3"
+    xgplayer-helper-codec "3.0.0-rc.3-1"
+    xgplayer-helper-models "3.0.0-rc.3-1"
+    xgplayer-helper-transmuxers "3.0.0-rc.3-1"
+    xgplayer-helper-utils "3.0.0-rc.3-1"
 
 xgplayer-helper-codec@3.0.0-rc.3-1:
   version "3.0.0-rc.3-1"
@@ -5808,17 +5820,17 @@ xgplayer-helper-utils@3.0.0-rc.5:
     core-js "3"
     eventemitter3 "^4.0.7"
 
-xgplayer-hls.js@^2.6.4:
-  version "2.6.4"
-  resolved "https://registry.npmmirror.com/xgplayer-hls.js/-/xgplayer-hls.js-2.6.4.tgz#ed7802b684d6641a392093f28b26cb55a86e5736"
-  integrity sha512-yHIXppRRGWVCZqkI+sAa6lFUXgocd87rk0BhGks04ARh4T8sMrpOBhyNq1PDolPu/mbOvIe8iwG4VwDJFkdwvg==
+xgplayer-hls.js@^2.6.1-alpha.0:
+  version "2.6.1-alpha.0"
+  resolved "https://registry.npmmirror.com/xgplayer-hls.js/-/xgplayer-hls.js-2.6.1-alpha.0.tgz#9ca1244b6f9e8e009e25562863e956458482fcd1"
+  integrity sha512-2cknir/3okFDSVb7JPRYgFVxfyTHaQPVZz1WRaag7ECeFOuG2QpqABrnG9n4jzBubB/5Ub5M/oBOIopWbX6hiA==
   dependencies:
     deepmerge "2.0.1"
     event-emitter "^0.3.5"
     eventemitter3 "^4.0.7"
-    hls.js "^1.2.9"
+    hls.js "^1.1.1"
 
-xgplayer-hls@^3.0.0-next.33-0:
+xgplayer-hls@^3.0.0-next.33-2:
   version "3.0.0-rc.5"
   resolved "https://registry.npmmirror.com/xgplayer-hls/-/xgplayer-hls-3.0.0-rc.5.tgz#f3204f32581ce043a4d86a0b967da37bf1e73f7d"
   integrity sha512-hhrKjh5m+sgHHGbz1ZsdGK/A+VtDE6HbM8iiBY1h/w31vzcHuHBdTxfyGBPbQV6qNHF+9ASJHdZFJyww8AZ+Xw==
@@ -5839,7 +5851,7 @@ xgplayer-livevideo@^3.0.0-alpha.136:
     xgplayer-helper-transmuxers "3.0.0-rc.3-1"
     xgplayer-helper-utils "3.0.0-rc.3-1"
 
-xgplayer@^3.0.0-alpha.110:
+xgplayer@^3.0.0-alpha.110-2:
   version "3.0.0-rc.2"
   resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.0-rc.2.tgz#fd479d3fc80314ef29593ba6a21f916a135f4077"
   integrity sha512-rXH5oUxVPxjNlWM1Vam/GUaY77rZIPx45VOaBfC2KH27gdInEBfckaGb3yvZLkOGw6tFpsuxUAOiFjvvoVJGZQ==

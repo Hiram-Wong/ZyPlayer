@@ -1,8 +1,8 @@
 {
   "name": "zy-player",
-  "author":  {
-    "name" : "hiram",
-    "email" : "admin@catni.cn"
+  "author": {
+    "name": "hiram",
+    "email": "admin@catni.cn"
   },
   "private": true,
   "version": "3.1.1",
@@ -47,7 +47,7 @@
     "pinia-plugin-persistedstate": "^3.0.2",
     "qrcode": "^1.5.1",
     "tdesign-icons-vue-next": "^0.1.7",
-    "tdesign-vue-next": "^1.0.9",
+    "tdesign-vue-next": "^1.1.1",
     "tvision-color": "^1.5.0",
     "uuid-by-string": "^4.0.0",
     "v3-infinite-loading": "^1.2.2",
@@ -58,10 +58,11 @@
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
     "vue-waterfall-plugin-next": "^2.1.11",
-    "xgplayer": "^3.0.0-alpha.110",
-    "xgplayer-flv.js": "^2.3.0",
-    "xgplayer-hls": "^3.0.0-next.33-0",
-    "xgplayer-hls.js": "^2.6.4",
+    "xgplayer": "^3.0.0-alpha.110-2",
+    "xgplayer-flv": "^3.0.0-next.19",
+    "xgplayer-flv.js": "^3.0.0-alpha.1",
+    "xgplayer-hls": "^3.0.0-next.33-2",
+    "xgplayer-hls.js": "^2.6.1-alpha.0",
     "xgplayer-livevideo": "^3.0.0-alpha.136"
   },
   "devDependencies": {
