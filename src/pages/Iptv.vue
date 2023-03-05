@@ -369,6 +369,8 @@ const txt = (text) => {
       :deep(.t-input) {
         padding: 0;
         border-style: none !important;
+        font-size: 0.8rem;
+        font-weight: bold;
       }
       :deep(.t-input--focused) {
         border-color: rgba(255, 255, 255, 0) !important;
