@@ -453,7 +453,7 @@ const initPlayer = async (firstInit = false) => {
   } else if (type.value === 'film') {
     getDetailInfo();
     // await getDoubanRate();
-    await getDoubanRecommend();
+    getDoubanRecommend();
     await getBinge();
     if (!firstInit) {
       await getHistoryData().then(async () => {
@@ -478,7 +478,7 @@ const initPlayer = async (firstInit = false) => {
         if (dataHistory.value.watchTime < set.value.skipTimeInStart) config.value.startTime = set.value.skipTimeInStart;
       }
       if (!config.value.url.endsWith('m3u8')) {
-        config.value.url = zy.parserFilmUrl(config.value.url);
+        config.value.url = await zy.parserFilmUrl(config.value.url);
       } // 判断是否做解析
       xg.value = new Player(config.value);
     }
@@ -560,12 +560,11 @@ const getDetailInfo = async () => {
 // 切换选集
 const changeEvent = async (e) => {
   if (timer.value) clearInterval(timer.value);
-  console.log(timer.value);
   const [index, url] = e.split('$');
   selectPlayIndex.value = index;
   config.value.url = url;
   const doc = {
-    watchTime: xg.value.currentTime,
+    watchTime: xg.value ? xg.value.currentTime : 0,
     duration: null,
     siteSource: selectPlaySource.value,
     videoIndex: selectPlayIndex.value,
