@@ -279,10 +279,20 @@ import QRCode from 'qrcode';
 import { useClipboard } from '@vueuse/core';
 import Player from 'xgplayer';
 import HlsPlugin from 'xgplayer-hls';
+import playbackRate from 'xgplayer/es/plugins/playbackRate';
 import HlsJSPlugin from 'xgplayer-hls.js';
 import 'xgplayer/dist/xgplayer.min.css';
 import 'xgplayer-livevideo';
 import LivePreset from 'xgplayer/es/presets/live';
+import { compileScript } from '@vue/compiler-sfc';
+import playerPlayIcon from '@/assets/player/play.svg?raw';
+import playerPauseIcon from '@/assets/player/pause.svg?raw';
+import playerPlayNextIcon from '@/assets/player/play-next.svg?raw';
+import playerZoomIcon from '@/assets/player/zoom.svg?raw';
+import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
+import playerVoiceIcon from '@/assets/player/voice.svg?raw';
+import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
+import playerPipIcon from '@/assets/player/pip.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
 import { setting, history, star } from '@/lib/dexie';
@@ -311,16 +321,29 @@ const set = computed(() => {
 const info = ref(data.value.info);
 const ext = ref(data.value.ext);
 
-const { text, isSupported, copy } = useClipboard();
+const { isSupported, copy } = useClipboard();
 
 const config = ref({
   id: 'xgplayer',
   url: '',
   autoplay: true,
   pip: true,
-  screenShot: true,
   cssFullscreen: false,
+  playbackRate: { index: 7 }, // pip:6 volume:1 fullscreen:1 playbackrate:0
+  enableContextmenu: true, // 允许右键
   lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
+  icons: {
+    play: playerPlayIcon,
+    pause: playerPauseIcon,
+    playNext: playerPlayNextIcon,
+    fullscreen: playerZoomIcon,
+    exitFullscreen: playerZoomExitIcon,
+    volumeSmall: playerVoiceIcon,
+    volumeLarge: playerVoiceIcon,
+    volumeMuted: playerVoiceNoIcon,
+    pipIcon: playerPipIcon,
+    pipIconExit: playerPipIcon,
+  },
   plugins: [HlsPlugin],
   hls: {
     retryCount: 3, // 重试 3 次，默认值
@@ -331,7 +354,7 @@ const config = ref({
       mode: 'cors',
     },
   },
-  width: '100%',
+  width: 'auto',
   height: 'calc(100vh - 50px)',
 }); // 西瓜播放器参数
 
@@ -433,15 +456,19 @@ const initPlayer = async (firstInit = false) => {
     await getDoubanRecommend();
     await getBinge();
     if (!firstInit) {
-      config.value.url = season.value[selectPlaySource.value][0].split('$')[1]; // 初始化播放链接
       await getHistoryData().then(async () => {
         if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
         if (set.value.skipStartEnd) {
           if (dataHistory.value.watchTime < set.value.skipTimeInStart)
             config.value.startTime = set.value.skipTimeInStart;
         }
+
+        _.forEach(season.value[selectPlaySource.value], (item) => {
+          if (item.split('$')[0] === dataHistory.value.videoIndex) config.value.url = item.split('$')[1];
+        });
+        if (!config.value.url) config.value.url = season.value[selectPlaySource.value][0].split('$')[1]; // 初始化播放链接
         if (!config.value.url.endsWith('m3u8')) {
-          config.value.url = zy.parserFilmUrl(config.value.url);
+          config.value.url = await zy.parserFilmUrl(config.value.url);
         } // 判断是否做解析
         xg.value = new Player(config.value);
       });
@@ -1345,5 +1372,12 @@ const openMainWinEvent = () => {
       }
     }
   }
+}
+:deep(.xgplayer-icon svg) {
+  width: 1.4em !important;
+  height: 100% !important;
+}
+:deep(.xgplayer .xg-pos) {
+  padding: 0 13px;
 }
 </style>
