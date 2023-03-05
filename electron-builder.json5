@@ -35,8 +35,12 @@
   },
   "linux": {
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
-    "target": ["AppImage"],
-    "category": "Audio"
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": ["x64", "arm64"]
+      }
+    ],
   },
   "nsis": {
     "oneClick": false,
