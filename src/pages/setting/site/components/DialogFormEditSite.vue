@@ -102,7 +102,7 @@ const onSubmit = ({ result, firstError }) => {
 const onClickCloseBtn = () => {
   formVisible.value = false;
 };
-const emit = defineEmits(['update:visible', 'refreshTableData']);
+const emit = defineEmits(['update:visible', 'refreshTableGroup']);
 watch(
   () => formVisible.value,
   (val) => {
@@ -114,7 +114,7 @@ watch(
   (val) => {
     formVisible.value = val;
     newOption.value = '';
-    if (!val) emit('refreshTableData');
+    // if (!val) emit('refreshTableGroup');
   },
 );
 watch(

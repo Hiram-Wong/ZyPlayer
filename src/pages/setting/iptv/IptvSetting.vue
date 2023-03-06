@@ -24,12 +24,14 @@
     <t-table
       :row-key="rowKey"
       :data="emptyData ? [] : data"
+      :sort="sort"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
       :selected-row-keys="selectedRowKeys"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-iptv-container` }"
+      @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
@@ -77,6 +79,7 @@ const pagination = ref({
 });
 const selectedRowKeys = ref([]);
 const defaultIptv = ref();
+const sort = ref({});
 
 // Define table table
 const emptyData = ref(false);
@@ -87,6 +90,12 @@ const rehandleSelectChange = (val) => {
 
 const rehandlePageChange = (curr) => {
   pagination.value.defaultCurrent = curr.current;
+};
+
+const rehandleSortChange = (sortVal, options) => {
+  // sort.value 和 data.value 的赋值都是必须
+  sort.value = sortVal;
+  data.value = options.currentDataSource;
 };
 
 // Business Processing

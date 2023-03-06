@@ -83,7 +83,6 @@ watch(
   () => props.data,
   (val) => {
     formData.value = val;
-    console.log(val);
   },
 );
 const rules = {

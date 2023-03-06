@@ -29,13 +29,14 @@
     </div>
     <t-table
       row-key="id"
-      vertical-align="top"
       :data="emptyData ? [] : data"
+      :sort="sort"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
+      @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
@@ -69,7 +70,7 @@
       v-model:visible="formDialogVisibleEditSite"
       :data="formData"
       :group="formGroup"
-      @refresh-table-data="refreshEvent"
+      @refresh-table-group="getGroup"
     />
   </div>
 </template>
@@ -89,6 +90,7 @@ const formDialogVisibleEditSite = ref(false);
 const formData = ref();
 const isCheckStatusChangeActive = ref();
 const formGroup = ref();
+const sort = ref({});
 
 // Define table
 const emptyData = ref(false);
@@ -182,6 +184,12 @@ const checkSingleEvent = async (row, all = false) => {
 
 const rehandlePageChange = (curr) => {
   pagination.value.defaultCurrent = curr.current;
+};
+
+const rehandleSortChange = (sortVal, options) => {
+  // sort.value 和 data.value 的赋值都是必须
+  sort.value = sortVal;
+  data.value = options.currentDataSource;
 };
 
 const editEvent = (row) => {

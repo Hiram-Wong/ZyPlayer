@@ -26,11 +26,13 @@
     <t-table
       row-key="id"
       :data="emptyData ? [] : data"
+      :sort="sort"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-analyze-container` }"
+      @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
     >
@@ -74,6 +76,7 @@ const formDialogVisibleAddAnalyze = ref(false);
 const formDialogVisibleEditAnalyze = ref(false);
 const formData = ref();
 const defaultAnalyze = ref();
+const sort = ref({});
 
 // Define table
 const emptyData = ref(false);
@@ -95,6 +98,12 @@ onMounted(() => {
 
 const rehandlePageChange = (curr) => {
   pagination.value.defaultCurrent = curr.current;
+};
+
+const rehandleSortChange = (sortVal, options) => {
+  // sort.value 和 data.value 的赋值都是必须
+  sort.value = sortVal;
+  data.value = options.currentDataSource;
 };
 
 // 获取列表

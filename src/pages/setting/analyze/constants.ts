@@ -8,7 +8,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     width: 150,
     colKey: 'name',
     fixed: 'left',
-    sorter: true,
+    sorter: (a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'),
   },
   { title: '启用', colKey: 'isActive', width: 100 },
   {
