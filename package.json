@@ -5,7 +5,7 @@
     "email": "admin@catni.cn"
   },
   "private": true,
-  "version": "3.1.1",
+  "version": "3.1.2",
   "license": "MIT",
   "main": "dist-electron/main/index.js",
   "scripts": {
