@@ -22,7 +22,7 @@ jobs:
         with:
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
-          github_token: ${{ secrets.github_token }}
+          github_token: ${{ secrets.access_token }}
           build_script_name: 'electron:prebuild'
           # If the commit is tagged with a version (e.g. "v1.0.0"),
           # release the app after building
