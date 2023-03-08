@@ -127,7 +127,7 @@ const onSubmit = ({ result, firstError }, type) => {
       formData.value.file.file = [];
     } else {
       console.log('api');
-      urlEvent();
+      urlEvent(formData.value.url.sitesDataURL);
     }
     formVisible.value = false;
   } else {
