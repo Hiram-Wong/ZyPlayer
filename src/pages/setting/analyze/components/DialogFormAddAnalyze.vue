@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="新建" :width="680" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加解析源" :width="680" :footer="false">
     <template #body>
       <t-space direction="vertical">
         <t-radio-group v-model="selectWay" variant="default-filled" style="width: auto">
