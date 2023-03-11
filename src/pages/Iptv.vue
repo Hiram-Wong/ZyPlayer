@@ -377,10 +377,6 @@ const txt = (text) => {
         box-shadow: none !important;
       }
       .title {
-        height: 32px;
-        padding: 0 5px;
-        // background-color: #f2f2f2;
-        border-radius: 5px;
         .data-item {
           display: block;
           line-height: 1rem;
