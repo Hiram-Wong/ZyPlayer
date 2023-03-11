@@ -279,12 +279,9 @@ import QRCode from 'qrcode';
 import { useClipboard } from '@vueuse/core';
 import Player from 'xgplayer';
 import HlsPlugin from 'xgplayer-hls';
-import playbackRate from 'xgplayer/es/plugins/playbackRate';
-import HlsJSPlugin from 'xgplayer-hls.js';
 import 'xgplayer/dist/xgplayer.min.css';
 import 'xgplayer-livevideo';
 import LivePreset from 'xgplayer/es/presets/live';
-import { compileScript } from '@vue/compiler-sfc';
 import playerPlayIcon from '@/assets/player/play.svg?raw';
 import playerPauseIcon from '@/assets/player/pause.svg?raw';
 import playerPlayNextIcon from '@/assets/player/play-next.svg?raw';
@@ -481,6 +478,9 @@ const initPlayer = async (firstInit = false) => {
         config.value.url = await zy.parserFilmUrl(config.value.url);
       } // 判断是否做解析
       xg.value = new Player(config.value);
+      xg.value.on(EVENTS.MINI_STATE_CHANGE, (isPip) => {
+        console.log(isPip);
+      });
     }
 
     await timerUpdatePlayProcess();
