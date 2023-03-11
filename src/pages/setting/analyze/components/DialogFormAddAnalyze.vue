@@ -249,7 +249,8 @@ const urlEvent = async (url) => {
 :deep(.t-form:not(.t-form-inline) .t-form__item:last-of-type) {
   margin-bottom: var(--td-comp-margin-xxl);
 }
-.input-item {
+.input-item,
+:deep(.t-upload__dragger) {
   width: 480px;
 }
 </style>
