@@ -1,12 +1,21 @@
 import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } from 'electron';
+
+import { autoUpdater } from 'electron-updater';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
-
 import { electronApp } from '@electron-toolkit/utils';
+import { createMenu } from './core/menu';
+import initUpdater from './core/auto-update';
 
 const remote = require('@electron/remote/main');
 
+// Object.defineProperty(app, 'isPackaged', {
+//   get() {
+//     return true;
+//   },
+// });
+console.log(app.getPath('userData'));
 remote.initialize(); // 主进程初始化
 
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
@@ -23,7 +32,7 @@ let mainWindow;
 let playWindow; // 播放窗口
 let isHidden = true;
 
-function createWindow() {
+function createWindow(): void {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
     width: 950,
@@ -65,6 +74,8 @@ function createWindow() {
   mainWindow.loadURL(
     app.isPackaged ? `file://${path.join(__dirname, '../../dist/index.html')}` : 'http://localhost:3000',
   );
+
+  initUpdater(mainWindow);
 }
 
 // 这段程序将会在 Electron 结束初始化和创建浏览器窗口的时候调用
@@ -79,12 +90,9 @@ app.whenReady().then(() => {
   if (shortcuts === undefined) {
     store.set('settings.shortcuts', 'Shift+Command+Z');
   }
-  const enableGlobalShortcut = store.get('settings.enableGlobalShortcut');
-  if (enableGlobalShortcut === undefined) {
-    store.set('settings.enableGlobalShortcut', true);
-  }
-  console.log(enableGlobalShortcut, shortcuts);
-  if (enableGlobalShortcut === true) {
+
+  console.log(shortcuts);
+  if (shortcuts) {
     globalShortcut.register(shortcuts, () => {
       // Do stuff when Y and either Command/Control is pressed.
       if (isHidden) {
@@ -184,18 +192,14 @@ ipcMain.on('showMainWin', async () => {
   mainWindow.show();
 });
 
-ipcMain.on('switchGlobalShortcutStatusTemporary', (_, status) => {
-  console.log('switchGlobalShortcutStatusTemporary');
-  if (status === 'disable') {
-    store.set('settings.enableGlobalShortcut', false);
-    globalShortcut.unregisterAll();
-  } else {
-    store.set('settings.enableGlobalShortcut', true);
-  }
+ipcMain.on('uninstallShortcut', () => {
+  globalShortcut.unregisterAll();
+  store.set('settings.shortcuts', '');
 });
 
 ipcMain.on('updateShortcut', (_, { shortcut }) => {
   store.set('settings.shortcuts', shortcut);
+  globalShortcut.unregisterAll();
   globalShortcut.register(shortcut, () => {
     if (isHidden) {
       if (mainWindow) mainWindow.hide();
@@ -206,4 +210,15 @@ ipcMain.on('updateShortcut', (_, { shortcut }) => {
     }
     isHidden = !isHidden;
   });
+});
+
+ipcMain.on('playerPip', (_, isPip) => {
+  if (isPip) {
+    if (mainWindow) mainWindow.hide();
+    if (playWindow) playWindow.hide();
+  } else {
+    if (mainWindow) mainWindow.show();
+    if (playWindow) playWindow.show();
+  }
+  isHidden = !isHidden;
 });
