@@ -103,6 +103,10 @@ db.version(13).stores({
   iptv: '++id, name, url, epg, isActive',
 })
 
+db.version(14).stores({
+  analyzeHistory: '++id, [analyzeId+videoUrl], date, analyzeId, videoUrl, videoName',
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)

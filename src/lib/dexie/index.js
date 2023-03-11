@@ -1,4 +1,5 @@
 import history from './history'
+import analyzeHistory from './analyzeHistory'
 import setting from './setting'
 import star from './star'
 import sites from './sites'
@@ -9,6 +10,7 @@ import analyze from './analyze'
 
 export {
   history,
+  analyzeHistory,
   setting,
   star,
   sites,

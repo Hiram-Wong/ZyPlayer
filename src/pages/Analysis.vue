@@ -1,8 +1,27 @@
 <template>
   <div class="analysis-container mx-auto">
     <div class="analysis-main">
-      <div class="analysis-main-header" @dblclick="showSupportEvent">
-        <span class="play_title">{{ urlTitle ? urlTitle : '暂无播放内容' }}</span>
+      <div class="analysis-main-header">
+        <span class="play_title" @dblclick="showSupportEvent">{{ urlTitle ? urlTitle : '暂无播放内容' }}</span>
+        <history-icon size="1.3rem" @click="visible = true" />
+        <t-drawer v-model:visible="visible" header="历史" size="small" class="history-items">
+          <div v-for="item in historyList" :key="item.id" class="" @click="historyPlayEvent(item)">
+            <div class="history-item">
+              <div class="date">{{ item.date }}</div>
+              <div class="title">{{ item.videoName }}</div>
+              <div class="clear" @click.stop="histroyDeleteEvent(item)"><clear-icon size="1rem" /></div>
+            </div>
+            <t-divider dashed style="margin: 5px 0" />
+          </div>
+          <template #footer>
+            <t-button @click="histroyClearEvent">清空</t-button>
+            <t-button variant="outline" @click="visible = false"> 取消 </t-button>
+          </template>
+          <infinite-loading style="text-align: center" :distance="200" @infinite="load">
+            <template #complete>人家是有底线的</template>
+            <template #error>哎呀，出了点差错</template>
+          </infinite-loading>
+        </t-drawer>
       </div>
       <div class="analysis-main-play">
         <iframe
@@ -59,10 +78,15 @@
 <script setup lang="ts">
 // TODO：JXU1NzI4JXU2NzJDJXU0RTFBJXU2NDFDJXU3RDIyc2hvd1N1cHBvcnRFdmVudCV1RkYwQyV1NjdFNSV1NzcwQiV1NjcyQyV1NjVCOSV1NkNENSV1NzY4NCV1ODlFNiV1NTNEMSV1N0M3QiV1NTc4Qg==
 import { ref, reactive, onMounted } from 'vue';
-import { MessagePlugin, NotifyPlugin } from 'tdesign-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { HistoryIcon, ClearIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
-import { setting, analyze } from '@/lib/dexie';
+import moment from 'moment';
+import InfiniteLoading from 'v3-infinite-loading';
+import { setting, analyze, analyzeHistory } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
+
+import 'v3-infinite-loading/lib/style.css';
 
 import logoIqiyi from '@/assets/iqiyi.png';
 import logoLe from '@/assets/le.png';
@@ -124,6 +148,13 @@ const VIDEOSITES = reactive([
     img: logoPptv,
   },
 ]); // 视频网站列表
+const visible = ref(false);
+const historyList = ref([]);
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 32,
+  count: 0,
+});
 
 onMounted(() => {
   getAnalysisApi();
@@ -143,21 +174,80 @@ const getAnalysisApi = async () => {
   });
 };
 
+const getHistoryList = async () => {
+  let length;
+  await analyzeHistory.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
+    historyList.value = _.unionWith(historyList.value, res.list, _.isEqual);
+    pagination.value.count = res.total;
+    pagination.value.pageIndex++;
+    length = _.size(res.list);
+  });
+  return length;
+};
+
+const load = async ($state) => {
+  console.log('loading...');
+  try {
+    const resLength = await getHistoryList();
+    if (resLength === 0) $state.complete();
+    else {
+      $state.loaded();
+    }
+  } catch (error) {
+    console.log(error);
+    $state.error();
+  }
+};
+
 // 解析
 const analysisEvent = async () => {
   if (selectAnalysisApi.value && analysisUrl.value) {
     urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
     url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
-    NotifyPlugin.info({
-      title: '提醒',
-      content: '正在加载当前视频，如遇解析失败请切换线路!',
-      duration: 5000,
-    });
+    MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
+    const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
+    if (res) await analyzeHistory.update(res, { date: moment().format('YYYY-MM-DD') });
+    else {
+      const doc = {
+        date: moment().format('YYYY-MM-DD'),
+        analyzeId: selectAnalysisApi.value,
+        videoUrl: analysisUrl.value,
+        videoName: urlTitle.value,
+      };
+      historyList.value.push(doc);
+      await analyzeHistory.add(doc);
+    }
   } else {
     MessagePlugin.error('请选择解析接口或输入需要解析的地址');
   }
 };
 
+// 历史解析
+const historyPlayEvent = async (item) => {
+  if (_.find(analysisApi.value, { id: item.analyzeId })) {
+    urlTitle.value = item.videoName;
+    url.value = `${_.find(analysisApi.value, { id: item.analyzeId }).url}${item.videoUrl}`;
+    await analyzeHistory.update(item.id, { date: moment().format('YYYY-MM-DD') });
+    MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
+  } else MessagePlugin.error('该历史记录解析接口已删除');
+};
+
+// 历史删除
+const histroyDeleteEvent = async (item) => {
+  console.log(item);
+  _.pull(historyList.value, _.find(historyList.value, { ...item }));
+  await analyzeHistory.remove(item.id);
+};
+
+// 历史清空
+const histroyClearEvent = async () => {
+  historyList.value = [];
+  await analyzeHistory.clear().then(() => {
+    MessagePlugin.success('sucess');
+  });
+};
+
+// 显示支持平台
 const showSupportEvent = async () => {
   isSupport.value = !isSupport.value;
   await setting.update({
@@ -176,8 +266,33 @@ const showSupportEvent = async () => {
   .analysis-main {
     .analysis-main-header {
       line-height: 42px;
-      padding-right: 32px;
       font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      svg {
+        cursor: pointer;
+      }
+      .history-items {
+        :global(.history-item) {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          white-space: nowrap;
+          font-weight: 500;
+          cursor: pointer;
+        }
+        :global(.date) {
+          width: 85px;
+        }
+        :global(.title) {
+          padding: 0 10px;
+          flex: 1 1 auto;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
     }
     .analysis-main-play {
       .analysis-play-box-show {
