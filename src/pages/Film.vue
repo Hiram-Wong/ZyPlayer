@@ -37,7 +37,7 @@
                         v-for="item in classKeywords"
                         :key="item.type_id"
                         variant="text"
-                        @click="defaultClass(item)"
+                        @click="changeClassEvent(item)"
                       >
                         {{ item.type_name }}
                       </span>
@@ -78,29 +78,64 @@
       </div>
       <!-- 过滤工具栏 -->
       <div v-show="showToolbar" class="toolbar">
-        <!-- <t-space> -->
         <!-- 地区 -->
-        <t-select v-model="filterData.area" class="toolbar-item" placeholder="地区">
-          <t-option v-for="item in areasKeywords" :key="item" :label="item" :value="item" />
-        </t-select>
-        <!-- 排序 -->
-        <t-select v-model="filterData.sort" class="toolbar-item" placeholder="排序">
-          <t-option v-for="item in sortKeywords" :key="item" :label="item" :value="item" />
-        </t-select>
+        <div class="tags">
+          <div class="tags-list">
+            <div class="item title">地区</div>
+            <div class="wp">
+              <div
+                v-for="item in areasKeywords"
+                :key="item"
+                class="item"
+                :class="{ active: filterData.area === item }"
+                :label="item"
+                :value="item"
+                @click="changeFilterEvent('area', item)"
+              >
+                {{ item }}
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- 日期 -->
-        <!-- <t-date-picker mode="year" clearable allow-input v-model="selectedYear" format="YYYY 年" valueType="YYYY">
-          </t-date-picker> -->
-        <!-- <t-date-picker mode="year" clearable allow-input /> -->
-        <t-date-range-picker
-          v-model="filterData.date"
-          class="toolbar-item"
-          mode="year"
-          clearable
-          allow-input
-          format="YYYY"
-          value-type="YYYY"
-        />
-        <!-- </t-space> -->
+        <div class="tags">
+          <div class="tags-list">
+            <div class="item title">年份</div>
+            <div class="wp">
+              <div
+                v-for="item in yearsKeywords"
+                :key="item"
+                class="item"
+                :class="{ active: filterData.year === item }"
+                :label="item"
+                :value="item"
+                @click="changeFilterEvent('year', item)"
+              >
+                {{ item }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 排序 -->
+        <div class="tags">
+          <div class="tags-list">
+            <div class="item title">排序</div>
+            <div class="wp">
+              <div
+                v-for="item in sortKeywords"
+                :key="item"
+                class="item"
+                :class="{ active: filterData.sort === item }"
+                :label="item"
+                :value="item"
+                @click="changeFilterEvent('sort', item)"
+              >
+                {{ item }}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="main" :class="{ 'main-ext': showToolbar }">
@@ -166,14 +201,16 @@ const store = usePlayStore();
 const infiniteId = ref(+new Date()); // infinite-loading此属性更改重置组件
 const showToolbar = ref(false); // 是否显示筛选框 true显示 false隐藏
 const searchTxt = ref(''); // 搜索框
-const sortKeywords = ['按片名', '按上映年份', '按更新时间']; // 过滤排序条件
-const areasKeywords = ref([]); // 过滤地区
+const sortKeywords = ['按更新时间', '按上映年份', '按片名']; // 过滤排序条件
+const areasKeywords = ref(['全部']); // 过滤地区
+const yearsKeywords = ref(['全部']); // 过滤年份
 const classKeywords = ref([]); // 过滤类型
 const filterData = ref({
   site: '',
-  sort: '',
+  sort: '按更新时间',
   class: '',
-  area: '',
+  area: '全部',
+  year: '全部',
   date: [],
 }); // 过滤选择值
 const formSiteData = ref({}); // 详情组件源传参
@@ -219,24 +256,26 @@ onMounted(async () => {
   await getFilmList();
   await getFilmSite();
   await getFilmArea();
+  await getFilmYear();
 });
 
+// 筛选
 const filterEvent = () => {
-  let filteredData = FilmDataList.value.list;
-  console.log(filteredData);
+  let filteredData = FilmDataList.value.rawList;
+
   // 地区
-  filteredData = filteredData.filter(
-    (x) => filterData.value.area.length === 0 || filterData.value.area.includes(x.vod_area),
-  );
+  if (filterData.value.area !== '全部') {
+    filteredData = filteredData.filter((item) => item.vod_area.includes(filterData.value.area));
+  }
   console.log('地区', filteredData);
-  filteredData = filteredData.filter((x) => !setting.excludeR18Films || !containsClassFilterKeyword(x.vod_type));
+
   // 年份
-  filteredData = filteredData.filter(
-    (x) =>
-      filterData.value.date.length === 0 ||
-      (filterData.value.date[0] <= x.vod_year && x.vod_year <= filterData.value.date[1]),
-  );
+  if (filterData.value.year !== '全部') {
+    filteredData = filteredData.filter((item) => item.vod_year.includes(filterData.value.year));
+  }
   console.log('年份', filteredData);
+
+  // 排序
   switch (filterData.value.sort) {
     case '按上映年份':
       filteredData.sort((a, b) => {
@@ -245,17 +284,17 @@ const filterEvent = () => {
       break;
     case '按片名':
       filteredData.sort((a, b) => {
-        return a.vod_name.localeCompare(b.vod_name, 'zh');
+        return a.vod_name.localeCompare(b.vod_name, 'zh-Hans-CN');
       });
       break;
     case '按更新时间':
       filteredData.sort((a, b) => {
-        return new Date(b.vod_last) - new Date(a.vod_last);
+        return new Date(b.vod_time) - new Date(a.vod_time);
       });
       break;
     default:
       filteredData.sort((a, b) => {
-        return new Date(b.vod_last) - new Date(a.vod_last);
+        return new Date(b.vod_time) - new Date(a.vod_time);
       });
       break;
   }
@@ -264,6 +303,11 @@ const filterEvent = () => {
   // Get unique film data
   filteredData = Array.from(new Set(filteredData));
   FilmDataList.value.list = filteredData;
+};
+
+// 筛选条件切换
+const changeFilterEvent = (type, item) => {
+  filterData.value[type] = item;
 };
 
 const getFilmSetting = async () => {
@@ -307,17 +351,39 @@ const getFilmSetting = async () => {
   });
 };
 
+// 获取地区
 const getFilmArea = () => {
   const { list } = FilmDataList.value;
-  areasKeywords.value = [...new Set(list.map((ele) => ele.vod_area))].filter((x) => x);
+  [areasKeywords.value] = _.sortedUniq([
+    _.unionWith(
+      areasKeywords.value,
+      _.map(list, (item) => item.vod_area.split(',')[0]),
+      _.isEqual,
+    ),
+  ]);
 };
 
+// 获取年份
+const getFilmYear = () => {
+  const { list } = FilmDataList.value;
+  [yearsKeywords.value] = _.sortedUniq([
+    _.unionWith(
+      yearsKeywords.value,
+      _.map(list, (item) => item.vod_year.split('–')[0]),
+      _.isEqual,
+    ),
+  ]);
+  yearsKeywords.value = yearsKeywords.value.sort((a, b) => b - a);
+};
+
+// 获取所有站点资源
 const getFilmSite = () => {
   sites.all().then((res) => {
     FilmSiteList.value = res.filter((item) => item.isActive);
   });
 };
 
+// 青少年过滤
 const containsClassFilterKeyword = (name) => {
   let ret = false;
   // 主分类过滤, 检测关键词是否包含分类名
@@ -331,6 +397,7 @@ const containsClassFilterKeyword = (name) => {
   return ret;
 };
 
+// 获取分类
 const getClass = async () => {
   const { key } = FilmSiteSetting.value.basic;
   await zy.class(key).then((res) => {
@@ -348,7 +415,8 @@ const getClass = async () => {
   });
 };
 
-const defaultClass = async (item) => {
+// 切换分类
+const changeClassEvent = async (item) => {
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
   FilmDataList.value.list = [];
@@ -357,6 +425,7 @@ const defaultClass = async (item) => {
   await getFilmList();
 };
 
+// 获取资源
 const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
@@ -364,6 +433,7 @@ const getFilmList = async () => {
   let length;
   await zy.list(key, pg, t).then((res) => {
     FilmDataList.value.list = _.unionWith(FilmDataList.value.list, res, _.isEqual);
+    FilmDataList.value.rawList = _.unionWith(FilmDataList.value.rawList, res, _.isEqual);
     pagination.value.pageIndex++;
     length = _.size(res);
   });
@@ -371,6 +441,7 @@ const getFilmList = async () => {
   return length;
 };
 
+// 加载
 const load = async ($state) => {
   console.log('loading...');
   // 暂时使用定时器修复onMounted中没执行完就触发load
@@ -384,7 +455,8 @@ const load = async ($state) => {
     } else {
       resLength = 0;
     }
-    await getFilmArea();
+    getFilmArea();
+    getFilmYear();
     if (resLength === 0) $state.complete();
     else {
       $state.loaded();
@@ -395,6 +467,7 @@ const load = async ($state) => {
   }
 };
 
+// 搜索
 const searchEvent = async () => {
   console.log('search');
   FilmDataList.value.list = [];
@@ -421,6 +494,7 @@ const searchEvent = async () => {
   } else await getFilmList();
 };
 
+// 切换站点
 const changeSitesEvent = async (event) => {
   if (FilmSiteSetting.value.change) await setting.update({ defaultSite: event });
   await sites.get(event).then(async (res) => {
@@ -431,13 +505,13 @@ const changeSitesEvent = async (event) => {
   await getClass();
   FilmDataList.value = {};
   if (!_.size(FilmDataList.value.list)) infiniteId.value++;
-  // $state.loaded();
   pagination.value.pageIndex = 0;
   await getFilmList();
   await getFilmSite();
   await getFilmArea();
 };
 
+// 播放
 const playEvent = (item) => {
   if (item.siteName) {
     formSiteData.value = {
@@ -470,7 +544,7 @@ const playEvent = (item) => {
   overflow: hidden;
   position: relative;
   .tool-ext {
-    height: 90px !important;
+    height: 190px !important;
   }
   .tool {
     height: 50px;
@@ -481,8 +555,6 @@ const playEvent = (item) => {
     }
     .header-title-wrap {
       .title {
-        height: 32px;
-        padding: 0 5px;
         .data-item {
           display: block;
           line-height: 1rem;
@@ -605,17 +677,66 @@ const playEvent = (item) => {
       }
     }
     .toolbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      .toolbar-item {
-        width: 33%;
+      position: relative;
+      margin-bottom: 10px;
+      .tags {
+        .tags-list {
+          padding: 5px 0;
+          &:after {
+            clear: both;
+            display: block;
+            height: 0;
+            visibility: hidden;
+            content: '';
+          }
+          .title {
+            float: left;
+            width: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: left;
+            cursor: auto;
+            box-sizing: border-box;
+            height: 30px;
+            font-weight: 400;
+            font-size: 15px;
+            line-height: 30px;
+          }
+          .wp {
+            float: left;
+            width: calc(100% - 50px);
+            overflow-y: auto;
+            white-space: nowrap;
+            &::-webkit-scrollbar {
+              height: 8px;
+              background: transparent;
+            }
+            .item {
+              display: inline-block;
+              padding: 0 14px;
+              margin-right: 5px;
+              box-sizing: border-box;
+              height: 30px;
+              font-weight: 400;
+              font-size: 13px;
+              line-height: 30px;
+              text-align: center;
+              cursor: pointer;
+            }
+            .active {
+              height: 30px;
+              border-radius: 20px;
+              background: var(--td-bg-color-component);
+            }
+          }
+        }
       }
     }
   }
 
   .main-ext {
-    height: calc(100vh - 95px - var(--td-comp-size-l)) !important;
+    height: calc(100vh - 55px - 140px - var(--td-comp-size-l)) !important;
   }
   .main {
     overflow-y: auto;
