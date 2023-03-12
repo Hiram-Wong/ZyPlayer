@@ -153,10 +153,12 @@
       </t-form-item>
       <t-form-item label="其他" name="data">
         <t-space>
-          <t-button theme="default" variant="base" @click="resetEvent">重置应用</t-button>
-          <!-- <t-button theme="default" variant="base" @click="checkUpdate">检查更新</t-button>
-          <t-button theme="default" variant="base" @click="easyConfig">一键配置</t-button> -->
+          <span class="title" @click="resetEvent">重置应用</span>
+          <span class="title" @click="easyConfig">一键配置</span>
+          <!-- <span class="title" @click="checkUpdate">检查更新</span> -->
         </t-space>
+
+        <dialog-easy-config-view v-model:visible="isEasyConfigDialog" />
       </t-form-item>
     </t-form>
   </div>
@@ -171,6 +173,7 @@ import db from '@/lib/dexie/dexie';
 import { setting } from '@/lib/dexie';
 import { useSettingStore, usePlayStore } from '@/store';
 import DialogClassView from './components/DialogClass.vue';
+import DialogEasyConfigView from './components/DialogEasyConfig.vue';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
@@ -181,6 +184,7 @@ const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
 const isClassDialog = ref(false);
 const classDialogData = ref({ data: [], type: 'rootClassFilter' });
+const isEasyConfigDialog = ref(false);
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -450,13 +454,14 @@ const selefBootEvnet = () => {
   ipcRenderer.send('selfBoot', formData.value.selfBoot);
 };
 
-const checkUpdate = () => {
-  console.log('checkUpdate');
-  ipcRenderer.send('checkForUpdate');
-};
+// const checkUpdate = () => {
+//   console.log('checkUpdate');
+//   ipcRenderer.send('checkForUpdate');
+// };
 
-const easyConfig = () => {
+const easyConfig = async () => {
   console.log('easyConfig');
+  isEasyConfigDialog.value = true;
 };
 
 const classEvent = (item) => {

@@ -55,6 +55,6 @@
   "softSolution": false,
   "skipStartEnd": false,
   "agreementMask": false,
-  "bossKey": true,
-  "ecordedShortcut": "Shift+Command+Z"
+  "ecordedShortcut": "Shift+Command+Z",
+  "selfBoot": false
 }]
