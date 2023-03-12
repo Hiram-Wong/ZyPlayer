@@ -14,42 +14,38 @@
         </t-radio-group>
       </t-form-item>
       <t-form-item label="老板键" name="shortcutKey">
-        <t-space direction="vertical">
-          <div class="shortcut-container">
-            <t-input-adornment>
-              <t-input
-                ref="shortcutInputRef"
-                v-model="formData.recordedShortcut"
-                :format="formatShortcut"
-                class="shortcut-content"
-                :placeholder="placeholderShortcut"
-                :status="statusShortcut"
-                :tips="tipShortcut"
-                @keydown="getShortKeys"
-                @focus="focusShortcut"
-                @blur="blurShortcut"
-              >
-                <template #suffix>
-                  <div @click.stop="cancelShortcut">
-                    <t-popup content="取消快捷键">
-                      <close-icon />
-                    </t-popup>
-                  </div>
-                </template>
-              </t-input>
-              <template #append>
-                <div
-                  style="width: 24px; height: 100%; display: flex; align-items: center; justify-content: center"
-                  @click.stop="resetShortcut"
-                >
-                  <t-popup content="重置快捷键">
-                    <refresh-icon size="11px" style="margin-top: 3px" />
-                  </t-popup>
-                </div>
-              </template>
-            </t-input-adornment>
-          </div>
-        </t-space>
+        <t-input-adornment>
+          <t-input
+            ref="shortcutInputRef"
+            v-model="formData.recordedShortcut"
+            :format="formatShortcut"
+            class="shortcut-content"
+            :placeholder="placeholderShortcut"
+            :status="statusShortcut"
+            :tips="tipShortcut"
+            @keydown="getShortKeys"
+            @focus="focusShortcut"
+            @blur="blurShortcut"
+          >
+            <template #suffix>
+              <div @click.stop="cancelShortcut">
+                <t-popup content="取消快捷键">
+                  <close-icon />
+                </t-popup>
+              </div>
+            </template>
+          </t-input>
+          <template #append>
+            <div
+              style="width: 24px; height: 100%; display: flex; align-items: center; justify-content: center"
+              @click.stop="resetShortcut"
+            >
+              <t-popup content="重置快捷键">
+                <refresh-icon size="11px" style="margin-top: 3px" />
+              </t-popup>
+            </div>
+          </template>
+        </t-input-adornment>
       </t-form-item>
       <t-form-item label="站点" name="site">
         <div class="site">
@@ -202,6 +198,11 @@
           </div>
         </t-space>
       </t-form-item>
+      <t-form-item label="权限" name="data">
+        <t-space>
+          <t-radio v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">开机自启</t-radio>
+        </t-space>
+      </t-form-item>
       <t-form-item label="其他" name="data">
         <t-space>
           <t-button theme="default" variant="base" @click="resetEvent">重置应用</t-button>
@@ -352,7 +353,8 @@ const formatShortcut = () => {
       .replace('Control', '⌃')
       .replace('Shift', '⇧');
   }
-  return shortcut.replace('CommandOrControl', 'Ctrl');
+  shortcut.replace('CommandOrControl', 'Ctrl');
+  return shortcut;
 };
 
 // 设置组合键更换焦点placeholder
@@ -369,6 +371,7 @@ const blurShortcut = () => {
   if (formData.value.recordedSourceShortcut && !formData.value.recordedShortcut)
     formData.value.recordedShortcut = formData.value.recordedSourceShortcut;
   placeholderShortcut.value = '设置快捷键';
+  formatShortcut();
 };
 
 // 获取组合按键
@@ -504,6 +507,11 @@ const resetShortcut = () => {
   ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordedShortcut });
 };
 
+const selefBootEvnet = () => {
+  console.log('开机自启', formData.value.selfBoot);
+  ipcRenderer.send('selfBoot', formData.value.selfBoot);
+};
+
 const checkUpdate = () => {
   console.log('checkUpdate');
   ipcRenderer.send('checkForUpdate');
@@ -523,7 +531,13 @@ const easyConfig = () => {
       font-weight: 500;
     }
   }
-
+  :deep(.t-input-adornment__append) {
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--td-border-level-2-color);
+    background-color: var(--td-bg-color-specialcomponent);
+    cursor: pointer;
+  }
   .setting-layout-drawer {
     display: flex;
     flex-direction: column;

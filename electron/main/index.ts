@@ -6,6 +6,7 @@ import path from 'path';
 import url from 'url';
 import { electronApp } from '@electron-toolkit/utils';
 import { createMenu } from './core/menu';
+import log from './core/log';
 import initUpdater from './core/auto-update';
 
 const remote = require('@electron/remote/main');
@@ -81,12 +82,13 @@ function createWindow(): void {
 // 这段程序将会在 Electron 结束初始化和创建浏览器窗口的时候调用
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(() => {
+  log.info('[index] App ready');
   // 为 Windows 设置应用程序用户模型 ID
   electronApp.setAppUserModelId('com.zyplayer');
 
   // register global shortcuts
   // 初始化数据
-  const shortcuts = store.get('settings.shortcuts');
+  const shortcuts: any = store.get('settings.shortcuts');
   if (shortcuts === undefined) {
     store.set('settings.shortcuts', 'Shift+Command+Z');
   }
@@ -221,4 +223,28 @@ ipcMain.on('playerPip', (_, isPip) => {
     if (playWindow) playWindow.show();
   }
   isHidden = !isHidden;
+});
+
+ipcMain.on('selfBoot', (_, status) => {
+  if (status) {
+    app.setLoginItemSettings({
+      openAtLogin: true,
+      openAsHidden: false,
+      path: process.execPath,
+      args: ['--processStart', path.basename(process.execPath)],
+    });
+  } else {
+    if (!app.isPackaged) {
+      app.setLoginItemSettings({
+        openAtLogin: !app.getLoginItemSettings().openAtLogin,
+        path: process.execPath,
+      });
+    } else {
+      app.setLoginItemSettings({
+        openAtLogin: !app.getLoginItemSettings().openAtLogin,
+      });
+    }
+    console.log(app.getLoginItemSettings().openAtLogin);
+    console.log(!app.isPackaged);
+  }
 });
