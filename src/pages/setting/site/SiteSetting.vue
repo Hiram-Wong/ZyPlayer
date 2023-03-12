@@ -60,13 +60,13 @@
         <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
       </template>
     </t-table>
-    <dialog-form-add-api
+    <dialog-add-view
       v-model:visible="formDialogVisibleAddApi"
       :data="data"
       :group="formGroup"
       @refresh-table-data="refreshEvent"
     />
-    <dialog-form-edit-site
+    <dialog-edit-view
       v-model:visible="formDialogVisibleEditSite"
       :data="formData"
       :group="formGroup"
@@ -80,8 +80,8 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { saveAs } from 'file-saver';
 import { sites, setting } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
-import DialogFormAddApi from './components/DialogFormAddApi.vue';
-import DialogFormEditSite from './components/DialogFormEditSite.vue';
+import DialogAddView from './components/DialogAdd.vue';
+import DialogEditView from './components/DialogEdit.vue';
 import { COLUMNS } from './constants';
 
 // Define item form data & dialog status

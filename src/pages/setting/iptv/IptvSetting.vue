@@ -51,8 +51,8 @@
       </template>
     </t-table>
 
-    <dialog-form-add-iptv v-model:visible="formDialogVisibleAddIptv" :data="data" @refresh-table-data="getIptv" />
-    <dialog-form-edit-iptv v-model:visible="formDialogVisibleEditIptv" :data="formData" />
+    <dialog-add-view v-model:visible="formDialogVisibleAddIptv" :data="data" @refresh-table-data="getIptv" />
+    <dialog-edit-view v-model:visible="formDialogVisibleEditIptv" :data="formData" />
   </div>
 </template>
 <script setup lang="ts">
@@ -61,8 +61,8 @@ import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
-import DialogFormAddIptv from './components/DialogFormAdd.vue';
-import DialogFormEditIptv from './components/DialogFormEdit.vue';
+import DialogAddView from './components/DialogAdd.vue';
+import DialogEditView from './components/DialogEdit.vue';
 import { iptv, channelList, setting } from '@/lib/dexie';
 import { COLUMNS } from './constants';
 

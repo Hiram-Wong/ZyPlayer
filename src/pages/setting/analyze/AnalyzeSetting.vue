@@ -54,12 +54,8 @@
         <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
       </template>
     </t-table>
-    <dialog-form-add-analyze
-      v-model:visible="formDialogVisibleAddAnalyze"
-      :data="data"
-      @refresh-table-data="getAnalyze"
-    />
-    <dialog-form-edit-analyze v-model:visible="formDialogVisibleEditAnalyze" :data="formData" />
+    <dialog-add-view v-model:visible="formDialogVisibleAddAnalyze" :data="data" @refresh-table-data="getAnalyze" />
+    <dialog-edit-view v-model:visible="formDialogVisibleEditAnalyze" :data="formData" />
   </div>
 </template>
 <script setup>
@@ -67,8 +63,8 @@ import { ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { saveAs } from 'file-saver';
 import { analyze, setting } from '@/lib/dexie';
-import DialogFormAddAnalyze from './components/DialogFormAddAnalyze.vue';
-import DialogFormEditAnalyze from './components/DialogFormEditAnalyze.vue';
+import DialogAddView from './components/DialogAdd.vue';
+import DialogEditView from './components/DialogEdit.vue';
 import { COLUMNS } from './constants';
 
 // Define item form data & dialog status
