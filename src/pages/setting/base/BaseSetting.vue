@@ -14,7 +14,7 @@
         </t-radio-group>
       </t-form-item>
       <t-form-item label="老板键" name="shortcutKey">
-        <t-input-adornment>
+        <t-space>
           <t-input
             ref="shortcutInputRef"
             v-model="formData.recordedShortcut"
@@ -35,129 +35,77 @@
               </div>
             </template>
           </t-input>
-          <template #append>
-            <div
-              style="width: 24px; height: 100%; display: flex; align-items: center; justify-content: center"
-              @click.stop="resetShortcut"
-            >
-              <t-popup content="重置快捷键">
-                <refresh-icon size="11px" style="margin-top: 3px" />
-              </t-popup>
-            </div>
-          </template>
-        </t-input-adornment>
+
+          <t-popup content="重置快捷键">
+            <t-button theme="default" variant="base" @click="resetShortcut">
+              <refresh-icon size="11px" style="margin-top: 3px" />
+            </t-button>
+          </t-popup>
+        </t-space>
+      </t-form-item>
+      <t-form-item label="热榜" name="hotRecommend">
+        <div class="hot-recommend">
+          <t-radio-group v-model="formData.defaultHot">
+            <t-radio value="site">站内推荐</t-radio>
+            <t-radio value="douban">豆瓣推荐</t-radio>
+          </t-radio-group>
+        </div>
+      </t-form-item>
+      <t-form-item label="搜索" name="search">
+        <div class="search">
+          <t-radio-group v-model="formData.defaultSearch">
+            <t-radio value="site">站内搜索</t-radio>
+            <t-radio value="group">组内搜索</t-radio>
+            <t-radio value="all">全站搜索</t-radio>
+          </t-radio-group>
+        </div>
       </t-form-item>
       <t-form-item label="站点" name="site">
         <div class="site">
-          <t-space direction="vertical">
-            <div class="hot-recommend site-item">
-              <t-radio-group v-model="formData.defaultHot">
-                <t-radio value="site">站内推荐</t-radio>
-                <t-radio value="douban">豆瓣推荐</t-radio>
-              </t-radio-group>
-            </div>
-            <div class="hot-recommend site-item">
-              <t-radio-group v-model="formData.defaultSearch">
-                <t-radio value="site">站内搜索</t-radio>
-                <t-radio value="group">组内搜索</t-radio>
-                <t-radio value="all">全站搜索</t-radio>
-              </t-radio-group>
-            </div>
-            <div class="check-status site-item">
-              <t-space>
-                <t-switch v-model="formData.defaultCheckModel">
-                  <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-                </t-switch>
-                <span>检查源变更状态</span>
-                <t-switch v-model="formData.defaultChangeModel">
-                  <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-                </t-switch>
-                <span>切换源设置默认</span>
-              </t-space>
-            </div>
-            <div class="filter site-item">
-              <t-space direction="vertical">
-                <div class="filter-item">
-                  <t-space direction="vertical">
-                    <t-space>
-                      <t-switch v-model="formData.filterKeywordsDialogVisible">
-                        <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-                      </t-switch>
-                      <span>主要分类</span>
-                    </t-space>
-                    <t-textarea
-                      v-if="formData.filterKeywordsDialogVisible"
-                      v-model="rootClassFilter"
-                      class="textarea"
-                      placeholder="请输入过滤关键词,逗号分隔"
-                      autofocus
-                    />
-                  </t-space>
-                </div>
-                <div class="filter-item">
-                  <t-space direction="vertical">
-                    <t-space>
-                      <t-switch v-model="formData.excludeR18Films">
-                        <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-                      </t-switch>
-                      <span>青少年模式</span>
-                    </t-space>
-                    <t-textarea
-                      v-if="formData.excludeR18Films"
-                      v-model="r18ClassFilter"
-                      class="textarea"
-                      placeholder="请输入过滤关键词,逗号分隔"
-                      autofocus
-                    />
-                  </t-space>
-                </div>
-              </t-space>
-            </div>
+          <t-space>
+            <t-radio v-model="formData.defaultCheckModel" allow-uncheck>检查源变更状态</t-radio>
+            <t-radio v-model="formData.defaultChangeModel" allow-uncheck>切换源设置默认</t-radio>
           </t-space>
+        </div>
+      </t-form-item>
+      <t-form-item label="过滤" name="filter">
+        <div class="filter">
+          <t-space>
+            <span class="title" @click="classEvent('main')">主要分类</span>
+            <span class="title" @click="classEvent('r18')">青少年模式</span>
+          </t-space>
+          <dialog-class-view
+            v-model:visible="isClassDialog"
+            :data="classDialogData"
+            @receive-class-data="setClassData"
+          />
         </div>
       </t-form-item>
       <t-form-item label="直播" name="iptv">
         <div class="iptv">
-          <t-space direction="vertical">
-            <t-space>
-              <t-switch v-model="formData.iptvSkipIpv6">
-                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-              </t-switch>
-              <span>跳过ipv6</span>
-              <t-switch v-model="formData.iptvStatus">
-                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-              </t-switch>
-              <span>检测可用性</span>
-              <!-- <t-switch v-model="formData.iptvThumbnail" >
-              <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-            </t-switch>
-            <span>缩略图</span> -->
-            </t-space>
-            <t-input
-              v-model="formData.defaultIptvEpg"
-              label="默认EPG："
-              placeholder="仅支持DIYP"
-              :style="{ width: '300px' }"
-            />
+          <t-space>
+            <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
+            <t-radio v-model="formData.iptvStatus" allow-uncheck>检测可用性</t-radio>
           </t-space>
+        </div>
+      </t-form-item>
+      <t-form-item label="节目单" name="epg">
+        <div class="epg">
+          <t-input
+            v-model="formData.defaultIptvEpg"
+            label="默认EPG："
+            placeholder="仅支持DIYP"
+            :style="{ width: '300px' }"
+          />
         </div>
       </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
           <t-space direction="vertical">
             <t-space>
-              <t-switch v-model="formData.pauseWhenMinimize">
-                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-              </t-switch>
-              <span>最小化暂停播放</span>
-              <t-switch v-model="formData.softSolution">
-                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-              </t-switch>
-              <span>软解</span>
-              <t-switch v-model="formData.skipStartEnd">
-                <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-              </t-switch>
-              <span>跳过开头</span>
+              <t-radio v-model="formData.pauseWhenMinimize" allow-uncheck>最小化暂停播放</t-radio>
+              <t-radio v-model="formData.softSolution" allow-uncheck>软解</t-radio>
+              <t-radio v-model="formData.skipStartEnd" allow-uncheck>跳过开头</t-radio>
             </t-space>
             <div v-if="formData.skipStartEnd" class="">
               <div class="skip">
@@ -214,14 +162,15 @@
   </div>
 </template>
 
-<script setup>
-import { ref, watchEffect, computed, onMounted } from 'vue';
+<script setup lang="jsx">
+import { ref, watchEffect, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import db from '@/lib/dexie/dexie';
 import { setting } from '@/lib/dexie';
 import { useSettingStore, usePlayStore } from '@/store';
+import DialogClassView from './components/DialogClass.vue';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
@@ -230,6 +179,8 @@ const { ipcRenderer } = require('electron');
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
+const isClassDialog = ref(false);
+const classDialogData = ref({ data: [], type: 'rootClassFilter' });
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -267,38 +218,23 @@ const storeSetting = useSettingStore();
 
 const formData = ref({});
 
-const rootClassFilter = computed({
-  get() {
-    return _.join(formData.value.rootClassFilter, ',');
-  },
-  set(val) {
-    formData.value.rootClassFilter = _.split(val, '-');
-  },
-});
-
-const r18ClassFilter = computed({
-  get() {
-    return _.join(formData.value.r18ClassFilter, ',');
-  },
-  set(val) {
-    formData.value.r18ClassFilter = _.split(val, '-');
-  },
-});
-
 watchEffect(() => {
   const res = JSON.parse(JSON.stringify(formData.value));
-  setting.update(res);
 
-  storeSetting.updateConfig({ mode: formData.value.theme });
-  storePlayer.updateConfig({
-    setting: {
-      pauseWhenMinimize: formData.value.pauseWhenMinimize,
-      softSolution: formData.value.softSolution,
-      skipStartEnd: formData.value.skipStartEnd,
-      skipTimeInStart: formData.value.skipTimeInStart,
-      skipTimeInEnd: formData.value.skipTimeInEnd,
-    },
-  });
+  if (res) {
+    setting.update(res);
+
+    storeSetting.updateConfig({ mode: formData.value.theme });
+    storePlayer.updateConfig({
+      setting: {
+        pauseWhenMinimize: formData.value.pauseWhenMinimize,
+        softSolution: formData.value.softSolution,
+        skipStartEnd: formData.value.skipStartEnd,
+        skipTimeInStart: formData.value.skipTimeInStart,
+        skipTimeInEnd: formData.value.skipTimeInEnd,
+      },
+    });
+  }
 });
 
 onMounted(() => {
@@ -314,13 +250,14 @@ const getSetting = async () => {
 const resetEvent = () => {
   clearDB();
   clearCache();
+  setTimeout(() => {
+    window?.location.reload();
+  }, 1000);
 };
 
 const clearDB = () => {
   db.delete().then(() => {
     MessagePlugin.success('重置成功,请手动重启软件！');
-    win.relaunch();
-    win.destroy();
   });
 };
 
@@ -507,6 +444,7 @@ const resetShortcut = () => {
   ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordedShortcut });
 };
 
+// 开机自启
 const selefBootEvnet = () => {
   console.log('开机自启', formData.value.selfBoot);
   ipcRenderer.send('selfBoot', formData.value.selfBoot);
@@ -520,6 +458,29 @@ const checkUpdate = () => {
 const easyConfig = () => {
   console.log('easyConfig');
 };
+
+const classEvent = (item) => {
+  switch (item) {
+    case 'r18':
+      classDialogData.value = {
+        data: [...formData.value.r18ClassFilter],
+        type: 'r18ClassFilter',
+      };
+      break;
+    default:
+      classDialogData.value = {
+        data: [...formData.value.rootClassFilter],
+        type: 'rootClassFilter',
+      };
+      break;
+  }
+  isClassDialog.value = true;
+};
+
+const setClassData = (item) => {
+  const { data, type } = item;
+  formData.value[type] = data;
+};
 </script>
 
 <style lang="less" scoped>
@@ -531,11 +492,21 @@ const easyConfig = () => {
       font-weight: 500;
     }
   }
+
+  .title {
+    color: var(--td-brand-color);
+    cursor: pointer;
+    font-weight: 500;
+  }
+  :deep(.t-input) {
+    background-color: var(--td-bg-color-component);
+    border-color: transparent;
+  }
   :deep(.t-input-adornment__append) {
     border-width: 1px;
     border-style: solid;
-    border-color: var(--td-border-level-2-color);
-    background-color: var(--td-bg-color-specialcomponent);
+    border-color: var(--td-bg-color-component);
+    background-color: var(--td-bg-color-component);
     cursor: pointer;
   }
   .setting-layout-drawer {
@@ -572,10 +543,6 @@ const easyConfig = () => {
       font-size: 13px;
       font-weight: 400;
     }
-  }
-
-  .textarea {
-    width: 60vw;
   }
 }
 </style>

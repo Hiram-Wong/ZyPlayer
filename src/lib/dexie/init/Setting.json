@@ -2,8 +2,6 @@
   "id": 0,
   "theme": "auto",
   "externalPlayer": "",
-  "excludeRootClasses": true,
-  "excludeR18Films": true,
   "proxy": {
     "type": "disable",
     "scheme": "",

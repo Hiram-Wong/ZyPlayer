@@ -322,17 +322,11 @@ const getFilmSetting = async () => {
         FilmSiteSetting.value.basic.group = res.group;
       });
   });
-  await setting.get('excludeRootClasses').then((res) => {
-    FilmSiteSetting.value.excludeRootClasses = res;
-  });
   await setting.get('rootClassFilter').then((res) => {
     FilmSiteSetting.value.rootClassFilter = res;
   });
   await setting.get('r18ClassFilter').then((res) => {
     FilmSiteSetting.value.r18ClassFilter = res;
-  });
-  await setting.get('excludeR18Films').then((res) => {
-    FilmSiteSetting.value.excludeR18Films = res;
   });
   await setting.get('defaultChangeModel').then((res) => {
     FilmSiteSetting.value.change = res;
@@ -387,11 +381,11 @@ const getFilmSite = () => {
 const containsClassFilterKeyword = (name) => {
   let ret = false;
   // 主分类过滤, 检测关键词是否包含分类名
-  if (FilmSiteSetting.value.excludeRootClasses) {
+  if (FilmSiteSetting.value.rootClassFilter) {
     ret = FilmSiteSetting.value.rootClassFilter?.some((v) => v.includes(name));
   }
   // 福利过滤,检测分类名是否包含关键词
-  if (FilmSiteSetting.value.excludeR18Films && !ret) {
+  if (FilmSiteSetting.value.r18ClassFilter && !ret) {
     ret = FilmSiteSetting.value.r18ClassFilter?.some((v) => name?.includes(v));
   }
   return ret;
