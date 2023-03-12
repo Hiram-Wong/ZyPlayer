@@ -496,6 +496,10 @@ const changeSitesEvent = async (event) => {
     FilmSiteSetting.value.basic.name = res.name;
     FilmSiteSetting.value.basic.key = res.key;
   });
+  FilmSiteSetting.value.class = {
+    id: 0,
+    name: '最新',
+  };
   await getClass();
   FilmDataList.value = {};
   if (!_.size(FilmDataList.value.list)) infiniteId.value++;
