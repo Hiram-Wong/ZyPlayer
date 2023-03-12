@@ -34,6 +34,51 @@
 
 ### 🧤 格式
 
+> 一键格式
+```json
+{
+  "sites": { // 站点源
+    "default": 1, // 默认值：需为data中需要设置的id
+    "data": [ // 所有数据
+      {
+        "id": 1, // id 唯一值不可重复
+        "key": "39kan",
+        "name": "39影视", // 名称
+        "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
+        "type": 1, // 1cms资源 预留
+        "jiexiUrl": "", // 需要配合解析的地址 预留
+        "group": "影视", // 分组
+        "isActive": true, // 是否启用 true启用 false 禁用
+        "status": true, // 状态 true可用 false 失效
+      }
+    ]
+  },
+  "iptv": { // 直播源
+    "default": 1, // 默认值：需为data中需要设置的id
+    "data": [
+      {
+        "id": 1, // id 唯一值不可重复
+        "name": "APTV", // 名称
+        "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
+        "epg": "", // 电子节目单地址
+        "isActive": true // 是否启用 true启用 false 禁用
+      }
+    ]
+  },
+  "analyzes": { // 解析源
+    "default": 2, // 默认值：需为data中需要设置的id
+    "data": [
+      {
+        "id": 2, // id 唯一值不可重复
+        "name": "爱豆", // 名称
+        "url": "https://jx.aidouer.net/?url=", // 解析源地址
+        "isActive": true // 是否启用 true启用 false 禁用
+      }
+    ]
+  }
+}
+```
+
 > 资源站点接口格式
 
 ```json
@@ -48,7 +93,6 @@
     "group": "影视",
     "isActive": true,
     "status": true,
-    "reverseOrder": false
   }
 ]
 ```
@@ -57,7 +101,7 @@
 
 ```json
 [
-    {
+  {
     "id": 1,
     "name": "APTV",
     "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
@@ -73,7 +117,7 @@
 [
   {
     "id":1,
-    "name":"xxx",
+    "name":"爱豆",
     "url":"https://jx.aidouer.net/?url=",
     "isActive": true
   }
