@@ -3,7 +3,7 @@
     <div class="header">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-tag size="large" shape="mark">添加源后需设置默认哟！</t-tag>
+          <t-tag size="large" shape="mark">添加源后需设置默认并刷新哟！</t-tag>
         </div>
         <div class="right-operation-container">
           <div class="component-op">
