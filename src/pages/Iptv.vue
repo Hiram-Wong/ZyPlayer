@@ -152,7 +152,7 @@ onMounted(() => {
 // 获取配置
 const getIptvSetting = async () => {
   setting.get('defaultIptv').then(async (id) => {
-    if (!id) MessagePlugin.warning({ content: '请设置iptv默认数据源', duration: 0, closeBtn: true });
+    if (!id) MessagePlugin.warning({ content: '请设置直播默认数据源', duration: 0, closeBtn: true });
     else
       await iptv.get(id).then(async (res) => {
         iptvListSelect.value = res.id;
