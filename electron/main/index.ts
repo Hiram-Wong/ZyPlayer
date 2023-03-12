@@ -1,21 +1,16 @@
 import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } from 'electron';
 
-import { autoUpdater } from 'electron-updater';
+// import { autoUpdater } from 'electron-updater';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
 import { electronApp } from '@electron-toolkit/utils';
-import { createMenu } from './core/menu';
+// import { createMenu } from './core/menu';
 import log from './core/log';
 import initUpdater from './core/auto-update';
 
 const remote = require('@electron/remote/main');
 
-// Object.defineProperty(app, 'isPackaged', {
-//   get() {
-//     return true;
-//   },
-// });
 console.log(app.getPath('userData'));
 remote.initialize(); // 主进程初始化
 
@@ -24,7 +19,7 @@ app.commandLine.appendSwitch('--ignore-certificate-errors', 'true'); // 忽略�
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
-const { NODE_ENV } = process.env;
+// const { NODE_ENV } = process.env;
 
 const store = new Store();
 

@@ -1,10 +1,8 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 
-const delDir = require('../utils/deleteDir');
-
 // electron-updater 增量更新时似乎无法显示进度
-export function initUpdater(win: BrowserWindow) {
+export default (win: BrowserWindow) => {
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
 
@@ -12,7 +10,7 @@ export function initUpdater(win: BrowserWindow) {
   function downloadUpdate() {
     autoUpdater.downloadUpdate().catch((err) => {
       if (err.message && err.message.includes('file already exists') && err.path) {
-        delDir(err.path);
+        // delDir(err.path);
         downloadUpdate();
       } else {
         win.webContents.send('update-error', err);
@@ -66,4 +64,4 @@ export function initUpdater(win: BrowserWindow) {
   autoUpdater.on('update-downloaded', () => {
     win.webContents.send('update-downloaded');
   });
-}
+};
