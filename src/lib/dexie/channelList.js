@@ -59,7 +59,7 @@ export default {
         groupListValue.push(i.group)
       }
     }
-    const res = groupListLabel.map((label, i) => ({ label, value: groupListValue[i] }))
+    const res = groupListLabel.map((label, i) => ({ 'id': label, 'name': groupListValue[i] }))
     return res
   }
 }

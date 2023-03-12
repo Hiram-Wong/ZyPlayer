@@ -3,47 +3,57 @@
     <div class="tool">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <div class="title">
-            <t-select
-              v-model="iptvListSelect"
-              placeholder="暂无选择源"
-              size="small"
-              :show-arrow="false"
-              style="max-width: 8em"
-              @change="changeDefaultIptvEvent"
-            >
-              <t-option v-for="item in iptvList" :key="item.id" :label="item.name" :value="item.id" />
-            </t-select>
-            <!-- <span class="data-item source">{{ iptvSetting.name ? iptvSetting.name : '暂无选择源' }}</span> -->
-            <span class="data-item data">共{{ pagination.count ? pagination.count : 0 }}频道</span>
-          </div>
+          <t-space align="center">
+            <div class="title">
+              <t-select
+                v-model="iptvListSelect"
+                placeholder="暂无选择源"
+                size="small"
+                :show-arrow="false"
+                style="max-width: 60px"
+                class="data-item source"
+                @change="changeDefaultIptvEvent"
+              >
+                <t-option v-for="item in iptvList" :key="item.id" :label="item.name" :value="item.id" />
+              </t-select>
+              <span class="data-item data">共{{ pagination.count ? pagination.count : 0 }}频道</span>
+            </div>
+            <div v-if="iptvClassList" class="head-center">
+              <p class="head-center-class">{{ iptvClassSelect }}</p>
+              <t-popup
+                placement="bottom-left"
+                :overlay-inner-style="{ marginTop: '16px', maxWidth: '60%' }"
+                attach=".head-center"
+              >
+                <more-icon size="1.5rem" style="transform: rotate(90deg)" />
+                <template #content>
+                  <div class="content">
+                    <span v-for="item in iptvClassList" :key="item.id" variant="text" @click="changeClassEvent(item)">
+                      {{ item.name }}
+                    </span>
+                  </div>
+                </template>
+              </t-popup>
+            </div>
+          </t-space>
         </div>
         <div class="right-operation-container">
-          <t-space align="center">
-            <t-select
-              v-model="iptvClassSelect"
-              :options="iptvClassList"
-              :style="{ width: '100px' }"
-              placeholder="分类"
-              @change="classEvent"
-            >
-              <template #prefixIcon>
-                <icon name="view-module" style="margin-right: 2px" />
-              </template>
-            </t-select>
-            <t-input
-              v-model.trim="searchTxt"
-              placeholder="搜索频道"
-              clearable
-              :style="{ width: '200px' }"
-              @enter="searchEvent"
-              @clear="searchEvent"
-            >
-              <template #prefix-icon>
-                <t-icon name="search" />
-              </template>
-            </t-input>
-          </t-space>
+          <div class="search-box">
+            <div class="search-input">
+              <input
+                v-model.trim="searchTxt"
+                placeholder="输入关键词搜索"
+                class="search-input-item"
+                @keyup.enter="searchEvent"
+              />
+              <div class="search-button-box" @click="searchEvent">
+                <div class="search-button">
+                  <t-icon name="search" style="color: #fff" class="search-button-icon" />
+                </div>
+              </div>
+            </div>
+            <div class="search-list"></div>
+          </div>
         </div>
       </t-row>
     </div>
@@ -78,7 +88,7 @@
         :distance="200"
         @infinite="load"
       >
-        <template #complete>没有更多内容了</template>
+        <template #complete>{{ infiniteCompleteTip }}</template>
         <template #error>哎呀，出了点差错</template>
       </infinite-loading>
     </div>
@@ -87,7 +97,8 @@
 <script setup lang="jsx">
 import { ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { Icon, LoadingIcon, LinkUnlinkIcon } from 'tdesign-icons-vue-next';
+import { MoreIcon, LoadingIcon, LinkUnlinkIcon } from 'tdesign-icons-vue-next';
+
 import axios from 'axios';
 import _ from 'lodash';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -128,8 +139,8 @@ const iptvListSelect = ref();
 const iptvDataList = ref({});
 const iptvClassList = ref([
   {
-    label: '全部',
-    value: '全部',
+    id: '全部',
+    name: '全部',
   },
 ]);
 const iptvClassSelect = ref('全部');
@@ -137,6 +148,7 @@ const iptvClassSelect = ref('全部');
 const searchTxt = ref('');
 
 const infiniteId = ref(+new Date());
+const infiniteCompleteTip = ref('没有更多内容了');
 const pagination = ref({
   pageIndex: 0,
   pageSize: 32,
@@ -152,14 +164,14 @@ onMounted(() => {
 // 获取配置
 const getIptvSetting = async () => {
   setting.get('defaultIptv').then(async (id) => {
-    if (!id) MessagePlugin.warning({ content: '请设置直播默认数据源', duration: 0, closeBtn: true });
-    else
+    if (id) {
       await iptv.get(id).then(async (res) => {
         iptvListSelect.value = res.id;
         iptvSetting.value.name = res.name;
         iptvSetting.value.epg = res.epg;
         if (!res.epg) iptvSetting.value.epg = await setting.get('defaultIptvEpg');
       });
+    }
   });
   setting.get('iptvSkipIpv6').then((res) => {
     iptvSetting.value.skipIpv6 = res;
@@ -227,8 +239,10 @@ const load = async ($state) => {
   console.log('loading...');
   try {
     const resLength = await getChannelList();
-    if (resLength === 0) $state.complete();
-    else {
+    if (resLength === 0) {
+      $state.complete();
+      if (!iptvSetting.value.name) infiniteCompleteTip.value = '暂无数据，请前往设置直播源设置默认源！';
+    } else {
       $state.loaded();
     }
   } catch (error) {
@@ -245,9 +259,11 @@ const searchEvent = async () => {
   await getChannelList();
 };
 
-// 分类
-const classEvent = async () => {
+// 切换分类
+const changeClassEvent = async (item) => {
   console.log('class');
+  iptvClassSelect.value = item.name;
+
   iptvDataList.value = {};
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
@@ -366,32 +382,107 @@ const txt = (text) => {
     height: 50px;
     margin-right: 10px;
     .left-operation-container {
-      :deep(.t-input) {
-        padding: 0;
-        border-style: none !important;
-        font-size: 0.8rem;
-        font-weight: bold;
-      }
-      :deep(.t-input--focused) {
-        border-color: rgba(255, 255, 255, 0) !important;
-        box-shadow: none !important;
-      }
       .title {
         .data-item {
           display: block;
           line-height: 1rem;
         }
         .source {
-          font-weight: bold;
-          font-size: 0.8rem;
+          :deep(.t-input) {
+            padding: 0;
+            border-style: none !important;
+            font-size: 0.8rem;
+            font-weight: bold;
+          }
+          :deep(.t-input--focused) {
+            border-color: rgba(255, 255, 255, 0) !important;
+            box-shadow: none !important;
+          }
         }
         .data {
           font-size: 0.7rem;
         }
       }
+      .head-center {
+        .head-center-class {
+          max-width: 75px;
+          height: 23px;
+          font-size: 18px;
+          font-weight: bold;
+          float: left;
+          margin-right: 5px;
+        }
+
+        .content {
+          padding: 10px 0 10px 25px;
+          span {
+            display: inline-block;
+            line-height: 20px;
+            margin-right: 25px;
+            width: 60px;
+            overflow: hidden;
+            text-overflow: inherit;
+            white-space: nowrap;
+            text-align: center;
+          }
+        }
+      }
     }
     .right-operation-container {
-      width: auto;
+      .search-box {
+        width: 220px;
+        position: relative;
+        height: 34px;
+        border-radius: 21px;
+        border: 1px solid rgba(0, 0, 0, 0);
+        .search-input {
+          border: 1px solid hsla(0, 0%, 100%, 0);
+          background: linear-gradient(
+            90deg,
+            rgba(85, 187, 56, 0.2),
+            rgba(216, 244, 222, 0.2) 50%,
+            rgba(124, 212, 118, 0.2)
+          );
+          border-radius: 100px;
+          width: 100%;
+          white-space: nowrap;
+          .search-input-item {
+            background: rgba(255, 25, 255, 0);
+            border: 0;
+            font-size: 14px;
+            color: hsla(0, 0%, 0%, 0.6);
+            outline: 0 none;
+            padding: 0 0 0 20px;
+            vertical-align: middle;
+            height: 34px;
+            width: calc(100% - 80px);
+          }
+          .search-button-box {
+            width: 44px;
+            height: 28px;
+            position: absolute;
+            right: 0;
+            top: 4px;
+            cursor: pointer;
+            .search-button {
+              display: inline-block;
+              font-size: 14px;
+              background-color: var(--td-brand-color);
+              margin: 0 0 0 12px;
+              width: 28px;
+              height: 28px;
+              border-radius: 100%;
+              text-align: center;
+              line-height: 24px;
+              .search-button-icon {
+                width: 14px;
+                height: 14px;
+                display: inline-block;
+              }
+            }
+          }
+        }
+      }
     }
   }
   .main {
@@ -471,6 +562,22 @@ const txt = (text) => {
           .card-footer-title {
             color: var(--td-brand-color);
           }
+        }
+      }
+    }
+  }
+}
+
+:root[theme-mode='dark'] {
+  .right-operation-container {
+    .search-box {
+      .search-input-item {
+        color: hsla(0, 0%, 100%, 0.6) !important;
+      }
+      .hot-search-button {
+        color: hsla(0, 0%, 100%, 0.6) !important;
+        .hot-search-button-icon {
+          color: hsla(0, 0%, 100%, 0.6) !important;
         }
       }
     }

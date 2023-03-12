@@ -551,123 +551,125 @@ const playEvent = (item) => {
     .toolbar {
       margin-bottom: 10px;
     }
-    .header-title-wrap {
-      .title {
-        .data-item {
-          display: block;
-          line-height: 1rem;
-        }
-        .source {
-          :deep(.t-input) {
-            padding: 0;
-            border-style: none !important;
-            font-size: 0.8rem;
-            font-weight: bold;
-          }
-          :deep(.t-input--focused) {
-            border-color: rgba(255, 255, 255, 0) !important;
-            box-shadow: none !important;
-          }
-        }
-        .data {
-          font-size: 0.7rem;
-        }
-      }
-    }
     .header {
-      .head-center {
-        .head-center-class {
-          max-width: 75px;
-          height: 23px;
-          font-size: 18px;
-          font-weight: bold;
-          float: left;
-          margin-right: 5px;
+      .left-operation-container {
+        .header-title-wrap {
+          .title {
+            .data-item {
+              display: block;
+              line-height: 1rem;
+            }
+            .source {
+              :deep(.t-input) {
+                padding: 0;
+                border-style: none !important;
+                font-size: 0.8rem;
+                font-weight: bold;
+              }
+              :deep(.t-input--focused) {
+                border-color: rgba(255, 255, 255, 0) !important;
+                box-shadow: none !important;
+              }
+            }
+            .data {
+              font-size: 0.7rem;
+            }
+          }
         }
+        .head-center {
+          .head-center-class {
+            max-width: 75px;
+            height: 23px;
+            font-size: 18px;
+            font-weight: bold;
+            float: left;
+            margin-right: 5px;
+          }
 
-        .content {
-          padding: 10px 0 10px 25px;
-          span {
-            display: inline-block;
-            line-height: 20px;
-            margin-right: 25px;
-            width: 60px;
-            overflow: hidden;
-            text-overflow: inherit;
-            white-space: nowrap;
-            text-align: center;
+          .content {
+            padding: 10px 0 10px 25px;
+            span {
+              display: inline-block;
+              line-height: 20px;
+              margin-right: 25px;
+              width: 60px;
+              overflow: hidden;
+              text-overflow: inherit;
+              white-space: nowrap;
+              text-align: center;
+            }
           }
         }
       }
-    }
-    .right-operation-container {
-      .search-box {
-        width: 220px;
-        position: relative;
-        height: 34px;
-        border-radius: 21px;
-        border: 1px solid rgba(0, 0, 0, 0);
-        .search-input {
-          border: 1px solid hsla(0, 0%, 100%, 0);
-          background: linear-gradient(
-            90deg,
-            rgba(85, 187, 56, 0.2),
-            rgba(216, 244, 222, 0.2) 50%,
-            rgba(124, 212, 118, 0.2)
-          );
-          border-radius: 100px;
-          width: 100%;
-          white-space: nowrap;
-          .search-input-item {
-            background: rgba(255, 25, 255, 0);
-            border: 0;
-            font-size: 14px;
-            color: hsla(0, 0%, 0%, 0.6);
-            outline: 0 none;
-            padding: 0 0 0 20px;
-            vertical-align: middle;
-            height: 34px;
-            width: calc(100% - 80px);
-          }
-          .hot-search-button {
-            display: inline-block;
-            font-size: 13px;
-            color: hsla(0, 0%, 0%, 0.6);
-            line-height: 13px;
-            cursor: pointer;
-            :hover {
-              color: var(--td-brand-color);
-            }
-            .hot-search-button-icon {
-              width: 14px;
-              height: 14px;
-              color: hsla(0, 0%, 0%, 0.6);
-              opacity: 0.8;
-              display: inline-block;
-              vertical-align: middle;
-            }
-          }
-          .search-button-box {
-            width: 44px;
-            height: 28px;
-            position: absolute;
-            right: 0;
-            top: 4px;
-            cursor: pointer;
-            .search-button {
-              display: inline-block;
+      .right-operation-container {
+        .search-box {
+          width: 220px;
+          position: relative;
+          height: 34px;
+          border-radius: 21px;
+          border: 1px solid rgba(0, 0, 0, 0);
+          .search-input {
+            border: 1px solid hsla(0, 0%, 100%, 0);
+            background: linear-gradient(
+              90deg,
+              rgba(85, 187, 56, 0.2),
+              rgba(216, 244, 222, 0.2) 50%,
+              rgba(124, 212, 118, 0.2)
+            );
+            border-radius: 100px;
+            width: 100%;
+            white-space: nowrap;
+            .search-input-item {
+              background: rgba(255, 25, 255, 0);
+              border: 0;
               font-size: 14px;
-              background-color: var(--td-brand-color);
-              margin: 0 0 0 12px;
-              width: 28px;
-              height: 28px;
-              border-radius: 100%;
-              text-align: center;
-              line-height: 24px;
-              .search-button-icon {
+              color: hsla(0, 0%, 0%, 0.6);
+              outline: 0 none;
+              padding: 0 0 0 20px;
+              vertical-align: middle;
+              height: 34px;
+              width: calc(100% - 80px);
+            }
+            .hot-search-button {
+              display: inline-block;
+              font-size: 13px;
+              color: hsla(0, 0%, 0%, 0.6);
+              line-height: 13px;
+              cursor: pointer;
+              :hover {
+                color: var(--td-brand-color);
+              }
+              .hot-search-button-icon {
                 width: 14px;
                 height: 14px;
+                color: hsla(0, 0%, 0%, 0.6);
+                opacity: 0.8;
                 display: inline-block;
+                vertical-align: middle;
+              }
+            }
+            .search-button-box {
+              width: 44px;
+              height: 28px;
+              position: absolute;
+              right: 0;
+              top: 4px;
+              cursor: pointer;
+              .search-button {
+                display: inline-block;
+                font-size: 14px;
+                background-color: var(--td-brand-color);
+                margin: 0 0 0 12px;
+                width: 28px;
+                height: 28px;
+                border-radius: 100%;
+                text-align: center;
+                line-height: 24px;
+                .search-button-icon {
+                  width: 14px;
+                  height: 14px;
+                  display: inline-block;
+                }
               }
             }
           }
