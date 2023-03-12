@@ -87,10 +87,9 @@ db.version(11).stores({
 })
 
 db.version(12).stores({
-  sites: '++id, key, name, api, download, jiexiUrl, type, isActive, group, reverseOrder'
+  sites: '++id, key, name, api, download, jiexiUrl, type, isActive, group'
 }).upgrade(trans => {
   trans.sites.toCollection().modify(site => {
-    site.reverseOrder = false
     site.type = 1
   })
 })

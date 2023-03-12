@@ -145,7 +145,7 @@ const newOption = ref('');
 const selectWay = ref('add-single');
 
 const formVisible = ref(false);
-// key, name, api, download, jiexiUrl, isActive, group, reverseOrder;
+// key, name, api, download, jiexiUrl, isActive, group;
 const formData = ref({
   siteInfo: {
     key: '',
@@ -156,7 +156,6 @@ const formData = ref({
     group: '',
     status: true,
     isActive: true,
-    reverseOrder: false,
     type: 1,
   },
   url: { sitesDataURL: '' },
