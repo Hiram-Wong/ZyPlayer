@@ -2,7 +2,9 @@
   <div class="setting-iptv-container">
     <div class="header">
       <t-row justify="space-between">
-        <div class="left-operation-container"></div>
+        <div class="left-operation-container">
+          <t-tag size="large" shape="mark">添加源后需设置默认哟！</t-tag>
+        </div>
         <div class="right-operation-container">
           <div class="component-op">
             <div class="item" @click="exportEvent">
@@ -25,12 +27,14 @@
       :row-key="rowKey"
       :data="emptyData ? [] : data"
       :sort="sort"
+      height="calc(100vh - 240px)"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
       :selected-row-keys="selectedRowKeys"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-iptv-container` }"
+      :reserve-selected-row-on-paginate="false"
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
@@ -57,10 +61,10 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
 import { saveAs } from 'file-saver';
 import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
+import zy from '@/lib/site/tools';
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
 import { iptv, channelList, setting } from '@/lib/dexie';
@@ -125,12 +129,11 @@ const exportEvent = () => {
 
 const defaultEvent = async (row) => {
   const m3uUrl = row.row.url;
-  await axios.get(m3uUrl).then((res) => {
-    const { data } = res;
-    // console.log(data);
-    if (data) {
-      if (data.trim().startsWith('#EXTM3U')) m3u(data);
-      else txt(data);
+  await zy.getConfig(m3uUrl).then((res) => {
+    console.log(res);
+    if (res) {
+      if (res.trim().startsWith('#EXTM3U')) m3u(res);
+      else txt(res);
       MessagePlugin.success('设置成功');
     }
   });
@@ -228,44 +231,80 @@ const removeAllEvent = () => {
 <style lang="less" scoped>
 @import '@/style/variables';
 .setting-iptv-container {
+  height: calc(100vh - var(--td-comp-size-l));
   .header {
-    margin-bottom: 20px;
+    margin: 0 10px 10px 10px;
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
   }
-}
-.component-op {
-  display: flex;
-  padding: 4px;
-  height: 40px;
-  background: #f0f0f0;
-  backdrop-filter: blur(10px);
-  border-radius: 6px;
-  color: #161616;
-  align-items: center;
-  box-shadow: 10px;
-  margin-right: 20px;
-  .item {
-    border-radius: 5px;
-    transition: all 0.2s ease 0s;
-    display: flex;
-    align-items: center;
-    padding: 5px 8px;
-    line-height: 22px;
-    cursor: pointer;
-    text-decoration: none;
+  .right-operation-container {
+    .component-op {
+      display: flex;
+      padding: 4px;
+      height: 40px;
+      background: #f0f0f0;
+      backdrop-filter: blur(10px);
+      border-radius: 6px;
+      color: #161616;
+      align-items: center;
+      box-shadow: 10px;
+      .item {
+        border-radius: 5px;
+        transition: all 0.2s ease 0s;
+        display: flex;
+        align-items: center;
+        padding: 5px 8px;
+        line-height: 22px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .item:hover {
+        background: #dcdcdc;
+      }
+    }
   }
-  .item:hover {
-    background: #dcdcdc;
+
+  :deep(.t-table) {
+    background-color: #fbfbfb;
+    tr {
+      background-color: #fbfbfb;
+      &:hover {
+        background-color: var(--td-bg-color-container-hover);
+      }
+    }
+  }
+  :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
+    background-color: #fbfbfb;
+  }
+  :deep(.t-table__pagination) {
+    background-color: #fbfbfb;
   }
 }
+
 :root[theme-mode='dark'] {
-  .component-op {
-    background: #484848;
-    color: #eee;
-    .item:hover {
-      background: #5e5e5e;
+  .setting-iptv-container {
+    .component-op {
+      background: #484848;
+      color: #eee;
+      .item:hover {
+        background: #5e5e5e;
+      }
+    }
+    :deep(.t-table) {
+      background-color: #000;
+      tr {
+        background-color: #000;
+        &:hover {
+          background-color: var(--td-bg-color-container-hover);
+        }
+      }
+    }
+    :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
+      background-color: #000 !important;
+    }
+    :deep(.t-table__pagination) {
+      background-color: #000 !important;
     }
   }
 }

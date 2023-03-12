@@ -3,7 +3,7 @@
     <div class="header">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <!-- 删除无二次确认，谨慎操作！ -->
+          <t-tag size="large" shape="mark">添加源后需设置默认哟！</t-tag>
         </div>
         <div class="right-operation-container">
           <div class="component-op">
@@ -31,11 +31,13 @@
       row-key="id"
       :data="emptyData ? [] : data"
       :sort="sort"
+      height="calc(100vh - 240px)"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
       :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
+      :reserve-selected-row-on-paginate="false"
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
@@ -250,7 +252,7 @@ const defaultEvent = async (row) => {
   overflow: auto;
 
   .header {
-    margin-bottom: 20px;
+    margin: 0 10px 10px 10px;
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
@@ -262,38 +264,73 @@ const defaultEvent = async (row) => {
     border-radius: var(--td-radius-circle);
     background-color: var(--td-error-color);
   }
-}
-.component-op {
-  display: flex;
-  padding: 4px;
-  height: 40px;
-  background: #f0f0f0;
-  backdrop-filter: blur(10px);
-  border-radius: 6px;
-  color: #161616;
-  align-items: center;
-  box-shadow: 10px;
-  margin-right: 20px;
-  .item {
-    border-radius: 5px;
-    transition: all 0.2s ease 0s;
-    display: flex;
-    align-items: center;
-    padding: 5px 8px;
-    line-height: 22px;
-    cursor: pointer;
-    text-decoration: none;
+  .right-operation-container {
+    .component-op {
+      display: flex;
+      padding: 4px;
+      height: 40px;
+      background: #f0f0f0;
+      backdrop-filter: blur(10px);
+      border-radius: 6px;
+      color: #161616;
+      align-items: center;
+      box-shadow: 10px;
+      .item {
+        border-radius: 5px;
+        transition: all 0.2s ease 0s;
+        display: flex;
+        align-items: center;
+        padding: 5px 8px;
+        line-height: 22px;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .item:hover {
+        background: #dcdcdc;
+      }
+    }
   }
-  .item:hover {
-    background: #dcdcdc;
+
+  :deep(.t-table) {
+    background-color: #fbfbfb;
+    tr {
+      background-color: #fbfbfb;
+      &:hover {
+        background-color: var(--td-bg-color-container-hover);
+      }
+    }
+  }
+  :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
+    background-color: #fbfbfb;
+  }
+  :deep(.t-table__pagination) {
+    background-color: #fbfbfb;
   }
 }
+
 :root[theme-mode='dark'] {
-  .component-op {
-    background: #484848;
-    color: #eee;
-    .item:hover {
-      background: #5e5e5e;
+  .setting-site-container {
+    .component-op {
+      background: #484848;
+      color: #eee;
+      .item:hover {
+        background: #5e5e5e;
+      }
+    }
+    :deep(.t-table) {
+      background-color: #000;
+      tr {
+        background-color: #000;
+        &:hover {
+          background-color: var(--td-bg-color-container-hover);
+        }
+      }
+    }
+    :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
+      background-color: #000 !important;
+    }
+    :deep(.t-table__pagination) {
+      background-color: #000 !important;
     }
   }
 }
