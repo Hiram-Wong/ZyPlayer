@@ -146,7 +146,7 @@
           </div>
         </t-space>
       </t-form-item>
-      <t-form-item label="权限" name="data">
+      <t-form-item v-if="platform !== 'linux'" label="权限" name="data">
         <t-space>
           <t-radio v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">开机自启</t-radio>
         </t-space>
@@ -182,6 +182,9 @@ const { ipcRenderer } = require('electron');
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
+
+const { platform } = process;
+
 const isClassDialog = ref(false);
 const classDialogData = ref({ data: [], type: 'rootClassFilter' });
 const isEasyConfigDialog = ref(false);
