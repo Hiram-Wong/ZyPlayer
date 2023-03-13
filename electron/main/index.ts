@@ -11,7 +11,7 @@ import initUpdater from './core/auto-update';
 
 const remote = require('@electron/remote/main');
 
-console.log(app.getPath('userData'));
+log.info(`storage location：${app.getPath('userData')}`);
 remote.initialize(); // 主进程初始化
 
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
@@ -221,25 +221,23 @@ ipcMain.on('playerPip', (_, isPip) => {
 });
 
 ipcMain.on('selfBoot', (_, status) => {
+  log.info(`selfBoot：${status}`);
   if (status) {
+    const exeName = path.basename(process.execPath);
     app.setLoginItemSettings({
       openAtLogin: true,
       openAsHidden: false,
       path: process.execPath,
-      args: ['--processStart', path.basename(process.execPath)],
+      args: ['--processStart', `"${exeName}"`],
+    });
+  } else if (!app.isPackaged) {
+    app.setLoginItemSettings({
+      openAtLogin: false,
+      path: process.execPath,
     });
   } else {
-    if (!app.isPackaged) {
-      app.setLoginItemSettings({
-        openAtLogin: !app.getLoginItemSettings().openAtLogin,
-        path: process.execPath,
-      });
-    } else {
-      app.setLoginItemSettings({
-        openAtLogin: !app.getLoginItemSettings().openAtLogin,
-      });
-    }
-    console.log(app.getLoginItemSettings().openAtLogin);
-    console.log(!app.isPackaged);
+    app.setLoginItemSettings({
+      openAtLogin: false,
+    });
   }
 });
