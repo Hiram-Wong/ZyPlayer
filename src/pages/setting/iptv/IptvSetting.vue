@@ -3,7 +3,7 @@
     <div class="header">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-tag size="large" shape="mark">添加源后需设置默认并刷新哟！</t-tag>
+          <t-tag size="large" shape="mark">添加源后需设置默认哟！</t-tag>
         </div>
         <div class="right-operation-container">
           <div class="component-op">
@@ -61,6 +61,7 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { saveAs } from 'file-saver';
 import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
@@ -127,10 +128,11 @@ const exportEvent = () => {
   });
 };
 
+const emitReload = useEventBus<string>('iptv-reload');
+
 const defaultEvent = async (row) => {
   const m3uUrl = row.row.url;
   await zy.getConfig(m3uUrl).then((res) => {
-    console.log(res);
     if (res) {
       if (res.trim().startsWith('#EXTM3U')) m3u(res);
       else txt(res);
@@ -138,6 +140,7 @@ const defaultEvent = async (row) => {
     }
   });
   setting.update({ defaultIptv: row.row.id });
+  emitReload.emit('iptv-reload');
   defaultIptv.value = row.row.id;
 };
 

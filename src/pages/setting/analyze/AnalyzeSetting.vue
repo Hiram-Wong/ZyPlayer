@@ -3,7 +3,7 @@
     <div class="header">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-tag size="large" shape="mark">添加源后需设置默认并刷新哟！</t-tag>
+          <t-tag size="large" shape="mark">添加源后需设置默认哟！</t-tag>
         </div>
         <div class="right-operation-container">
           <div class="component-op">
@@ -60,8 +60,9 @@
     <dialog-edit-view v-model:visible="formDialogVisibleEditAnalyze" :data="formData" />
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { saveAs } from 'file-saver';
 import { analyze, setting } from '@/lib/dexie';
@@ -170,12 +171,15 @@ const exportEvent = () => {
   MessagePlugin.success('导出成功');
 };
 
+const emitReload = useEventBus<string>('analyze-reload');
+
 // 设置默认接口
 const defaultEvent = async (row) => {
   setting.update({
     defaultAnalyze: row.row.id,
   });
   defaultAnalyze.value = row.row.id;
+  emitReload.emit('analyze-reload');
   MessagePlugin.success('设置成功');
 };
 </script>

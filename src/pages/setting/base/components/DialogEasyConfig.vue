@@ -4,7 +4,7 @@
       <!-- 表单内容 -->
       <t-form ref="form" :data="formData" @submit="onSubmit">
         <t-input v-model="formData.url" autofocus clearable placeholder="请输入一键配置链接!" class="input" />
-        <p class="tip">请保持网络连通性</p>
+        <p class="tip">请保障网络连通性</p>
         <div class="optios">
           <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
             <t-space>
@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
 import zy from '@/lib/site/tools';
@@ -50,6 +51,10 @@ watch(
     formVisible.value = val;
   },
 );
+
+const filmEmitReload = useEventBus<string>('film-reload');
+const iptvEmitReload = useEventBus<string>('iptv-reload');
+const analyzeEmitReload = useEventBus<string>('analyze-reload');
 
 const onSubmit = async () => {
   const { url } = formData.value;
@@ -91,10 +96,11 @@ const onSubmit = async () => {
       if (config.analyzes.default) defaultObject.defaultAnalyze = config.analyzes.default;
     }
     setting.update(defaultObject);
+
+    filmEmitReload.emit('film-reload');
+    iptvEmitReload.emit('iptv-reload');
+    analyzeEmitReload.emit('analyze-reload');
     MessagePlugin.success('一键配置成功,畅享点点滴滴吧！');
-    setTimeout(() => {
-      window?.location.reload();
-    }, 1500);
   } catch (error) {
     MessagePlugin.error(`一键配置失败：${error}`);
     console.log(error);

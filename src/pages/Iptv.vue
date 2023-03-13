@@ -96,6 +96,7 @@
 </template>
 <script setup lang="jsx">
 import { ref, onMounted } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { MoreIcon, LoadingIcon, LinkUnlinkIcon } from 'tdesign-icons-vue-next';
 
@@ -162,14 +163,14 @@ onMounted(() => {
 });
 
 // 获取配置
-const getIptvSetting = async () => {
-  setting.get('defaultIptv').then(async (id) => {
+const getIptvSetting = () => {
+  setting.get('defaultIptv').then((id) => {
     if (id) {
-      await iptv.get(id).then(async (res) => {
+      iptv.get(id).then((res) => {
         iptvListSelect.value = res.id;
         iptvSetting.value.name = res.name;
         iptvSetting.value.epg = res.epg;
-        if (!res.epg) iptvSetting.value.epg = await setting.get('defaultIptvEpg');
+        if (!res.epg) iptvSetting.value.epg = setting.get('defaultIptvEpg');
       });
     }
   });
@@ -179,7 +180,7 @@ const getIptvSetting = async () => {
   setting.get('iptvStatus').then((res) => {
     iptvSetting.value.iptvStatus = res;
   });
-  await iptv.all().then((res) => {
+  iptv.all().then((res) => {
     iptvList.value = res.filter((item) => item.isActive);
   });
 };
@@ -368,6 +369,18 @@ const txt = (text) => {
     });
   });
 };
+
+// 监听设置默认源变更
+const eventBus = useEventBus('iptv-reload');
+eventBus.on(async () => {
+  await getIptvSetting();
+  await getChannelCount();
+  await getIptvClass();
+  iptvDataList.value = {};
+  if (!_.size(iptvDataList.value.list)) infiniteId.value++;
+  pagination.value.pageIndex = 0;
+  await getChannelList();
+});
 </script>
 
 <style lang="less" scoped>

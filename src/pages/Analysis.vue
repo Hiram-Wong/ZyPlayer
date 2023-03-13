@@ -78,6 +78,7 @@
 <script setup lang="ts">
 // TODO：JXU1NzI4JXU2NzJDJXU0RTFBJXU2NDFDJXU3RDIyc2hvd1N1cHBvcnRFdmVudCV1RkYwQyV1NjdFNSV1NzcwQiV1NjcyQyV1NjVCOSV1NkNENSV1NzY4NCV1ODlFNiV1NTNEMSV1N0M3QiV1NTc4Qg==
 import { ref, reactive, onMounted } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { HistoryIcon, ClearIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
@@ -254,6 +255,12 @@ const showSupportEvent = async () => {
     analyzeSupport: isSupport.value,
   });
 };
+
+// 监听设置默认源变更
+const eventBus = useEventBus('analyze-reload');
+eventBus.on(async () => {
+  getAnalysisApi();
+});
 </script>
 
 <style lang="less" scoped>

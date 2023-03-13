@@ -179,9 +179,9 @@
 </template>
 <script setup lang="jsx">
 import { ref, watch, onMounted } from 'vue';
-
-import { MoreIcon, ChartBarIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
+import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { MoreIcon, ChartBarIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
 
 import InfiniteLoading from 'v3-infinite-loading';
 import 'v3-infinite-loading/lib/style.css';
@@ -532,6 +532,23 @@ const playEvent = (item) => {
 
   ipcRenderer.send('openPlayWindow', item.vod_name);
 };
+
+// 监听设置默认源变更
+const eventBus = useEventBus('film-reload');
+eventBus.on(async () => {
+  await getFilmSetting();
+  FilmSiteSetting.value.class = {
+    id: 0,
+    name: '最新',
+  };
+  await getClass();
+  FilmDataList.value = {};
+  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
+  pagination.value.pageIndex = 0;
+  await getFilmList();
+  await getFilmSite();
+  await getFilmArea();
+});
 </script>
 
 <style lang="less" scoped>
