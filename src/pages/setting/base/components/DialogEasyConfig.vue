@@ -147,7 +147,9 @@ const m3u = (text) => {
     }
   });
 
-  channelList.bulkAdd(docs);
+  channelList.bulkAdd(docs).then(() => {
+    iptvEmitReload.emit('iptv-reload');
+  });
 };
 
 const txt = (text) => {
@@ -168,7 +170,9 @@ const txt = (text) => {
     }
   });
 
-  channelList.bulkAdd(docs);
+  channelList.bulkAdd(docs).then(() => {
+    iptvEmitReload.emit('iptv-reload');
+  });
 };
 </script>
 <style lang="less" scoped>
