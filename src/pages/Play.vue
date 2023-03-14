@@ -15,11 +15,14 @@
         <div class="player-top-right">
           <div v-if="type === 'film'" class="player-top-right-popup player-top-right-item player-top-right-share">
             <t-popup
+              trigger="click"
+              :visible="isShareVisible"
+              :on-visible-change="onShareVisibleChange"
               placement="bottom-right"
               :overlay-inner-style="{ background: '#2a2a31', boxShadow: 'none', marginTop: '16px' }"
               attach=".player-top-right-share"
             >
-              <share-icon size="1.5em" />
+              <share-icon size="1.5em" @click="isShareVisible = !isShareVisible" />
               <template #content>
                 <div class="share-container">
                   <div class="share-container-main">
@@ -50,7 +53,19 @@
                     <span class="bottom-copy-url">
                       <input id="bottom-copy-url-input" v-model="shareUrl" type="text" disabled />
                     </span>
-                    <span v-if="isSupported" class="bottom-copy-btn" @click="copy(shareUrl)">复制地址</span>
+                    <t-popup
+                      trigger="click"
+                      placement="right"
+                      :overlay-inner-style="{
+                        background: '#f5f5f5',
+                        boxShadow: 'none',
+                        color: '#848282',
+                        fontSize: '10px',
+                        marginTop: '5px',
+                      }"
+                    >
+                      <span class="bottom-copy-btn" @click="shareUrlEvent">复制地址</span>
+                    </t-popup>
                   </div>
                 </div>
               </template>
@@ -319,6 +334,7 @@ const info = ref(data.value.info);
 const ext = ref(data.value.ext);
 
 const { isSupported, copy } = useClipboard();
+const isShareVisible = ref(false);
 
 const config = ref({
   id: 'xgplayer',
@@ -440,9 +456,9 @@ const initPlayer = async (firstInit = false) => {
     console.log(info.value.url);
     config.value.url = info.value.url; // 初始化播放链接
     if (data.value.ext.epg) {
-      epgData.value = await zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
+      epgData.value = zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
     } // 处理电子节目单
-    await zy.isLiveM3U8(info.value.url).then((res) => {
+    zy.isLiveM3U8(info.value.url).then((res) => {
       config.value.isLive = res;
       config.value.presets = [LivePreset];
     }); // 判断是否直播
@@ -478,9 +494,6 @@ const initPlayer = async (firstInit = false) => {
         config.value.url = await zy.parserFilmUrl(config.value.url);
       } // 判断是否做解析
       xg.value = new Player(config.value);
-      xg.value.on(EVENTS.MINI_STATE_CHANGE, (isPip) => {
-        console.log(isPip);
-      });
     }
 
     await timerUpdatePlayProcess();
@@ -678,6 +691,19 @@ const qrCodeImg = () => {
   QRCode.toDataURL(shareUrl.value, opts, (err, url) => {
     qrCodeUrl.value = url;
   });
+};
+
+const shareUrlEvent = () => {
+  copy(shareUrl.value);
+  if (isSupported) {
+    MessagePlugin.info('复制成功，快分享给好友吧！');
+    isShareVisible.value = false;
+  } else MessagePlugin.info('当前环境不支持一键复制，请手动复制链接！');
+};
+
+const onShareVisibleChange = (_, context) => {
+  // trigger=document 表示点击非浮层元素触发
+  if (context.trigger === 'document') isShareVisible.value = false;
 };
 
 // 推荐刷新数据
