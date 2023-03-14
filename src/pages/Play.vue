@@ -308,7 +308,7 @@ import playerPipIcon from '@/assets/player/pip.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
 import { setting, history, star } from '@/lib/dexie';
-import { usePlayStore } from '@/store';
+import { getSettingStore, usePlayStore } from '@/store';
 
 // 用于窗口管理
 const { ipcRenderer } = require('electron');
@@ -405,7 +405,7 @@ watch(
 onMounted(() => {
   initPlayer();
   minMaxEvent();
-  macFullScreenEvent();
+  // macFullScreenEvent();
   // wideEvent();
 });
 
@@ -693,6 +693,7 @@ const qrCodeImg = () => {
   });
 };
 
+// 点击分复制地址
 const shareUrlEvent = () => {
   copy(shareUrl.value);
   if (isSupported) {
@@ -701,6 +702,7 @@ const shareUrlEvent = () => {
   } else MessagePlugin.info('当前环境不支持一键复制，请手动复制链接！');
 };
 
+// 点击非浮层元素触发关闭分享
 const onShareVisibleChange = (_, context) => {
   // trigger=document 表示点击非浮层元素触发
   if (context.trigger === 'document') isShareVisible.value = false;
@@ -744,7 +746,7 @@ const winStickyEvnet = () => {
 // 最小化暂停播放
 const minMaxEvent = () => {
   win.on('minimize', () => {
-    if (xg.value && xg.value.hasStart && setting.value.pauseWhenMinimize) {
+    if (xg.value && xg.value.hasStart && set.value.pauseWhenMinimize) {
       xg.value.pause();
     }
   });
