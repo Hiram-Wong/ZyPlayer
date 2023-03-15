@@ -82,7 +82,8 @@
           </div>
         </div>
         <context-menu :show="show" :options="optionsComponent" @close="show = false">
-          <context-menu-item icon="icon-reload-1" label="删除" @click="delChannelEvent" />
+          <context-menu-item label="拷贝频道链接" @click="copyChannelEvent" />
+          <context-menu-item label="删除频道" @click="delChannelEvent" />
         </context-menu>
       </div>
       <infinite-loading
@@ -99,7 +100,7 @@
 </template>
 <script setup lang="jsx">
 import { ref, computed, onMounted } from 'vue';
-import { useEventBus } from '@vueuse/core';
+import { useEventBus, useClipboard } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { MoreIcon, LoadingIcon, LinkUnlinkIcon } from 'tdesign-icons-vue-next';
 
@@ -174,7 +175,7 @@ const optionsComponent = ref({
   y: 200,
   theme: mode.value === 'light' ? 'default' : 'default dark',
 });
-const delChannelItem = ref(null);
+const channelItem = ref(null);
 
 onMounted(() => {
   getIptvSetting();
@@ -408,14 +409,21 @@ const conButtonClick = (item, e) => {
   show.value = true;
   optionsComponent.value.x = e.x;
   optionsComponent.value.y = e.y;
-  delChannelItem.value = item;
+  channelItem.value = item;
 };
 
 // 删除
 const delChannelEvent = () => {
-  _.pull(iptvDataList.value.list, _.find(iptvDataList.value.list, { ...delChannelItem.value }));
-  channelList.remove(delChannelItem.value.id);
+  _.pull(iptvDataList.value.list, _.find(iptvDataList.value.list, { ...channelItem.value }));
+  channelList.remove(channelItem.value.id);
   pagination.value.count--;
+  show.value = false;
+};
+
+// 拷贝
+const copyChannelEvent = () => {
+  const { isSupported, copy } = useClipboard();
+  if (isSupported) copy(channelItem.value.url);
   show.value = false;
 };
 </script>
