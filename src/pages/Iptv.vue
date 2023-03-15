@@ -60,7 +60,7 @@
     <div class="main">
       <div class="main-flow-wrap">
         <div v-for="item in iptvDataList.list" :key="item.id" class="card-wrap">
-          <div class="card" @click="playEvent(item)">
+          <div class="card" @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
             <div v-show="iptvSetting.iptvStatus" class="card-header">
               <t-tag v-if="item.status" disabled size="small" variant="outline" theme="success">有效</t-tag>
               <t-tag v-else disabled size="small" variant="outline" theme="danger">无效</t-tag>
@@ -81,6 +81,9 @@
             </div>
           </div>
         </div>
+        <context-menu :show="show" :options="optionsComponent" @close="show = false">
+          <context-menu-item icon="icon-reload-1" label="删除" @click="delChannelEvent" />
+        </context-menu>
       </div>
       <infinite-loading
         :identifier="infiniteId"
@@ -95,16 +98,19 @@
   </div>
 </template>
 <script setup lang="jsx">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { MoreIcon, LoadingIcon, LinkUnlinkIcon } from 'tdesign-icons-vue-next';
 
 import axios from 'axios';
 import _ from 'lodash';
+import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import InfiniteLoading from 'v3-infinite-loading';
 import { useIpcRenderer } from '@vueuse/electron';
-import { usePlayStore } from '@/store';
+import { useSettingStore, usePlayStore } from '@/store';
+
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import 'v3-infinite-loading/lib/style.css';
 
 import { channelList, setting, iptv } from '@/lib/dexie';
@@ -112,7 +118,8 @@ import zy from '@/lib/site/tools';
 
 const ipcRenderer = useIpcRenderer();
 
-const store = usePlayStore();
+const storePlayer = usePlayStore();
+const storeSetting = useSettingStore();
 
 const renderError = () => {
   return (
@@ -156,6 +163,19 @@ const pagination = ref({
   count: 0,
 });
 
+const show = ref(false);
+const mode = computed(() => {
+  return storeSetting.displayMode;
+});
+const optionsComponent = ref({
+  zIndex: 3,
+  width: 160,
+  x: 500,
+  y: 200,
+  theme: mode.value === 'light' ? 'default' : 'default dark',
+});
+const delChannelItem = ref(null);
+
 onMounted(() => {
   getIptvSetting();
   getChannelCount();
@@ -163,14 +183,14 @@ onMounted(() => {
 });
 
 // 获取配置
-const getIptvSetting = () => {
-  setting.get('defaultIptv').then((id) => {
+const getIptvSetting = async () => {
+  await setting.get('defaultIptv').then(async (id) => {
     if (id) {
-      iptv.get(id).then((res) => {
+      await iptv.get(id).then(async (res) => {
         iptvListSelect.value = res.id;
         iptvSetting.value.name = res.name;
         iptvSetting.value.epg = res.epg;
-        if (!res.epg) iptvSetting.value.epg = setting.get('defaultIptvEpg');
+        if (!res.epg) iptvSetting.value.epg = await setting.get('defaultIptvEpg');
       });
     }
   });
@@ -273,7 +293,8 @@ const changeClassEvent = async (item) => {
 
 // 播放
 const playEvent = (item) => {
-  store.updateConfig({
+  console.log(iptvSetting.value.epg);
+  storePlayer.updateConfig({
     type: 'iptv',
     data: {
       info: item,
@@ -381,6 +402,22 @@ eventBus.on(async () => {
   pagination.value.pageIndex = 0;
   await getChannelList();
 });
+
+// 右键
+const conButtonClick = (item, e) => {
+  show.value = true;
+  optionsComponent.value.x = e.x;
+  optionsComponent.value.y = e.y;
+  delChannelItem.value = item;
+};
+
+// 删除
+const delChannelEvent = () => {
+  _.pull(iptvDataList.value.list, _.find(iptvDataList.value.list, { ...delChannelItem.value }));
+  channelList.remove(delChannelItem.value.id);
+  pagination.value.count--;
+  show.value = false;
+};
 </script>
 
 <style lang="less" scoped>
