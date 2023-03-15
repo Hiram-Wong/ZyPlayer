@@ -14,8 +14,9 @@ const remote = require('@electron/remote/main');
 log.info(`storage location：${app.getPath('userData')}`);
 remote.initialize(); // 主进程初始化
 
+app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 支持hevc
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
-app.commandLine.appendSwitch('--ignore-certificate-errors', 'true'); // 忽略证书相关错误
+app.commandLine.appendSwitch('ignore-certificate-errors', 'true'); // 忽略证书相关错误
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
