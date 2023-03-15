@@ -26,7 +26,7 @@
               </t-image>
             </div>
             <div class="card-footer">
-              <span class="history-item-title card-footer-item nowrap">{{ item.videoName }}</span>
+              <span class="history-item-title card-footer-item nowrap">{{ item.videoName }} {{ item.videoIndex }}</span>
               <p class="history-item-time card-footer-item nowrap">
                 <laptop-icon />
                 <span>观看到{{ filterPlayProgress(item.watchTime, item.duration) }}</span>
