@@ -456,7 +456,9 @@ const initPlayer = async (firstInit = false) => {
     console.log(info.value.url);
     config.value.url = info.value.url; // 初始化播放链接
     if (data.value.ext.epg) {
-      epgData.value = zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
+      zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD')).then((res) => {
+        epgData.value = res;
+      });
     } // 处理电子节目单
     zy.isLiveM3U8(info.value.url).then((res) => {
       config.value.isLive = res;
