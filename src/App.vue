@@ -5,6 +5,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+
 import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
 import { useSettingStore, usePlayStore } from '@/store';
 import { setting } from '@/lib/dexie';
@@ -62,18 +63,4 @@ const initPlayerSetting = () => {
   });
   storePlayer.updateConfig({ setting: init });
 };
-
-// 注入自执行匿名函数来检测系统外观变化
-(() => {
-  if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      const status = !!e.matches;
-      if (status) {
-        storeSetting.updateConfig({ mode: 'dark' });
-      } else {
-        storeSetting.updateConfig({ mode: 'light' });
-      }
-    });
-  }
-})();
 </script>
