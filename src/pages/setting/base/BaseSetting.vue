@@ -17,8 +17,7 @@
         <t-space>
           <t-input
             ref="shortcutInputRef"
-            v-model="formData.recordedShortcut"
-            :format="formatShortcut"
+            v-model="formatShortcut"
             class="shortcut-content"
             :placeholder="placeholderShortcut"
             :status="statusShortcut"
@@ -146,14 +145,20 @@
           </div>
         </t-space>
       </t-form-item>
-      <t-form-item v-if="platform !== 'linux'" label="权限" name="data">
+      <t-form-item label="权限" name="data">
         <t-space>
-          <t-radio v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">开机自启</t-radio>
+          <t-radio v-if="platform !== 'linux'" v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">
+            开机自启
+          </t-radio>
+          <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="hardwareAccelerationEvnet">
+            硬件加速
+          </t-radio>
         </t-space>
       </t-form-item>
       <t-form-item label="其他" name="data">
         <t-space>
-          <span class="title" @click="resetEvent">重置应用</span>
+          <span class="title" @click="resetEvent">恢复出厂</span>
+          <span class="title" @click="resetCache">清理缓存</span>
           <span class="title" @click="easyConfig">一键配置</span>
           <!-- <span class="title" @click="checkUpdate">检查更新</span> -->
         </t-space>
@@ -165,7 +170,7 @@
 </template>
 
 <script setup lang="jsx">
-import { ref, watchEffect, onMounted } from 'vue';
+import { ref, computed, watchEffect, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
@@ -254,34 +259,42 @@ const getSetting = async () => {
   });
 };
 
+// 出厂恢复
 const resetEvent = () => {
   clearDB();
   clearCache();
+  MessagePlugin.success('重置成功, 即将自动刷新页面！');
   setTimeout(() => {
     window?.location.reload();
   }, 1000);
 };
 
-const clearDB = () => {
-  db.delete().then(() => {
-    MessagePlugin.success('重置成功,请手动重启软件！');
-  });
+// 清理缓存
+const resetCache = async () => {
+  const size = await clearCache();
+  MessagePlugin.success(`清除缓存成功, 共清理 ${size} MB`);
 };
 
+// 清除数据库
+const clearDB = () => {
+  db.delete();
+};
+
+// 清除缓存
 const clearCache = async () => {
   const ses = win.webContents.session;
-  const size = (await ses.getCacheSize()) / 1024 / 1024;
-  const mb = size.toFixed(2);
+  const size = ((await ses.getCacheSize()) / 1024 / 1024).toFixed(2);
   await ses.clearCache();
-  MessagePlugin.success(`清除缓存成功, 共清理 ${mb} MB`);
+  return size;
 };
 
 // 组合键格式化
-const formatShortcut = () => {
-  const sourceShortcut = formData.value.recordedShortcut;
-  if (!sourceShortcut) return '';
+const formatShortcut = computed(() => {
+  const val = formData.value.recordShortcut;
+  if (!val) return '';
   let shortcut;
-  shortcut = sourceShortcut
+  console.log(formData.value.recordShortcut, val);
+  shortcut = val
     .replaceAll('+', ' + ')
     .replace('Up', '↑')
     .replace('Down', '↓')
@@ -289,7 +302,7 @@ const formatShortcut = () => {
     .replace('Left', '←')
     .replace('Space', '空格');
   if (process.platform === 'darwin') {
-    shortcut = sourceShortcut
+    shortcut = val
       .replace('CommandOrControl', '⌘')
       .replace('Command', '⌘')
       .replace('Meta', '⌘')
@@ -299,23 +312,22 @@ const formatShortcut = () => {
   }
   shortcut.replace('CommandOrControl', 'Ctrl');
   return shortcut;
-};
+});
 
 // 设置组合键更换焦点placeholder
 const focusShortcut = () => {
   // 复制快捷键
-  formData.value.recordedSourceShortcut = formData.value.recordedShortcut;
-  formData.value.recordedShortcut = '';
+  formData.value.recordedSourceShortcut = formData.value.recordShortcut;
+  formData.value.recordShortcut = '';
   placeholderShortcut.value = '请按下快捷键组合';
 };
 
 // 设置组合键更换失去焦点placeholder
 const blurShortcut = () => {
   // 还原快捷键
-  if (formData.value.recordedSourceShortcut && !formData.value.recordedShortcut)
-    formData.value.recordedShortcut = formData.value.recordedSourceShortcut;
+  if (formData.value.recordedSourceShortcut && !formData.value.recordShortcut)
+    formData.value.recordShortcut = formData.value.recordedSourceShortcut;
   placeholderShortcut.value = '设置快捷键';
-  formatShortcut();
 };
 
 // 获取组合按键
@@ -323,7 +335,7 @@ const getShortKeys = (_, event) => {
   const { e } = event;
 
   e.preventDefault();
-  const str = formData.value.recordedShortcut;
+  const str = formData.value.recordShortcut;
   // 已存储按键则跳过
   if (str.includes(e.key)) return;
 
@@ -354,11 +366,11 @@ const getShortKeys = (_, event) => {
   }
 
   if (auxiliaryKey.length) {
-    formData.value.recordedShortcut = `${auxiliaryKey.join('+')}+${publicKey}`;
+    formData.value.recordShortcut = `${auxiliaryKey.join('+')}+${publicKey}`;
   } else {
-    formData.value.recordedShortcut = str.substring(0, str.lastIndexOf('+') + 1) + publicKey;
+    formData.value.recordShortcut = str.substring(0, str.lastIndexOf('+') + 1) + publicKey;
   }
-  isLegalShortcut(formData.value.recordedShortcut);
+  isLegalShortcut(formData.value.recordShortcut);
 };
 
 // 判断快捷键是否合法
@@ -428,8 +440,9 @@ const isLegalShortcut = (item) => {
   if (isPubilcKeys && isSpecialKeys) {
     statusShortcut.value = 'default';
     tipShortcut.value = '';
+    console.log(formData.value.recordShortcut);
     shortcutInputRef.value.blur();
-    ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordedShortcut });
+    ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
   } else {
     tipShortcut.value = '当前组合键不合规';
     statusShortcut.value = 'error';
@@ -439,16 +452,16 @@ const isLegalShortcut = (item) => {
 // 取消快捷键
 const cancelShortcut = () => {
   console.log('cancelShortcut');
-  formData.value.recordedShortcut = '';
+  formData.value.recordShortcut = '';
   ipcRenderer.send('uninstallShortcut');
 };
 
 // 重置快捷键
 const resetShortcut = () => {
   console.log('resetShortcut');
-  formData.value.recordedShortcut = 'Shift+Command+Z';
+  formData.value.recordShortcut = 'Shift+Command+Z';
   shortcutInputRef.value.blur();
-  ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordedShortcut });
+  ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
 };
 
 // 开机自启
@@ -457,10 +470,18 @@ const selefBootEvnet = () => {
   ipcRenderer.send('selfBoot', formData.value.selfBoot);
 };
 
-// const checkUpdate = () => {
-//   console.log('checkUpdate');
-//   ipcRenderer.send('checkForUpdate');
-// };
+// 硬件加速
+const hardwareAccelerationEvnet = () => {
+  ipcRenderer.send('toggle-hardware-acceleration', formData.value.hardwareAcceleration);
+};
+
+const checkUpdate = () => {
+  console.log('checkUpdate');
+  ipcRenderer.send('checkForUpdate');
+  ipcRenderer.on('update-available', (e, info) => {
+    console.log(e, info);
+  });
+};
 
 const easyConfig = async () => {
   console.log('easyConfig');
