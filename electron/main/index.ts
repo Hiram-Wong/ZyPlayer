@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, dialog } from 'electron';
 
 // import { autoUpdater } from 'electron-updater';
 import Store from 'electron-store';
@@ -14,15 +14,33 @@ const remote = require('@electron/remote/main');
 log.info(`storage location：${app.getPath('userData')}`);
 remote.initialize(); // 主进程初始化
 
-app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 支持hevc
-app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
-app.commandLine.appendSwitch('ignore-certificate-errors', 'true'); // 忽略证书相关错误
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
-// const { NODE_ENV } = process.env;
+
+app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
+app.commandLine.appendSwitch('--ignore-certificate-errors', 'true'); // 忽略证书相关错误
+app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 支持hevc
+
+if (process.platform === 'linux') {
+  app.commandLine.appendSwitch('--no-sandbox'); // linux 关闭沙盒模式
+}
 
 const store = new Store();
+// 初始化数据
+const shortcuts: any = store.get('settings.shortcuts');
+if (shortcuts === undefined) {
+  store.set('settings.shortcuts', 'Shift+Command+Z');
+}
+const hardwareAcceleration: any = store.get('settings.hardwareAcceleration');
+if (shortcuts === undefined) {
+  store.set('settings.hardwareAcceleration', true);
+}
+
+if (!hardwareAcceleration) {
+  app.disableHardwareAcceleration();
+}
+// const { NODE_ENV } = process.env;
 
 // 保持window对象的: BrowserWindow | null全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let mainWindow;
@@ -41,14 +59,8 @@ function createWindow(): void {
     frame: false,
     autoHideMenuBar: true,
     title: 'ZyPlayer',
-    ...(process.platform === 'linux'
-      ? {
-          icon: path.join(__dirname, '../../build/icon.png'),
-        }
-      : {}),
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
-      // preload: path.join(__dirname, './preload.ts'),
       sandbox: false,
       nodeIntegration: true,
       contextIsolation: false,
@@ -72,6 +84,22 @@ function createWindow(): void {
     app.isPackaged ? `file://${path.join(__dirname, '../../dist/index.html')}` : 'http://localhost:3000',
   );
 
+  mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    const url = new URL(details.url);
+    details.requestHeaders.Origin = url.origin;
+    if (
+      !details.url.includes('//localhost') &&
+      details.requestHeaders.Referer &&
+      details.requestHeaders.Referer.includes('//localhost')
+    ) {
+      details.requestHeaders.Referer = url.origin;
+    }
+    callback({
+      // https://github.com/electron/electron/issues/23988 回调似乎无法修改headers，暂时先用index.html的meta referer policy替代
+      requestHeaders: details.requestHeaders,
+    });
+  });
+
   initUpdater(mainWindow);
 }
 
@@ -83,11 +111,6 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zyplayer');
 
   // register global shortcuts
-  // 初始化数据
-  const shortcuts: any = store.get('settings.shortcuts');
-  if (shortcuts === undefined) {
-    store.set('settings.shortcuts', 'Shift+Command+Z');
-  }
 
   console.log(shortcuts);
   if (shortcuts) {
@@ -173,6 +196,29 @@ ipcMain.on('openPlayWindow', (_, arg) => {
         })
       : 'http://localhost:3000/#/play',
   );
+
+  // 修改request headers
+  // Sec-Fetch下禁止修改，浏览器自动加上请求头 https://www.cnblogs.com/fulu/p/13879080.html 暂时先用index.html的meta referer policy替代
+
+  playWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    const url = new URL(details.url);
+    details.requestHeaders.Origin = url.origin;
+    console.log(details.requestHeaders);
+    details.requestHeaders['Accept-Language'] = 'zh-CN,zh;q=0.9,en;q=0.8';
+    details.requestHeaders['sec-ch-ua'] = 'Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111';
+    if (
+      !details.url.includes('//localhost') &&
+      details.requestHeaders.Referer &&
+      details.requestHeaders.Referer.includes('//localhost')
+    ) {
+      details.requestHeaders.Referer = url.origin;
+    }
+    callback({
+      // https://github.com/electron/electron/issues/23988 回调似乎无法修改headers，暂时先用index.html的meta referer policy替代
+      requestHeaders: details.requestHeaders,
+    });
+  });
+
   playWindow.on('ready-to-show', () => {
     playWindow.show();
   });
@@ -222,7 +268,7 @@ ipcMain.on('playerPip', (_, isPip) => {
 });
 
 ipcMain.on('selfBoot', (_, status) => {
-  log.info(`selfBoot：${status}`);
+  log.info(`set-selfBoot：${status}`);
   if (status) {
     const exeName = path.basename(process.execPath);
     app.setLoginItemSettings({
@@ -241,4 +287,18 @@ ipcMain.on('selfBoot', (_, status) => {
       openAtLogin: false,
     });
   }
+});
+
+ipcMain.on('toggle-hardware-acceleration', (_, status) => {
+  log.info(`set-hardwareAcceleration：${status}`);
+
+  store.set('settings.hardwareAcceleration', status);
+  setTimeout(() => {
+    dialog.showMessageBoxSync({
+      type: 'none',
+      message: status ? '已开启硬件加速，重启应用生效' : '已关闭硬件加速，重启应用生效',
+    });
+    app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
+    app.exit(0);
+  }, 500);
 });
