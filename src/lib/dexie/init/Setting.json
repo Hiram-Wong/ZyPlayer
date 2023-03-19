@@ -55,6 +55,7 @@
   "softSolution": false,
   "skipStartEnd": false,
   "agreementMask": false,
-  "ecordedShortcut": "Shift+Command+Z",
-  "selfBoot": false
+  "recordShortcut": "Shift+Command+Z",
+  "selfBoot": false,
+  "hardwareAcceleration": true
 }]
