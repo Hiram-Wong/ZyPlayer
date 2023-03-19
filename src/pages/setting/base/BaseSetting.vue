@@ -160,10 +160,11 @@
           <span class="title" @click="resetEvent">恢复出厂</span>
           <span class="title" @click="resetCache">清理缓存</span>
           <span class="title" @click="easyConfig">一键配置</span>
-          <!-- <span class="title" @click="checkUpdate">检查更新</span> -->
+          <span class="title" @click="checkUpdate">检查更新</span>
         </t-space>
 
         <dialog-easy-config-view v-model:visible="isEasyConfigDialog" />
+        <dialog-update-view v-model:visible="isUpdateDialog" />
       </t-form-item>
     </t-form>
   </div>
@@ -171,6 +172,7 @@
 
 <script setup lang="jsx">
 import { ref, computed, watchEffect, onMounted } from 'vue';
+import { useIpcRenderer } from '@vueuse/electron';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
@@ -179,11 +181,12 @@ import { setting } from '@/lib/dexie';
 import { useSettingStore, usePlayStore } from '@/store';
 import DialogClassView from './components/DialogClass.vue';
 import DialogEasyConfigView from './components/DialogEasyConfig.vue';
+import DialogUpdateView from './components/DialogUpdate.vue';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 
-const { ipcRenderer } = require('electron');
+const ipcRenderer = useIpcRenderer();
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
@@ -193,6 +196,7 @@ const { platform } = process;
 const isClassDialog = ref(false);
 const classDialogData = ref({ data: [], type: 'rootClassFilter' });
 const isEasyConfigDialog = ref(false);
+const isUpdateDialog = ref(false);
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -293,7 +297,6 @@ const formatShortcut = computed(() => {
   const val = formData.value.recordShortcut;
   if (!val) return '';
   let shortcut;
-  console.log(formData.value.recordShortcut, val);
   shortcut = val
     .replaceAll('+', ' + ')
     .replace('Up', '↑')
@@ -467,20 +470,20 @@ const resetShortcut = () => {
 // 开机自启
 const selefBootEvnet = () => {
   console.log('开机自启', formData.value.selfBoot);
-  ipcRenderer.send('selfBoot', formData.value.selfBoot);
+  ipcRenderer.send('toggle-selfBoot', formData.value.selfBoot);
 };
 
 // 硬件加速
 const hardwareAccelerationEvnet = () => {
-  ipcRenderer.send('toggle-hardware-acceleration', formData.value.hardwareAcceleration);
+  console.log('开机自启', formData.value.hardwareAcceleration);
+  ipcRenderer.send('toggle-hardwareAcceleration', formData.value.hardwareAcceleration);
+  MessagePlugin.success(
+    formData.value.hardwareAcceleration ? '已开启硬件加速，重启应用生效' : '已关闭硬件加速，重启应用生效',
+  );
 };
 
 const checkUpdate = () => {
-  console.log('checkUpdate');
-  ipcRenderer.send('checkForUpdate');
-  ipcRenderer.on('update-available', (e, info) => {
-    console.log(e, info);
-  });
+  isUpdateDialog.value = true;
 };
 
 const easyConfig = async () => {
