@@ -277,6 +277,8 @@
 </template>
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, onDeactivated } from 'vue';
+import { useClipboard } from '@vueuse/core';
+import { useIpcRenderer } from '@vueuse/electron';
 import { MessagePlugin } from 'tdesign-vue-next';
 import {
   HomeIcon,
@@ -292,7 +294,6 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import QRCode from 'qrcode';
-import { useClipboard } from '@vueuse/core';
 import Player, { Events } from 'xgplayer';
 import HlsPlugin from 'xgplayer-hls';
 import 'xgplayer/dist/xgplayer.min.css';
@@ -308,11 +309,11 @@ import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
-import { setting, history, star } from '@/lib/dexie';
-import { getSettingStore, usePlayStore } from '@/store';
+import { history, star } from '@/lib/dexie';
+import { usePlayStore } from '@/store';
 
 // 用于窗口管理
-const { ipcRenderer } = require('electron');
+const ipcRenderer = useIpcRenderer();
 
 const remote = window.require('@electron/remote');
 const { BrowserWindow } = require('@electron/remote');
@@ -403,6 +404,19 @@ watch(
   },
 );
 
+// 添加画中画事件
+watch(
+  () => xg.value,
+  (val) => {
+    if (val) {
+      xg.value.on(Events.PIP_CHANGE, (isPip) => {
+        console.log('isPip', isPip);
+        ipcRenderer.send('toggle-playerPip', isPip);
+      });
+    }
+  },
+);
+
 onMounted(() => {
   initPlayer();
   minMaxEvent();
@@ -461,11 +475,14 @@ const initPlayer = async (firstInit = false) => {
       });
     } // 处理电子节目单
     zy.isLiveM3U8(info.value.url).then((res) => {
-      config.value.isLive = res;
-      config.value.presets = [LivePreset];
+      if (res) {
+        config.value.isLive = res;
+        config.value.presets = [LivePreset];
+      }
     }); // 判断是否直播
+    console.log(config.value);
     xg.value = new Player(config.value);
-    pipEvent();
+    // pipEvent();
   } else if (type.value === 'film') {
     getDetailInfo();
     // await getDoubanRate();
@@ -763,15 +780,19 @@ const minMaxEvent = () => {
 };
 
 // 画中画事件
-// const pipEvent = () => {
-//   xg.value.on(Events.MINI_STATE_CHANGE, (isPip) => {
-//     console.log('isPip');
-//     console.log(isPip);
-//   });
-//   xg.value.on(Events.RATE_CHANGE, () => {
-//     console.log('RATE_CHANGE');
-//   });
-// };
+const pipEvent = () => {
+  xg.value.on(Events.MINI_STATE_CHANGE, (isPip) => {
+    console.log('isPip');
+    console.log(isPip);
+    ipcRenderer.send('toggle-playerPip', isPip);
+  });
+  xg.value.on(Events.FULLSCREEN_CHANGE, (isFullscreen) => {
+    console.log('isFullscreen');
+  });
+  xg.value.on(Events.VOLUME_CHANGE, () => {
+    console.log('VOLUME_CHANGE');
+  });
+};
 
 // 打开主窗口
 const openMainWinEvent = () => {

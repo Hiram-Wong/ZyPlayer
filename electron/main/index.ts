@@ -255,7 +255,8 @@ ipcMain.on('updateShortcut', (_, { shortcut }) => {
   });
 });
 
-ipcMain.on('playerPip', (_, status) => {
+ipcMain.on('toggle-playerPip', (_, status) => {
+  log.info(`set-playerPip${status}`);
   if (status) {
     if (mainWindow) mainWindow.hide();
     if (playWindow) playWindow.hide();
