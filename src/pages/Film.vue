@@ -169,8 +169,13 @@
           </div>
         </div>
       </div>
-      <infinite-loading :identifier="infiniteId" style="text-align: center" top :distance="200" @infinite="load">
-        <template #complete>没有更多内容了</template>
+      <infinite-loading
+        :identifier="infiniteId"
+        style="text-align: center; margin-bottom: 2em"
+        :distance="200"
+        @infinite="load"
+      >
+        <template #complete>{{ infiniteCompleteTip }}</template>
         <template #error>哎呀，出了点差错</template>
       </infinite-loading>
     </div>
@@ -180,7 +185,6 @@
 <script setup lang="jsx">
 import { ref, watch, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { MoreIcon, ChartBarIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
 
 import InfiniteLoading from 'v3-infinite-loading';
@@ -239,6 +243,7 @@ const FilmDataList = ref({}); // Waterfall
 const FilmSiteList = ref(); // 站点
 const sitesList = ref({}); // 全部源
 const sitesListSelect = ref(); // 选择的源
+const infiniteCompleteTip = ref('没有更多内容了');
 
 // 深度监听过滤条件变更
 watch(
@@ -312,15 +317,14 @@ const changeFilterEvent = (type, item) => {
 
 const getFilmSetting = async () => {
   setting.get('defaultSite').then((id) => {
-    if (!id) {
-      MessagePlugin.warning({ content: '请设置影视默认数据源', duration: 0, closeBtn: true });
-    } else
+    if (id) {
       sites.get(id).then((res) => {
         sitesListSelect.value = res.id;
         FilmSiteSetting.value.basic.name = res.name;
         FilmSiteSetting.value.basic.key = res.key;
         FilmSiteSetting.value.basic.group = res.group;
       });
+    }
   });
   await setting.get('rootClassFilter').then((res) => {
     FilmSiteSetting.value.rootClassFilter = res;
@@ -440,7 +444,10 @@ const load = async ($state) => {
   console.log('loading...');
   // 暂时使用定时器修复onMounted中没执行完就触发load
   setTimeout(() => {
-    if (!FilmSiteSetting.value.basic.key) $state.complete();
+    if (!FilmSiteSetting.value.basic.key) {
+      $state.complete();
+      infiniteCompleteTip.value = '暂无数据，请前往设置-影视源设置默认源！';
+    }
   }, 1000);
   try {
     let resLength;
@@ -614,6 +621,11 @@ eventBus.on(async () => {
               text-overflow: inherit;
               white-space: nowrap;
               text-align: center;
+              cursor: pointer;
+              &:hover {
+                background-color: var(--td-bg-color-component);
+                border-radius: var(--td-radius-default);
+              }
             }
           }
         }

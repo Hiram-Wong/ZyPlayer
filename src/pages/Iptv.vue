@@ -10,7 +10,7 @@
                 placeholder="暂无选择源"
                 size="small"
                 :show-arrow="false"
-                style="max-width: 60px"
+                style="max-width: 80px"
                 class="data-item source"
                 @change="changeDefaultIptvEvent"
               >
@@ -263,7 +263,7 @@ const load = async ($state) => {
     const resLength = await getChannelList();
     if (resLength === 0) {
       $state.complete();
-      if (!iptvSetting.value.name) infiniteCompleteTip.value = '暂无数据，请前往设置直播源设置默认源！';
+      if (!iptvSetting.value.name) infiniteCompleteTip.value = '暂无数据，请前往设置-直播源设置默认源！';
     } else {
       $state.loaded();
     }
@@ -482,6 +482,11 @@ const copyChannelEvent = () => {
             text-overflow: inherit;
             white-space: nowrap;
             text-align: center;
+            cursor: pointer;
+            &:hover {
+              background-color: var(--td-bg-color-component);
+              border-radius: var(--td-radius-default);
+            }
           }
         }
       }
@@ -553,7 +558,7 @@ const copyChannelEvent = () => {
     width: 100%;
     &-flow-wrap {
       display: grid;
-      padding-bottom: 10px;
+      padding: 10px 0;
       grid-template-columns: repeat(auto-fill, 190px);
       grid-column-gap: 25px;
       grid-row-gap: 10px;
