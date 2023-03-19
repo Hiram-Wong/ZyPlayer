@@ -63,6 +63,7 @@
                         fontSize: '10px',
                         marginTop: '5px',
                       }"
+                      attach=".bottom-copy"
                     >
                       <span class="bottom-copy-btn" @click="shareUrlEvent">复制地址</span>
                     </t-popup>
@@ -292,7 +293,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import QRCode from 'qrcode';
 import { useClipboard } from '@vueuse/core';
-import Player from 'xgplayer';
+import Player, { Events } from 'xgplayer';
 import HlsPlugin from 'xgplayer-hls';
 import 'xgplayer/dist/xgplayer.min.css';
 import 'xgplayer-livevideo';
@@ -405,7 +406,6 @@ watch(
 onMounted(() => {
   initPlayer();
   minMaxEvent();
-  // macFullScreenEvent();
   // wideEvent();
 });
 
@@ -465,6 +465,7 @@ const initPlayer = async (firstInit = false) => {
       config.value.presets = [LivePreset];
     }); // 判断是否直播
     xg.value = new Player(config.value);
+    pipEvent();
   } else if (type.value === 'film') {
     getDetailInfo();
     // await getDoubanRate();
@@ -496,6 +497,8 @@ const initPlayer = async (firstInit = false) => {
         config.value.url = await zy.parserFilmUrl(config.value.url);
       } // 判断是否做解析
       xg.value = new Player(config.value);
+
+      // pipEvent();
     }
 
     await timerUpdatePlayProcess();
@@ -759,15 +762,16 @@ const minMaxEvent = () => {
   });
 };
 
-// 最小化暂停播放
-const macFullScreenEvent = () => {
-  win.on('maxmize', () => {
-    isMacFull.value = true;
-  });
-  win.on('restore', () => {
-    isMacFull.value = false;
-  });
-};
+// 画中画事件
+// const pipEvent = () => {
+//   xg.value.on(Events.MINI_STATE_CHANGE, (isPip) => {
+//     console.log('isPip');
+//     console.log(isPip);
+//   });
+//   xg.value.on(Events.RATE_CHANGE, () => {
+//     console.log('RATE_CHANGE');
+//   });
+// };
 
 // 打开主窗口
 const openMainWinEvent = () => {
