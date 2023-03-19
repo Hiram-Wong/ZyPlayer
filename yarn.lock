@@ -5196,10 +5196,10 @@ tdesign-icons-vue-next@^0.1.7:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.1.1.tgz#80074e3a9fca68f78ec3ae5a9e19df7cbb3eb72d"
-  integrity sha512-KtXQ4Ll8z82CD/btqJ1H+NmNcGvUDlf9SK89abZW8CjzqRpsf4yZ+bH0UcKpOyOK6XxasLh/KhiFO4CkZQGERA==
+tdesign-vue-next@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.2.1.tgz#548041dc4cde8df91dec119997876a077d1f376a"
+  integrity sha512-XoS/aB3lrHAk1C+VEBKF1XCbhscj+bQw37uUyiHKVYFAx1c/NZqjWnEGLZjKgtoae077lU2EcniOEnyiX+3hHw==
   dependencies:
     "@babel/runtime" "^7.14.8"
     "@popperjs/core" "^2.9.3"
@@ -5729,7 +5729,7 @@ xgplayer-helper-utils@3.0.0-rc.5:
     core-js "3"
     eventemitter3 "^4.0.7"
 
-xgplayer-hls@^3.0.0-next.34-1:
+xgplayer-hls@^3.0.0-next.35:
   version "3.0.0-rc.5"
   resolved "https://registry.npmmirror.com/xgplayer-hls/-/xgplayer-hls-3.0.0-rc.5.tgz#f3204f32581ce043a4d86a0b967da37bf1e73f7d"
   integrity sha512-hhrKjh5m+sgHHGbz1ZsdGK/A+VtDE6HbM8iiBY1h/w31vzcHuHBdTxfyGBPbQV6qNHF+9ASJHdZFJyww8AZ+Xw==
@@ -5750,7 +5750,7 @@ xgplayer-livevideo@^3.0.0-next.8:
     xgplayer-helper-transmuxers "3.0.0-rc.3-1"
     xgplayer-helper-utils "3.0.0-rc.3-1"
 
-xgplayer@^3.0.0-alpha.110-8:
+xgplayer@^3.0.0-alpha.110-9:
   version "3.0.0-rc.2"
   resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.0-rc.2.tgz#fd479d3fc80314ef29593ba6a21f916a135f4077"
   integrity sha512-rXH5oUxVPxjNlWM1Vam/GUaY77rZIPx45VOaBfC2KH27gdInEBfckaGb3yvZLkOGw6tFpsuxUAOiFjvvoVJGZQ==

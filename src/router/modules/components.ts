@@ -99,7 +99,16 @@ export default [
   {
     path: '/test',
     name: 'test',
-    component: () => import('@/pages/Test.vue'),
+    component: Layout,
+    redirect: '/test/index',
     meta: { title: '测试', icon: 'setting', hidden: true },
+    children: [
+      {
+        path: 'index',
+        name: 'TestIndex',
+        component: () => import('@/pages/Test.vue'),
+        meta: { title: '设置', icon: 'setting' },
+      },
+    ],
   },
 ];
