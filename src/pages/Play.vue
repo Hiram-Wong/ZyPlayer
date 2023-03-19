@@ -482,7 +482,6 @@ const initPlayer = async (firstInit = false) => {
     }); // 判断是否直播
     console.log(config.value);
     xg.value = new Player(config.value);
-    // pipEvent();
   } else if (type.value === 'film') {
     getDetailInfo();
     // await getDoubanRate();
@@ -514,8 +513,6 @@ const initPlayer = async (firstInit = false) => {
         config.value.url = await zy.parserFilmUrl(config.value.url);
       } // 判断是否做解析
       xg.value = new Player(config.value);
-
-      // pipEvent();
     }
 
     await timerUpdatePlayProcess();
