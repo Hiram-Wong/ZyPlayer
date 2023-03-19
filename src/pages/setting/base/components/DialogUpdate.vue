@@ -22,15 +22,15 @@
               </t-link>
               下载
             </p>
+            <t-progress v-if="isDownload" :percentage="downloadProgress" />
+            <div v-if="platform === 'win32'" class="footer">
+              <t-button v-if="!isDownloaded" :loading="isDownload" @click="startDownload">
+                {{ isDownload ? '下载中...' : '下载' }}
+              </t-button>
+              <t-button v-else :disabled="!isDownloaded" @click="installUpdate">安装</t-button>
+            </div>
           </div>
           <p v-else>你当前使用的是最新版本</p>
-          <t-progress v-if="isDownload" :percentage="downloadProgress" />
-        </div>
-        <div v-if="platform === 'win32'" class="footer">
-          <t-button v-if="!isDownloaded" :loading="isDownload" @click="startDownload">
-            {{ isDownload ? '下载中...' : '下载' }}
-          </t-button>
-          <t-button v-else :disabled="!isDownloaded" @click="installUpdate">安装</t-button>
         </div>
       </div>
     </template>
@@ -93,6 +93,7 @@ const checkUpdate = () => {
   });
   ipcRenderer.on('update-not-available', () => {
     console.log('没有可用更新');
+    load.value = false;
     updateInfo.value.new = false;
   });
   console.log(updateInfo.value);
