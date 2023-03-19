@@ -411,7 +411,7 @@ const zy = {
    * @param {*} key 资源网 key
    * @returns boolean
    */
-  async check (key, id) {
+  async check (key) {
     try {
       const cls = await this.class(key)
       if (cls) {
