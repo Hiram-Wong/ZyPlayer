@@ -171,7 +171,8 @@
 </template>
 
 <script setup lang="jsx">
-import { ref, computed, watchEffect, onMounted } from 'vue';
+import { ref, computed, watch, watchEffect, onMounted } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
@@ -233,6 +234,30 @@ const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 
 const formData = ref({});
+
+const filmEmitReload = useEventBus('film-reload');
+const iptvEmitReload = useEventBus('iptv-reload');
+
+// 监听刷新film
+watch(
+  () => [
+    formData.value.defaultHot,
+    formData.value.defaultSearch,
+    formData.value.defaultChangeModel,
+    formData.value.defaultCheckModel,
+  ],
+  () => {
+    filmEmitReload.emit('film-reload');
+  },
+);
+
+// 监听刷新iptv
+watch(
+  () => [formData.value.iptvSkipIpv6, formData.value.iptvStatus, formData.value.defaultIptvEpg],
+  () => {
+    iptvEmitReload.emit('film-reload');
+  },
+);
 
 watchEffect(() => {
   const res = JSON.parse(JSON.stringify(formData.value));
