@@ -147,7 +147,7 @@ const defaultEvent = async (row) => {
 const m3u = (text) => {
   const GROUP = /.*group-title="(.?|.+?)".*/i;
   const LOGO = /.*tvg-logo="(.?|.+?)".*/i;
-  const NAME = /.*,(.+?)$/i;
+  const NAME = /.*,(.+?)(?:$|\n|\s)/i;
 
   const docs = [];
   let doc;

@@ -130,7 +130,7 @@ const setChannelList = async (url) => {
 const m3u = (text) => {
   const GROUP = /.*group-title="(.?|.+?)".*/i;
   const LOGO = /.*tvg-logo="(.?|.+?)".*/i;
-  const NAME = /.*,(.+?)$/i;
+  const NAME = /.*,(.+?)(?:$|\n|\s)/i;
 
   const docs = [];
   let doc;
@@ -142,6 +142,8 @@ const m3u = (text) => {
       doc.logo = line.match(LOGO) ? line.match(LOGO)[1] : '';
       doc.group = line.match(GROUP) ? line.match(GROUP)[1] : '';
     } else if (line.indexOf('://') > -1) {
+      if (line.startsWith('#EXT-X-SUB-URL')) return; // #EXT-X-SUB-URL https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u
+      if (line.startsWith('#EXTM3U')) return; // #EXTM3U url-tvg="http://epg.51zmt.top:8000/e.xml,https://epg.112114.xyz/pp.xml
       doc.url = line;
       docs.push(doc);
     }
