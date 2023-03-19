@@ -75,7 +75,7 @@ const formDialogVisibleAddAnalyze = ref(false);
 const formDialogVisibleEditAnalyze = ref(false);
 const formData = ref();
 const defaultAnalyze = ref();
-const sort = ref({});
+const sort = ref();
 
 // Define table
 const emptyData = ref(false);

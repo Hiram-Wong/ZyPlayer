@@ -84,7 +84,7 @@ const pagination = ref({
 });
 const selectedRowKeys = ref([]);
 const defaultIptv = ref();
-const sort = ref({});
+const sort = ref();
 
 // Define table table
 const emptyData = ref(false);

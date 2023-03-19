@@ -93,7 +93,7 @@ const formDialogVisibleEditSite = ref(false);
 const formData = ref();
 const isCheckStatusChangeActive = ref();
 const formGroup = ref();
-const sort = ref({});
+const sort = ref();
 
 // Define table
 const emptyData = ref(false);
