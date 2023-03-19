@@ -1,6 +1,5 @@
-import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, dialog } from 'electron';
+import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } from 'electron';
 
-// import { autoUpdater } from 'electron-updater';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
@@ -30,7 +29,7 @@ const store = new Store();
 // 初始化数据
 const shortcuts: any = store.get('settings.shortcuts');
 if (shortcuts === undefined) {
-  store.set('settings.shortcuts', 'Shift+Command+Z');
+  store.set('settings.shortcuts', '');
 }
 const hardwareAcceleration: any = store.get('settings.hardwareAcceleration');
 if (shortcuts === undefined) {
@@ -256,8 +255,8 @@ ipcMain.on('updateShortcut', (_, { shortcut }) => {
   });
 });
 
-ipcMain.on('playerPip', (_, isPip) => {
-  if (isPip) {
+ipcMain.on('playerPip', (_, status) => {
+  if (status) {
     if (mainWindow) mainWindow.hide();
     if (playWindow) playWindow.hide();
   } else {
@@ -267,7 +266,7 @@ ipcMain.on('playerPip', (_, isPip) => {
   isHidden = !isHidden;
 });
 
-ipcMain.on('selfBoot', (_, status) => {
+ipcMain.on('toggle-selfBoot', (_, status) => {
   log.info(`set-selfBoot：${status}`);
   if (status) {
     const exeName = path.basename(process.execPath);
@@ -289,16 +288,7 @@ ipcMain.on('selfBoot', (_, status) => {
   }
 });
 
-ipcMain.on('toggle-hardware-acceleration', (_, status) => {
+ipcMain.on('toggle-hardwareAcceleration', (_, status) => {
   log.info(`set-hardwareAcceleration：${status}`);
-
   store.set('settings.hardwareAcceleration', status);
-  setTimeout(() => {
-    dialog.showMessageBoxSync({
-      type: 'none',
-      message: status ? '已开启硬件加速，重启应用生效' : '已关闭硬件加速，重启应用生效',
-    });
-    app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
-    app.exit(0);
-  }, 500);
 });
