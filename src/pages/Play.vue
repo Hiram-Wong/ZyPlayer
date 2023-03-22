@@ -102,37 +102,63 @@
       </div>
 
       <div class="container-episode">
-        <div v-if="!showEpisode" class="episode-container">
+        <div v-if="!showEpisode" class="episode-warp">
           <div class="episode-panel-wrapper">
-            <div v-if="type == 'iptv'" class="epg">
-              <div class="epg-wrap-title">
-                <p class="title">{{ info.name }}</p>
+            <div v-if="type == 'iptv'" class="iptv contents">
+              <div class="play-title-warp">
+                <p class="play-title nowrap">{{ info.name }}</p>
               </div>
-              <div class="epg-wrap-info">
-                <p class="info">节目单</p>
-              </div>
-              <div class="epg-scroll">
-                <div v-for="(item, index) in epgData" :key="index" class="epg-item">
-                  <div class="epg-item-content">
-                    <div class="epg-item-content-start">{{ item.start }}</div>
-                    <div class="epg-item-content-title">{{ item.title }}</div>
-                    <div class="epg-item-content-status">
-                      <span v-if="filterEpgStatus(item.start, item.end) === '已播放'" class="played">{{
-                        filterEpgStatus(item.start, item.end)
-                      }}</span>
-                      <span v-if="filterEpgStatus(item.start, item.end) === '正在直播'" class="playing">{{
-                        filterEpgStatus(item.start, item.end)
-                      }}</span>
-                      <span v-if="filterEpgStatus(item.start, item.end) === '未播放'" class="unplay">{{
-                        filterEpgStatus(item.start, item.end)
-                      }}</span>
+              <div class="iptv-items">
+                <t-tabs v-model="selectIptvTab" class="iptv-tabs">
+                  <t-tab-panel value="epg" label="节目">
+                    <div class="epg-items">
+                      <div class="contents-wrap scroll">
+                        <div v-for="(item, index) in epgData" :key="index" class="content">
+                          <div class="content-item content-item-between">
+                            <div class="time-warp">{{ item.start }}</div>
+                            <div class="title-wrap nowrap">{{ item.title }}</div>
+                            <div class="status-wrap">
+                              <span v-if="filterEpgStatus(item.start, item.end) === '已播放'" class="played">{{
+                                filterEpgStatus(item.start, item.end)
+                              }}</span>
+                              <span v-if="filterEpgStatus(item.start, item.end) === '正在直播'" class="playing">{{
+                                filterEpgStatus(item.start, item.end)
+                              }}</span>
+                              <span v-if="filterEpgStatus(item.start, item.end) === '未播放'" class="unplay">{{
+                                filterEpgStatus(item.start, item.end)
+                              }}</span>
+                            </div>
+                          </div>
+                          <t-divider dashed style="margin: 5px 0" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <t-divider dashed style="margin: 5px 0" />
-                </div>
+                  </t-tab-panel>
+                  <t-tab-panel value="channel" label="频道">
+                    <div class="channel-items">
+                      <div class="contents-wrap scroll">
+                        <div v-for="(item, index) in channelListData" :key="index" class="content">
+                          <div class="content-item content-item-start" @click="changeIptvEvent(item)">
+                            <div class="logo-wrap">
+                              <t-image
+                                class="logo"
+                                :src="item.logo"
+                                :style="{ width: '60px', height: '30px', background: 'none' }"
+                                :lazy="true"
+                              >
+                              </t-image>
+                            </div>
+                            <div class="title-wrap nowrap">{{ item.name }}</div>
+                          </div>
+                          <t-divider dashed style="margin: 5px 0" />
+                        </div>
+                      </div>
+                    </div>
+                  </t-tab-panel>
+                </t-tabs>
               </div>
             </div>
-            <div v-if="type == 'film'" class="film">
+            <div v-if="type == 'film'" class="film contents">
               <div v-if="!isProfile" class="contents-wrap">
                 <div class="title-wrap">
                   <h3 class="title-name nowrap">{{ info.vod_name }}</h3>
@@ -309,13 +335,14 @@ import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
-import { history, star } from '@/lib/dexie';
+import { history, star, channelList } from '@/lib/dexie';
 import { usePlayStore } from '@/store';
 
 // 用于窗口管理
 const ipcRenderer = useIpcRenderer();
 
 const remote = window.require('@electron/remote');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { BrowserWindow } = require('@electron/remote');
 
 const win = remote.getCurrentWindow();
@@ -372,6 +399,9 @@ const config = ref({
   width: 'auto',
   height: 'calc(100vh - 50px)',
 }); // 西瓜播放器参数
+
+const selectIptvTab = ref('epg');
+const channelListData = ref();
 
 const recommend = ref([]); // 推荐
 const season = ref(); // 选集
@@ -468,6 +498,8 @@ const initPlayer = async (firstInit = false) => {
   if (xg.value) xg.value.destroy(); // 存在播放器则摧毁
   if (type.value === 'iptv') {
     console.log(info.value.url);
+    console.log(store.getData);
+    getChannelList();
     config.value.url = info.value.url; // 初始化播放链接
     if (data.value.ext.epg) {
       zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD')).then((res) => {
@@ -618,14 +650,28 @@ const changeEvent = async (e) => {
     delete doc.duration;
   }
 
+  history.update(dataHistory.value.id, doc);
+
   console.log(doc);
   for (const key in doc) {
     dataHistory.value[key] = doc[key];
   }
-  history.update(dataHistory.value.id, doc);
   await initPlayer(true);
 
   await getHistoryData(true);
+};
+
+// 切换iptv
+const changeIptvEvent = async (e) => {
+  store.updateConfig({
+    type: 'iptv',
+    data: {
+      info: e,
+      ext: { epg: data.value.ext.epg },
+    },
+  });
+  info.value = e;
+  await initPlayer();
 };
 
 // 获取豆瓣评分
@@ -666,12 +712,12 @@ const filterContent = (item) => {
 
 // 定时更新播放进度
 const timerUpdatePlayProcess = () => {
-  timer.value = setInterval(async () => {
+  timer.value = setInterval(() => {
     const doc = {
       watchTime: xg.value.currentTime,
       duration: xg.value.duration,
     };
-    await history.update(dataHistory.value.id, doc);
+    history.update(dataHistory.value.id, doc);
 
     console.log(timer.value);
   }, 10000);
@@ -697,6 +743,11 @@ const filterEpgStatus = (start, end) => {
     return '未播放';
   }
   return '已播放';
+};
+
+// 获取直播列表
+const getChannelList = async () => {
+  channelListData.value = await channelList.all();
 };
 
 // 生成二维码
@@ -773,21 +824,6 @@ const minMaxEvent = () => {
     if (xg.value && xg.value.hasStart) {
       xg.value.play();
     }
-  });
-};
-
-// 画中画事件
-const pipEvent = () => {
-  xg.value.on(Events.MINI_STATE_CHANGE, (isPip) => {
-    console.log('isPip');
-    console.log(isPip);
-    ipcRenderer.send('toggle-playerPip', isPip);
-  });
-  xg.value.on(Events.FULLSCREEN_CHANGE, (isFullscreen) => {
-    console.log('isFullscreen');
-  });
-  xg.value.on(Events.VOLUME_CHANGE, () => {
-    console.log('VOLUME_CHANGE');
   });
 };
 
@@ -1068,7 +1104,7 @@ const openMainWinEvent = () => {
     .container-episode {
       width: 300px;
       position: relative;
-      .episode-container {
+      .episode-warp {
         padding: 0 10px;
         position: relative;
         right: 0;
@@ -1084,75 +1120,21 @@ const openMainWinEvent = () => {
           position: relative;
           width: 270px;
           position: relative;
-          .epg {
-            width: 100%;
-            height: 100%;
+          .contents {
             padding-top: 20px;
-            &-wrap-title {
-              height: 26px;
-              line-height: 26px;
-              .title {
-                display: block;
-                float: left;
-                width: 180px;
-                font-size: 16px;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                color: hsla(0, 0%, 100%, 0.87);
-              }
-            }
-            &-wrap-info {
-              max-height: 34px;
-              width: 100%;
-              font-size: 12px;
-              line-height: 17px;
+          }
+          .play-title-warp {
+            height: 26px;
+            line-height: 26px;
+            .play-title {
+              display: block;
+              float: left;
+              width: 180px;
+              font-size: 16px;
+              white-space: nowrap;
+              text-overflow: ellipsis;
               overflow: hidden;
-              margin-top: 10px;
-              padding-bottom: 20px;
-              .info {
-                font-size: 12px;
-                line-height: 17px;
-                color: hsla(0, 0%, 100%, 0.6);
-              }
-            }
-            &-scroll {
-              height: calc(100% - 90px);
-              width: 100%;
-              overflow-y: scroll;
-              display: flex;
-              flex-direction: column;
-              .epg-item {
-                &-content {
-                  display: flex;
-                  justify-content: flex-start;
-                  font-weight: 500;
-                  &-start {
-                    width: 40px;
-                    color: #f09736;
-                    margin-right: 10px;
-                  }
-                  &-title {
-                    width: calc(100% - 110px);
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                  }
-                  &-status {
-                    width: 60px;
-                    text-align: right;
-                    .played {
-                      color: #2774f6;
-                    }
-                    .playing {
-                      color: #f09736;
-                    }
-                    .unplay {
-                      color: #f0f0f1;
-                    }
-                  }
-                }
-              }
+              color: hsla(0, 0%, 100%, 0.87);
             }
           }
 
@@ -1430,5 +1412,100 @@ const openMainWinEvent = () => {
 }
 :deep(.xgplayer .xg-pos) {
   padding: 0 13px;
+}
+
+:deep(.t-tabs__nav-item-text-wrapper) {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+:deep(.tag) {
+  color: rgba(255, 255, 255, 0.9) !important;
+  background-color: #393939 !important;
+  cursor: pointer;
+}
+.select {
+  color: #85d46e !important;
+}
+
+:deep(.t-tabs__content) {
+  padding-top: 10px;
+}
+:deep(.t-tabs__nav-item:not(.t-is-disabled):not(.t-is-active):hover .t-tabs__nav-item-wrapper) {
+  background-color: #393939 !important;
+}
+:deep(.t-tabs__nav-container.t-is-top:after) {
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+:deep(.t-tabs__bar) {
+  background-color: var(--td-brand-color) !important;
+}
+
+.t-tabs {
+  background-color: rgba(0, 0, 0, 0) !important;
+  .contents-wrap,
+  .epg-warp {
+    height: calc(100% - 90px);
+    width: 100%;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    .content {
+      .content-item-start {
+        justify-content: flex-start;
+      }
+      .content-item-between {
+        justify-content: space-between;
+      }
+      .content-item {
+        display: flex;
+        font-weight: 500;
+        .time-warp {
+          width: 40px;
+          color: #f09736;
+          margin-right: 10px;
+        }
+        .status-wrap {
+          width: 60px;
+          text-align: right;
+          .played {
+            color: #2774f6;
+          }
+          .playing {
+            color: #f09736;
+          }
+          .unplay {
+            color: #f0f0f1;
+          }
+        }
+        .logo-wrap {
+          max-width: 60px;
+          margin-right: 10px;
+        }
+        .title-wrap {
+          width: calc(100% - 110px);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        &:hover {
+          background-color: var(--td-bg-color-component);
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+
+.scroll {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-items,
+.epg-items {
+  position: relative;
+  height: calc(100vh - 70px);
 }
 </style>
