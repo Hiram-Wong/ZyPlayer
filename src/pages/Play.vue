@@ -9,7 +9,7 @@
           </div>
         </div>
         <div class="player-top-spacer">
-          <span v-if="type === 'film'">{{ `${info.vod_name}  ${selectPlayIndex}` }}</span>
+          <span v-if="type === 'film'">{{ `${info.vod_name} ${selectPlayIndex}` }}</span>
           <span v-else>{{ info.name }}</span>
         </div>
         <div class="player-top-right">
@@ -19,7 +19,7 @@
               :visible="isShareVisible"
               :on-visible-change="onShareVisibleChange"
               placement="bottom-right"
-              :overlay-inner-style="{ background: '#2a2a31', boxShadow: 'none', marginTop: '16px' }"
+              :overlay-inner-style="{ boxShadow: 'none', padding: '0' }"
               attach=".player-top-right-share"
             >
               <share-icon size="1.5em" @click="isShareVisible = !isShareVisible" />
@@ -37,7 +37,7 @@
                       <t-divider dashed style="margin: 5px 0" />
                       <div class="share-container-main-left-bottom">
                         <div v-if="type === 'film'" class="bottom-title">
-                          {{ `${info.vod_name}  ${selectPlayIndex}` }}
+                          {{ `${info.vod_name} ${selectPlayIndex}` }}
                         </div>
                         <div v-else class="bottom-title">{{ info.name }}</div>
                       </div>
@@ -72,9 +72,54 @@
               </template>
             </t-popup>
           </div>
-          <!-- <div class="player-top-right-popup player-top-right-item" @click="downloadEvent" v-if="type === 'film'">
-            <DownloadIcon size="1.5em"/>
-          </div> -->
+          <div
+            v-if="type === 'film'"
+            class="player-top-right-popup player-top-right-item"
+            @click="isDownloadVisible = true"
+          >
+            <download-icon size="1.5em" />
+          </div>
+          <t-dialog
+            v-model:visible="isDownloadVisible"
+            header="离线缓存"
+            width="508"
+            placement="center"
+            confirm-btn="复制下载链接"
+            :on-confirm="copyDownloadUrl"
+            :cancel-btn="null"
+          >
+            <div class="download-warp">
+              <div class="source-warp">
+                <t-select
+                  v-model="downloadSource"
+                  placeholder="请选下载源"
+                  size="small"
+                  style="width: 200px; display: inline-block"
+                >
+                  <t-option v-for="(value, key, index) in season" :key="index" :value="key" :label="key"></t-option>
+                </t-select>
+                <div>仅支持m3u8播放源</div>
+              </div>
+              <div class="content-warp">
+                <t-transfer v-model="downloadTarget" :data="downloadEpisodes">
+                  <template #title="props">
+                    <div>{{ props.type === 'target' ? '需下载' : '待下载' }}</div>
+                  </template>
+                </t-transfer>
+              </div>
+              <div class="tip-warp">
+                <span>推荐使用开源下载器：</span>
+                <t-link
+                  theme="primary"
+                  underline
+                  href="https://github.com/HeiSir2014/M3U8-Downloader/releases/"
+                  target="_blank"
+                >
+                  M3U8-Downloader
+                </t-link>
+              </div>
+            </div>
+          </t-dialog>
           <div class="player-top-right-popup player-top-right-item" @click="winStickyEvnet">
             <pin-icon v-if="isPin" size="1.5em" />
             <pin-filled-icon v-else size="1.5em" />
@@ -116,7 +161,7 @@
                         <div v-for="(item, index) in epgData" :key="index" class="content">
                           <div class="content-item content-item-between">
                             <div class="time-warp">{{ item.start }}</div>
-                            <div class="title-wrap nowrap">{{ item.title }}</div>
+                            <div class="title-wrap nowrap title-warp-epg">{{ item.title }}</div>
                             <div class="status-wrap">
                               <span v-if="filterEpgStatus(item.start, item.end) === '已播放'" class="played">{{
                                 filterEpgStatus(item.start, item.end)
@@ -142,13 +187,21 @@
                             <div class="logo-wrap">
                               <t-image
                                 class="logo"
+                                fit="contain"
                                 :src="item.logo"
-                                :style="{ width: '60px', height: '30px', background: 'none' }"
+                                :style="{ width: '64px', height: '32px', maxHeight: '32px', background: 'none' }"
                                 :lazy="true"
+                                :loading="renderLoading"
+                                :error="renderError"
                               >
                               </t-image>
                             </div>
-                            <div class="title-wrap nowrap">{{ item.name }}</div>
+                            <div class="title-wrap nowrap title-warp-channel">{{ item.name }}</div>
+                            <div class="status-wrap">
+                              <span :class="item.url === config.url ? 'playing' : 'unplay'">
+                                {{ item.url === config.url ? '正在播放' : '未播放' }}
+                              </span>
+                            </div>
                           </div>
                           <t-divider dashed style="margin: 5px 0" />
                         </div>
@@ -301,7 +354,7 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
+<script setup lang="tsx">
 import { ref, onMounted, computed, watch, onDeactivated } from 'vue';
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
@@ -311,11 +364,13 @@ import {
   HeartIcon,
   PhotoIcon,
   ShareIcon,
-  // DownloadIcon,
+  DownloadIcon,
   PinIcon,
   PinFilledIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  DesktopIcon,
+  LoadingIcon,
 } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import moment from 'moment';
@@ -335,7 +390,7 @@ import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
-import { history, star, channelList } from '@/lib/dexie';
+import { setting, history, star, channelList } from '@/lib/dexie';
 import { usePlayStore } from '@/store';
 
 // 用于窗口管理
@@ -364,6 +419,10 @@ const ext = ref(data.value.ext);
 
 const { isSupported, copy } = useClipboard();
 const isShareVisible = ref(false);
+const isDownloadVisible = ref(false);
+const downloadSource = ref();
+const downloadEpisodes = ref([]);
+const downloadTarget = ref([]);
 
 const config = ref({
   id: 'xgplayer',
@@ -425,6 +484,44 @@ const shareUrl = computed(() => {
   if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name}  ${selectPlayIndex.value}`;
   return soureUrl + params;
 }); // 分享地址
+
+watch(
+  () => downloadSource.value,
+  (val) => {
+    if (val) {
+      const list = [];
+      for (const item of season.value[downloadSource.value]) {
+        const [index, url] = item.split('$');
+        if (!url.endsWith('m3u8')) {
+          MessagePlugin.info('注意: 当前选择非m3u8播放源');
+          break;
+        }
+        list.push({
+          value: url,
+          label: index,
+          disabled: false,
+        });
+      }
+      downloadEpisodes.value = list;
+    }
+  },
+);
+
+const renderError = () => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+      <DesktopIcon size="1.5em" stroke="#fdfdfd" />
+    </div>
+  );
+};
+
+const renderLoading = () => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+      <LoadingIcon size="1.5em" stroke="#fdfdfd" />
+    </div>
+  );
+};
 
 // 更新二维码
 watch(
@@ -625,6 +722,7 @@ const getDetailInfo = async () => {
 const changeEvent = async (e) => {
   if (timer.value) clearInterval(timer.value);
   const [index, url] = e.split('$');
+  console.log(index, url);
   selectPlayIndex.value = index;
   config.value.url = url;
   const doc = {
@@ -745,9 +843,18 @@ const filterEpgStatus = (start, end) => {
   return '已播放';
 };
 
+// ipv6规则校验
+const isIpv6 = (str) => {
+  return /([0-9a-z]*:{1,4}){1,7}[0-9a-z]{1,4}/i.test(str);
+};
+
 // 获取直播列表
-const getChannelList = async () => {
-  channelListData.value = await channelList.all();
+const getChannelList = () => {
+  setting.get('iptvSkipIpv6').then(async (res) => {
+    let channelSourceData = await channelList.all();
+    if (res) channelSourceData = channelSourceData.filter((item) => !isIpv6(item.url));
+    channelListData.value = channelSourceData;
+  });
 };
 
 // 生成二维码
@@ -797,8 +904,18 @@ const recommendEvent = (e) => {
   initPlayer();
 };
 
-// 下载
-// const downloadEvent = () => {};
+// 复制下载链接
+const copyDownloadUrl = () => {
+  if (downloadTarget.value.length !== 0) {
+    const downloadUrl = _.join(downloadTarget.value, '\n');
+    console.log(downloadUrl);
+    copy(downloadUrl);
+    if (isSupported) {
+      MessagePlugin.info('复制成功，快到下载器里下载吧!');
+      isDownloadVisible.value = false;
+    } else MessagePlugin.warning('复制失败，当前环境不支持一键复制!');
+  } else MessagePlugin.warning('请先选择需要下载的内容!');
+};
 
 // electron窗口置顶
 const winStickyEvnet = () => {
@@ -836,9 +953,11 @@ const openMainWinEvent = () => {
 <style lang="less" scoped>
 @import '@/style/variables';
 @import '@/style/index.less';
+
 .container {
   height: calc(100vh);
   overflow-y: hidden;
+
   .nowrap {
     display: inline-block;
     text-overflow: ellipsis;
@@ -848,11 +967,13 @@ const openMainWinEvent = () => {
     width: auto;
     font-weight: normal;
   }
+
   .container-header {
     -webkit-app-region: drag;
     height: 50px;
     flex-shrink: 0;
     background: #1e2022;
+
     .player-top {
       display: flex;
       justify-content: space-between;
@@ -860,11 +981,14 @@ const openMainWinEvent = () => {
       white-space: nowrap;
       color: #fff;
       padding: 10px 15px;
+
       .player-center {
         align-items: center;
       }
+
       .player-top-left {
         -webkit-app-region: no-drag;
+
         .open-main-win {
           height: 30px;
           width: 120px;
@@ -872,20 +996,24 @@ const openMainWinEvent = () => {
           background-color: #2f3134;
           padding: 2px 10px;
           cursor: pointer;
+
           .tip-gotomain {
             display: inline-block;
             margin-left: 5px;
           }
         }
+
         :hover {
           background-color: #47494d;
         }
       }
+
       .player-top-spacer {
         flex: 1 1 auto;
         overflow: hidden;
         width: 100px;
         text-align: center;
+
         span {
           font-weight: 900;
           text-align: center;
@@ -894,12 +1022,14 @@ const openMainWinEvent = () => {
           white-space: nowrap;
         }
       }
+
       .player-top-right {
         -webkit-app-region: no-drag;
         display: flex;
         justify-content: flex-start;
         align-items: center;
         height: 100%;
+
         &-popup {
           line-height: 20px;
           position: relative;
@@ -912,6 +1042,7 @@ const openMainWinEvent = () => {
           font-weight: 400;
           margin: 0 8px;
         }
+
         &-item {
           cursor: pointer;
           width: 30px;
@@ -919,10 +1050,12 @@ const openMainWinEvent = () => {
           border-radius: 5px;
           text-align: center;
           line-height: 25px;
+
           &:hover {
             background-color: #2f3134;
           }
         }
+
         &-share {
           .share-container {
             width: 350px;
@@ -931,31 +1064,38 @@ const openMainWinEvent = () => {
             margin-top: 5px;
             position: relative;
             background-color: #2a2a31;
+
             &-main {
               display: flex;
               justify-content: flex-start;
+
               &-left {
                 width: 190px;
+
                 &-header {
                   .header-name {
                     color: #e0e0e1;
                     font-size: 15px;
                     line-height: 40px;
                   }
+
                   .header-info {
                     color: #4d4d53;
                     font-size: 12px;
                     line-height: 20px;
+
                     &-browser {
                       color: #89eff9;
                     }
                   }
+
                   .header-copyright {
                     color: #4d4d53;
                     font-size: 12px;
                     line-height: 20px;
                   }
                 }
+
                 &-bottom {
                   .bottom-title {
                     line-height: 20px;
@@ -963,23 +1103,29 @@ const openMainWinEvent = () => {
                   }
                 }
               }
+
               &-right {
                 position: relative;
+
                 .bg {
-                  position: relative;
+                  position: absolute;
                   background-color: #16161a;
-                  width: 30px;
-                  height: 90px;
-                  border-radius: 2px;
+                  width: 20px;
+                  height: 80px;
+                  border-radius: var(--td-radius-medium);
+                  top: 5px;
+                  left: 10px;
                 }
+
                 .main {
                   position: absolute;
-                  top: -5px;
+                  top: 0;
                   left: 30px;
+
                   .qrcode {
-                    width: 100px;
-                    height: 100px;
-                    border-radius: 5px;
+                    width: 90px;
+                    height: 90px;
+                    border-radius: var(--td-radius-large);
                   }
                 }
               }
@@ -994,6 +1140,7 @@ const openMainWinEvent = () => {
               color: #777;
               font-size: 12px;
               line-height: 35px;
+
               &-url {
                 float: left;
                 width: 200px;
@@ -1007,6 +1154,7 @@ const openMainWinEvent = () => {
                 white-space: nowrap;
                 word-wrap: normal;
                 word-break: keep-all;
+
                 input {
                   display: block;
                   width: 100%;
@@ -1019,6 +1167,7 @@ const openMainWinEvent = () => {
                   overflow: visible;
                 }
               }
+
               &-btn {
                 position: absolute;
                 top: 0;
@@ -1033,10 +1182,12 @@ const openMainWinEvent = () => {
             }
           }
         }
+
         &-window {
           display: flex;
           justify-content: flex-end;
           align-items: center;
+
           .window-separator {
             display: block;
             border: 0.5px solid #47494d;
@@ -1047,6 +1198,7 @@ const openMainWinEvent = () => {
       }
     }
   }
+
   .container-main {
     height: calc(100vh - 50px);
     color: #fff;
@@ -1055,13 +1207,16 @@ const openMainWinEvent = () => {
     margin: 0 auto;
     position: relative;
     background-color: #000000;
+
     .container-main-left {
       width: 100vw;
       position: relative;
       transition: 0.15s ease-out;
+
       .container-player-ext {
         width: 100vw !important;
       }
+
       .container-player {
         position: relative;
         width: 100%;
@@ -1071,6 +1226,7 @@ const openMainWinEvent = () => {
         justify-content: space-between;
         flex-direction: column;
         z-index: 0;
+
         .player-container {
           position: relative;
           width: 100%;
@@ -1078,12 +1234,14 @@ const openMainWinEvent = () => {
           overflow: hidden;
         }
       }
+
       .player-wide-btn {
         cursor: pointer;
         position: absolute;
         top: 50%;
         right: 0;
         transform: translateY(-50%);
+
         .player-wide-btn-box {
           z-index: 999;
           border-radius: 5px 0 0 5px;
@@ -1091,6 +1249,7 @@ const openMainWinEvent = () => {
           width: 20px;
           height: 120px;
         }
+
         .player-wide-btn-icon {
           position: absolute;
           top: 50%;
@@ -1101,9 +1260,11 @@ const openMainWinEvent = () => {
         }
       }
     }
+
     .container-episode {
       width: 300px;
       position: relative;
+
       .episode-warp {
         padding: 0 10px;
         position: relative;
@@ -1114,27 +1275,30 @@ const openMainWinEvent = () => {
         flex-shrink: 0;
         height: 100%;
         background: #18191c;
+
         .episode-panel-wrapper {
           width: 100%;
           height: 100%;
           position: relative;
           width: 270px;
           position: relative;
+
           .contents {
             padding-top: 20px;
           }
+
           .play-title-warp {
             height: 26px;
             line-height: 26px;
+
             .play-title {
-              display: block;
-              float: left;
-              width: 180px;
-              font-size: 16px;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              overflow: hidden;
-              color: hsla(0, 0%, 100%, 0.87);
+              max-width: 190px;
+              font-size: 20px;
+              min-height: 32px;
+              line-height: 32px;
+              font-weight: 500;
+              color: #fff;
+              position: relative;
             }
           }
 
@@ -1142,9 +1306,11 @@ const openMainWinEvent = () => {
             width: 100%;
             padding-top: 20px;
             overflow-y: hidden;
+
             .contents-wrap {
               .title-wrap {
                 position: relative;
+
                 .title-name {
                   max-width: 190px;
                   font-size: 20px;
@@ -1154,6 +1320,7 @@ const openMainWinEvent = () => {
                   color: #fff;
                   position: relative;
                 }
+
                 .title-binge {
                   position: absolute;
                   right: 0;
@@ -1168,6 +1335,7 @@ const openMainWinEvent = () => {
                   width: 74px;
                   height: 32px;
                 }
+
                 .title-feature {
                   position: relative;
                   font-size: 14px;
@@ -1175,14 +1343,17 @@ const openMainWinEvent = () => {
                   padding: 12px 45px 9px 0;
                   color: hsla(0, 0%, 100%, 0.9);
                   font-weight: 400;
+
                   .rate {
-                    color: #65d444;
+                    color: var(--td-brand-color);
                     font-weight: bold;
                   }
+
                   span {
                     margin-right: 6px;
                   }
                 }
+
                 .title-unfold {
                   position: absolute;
                   right: 0;
@@ -1192,6 +1363,7 @@ const openMainWinEvent = () => {
                   color: hsla(0, 0%, 100%, 0.6);
                   cursor: pointer;
                   padding-right: 15px;
+
                   &:after {
                     content: '';
                     width: 6px;
@@ -1208,12 +1380,14 @@ const openMainWinEvent = () => {
                   }
                 }
               }
+
               .anthology-contents-scroll {
                 position: relative;
                 height: calc(100vh - 160px);
                 margin-top: 5px;
                 overflow-y: auto;
                 overflow-x: hidden;
+
                 .box-anthology-title {
                   position: relative;
                   font-size: 18px;
@@ -1221,33 +1395,42 @@ const openMainWinEvent = () => {
                   color: hsla(0, 0%, 100%, 0.9);
                   font-weight: 600;
                 }
+
                 .box-anthology-items {
                   padding-bottom: 18px;
                   overflow: hidden;
+
                   .film-tabs {
                     background-color: rgba(0, 0, 0, 0) !important;
+
                     :deep(.t-tabs__nav-item-text-wrapper) {
                       color: rgba(255, 255, 255, 0.9) !important;
                     }
+
                     :deep(.tag) {
                       color: rgba(255, 255, 255, 0.9) !important;
                       background-color: #393939 !important;
                       cursor: pointer;
                     }
+
                     .select {
-                      color: #85d46e !important;
+                      color: var(--td-brand-color) !important;
                     }
+
                     :deep(.t-tabs__nav-item:not(.t-is-disabled):not(.t-is-active):hover .t-tabs__nav-item-wrapper) {
                       background-color: #393939 !important;
                     }
+
                     :deep(.t-tabs__nav-container.t-is-top:after) {
                       background-color: rgba(0, 0, 0, 0) !important;
                     }
+
                     :deep(.t-tabs__bar) {
                       background-color: var(--td-brand-color) !important;
                     }
                   }
                 }
+
                 .component-title {
                   font-size: 18px;
                   height: 25px;
@@ -1257,6 +1440,7 @@ const openMainWinEvent = () => {
                   font-weight: 600;
                   color: hsla(0, 0%, 100%, 0.9);
                 }
+
                 .anthology-content {
                   .pic-text-item {
                     position: relative;
@@ -1265,6 +1449,7 @@ const openMainWinEvent = () => {
                     overflow: hidden;
                     height: 70px;
                     cursor: pointer;
+
                     .cover {
                       position: relative;
                       float: left;
@@ -1273,6 +1458,7 @@ const openMainWinEvent = () => {
                       height: 100%;
                       overflow: hidden;
                     }
+
                     .anthology-title-wrap {
                       margin-left: 138px;
                       height: 70px;
@@ -1281,6 +1467,7 @@ const openMainWinEvent = () => {
                       display: flex;
                       flex-direction: column;
                       justify-content: center;
+
                       .title {
                         font-size: 14px;
                         line-height: 20px;
@@ -1294,6 +1481,7 @@ const openMainWinEvent = () => {
                         -webkit-line-clamp: 2;
                         color: #fff;
                       }
+
                       .subtitle {
                         color: #797979;
                         font-size: 10px;
@@ -1303,6 +1491,7 @@ const openMainWinEvent = () => {
                 }
               }
             }
+
             .profile {
               position: absolute;
               height: 100%;
@@ -1313,6 +1502,7 @@ const openMainWinEvent = () => {
               z-index: 100;
               animation: previewIn 0.3s cubic-bezier(0.86, 0, 0.07, 1);
               animation-fill-mode: forwards;
+
               h3 {
                 font-size: 20px;
                 height: 49px;
@@ -1322,6 +1512,7 @@ const openMainWinEvent = () => {
                 text-align: left;
                 border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
               }
+
               .intro-exit {
                 cursor: pointer;
                 display: block;
@@ -1330,6 +1521,7 @@ const openMainWinEvent = () => {
                 position: absolute;
                 right: 0;
                 top: 13px;
+
                 &:before {
                   content: '';
                   width: 2px;
@@ -1340,6 +1532,7 @@ const openMainWinEvent = () => {
                   left: 11px;
                   top: 4px;
                 }
+
                 &:after {
                   content: '';
                   width: 2px;
@@ -1351,12 +1544,15 @@ const openMainWinEvent = () => {
                   top: 4px;
                 }
               }
+
               .intro-content {
                 width: 100%;
                 height: calc(100% - 50px);
                 overflow-y: scroll;
+
                 .intro-img {
                   margin-top: 20px;
+
                   .img-wrap {
                     width: 120px;
                     height: 165px;
@@ -1366,6 +1562,7 @@ const openMainWinEvent = () => {
                     overflow: hidden;
                   }
                 }
+
                 h4 {
                   margin-top: 10px;
                   font-size: 15px;
@@ -1378,16 +1575,19 @@ const openMainWinEvent = () => {
                   white-space: nowrap;
                   text-align: center;
                 }
+
                 .intro-detail {
                   margin-top: 15px;
                   padding-bottom: 18px;
                   padding-right: 3px;
                 }
+
                 .intro-title {
                   font-size: 15px;
                   line-height: 21px;
                   font-weight: 800;
                 }
+
                 .intro-desc {
                   margin-top: 7px;
                   line-height: 24px;
@@ -1395,6 +1595,7 @@ const openMainWinEvent = () => {
                   font-size: 15px;
                   font-weight: 400;
                 }
+
                 .second {
                   margin-top: 27px;
                 }
@@ -1406,10 +1607,12 @@ const openMainWinEvent = () => {
     }
   }
 }
+
 :deep(.xgplayer-icon svg) {
   width: 1.4em !important;
   height: 100% !important;
 }
+
 :deep(.xgplayer .xg-pos) {
   padding: 0 13px;
 }
@@ -1417,11 +1620,13 @@ const openMainWinEvent = () => {
 :deep(.t-tabs__nav-item-text-wrapper) {
   color: rgba(255, 255, 255, 0.9) !important;
 }
+
 :deep(.tag) {
   color: rgba(255, 255, 255, 0.9) !important;
   background-color: #393939 !important;
   cursor: pointer;
 }
+
 .select {
   color: #85d46e !important;
 }
@@ -1432,15 +1637,31 @@ const openMainWinEvent = () => {
 :deep(.t-tabs__nav-item:not(.t-is-disabled):not(.t-is-active):hover .t-tabs__nav-item-wrapper) {
   background-color: #393939 !important;
 }
+
 :deep(.t-tabs__nav-container.t-is-top:after) {
   background-color: rgba(0, 0, 0, 0) !important;
 }
+
 :deep(.t-tabs__bar) {
   background-color: var(--td-brand-color) !important;
 }
 
+:deep(.t-input) {
+  background-color: var(--td-gray-color-11);
+  border-color: transparent;
+}
+
+:deep(.t-select-input) {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--td-gray-color-11);
+  background-color: var(--td-gray-color-11);
+  border-radius: 5px;
+}
+
 .t-tabs {
   background-color: rgba(0, 0, 0, 0) !important;
+
   .contents-wrap,
   .epg-warp {
     height: calc(100% - 90px);
@@ -1448,6 +1669,7 @@ const openMainWinEvent = () => {
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
+
     .content {
       .content-item-start {
         justify-content: flex-start;
@@ -1457,7 +1679,9 @@ const openMainWinEvent = () => {
       }
       .content-item {
         display: flex;
+        align-items: center;
         font-weight: 500;
+        cursor: pointer;
         .time-warp {
           width: 40px;
           color: #f09736;
@@ -1480,15 +1704,23 @@ const openMainWinEvent = () => {
           max-width: 60px;
           margin-right: 10px;
         }
+
         .title-wrap {
-          width: calc(100% - 110px);
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          color: #f0f0f1;
+          font-weight: bold;
         }
+
+        .title-warp-channel {
+          width: calc(100% - 120px);
+        }
+
+        .title-warp-epg {
+          width: calc(100% - 110px);
+        }
+
         &:hover {
-          background-color: var(--td-bg-color-component);
-          cursor: pointer;
+          background-color: #2f3134;
+          border-radius: var(--td-radius-small);
         }
       }
     }
@@ -1507,5 +1739,124 @@ const openMainWinEvent = () => {
 .epg-items {
   position: relative;
   height: calc(100vh - 70px);
+}
+
+.download-warp {
+  .source-warp {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: center;
+    color: var(--td-gray-color-6);
+    font-size: var(--td-font-size-link-small);
+  }
+
+  .content-warp {
+    margin: var(--td-comp-margin-s) 0;
+    :deep(.t-button + .t-button) {
+      margin-left: 0 !important;
+    }
+  }
+
+  .tip-warp {
+    color: var(--td-gray-color-6);
+  }
+}
+
+:deep(.t-dialog) {
+  color: var(--td-font-white-1) !important;
+  background-color: var(--td-gray-color-13) !important;
+  border: none !important;
+  .t-dialog__header {
+    color: var(--td-font-white-1);
+    .t-dialog__close {
+      color: var(--td-font-white-2);
+      &:hover {
+        background: var(--td-gray-color-12);
+      }
+    }
+  }
+}
+
+:deep(.t-select-input) {
+  color: var(--td-font-white-1) !important;
+  border-color: var(--td-gray-color-11) !important;
+  background-color: var(--td-gray-color-11) !important;
+}
+
+:deep(.t-input__inner),
+:deep(.t-transfer) {
+  color: var(--td-font-white-1) !important;
+}
+
+:deep(.t-input__inner) {
+  &::placeholder {
+    color: var(--td-gray-color-5);
+  }
+}
+
+:global(.t-select .t-fake-arrow) {
+  color: var(--td-font-white-3);
+}
+
+:global(.t-popup__content) {
+  background: var(--td-gray-color-11) !important;
+}
+
+:global(.t-select-option:not(.t-is-disabled):not(.t-is-selected):hover) {
+  background-color: var(--td-gray-color-12);
+}
+:global(.t-select-option) {
+  color: var(--td-font-white-1);
+}
+:global(
+    .t-select-option.t-select-option__hover:not(.t-is-disabled).t-select-option.t-select-option__hover:not(
+        .t-is-selected
+      )
+  ) {
+  background-color: var(--td-gray-color-12);
+}
+
+:deep(.t-transfer) {
+  color: var(--td-font-white-1) !important;
+  .t-transfer__list-source,
+  .t-transfer__list-target {
+    border: none;
+    background-color: var(--td-gray-color-12);
+  }
+  .t-transfer__list-header + :not(.t-transfer__list--with-search) {
+    border-top: 1px solid var(--td-gray-color-10);
+  }
+  .t-transfer__list-header > span,
+  .t-checkbox {
+    color: var(--td-font-white-1);
+  }
+  .t-transfer__list-item:hover {
+    background: var(--td-gray-color-12);
+  }
+  .t-transfer__list-item.t-is-checked {
+    background: var(--td-brand-color);
+  }
+  .t-checkbox__input {
+    border: 1px solid var(--td-gray-color-9);
+    background-color: var(--td-gray-color-13);
+  }
+  .t-transfer__empty {
+    color: var(--td-gray-color-6);
+  }
+  .t-button--variant-outline {
+    background-color: var(--td-gray-color-11);
+    border-color: transparent;
+  }
+  .t-button--variant-outline.t-is-disabled {
+    border-color: transparent;
+  }
+  .t-button--variant-outline.t-is-disabled {
+    background-color: var(--td-gray-color-12);
+  }
+  .t-button--variant-outline.t-is-disabled {
+    color: var(--td-font-white-4);
+  }
 }
 </style>
