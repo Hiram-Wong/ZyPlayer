@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
 
     build: {
       emptyOutDir: true,
-      chunkSizeWarningLimit: 1500,
+      chunkSizeWarningLimit: 2500,
     },
 
     plugins: [
