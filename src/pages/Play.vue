@@ -647,6 +647,8 @@ const initPlayer = async (firstInit = false) => {
 
     await timerUpdatePlayProcess();
   }
+
+  document.title = type.value === 'iptv' ? info.value.name : `${info.value.vod_name} ${selectPlayIndex.value}`;
 };
 
 // 在追
