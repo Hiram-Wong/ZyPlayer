@@ -84,6 +84,7 @@
         <div class="iptv">
           <t-space>
             <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
+            <span class="title" @click="checkIpv6">检查</span>
             <t-radio v-model="formData.iptvStatus" allow-uncheck>检测可用性</t-radio>
           </t-space>
         </div>
@@ -186,6 +187,7 @@ import DialogUpdateView from './components/DialogUpdate.vue';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
+import zy from '@/lib/site/tools';
 
 const ipcRenderer = useIpcRenderer();
 
@@ -507,15 +509,18 @@ const hardwareAccelerationEvnet = () => {
   );
 };
 
+// 更新
 const checkUpdate = () => {
   isUpdateDialog.value = true;
 };
 
+// 一键配置
 const easyConfig = async () => {
   console.log('easyConfig');
   isEasyConfigDialog.value = true;
 };
 
+// 分类：打开dialog并设置数据
 const classEvent = (item) => {
   switch (item) {
     case 'r18':
@@ -534,9 +539,23 @@ const classEvent = (item) => {
   isClassDialog.value = true;
 };
 
+// 分类：刷新dialog数据
 const setClassData = (item) => {
   const { data, type } = item;
   formData.value[type] = data;
+};
+
+// ipv6检查
+const checkIpv6 = async () => {
+  await zy
+    .checkSupportIpv6()
+    .then((res) => {
+      formData.value.iptvSkipIpv6 = !res;
+    })
+    .catch((err) => {
+      formData.value.iptvSkipIpv6 = true;
+      console.log(err);
+    });
 };
 </script>
 
