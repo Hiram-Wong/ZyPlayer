@@ -140,9 +140,10 @@
         </div>
 
         <div class="player-wide-btn" @click="showEpisode = !showEpisode">
-          <div class="player-wide-btn-box"></div>
-          <chevron-left-icon v-if="showEpisode" class="player-wide-btn-icon" />
-          <chevron-right-icon v-else class="player-wide-btn-icon" />
+          <div class="player-wide-btn-box">
+            <chevron-left-icon v-if="showEpisode" class="player-wide-btn-icon" />
+            <chevron-right-icon v-else class="player-wide-btn-icon" />
+          </div>
         </div>
       </div>
 
@@ -1236,27 +1237,29 @@ const openMainWinEvent = () => {
       }
 
       .player-wide-btn {
-        cursor: pointer;
         position: absolute;
         top: 50%;
         right: 0;
         transform: translateY(-50%);
 
         .player-wide-btn-box {
-          z-index: 999;
+          cursor: pointer;
+          z-index: 120;
           border-radius: 5px 0 0 5px;
           background: rgba(0, 0, 0, 0.5);
           width: 20px;
           height: 120px;
-        }
-
-        .player-wide-btn-icon {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          fill: #848494;
-          cursor: pointer;
-          left: 3px;
+          overflow: hidden;
+          &:hover {
+            background-color: #18191c;
+          }
+          .player-wide-btn-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            fill: #333;
+            left: 3px;
+          }
         }
       }
     }
