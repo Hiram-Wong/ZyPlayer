@@ -692,6 +692,20 @@ const zy = {
       }).catch(err => { reject(err) })
     })
   },
+  /**
+   * 判断是否支持ipv6
+   * @returns ture/false
+  */
+  checkSupportIpv6 () {
+    return new Promise((resolve, reject) => {
+      // https://ipw.cn/ipv6/
+      axios.get('https://6.ipw.cn').then(res => {
+        const ip = res.data
+        const isIpv6 = /([0-9a-z]*:{1,4}){1,7}[0-9a-z]{1,4}/i.test(ip);
+        resolve(isIpv6)
+      }).catch(err => { reject(err) })
+    })
+  },
   proxy () {
     return new Promise((resolve, reject) => {
       setting.find().then(db => {
