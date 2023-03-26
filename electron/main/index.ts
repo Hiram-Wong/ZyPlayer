@@ -1,18 +1,18 @@
-import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, powerSaveBlocker } from 'electron';
 
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
 import { electronApp } from '@electron-toolkit/utils';
 // import { createMenu } from './core/menu';
+import remote from '@electron/remote/main';
 import log from './core/log';
 import initUpdater from './core/auto-update';
 
-const remote = require('@electron/remote/main');
-
-log.info(`storage location：${app.getPath('userData')}`);
+log.info(`[storage] storage location: ${app.getPath('userData')}`);
 remote.initialize(); // 主进程初始化
 
+// Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
@@ -36,14 +36,16 @@ if (shortcuts === undefined) {
   store.set('settings.hardwareAcceleration', true);
 }
 
+// 默认数据处理
 if (!hardwareAcceleration) {
   app.disableHardwareAcceleration();
 }
+
 // const { NODE_ENV } = process.env;
 
 // 保持window对象的: BrowserWindow | null全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
-let mainWindow;
-let playWindow; // 播放窗口
+let mainWindow: BrowserWindow | null;
+let playWindow: BrowserWindow | null; // 播放窗口
 let isHidden = true;
 
 function createWindow(): void {
@@ -73,7 +75,7 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
   });
-  // initUpdater(mainWindow);
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
@@ -186,6 +188,12 @@ ipcMain.on('openPlayWindow', (_, arg) => {
       allowRunningInsecureContent: false,
     },
   });
+
+  playWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return { action: 'deny' };
+  });
+
   playWindow.loadURL(
     app.isPackaged
       ? url.format({
@@ -203,9 +211,6 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   playWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const url = new URL(details.url);
     details.requestHeaders.Origin = url.origin;
-    console.log(details.requestHeaders);
-    details.requestHeaders['Accept-Language'] = 'zh-CN,zh;q=0.9,en;q=0.8';
-    details.requestHeaders['sec-ch-ua'] = 'Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111';
     if (
       !details.url.includes('//localhost') &&
       details.requestHeaders.Referer &&
@@ -231,19 +236,22 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   });
 });
 
-ipcMain.on('showMainWin', async () => {
-  console.log('显示主窗口');
+ipcMain.on('showMainWin', () => {
+  log.info(`[ipcMain] show main windows`);
   mainWindow.show();
 });
 
 ipcMain.on('uninstallShortcut', () => {
+  log.info(`[ipcMain] globalShortcut unregisterAll`);
   globalShortcut.unregisterAll();
   store.set('settings.shortcuts', '');
 });
 
 ipcMain.on('updateShortcut', (_, { shortcut }) => {
+  log.info(`[ipcMain] storage-shortcuts: ${shortcut}`);
   store.set('settings.shortcuts', shortcut);
   globalShortcut.unregisterAll();
+  log.info(`[ipcMain] globalShortcut-install: ${shortcut}`);
   globalShortcut.register(shortcut, () => {
     if (isHidden) {
       if (mainWindow) mainWindow.hide();
@@ -257,7 +265,7 @@ ipcMain.on('updateShortcut', (_, { shortcut }) => {
 });
 
 ipcMain.on('toggle-playerPip', (_, status) => {
-  log.info(`set-playerPip${status}`);
+  log.info(`[ipcMain] set-playerPip: ${status}`);
   if (status) {
     if (mainWindow) mainWindow.hide();
     if (playWindow) playWindow.hide();
@@ -269,7 +277,7 @@ ipcMain.on('toggle-playerPip', (_, status) => {
 });
 
 ipcMain.on('toggle-selfBoot', (_, status) => {
-  log.info(`set-selfBoot：${status}`);
+  log.info(`[ipcMain] set-selfBoot: ${status}`);
   if (status) {
     const exeName = path.basename(process.execPath);
     app.setLoginItemSettings({
@@ -290,7 +298,7 @@ ipcMain.on('toggle-selfBoot', (_, status) => {
   }
 });
 
-ipcMain.on('toggle-hardwareAcceleration', (_, status) => {
-  log.info(`set-hardwareAcceleration：${status}`);
+ipcMain.on('update-hardwareAcceleration', (_, status) => {
+  log.info(`[ipcMain] storage-hardwareAcceleration: ${status}`);
   store.set('settings.hardwareAcceleration', status);
 });
