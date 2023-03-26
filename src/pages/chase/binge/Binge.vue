@@ -4,12 +4,16 @@
       <div class="main-flow-wrap">
         <div v-for="item in bingeList" :key="item.id" class="card-wrap">
           <div class="card" @click="playEvent(item)">
-            <div class="card-header"></div>
+            <div v-if="item.videoType" class="card-header">
+              <span class="card-header-tag card-header-tag-orange">
+                <span class="card-header-tag-tagtext">{{ item.videoType }}</span>
+              </span>
+            </div>
             <div class="card-main">
               <t-image
                 class="card-main-item"
                 :src="item.videoImage"
-                :style="{ width: '170px', height: '105px', borderRadius: '4px' }"
+                :style="{ width: '190px', height: '105px', borderRadius: '7px' }"
                 :lazy="true"
                 fit="cover"
                 overlay-trigger="hover"
@@ -23,9 +27,6 @@
             </div>
             <div class="card-footer">
               <div class="card-footer-title">
-                <t-tag v-if="item.videoType" class="card-footer-title-type" variant="outline" size="small">
-                  {{ item.videoType }}
-                </t-tag>
                 <span class="card-footer-title-name">{{ item.videoName }}</span>
               </div>
               <p class="card-footer-desc">{{ item.videoRemarks }}</p>
@@ -43,6 +44,7 @@
 
 <script setup lang="jsx">
 import { ref } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { DeleteIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import { useIpcRenderer } from '@vueuse/electron';
@@ -89,16 +91,23 @@ const load = async ($state) => {
 
 // 播放
 const playEvent = async (item) => {
-  const info = await zy.detail(item.siteKey, item.videoId);
-  store.updateConfig({
-    type: 'film',
-    data: {
-      info,
-      ext: { site: { key: item.siteKey } },
-    },
-  });
+  await zy
+    .detail(item.siteKey, item.videoId)
+    .then((res) => {
+      store.updateConfig({
+        type: 'film',
+        data: {
+          info: res,
+          ext: { site: { key: item.siteKey } },
+        },
+      });
 
-  ipcRenderer.send('openPlayWindow', item.videoName);
+      ipcRenderer.send('openPlayWindow', item.videoName);
+    })
+    .catch((err) => {
+      console.log(err);
+      MessagePlugin.warning('请求资源站失败，请检查网络!');
+    });
 };
 
 // 删除
@@ -125,11 +134,9 @@ defineExpose({
 @import '@/style/variables';
 @import '@/style/index.less';
 .binge-container {
-  overflow: hidden;
-  position: relative;
+  overflow-y: auto;
   height: inherit;
   .main {
-    height: calc(100% - 10px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -138,62 +145,83 @@ defineExpose({
     width: 100%;
     &-flow-wrap {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 170px);
+      grid-template-columns: repeat(auto-fill, 190px);
       grid-column-gap: 20px;
       grid-row-gap: 10px;
       justify-content: center;
       width: inherit;
-      .card {
+      .card-wrap {
+        flex-direction: column;
         position: relative;
-        display: inline-block;
-        vertical-align: top;
-        width: 170px;
-        height: 150px;
-        .card-header {
-          color: #fbfbfb;
-          position: absolute;
-          z-index: 2222;
-          .t-tag {
+        .card {
+          box-sizing: border-box;
+          width: 190px;
+          position: relative;
+          display: inline-block;
+          vertical-align: top;
+          .card-header {
             position: absolute;
-            top: 5px;
-            left: 5px;
-            font-size: 10px;
-          }
-        }
-        .card-main {
-          width: 100%;
-          .card-main-item {
-            .op {
-              background: rgba(0, 0, 0, 0.8);
-              position: absolute;
-              bottom: 5px;
-              right: 5px;
-              padding: 0 3px 3px;
-              border-radius: 5px;
+            color: #fff;
+            font-size: 12px;
+            z-index: 15;
+            height: 18px;
+            line-height: 18px;
+            right: 0;
+            top: 0;
+            &-tag {
+              height: 18px;
+              line-height: 18px;
+              padding: 1px 6px;
+              border-radius: 0 7px 0 7px;
+              background: #03c8d4;
+              display: block;
+              &-tagtext {
+                display: inline-block;
+                font-size: 12px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-width: 100px;
+              }
+            }
+            &-tag-orange {
+              background: #ffdd9a;
+              color: #4e2d03;
             }
           }
-        }
-        .card-footer {
-          overflow: hidden;
-          height: auto;
-          line-height: 26px;
-          .card-footer-title {
-            display: flex;
-            align-items: center;
-            &-type {
-              margin-right: 5px;
-            }
-            &-name {
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              overflow: hidden;
+          .card-main {
+            width: 100%;
+            .card-main-item {
+              .op {
+                background: rgba(0, 0, 0, 0.8);
+                position: absolute;
+                bottom: 5px;
+                right: 5px;
+                padding: 0 3px 3px;
+                border-radius: 5px;
+              }
             }
           }
-          .card-footer-desc {
-            line-height: 20px;
-            font-size: 13px;
-            color: #999;
-            font-weight: normal;
+          .card-footer {
+            overflow: hidden;
+            height: auto;
+            line-height: 26px;
+            .card-footer-title {
+              display: flex;
+              align-items: center;
+              &-name {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                font-weight: 500;
+              }
+            }
+            .card-footer-desc {
+              line-height: 10px;
+              font-size: 10px;
+              color: var(--td-gray-color-7);
+              font-weight: normal;
+            }
           }
         }
       }
