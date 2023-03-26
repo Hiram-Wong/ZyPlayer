@@ -93,7 +93,7 @@
         <div class="epg">
           <t-input
             v-model="formData.defaultIptvEpg"
-            label="默认EPG："
+            label="默认EPG:"
             placeholder="仅支持DIYP"
             :style="{ width: '300px' }"
           />
@@ -503,7 +503,7 @@ const selefBootEvnet = () => {
 // 硬件加速
 const hardwareAccelerationEvnet = () => {
   console.log('开机自启', formData.value.hardwareAcceleration);
-  ipcRenderer.send('toggle-hardwareAcceleration', formData.value.hardwareAcceleration);
+  ipcRenderer.send('update-hardwareAcceleration', formData.value.hardwareAcceleration);
   MessagePlugin.success(
     formData.value.hardwareAcceleration ? '已开启硬件加速，重启应用生效' : '已关闭硬件加速，重启应用生效',
   );
