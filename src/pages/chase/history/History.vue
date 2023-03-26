@@ -13,7 +13,7 @@
               <t-image
                 class="card-main-item"
                 :src="item.videoImage"
-                :style="{ width: '170px', height: '105px', borderRadius: '4px' }"
+                :style="{ width: '190px', height: '105px', borderRadius: '4px' }"
                 :lazy="true"
                 fit="cover"
                 overlay-trigger="hover"
@@ -44,6 +44,7 @@
 </template>
 <script setup lang="jsx">
 import { ref } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { LaptopIcon, LocationIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
@@ -87,12 +88,17 @@ const getHistoryList = async () => {
     });
     if (options.value.length === 0) options.value = arry;
     else {
+      // arry 数据每次循环都要添加到options
       for (const key1 in arry) {
+        let flag = false;
         for (const key2 in options.value) {
           if (arry[key1].time === options.value[key2].time) {
+            flag = true;
             options.value[key2].data = options.value[key2].data.concat(arry[key1].data);
-          } else options.value.push(arry[key1]);
+            break;
+          }
         }
+        if (!flag) options.value.push(arry[key1]);
       }
     }
     pagination.value.count = res.total;
@@ -118,16 +124,23 @@ const load = async ($state) => {
 
 // 播放
 const playEvent = async (item) => {
-  const info = await zy.detail(item.siteKey, item.videoId);
-  store.updateConfig({
-    type: 'film',
-    data: {
-      info,
-      ext: { site: { key: item.siteKey } },
-    },
-  });
+  await zy
+    .detail(item.siteKey, item.videoId)
+    .then((res) => {
+      store.updateConfig({
+        type: 'film',
+        data: {
+          info: res,
+          ext: { site: { key: item.siteKey } },
+        },
+      });
 
-  ipcRenderer.send('openPlayWindow', item.videoName);
+      ipcRenderer.send('openPlayWindow', item.videoName);
+    })
+    .catch((err) => {
+      console.log(err);
+      MessagePlugin.warning('请求资源站失败，请检查网络!');
+    });
 };
 
 // 删除
@@ -186,18 +199,22 @@ defineExpose({
       }
     }
     &-main {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 190px);
+      grid-column-gap: 20px;
+      grid-row-gap: 10px;
+      justify-content: center;
+      width: inherit;
       &-content {
-        display: inline-block;
+        flex-direction: column;
+        position: relative;
         .card {
+          box-sizing: border-box;
+          width: 190px;
+          height: 150px;
           position: relative;
-          vertical-align: top;
-          margin: 10px 15px 10px 0;
-          width: 170px;
-          height: 187px;
           display: inline-block;
+          vertical-align: top;
           &-main {
             &-item {
               .op {
@@ -211,21 +228,15 @@ defineExpose({
             }
           }
           &-footer {
-            max-width: 170px;
+            max-width: 190px;
             .history-item-title {
-              font-size: 15px;
-              letter-spacing: 0.6px;
-              line-height: 23px;
-              margin: 13px 0 8px;
-              font-weight: 400;
+              font-weight: 500;
             }
             .history-item-time {
-              position: relative;
-              font-size: 12px;
-              color: #999;
-              letter-spacing: 0;
-              line-height: 16px;
-              height: 16px;
+              line-height: 10px;
+              font-size: 10px;
+              color: var(--td-gray-color-7);
+              font-weight: normal;
               span {
                 padding-left: 5px;
               }
@@ -237,7 +248,6 @@ defineExpose({
               overflow: hidden;
               height: auto;
               width: 100%;
-              font-weight: normal;
             }
           }
         }
