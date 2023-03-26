@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, powerSaveBlocker } from 'electron';
+import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } from 'electron';
 
 import Store from 'electron-store';
 import path from 'path';
