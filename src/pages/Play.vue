@@ -13,116 +13,118 @@
           <span v-else>{{ info.name }}</span>
         </div>
         <div class="player-top-right">
-          <div v-if="type === 'film'" class="player-top-right-popup player-top-right-item player-top-right-share">
-            <t-popup
-              trigger="click"
-              :visible="isShareVisible"
-              :on-visible-change="onShareVisibleChange"
-              placement="bottom-right"
-              :overlay-inner-style="{ boxShadow: 'none', padding: '0' }"
-              attach=".player-top-right-share"
-            >
-              <share-icon size="1.5em" @click="isShareVisible = !isShareVisible" />
-              <template #content>
-                <div class="share-container">
-                  <div class="share-container-main">
-                    <div class="share-container-main-left">
-                      <div class="share-container-main-left-header">
-                        <div class="header-name">扫一扫，手机继续看</div>
-                        <div class="header-info">
-                          推荐使用<span class="header-info-browser">夸克浏览器</span>-首页<photo-icon />-扫码
+          <div v-if="type === 'film'" class="player-top-right-share">
+            <div class="player-top-right-popup player-top-right-item" @click="isShareVisible = !isShareVisible">
+              <t-popup
+                trigger="click"
+                :visible="isShareVisible"
+                :on-visible-change="onShareVisibleChange"
+                placement="bottom-right"
+                :overlay-inner-style="{ boxShadow: 'none', padding: '0' }"
+                attach=".player-top-right-share"
+              >
+                <share-icon size="1.5em" />
+                <template #content>
+                  <div class="share-container">
+                    <div class="share-container-main">
+                      <div class="share-container-main-left">
+                        <div class="share-container-main-left-header">
+                          <div class="header-name">扫一扫，手机继续看</div>
+                          <div class="header-info">
+                            推荐使用<span class="header-info-browser">夸克浏览器</span>-首页<photo-icon />-扫码
+                          </div>
+                          <div class="header-copyright">ZyPlayer提供支持,严禁传播资源</div>
                         </div>
-                        <div class="header-copyright">ZyPlayer提供支持,严禁传播资源</div>
+                        <t-divider dashed style="margin: 5px 0" />
+                        <div class="share-container-main-left-bottom">
+                          <div v-if="type === 'film'" class="bottom-title">
+                            {{ `${info.vod_name} ${selectPlayIndex}` }}
+                          </div>
+                          <div v-else class="bottom-title">{{ info.name }}</div>
+                        </div>
                       </div>
-                      <t-divider dashed style="margin: 5px 0" />
-                      <div class="share-container-main-left-bottom">
-                        <div v-if="type === 'film'" class="bottom-title">
-                          {{ `${info.vod_name} ${selectPlayIndex}` }}
+                      <div class="share-container-main-right">
+                        <div class="bg"></div>
+                        <div class="main">
+                          <img class="qrcode" :src="qrCodeUrl" alt="二维码" />
                         </div>
-                        <div v-else class="bottom-title">{{ info.name }}</div>
                       </div>
                     </div>
-                    <div class="share-container-main-right">
-                      <div class="bg"></div>
-                      <div class="main">
-                        <img class="qrcode" :src="qrCodeUrl" alt="二维码" />
-                      </div>
+                    <div class="bottom-copy">
+                      <span class="bottom-copy-url">
+                        <input id="bottom-copy-url-input" v-model="shareUrl" type="text" disabled />
+                      </span>
+                      <t-popup
+                        trigger="click"
+                        placement="right"
+                        :overlay-inner-style="{
+                          background: '#f5f5f5',
+                          boxShadow: 'none',
+                          color: '#848282',
+                          fontSize: '10px',
+                          marginTop: '5px',
+                        }"
+                        attach=".bottom-copy"
+                      >
+                        <span class="bottom-copy-btn" @click="shareUrlEvent">复制地址</span>
+                      </t-popup>
                     </div>
                   </div>
-                  <div class="bottom-copy">
-                    <span class="bottom-copy-url">
-                      <input id="bottom-copy-url-input" v-model="shareUrl" type="text" disabled />
-                    </span>
-                    <t-popup
-                      trigger="click"
-                      placement="right"
-                      :overlay-inner-style="{
-                        background: '#f5f5f5',
-                        boxShadow: 'none',
-                        color: '#848282',
-                        fontSize: '10px',
-                        marginTop: '5px',
-                      }"
-                      attach=".bottom-copy"
-                    >
-                      <span class="bottom-copy-btn" @click="shareUrlEvent">复制地址</span>
-                    </t-popup>
-                  </div>
-                </div>
-              </template>
-            </t-popup>
-          </div>
-          <div
-            v-if="type === 'film'"
-            class="player-top-right-popup player-top-right-item"
-            @click="isDownloadVisible = true"
-          >
-            <download-icon size="1.5em" />
-          </div>
-          <t-dialog
-            v-model:visible="isDownloadVisible"
-            header="离线缓存"
-            width="508"
-            placement="center"
-            confirm-btn="复制下载链接"
-            :on-confirm="copyDownloadUrl"
-            :cancel-btn="null"
-          >
-            <div class="download-warp">
-              <div class="source-warp">
-                <t-select
-                  v-model="downloadSource"
-                  placeholder="请选下载源"
-                  size="small"
-                  style="width: 200px; display: inline-block"
-                >
-                  <t-option v-for="(value, key, index) in season" :key="index" :value="key" :label="key"></t-option>
-                </t-select>
-                <div>仅支持m3u8播放源</div>
-              </div>
-              <div class="content-warp">
-                <t-transfer v-model="downloadTarget" :data="downloadEpisodes">
-                  <template #title="props">
-                    <div>{{ props.type === 'target' ? '需下载' : '待下载' }}</div>
-                  </template>
-                </t-transfer>
-              </div>
-              <div class="tip-warp">
-                <span>推荐使用开源下载器：</span>
-                <t-link
-                  theme="primary"
-                  underline
-                  href="https://github.com/HeiSir2014/M3U8-Downloader/releases/"
-                  target="_blank"
-                >
-                  M3U8-Downloader
-                </t-link>
-              </div>
+                </template>
+              </t-popup>
             </div>
-          </t-dialog>
-          <div class="player-top-right-popup player-top-right-item" @click="winStickyEvnet">
-            <pin-icon v-if="isPin" size="1.5em" />
-            <pin-filled-icon v-else size="1.5em" />
+          </div>
+          <div v-if="type === 'film'" class="player-top-right-download">
+            <div class="player-top-right-item player-top-right-popup" @click="isDownloadVisible = true">
+              <download-icon size="1.5em" />
+            </div>
+            <t-dialog
+              v-model:visible="isDownloadVisible"
+              header="离线缓存"
+              width="508"
+              placement="center"
+              confirm-btn="复制下载链接"
+              :on-confirm="copyDownloadUrl"
+              :cancel-btn="null"
+            >
+              <div class="download-warp">
+                <div class="source-warp">
+                  <t-select
+                    v-model="downloadSource"
+                    placeholder="请选下载源"
+                    size="small"
+                    style="width: 200px; display: inline-block"
+                  >
+                    <t-option v-for="(value, key, index) in season" :key="index" :value="key" :label="key"></t-option>
+                  </t-select>
+                  <div>仅支持m3u8播放源</div>
+                </div>
+                <div class="content-warp">
+                  <t-transfer v-model="downloadTarget" :data="downloadEpisodes">
+                    <template #title="props">
+                      <div>{{ props.type === 'target' ? '需下载' : '待下载' }}</div>
+                    </template>
+                  </t-transfer>
+                </div>
+                <div class="tip-warp">
+                  <span>推荐使用开源下载器：</span>
+                  <t-link
+                    theme="primary"
+                    underline
+                    href="https://github.com/HeiSir2014/M3U8-Downloader/releases/"
+                    target="_blank"
+                  >
+                    M3U8-Downloader
+                  </t-link>
+                </div>
+              </div>
+            </t-dialog>
+          </div>
+          <div class="player-top-right-staple">
+            <div class="player-top-right-popup player-top-right-item" @click="winStickyEvnet">
+              <pin-icon v-if="isPin" size="1.5em" />
+              <pin-filled-icon v-else size="1.5em" />
+            </div>
           </div>
           <div class="player-top-right-window">
             <span v-show="platform !== 'darwin'" class="window-separator"></span>
@@ -249,7 +251,7 @@
                     <t-tabs v-model="selectPlaySource" class="film-tabs">
                       <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key">
                         <template #label> {{ key }} </template>
-                        <div style="padding-top: 25px">
+                        <div>
                           <t-space break-line size="small" align="center">
                             <t-tag
                               v-for="item in value"
@@ -536,7 +538,7 @@ watch(
 watch(
   () => xg.value,
   (val) => {
-    if (val) {
+    if (val.hasStart) {
       xg.value.on(Events.PIP_CHANGE, (isPip) => {
         console.log('isPip', isPip);
         ipcRenderer.send('toggle-playerPip', isPip);
@@ -815,6 +817,7 @@ const filterContent = (item) => {
 const timerUpdatePlayProcess = () => {
   timer.value = setInterval(() => {
     const doc = {
+      date: moment().format('YYYY-MM-DD'),
       watchTime: xg.value.currentTime,
       duration: xg.value.duration,
     };
