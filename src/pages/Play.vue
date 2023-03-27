@@ -622,6 +622,7 @@ const initPlayer = async (firstInit = false) => {
     if (!firstInit) {
       await getHistoryData().then(async () => {
         if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
+        else config.value.startTime = 0;
         if (set.value.skipStartEnd) {
           if (dataHistory.value.watchTime < set.value.skipTimeInStart)
             config.value.startTime = set.value.skipTimeInStart;
@@ -638,6 +639,7 @@ const initPlayer = async (firstInit = false) => {
       });
     } else {
       if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
+      else config.value.startTime = 0;
       if (set.value.skipStartEnd) {
         if (dataHistory.value.watchTime < set.value.skipTimeInStart) config.value.startTime = set.value.skipTimeInStart;
       }
