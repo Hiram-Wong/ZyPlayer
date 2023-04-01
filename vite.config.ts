@@ -38,7 +38,14 @@ export default defineConfig(({ mode }) => {
     },
 
     plugins: [
-      createVuePlugin(),
+      createVuePlugin({
+        template: {
+          compilerOptions: {
+            // 注册electron中webview
+            isCustomElement: (tag) => tag === 'webview',
+          },
+        },
+      }),
       vueJsx(),
       svgLoader(),
       electron([
