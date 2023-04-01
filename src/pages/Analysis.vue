@@ -66,13 +66,18 @@
         </div>
         <div class="support-platform">
           <div v-for="(item, index) in VIDEOSITES" :key="index" class="logo-item">
-            <a :href="item.url" target="_blank" :title="item.name">
+            <div @click="openPlatform(item)">
               <img class="img-responsive" :src="item.img" />
-            </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <dialog-platform-analysis-view
+      v-model:visible="formDialogVisiblePlatformAnalysis"
+      :data="platformAnalysisData"
+      @platform-play="platformPlay"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -86,6 +91,7 @@ import moment from 'moment';
 import InfiniteLoading from 'v3-infinite-loading';
 import { setting, analyze, analyzeHistory } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
+import DialogPlatformAnalysisView from './analysis/PlatformAnalysis.vue';
 
 import 'v3-infinite-loading/lib/style.css';
 
@@ -96,8 +102,9 @@ import logoYouku from '@/assets/youku.png';
 import logoMgtv from '@/assets/mgtv.png';
 import logoSohu from '@/assets/sohu.png';
 import logoPptv from '@/assets/pptv.png';
-import logoBilibili from '@/assets/bilibili.png';
 
+const formDialogVisiblePlatformAnalysis = ref(false);
+const platformAnalysisData = ref();
 const isSupport = ref(false);
 const urlTitle = ref(); // 播放地址的标题
 const analysisApi = ref([]); // 解析接口api列表
@@ -139,11 +146,6 @@ const VIDEOSITES = reactive([
     img: logoSohu,
   },
   {
-    url: 'https://www.bilibili.com/',
-    name: 'Bilibili',
-    img: logoBilibili,
-  },
-  {
     url: 'https://www.pptv.com/',
     name: 'PPTV',
     img: logoPptv,
@@ -175,6 +177,7 @@ const getAnalysisApi = async () => {
   });
 };
 
+// 获取解析历史
 const getHistoryList = async () => {
   let length;
   await analyzeHistory.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
@@ -202,6 +205,31 @@ const load = async ($state) => {
 
 // 解析
 const analysisEvent = async () => {
+  if (selectAnalysisApi.value && analysisUrl.value) {
+    urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
+    url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
+    MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
+    const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
+    if (res) await analyzeHistory.update(res, { date: moment().format('YYYY-MM-DD') });
+    else {
+      const doc = {
+        date: moment().format('YYYY-MM-DD'),
+        analyzeId: selectAnalysisApi.value,
+        videoUrl: analysisUrl.value,
+        videoName: urlTitle.value,
+      };
+      historyList.value.push(doc);
+      await analyzeHistory.add(doc);
+    }
+  } else {
+    MessagePlugin.error('请选择解析接口或输入需要解析的地址');
+  }
+};
+
+const platformPlay = async (item) => {
+  console.log(item);
+  analysisUrl.value = item;
+  console.log(analysisUrl.value);
   if (selectAnalysisApi.value && analysisUrl.value) {
     urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
     url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
@@ -256,6 +284,14 @@ const showSupportEvent = async () => {
   });
 };
 
+//
+const openPlatform = (item) => {
+  const { _, name, url } = item;
+  platformAnalysisData.value = { name, url };
+  console.log(platformAnalysisData.value);
+  formDialogVisiblePlatformAnalysis.value = true;
+};
+
 // 监听设置默认源变更
 const eventBus = useEventBus('analyze-reload');
 eventBus.on(async () => {
@@ -264,7 +300,7 @@ eventBus.on(async () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 
 .analysis-container {
@@ -277,6 +313,9 @@ eventBus.on(async () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      .play_title {
+        cursor: pointer;
+      }
       svg {
         cursor: pointer;
       }
@@ -311,7 +350,7 @@ eventBus.on(async () => {
       .analysis-play-box {
         width: 100%;
         background-color: #f5f5f7;
-        border-radius: 10px;
+        border-radius: var(--td-radius-extraLarge);
       }
       .analysis-setting {
         &-group {
@@ -379,6 +418,7 @@ eventBus.on(async () => {
         display: flex;
       }
       .logo-item {
+        cursor: pointer;
         margin-right: 8px;
         border-radius: var(--td-radius-default);
         background: var(--td-text-color-anti);
