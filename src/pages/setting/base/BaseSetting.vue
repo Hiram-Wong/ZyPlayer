@@ -560,7 +560,7 @@ const checkIpv6 = async () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 
 .setting-base-container {
   :deep(.t-form__label) {

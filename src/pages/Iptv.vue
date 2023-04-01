@@ -431,7 +431,7 @@ const copyChannelEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 
 .iptv-container {

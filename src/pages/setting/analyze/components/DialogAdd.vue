@@ -245,7 +245,7 @@ const urlEvent = async (url) => {
 };
 </script>
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 :deep(.t-form:not(.t-form-inline) .t-form__item:last-of-type) {
   margin-bottom: var(--td-comp-margin-xxl);
 }

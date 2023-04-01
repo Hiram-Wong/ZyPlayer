@@ -89,5 +89,5 @@ const rules = {
 };
 </script>
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 </style>

@@ -123,7 +123,7 @@ const refreshEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 
 .light {
   .t-default-menu {

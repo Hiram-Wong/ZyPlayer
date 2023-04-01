@@ -82,7 +82,7 @@ const cancelEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 
 .privacy-policy-container {

@@ -249,7 +249,7 @@ const defaultEvent = async (row) => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 .setting-site-container {
   height: calc(100vh - var(--td-comp-size-l));
   overflow: auto;

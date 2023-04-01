@@ -28,7 +28,7 @@ const settingTag = ref('ConfigBase');
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 
 :deep(.t-radio-group.t-size-m .t-radio-button) {
   height: auto;

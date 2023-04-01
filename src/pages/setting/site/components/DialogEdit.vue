@@ -146,7 +146,7 @@ const onAddCancel = () => {
 };
 </script>
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 .select-panel-footer {
   border-top: 1px solid var(--td-component-stroke);
   padding: 10px 5px;

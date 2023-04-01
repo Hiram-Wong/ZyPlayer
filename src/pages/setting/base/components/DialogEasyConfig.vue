@@ -178,7 +178,7 @@ const txt = (text) => {
 };
 </script>
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 
 .tip {
   color: var(--td-gray-color-6);
