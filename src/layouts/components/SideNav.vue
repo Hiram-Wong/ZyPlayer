@@ -3,7 +3,7 @@
     <t-menu :theme="theme" :value="active" collapsed :class="`${prefix}-block-column`" style="width: 80px">
       <t-menu-item value="logo" disabled>
         <template #icon>
-          <asset-logo />
+          <img class="logo" src="@/assets/icon.png" alt="logo" />
         </template>
       </t-menu-item>
       <template v-for="item in list" :key="item.path">
@@ -37,8 +37,6 @@ import { useEventBus } from '@vueuse/core';
 import { getActive } from '@/router';
 import type { MenuRoute } from '@/types/interface';
 import { prefix } from '@/config/global';
-
-import AssetLogo from '@/assets/icon.svg?component';
 
 type ListItemType = MenuRoute & { icon?: string };
 
@@ -125,22 +123,25 @@ const refreshEvent = () => {
 <style lang="less" scoped>
 @import '@/style/variables.less';
 
-.light {
-  .t-default-menu {
-    background: #fbfbfb !important;
-  }
-  .t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
-    background-color: #fff;
-    color: #000;
-    box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
-    border-radius: var(--td-radius-large);
-  }
-  .t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon {
-    color: #000;
-  }
-  .tdesign-starter-sidebar-compact {
-    background: #fbfbfb !important;
-  }
+.logo {
+  width: 42px;
+  height: 42px;
+  padding: var(--td-pop-padding-s);
+}
+.t-default-menu {
+  background: #fbfbfb !important;
+}
+.t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
+  background-color: #fff;
+  color: #000;
+  box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
+  border-radius: var(--td-radius-large);
+}
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon {
+  color: #000;
+}
+.tdesign-starter-sidebar-compact {
+  background: #fbfbfb !important;
 }
 
 .dark {
