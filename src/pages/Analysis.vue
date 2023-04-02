@@ -91,7 +91,6 @@ import { HistoryIcon, ClearIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import moment from 'moment';
 import InfiniteLoading from 'v3-infinite-loading';
-import { json } from 'stream/consumers';
 import { setting, analyze, analyzeHistory } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
 import DialogPlatformAnalysisView from './analysis/PlatformAnalysis.vue';
@@ -225,7 +224,7 @@ const analysisEvent = async () => {
         videoUrl: analysisUrl.value,
         videoName: urlTitle.value,
       };
-      historyList.value.push(doc);
+      historyList.value.unshift(doc);
       await analyzeHistory.add(doc);
     }
   } else {
@@ -253,7 +252,7 @@ const platformPlay = async (item) => {
         videoUrl: analysisUrl.value,
         videoName: urlTitle.value,
       };
-      historyList.value.push(doc);
+      historyList.value.unshift(doc);
       await analyzeHistory.add(doc);
     }
   } else {
@@ -267,6 +266,8 @@ const historyPlayEvent = async (item) => {
     urlTitle.value = item.videoName;
     analysisUrl.value = item.videoUrl;
     url.value = `${_.find(analysisApi.value, { id: item.analyzeId }).url}${item.videoUrl}`;
+    const index = _.findIndex(historyList.value, item);
+    if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
     await analyzeHistory.update(item.id, { date: moment().format('YYYY-MM-DD') });
     MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
   } else MessagePlugin.error('该历史记录解析接口已删除');
@@ -274,7 +275,6 @@ const historyPlayEvent = async (item) => {
 
 // 历史删除
 const histroyDeleteEvent = async (item) => {
-  console.log(item);
   _.pull(historyList.value, _.find(historyList.value, { ...item }));
   await analyzeHistory.remove(item.id);
 };
