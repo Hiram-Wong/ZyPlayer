@@ -559,7 +559,7 @@ eventBus.on(async () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 
 .film-container {
@@ -822,6 +822,8 @@ eventBus.on(async () => {
         }
         .card-main {
           width: 100%;
+          overflow: hidden;
+          border-radius: 7px;
           .card-main-item {
             border-radius: 7px;
             .op {
