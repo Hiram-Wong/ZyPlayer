@@ -8,7 +8,9 @@
           <div v-for="item in historyList" :key="item.id" class="" @click="historyPlayEvent(item)">
             <div class="history-item">
               <div class="date">{{ item.date }}</div>
-              <div class="title">{{ item.videoName }}</div>
+              <t-popup :content="item.videoName" destroy-on-close>
+                <div class="title">{{ item.videoName }}</div>
+              </t-popup>
               <div class="clear" @click.stop="histroyDeleteEvent(item)"><clear-icon size="1rem" /></div>
             </div>
             <t-divider dashed style="margin: 5px 0" />
@@ -89,6 +91,7 @@ import { HistoryIcon, ClearIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import moment from 'moment';
 import InfiniteLoading from 'v3-infinite-loading';
+import { json } from 'stream/consumers';
 import { setting, analyze, analyzeHistory } from '@/lib/dexie';
 import zy from '@/lib/site/tools';
 import DialogPlatformAnalysisView from './analysis/PlatformAnalysis.vue';
@@ -161,6 +164,7 @@ const pagination = ref({
 
 onMounted(() => {
   getAnalysisApi();
+  getHistoryList();
 });
 
 // 获取解析接口及默认接口
@@ -210,8 +214,11 @@ const analysisEvent = async () => {
     url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
     MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
     const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
-    if (res) await analyzeHistory.update(res, { date: moment().format('YYYY-MM-DD') });
-    else {
+    if (res) {
+      const index = _.findIndex(historyList.value, res);
+      if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
+      await analyzeHistory.update(res.id, { date: moment().format('YYYY-MM-DD') });
+    } else {
       const doc = {
         date: moment().format('YYYY-MM-DD'),
         analyzeId: selectAnalysisApi.value,
@@ -226,17 +233,20 @@ const analysisEvent = async () => {
   }
 };
 
+// 平台回掉解析
 const platformPlay = async (item) => {
-  console.log(item);
   analysisUrl.value = item;
-  console.log(analysisUrl.value);
   if (selectAnalysisApi.value && analysisUrl.value) {
     urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
     url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
     MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
     const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
-    if (res) await analyzeHistory.update(res, { date: moment().format('YYYY-MM-DD') });
-    else {
+    console.log(res);
+    if (res) {
+      const index = _.findIndex(historyList.value, res);
+      if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
+      await analyzeHistory.update(res.id, { date: moment().format('YYYY-MM-DD') });
+    } else {
       const doc = {
         date: moment().format('YYYY-MM-DD'),
         analyzeId: selectAnalysisApi.value,
@@ -255,6 +265,7 @@ const platformPlay = async (item) => {
 const historyPlayEvent = async (item) => {
   if (_.find(analysisApi.value, { id: item.analyzeId })) {
     urlTitle.value = item.videoName;
+    analysisUrl.value = item.videoUrl;
     url.value = `${_.find(analysisApi.value, { id: item.analyzeId }).url}${item.videoUrl}`;
     await analyzeHistory.update(item.id, { date: moment().format('YYYY-MM-DD') });
     MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
@@ -284,7 +295,7 @@ const showSupportEvent = async () => {
   });
 };
 
-//
+// 打开平台iframe
 const openPlatform = (item) => {
   const { _, name, url } = item;
   platformAnalysisData.value = { name, url };
