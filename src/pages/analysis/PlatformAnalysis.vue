@@ -156,7 +156,7 @@ const analysisEvenbt = () => {
   }
 }
 :root[theme-mode='dark'] {
-  .analysis-play-box {
+  .platform-play-box {
     background-color: var(--td-bg-color-container) !important;
   }
 }
