@@ -316,15 +316,13 @@ const changeFilterEvent = (type, item) => {
 };
 
 const getFilmSetting = async () => {
-  setting.get('defaultSite').then((id) => {
+  await setting.get('defaultSite').then((id) => {
     if (id) {
       sites.get(id).then((res) => {
         sitesListSelect.value = res.id;
-        FilmSiteSetting.value.basic.name = res.name;
-        FilmSiteSetting.value.basic.key = res.key;
-        FilmSiteSetting.value.basic.group = res.group;
+        FilmSiteSetting.value.basic = res;
       });
-    }
+    } else infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
   });
   await setting.get('rootClassFilter').then((res) => {
     FilmSiteSetting.value.rootClassFilter = res;
@@ -429,12 +427,15 @@ const getFilmList = async () => {
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
   let length;
-  await zy.list(key, pg, t).then((res) => {
-    FilmDataList.value.list = _.unionWith(FilmDataList.value.list, res, _.isEqual);
-    FilmDataList.value.rawList = _.unionWith(FilmDataList.value.rawList, res, _.isEqual);
-    pagination.value.pageIndex++;
-    length = _.size(res);
-  });
+  await zy
+    .list(key, pg, t)
+    .then((res) => {
+      FilmDataList.value.list = _.unionWith(FilmDataList.value.list, res, _.isEqual);
+      FilmDataList.value.rawList = _.unionWith(FilmDataList.value.rawList, res, _.isEqual);
+      pagination.value.pageIndex++;
+      length = _.size(res);
+    })
+    .catch((err) => console.log(err));
   if (showToolbar.value) filterEvent();
   return length;
 };
@@ -442,13 +443,12 @@ const getFilmList = async () => {
 // 加载
 const load = async ($state) => {
   console.log('loading...');
-  // 暂时使用定时器修复onMounted中没执行完就触发load
-  setTimeout(() => {
-    if (!FilmSiteSetting.value.basic.key) {
+  if (!sitesListSelect.value) {
+    if (infiniteCompleteTip.value.indexOf('暂无数据') > -1) {
       $state.complete();
-      infiniteCompleteTip.value = '暂无数据，请前往设置-影视源设置默认源！';
     }
-  }, 1000);
+    return;
+  }
   try {
     let resLength;
     if (!searchTxt.value) {
@@ -456,15 +456,18 @@ const load = async ($state) => {
     } else {
       resLength = 0;
     }
-    getFilmArea();
-    getFilmYear();
-    if (resLength === 0) $state.complete();
-    else {
+
+    if (resLength === 0) {
+      $state.complete();
+    } else {
       $state.loaded();
+
+      getFilmArea();
+      getFilmYear();
     }
-  } catch (error) {
+  } catch (err) {
     $state.error();
-    console.log(error);
+    console.log(err);
   }
 };
 
