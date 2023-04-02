@@ -12,20 +12,30 @@
     </div>
     <div class="chase-container-right">
       <div class="chase-container-op">
-        <t-button theme="default" @click="clearEvent">
-          <span>一键清空</span>
-          <template #icon>
-            <delete-icon />
-          </template>
-        </t-button>
+        <div v-if="chaseTag === 'binge'" class="check-update chase-container-op-item">
+          <t-button theme="default" @click="checkUpdaterEvent">
+            <span>更新</span>
+            <template #icon>
+              <time-icon />
+            </template>
+          </t-button>
+        </div>
+        <div class="clear chase-container-op-item">
+          <t-button theme="default" @click="clearEvent">
+            <span>清空</span>
+            <template #icon>
+              <delete-icon />
+            </template>
+          </t-button>
+        </div>
       </div>
     </div>
     <div class="chase-container-dialog"></div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
-import { DeleteIcon } from 'tdesign-icons-vue-next';
+import { DeleteIcon, TimeIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next';
 import { star, history } from '@/lib/dexie';
 import bingeView from './chase/binge/Binge.vue';
@@ -35,11 +45,10 @@ const chaseTag = ref('history');
 const bingeRef = ref(null);
 const historyRef = ref(null);
 
+// 一键清空
 const clearEvent = () => {
   const confirmDia = DialogPlugin({
     body: '确认删除所有记录吗?',
-    confirmBtn: '删除',
-    cancelBtn: '取消',
     header: false,
     width: '300px',
     placement: 'center',
@@ -62,10 +71,15 @@ const clearEvent = () => {
     },
   });
 };
+
+// 检查更新
+const checkUpdaterEvent = () => {
+  bingeRef.value.checkUpdaterEvent();
+};
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 .chase-container {
   overflow: hidden;
@@ -75,10 +89,20 @@ const clearEvent = () => {
     position: absolute;
     top: 15px;
     right: 10px;
+    .chase-container-op {
+      gap: 16px;
+      display: flex;
+    }
+    .chase-container-op-item {
+      width: inherit;
+    }
   }
   &-dialog {
     :deep(.t-dialog__body) {
       text-align: center !important;
+    }
+    :deep(.t-dialog__footer) {
+      padding: var(--td-comp-paddingTB-l) 0 !important;
     }
   }
   .container-item {
