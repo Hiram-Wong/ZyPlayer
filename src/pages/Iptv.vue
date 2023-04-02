@@ -254,7 +254,7 @@ const getChannelList = async () => {
 };
 
 const isIpv6 = (str) => {
-  return /([0-9a-z]*:{1,4}){1,7}[0-9a-z]{1,4}/i.test(str);
+  return /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i.test(str);
 };
 
 const load = async ($state) => {
