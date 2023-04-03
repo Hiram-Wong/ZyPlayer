@@ -16,6 +16,9 @@ export default {
   async find (doc) {
     return await analyze.get(doc)
   },
+  async get (id) {
+    return await analyze.get(id)
+  },
   async update (id, docs) {
     return await analyze.update(id, docs)
   },

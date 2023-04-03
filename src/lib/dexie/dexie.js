@@ -106,6 +106,14 @@ db.version(14).stores({
   analyzeHistory: '++id, [analyzeId+videoUrl], date, analyzeId, videoUrl, videoName',
 })
 
+db.version(15).stores({
+  star: '++id, [siteKey+videoId], siteKey, videoId, videoImage, videoName, videoType, videoUpdate', 
+}).upgrade(trans => {
+  trans.star.toCollection().modify(star => {
+    star.videoUpdate = false
+  })
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)
