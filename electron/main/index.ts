@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, nativeTheme, screen } from 'electron';
 
 import Store from 'electron-store';
 import path from 'path';
@@ -18,8 +18,9 @@ protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: tru
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
 
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
-app.commandLine.appendSwitch('--ignore-certificate-errors', 'true'); // 忽略证书相关错误
+app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书相关错误
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 支持hevc
+app.commandLine.appendSwitch('disable-site-isolation-trials'); // iframe 跨域
 
 if (process.platform === 'linux') {
   app.commandLine.appendSwitch('--no-sandbox'); // linux 关闭沙盒模式
@@ -48,6 +49,12 @@ let mainWindow: BrowserWindow | null;
 let playWindow: BrowserWindow | null; // 播放窗口
 let isHidden = true;
 
+nativeTheme.on('updated', () => {
+  const isDarkMode = nativeTheme.shouldUseDarkColors;
+  if (mainWindow) mainWindow.webContents.send('system-theme-updated', `${isDarkMode ? 'dark' : 'light'}`);
+  log.info(`[nativeTheme] System-theme-updated: ${isDarkMode ? 'dark' : 'light'} ; send to vue app`);
+});
+
 function createWindow(): void {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
@@ -65,6 +72,7 @@ function createWindow(): void {
       sandbox: false,
       nodeIntegration: true,
       contextIsolation: false,
+      webviewTag: true, // 启用webview
       webSecurity: false, // 禁用同源策略
       allowRunningInsecureContent: false, // 允许一个 https 页面运行来自http url的JavaScript, CSS 或 plugins
     },
@@ -77,7 +85,8 @@ function createWindow(): void {
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url);
+    mainWindow.webContents.send('blockUrl', details.url);
+    if (details.url.indexOf('github') > -1) shell.openExternal(details.url);
     return { action: 'deny' };
   });
 
@@ -86,19 +95,25 @@ function createWindow(): void {
   );
 
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
-    const url = new URL(details.url);
-    details.requestHeaders.Origin = url.origin;
-    if (
-      !details.url.includes('//localhost') &&
-      details.requestHeaders.Referer &&
-      details.requestHeaders.Referer.includes('//localhost')
-    ) {
-      details.requestHeaders.Referer = url.origin;
+    const { requestHeaders, url } = details;
+    const requestUrl = new URL(url);
+
+    requestHeaders.Origin = requestUrl.origin;
+    if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
+      requestHeaders.Referer = requestUrl.origin;
     }
-    callback({
-      // https://github.com/electron/electron/issues/23988 回调似乎无法修改headers，暂时先用index.html的meta referer policy替代
-      requestHeaders: details.requestHeaders,
-    });
+    callback({ requestHeaders });
+  });
+
+  // X-Frame-Options
+  mainWindow.webContents.session.webRequest.onHeadersReceived({ urls: ['*://*/*'] }, (details, callback) => {
+    if (details.responseHeaders['X-Frame-Options']) {
+      delete details.responseHeaders['X-Frame-Options'];
+    } else if (details.responseHeaders['x-frame-options']) {
+      delete details.responseHeaders['x-frame-options'];
+    }
+
+    callback({ cancel: false, responseHeaders: details.responseHeaders });
   });
 
   initUpdater(mainWindow);
@@ -205,23 +220,26 @@ ipcMain.on('openPlayWindow', (_, arg) => {
       : 'http://localhost:3000/#/play',
   );
 
+  const { scaleFactor } = screen.getPrimaryDisplay();
+
+  // playWindow.webContents.executeJavaScript(
+  //   `document.documentElement.setAttribute('data-scale-factor', '${scaleFactor}')`,
+  // );
+  // playWindow.webContents.executeJavaScript(`document.documentElement.setAttribute('theme-mode', 'dark')`);
+  // playWindow.webContents.executeJavaScript(`document.documentElement.setAttribute('data-theme', 'light')`);
+
   // 修改request headers
   // Sec-Fetch下禁止修改，浏览器自动加上请求头 https://www.cnblogs.com/fulu/p/13879080.html 暂时先用index.html的meta referer policy替代
 
   playWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
-    const url = new URL(details.url);
-    details.requestHeaders.Origin = url.origin;
-    if (
-      !details.url.includes('//localhost') &&
-      details.requestHeaders.Referer &&
-      details.requestHeaders.Referer.includes('//localhost')
-    ) {
-      details.requestHeaders.Referer = url.origin;
+    const { requestHeaders, url } = details;
+    const requestUrl = new URL(url);
+
+    requestHeaders.Origin = requestUrl.origin;
+    if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
+      requestHeaders.Referer = requestUrl.origin;
     }
-    callback({
-      // https://github.com/electron/electron/issues/23988 回调似乎无法修改headers，暂时先用index.html的meta referer policy替代
-      requestHeaders: details.requestHeaders,
-    });
+    callback({ requestHeaders });
   });
 
   playWindow.on('ready-to-show', () => {
@@ -301,4 +319,8 @@ ipcMain.on('toggle-selfBoot', (_, status) => {
 ipcMain.on('update-hardwareAcceleration', (_, status) => {
   log.info(`[ipcMain] storage-hardwareAcceleration: ${status}`);
   store.set('settings.hardwareAcceleration', status);
+});
+
+ipcMain.on('set-playerDark', () => {
+  playWindow.webContents.executeJavaScript(`document.documentElement.setAttribute('theme-mode', 'dark')`);
 });
