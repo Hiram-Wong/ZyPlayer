@@ -267,7 +267,7 @@ const load = async ($state) => {
     } else {
       $state.loaded();
     }
-  } catch (error) {
+  } catch (err) {
     $state.error();
   }
 };
@@ -308,13 +308,10 @@ const playEvent = (item) => {
 // 检查状态
 const checkChannelList = (pageIndex, pageSize) => {
   for (let i = pageIndex * pageSize; i < (pageIndex + 1) * pageSize; i++) {
-    // console.log(iptvDataList.value.list[i].name);
+    if (!iptvDataList.value.list[i]) return;
     zy.checkChannel(iptvDataList.value.list[i].url).then((res) => {
-      if (res) {
-        iptvDataList.value.list[i].status = true;
-      } else {
-        iptvDataList.value.list[i].status = false;
-      }
+      if (res) iptvDataList.value.list[i].status = true;
+      else iptvDataList.value.list[i].status = false;
     });
   }
 };
