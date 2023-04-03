@@ -1,42 +1,46 @@
 <template>
-  <div ref="affixContainerRef" class="history-container mx-auto">
-    <div v-for="(itemList, index) in options" :key="index" class="history-container-item">
-      <div class="history-container-item-header">
-        <location-icon size="small" class="icon" />
-        <span class="title">{{ itemList.time }}</span>
+  <div class="history-container mx-auto">
+    <div v-for="(item, name, index) in options" :key="index" class="history-container-item">
+      <div v-if="item.length !== 0" class="history-container-item-header">
+        <span v-if="name === 'today'" class="title">今天</span>
+        <span v-if="name === 'week'" class="title">七天内</span>
+        <span v-if="name === 'ago'" class="title">更早</span>
       </div>
       <div class="history-container-item-main">
-        <div v-for="item in itemList.data" :key="item.id" class="history-container-item-main-content">
-          <div class="card" @click="playEvent(item)">
+        <div v-for="detail in item" :key="detail.id" class="history-container-item-main-content">
+          <div class="card" @click="playEvent(detail)">
             <div class="card-header"></div>
             <div class="card-main">
+              <div class="card-close" @click.stop="removeEvent(detail)"></div>
               <t-image
                 class="card-main-item"
-                :src="item.videoImage"
+                :src="detail.videoImage"
                 :style="{ width: '190px', height: '105px', borderRadius: '4px' }"
                 :lazy="true"
                 fit="cover"
-                overlay-trigger="hover"
               >
                 <template #overlayContent>
-                  <div class="op" @click.stop="removeEvent(item)">
-                    <delete-icon size="small" style="color: #fdfdfd" />
+                  <div class="op" @click.stop="removeEvent(detail)">
+                    <!-- <delete-icon style="color: #fdfdfd" /> -->
+                    {{ detail.videoRemarks }}
                   </div>
                 </template>
               </t-image>
             </div>
             <div class="card-footer">
-              <span class="history-item-title card-footer-item nowrap">{{ item.videoName }} {{ item.videoIndex }}</span>
+              <span class="history-item-title card-footer-item nowrap">
+                {{ detail.videoName }} {{ detail.videoIndex }}
+              </span>
               <p class="history-item-time card-footer-item nowrap">
                 <laptop-icon />
-                <span>观看到{{ filterPlayProgress(item.watchTime, item.duration) }}</span>
+                <span>观看到{{ filterPlayProgress(detail.watchTime, detail.duration) }}</span>
               </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <infinite-loading ref="infiniteLoading" :distance="200" style="text-align: center" @infinite="load">
+    <infinite-loading :identifier="infiniteId" :distance="200" style="text-align: center" @infinite="load">
       <template #complete>人家是有底线的</template>
       <template #error>哎呀，出了点差错</template>
     </infinite-loading>
@@ -44,8 +48,9 @@
 </template>
 <script setup lang="jsx">
 import { ref } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { LaptopIcon, LocationIcon, DeleteIcon } from 'tdesign-icons-vue-next';
+import { LaptopIcon } from 'tdesign-icons-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import moment from 'moment';
@@ -59,48 +64,31 @@ import 'v3-infinite-loading/lib/style.css';
 const ipcRenderer = useIpcRenderer();
 
 const store = usePlayStore();
-const options = ref([]);
+const options = ref({
+  today: [],
+  week: [],
+  ago: [],
+});
 const pagination = ref({
   pageIndex: 0,
   pageSize: 32,
   count: 0,
 });
 
+const infiniteId = ref(+new Date());
+
 const getHistoryList = async () => {
   let length;
   await history.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
-    console.log(res);
-    const arry = [];
-    let timeShow;
-    res.list.forEach((ele) => {
-      const { date } = ele;
+    let timeKey;
+    res.list.forEach((item) => {
+      const { date } = item;
       const timeDiff = filterDate(date);
-      if (timeDiff === 0) timeShow = '今天';
-      else if (timeDiff < 7) timeShow = '七天内';
-      else timeShow = '更早';
-      const isFind = _.findLastIndex(arry, (o) => {
-        return o.time === timeShow;
-      });
-      if (isFind >= 0) arry[isFind].data.push(ele);
-      else {
-        arry.push({ time: timeShow, data: [ele] });
-      }
+      if (timeDiff === 0) timeKey = 'today';
+      else if (timeDiff < 7) timeKey = 'week';
+      else timeKey = 'ago';
+      options.value[timeKey].push(item);
     });
-    if (options.value.length === 0) options.value = arry;
-    else {
-      // arry 数据每次循环都要添加到options
-      for (const key1 in arry) {
-        let flag = false;
-        for (const key2 in options.value) {
-          if (arry[key1].time === options.value[key2].time) {
-            flag = true;
-            options.value[key2].data = options.value[key2].data.concat(arry[key1].data);
-            break;
-          }
-        }
-        if (!flag) options.value.push(arry[key1]);
-      }
-    }
     pagination.value.count = res.total;
     pagination.value.pageIndex++;
     length = _.size(res.list);
@@ -146,13 +134,13 @@ const playEvent = async (item) => {
 // 删除
 const removeEvent = async (item) => {
   const { id } = item;
-  let index;
+  let timeKey;
   await history.remove(id);
   const timeDiff = filterDate(item.date);
-  if (timeDiff === 0) index = 0;
-  else if (timeDiff < 7) index = 1;
-  else index = 2;
-  _.pull(options.value[index].data, _.find(options.value[index].data, { ...item }));
+  if (timeDiff === 0) timeKey = 'today';
+  else if (timeDiff < 7) timeKey = 'week';
+  else timeKey = 'ago';
+  _.pull(options.value[timeKey], _.find(options.value[timeKey], { ...item }));
   pagination.value.count--;
 };
 
@@ -177,6 +165,19 @@ const clearEvent = () => {
   getHistoryList();
 };
 
+// 监听播放器变更
+const eventBus = useEventBus('history-reload');
+eventBus.on(async () => {
+  options.value = {
+    today: [],
+    week: [],
+    ago: [],
+  };
+  if (!_.size(options.value)) infiniteId.value++;
+  pagination.value.pageIndex = 0;
+  await getHistoryList();
+});
+
 // 对父组件暴露
 defineExpose({
   clearEvent,
@@ -184,7 +185,7 @@ defineExpose({
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 
 .history-container {
@@ -192,13 +193,26 @@ defineExpose({
   height: 100%;
   .history-container-item {
     &-header {
+      position: relative;
+      height: 40px;
+      line-height: 40px;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: left;
       .title {
-        margin-left: 5px;
-        color: #868a8f;
-        font-size: 12px;
+        position: relative;
+        display: inline-block;
+        padding-right: 18px;
+        vertical-align: middle;
+        z-index: 10;
       }
     }
     &-main {
+      &:after {
+        content: '';
+        display: block;
+        clear: both;
+      }
       display: grid;
       grid-template-columns: repeat(auto-fill, 190px);
       grid-column-gap: 20px;
@@ -207,15 +221,59 @@ defineExpose({
       width: inherit;
       &-content {
         flex-direction: column;
+        float: left;
+        display: inline-block;
+        width: 190px;
+        margin: 10px 15px 10px 0;
         position: relative;
+        &:hover {
+          .card-main-item {
+            :deep(img) {
+              transition: all 0.25s ease-in-out;
+              transform: scale(1.05);
+            }
+          }
+        }
         .card {
           box-sizing: border-box;
           width: 190px;
-          height: 150px;
+          height: 160px;
           position: relative;
           display: inline-block;
           vertical-align: top;
+
+          // padding: 0 10px;
+          // @media screen and (min-width: 1251px) {
+          //   width: 20%;
+          // }
+          // @media screen and (min-width: 1499px) {
+          //   width: 16.666666%;
+          // }
+          // @media screen and (min-width: 1799px) {
+          //   width: 14.285714%;
+          // }
+          // @media screen and (min-width: 2048px) {
+          //   width: 12.5%;
+          // }
+          &-close {
+            display: none;
+            position: absolute;
+            right: -9px;
+            top: -9px;
+            height: 22px;
+            width: 22px;
+            background: url(../../../assets/close.png) 0 0 no-repeat;
+            z-index: 1000;
+            cursor: pointer;
+            background-size: 100%;
+          }
           &-main {
+            margin-bottom: 13px;
+            overflow: hidden;
+            border-radius: 5px;
+            &:hover .card-close {
+              display: block !important;
+            }
             &-item {
               .op {
                 background: rgba(0, 0, 0, 0.8);
@@ -230,21 +288,27 @@ defineExpose({
           &-footer {
             max-width: 190px;
             .history-item-title {
-              font-weight: 500;
+              font-weight: 700;
+              line-height: 20px;
+              width: 100%;
+              height: 21px;
+              margin-bottom: 4px;
             }
             .history-item-time {
-              line-height: 10px;
-              font-size: 10px;
+              height: 16px;
+              position: relative;
               color: var(--td-gray-color-7);
-              font-weight: normal;
+              font-size: 12px;
+              display: block;
+              line-height: 16px;
               span {
                 padding-left: 5px;
               }
             }
             .nowrap {
-              display: inline-block;
-              text-overflow: ellipsis;
-              white-space: nowrap;
+              display: -webkit-box;
+              -webkit-line-clamp: 1;
+              -webkit-box-orient: vertical;
               overflow: hidden;
               height: auto;
               width: 100%;
