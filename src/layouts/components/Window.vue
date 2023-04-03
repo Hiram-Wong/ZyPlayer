@@ -4,7 +4,8 @@
       <remove-icon size="1.5em" />
     </div>
     <div class="window-popup window-item" @click="minMaxEvent">
-      <rectangle-icon size="1.2em" />
+      <rectangle-icon v-if="!isMaxed" size="1.2em"/>
+      <relativity-icon v-else size="1.2em"/>
     </div>
     <div class="window-popup window-item" @click="win.destroy()">
       <close-icon size="1.5em" />
@@ -13,7 +14,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
-import { RectangleIcon, RemoveIcon, CloseIcon } from 'tdesign-icons-vue-next';
+import { RectangleIcon, RelativityIcon, RemoveIcon, CloseIcon } from 'tdesign-icons-vue-next';
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
