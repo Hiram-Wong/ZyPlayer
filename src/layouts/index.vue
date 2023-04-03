@@ -6,7 +6,7 @@
       </t-header>
       <t-layout :class="`${prefix}-layout`">
         <t-aside key="side" width="80px" :class="`${prefix}-aside`">
-          <layout-side-nav :theme="settingStore.displayMode" :nav-data="sideMenu" />
+          <layout-side-nav :nav-data="sideMenu" />
         </t-aside>
         <t-content class="zy-content">
           <layout-content />
@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { usePermissionStore, useSettingStore } from '@/store';
+import { usePermissionStore } from '@/store';
 import LayoutSideNav from './components/SideNav.vue';
 import LayoutContent from './components/Content.vue';
 import LayoutHeader from './components/Header.vue';
@@ -27,7 +27,6 @@ import LayoutHeader from './components/Header.vue';
 import { prefix } from '@/config/global';
 import '@/style/layout.less';
 
-const settingStore = useSettingStore();
 const permissionStore = usePermissionStore();
 const { routers: menuRouters } = storeToRefs(permissionStore);
 
@@ -38,14 +37,13 @@ const sideMenu = computed(() => {
 </script>
 
 <style lang="less" scoped>
-.dark {
+.t-layout {
+  background: #fbfbfb !important;
+}
+:root[theme-mode='dark']  {
   .t-layout {
     background: #000 !important;
   }
 }
-.light {
-  .t-layout {
-    background: #fbfbfb !important;
-  }
-}
+
 </style>

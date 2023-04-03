@@ -1,6 +1,6 @@
 <template>
   <div :class="`${prefix}-sidebar-layout ${prefix}-sidebar-compact`">
-    <t-menu :theme="theme" :value="active" collapsed :class="`${prefix}-block-column`" style="width: 80px">
+    <t-menu :value="active" collapsed :class="`${prefix}-block-column`" style="width: 80px">
       <t-menu-item value="logo" disabled>
         <template #icon>
           <img class="logo" src="@/assets/icon.png" alt="logo" />
@@ -137,14 +137,11 @@ const refreshEvent = () => {
   box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
   border-radius: var(--td-radius-large);
 }
-.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon {
-  color: #000;
-}
 .tdesign-starter-sidebar-compact {
   background: #fbfbfb !important;
 }
 
-.dark {
+:root[theme-mode='dark'] {
   .t-default-menu {
     background: #000 !important;
   }
@@ -153,11 +150,8 @@ const refreshEvent = () => {
     box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
     border-radius: var(--td-radius-large);
   }
-  .t-default-menu.t-menu--dark .t-menu__item.t-is-active:not(.t-is-opened) {
-    background-color: #161616;
-  }
-  .t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon {
-    color: #fff;
+  .t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
+    background-color: #161616 ;
   }
   .tdesign-starter-sidebar-compact {
     background: #000 !important;

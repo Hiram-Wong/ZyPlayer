@@ -13,6 +13,9 @@ export type TState = typeof state;
 export const useSettingStore = defineStore('setting', {
   state: () => state,
   getters: {
+    getStateMode: (state): 'dark' | 'light' | 'auto' => {
+      return state.mode;
+    },
     displayMode: (state): 'dark' | 'light' => {
       if (state.mode === 'auto') {
         const media = window.matchMedia('(prefers-color-scheme:dark)');

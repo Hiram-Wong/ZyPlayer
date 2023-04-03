@@ -1,5 +1,5 @@
 <template>
-  <router-view :class="[mode]"></router-view>
+  <router-view />
   <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
 </template>
 
@@ -20,10 +20,9 @@ const ipcRenderer = useIpcRenderer();
 
 const formDialogPrivacyPolicy = ref(false);
 
-const mode = computed(() => {
-  return storeSetting.displayMode;
+const theme = computed(() => {
+  return storeSetting.getStateMode;
 });
-const theme = ref('');
 
 onMounted(() => {
   initTheme();
@@ -33,14 +32,13 @@ onMounted(() => {
 
 const initTheme = () => {
   setting.get('theme').then((res: 'dark' | 'light' | 'auto') => {
-    theme.value = res;
     storeSetting.updateConfig({ mode: res });
   });
 };
 
 ipcRenderer.on('system-theme-updated', (_, ativeTheme) => {
-  console.log(`system-theme-updated: ${ativeTheme}`);
   if (theme.value === 'auto') {
+    console.log(`system-theme-updated: ${ativeTheme}`);
     document.documentElement.setAttribute('theme-mode', ativeTheme === 'dark' ? 'dark' : '');
   }
 });
