@@ -10,17 +10,17 @@
               </span>
             </div>
             <div class="card-main">
+              <div class="card-close" @click.stop="removeEvent(item)"></div>
               <t-image
                 class="card-main-item"
                 :src="item.videoImage"
                 :style="{ width: '190px', height: '105px', borderRadius: '7px' }"
                 :lazy="true"
                 fit="cover"
-                overlay-trigger="hover"
               >
-                <template #overlayContent>
-                  <div class="op" @click.stop="removeEvent(item)">
-                    <delete-icon size="small" style="color: #fdfdfd" />
+                <template v-if="item.videoUpdate" #overlayContent>
+                  <div class="op">
+                    <span style="color: #fdfdfd">有更新哟</span>
                   </div>
                 </template>
               </t-image>
@@ -34,7 +34,7 @@
           </div>
         </div>
       </div>
-      <infinite-loading style="text-align: center" :distance="200" @infinite="load">
+      <infinite-loading style="text-align: center" :identifier="infiniteId" :distance="200" @infinite="load">
         <template #complete>人家是有底线的</template>
         <template #error>哎呀，出了点差错</template>
       </infinite-loading>
@@ -44,8 +44,8 @@
 
 <script setup lang="jsx">
 import { ref } from 'vue';
+import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { DeleteIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import { useIpcRenderer } from '@vueuse/electron';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -64,6 +64,8 @@ const pagination = ref({
 });
 
 const bingeList = ref([]);
+
+const infiniteId = ref(+new Date());
 
 const getBingeList = async () => {
   let length;
@@ -124,41 +126,108 @@ const clearEvent = () => {
   getBingeList();
 };
 
+// 更新
+const checkUpdaterEvent = () => {
+  bingeList.value.forEach((item) => {
+    const { id, siteKey, videoId } = item;
+    zy.detail(siteKey, videoId)
+      .then((res) => {
+        if (res.vod_remarks) {
+          const index = _.findIndex(bingeList.value, { ...item });
+          console.log(res.vod_remarks, bingeList.value[index].videoRemarks);
+          let isUpdate = false;
+          if (res.vod_remarks !== bingeList.value[index].videoRemarks) {
+            console.log(res.vod_remarks, bingeList.value[index].videoRemarks);
+            isUpdate = true;
+            bingeList.value[index].videoUpdate = true;
+          } else bingeList.value[index].videoUpdate = false;
+          bingeList.value[index].videoRemarks = res.vod_remarks;
+          star.update(id, { videoRemarks: res.vod_remarks, videoUpdate: isUpdate });
+        }
+      })
+      .catch((err) => console.log(err));
+  });
+};
+
+// 监听播放器变更
+const eventBus = useEventBus('binge-reload');
+eventBus.on(async () => {
+  bingeList.value = [];
+  if (!_.size(bingeList.value)) infiniteId.value++;
+  pagination.value.pageIndex = 0;
+  await getBingeList();
+});
+
 // 对父组件暴露
 defineExpose({
   clearEvent,
+  checkUpdaterEvent,
 });
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 .binge-container {
   overflow-y: auto;
   height: inherit;
   .main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    overflow-y: auto;
-    width: 100%;
+    // display: flex;
+    // flex-direction: column;
+    // align-items: center;
+    // position: relative;
+    // overflow-y: auto;
+    // width: 100%;
+
     &-flow-wrap {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 190px);
-      grid-column-gap: 20px;
-      grid-row-gap: 10px;
-      justify-content: center;
-      width: inherit;
+      // display: grid;
+      // grid-template-columns: repeat(auto-fill, 190px);
+      // grid-column-gap: 20px;
+      // grid-row-gap: 10px;
+      // justify-content: center;
+      // width: inherit;
+
+      &:after {
+        content: '';
+        display: block;
+        clear: both;
+      }
+
       .card-wrap {
-        flex-direction: column;
+        // flex-direction: column;
+        // position: relative;
+        float: left;
+        display: inline-block;
+        width: 190px;
+        margin: 10px 15px 10px 0;
         position: relative;
+        &:hover {
+          .card-main-item {
+            :deep(img) {
+              transition: all 0.25s ease-in-out;
+              transform: scale(1.05);
+            }
+          }
+        }
         .card {
           box-sizing: border-box;
           width: 190px;
+          height: 160px;
           position: relative;
           display: inline-block;
           vertical-align: top;
+          .card-close {
+            display: none;
+            position: absolute;
+            right: -9px;
+            top: -9px;
+            height: 22px;
+            width: 22px;
+            background: url(../../../assets/close.png) 0 0 no-repeat;
+            z-index: 1000;
+            cursor: pointer;
+            background-size: 100%;
+          }
           .card-header {
             position: absolute;
             color: #fff;
@@ -166,13 +235,13 @@ defineExpose({
             z-index: 15;
             height: 18px;
             line-height: 18px;
-            right: 0;
+            left: 0;
             top: 0;
             &-tag {
               height: 18px;
               line-height: 18px;
               padding: 1px 6px;
-              border-radius: 0 7px 0 7px;
+              border-radius: 7px 0 7px 0;
               background: #03c8d4;
               display: block;
               &-tagtext {
@@ -191,14 +260,24 @@ defineExpose({
           }
           .card-main {
             width: 100%;
+            overflow: hidden;
+            border-radius: 5px;
+            &:hover .card-close {
+              display: block !important;
+            }
             .card-main-item {
               .op {
                 background: rgba(0, 0, 0, 0.8);
                 position: absolute;
                 bottom: 5px;
                 right: 5px;
-                padding: 0 3px 3px;
+                padding: 0 8px;
                 border-radius: 5px;
+                span {
+                  font-size: 10px;
+                  font-weight: 500;
+                  color: #fdfdfd;
+                }
               }
             }
           }
