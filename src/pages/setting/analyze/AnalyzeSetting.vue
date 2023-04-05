@@ -97,6 +97,7 @@ onMounted(() => {
 
 const rehandlePageChange = (curr) => {
   pagination.value.defaultCurrent = curr.current;
+  pagination.value.defaultPageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
