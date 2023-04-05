@@ -1885,27 +1885,27 @@ const openMainWinEvent = () => {
   }
 }
 
-:global(.t-select .t-fake-arrow) {
-  color: var(--td-font-white-3);
-}
+// :global(.t-select .t-fake-arrow) {
+//   color: var(--td-font-white-3);
+// }
 
-:global(.t-popup__content) {
-  background: var(--td-gray-color-11) !important;
-}
+// :global(.t-popup__content) {
+//   background: var(--td-gray-color-11) !important;
+// }
 
-:global(.t-select-option:not(.t-is-disabled):not(.t-is-selected):hover) {
-  background-color: var(--td-gray-color-12);
-}
-:global(.t-select-option) {
-  color: var(--td-font-white-1);
-}
-:global(
-    .t-select-option.t-select-option__hover:not(.t-is-disabled).t-select-option.t-select-option__hover:not(
-        .t-is-selected
-      )
-  ) {
-  background-color: var(--td-gray-color-12);
-}
+// :global(.t-select-option:not(.t-is-disabled):not(.t-is-selected):hover) {
+//   background-color: var(--td-gray-color-12);
+// }
+// :global(.t-select-option) {
+//   color: var(--td-font-white-1);
+// }
+// :global(
+//     .t-select-option.t-select-option__hover:not(.t-is-disabled).t-select-option.t-select-option__hover:not(
+//         .t-is-selected
+//       )
+//   ) {
+//   background-color: var(--td-gray-color-12);
+// }
 
 :deep(.t-transfer) {
   color: var(--td-font-white-1) !important;

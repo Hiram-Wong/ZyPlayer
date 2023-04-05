@@ -59,5 +59,6 @@
   "agreementMask": false,
   "recordShortcut": "",
   "selfBoot": false,
-  "hardwareAcceleration": true
+  "hardwareAcceleration": true,
+  "doh": ""
 }]

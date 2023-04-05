@@ -4,8 +4,8 @@
       <remove-icon size="1.5em" />
     </div>
     <div class="window-popup window-item" @click="minMaxEvent">
-      <rectangle-icon v-if="!isMaxed" size="1.2em"/>
-      <relativity-icon v-else size="1.2em"/>
+      <rectangle-icon v-if="!isMaxed" size="1.2em" />
+      <relativity-icon v-else size="1.2em" />
     </div>
     <div class="window-popup window-item" @click="win.destroy()">
       <close-icon size="1.5em" />
