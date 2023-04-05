@@ -38,8 +38,8 @@ import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { setting } from '@/lib/dexie';
 
-const remote = window.require('@electron/remote');
-const win = remote.getCurrentWindow();
+const { getCurrentWindow } = window.require('@electron/remote');
+const win = getCurrentWindow();
 
 const props = defineProps({
   visible: {

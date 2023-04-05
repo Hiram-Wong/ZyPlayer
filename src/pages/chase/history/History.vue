@@ -1,5 +1,5 @@
 <template>
-  <div class="history-container mx-auto">
+  <div class="history-container">
     <div v-for="(item, name, index) in options" :key="index" class="history-container-item">
       <div v-if="item.length !== 0" class="history-container-item-header">
         <span v-if="name === 'today'" class="title">今天</span>
@@ -46,7 +46,7 @@
     </infinite-loading>
   </div>
 </template>
-<script setup lang="jsx">
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -78,69 +78,69 @@ const pagination = ref({
 const infiniteId = ref(+new Date());
 
 const getHistoryList = async () => {
-  let length;
-  await history.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
+  const { pageIndex, pageSize } = pagination.value;
+  const res = await history.pagination(pageIndex, pageSize);
+
+  res.list.forEach((item) => {
+    const { date } = item;
+    const timeDiff = filterDate(date);
     let timeKey;
-    res.list.forEach((item) => {
-      const { date } = item;
-      const timeDiff = filterDate(date);
-      if (timeDiff === 0) timeKey = 'today';
-      else if (timeDiff < 7) timeKey = 'week';
-      else timeKey = 'ago';
-      options.value[timeKey].push(item);
-    });
-    pagination.value.count = res.total;
-    pagination.value.pageIndex++;
-    length = _.size(res.list);
+    if (timeDiff === 0) timeKey = 'today';
+    else if (timeDiff < 7) timeKey = 'week';
+    else timeKey = 'ago';
+    options.value[timeKey].push(item);
   });
-  return length;
+
+  pagination.value.count = res.total;
+  pagination.value.pageIndex++;
+
+  return _.size(res.list);
 };
 
 const load = async ($state) => {
   console.log('loading...');
+
   try {
     const resLength = await getHistoryList();
     if (resLength === 0) $state.complete();
-    else {
-      $state.loaded();
-    }
-  } catch (error) {
-    console.log(error);
+    else $state.loaded();
+  } catch (err) {
+    console.log(err);
     $state.error();
   }
 };
 
 // 播放
 const playEvent = async (item) => {
-  await zy
-    .detail(item.siteKey, item.videoId)
-    .then((res) => {
-      store.updateConfig({
-        type: 'film',
-        data: {
-          info: res,
-          ext: { site: { key: item.siteKey } },
-        },
-      });
+  try {
+    const res = await zy.detail(item.siteKey, item.videoId);
+    const { videoName } = item;
 
-      ipcRenderer.send('openPlayWindow', item.videoName);
-    })
-    .catch((err) => {
-      console.log(err);
-      MessagePlugin.warning('请求资源站失败，请检查网络!');
+    store.updateConfig({
+      type: 'film',
+      data: {
+        info: res,
+        ext: { site: { key: item.siteKey } },
+      },
     });
+
+    ipcRenderer.send('openPlayWindow', videoName);
+  } catch (err) {
+    console.log(err);
+    MessagePlugin.warning('请求资源站失败，请检查网络!');
+  }
 };
 
 // 删除
 const removeEvent = async (item) => {
   const { id } = item;
+  const timeDiff = filterDate(item.date);
   let timeKey;
   await history.remove(id);
-  const timeDiff = filterDate(item.date);
   if (timeDiff === 0) timeKey = 'today';
   else if (timeDiff < 7) timeKey = 'week';
   else timeKey = 'ago';
-  _.pull(options.value[timeKey], _.find(options.value[timeKey], { ...item }));
+  options.value[timeKey] = _.reject(options.value[timeKey], { id });
   pagination.value.count--;
 };
 
@@ -155,13 +155,17 @@ const filterDate = (date) => {
 // 播放进度
 const filterPlayProgress = (start, all) => {
   const progress = Math.trunc((start / all) * 100);
-  if (progress) return `${progress}%`;
-  return `0%`;
+  return progress ? `${progress}%` : '0%';
 };
 
 // 清空
-const clearEvent = () => {
-  options.value = [];
+const clearEvent = async () => {
+  options.value = {
+    today: [],
+    week: [],
+    ago: [],
+  };
+  await history.clear();
   getHistoryList();
 };
 

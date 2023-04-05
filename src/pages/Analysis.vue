@@ -1,5 +1,5 @@
 <template>
-  <div class="analysis-container mx-auto">
+  <div class="analysis-container">
     <div class="analysis-main">
       <div class="analysis-main-header">
         <span class="play_title" @dblclick="showSupportEvent">{{ urlTitle ? urlTitle : '暂无播放内容' }}</span>
@@ -31,7 +31,7 @@
           :key="key"
           class="analysis-play-box"
           :class="isSupport ? 'analysis-play-box-hidden' : 'analysis-play-box-show'"
-          :src="url"
+          :src="iframeUrl"
           allowtransparency="true"
           frameborder="0"
           scrolling="no"
@@ -41,13 +41,7 @@
           <div class="analysis-setting-group">
             <t-input-adornment>
               <template #prepend>
-                <t-select
-                  v-model="selectAnalysisApi"
-                  :loading="analysisApiLoading"
-                  placeholder="请选择接口"
-                  size="large"
-                  style="width: 10em"
-                >
+                <t-select v-model="selectAnalysisApi" placeholder="请选择接口" size="large" style="width: 10em">
                   <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.id" />
                 </t-select>
               </template>
@@ -64,7 +58,16 @@
       <div v-if="isSupport" class="analysis-main-bottom">
         <div class="support-title">
           <span class="support-separator"></span>
-          <p class="support-tip">支持平台</p>
+          <p class="support-tip">
+            <t-link theme="default" hover="color" @click="openCurrentUrl">
+              <template #suffixIcon>
+                <jump-icon />
+              </template>
+
+              支持平台
+            </t-link>
+          </p>
+          <!-- <p class="support-tip">支持平台</p> -->
         </div>
         <div class="support-platform">
           <div v-for="(item, index) in VIDEOSITES" :key="index" class="logo-item">
@@ -87,7 +90,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { HistoryIcon, ClearIcon } from 'tdesign-icons-vue-next';
+import { HistoryIcon, ClearIcon, JumpIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import moment from 'moment';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -108,13 +111,12 @@ import logoPptv from '@/assets/pptv.png';
 const formDialogVisiblePlatformAnalysis = ref(false);
 const platformAnalysisData = ref();
 const isSupport = ref(false);
-const urlTitle = ref(); // 播放地址的标题
+const urlTitle = ref(''); // 播放地址的标题
 const analysisApi = ref([]); // 解析接口api列表
-const analysisApiLoading = ref(true);
-const selectAnalysisApi = ref(); // 选择的解析接口
-const analysisUrl = ref(); // 输入需要解析地址
-const url = ref(); // 解析接口+需解析的地址
-const iframeRef = ref(); // iframe dom节点
+const selectAnalysisApi = ref(null); // 选择的解析接口
+const analysisUrl = ref(null); // 输入需要解析地址
+const iframeUrl = ref(null); // 解析接口+需解析的地址
+const iframeRef = ref(null); // iframe dom节点
 const key = new Date().getTime(); // 解决iframe不刷新问题
 const VIDEOSITES = reactive([
   {
@@ -161,35 +163,35 @@ const pagination = ref({
   count: 0,
 });
 
-onMounted(() => {
-  getAnalysisApi();
-  getHistoryList();
+onMounted(async () => {
+  await getAnalysisApi();
+  await getHistoryList();
 });
 
 // 获取解析接口及默认接口
 const getAnalysisApi = async () => {
-  await analyze.all().then((res) => {
-    analysisApi.value = res.filter((item) => item.isActive);
-    if (res) analysisApiLoading.value = false;
-  });
-  await setting.get('defaultAnalyze').then((res) => {
-    selectAnalysisApi.value = res;
-  });
-  await setting.get('analyzeSupport').then((res) => {
-    isSupport.value = res;
-  });
+  const [allRes, defaultAnalyzeRes, analyzeSupportRes] = await Promise.all([
+    analyze.all(),
+    setting.get('defaultAnalyze'),
+    setting.get('analyzeSupport'),
+  ]);
+
+  analysisApi.value = allRes.filter((item) => item.isActive);
+  selectAnalysisApi.value = defaultAnalyzeRes;
+  isSupport.value = analyzeSupportRes;
 };
 
 // 获取解析历史
 const getHistoryList = async () => {
-  let length;
-  await analyzeHistory.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
-    historyList.value = _.unionWith(historyList.value, res.list, _.isEqual);
-    pagination.value.count = res.total;
-    pagination.value.pageIndex++;
-    length = _.size(res.list);
-  });
-  return length;
+  const { pageIndex, pageSize } = pagination.value;
+  const res = await analyzeHistory.pagination(pageIndex, pageSize);
+  const { list } = res;
+  historyList.value = _.unionWith(historyList.value, list, _.isEqual);
+
+  pagination.value.count = res.total;
+  pagination.value.pageIndex++;
+
+  return _.size(res.list);
 };
 
 const load = async ($state) => {
@@ -197,110 +199,124 @@ const load = async ($state) => {
   try {
     const resLength = await getHistoryList();
     if (resLength === 0) $state.complete();
-    else {
-      $state.loaded();
-    }
-  } catch (error) {
-    console.log(error);
+    else $state.loaded();
+  } catch (err) {
+    console.error(err);
     $state.error();
   }
 };
 
-// 解析
-const analysisEvent = async () => {
-  if (selectAnalysisApi.value && analysisUrl.value) {
-    urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
-    url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
-    MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
-    const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
-    if (res) {
-      const index = _.findIndex(historyList.value, res);
-      if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
-      await analyzeHistory.update(res.id, { date: moment().format('YYYY-MM-DD') });
-    } else {
-      const doc = {
-        date: moment().format('YYYY-MM-DD'),
-        analyzeId: selectAnalysisApi.value,
-        videoUrl: analysisUrl.value,
-        videoName: urlTitle.value,
-      };
-      historyList.value.unshift(doc);
-      await analyzeHistory.add(doc);
-    }
-  } else {
+// 解析函数抽离
+const getVideoInfo = async () => {
+  if (!selectAnalysisApi.value || !analysisUrl.value) {
     MessagePlugin.error('请选择解析接口或输入需要解析的地址');
+    return;
+  }
+
+  const api = _.find(analysisApi.value, { id: selectAnalysisApi.value });
+  if (!api) {
+    MessagePlugin.error('无效的解析接口');
+    return;
+  }
+
+  const url = `${api?.url}${analysisUrl.value}`;
+  urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
+  MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
+
+  const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
+  if (res) {
+    const index = _.findIndex(historyList.value, res);
+    if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
+    await analyzeHistory.update(res.id, { date: moment().format('YYYY-MM-DD') });
+  } else {
+    const doc = {
+      date: moment().format('YYYY-MM-DD'),
+      analyzeId: selectAnalysisApi.value,
+      videoUrl: analysisUrl.value,
+      videoName: urlTitle.value,
+    };
+    historyList.value.unshift(doc);
+    await analyzeHistory.add(doc);
+  }
+
+  return url;
+};
+
+// 解析解析
+const analysisEvent = async () => {
+  const url = await getVideoInfo();
+  if (url) {
+    iframeUrl.value = url;
   }
 };
 
 // 平台回掉解析
 const platformPlay = async (item) => {
   analysisUrl.value = item;
-  if (selectAnalysisApi.value && analysisUrl.value) {
-    urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
-    url.value = `${_.find(analysisApi.value, { id: selectAnalysisApi.value }).url}${analysisUrl.value}`;
-    MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
-    const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
-    console.log(res);
-    if (res) {
-      const index = _.findIndex(historyList.value, res);
-      if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
-      await analyzeHistory.update(res.id, { date: moment().format('YYYY-MM-DD') });
-    } else {
-      const doc = {
-        date: moment().format('YYYY-MM-DD'),
-        analyzeId: selectAnalysisApi.value,
-        videoUrl: analysisUrl.value,
-        videoName: urlTitle.value,
-      };
-      historyList.value.unshift(doc);
-      await analyzeHistory.add(doc);
-    }
-  } else {
-    MessagePlugin.error('请选择解析接口或输入需要解析的地址');
+  const url = await getVideoInfo();
+  if (url) {
+    iframeUrl.value = url;
   }
 };
 
 // 历史解析
 const historyPlayEvent = async (item) => {
-  if (_.find(analysisApi.value, { id: item.analyzeId })) {
-    urlTitle.value = item.videoName;
-    analysisUrl.value = item.videoUrl;
-    url.value = `${_.find(analysisApi.value, { id: item.analyzeId }).url}${item.videoUrl}`;
-    const index = _.findIndex(historyList.value, item);
-    if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
-    await analyzeHistory.update(item.id, { date: moment().format('YYYY-MM-DD') });
-    MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
-  } else MessagePlugin.error('该历史记录解析接口已删除');
+  const api = _.find(analysisApi.value, { id: item.analyzeId });
+  if (!api) {
+    MessagePlugin.error('该历史记录解析接口已删除');
+    return;
+  }
+
+  urlTitle.value = item.videoName;
+  analysisUrl.value = item.videoUrl;
+  iframeUrl.value = `${api?.url}${item.videoUrl}`;
+  const index = _.findIndex(historyList.value, item);
+  if (index > -1) historyList.value[index].date = moment().format('YYYY-MM-DD');
+  await analyzeHistory.update(item.id, { date: moment().format('YYYY-MM-DD') });
+  MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
 };
 
 // 历史删除
 const histroyDeleteEvent = async (item) => {
-  _.pull(historyList.value, _.find(historyList.value, { ...item }));
-  await analyzeHistory.remove(item.id);
+  const index = historyList.value.findIndex((historyItem) => historyItem.id === item.id);
+  if (index !== -1) {
+    historyList.value.splice(index, 1);
+    await analyzeHistory.remove(item.id);
+  }
 };
 
 // 历史清空
 const histroyClearEvent = async () => {
-  historyList.value = [];
-  await analyzeHistory.clear().then(() => {
+  try {
+    await analyzeHistory.clear();
+    historyList.value = [];
     MessagePlugin.success('sucess');
-  });
+  } catch (err) {
+    console.error(err);
+    MessagePlugin.error('failed');
+  }
 };
 
 // 显示支持平台
 const showSupportEvent = async () => {
   isSupport.value = !isSupport.value;
-  await setting.update({
-    analyzeSupport: isSupport.value,
-  });
+  await setting.update({ analyzeSupport: isSupport.value });
 };
 
 // 打开平台iframe
 const openPlatform = (item) => {
-  const { _, name, url } = item;
+  const { name, url } = item;
   platformAnalysisData.value = { name, url };
   console.log(platformAnalysisData.value);
   formDialogVisiblePlatformAnalysis.value = true;
+};
+
+// 打开当前播放地址
+const openCurrentUrl = () => {
+  openPlatform({
+    url: analysisUrl.value,
+    name: urlTitle.value,
+  });
 };
 
 // 监听设置默认源变更
@@ -420,9 +436,11 @@ eventBus.on(async () => {
         .support-tip {
           margin-left: 5px;
           display: inline-block;
-          font-weight: 500;
           text-align: left;
           line-height: 40px;
+          a {
+            font-weight: 500;
+          }
         }
       }
       .support-platform {

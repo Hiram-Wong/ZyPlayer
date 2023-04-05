@@ -1,5 +1,5 @@
 <template>
-  <div class="chase-container mx-auto">
+  <div class="chase-container">
     <div class="chase-container-left">
       <t-tabs v-model="chaseTag">
         <t-tab-panel value="history" label="历史记录">
@@ -37,7 +37,6 @@
 import { ref } from 'vue';
 import { DeleteIcon, TimeIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next';
-import { star, history } from '@/lib/dexie';
 import bingeView from './chase/binge/Binge.vue';
 import historyView from './chase/history/History.vue';
 
@@ -47,28 +46,24 @@ const historyRef = ref(null);
 
 // 一键清空
 const clearEvent = () => {
+  const handleClear = () => {
+    if (chaseTag.value === 'binge') {
+      bingeRef.value.clearEvent();
+    } else if (chaseTag.value === 'history') {
+      historyRef.value.clearEvent();
+    }
+    MessagePlugin.success('删除成功');
+    confirmDia.hide();
+  };
+
   const confirmDia = DialogPlugin({
     body: '确认删除所有记录吗?',
     header: false,
     width: '300px',
     placement: 'center',
     attach: '.chase-container-dialog',
-    onConfirm: () => {
-      if (chaseTag.value === 'binge') {
-        star.clear();
-        bingeRef.value.clearEvent();
-      } else if (chaseTag.value === 'history') {
-        history.clear();
-        historyRef.value.clearEvent();
-      }
-      MessagePlugin.success('删除成功');
-      confirmDia.hide();
-    },
-    onClose: ({ e, trigger }) => {
-      console.log('e: ', e);
-      console.log('trigger: ', trigger);
-      confirmDia.hide();
-    },
+    onConfirm: handleClear,
+    onClose: () => confirmDia.hide(),
   });
 };
 
@@ -100,9 +95,6 @@ const checkUpdaterEvent = () => {
   &-dialog {
     :deep(.t-dialog__body) {
       text-align: center !important;
-    }
-    :deep(.t-dialog__footer) {
-      padding: var(--td-comp-paddingTB-l) 0 !important;
     }
   }
   .container-item {

@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto">
+  <div class="container">
     <div class="container-header">
       <div class="player-top">
         <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' && !isMacFull ? '60px' : '0' }">
@@ -137,7 +137,18 @@
       <div class="container-main-left">
         <div class="container-player" :class="{ 'container-player-ext': showEpisode }">
           <div class="player-container">
-            <div id="xgplayer" class="xgplayer"></div>
+            <div v-show="!onlineUrl" id="xgplayer" class="xgplayer"></div>
+            <iframe
+              v-show="onlineUrl"
+              ref="iframeRef"
+              :key="onlinekey"
+              class="analysis-play-box"
+              :src="onlineUrl"
+              allowtransparency="true"
+              frameborder="0"
+              scrolling="no"
+              allowfullscreen="true"
+            ></iframe>
           </div>
         </div>
 
@@ -393,7 +404,7 @@ import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import zy from '@/lib/site/tools';
-import { setting, history, star, channelList } from '@/lib/dexie';
+import { setting, sites, analyze, history, star, channelList } from '@/lib/dexie';
 import { usePlayStore } from '@/store';
 
 // 用于窗口管理
@@ -481,12 +492,33 @@ const isMacFull = ref(false); // mac最大化
 // const iswideBtn = ref(false); // 视频划过显示按钮
 const isProfile = ref(false); // 简介
 
+const analyzeUrl = ref(); // 解析接口
+const onlineUrl = ref(); // 解析接口+需解析的地址
+const iframeRef = ref(); // iframe dom节点
+const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
+
 const shareUrl = computed(() => {
-  const soureUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
+  const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
   let params = `${config.value.url}&name=${info.value.name}`;
   if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name}  ${selectPlayIndex.value}`;
-  return soureUrl + params;
+  return onlineUrl.value || sourceUrl + params;
 }); // 分享地址
+
+const renderError = () => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+      <DesktopIcon size="1.5em" stroke="#fdfdfd" />
+    </div>
+  );
+};
+
+const renderLoading = () => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+      <LoadingIcon size="1.5em" stroke="#fdfdfd" />
+    </div>
+  );
+};
 
 watch(
   () => downloadSource.value,
@@ -509,22 +541,6 @@ watch(
     }
   },
 );
-
-const renderError = () => {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <DesktopIcon size="1.5em" stroke="#fdfdfd" />
-    </div>
-  );
-};
-
-const renderLoading = () => {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <LoadingIcon size="1.5em" stroke="#fdfdfd" />
-    </div>
-  );
-};
 
 // 更新二维码
 watch(
@@ -549,13 +565,28 @@ watch(
 
 onMounted(() => {
   initPlayer();
+  if (type.value === 'film') getAnalysisData();
   minMaxEvent();
-  // wideEvent();
 });
 
 onDeactivated(() => {
   clearInterval(timer.value);
 });
+
+// 获取解析地址
+const getAnalysisData = async () => {
+  const currentSite = await sites.find({ key: ext.value.site.key });
+  if (currentSite.jiexiUrl) {
+    analyzeUrl.value = currentSite.jiexiUrl;
+  } else {
+    setting.get('defaultAnalyze').then((id) => {
+      analyze.get(id).then((item) => {
+        analyzeUrl.value = item.url;
+        console.log(item.url);
+      });
+    });
+  }
+};
 
 const getHistoryData = async (type = false) => {
   const { key } = ext.value.site;
@@ -593,36 +624,34 @@ const getHistoryData = async (type = false) => {
 };
 
 // 初始化播放器
-const initPlayer = async (firstInit = false) => {
+const initPlayer = async (isFirst = false) => {
   if (set.value.softSolution) config.value.mediaType = 'live-video'; // 软解支持
-  if (xg.value) xg.value.destroy(); // 存在播放器则摧毁
+  if (xg.value) {
+    xg.value.destroy();
+    xg.value = null;
+  } // 存在播放器则摧毁
   if (type.value === 'iptv') {
-    console.log(info.value.url);
-    console.log(store.getData);
-    getChannelList();
     config.value.url = info.value.url; // 初始化播放链接
-    if (data.value.ext.epg) {
-      zy.iptvEpg(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD')).then((res) => {
-        epgData.value = res;
-      });
-    } // 处理电子节目单
-    zy.isLiveM3U8(info.value.url).then((res) => {
-      if (res) {
-        config.value.isLive = res;
-        config.value.presets = [LivePreset];
-      }
-    }); // 判断是否直播
-    console.log(config.value);
-    xg.value = new Player(config.value);
+    await getChannelList();
+    if (data.value.ext.epg) await getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD')); // 处理电子节目单
+    // 判断是否直播/点播
+    zy.isLiveM3U8(info.value.url)
+      .then((res) => {
+        if (res) {
+          config.value.isLive = true;
+          config.value.presets = [LivePreset];
+        }
+      })
+      .then(() => (xg.value = new Player(config.value)))
+      .catch((err) => console.log(err));
   } else if (type.value === 'film') {
     getDetailInfo();
     // await getDoubanRate();
     getDoubanRecommend();
     await getBinge();
-    if (!firstInit) {
+    if (!isFirst) {
       await getHistoryData().then(async () => {
         if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
-        else config.value.startTime = 0;
         if (set.value.skipStartEnd) {
           if (dataHistory.value.watchTime < set.value.skipTimeInStart)
             config.value.startTime = set.value.skipTimeInStart;
@@ -632,25 +661,59 @@ const initPlayer = async (firstInit = false) => {
           if (item.split('$')[0] === dataHistory.value.videoIndex) config.value.url = item.split('$')[1];
         });
         if (!config.value.url) config.value.url = season.value[selectPlaySource.value][0].split('$')[1]; // 初始化播放链接
+
+        // 尝试提取ck/dp播放器中m3u8
+        // if (!config.value.url.endsWith('m3u8')) {
+        //   config.value.url = await zy.parserFilmUrl(config.value.url);
+        // }
+        // xg.value = new Player(config.value);
+        onlineUrl.value = '';
         if (!config.value.url.endsWith('m3u8')) {
-          config.value.url = await zy.parserFilmUrl(config.value.url);
-        } // 判断是否做解析
-        xg.value = new Player(config.value);
+          console.log('非m3u8流程');
+          await zy
+            .parserFilmUrl(config.value.url)
+            .then((res) => {
+              console.log('尝试提取ck/dp播放器中m3u8', res);
+              config.value.url = res;
+            })
+            .catch((err) => {
+              console.log(err);
+              onlineUrl.value = analyzeUrl.value + config.value.url;
+              console.log(onlineUrl.value);
+            });
+        }
+        if (!onlineUrl.value) xg.value = new Player(config.value);
       });
     } else {
       if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
-      else config.value.startTime = 0;
       if (set.value.skipStartEnd) {
         if (dataHistory.value.watchTime < set.value.skipTimeInStart) config.value.startTime = set.value.skipTimeInStart;
       }
+      // if (!config.value.url.endsWith('m3u8')) {
+      //   config.value.url = await zy.parserFilmUrl(config.value.url);
+      // } // 判断是否做解析
+      // xg.value = new Player(config.value);
+      onlineUrl.value = '';
       if (!config.value.url.endsWith('m3u8')) {
-        config.value.url = await zy.parserFilmUrl(config.value.url);
-      } // 判断是否做解析
-      xg.value = new Player(config.value);
+        console.log('非m3u8流程');
+        await zy
+          .parserFilmUrl(config.value.url)
+          .then((res) => {
+            console.log('尝试提取ck/dp播放器中m3u8', res);
+            config.value.url = res;
+          })
+          .catch((err) => {
+            console.log(err);
+            onlineUrl.value = analyzeUrl.value + config.value.url;
+            console.log(onlineUrl.value);
+          });
+      }
+      if (!onlineUrl.value) xg.value = new Player(config.value);
     }
 
     await timerUpdatePlayProcess();
   }
+  document.documentElement.setAttribute('theme-mode', 'dark');
 
   document.title = type.value === 'iptv' ? info.value.name : `${info.value.vod_name} ${selectPlayIndex.value}`;
 };
@@ -714,6 +777,7 @@ const getDetailInfo = async () => {
       .filter((e) => e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http'))));
     playEpisodes.push(playContont);
   });
+  console.log(playEpisodes);
   if (!selectPlayIndex.value) selectPlayIndex.value = playEpisodes[0][0].split('$')[0];
 
   // 合并播放源和剧集
@@ -722,7 +786,7 @@ const getDetailInfo = async () => {
   videoList.fullList = fullList;
   info.value = videoList;
   season.value = fullList;
-  // console.log(info.value, season.value);
+  console.log(info.value, season.value);
 };
 
 // 切换选集
@@ -796,15 +860,18 @@ const getDoubanRecommend = async () => {
   const name = info.value.vod_name;
   const year = info.value.vod_year;
   const id = info.value.vod_douban_id;
-  await zy.doubanRecommendations(id, name, year).then((resName) => {
-    _.forEach(resName, async (element) => {
-      await zy.searchFirstDetail(key, element).then((res) => {
-        if (res) {
-          if (recommend.value.length < 10) recommend.value.push(res);
-        }
+  await zy
+    .doubanRecommendations(id, name, year)
+    .then((resName) => {
+      _.forEach(resName, async (element) => {
+        await zy.searchFirstDetail(key, element).then((res) => {
+          if (res) {
+            if (recommend.value.length < 10) recommend.value.push(res);
+          }
+        });
       });
-    });
-  });
+    })
+    .catch((err) => console.log(err));
 };
 
 // 替换style
@@ -812,11 +879,9 @@ const filterContent = (item) => {
   return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
 };
 
-// 自动隐藏wide
-// const wideEvent = () => {};
-
 // 定时更新播放进度
 const timerUpdatePlayProcess = () => {
+  if (onlineUrl.value) return;
   timer.value = setInterval(() => {
     const doc = {
       date: moment().format('YYYY-MM-DD'),
@@ -863,6 +928,16 @@ const getChannelList = () => {
     if (res) channelSourceData = channelSourceData.filter((item) => !isIpv6(item.url));
     channelListData.value = channelSourceData;
   });
+};
+
+// 获取电子节目单
+const getEpgList = async (url, name, date) => {
+  await zy
+    .iptvEpg(url, name, date)
+    .then((res) => {
+      epgData.value = res;
+    })
+    .catch((err) => console.log(err));
 };
 
 // 生成二维码
@@ -959,7 +1034,7 @@ const openMainWinEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables';
+@import '@/style/variables.less';
 @import '@/style/index.less';
 
 .container {
@@ -1240,6 +1315,10 @@ const openMainWinEvent = () => {
           width: 100%;
           height: 100vh;
           overflow: hidden;
+          .analysis-play-box {
+            width: 100%;
+            height: 100%;
+          }
         }
       }
 

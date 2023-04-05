@@ -1,13 +1,13 @@
 <template>
   <t-dialog v-model:visible="formVisible" header="热榜" :footer="false" placement="center">
     <template #body>
-      <div class="hot-container mx-auto">
+      <div class="hot-container">
         <div class="hot-heading">
           <span class="hot-heading-tip">根据当前热度整理 不定时更新</span>
         </div>
         <t-skeleton theme="paragraph" :loading="loading">
           <div class="hot-main">
-            <div v-for="(item, index) in HotList" :key="index" class="hot-paper-item-main" @click="detailEvent(item)">
+            <div v-for="(item, index) in hotList" :key="index" class="hot-paper-item-main" @click="detailEvent(item)">
               <div class="hot-paper-item-num" :class="`hot-paper-item-num-${index + 1}`">{{ index + 1 }}</div>
               <div class="hot-paper-item-info">
                 <span class="hot-paper-item-infotitle">{{ item.vod_name }}</span>
@@ -55,7 +55,7 @@ const loading = ref(true); // 骨架屏是否显示热播
 
 const formVisible = ref(false); // dialog是否显示热播
 const formData = ref(props.site); // 接受父组件参数
-const HotList = ref([]); // 热播列表
+const hotList = ref([]); // 热播列表
 
 const formDetailData = ref({}); // 详情组件传参
 const emit = defineEmits(['update:visible']);
@@ -82,45 +82,36 @@ watch(
 
 const getHotList = async () => {
   const defaultHot = await setting.get('defaultHot');
+  const { key } = formData.value;
   if (defaultHot === 'site') {
-    const { key } = formData.value;
-    await zy.hot(key, 24).then((res) => {
-      HotList.value = res;
-    });
+    hotList.value = await zy.hot(key, 24);
   } else if (defaultHot === 'douban') {
-    HotList.value = await zy.doubanHot('tv', '热门', 20, 0);
+    hotList.value = await zy.doubanHot('tv', '热门', 20, 0);
   }
-  if (HotList.value.length) loading.value = false;
+  if (hotList.value.length) loading.value = false;
 };
 
 const detailEvent = async (item) => {
   const defaultHot = await setting.get('defaultHot');
   const { key } = formData.value;
-  let isExist = true;
   if (defaultHot === 'site') {
-    await zy.detail(key, item.vod_id).then((res) => {
-      formDetailData.value = res;
-    });
+    formDetailData.value = await zy.detail(key, item.vod_id);
   } else if (defaultHot === 'douban') {
-    await zy.searchFirstDetail(key, item.vod_name).then((res) => {
-      if (res) formDetailData.value = res;
-      else {
-        MessagePlugin.warning('暂无在本源搜索到相关资源');
-        isExist = false;
-      }
-    });
+    const res = await zy.searchFirstDetail(key, item.vod_name);
+    if (!res) {
+      MessagePlugin.warning('暂无在本源搜索到相关资源');
+      return;
+    }
+    formDetailData.value = res;
   }
-  if (isExist) {
-    store.updateConfig({
-      type: 'film',
-      data: {
-        info: formDetailData.value,
-        ext: { site: formData.value },
-      },
-    });
-
-    ipcRenderer.send('openPlayWindow', item.vod_name);
-  }
+  store.updateConfig({
+    type: 'film',
+    data: {
+      info: formDetailData.value,
+      ext: { site: formData.value },
+    },
+  });
+  ipcRenderer.send('openPlayWindow', item.vod_name);
 };
 </script>
 

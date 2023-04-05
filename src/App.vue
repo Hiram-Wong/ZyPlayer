@@ -1,5 +1,5 @@
 <template>
-  <router-view />
+  <router-view></router-view>
   <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
 </template>
 
@@ -30,47 +30,39 @@ onMounted(() => {
   initPlayerSetting();
 });
 
-const initTheme = () => {
-  setting.get('theme').then((res: 'dark' | 'light' | 'auto') => {
-    storeSetting.updateConfig({ mode: res });
-  });
+const initTheme = async () => {
+  const res = await setting.get('theme');
+  storeSetting.updateConfig({ mode: res });
 };
 
-ipcRenderer.on('system-theme-updated', (_, ativeTheme) => {
+ipcRenderer.on('system-theme-updated', (_, activeTheme) => {
   if (theme.value === 'auto') {
-    console.log(`system-theme-updated: ${ativeTheme}`);
-    document.documentElement.setAttribute('theme-mode', ativeTheme === 'dark' ? 'dark' : '');
+    const themeMode = activeTheme === 'dark' ? 'dark' : '';
+    document.documentElement.setAttribute('theme-mode', themeMode);
+    console.log(`system-theme-updated: ${activeTheme}`);
   }
 });
 
-const initAgreementMask = () => {
-  setting.get('agreementMask').then((res) => {
-    formDialogPrivacyPolicy.value = !res;
-  });
+const initAgreementMask = async () => {
+  const res = await setting.get('agreementMask');
+  formDialogPrivacyPolicy.value = !res;
 };
 
-const initPlayerSetting = () => {
+const initPlayerSetting = async () => {
   const init = {
     ...PLAY_CONFIG.setting,
   };
-  setting.get('softSolution').then((res) => {
-    init.softSolution = res;
-  });
-  setting.get('pauseWhenMinimize').then((res) => {
-    init.pauseWhenMinimize = res;
-  });
 
-  setting.get('skipStartEnd').then((isSkip) => {
-    init.skipStartEnd = isSkip;
-    if (isSkip) {
-      setting.get('skipTimeInStart').then((res) => {
-        init.skipTimeInStart = res;
-      });
-      setting.get('skipTimeInEnd').then((res) => {
-        init.skipTimeInEnd = res;
-      });
-    }
-  });
+  init.softSolution = await setting.get('softSolution');
+  init.pauseWhenMinimize = await setting.get('pauseWhenMinimize');
+  const isSkip = await setting.get('skipStartEnd');
+  init.skipStartEnd = isSkip;
+
+  if (isSkip) {
+    init.skipTimeInStart = await setting.get('skipTimeInStart');
+    init.skipTimeInEnd = await setting.get('skipTimeInEnd');
+  }
+
   storePlayer.updateConfig({ setting: init });
 };
 </script>

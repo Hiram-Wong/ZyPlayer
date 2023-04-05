@@ -1,7 +1,7 @@
 <template>
   <t-dialog v-model:visible="formVisible" width="80%" placement="center" :footer="false">
     <template #body>
-      <div class="detail-container mx-auto">
+      <div class="detail-container">
         <div class="plist-body">
           <div class="detail-title clearfix">
             <div class="title-width">

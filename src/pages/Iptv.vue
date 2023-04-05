@@ -1,5 +1,5 @@
 <template>
-  <div class="iptv-container mx-auto">
+  <div class="iptv-container">
     <div class="tool">
       <t-row justify="space-between">
         <div class="left-operation-container">
@@ -98,7 +98,7 @@
     </div>
   </div>
 </template>
-<script setup lang="jsx">
+<script setup lang="tsx">
 import { ref, computed, onMounted } from 'vue';
 import { useEventBus, useClipboard } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -140,18 +140,13 @@ const renderLoading = () => {
 const iptvSetting = ref({
   name: '',
   epg: '',
-  skipIpv6: true,
-  thumbnail: false,
+  skipIpv6: false,
+  iptvStatus: false,
 });
 const iptvList = ref({});
 const iptvListSelect = ref();
 const iptvDataList = ref({});
-const iptvClassList = ref([
-  {
-    id: '全部',
-    name: '全部',
-  },
-]);
+const iptvClassList = ref([{ id: '全部', name: '全部' }]);
 const iptvClassSelect = ref('全部');
 
 const searchTxt = ref('');
@@ -185,25 +180,19 @@ onMounted(() => {
 
 // 获取配置
 const getIptvSetting = async () => {
-  await setting.get('defaultIptv').then(async (id) => {
-    if (id) {
-      await iptv.get(id).then(async (res) => {
-        iptvListSelect.value = res.id;
-        iptvSetting.value.name = res.name;
-        iptvSetting.value.epg = res.epg;
-        if (!res.epg) iptvSetting.value.epg = await setting.get('defaultIptvEpg');
-      });
+  const defaultIptv = await setting.get('defaultIptv');
+  if (defaultIptv) {
+    const res = await iptv.get(defaultIptv);
+    if (res) {
+      iptvListSelect.value = res.id;
+      iptvSetting.value.name = res.name;
+      iptvSetting.value.epg = res.epg || (await setting.get('defaultIptvEpg'));
     }
-  });
-  setting.get('iptvSkipIpv6').then((res) => {
-    iptvSetting.value.skipIpv6 = res;
-  });
-  setting.get('iptvStatus').then((res) => {
-    iptvSetting.value.iptvStatus = res;
-  });
-  iptv.all().then((res) => {
-    iptvList.value = res.filter((item) => item.isActive);
-  });
+  }
+  iptvSetting.value.skipIpv6 = await setting.get('iptvSkipIpv6');
+  iptvSetting.value.iptvStatus = await setting.get('iptvStatus');
+
+  iptvList.value = (await iptv.all()).filter((item: { isActive: any }) => item.isActive);
 };
 
 // 获取直播列表个数
@@ -229,8 +218,7 @@ const getChannelList = async () => {
     pagination.value.pageSize,
   );
   const sourceLength = res.list.length;
-  console.log(res.list);
-  if (iptvSetting.value.skipIpv6) res.list = res.list.filter((item) => !isIpv6(item.url));
+  if (iptvSetting.value.skipIpv6) res.list = res.list.filter((item: { url: string }) => !isIpv6(item.url));
   const restultLength = res.list.length;
   iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
   if (iptvSetting.value.iptvStatus) await checkChannelList(pagination.value.pageIndex, pagination.value.pageSize);
@@ -239,11 +227,12 @@ const getChannelList = async () => {
   // 1. 开启检查：为0  1).返回原或0
   // 2. 开启检查：非0  1).相等直接返回  2).不相等[原非0:目的0再次请求；原小于pagesise:目的小于pagesise返回原]  3).
   // 3. 非开启检查     1).直接返回原
-  let length = sourceLength;
+  let length;
+
   if (iptvSetting.value.skipIpv6) {
     if (sourceLength) {
       if (sourceLength === restultLength) length = sourceLength;
-      else if (restultLength === 0) {
+      if (restultLength === 0) {
         pagination.value.pageIndex++;
         await getChannelList();
       }
@@ -253,21 +242,35 @@ const getChannelList = async () => {
   return length;
 };
 
-const isIpv6 = (str) => {
-  return /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i.test(str);
+const isIpv6 = (url: string) => {
+  // 去除协议
+  const urlWithoutProtocol = url.replace(/^(https?:)?\/\//i, '');
+  // 去除路径
+  const hostname = urlWithoutProtocol.split('/')[0];
+  // 直接提取[]
+  const reg = /^\[(.+)\](:\d+)?\/?/;
+  const match = hostname.match(reg);
+  if (!match) {
+    return false;
+  }
+  const ipv6Address = match[1];
+
+  // ipv6规则
+  const ipv6Regex =
+    /^(?:(?:(?:(?:[0-9A-Fa-f]{1,4}:){6}|(?=(?:[0-9A-Fa-f]{0,4}:){2,6}(?:\d{1,3}\.){3}\d{1,3}$)(([0-9A-Fa-f]{0,4}:){1,5}|:)((:[0-9A-Fa-f]{0,4}){1,5}:|:)|::(?:[0-9A-Fa-f]{0,4}:){0,4}(?:(?<=::)|(?:(?<=:)0{0,4})))|::(?:[0-9A-Fa-f]{0,4}:){0,5}(?:(?<=::)|(?:(?<=:)0{0,4}[0-9A-Fa-f]{1,4}))|(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?=(?:[0-9A-Fa-f]{0,4}:){0,7}[0-9A-Fa-f]{0,4}$)([0-9A-Fa-f]{0,4}:){0,6}[0-9A-Fa-f]{0,4}))(?:%[0-9A-Za-z]{1,})?(?:\:\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$/;
+  return ipv6Regex.test(ipv6Address);
 };
 
-const load = async ($state) => {
+const load = async ($state: { complete: () => void; loaded: () => void; error: () => void }) => {
   console.log('loading...');
   try {
     const resLength = await getChannelList();
     if (resLength === 0) {
+      if (!iptvSetting.value.name) infiniteCompleteTip.value = '暂无数据，请前往设置-直播源设置默认源!';
       $state.complete();
-      if (!iptvSetting.value.name) infiniteCompleteTip.value = '暂无数据，请前往设置-直播源设置默认源！';
-    } else {
-      $state.loaded();
-    }
+    } else $state.loaded();
   } catch (err) {
+    console.log(err);
     $state.error();
   }
 };
@@ -282,7 +285,7 @@ const searchEvent = async () => {
 };
 
 // 切换分类
-const changeClassEvent = async (item) => {
+const changeClassEvent = async (item: { name: string }) => {
   console.log('class');
   iptvClassSelect.value = item.name;
 
@@ -293,31 +296,39 @@ const changeClassEvent = async (item) => {
 };
 
 // 播放
-const playEvent = (item) => {
-  console.log(iptvSetting.value.epg);
+const playEvent = (item: { name: any }) => {
+  const { epg } = iptvSetting.value;
+  console.log(epg);
   storePlayer.updateConfig({
     type: 'iptv',
-    data: {
-      info: item,
-      ext: { epg: iptvSetting.value.epg },
-    },
+    data: { info: item, ext: { epg } },
   });
   ipcRenderer.send('openPlayWindow', item.name);
 };
 
 // 检查状态
-const checkChannelList = (pageIndex, pageSize) => {
+const checkChannelListStatus = async (pageIndex: number, pageSize: number) => {
+  const promises = [];
   for (let i = pageIndex * pageSize; i < (pageIndex + 1) * pageSize; i++) {
     if (!iptvDataList.value.list[i]) return;
-    zy.checkChannel(iptvDataList.value.list[i].url).then((res) => {
-      if (res) iptvDataList.value.list[i].status = true;
-      else iptvDataList.value.list[i].status = false;
-    });
+
+    promises.push(zy.checkChannel(iptvDataList.value.list[i].url));
+
+    const results = await Promise.all(promises.map((p) => p.catch((error: any) => error)));
+    for (let i = 0; i < results.length; i++) {
+      if (results[i] !== undefined) {
+        iptvDataList.value.list[pageIndex * pageSize + i].status = true;
+      } else {
+        iptvDataList.value.list[pageIndex * pageSize + i].status = false;
+      }
+    }
   }
 };
+// 500毫秒检测一次，防止异步阻塞
+const checkChannelList = _.debounce(checkChannelListStatus, 500);
 
 // 修改源
-const changeDefaultIptvEvent = async (event) => {
+const changeDefaultIptvEvent = async (event: any) => {
   console.log(event);
   const { url } = await iptv.get(event);
   await axios.get(url).then((res) => {
@@ -339,15 +350,15 @@ const changeDefaultIptvEvent = async (event) => {
   getChannelList();
 };
 
-const m3u = (text) => {
+const m3u = (text: string) => {
   const GROUP = /.*group-title="(.?|.+?)".*/i;
   const LOGO = /.*tvg-logo="(.?|.+?)".*/i;
   const NAME = /.*,(.+?)(?:$|\n|\s)/i;
 
   const docs = [];
-  let doc;
+  let doc: { name?: any; logo?: any; group?: any; url?: any };
   const splitList = text.split('\n');
-  splitList.forEach((line) => {
+  splitList.forEach((line: string) => {
     if (line.startsWith('#EXTINF:')) {
       doc = {}; // 切断指针的联系
       doc.name = line.match(NAME) ? line.match(NAME)[1] : '';
@@ -367,11 +378,11 @@ const m3u = (text) => {
   });
 };
 
-const txt = (text) => {
+const txt = (text: string) => {
   const docs = [];
-  let group;
+  let group: any;
   const splitList = text.split('\n');
-  splitList.forEach((line) => {
+  splitList.forEach((line: string) => {
     const split = line.split(',');
     if (split.length < 2) return;
     if (line.indexOf('#genre#') > -1) [group] = split;
@@ -394,28 +405,27 @@ const txt = (text) => {
 // 监听设置默认源变更
 const eventBus = useEventBus('iptv-reload');
 eventBus.on(async () => {
-  await getIptvSetting();
-  await getChannelCount();
-  await getIptvClass();
+  await Promise.all([getIptvSetting(), getChannelCount(), getIptvClass(), getChannelList()]);
   iptvDataList.value = {};
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
-  await getChannelList();
 });
 
 // 右键
-const conButtonClick = (item, e) => {
+const conButtonClick = (item: any, { x, y }: any) => {
   show.value = true;
-  optionsComponent.value.x = e.x;
-  optionsComponent.value.y = e.y;
+  // Object.assign()用于同时设置两个属性，而不是逐个分配x和y属性。
+  Object.assign(optionsComponent.value, { x, y });
   channelItem.value = item;
 };
 
 // 删除
 const delChannelEvent = () => {
-  _.pull(iptvDataList.value.list, _.find(iptvDataList.value.list, { ...channelItem.value }));
-  channelList.remove(channelItem.value.id);
-  pagination.value.count--;
+  const index = iptvDataList.value.list.indexOf(channelItem.value);
+  if (index > -1) {
+    iptvDataList.value.list.splice(index, 1);
+    channelList.remove(channelItem.value.id);
+  }
   show.value = false;
 };
 
@@ -548,7 +558,7 @@ const copyChannelEvent = () => {
     }
   }
   .main {
-    height: calc(100% - var(--td-comp-size-l));
+    height: calc(100% - 50px);
     display: flex;
     flex-direction: column;
     align-items: center;

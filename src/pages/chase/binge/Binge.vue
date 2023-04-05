@@ -1,5 +1,5 @@
 <template>
-  <div class="binge-container mx-auto">
+  <div class="binge-container">
     <div class="main" infinite-wrapper>
       <div class="main-flow-wrap">
         <div v-for="item in bingeList" :key="item.id" class="card-wrap">
@@ -14,7 +14,7 @@
               <t-image
                 class="card-main-item"
                 :src="item.videoImage"
-                :style="{ width: '190px', height: '105px', borderRadius: '7px' }"
+                :style="{ width: '190px', height: '105px' }"
                 :lazy="true"
                 fit="cover"
               >
@@ -42,7 +42,7 @@
   </div>
 </template>
 
-<script setup lang="jsx">
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -68,14 +68,16 @@ const bingeList = ref([]);
 const infiniteId = ref(+new Date());
 
 const getBingeList = async () => {
-  let length;
-  await star.pagination(pagination.value.pageIndex, pagination.value.pageSize).then((res) => {
+  try {
+    const res = await star.pagination(pagination.value.pageIndex, pagination.value.pageSize);
     bingeList.value = _.unionWith(bingeList.value, res.list, _.isEqual);
     pagination.value.count = res.total;
     pagination.value.pageIndex++;
-    length = _.size(res.list);
-  });
-  return length;
+    return _.size(res.list);
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
 const load = async ($state) => {
@@ -116,37 +118,41 @@ const playEvent = async (item) => {
 const removeEvent = async (item) => {
   const { id } = item;
   await star.remove(id);
-  _.pull(bingeList.value, _.find(bingeList.value, { ...item }));
+  bingeList.value = _.reject(bingeList.value, { id });
   pagination.value.count--;
 };
 
 // 清空
-const clearEvent = () => {
+const clearEvent = async () => {
   bingeList.value = [];
+  await star.clear();
   getBingeList();
 };
 
 // 更新
-const checkUpdaterEvent = () => {
-  bingeList.value.forEach((item) => {
-    const { id, siteKey, videoId } = item;
-    zy.detail(siteKey, videoId)
-      .then((res) => {
+const updateVideoRemarks = (item, res) => {
+  const { id } = item;
+  const index = _.findIndex(bingeList.value, { ...item });
+  const isUpdate = res.vod_remarks !== bingeList.value[index].videoRemarks;
+  bingeList.value[index].videoUpdate = isUpdate;
+  bingeList.value[index].videoRemarks = res.vod_remarks;
+  star.update(id, { videoRemarks: res.vod_remarks, videoUpdate: isUpdate });
+};
+
+const checkUpdaterEvent = async () => {
+  await Promise.all(
+    bingeList.value.map(async (item) => {
+      const { siteKey, videoId } = item;
+      try {
+        const res = await zy.detail(siteKey, videoId);
         if (res.vod_remarks) {
-          const index = _.findIndex(bingeList.value, { ...item });
-          console.log(res.vod_remarks, bingeList.value[index].videoRemarks);
-          let isUpdate = false;
-          if (res.vod_remarks !== bingeList.value[index].videoRemarks) {
-            console.log(res.vod_remarks, bingeList.value[index].videoRemarks);
-            isUpdate = true;
-            bingeList.value[index].videoUpdate = true;
-          } else bingeList.value[index].videoUpdate = false;
-          bingeList.value[index].videoRemarks = res.vod_remarks;
-          star.update(id, { videoRemarks: res.vod_remarks, videoUpdate: isUpdate });
+          updateVideoRemarks(item, res);
         }
-      })
-      .catch((err) => console.log(err));
-  });
+      } catch (err) {
+        console.error(err);
+      }
+    }),
+  );
 };
 
 // 监听播放器变更
@@ -241,7 +247,7 @@ defineExpose({
               height: 18px;
               line-height: 18px;
               padding: 1px 6px;
-              border-radius: 7px 0 7px 0;
+              border-radius: 5px 0 5px 0;
               background: #03c8d4;
               display: block;
               &-tagtext {

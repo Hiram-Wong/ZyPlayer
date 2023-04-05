@@ -1,5 +1,5 @@
 <template>
-  <div class="film-container mx-auto">
+  <div class="film-container">
     <div class="tool" :class="{ 'tool-ext': showToolbar }">
       <div class="header">
         <t-row justify="space-between">
@@ -239,7 +239,10 @@ const FilmSiteSetting = ref({
   searchType: 'site',
   searchGroup: [],
 }); // 站点源设置
-const FilmDataList = ref({}); // Waterfall
+const FilmDataList = ref({
+  list: [],
+  rawList: [],
+}); // Waterfall
 const FilmSiteList = ref(); // 站点
 const sitesList = ref({}); // 全部源
 const sitesListSelect = ref(); // 选择的源
@@ -266,48 +269,26 @@ onMounted(async () => {
 
 // 筛选
 const filterEvent = () => {
-  let filteredData = FilmDataList.value.rawList;
+  const { rawList } = FilmDataList.value;
+  const { area, year, sort } = filterData.value;
 
-  // 地区
-  if (filterData.value.area !== '全部') {
-    filteredData = filteredData.filter((item) => item.vod_area.includes(filterData.value.area));
-  }
-  console.log('地区', filteredData);
-
-  // 年份
-  if (filterData.value.year !== '全部') {
-    filteredData = filteredData.filter((item) => item.vod_year.includes(filterData.value.year));
-  }
-  console.log('年份', filteredData);
-
-  // 排序
-  switch (filterData.value.sort) {
-    case '按上映年份':
-      filteredData.sort((a, b) => {
-        return b.vod_year - a.vod_year;
-      });
-      break;
-    case '按片名':
-      filteredData.sort((a, b) => {
-        return a.vod_name.localeCompare(b.vod_name, 'zh-Hans-CN');
-      });
-      break;
-    case '按更新时间':
-      filteredData.sort((a, b) => {
-        return new Date(b.vod_time) - new Date(a.vod_time);
-      });
-      break;
-    default:
-      filteredData.sort((a, b) => {
-        return new Date(b.vod_time) - new Date(a.vod_time);
-      });
-      break;
-  }
-  console.log('排序', filteredData);
+  const filteredData = rawList
+    .filter((item) => area === '全部' || item.vod_area.includes(area))
+    .filter((item) => year === '全部' || item.vod_year.includes(year))
+    .sort((a, b) => {
+      switch (sort) {
+        case '按上映年份':
+          return b.vod_year - a.vod_year;
+        case '按片名':
+          return a.vod_name.localeCompare(b.vod_name, 'zh-Hans-CN');
+        default:
+          return new Date(b.vod_time) - new Date(a.vod_time);
+      }
+    });
 
   // Get unique film data
-  filteredData = Array.from(new Set(filteredData));
-  FilmDataList.value.list = filteredData;
+  const uniqueData = Array.from(new Set(filteredData));
+  FilmDataList.value.list = uniqueData;
 };
 
 // 筛选条件切换
@@ -316,34 +297,39 @@ const changeFilterEvent = (type, item) => {
 };
 
 const getFilmSetting = async () => {
-  await setting.get('defaultSite').then((id) => {
-    if (id) {
-      sites.get(id).then((res) => {
-        sitesListSelect.value = res.id;
-        FilmSiteSetting.value.basic = res;
-      });
-    } else infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
-  });
-  await setting.get('rootClassFilter').then((res) => {
-    FilmSiteSetting.value.rootClassFilter = res;
-  });
-  await setting.get('r18ClassFilter').then((res) => {
-    FilmSiteSetting.value.r18ClassFilter = res;
-  });
-  await setting.get('defaultChangeModel').then((res) => {
-    FilmSiteSetting.value.change = res;
-  });
-  await sites.all().then((res) => {
-    sitesList.value = res.filter((item) => item.isActive);
-  });
-  await setting.get('defaultSearch').then((res) => {
-    FilmSiteSetting.value.searchType = res;
-    if (res === 'site') FilmSiteSetting.value.searchGroup = [{ ...FilmSiteSetting.value.basic }];
-    if (res === 'group')
-      FilmSiteSetting.value.searchGroup = sitesList.value.filter(
-        (item) => item.group === FilmSiteSetting.value.basic.group,
-      );
-    if (res === 'all') FilmSiteSetting.value.searchGroup = sitesList.value;
+  const [defaultSite, rootClassFilter, r18ClassFilter, defaultChangeModel, sitesAll, defaultSearch] = await Promise.all(
+    [
+      setting.get('defaultSite'),
+      setting.get('rootClassFilter'),
+      setting.get('r18ClassFilter'),
+      setting.get('defaultChangeModel'),
+      sites.all(),
+      setting.get('defaultSearch'),
+    ],
+  );
+
+  if (defaultSite) {
+    const basic = await sites.get(defaultSite);
+    const { id } = basic;
+    sitesListSelect.value = id;
+    FilmSiteSetting.value.basic = basic;
+  } else {
+    infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
+  }
+
+  sitesList.value = sitesAll.filter((item) => item.isActive);
+
+  Object.assign(FilmSiteSetting.value, {
+    rootClassFilter,
+    r18ClassFilter,
+    change: defaultChangeModel,
+    searchType: defaultSearch,
+    searchGroup:
+      defaultSearch === 'site'
+        ? [{ ...FilmSiteSetting.value.basic }]
+        : defaultSearch === 'group'
+        ? sitesList.value.filter((item) => item.group === FilmSiteSetting.value.basic.group)
+        : sitesList.value,
   });
 };
 
@@ -373,22 +359,22 @@ const getFilmYear = () => {
 };
 
 // 获取所有站点资源
-const getFilmSite = () => {
-  sites.all().then((res) => {
-    FilmSiteList.value = res.filter((item) => item.isActive);
-  });
+const getFilmSite = async () => {
+  const res = await sites.all();
+  FilmSiteList.value = res.filter((item) => item.isActive);
 };
 
 // 青少年过滤
 const containsClassFilterKeyword = (name) => {
+  const { rootClassFilter, r18ClassFilter } = FilmSiteSetting.value;
   let ret = false;
   // 主分类过滤, 检测关键词是否包含分类名
   if (FilmSiteSetting.value.rootClassFilter) {
-    ret = FilmSiteSetting.value.rootClassFilter?.some((v) => v.includes(name));
+    ret = rootClassFilter.includes(name);
   }
   // 福利过滤,检测分类名是否包含关键词
-  if (FilmSiteSetting.value.r18ClassFilter && !ret) {
-    ret = FilmSiteSetting.value.r18ClassFilter?.some((v) => name?.includes(v));
+  if (r18ClassFilter?.length && !ret) {
+    ret = r18ClassFilter?.some((v) => name?.includes(v));
   }
   return ret;
 };
@@ -396,25 +382,26 @@ const containsClassFilterKeyword = (name) => {
 // 获取分类
 const getClass = async () => {
   const { key } = FilmSiteSetting.value.basic;
-  await zy.class(key).then((res) => {
-    pagination.value.pageIndex = res.page;
-    pagination.value.count = res.pagecount;
-    pagination.value.pageSize = res.pagesize;
-    FilmSiteSetting.value.basic.recordcount = res.recordcount;
-    const allClass = [{ type_id: 0, type_name: '最新' }];
-    res.class.forEach((element) => {
-      if (!containsClassFilterKeyword(element.type_name)) {
-        allClass.push(element);
-      }
-    });
-    classKeywords.value = allClass;
-  });
+  const res = await zy.class(key);
+
+  const { page, pagecount, pagesize, recordcount, class: classList } = res;
+  pagination.value.pageIndex = page;
+  pagination.value.count = pagecount;
+  pagination.value.pageSize = pagesize;
+  FilmSiteSetting.value.basic.recordcount = recordcount;
+
+  const allClass = [
+    { type_id: 0, type_name: '最新' },
+    ...classList.filter((item) => !containsClassFilterKeyword(item.type_name)),
+  ];
+  classKeywords.value = allClass;
 };
 
 // 切换分类
 const changeClassEvent = async (item) => {
-  FilmSiteSetting.value.class.id = item.type_id;
-  FilmSiteSetting.value.class.name = item.type_name;
+  const { type_id, type_name } = item;
+  FilmSiteSetting.value.class.id = type_id;
+  FilmSiteSetting.value.class.name = type_name;
   FilmDataList.value.list = [];
   pagination.value.pageIndex = 1;
   infiniteId.value++;
@@ -426,18 +413,19 @@ const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
-  let length;
-  await zy
-    .list(key, pg, t)
-    .then((res) => {
-      FilmDataList.value.list = _.unionWith(FilmDataList.value.list, res, _.isEqual);
-      FilmDataList.value.rawList = _.unionWith(FilmDataList.value.rawList, res, _.isEqual);
-      pagination.value.pageIndex++;
-      length = _.size(res);
-    })
-    .catch((err) => console.log(err));
-  if (showToolbar.value) filterEvent();
-  return length;
+
+  try {
+    const res = await zy.list(key, pg, t);
+    const newFilms = _.differenceWith(res, FilmDataList.value.rawList, _.isEqual);
+    FilmDataList.value.list = [...FilmDataList.value.list, ...newFilms];
+    FilmDataList.value.rawList = [...FilmDataList.value.rawList, ...res];
+    pagination.value.pageIndex++;
+    if (showToolbar.value) filterEvent();
+    return newFilms.length;
+  } catch (err) {
+    console.log(err);
+    return 0;
+  }
 };
 
 // 加载
@@ -450,24 +438,16 @@ const load = async ($state) => {
     return;
   }
   try {
-    let resLength;
-    if (!searchTxt.value) {
-      resLength = await getFilmList();
-    } else {
-      resLength = 0;
-    }
+    const resLength = searchTxt.value ? 0 : await getFilmList();
 
-    if (resLength === 0) {
-      $state.complete();
-    } else {
+    if (resLength === 0) $state.complete();
+    else {
+      await Promise.all([getFilmArea(), getFilmYear()]);
       $state.loaded();
-
-      getFilmArea();
-      getFilmYear();
     }
   } catch (err) {
+    console.error(err);
     $state.error();
-    console.log(err);
   }
 };
 
@@ -480,39 +460,45 @@ const searchEvent = async () => {
 
   const wd = searchTxt.value;
   if (wd) {
-    FilmSiteSetting.value.searchGroup.forEach((site) => {
-      zy.search(site.key, wd).then((res) => {
-        if (res) {
-          res.forEach(async (item) => {
-            await zy.detail(site.key, item.vod_id).then((res) => {
-              res.siteKey = site.key; // 添加站点标识
-              res.siteName = site.name; // 添加站点名称
-              res.siteId = site.id; // 添加站点id
-              FilmDataList.value.list.push(res);
-            });
-          });
-        }
+    try {
+      const searchPromises = FilmSiteSetting.value.searchGroup.map((site) => {
+        return zy.search(site.key, wd).then(async (res) => {
+          if (res) {
+            await Promise.all(
+              res.map(async (item) => {
+                const detailRes = await zy.detail(site.key, item.vod_id);
+                detailRes.siteKey = site.key; // 添加站点标识
+                detailRes.siteName = site.name; // 添加站点名称
+                detailRes.siteId = site.id; // 添加站点id
+                FilmDataList.value.list.push(detailRes);
+              }),
+            );
+          }
+        });
       });
-    });
-    console.log('complete');
+      await Promise.all(searchPromises);
+      console.log('complete');
+    } catch (err) {
+      console.error(err);
+    }
   } else await getFilmList();
 };
 
 // 切换站点
 const changeSitesEvent = async (event) => {
   if (FilmSiteSetting.value.change) await setting.update({ defaultSite: event });
-  await sites.get(event).then(async (res) => {
-    sitesListSelect.value = res.id;
-    FilmSiteSetting.value.basic.name = res.name;
-    FilmSiteSetting.value.basic.key = res.key;
-  });
+
+  const res = await sites.get(event);
+  sitesListSelect.value = res.id;
+  FilmSiteSetting.value.basic.name = res.name;
+  FilmSiteSetting.value.basic.key = res.key;
   FilmSiteSetting.value.class = {
     id: 0,
     name: '最新',
   };
   await getClass();
-  FilmDataList.value = {};
-  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
+  FilmDataList.value = { list: [], rawList: [] };
+  if (_.isEmpty(FilmDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
   await getFilmList();
   await getFilmSite();
@@ -521,17 +507,13 @@ const changeSitesEvent = async (event) => {
 
 // 播放
 const playEvent = (item) => {
-  if (item.siteName) {
-    formSiteData.value = {
-      name: item.siteName,
-      key: item.siteKey,
-    };
-  } else {
-    formSiteData.value = {
-      name: FilmSiteSetting.value.basic.name,
-      key: FilmSiteSetting.value.basic.key,
-    };
-  }
+  const { siteName, siteKey, vod_name } = item;
+
+  formSiteData.value = {
+    name: siteName || FilmSiteSetting.value.basic.name,
+    key: siteKey || FilmSiteSetting.value.basic.key,
+  };
+
   store.updateConfig({
     type: 'film',
     data: {
@@ -540,7 +522,7 @@ const playEvent = (item) => {
     },
   });
 
-  ipcRenderer.send('openPlayWindow', item.vod_name);
+  ipcRenderer.send('openPlayWindow', vod_name);
 };
 
 // 监听设置默认源变更
@@ -552,8 +534,8 @@ eventBus.on(async () => {
     name: '最新',
   };
   await getClass();
-  FilmDataList.value = {};
-  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
+  FilmDataList.value = { list: [], rawList: [] };
+  if (_.isEmpty(FilmDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
   await getFilmList();
   await getFilmSite();
