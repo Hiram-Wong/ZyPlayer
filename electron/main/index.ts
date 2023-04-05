@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, nativeTheme, screen } from 'electron';
+import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, nativeTheme } from 'electron';
 
 import Store from 'electron-store';
 import path from 'path';
@@ -8,6 +8,8 @@ import { electronApp } from '@electron-toolkit/utils';
 import remote from '@electron/remote/main';
 import log from './core/log';
 import initUpdater from './core/auto-update';
+
+const { platform } = process;
 
 log.info(`[storage] storage location: ${app.getPath('userData')}`);
 remote.initialize(); // 主进程初始化
@@ -34,6 +36,10 @@ if (shortcuts === undefined) {
 const hardwareAcceleration: any = store.get('settings.hardwareAcceleration');
 if (shortcuts === undefined) {
   store.set('settings.hardwareAcceleration', true);
+}
+const doh: any = store.get('settings.doh');
+if (doh === undefined) {
+  store.set('settings.doh', '');
 }
 
 // 默认数据处理
@@ -139,6 +145,14 @@ app.whenReady().then(() => {
         if (playWindow) playWindow.show();
       }
       isHidden = !isHidden;
+    });
+  }
+
+  console.log(doh);
+  if (doh) {
+    app.configureHostResolver({
+      secureDnsMode: 'secure',
+      secureDnsServers: [doh],
     });
   }
 
@@ -312,4 +326,25 @@ ipcMain.on('update-hardwareAcceleration', (_, status) => {
 
 ipcMain.on('set-playerDark', () => {
   playWindow.webContents.executeJavaScript(`document.documentElement.setAttribute('theme-mode', 'dark')`);
+});
+
+ipcMain.on('open-proxy-setting', () => {
+  log.info(`[ipcMain] open-proxy-setting`);
+  if (platform === 'win32') shell.openPath('ms-settings:network-proxy');
+  if (platform === 'darwin') shell.openExternal('x-apple.systempreferences:com.apple.preference.network?Proxies');
+});
+
+ipcMain.on('update-dns', (_, status, doh) => {
+  log.info(`[ipcMain] status:${doh} update-dns: ${doh}`);
+  store.set('settings.doh', doh);
+  // "off", "automatic", "secure"
+  app.configureHostResolver({});
+
+  if (status) {
+    app.configureHostResolver({
+      enableBuiltInResolver: false,
+      secureDnsMode: 'secure',
+      secureDnsServers: [doh],
+    });
+  }
 });

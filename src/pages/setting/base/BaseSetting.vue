@@ -76,7 +76,7 @@
           <dialog-class-view
             v-model:visible="isClassDialog"
             :data="classDialogData"
-            @receive-class-data="setClassData"
+            @receive-class-data="flushDialogData"
           />
         </div>
       </t-form-item>
@@ -121,30 +121,13 @@
           </t-space>
         </div>
       </t-form-item>
-      <t-form-item label="代理" name="proxy">
-        <t-space direction="vertical">
-          <div class="proxy-switch">
-            <t-select v-if="formData.proxy?.type" v-model="formData.proxy.type" :style="{ width: '300px' }">
-              <t-option value="disable" label="无代理" />
-              <t-option value="system" label="使用系统代理" />
-              <t-option value="manual" label="指定代理服务器" />
-            </t-select>
-          </div>
-
-          <div v-if="formData.proxy?.type == 'manual'" class="proxy-item">
-            <t-space direction="vertical">
-              <t-select v-model="formData.proxy.scheme" :style="{ width: '300px' }" placeholder="请选择代理协议">
-                <t-option value="http" label="http">http</t-option>
-                <t-option value="socks5" label="socks5">socks5</t-option>
-              </t-select>
-              <t-input-group separate>
-                <t-input v-model="formData.proxy.url" :style="{ width: '200px' }" placeholder="ip" />
-                <span :style="{ lineHeight: '32px' }">&nbsp;:&nbsp;</span>
-                <t-input v-model="formData.proxy.port" :style="{ width: '88px' }" placeholder="端口" />
-              </t-input-group>
-            </t-space>
-          </div>
+      <t-form-item label="安全" name="proxy">
+        <t-space>
+          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">打开计算机的代理设置</span>
+          <span class="title" @click="dnsEvnet">安全DNS</span>
         </t-space>
+
+        <dialog-dns-view v-model:visible="isDnsDialog" :data="dnsDialogData" @receive-dns-data="flushDialogData" />
       </t-form-item>
       <t-form-item label="权限" name="data">
         <t-space>
@@ -184,6 +167,7 @@ import { useSettingStore, usePlayStore } from '@/store';
 import DialogClassView from './components/DialogClass.vue';
 import DialogEasyConfigView from './components/DialogEasyConfig.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
+import DialogDnsView from './components/DialogDns.vue';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
@@ -200,6 +184,8 @@ const isClassDialog = ref(false);
 const classDialogData = ref({ data: [], type: 'rootClassFilter' });
 const isEasyConfigDialog = ref(false);
 const isUpdateDialog = ref(false);
+const isDnsDialog = ref(false);
+const dnsDialogData = ref({ data: '', type: 'dns' });
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -288,6 +274,10 @@ const getSetting = async () => {
   await setting.find().then((res) => {
     formData.value = res;
   });
+};
+
+const openProxySetting = () => {
+  ipcRenderer.send('open-proxy-setting');
 };
 
 // 出厂恢复
@@ -539,9 +529,21 @@ const classEvent = (item) => {
   isClassDialog.value = true;
 };
 
-// 分类：刷新dialog数据
-const setClassData = (item) => {
+// dns：打开dialog并设置数据
+const dnsEvnet = () => {
+  const { dns } = formData.value;
+  dnsDialogData.value = {
+    data: dns,
+    type: 'dns',
+  };
+
+  isDnsDialog.value = true;
+};
+
+// 分类：刷新dialog数据class
+const flushDialogData = (item) => {
   const { data, type } = item;
+  console.log(data, type);
   formData.value[type] = data;
 };
 
