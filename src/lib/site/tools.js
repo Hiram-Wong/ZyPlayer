@@ -4,6 +4,8 @@ import { XMLParser } from 'fast-xml-parser';
 import * as cheerio from 'cheerio';
 import { Parser as M3u8Parser } from 'm3u8-parser';
 import _ from 'lodash';
+// import iconv from '@vscode/iconv-lite-umd';
+const iconv = require('iconv-lite')
 const { getCurrentWindow } = window.require('@electron/remote');
 // // import FLVDemuxer from 'xgplayer-flv.js/src/flv/demux/flv-demuxer.js'
 // import SocksProxyAgent from 'socks-proxy-agent'
@@ -147,17 +149,18 @@ const zy = {
    * @returns
    */
   // https://y.ioszxc123.me/api/v1/Vod/hot?limit=10&order=1&os=2&page=1&type=2
-  hot (key, h) {
-    return this.getSite(key)
-      .then(site => axios.get(`${site.api}?ac=hot&h=${h}`))
-      .then(res => {
-        const json = res.data.rss || res.data;
-        const videoList = json.list || [];
-        return videoList;
-      })
-      .catch(err => {
-        throw err;
-      });
+  async hot(key, h) {
+    try {
+      const site = await sites.find({key:key});
+      const url = `${site.api}?ac=hot&h=${h}`;
+      const res = await axios.get(url);
+      const json = res.data;
+      const jsondata = json.rss || json;
+      const videoList = jsondata.list || [];
+      return videoList;
+    } catch (err) {
+      throw err;
+    }
   },
   /**
    * 获取总资源数, 以及页数
@@ -524,8 +527,14 @@ const zy = {
   */
   async getAnalysizeTitle (url) {
     try {
-      const res = await axios.get(url);
-      const $ = cheerio.load(res.data);
+      const res = await axios.get(url, { responseType: 'arraybuffer' });
+      let html = '';
+      if (url.includes('sohu')) {
+        html = iconv.decode(Buffer.from(res.data), 'gb2312');
+      } else {
+        html = iconv.decode(Buffer.from(res.data), 'utf-8');
+      }
+      const $ = cheerio.load(html);
       return $("title").text();
     } catch (err) {
       throw err;
