@@ -175,7 +175,6 @@ const channelItem = ref(null);
 onMounted(() => {
   getIptvSetting();
   getChannelCount();
-  getIptvClass();
 });
 
 // 获取配置
@@ -192,6 +191,8 @@ const getIptvSetting = async () => {
   iptvSetting.value.skipIpv6 = await setting.get('iptvSkipIpv6');
   iptvSetting.value.iptvStatus = await setting.get('iptvStatus');
 
+  getIptvClass();
+
   iptvList.value = (await iptv.all()).filter((item: { isActive: any }) => item.isActive);
 };
 
@@ -203,10 +204,11 @@ const getChannelCount = () => {
 };
 
 // 获取分类
-const getIptvClass = () => {
-  channelList.class().then((res) => {
-    iptvClassList.value = _.unionWith(iptvClassList.value, res, _.isEqual);
-  });
+const getIptvClass = async () => {
+  let res = await channelList.class();
+  if (iptvSetting.value.skipIpv6) res = res.filter((item) => !/ipv6/i.test(item.name));
+
+  iptvClassList.value = _.unionWith(iptvClassList.value, res, _.isEqual);
 };
 
 // 获取直播列表

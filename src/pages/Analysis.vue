@@ -242,7 +242,7 @@ const getVideoInfo = async () => {
   return url;
 };
 
-// 解析解析
+// 直接解析
 const analysisEvent = async () => {
   const url = await getVideoInfo();
   if (url) {
@@ -313,10 +313,12 @@ const openPlatform = (item) => {
 
 // 打开当前播放地址
 const openCurrentUrl = () => {
-  openPlatform({
-    url: analysisUrl.value,
-    name: urlTitle.value,
-  });
+  if (analysisUrl.value) {
+    openPlatform({
+      url: analysisUrl.value,
+      name: urlTitle.value,
+    });
+  }
 };
 
 // 监听设置默认源变更
@@ -347,7 +349,7 @@ eventBus.on(async () => {
         cursor: pointer;
       }
       .history-items {
-        :global(.history-item) {
+        .history-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -355,10 +357,10 @@ eventBus.on(async () => {
           font-weight: 500;
           cursor: pointer;
         }
-        :global(.date) {
+        .date {
           width: 85px;
         }
-        :global(.title) {
+        .title {
           padding: 0 10px;
           flex: 1 1 auto;
           overflow: hidden;

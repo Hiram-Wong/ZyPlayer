@@ -16,14 +16,13 @@ remote.initialize(); // 主进程初始化
 protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: true, standard: true } }]);
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
-
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
 app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书相关错误
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 支持hevc
 app.commandLine.appendSwitch('disable-site-isolation-trials'); // iframe 跨域
 
 if (process.platform === 'linux') {
-  app.commandLine.appendSwitch('--no-sandbox'); // linux 关闭沙盒模式
+  app.commandLine.appendSwitch('no-sandbox'); // linux 关闭沙盒模式
 }
 
 const store = new Store();
@@ -163,6 +162,8 @@ app.whenReady().then(() => {
 // 任务栏上的图标来说，应当保持活跃状态，直到用户使用 Cmd + Q 退出。
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  // remove all nativeTheme listeners
+  nativeTheme.removeAllListeners('updated');
   // unregister all global shortcuts
   globalShortcut.unregisterAll();
   if (process.platform !== 'darwin') {
@@ -219,14 +220,6 @@ ipcMain.on('openPlayWindow', (_, arg) => {
         })
       : 'http://localhost:3000/#/play',
   );
-
-  const { scaleFactor } = screen.getPrimaryDisplay();
-
-  // playWindow.webContents.executeJavaScript(
-  //   `document.documentElement.setAttribute('data-scale-factor', '${scaleFactor}')`,
-  // );
-  // playWindow.webContents.executeJavaScript(`document.documentElement.setAttribute('theme-mode', 'dark')`);
-  // playWindow.webContents.executeJavaScript(`document.documentElement.setAttribute('data-theme', 'light')`);
 
   // 修改request headers
   // Sec-Fetch下禁止修改，浏览器自动加上请求头 https://www.cnblogs.com/fulu/p/13879080.html 暂时先用index.html的meta referer policy替代
@@ -285,12 +278,8 @@ ipcMain.on('updateShortcut', (_, { shortcut }) => {
 ipcMain.on('toggle-playerPip', (_, status) => {
   log.info(`[ipcMain] set-playerPip: ${status}`);
   if (status) {
-    if (mainWindow) mainWindow.hide();
     if (playWindow) playWindow.hide();
-  } else {
-    if (mainWindow) mainWindow.show();
-    if (playWindow) playWindow.show();
-  }
+  } else if (playWindow) playWindow.show();
   isHidden = !isHidden;
 });
 
