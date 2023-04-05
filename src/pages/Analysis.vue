@@ -100,13 +100,7 @@ import DialogPlatformAnalysisView from './analysis/PlatformAnalysis.vue';
 
 import 'v3-infinite-loading/lib/style.css';
 
-import logoIqiyi from '@/assets/iqiyi.png';
-import logoLe from '@/assets/le.png';
-import logoVqq from '@/assets/vqq.png';
-import logoYouku from '@/assets/youku.png';
-import logoMgtv from '@/assets/mgtv.png';
-import logoSohu from '@/assets/sohu.png';
-import logoPptv from '@/assets/pptv.png';
+import PLATFORM_CONFIG from '@/config/platform';
 
 const formDialogVisiblePlatformAnalysis = ref(false);
 const platformAnalysisData = ref();
@@ -118,43 +112,9 @@ const analysisUrl = ref(null); // 输入需要解析地址
 const iframeUrl = ref(null); // 解析接口+需解析的地址
 const iframeRef = ref(null); // iframe dom节点
 const key = new Date().getTime(); // 解决iframe不刷新问题
-const VIDEOSITES = reactive([
-  {
-    url: 'https://www.iqiyi.com/',
-    name: '爱奇艺',
-    img: logoIqiyi,
-  },
-  {
-    url: 'https://film.qq.com/',
-    name: '腾讯视频',
-    img: logoVqq,
-  },
-  {
-    url: 'https://vip.youku.com/',
-    name: '优酷视频',
-    img: logoYouku,
-  },
-  {
-    url: 'https://www.mgtv.com/vip/',
-    name: '芒果tv',
-    img: logoMgtv,
-  },
-  {
-    url: 'https://vip.le.com/',
-    name: '乐视视频',
-    img: logoLe,
-  },
-  {
-    url: 'https://film.sohu.com/',
-    name: '搜狐视频',
-    img: logoSohu,
-  },
-  {
-    url: 'https://www.pptv.com/',
-    name: 'PPTV',
-    img: logoPptv,
-  },
-]); // 视频网站列表
+const VIDEOSITES = reactive({
+  ...PLATFORM_CONFIG.site,
+}); // 视频网站列表
 const visible = ref(false);
 const historyList = ref([]);
 const pagination = ref({
@@ -162,7 +122,6 @@ const pagination = ref({
   pageSize: 32,
   count: 0,
 });
-
 onMounted(async () => {
   await getAnalysisApi();
   await getHistoryList();
