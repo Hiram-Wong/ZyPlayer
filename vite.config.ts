@@ -5,6 +5,10 @@ import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
 import svgLoader from 'vite-svg-loader';
 
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
+import { TDesignResolver } from 'unplugin-vue-components/resolvers';
+
 import path from 'path';
 import { dependencies } from './package.json';
 
@@ -48,6 +52,20 @@ export default defineConfig(({ mode }) => {
       }),
       vueJsx(),
       svgLoader(),
+      AutoImport({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+        ],
+      }),
+      Components({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+        ],
+      }),
       electron([
         {
           entry: 'electron/main/index.ts',
