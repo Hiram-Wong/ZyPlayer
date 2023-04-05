@@ -14,7 +14,7 @@ export const useSettingStore = defineStore('setting', {
   state: () => state,
   getters: {
     getStateMode: (state): 'dark' | 'light' | 'auto' => {
-      return state.mode;
+      return state.mode as 'dark' | 'light' | 'auto';
     },
     displayMode: (state): 'dark' | 'light' => {
       if (state.mode === 'auto') {
