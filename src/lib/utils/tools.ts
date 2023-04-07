@@ -1,88 +1,11 @@
-import { sites, setting } from '../dexie';
-import axios from 'axios';
+import { sites } from '../dexie';
+import axios, { AxiosRequestConfig, AxiosResponse, CancelTokenSource } from 'axios';
 import { XMLParser } from 'fast-xml-parser';
 import * as cheerio from 'cheerio';
 import { Parser as M3u8Parser } from 'm3u8-parser';
 import _ from 'lodash';
-// import iconv from '@vscode/iconv-lite-umd';
+
 const iconv = require('iconv-lite')
-const { getCurrentWindow } = window.require('@electron/remote');
-// // import FLVDemuxer from 'xgplayer-flv.js/src/flv/demux/flv-demuxer.js'
-// import SocksProxyAgent from 'socks-proxy-agent'
-
-// 代理设置
-// axios使用系统代理  https://evandontje.com/2020/04/02/automatic-system-proxy-configuration-for-electron-applications/
-// xgplayer使用chromium代理设置，浏览器又默认使用系统代理 https://www.chromium.org/developers/design-documents/network-settings
-// 要在设置中添加代理设置，可参考https://stackoverflow.com/questions/37393248/how-connect-to-proxy-in-electron-webview
-const http = window.require('http')
-const https =  window.require('http')
-const session = getCurrentWindow().webContents.session
-
-// const URL = require('url')
-// const request = require('request')
-
-
-// 定义代理地址
-let proxyURL
-
-// 取消axios重复请求  浅析cancelToken https://juejin.cn/post/6844904168277147661 https://masteringjs.io/tutorials/axios/cancel
-const CancelToken = axios.CancelToken
-const source = CancelToken.source()
-const cancelToken = source.token
-
-//axios全局参数
-axios.defaults.timeout = 10000 // 请求超时时限，单位毫秒
-const TIMEOUT = 20000
-axios.defaults.retry = 3 // 重试次数
-axios.defaults.retryDelay = 1000 // 请求的间隙
-
-// 添加请求拦截器
-axios.interceptors.request.use(function (config) {
-  if (config.__retryCount === undefined) {
-    config.timeout = TIMEOUT
-  } else {
-    // 时间*增加重试次数
-    config.timeout = TIMEOUT * (config.__retryCount + 1)
-  }
-  return config
-}, function (err) {
-  return Promise.reject(err)
-})
-
-// 添加响应拦截器
-axios.interceptors.response.use(function (response) {
-  return response
-}, function (err) { // 请求错误时做些事
-  // 请求超时的之后，抛出 err.code = ECONNABORTED的错误..错误信息是 timeout of  xxx ms exceeded
-  if (err.code === 'ECONNABORTED' && err.message.indexOf('timeout') !== -1) {
-    const config = err.config
-    config.__retryCount = config.__retryCount || 0
-
-    if (config.__retryCount >= config.retry) {
-      err.message = '多次请求均超时'
-      return Promise.reject(err)
-    }
-
-    config.__retryCount += 1
-
-    const backoff = new Promise(function (resolve) {
-      setTimeout(function () {
-        resolve()
-      }, config.retryDelay || 1)
-    })
-
-    return backoff.then(function () {
-      return axios(config)
-    })
-  } else {
-    if (err && !err.response) {
-      err.message = '连接服务器失败!'
-    }
-    return Promise.reject(err)
-  }
-})
-
-const instance = axios.create();
 
 // 初始化对象xml转json https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/docs/v4/1.GettingStarted.md
 const options = { // XML 转 JSON 配置
@@ -567,33 +490,6 @@ const zy = {
       throw err;
     }
   },
-  proxy () {
-    return new Promise((resolve, reject) => {
-      setting.find().then(db => {
-        const mode = db.proxy.type
-        switch (mode) {
-          case 'manual': {
-            proxyURL = db.proxy.scheme + '://' + db.proxy.url.trim() + ':' + db.proxy.port.trim()
-            session.setProxy({
-              proxyRules: proxyURL
-            });
-            break;
-          }
-          case 'system': {
-            session.setProxy({ mode: 'system' });
-            break;
-          }
-          case 'disable':
-          default:
-            session.setProxy({ mode: 'direct' });
-            break;
-        }
-        // axios.get('https://api.my-ip.io/ip').then(res => console.log(res))
-      })
-    })
-  }
 }
-
-zy.proxy()
 
 export default zy

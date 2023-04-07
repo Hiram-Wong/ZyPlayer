@@ -2,12 +2,6 @@
   "id": 0,
   "theme": "auto",
   "externalPlayer": "",
-  "proxy": {
-    "type": "disable",
-    "scheme": "",
-    "url": "",
-    "port": ""
-  },
   "rootClassFilter": [
     "电影",
     "电影片",
@@ -50,9 +44,9 @@
   "iptvThumbnail": false,
   "restoreWindowPositionAndSize": false,
   "pauseWhenMinimize": true,
-  "defaultSite": "",
-  "defaultIptv": "",
-  "defaultAnalyze": "",
+  "defaultSite": 0,
+  "defaultIptv": 0,
+  "defaultAnalyze": 0,
   "analyzeSupport": false,
   "softSolution": false,
   "skipStartEnd": false,
