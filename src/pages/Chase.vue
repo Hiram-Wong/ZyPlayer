@@ -80,21 +80,22 @@ const checkUpdaterEvent = () => {
   overflow: hidden;
   height: calc(100vh - var(--td-comp-size-l));
   position: relative;
+
   &-right {
     position: absolute;
     top: 15px;
     right: 10px;
     .chase-container-op {
-      gap: 16px;
       display: flex;
-    }
-    .chase-container-op-item {
-      width: inherit;
+      gap: 16px;
+      &-item {
+        width: inherit;
+      }
     }
   }
   &-dialog {
     :deep(.t-dialog__body) {
-      text-align: center !important;
+      text-align: center;
     }
   }
   .container-item {
@@ -102,15 +103,14 @@ const checkUpdaterEvent = () => {
     overflow: auto;
     padding: 10px 0;
   }
-  .t-tabs {
-    background-color: rgba(0, 0, 0, 0) !important;
-    :deep(.t-tabs__nav-container.t-is-top:after) {
-      background-color: rgba(0, 0, 0, 0) !important;
+  :deep(.t-tabs) {
+    background-color: var(--td-bg-color-specialcomponent);
+    .t-tabs__nav-container {
+      padding-bottom: 10px;
     }
-  }
-
-  :deep(.t-tabs__nav-container) {
-    padding-bottom: 10px !important;
+    .t-tabs__nav-container.t-is-top:after {
+      background-color: var(--td-bg-color-specialcomponent);
+    }
   }
 }
 </style>

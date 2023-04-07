@@ -565,6 +565,9 @@ const checkIpv6 = async () => {
 @import '@/style/variables.less';
 
 .setting-base-container {
+  :deep(.t-radio-group.t-size-m .t-radio-button) {
+    height: auto;
+  }
   :deep(.t-form__label) {
     label {
       font-weight: 500;

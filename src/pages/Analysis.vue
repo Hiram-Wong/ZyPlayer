@@ -77,11 +77,22 @@
           </div>
         </div>
       </div>
+      <div v-if="miniOptions.isMini" class="analysis-main-flex">
+        <div class="mini-box" @click="platformPlayMax">
+          <div class="mini-box-close" @click.stop="platformPlayClose">
+            <close-icon size="smll" class="close" />
+          </div>
+          <div class="mini-box-title-warp">
+            <span class="mini-box-title">{{ miniOptions.miniTitle }}</span>
+          </div>
+        </div>
+      </div>
     </div>
     <dialog-platform-analysis-view
       v-model:visible="formDialogVisiblePlatformAnalysis"
       :data="platformAnalysisData"
       @platform-play="platformPlay"
+      @platform-play-status="platformPlayStatus"
     />
   </div>
 </template>
@@ -90,7 +101,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { HistoryIcon, ClearIcon, JumpIcon } from 'tdesign-icons-vue-next';
+import { HistoryIcon, ClearIcon, JumpIcon, CloseIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import moment from 'moment';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -122,6 +133,12 @@ const pagination = ref({
   pageSize: 32,
   count: 0,
 });
+const miniOptions = ref({
+  isMini: false,
+  miniUrl: '',
+  miniTitle: '',
+});
+
 onMounted(async () => {
   await getAnalysisApi();
   await getHistoryList();
@@ -285,6 +302,24 @@ const eventBus = useEventBus('analyze-reload');
 eventBus.on(async () => {
   getAnalysisApi();
 });
+
+const platformPlayStatus = (status, url, title) => {
+  miniOptions.value.isMini = status;
+  miniOptions.value.miniUrl = url;
+  miniOptions.value.miniTitle = title;
+};
+
+const platformPlayMax = () => {
+  const { miniUrl, miniTitle } = miniOptions.value;
+  openPlatform({
+    url: miniUrl,
+    name: miniTitle,
+  });
+};
+
+const platformPlayClose = () => {
+  miniOptions.value.isMini = false;
+};
 </script>
 
 <style lang="less" scoped>
@@ -417,6 +452,47 @@ eventBus.on(async () => {
         }
       }
     }
+    .analysis-main-flex {
+      bottom: 10px;
+      right: 5px;
+      position: fixed;
+      .mini-box {
+        border-radius: var(--td-radius-round);
+        height: 30px;
+        width: 140px;
+        background-color: #f5f5f7;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        &-close {
+          margin: 0 5px 0 10px;
+          width: 15px;
+          display: flex;
+          justify-content: center;
+          color: var(--td-brand-color);
+          svg {
+            margin: 0 auto;
+          }
+        }
+        &-title-warp {
+          overflow: hidden;
+          width: 100%;
+          .mini-box-title {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 10s linear infinite;
+          }
+          @keyframes marquee {
+            0% {
+              transform: translateX(100%);
+            }
+            100% {
+              transform: translateX(-100%);
+            }
+          }
+        }
+      }
+    }
   }
 }
 :root[theme-mode='dark'] {
@@ -425,6 +501,20 @@ eventBus.on(async () => {
   }
   .analysis-setting-group {
     background-color: var(--td-bg-color-container) !important;
+  }
+  .analysis-main-flex {
+    .mini-box {
+      background-color: var(--td-bg-color-container) !important;
+    }
+  }
+}
+
+:deep(.t-dialog) {
+  .t-dialog__body--fullscreen {
+    height: calc(100% - var(--td-comp-size-xxxl));
+  }
+  .t-dialog__close {
+    -webkit-app-region: no-drag;
   }
 }
 </style>

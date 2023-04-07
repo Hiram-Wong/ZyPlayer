@@ -447,9 +447,11 @@ const copyChannelEvent = () => {
   overflow: hidden;
   position: relative;
   height: calc(100vh - var(--td-comp-size-l));
+
   .tool {
     height: 50px;
     margin-right: 10px;
+
     .left-operation-container {
       .title {
         .data-item {
@@ -462,16 +464,18 @@ const copyChannelEvent = () => {
             border-style: none !important;
             font-size: 0.8rem;
             font-weight: bold;
+
+            &--focused {
+              border-color: rgba(255, 255, 255, 0) !important;
+              box-shadow: none !important;
+            }
           }
-          :deep(.t-input--focused) {
-            border-color: rgba(255, 255, 255, 0) !important;
-            box-shadow: none !important;
+          .data {
+            font-size: 0.7rem;
           }
-        }
-        .data {
-          font-size: 0.7rem;
         }
       }
+
       .head-center {
         .head-center-class {
           max-width: 75px;
@@ -481,9 +485,9 @@ const copyChannelEvent = () => {
           float: left;
           margin-right: 5px;
         }
-
         .content {
           padding: 10px 0 10px 25px;
+
           span {
             display: inline-block;
             line-height: 20px;
@@ -494,6 +498,7 @@ const copyChannelEvent = () => {
             white-space: nowrap;
             text-align: center;
             cursor: pointer;
+
             &:hover {
               background-color: var(--td-bg-color-component);
               border-radius: var(--td-radius-default);
@@ -502,6 +507,7 @@ const copyChannelEvent = () => {
         }
       }
     }
+
     .right-operation-container {
       .search-box {
         width: 220px;
@@ -509,6 +515,7 @@ const copyChannelEvent = () => {
         height: 34px;
         border-radius: 21px;
         border: 1px solid rgba(0, 0, 0, 0);
+
         .search-input {
           border: 1px solid hsla(0, 0%, 100%, 0);
           background: linear-gradient(
@@ -520,17 +527,19 @@ const copyChannelEvent = () => {
           border-radius: 100px;
           width: 100%;
           white-space: nowrap;
+
           .search-input-item {
             background: rgba(255, 25, 255, 0);
             border: 0;
             font-size: 14px;
             color: hsla(0, 0%, 0%, 0.6);
-            outline: 0 none;
+            outline: none;
             padding: 0 0 0 20px;
             vertical-align: middle;
             height: 34px;
             width: calc(100% - 80px);
           }
+
           .search-button-box {
             width: 44px;
             height: 28px;
@@ -538,6 +547,7 @@ const copyChannelEvent = () => {
             right: 0;
             top: 4px;
             cursor: pointer;
+
             .search-button {
               display: inline-block;
               font-size: 14px;
@@ -548,6 +558,7 @@ const copyChannelEvent = () => {
               border-radius: 100%;
               text-align: center;
               line-height: 24px;
+
               .search-button-icon {
                 width: 14px;
                 height: 14px;
@@ -645,12 +656,10 @@ const copyChannelEvent = () => {
 :root[theme-mode='dark'] {
   .right-operation-container {
     .search-box {
-      .search-input-item {
-        color: hsla(0, 0%, 100%, 0.6) !important;
-      }
+      .search-input-item,
       .hot-search-button {
         color: hsla(0, 0%, 100%, 0.6) !important;
-        .hot-search-button-icon {
+        &-icon {
           color: hsla(0, 0%, 100%, 0.6) !important;
         }
       }
