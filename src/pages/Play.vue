@@ -66,7 +66,7 @@
                         }"
                         attach=".bottom-copy"
                       >
-                        <span class="bottom-copy-btn" @click="shareUrlEvent">复制地址</span>
+                        <span class="bottom-copy-btn" @click="copyShareUrl">复制地址</span>
                       </t-popup>
                     </div>
                   </div>
@@ -121,8 +121,8 @@
             </t-dialog>
           </div>
           <div class="player-top-right-staple">
-            <div class="player-top-right-popup player-top-right-item" @click="winStickyEvnet">
-              <pin-icon v-if="isPin" size="1.5em" />
+            <div class="player-top-right-popup player-top-right-item" @click="toggleAlwaysOnTop">
+              <pin-icon v-if="isPinned" size="1.5em" />
               <pin-filled-icon v-else size="1.5em" />
             </div>
           </div>
@@ -403,7 +403,7 @@ import playerVoiceIcon from '@/assets/player/voice.svg?raw';
 import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 import { setting, sites, analyze, history, star, channelList } from '@/lib/dexie';
 import { usePlayStore } from '@/store';
 
@@ -485,7 +485,7 @@ const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
 const timer = ref(); // 定时器 用于刷新历史进度
 const isBinge = ref(true); // true未收藏 false收藏
-const isPin = ref(true); // true未置顶 false置顶
+const isPinned = ref(true); // true未置顶 false置顶
 const qrCodeUrl = ref(); // 二维码图片流
 const dataHistory = ref({}); // 历史
 const isMacFull = ref(false); // mac最大化
@@ -496,6 +496,13 @@ const analyzeUrl = ref(); // 解析接口
 const onlineUrl = ref(); // 解析接口+需解析的地址
 const iframeRef = ref(); // iframe dom节点
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
+
+const QR_CODE_OPTIONS = {
+  errorCorrectionLevel: 'H',
+  type: 'image/jpeg',
+  quality: 0.3,
+  margin: 4,
+};
 
 const shareUrl = computed(() => {
   const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
@@ -546,7 +553,7 @@ watch(
 watch(
   () => selectPlayIndex.value,
   () => {
-    qrCodeImg();
+    generateQRCode();
   },
 );
 
@@ -554,8 +561,8 @@ watch(
 watch(
   () => xg.value,
   (val) => {
-    if (val.hasStart) {
-      xg.value.on(Events.PIP_CHANGE, (isPip) => {
+    if (val?.hasStart) {
+      val.on(Events.PIP_CHANGE, (isPip) => {
         console.log('isPip', isPip);
         ipcRenderer.send('toggle-playerPip', isPip);
       });
@@ -575,24 +582,27 @@ onDeactivated(() => {
 
 // 获取解析地址
 const getAnalysisData = async () => {
-  const currentSite = await sites.find({ key: ext.value.site.key });
-  if (currentSite.jiexiUrl) {
-    analyzeUrl.value = currentSite.jiexiUrl;
-  } else {
-    setting.get('defaultAnalyze').then((id) => {
-      analyze.get(id).then((item) => {
-        analyzeUrl.value = item.url;
-        console.log(item.url);
-      });
-    });
+  try {
+    const currentSite = await sites.find({ key: ext.value.site.key });
+    if (currentSite.jiexiUrl) {
+      analyzeUrl.value = currentSite.jiexiUrl;
+    } else {
+      const id = await setting.get('defaultAnalyze');
+      const item = await analyze.get(id);
+      analyzeUrl.value = item.url;
+      console.log(item.url);
+    }
+  } catch (error) {
+    console.error(error);
   }
 };
 
 const getHistoryData = async (type = false) => {
-  const { key } = ext.value.site;
-  const id = info.value.vod_id;
-  await history.find({ siteKey: key, videoId: id }).then((res) => {
-    let doc = {
+  try {
+    const { key } = ext.value.site;
+    const id = info.value.vod_id;
+    const res = await history.find({ siteKey: key, videoId: id });
+    const doc = {
       date: moment().format('YYYY-MM-DD'),
       siteKey: key,
       siteSource: selectPlaySource.value,
@@ -609,151 +619,122 @@ const getHistoryData = async (type = false) => {
         selectPlaySource.value = res.siteSource;
         selectPlayIndex.value = res.videoIndex;
       }
-      if (res.siteSource === selectPlaySource.value && res.videoIndex === selectPlayIndex.value) {
-        doc = res;
+      if (res.siteSource !== selectPlaySource.value || res.videoIndex !== selectPlayIndex.value) {
+        await history.update(res.id, doc);
+        dataHistory.value = { ...doc, id: res.id };
       } else {
-        history.update(res.id, doc);
+        dataHistory.value = { ...res };
       }
-      dataHistory.value = doc;
-      dataHistory.value.id = res.id;
     } else {
-      dataHistory.value = doc;
-      dataHistory.value.id = history.add(doc);
+      const id = await history.add(doc);
+      dataHistory.value = { ...doc, id };
     }
-  });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// 摧毁播放器
+const destroyPlayer = () => {
+  if (xg.value) {
+    xg.value.destroy();
+    xg.value = null;
+  }
+};
+
+// 初始化iptv
+const initIptvPlayer = async () => {
+  config.value.url = info.value.url;
+  await getChannelList();
+  if (data.value.ext.epg) await getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
+  const isLive = await zy.isLiveM3U8(info.value.url);
+  config.value.isLive = isLive;
+  config.value.presets = isLive ? [LivePreset] : [];
+  xg.value = new Player(config.value);
+};
+
+// 初始化film
+const initFilmPlayer = async (isFirst) => {
+  await getDetailInfo();
+  await Promise.allSettled([getDoubanRecommend(), getBinge()]);
+  if (!isFirst) {
+    await getHistoryData();
+    const item = season.value[selectPlaySource.value].find(
+      (item) => item.split('$')[0] === dataHistory.value.videoIndex,
+    );
+    config.value.url = item ? item.split('$')[1] : season.value[selectPlaySource.value][0].split('$')[1];
+    if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
+      config.value.startTime = set.value.skipTimeInStart;
+    } else {
+      config.value.startTime = dataHistory.value.watchTime || 0;
+    }
+  } else {
+    config.value.startTime = dataHistory.value.watchTime || 0;
+    if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
+      config.value.startTime = set.value.skipTimeInStart;
+    }
+  }
+  if (!config.value.url.endsWith('m3u8')) {
+    try {
+      config.value.url = await zy.parserFilmUrl(config.value.url);
+    } catch (err) {
+      onlineUrl.value = analyzeUrl.value + config.value.url;
+    }
+  }
+  xg.value = new Player(config.value);
+  await timerUpdatePlayProcess();
 };
 
 // 初始化播放器
 const initPlayer = async (isFirst = false) => {
-  if (set.value.softSolution) config.value.mediaType = 'live-video'; // 软解支持
-  if (xg.value) {
-    xg.value.destroy();
-    xg.value = null;
-  } // 存在播放器则摧毁
+  if (set.value.softSolution) config.value.mediaType = 'live-video';
+
+  destroyPlayer();
+
   if (type.value === 'iptv') {
-    config.value.url = info.value.url; // 初始化播放链接
-    await getChannelList();
-    if (data.value.ext.epg) await getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD')); // 处理电子节目单
-    // 判断是否直播/点播
-    zy.isLiveM3U8(info.value.url)
-      .then((res) => {
-        if (res) {
-          config.value.isLive = true;
-          config.value.presets = [LivePreset];
-        }
-      })
-      .then(() => (xg.value = new Player(config.value)))
-      .catch((err) => console.log(err));
+    await initIptvPlayer();
   } else if (type.value === 'film') {
-    getDetailInfo();
-    // await getDoubanRate();
-    getDoubanRecommend();
-    await getBinge();
-    if (!isFirst) {
-      await getHistoryData().then(async () => {
-        if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
-        if (set.value.skipStartEnd) {
-          if (dataHistory.value.watchTime < set.value.skipTimeInStart)
-            config.value.startTime = set.value.skipTimeInStart;
-        }
-
-        _.forEach(season.value[selectPlaySource.value], (item) => {
-          if (item.split('$')[0] === dataHistory.value.videoIndex) config.value.url = item.split('$')[1];
-        });
-        if (!config.value.url) config.value.url = season.value[selectPlaySource.value][0].split('$')[1]; // 初始化播放链接
-
-        // 尝试提取ck/dp播放器中m3u8
-        // if (!config.value.url.endsWith('m3u8')) {
-        //   config.value.url = await zy.parserFilmUrl(config.value.url);
-        // }
-        // xg.value = new Player(config.value);
-        onlineUrl.value = '';
-        if (!config.value.url.endsWith('m3u8')) {
-          console.log('非m3u8流程');
-          await zy
-            .parserFilmUrl(config.value.url)
-            .then((res) => {
-              console.log('尝试提取ck/dp播放器中m3u8', res);
-              config.value.url = res;
-            })
-            .catch((err) => {
-              console.log(err);
-              onlineUrl.value = analyzeUrl.value + config.value.url;
-              console.log(onlineUrl.value);
-            });
-        }
-        if (!onlineUrl.value) xg.value = new Player(config.value);
-      });
-    } else {
-      if (dataHistory.value.watchTime) config.value.startTime = dataHistory.value.watchTime;
-      if (set.value.skipStartEnd) {
-        if (dataHistory.value.watchTime < set.value.skipTimeInStart) config.value.startTime = set.value.skipTimeInStart;
-      }
-      // if (!config.value.url.endsWith('m3u8')) {
-      //   config.value.url = await zy.parserFilmUrl(config.value.url);
-      // } // 判断是否做解析
-      // xg.value = new Player(config.value);
-      onlineUrl.value = '';
-      if (!config.value.url.endsWith('m3u8')) {
-        console.log('非m3u8流程');
-        await zy
-          .parserFilmUrl(config.value.url)
-          .then((res) => {
-            console.log('尝试提取ck/dp播放器中m3u8', res);
-            config.value.url = res;
-          })
-          .catch((err) => {
-            console.log(err);
-            onlineUrl.value = analyzeUrl.value + config.value.url;
-            console.log(onlineUrl.value);
-          });
-      }
-      if (!onlineUrl.value) xg.value = new Player(config.value);
-    }
-
-    await timerUpdatePlayProcess();
+    await initFilmPlayer(isFirst);
   }
-  document.documentElement.setAttribute('theme-mode', 'dark');
 
+  document.documentElement.setAttribute('theme-mode', 'dark');
   document.title = type.value === 'iptv' ? info.value.name : `${info.value.vod_name} ${selectPlayIndex.value}`;
 };
 
 // 在追
 const bingeEvnet = async () => {
-  isBinge.value = !isBinge.value;
-  const { key } = ext.value.site;
-  const id = info.value.vod_id;
-  const db = await star.find({ siteKey: key, videoId: id });
-  console.log(db);
-  if (!isBinge.value) {
-    const doc = {
-      siteKey: key,
-      videoId: id,
-      videoImage: info.value.vod_pic,
-      videoName: info.value.vod_name,
-      videoType: info.value.type_name,
-      videoRemarks: info.value.vod_remarks,
-    };
-    if (!db) {
-      star
-        .add(doc)
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((error) => {
-          MessagePlugin.error(`加入追剧列表失败:${error}`);
-        });
+  try {
+    isBinge.value = !isBinge.value;
+    const { key } = ext.value.site;
+    const id = info.value.vod_id;
+    const db = await star.find({ siteKey: key, videoId: id });
+    console.log(db);
+    if (!isBinge.value) {
+      const doc = {
+        siteKey: key,
+        videoId: id,
+        videoImage: info.value.vod_pic,
+        videoName: info.value.vod_name,
+        videoType: info.value.type_name,
+        videoRemarks: info.value.vod_remarks,
+      };
+      if (!db) {
+        const res = await star.add(doc);
+        console.log(res);
+      }
+    } else {
+      await star.remove(db.id);
     }
-  } else star.remove(db.id);
+  } catch (error) {
+    console.error(error);
+    MessagePlugin.error(`操作失败:${error}`);
+  }
 };
 
 // 格式化剧集名称
 const formatName = (e) => {
-  const num = e.split('$');
-  if (num.length > 1) {
-    return e.split('$')[0];
-  }
-  return `正片`;
+  const [first] = e.split('$');
+  return first.length > 0 ? first : '正片';
 };
 
 // 获取播放源及剧集
@@ -769,19 +750,17 @@ const getDetailInfo = async () => {
   // 剧集
   const playUrl = videoList.vod_play_url;
   const playUrlDiffPlaySource = playUrl.split('$$$'); // 分离不同播放源
-  const playEpisodes = [];
-  _.forEach(playUrlDiffPlaySource, (item) => {
-    const playContont = item
+  const playEpisodes = playUrlDiffPlaySource.map((item) =>
+    item
       .replace(/\$+/g, '$')
       .split('#')
-      .filter((e) => e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http'))));
-    playEpisodes.push(playContont);
-  });
+      .filter((e) => e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http')))),
+  );
   console.log(playEpisodes);
   if (!selectPlayIndex.value) selectPlayIndex.value = playEpisodes[0][0].split('$')[0];
 
   // 合并播放源和剧集
-  const fullList = _.zipObject(playSource, playEpisodes);
+  const fullList = Object.fromEntries(playSource.map((key, i) => [key, playEpisodes[i]]));
 
   videoList.fullList = fullList;
   info.value = videoList;
@@ -860,18 +839,20 @@ const getDoubanRecommend = async () => {
   const name = info.value.vod_name;
   const year = info.value.vod_year;
   const id = info.value.vod_douban_id;
-  await zy
-    .doubanRecommendations(id, name, year)
-    .then((resName) => {
-      _.forEach(resName, async (element) => {
-        await zy.searchFirstDetail(key, element).then((res) => {
-          if (res) {
-            if (recommend.value.length < 10) recommend.value.push(res);
-          }
-        });
-      });
-    })
-    .catch((err) => console.log(err));
+
+  try {
+    const resName = await zy.doubanRecommendations(id, name, year);
+
+    for (const element of resName) {
+      const res = await zy.searchFirstDetail(key, element);
+
+      if (res && recommend.value.length < 10) {
+        recommend.value.push(res);
+      }
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // 替换style
@@ -896,70 +877,80 @@ const timerUpdatePlayProcess = () => {
 
 // 获取是否追剧
 const getBinge = async () => {
-  console.log(ext.value.site.key, info.value.vod_id);
-  await star.find({ siteKey: ext.value.site.key, videoId: info.value.vod_id }).then((res) => {
-    if (res) isBinge.value = false;
-  });
+  const { key } = ext.value.site;
+  const { vod_id } = info.value;
+  console.log(key, vod_id);
+  const res = await star.find({ siteKey: key, videoId: vod_id });
+  isBinge.value = res.length === 0;
 };
 
 // 电子节目单播放状态
 const filterEpgStatus = (start, end) => {
   const nowTimestamp = moment();
-  const startTimestamp = moment(`${moment().format('YYYY-MM-DD')} ${start}`);
-  const endTimestamp = moment(`${moment().format('YYYY-MM-DD')} ${end}`);
-  if (nowTimestamp.isBetween(startTimestamp, endTimestamp)) {
-    return '正在直播';
-  }
-  if (nowTimestamp === moment.min(nowTimestamp, endTimestamp)) {
-    return '未播放';
-  }
-  return '已播放';
+  const startTimestamp = moment(`${nowTimestamp.format('YYYY-MM-DD')} ${start}`);
+  const endTimestamp = moment(`${nowTimestamp.format('YYYY-MM-DD')} ${end}`);
+
+  if (nowTimestamp.isBetween(startTimestamp, endTimestamp)) return '正在直播';
+  if (nowTimestamp.isBefore(startTimestamp)) return '未播放';
+  if (nowTimestamp.isAfter(endTimestamp)) return '已播放';
 };
 
 // ipv6规则校验
-const isIpv6 = (str) => {
-  return /([0-9a-z]*:{1,4}){1,7}[0-9a-z]{1,4}/i.test(str);
+const isIpv6 = (url: string) => {
+  // 去除协议
+  const urlWithoutProtocol = url.replace(/^(https?:)?\/\//i, '');
+  // 去除路径
+  const hostname = urlWithoutProtocol.split('/')[0];
+  // 直接提取[]
+  const reg = /^\[(.+)\](:\d+)?\/?/;
+  const match = hostname.match(reg);
+  if (!match) {
+    return false;
+  }
+  const ipv6Address = match[1];
+
+  // ipv6规则
+  const ipv6Regex =
+    /^(?:(?:(?:(?:[0-9A-Fa-f]{1,4}:){6}|(?=(?:[0-9A-Fa-f]{0,4}:){2,6}(?:\d{1,3}\.){3}\d{1,3}$)(([0-9A-Fa-f]{0,4}:){1,5}|:)((:[0-9A-Fa-f]{0,4}){1,5}:|:)|::(?:[0-9A-Fa-f]{0,4}:){0,4}(?:(?<=::)|(?:(?<=:)0{0,4})))|::(?:[0-9A-Fa-f]{0,4}:){0,5}(?:(?<=::)|(?:(?<=:)0{0,4}[0-9A-Fa-f]{1,4}))|(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?=(?:[0-9A-Fa-f]{0,4}:){0,7}[0-9A-Fa-f]{0,4}$)([0-9A-Fa-f]{0,4}:){0,6}[0-9A-Fa-f]{0,4}))(?:%[0-9A-Za-z]{1,})?(?:\:\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$/;
+  return ipv6Regex.test(ipv6Address);
 };
 
 // 获取直播列表
-const getChannelList = () => {
-  setting.get('iptvSkipIpv6').then(async (res) => {
-    let channelSourceData = await channelList.all();
-    if (res) channelSourceData = channelSourceData.filter((item) => !isIpv6(item.url));
-    channelListData.value = channelSourceData;
-  });
+const getChannelList = async () => {
+  const res = await setting.get('iptvSkipIpv6');
+  let channelSourceData = await channelList.all();
+  if (res) {
+    channelSourceData = channelSourceData.filter((item) => !isIpv6(item.url));
+  }
+  channelListData.value = channelSourceData;
 };
 
 // 获取电子节目单
 const getEpgList = async (url, name, date) => {
-  await zy
-    .iptvEpg(url, name, date)
-    .then((res) => {
-      epgData.value = res;
-    })
-    .catch((err) => console.log(err));
+  try {
+    const res = await zy.iptvEpg(url, name, date);
+    epgData.value = res;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 // 生成二维码
-const qrCodeImg = () => {
-  const opts = {
-    errorCorrectionLevel: 'H',
-    type: 'image/jpeg',
-    quality: 0.3,
-    margin: 4,
-  };
-  QRCode.toDataURL(shareUrl.value, opts, (err, url) => {
+const generateQRCode = async () => {
+  try {
+    const url = await new Promise((resolve, reject) => {
+      QRCode.toDataURL(shareUrl.value, QR_CODE_OPTIONS, (err, url) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(url);
+        }
+      });
+    });
     qrCodeUrl.value = url;
-  });
-};
-
-// 点击分复制地址
-const shareUrlEvent = () => {
-  copy(shareUrl.value);
-  if (isSupported) {
-    MessagePlugin.info('复制成功，快分享给好友吧！');
-    isShareVisible.value = false;
-  } else MessagePlugin.info('当前环境不支持一键复制，请手动复制链接！');
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // 点击非浮层元素触发关闭分享
@@ -987,29 +978,48 @@ const recommendEvent = (e) => {
   initPlayer();
 };
 
+const copyToClipboard = (content, successMessage, errorMessage) => {
+  copy(content);
+  if (isSupported) {
+    MessagePlugin.info(successMessage);
+  } else {
+    MessagePlugin.warning(errorMessage);
+  }
+};
+
 // 复制下载链接
 const copyDownloadUrl = () => {
   if (downloadTarget.value.length !== 0) {
     const downloadUrl = _.join(downloadTarget.value, '\n');
     console.log(downloadUrl);
-    copy(downloadUrl);
-    if (isSupported) {
-      MessagePlugin.info('复制成功，快到下载器里下载吧!');
-      isDownloadVisible.value = false;
-    } else MessagePlugin.warning('复制失败，当前环境不支持一键复制!');
-  } else MessagePlugin.warning('请先选择需要下载的内容!');
+    const successMessage = '复制成功，快到下载器里下载吧!';
+    const errorMessage = '复制失败，当前环境不支持一键复制!';
+    copyToClipboard(downloadUrl, successMessage, errorMessage);
+    isDownloadVisible.value = false;
+  } else {
+    MessagePlugin.warning('请先选择需要下载的内容!');
+  }
+};
+
+// 复制分享地址
+const copyShareUrl = () => {
+  const successMessage = '复制成功，快分享给好友吧!';
+  const errorMessage = '当前环境不支持一键复制，请手动复制链接!';
+  copyToClipboard(shareUrl.value, successMessage, errorMessage);
+
+  isShareVisible.value = false;
 };
 
 // electron窗口置顶
-const winStickyEvnet = () => {
+const toggleAlwaysOnTop = () => {
   if (win.isAlwaysOnTop()) {
     win.setAlwaysOnTop(false);
     BrowserWindow.getFocusedWindow().webContents.send('alwaysOnTop', 'no');
-    isPin.value = true;
+    isPinned.value = true;
   } else {
     win.setAlwaysOnTop(true);
     BrowserWindow.getFocusedWindow().webContents.send('alwaysOnTop', 'yes');
-    isPin.value = false;
+    isPinned.value = false;
   }
 };
 
@@ -1748,12 +1758,21 @@ const openMainWinEvent = () => {
   border-radius: 5px;
 }
 
+@tab-content-height: calc(100% - 90px);
+@tab-content-item-padding: 10px;
+@tab-content-item-color: #f0f0f1;
+@tab-content-item-font-weight: bold;
+@tab-content-item-cursor: pointer;
+@tab-content-item-time-width: 40px;
+@tab-content-item-status-width: 60px;
+@tab-content-item-logo-width: 60px;
+
 .t-tabs {
-  background-color: rgba(0, 0, 0, 0) !important;
+  background-color: transparent !important;
 
   .contents-wrap,
   .epg-warp {
-    height: calc(100% - 90px);
+    height: @tab-content-height;
     width: 100%;
     overflow-y: scroll;
     display: flex;
@@ -1763,21 +1782,27 @@ const openMainWinEvent = () => {
       .content-item-start {
         justify-content: flex-start;
       }
+
       .content-item-between {
         justify-content: space-between;
       }
+
       .content-item {
         display: flex;
         align-items: center;
-        font-weight: 500;
-        cursor: pointer;
+        font-weight: @tab-content-item-font-weight;
+        cursor: @tab-content-item-cursor;
+        padding: @tab-content-item-padding;
+        color: @tab-content-item-color;
+
         .time-warp {
-          width: 40px;
+          width: @tab-content-item-time-width;
           color: #f09736;
-          margin-right: 10px;
+          margin-right: @tab-content-item-padding;
         }
+
         .status-wrap {
-          width: 60px;
+          width: @tab-content-item-status-width;
           text-align: right;
           .played {
             color: #2774f6;
@@ -1789,22 +1814,28 @@ const openMainWinEvent = () => {
             color: #f0f0f1;
           }
         }
+
         .logo-wrap {
-          max-width: 60px;
-          margin-right: 10px;
+          max-width: @tab-content-item-logo-width;
+          margin-right: @tab-content-item-padding;
         }
 
         .title-wrap {
-          color: #f0f0f1;
-          font-weight: bold;
+          font-weight: @tab-content-item-font-weight;
         }
 
         .title-warp-channel {
-          width: calc(100% - 120px);
+          width: calc(
+            100% - @tab-content-item-status-width - @tab-content-item-time-width - @tab-content-item-logo-width - 3 *
+              @tab-content-item-padding
+          );
         }
 
         .title-warp-epg {
-          width: calc(100% - 110px);
+          width: calc(
+            100% - @tab-content-item-status-width - @tab-content-item-time-width - @tab-content-item-logo-width - 2 *
+              @tab-content-item-padding
+          );
         }
 
         &:hover {
@@ -1885,67 +1916,72 @@ const openMainWinEvent = () => {
   }
 }
 
-// :global(.t-select .t-fake-arrow) {
-//   color: var(--td-font-white-3);
-// }
+.t-select :deep(.t-fake-arrow) {
+  color: var(--td-font-white-3);
+}
 
-// :global(.t-popup__content) {
-//   background: var(--td-gray-color-11) !important;
-// }
+.t-popup__content :deep(*) {
+  background: var(--td-gray-color-11) !important;
+}
 
-// :global(.t-select-option:not(.t-is-disabled):not(.t-is-selected):hover) {
-//   background-color: var(--td-gray-color-12);
-// }
-// :global(.t-select-option) {
-//   color: var(--td-font-white-1);
-// }
-// :global(
-//     .t-select-option.t-select-option__hover:not(.t-is-disabled).t-select-option.t-select-option__hover:not(
-//         .t-is-selected
-//       )
-//   ) {
-//   background-color: var(--td-gray-color-12);
-// }
+.t-select-option:not(.t-is-disabled):not(.t-is-selected):hover :deep(*) {
+  background-color: var(--td-gray-color-12);
+}
+
+.t-select-option :deep(*) {
+  color: var(--td-font-white-1);
+}
+
+.t-select-option.t-select-option__hover:not(.t-is-disabled).t-select-option.t-select-option__hover:not(.t-is-selected)
+  :deep(*) {
+  background-color: var(--td-gray-color-12);
+}
 
 :deep(.t-transfer) {
-  color: var(--td-font-white-1) !important;
-  .t-transfer__list-source,
-  .t-transfer__list-target {
+  color: var(--td-font-white-1);
+  background-color: var(--td-gray-color-11);
+  border-radius: var(--td-radius-large);
+
+  &__list-source,
+  &__list-target {
     border: none;
-    background-color: var(--td-gray-color-12);
   }
-  .t-transfer__list-header + :not(.t-transfer__list--with-search) {
+
+  &__list-header + :not(.t-transfer__list--with-search) {
     border-top: 1px solid var(--td-gray-color-10);
   }
-  .t-transfer__list-header > span,
+
+  &__list-header > span,
   .t-checkbox {
     color: var(--td-font-white-1);
   }
-  .t-transfer__list-item:hover {
+
+  &__list-item:hover {
     background: var(--td-gray-color-12);
   }
-  .t-transfer__list-item.t-is-checked {
+
+  &__list-item.t-is-checked {
     background: var(--td-brand-color);
   }
+
   .t-checkbox__input {
     border: 1px solid var(--td-gray-color-9);
     background-color: var(--td-gray-color-13);
   }
-  .t-transfer__empty {
+
+  &__empty {
     color: var(--td-gray-color-6);
   }
+
   .t-button--variant-outline {
     background-color: var(--td-gray-color-11);
     border-color: transparent;
-  }
-  .t-button--variant-outline.t-is-disabled {
-    border-color: transparent;
-  }
-  .t-button--variant-outline.t-is-disabled {
-    background-color: var(--td-gray-color-12);
-  }
-  .t-button--variant-outline.t-is-disabled {
-    color: var(--td-font-white-4);
+
+    &.t-is-disabled {
+      border-color: transparent;
+      background-color: var(--td-gray-color-12);
+      color: var(--td-font-white-4);
+    }
   }
 }
 </style>

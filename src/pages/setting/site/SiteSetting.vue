@@ -82,7 +82,7 @@ import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { saveAs } from 'file-saver';
 import { sites, setting } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
 import { COLUMNS } from './constants';

@@ -30,22 +30,20 @@ const settingTag = ref('ConfigBase');
 <style lang="less" scoped>
 @import '@/style/variables.less';
 
-:deep(.t-radio-group.t-size-m .t-radio-button) {
-  height: auto;
-}
-
 .setting-container {
   overflow: hidden;
   height: calc(100vh - var(--td-comp-size-l));
+
   .container-item {
     height: calc(100vh - var(--td-comp-size-l) - var(--td-comp-size-xxl));
     overflow: auto;
     padding: 20px 0;
   }
-  .t-tabs {
-    background-color: rgba(0, 0, 0, 0) !important;
-    :deep(.t-tabs__nav-container.t-is-top:after) {
-      background-color: rgba(0, 0, 0, 0) !important;
+
+  :deep(.t-tabs) {
+    background-color: var(--td-bg-color-specialcomponent);
+    .t-tabs__nav-container.t-is-top:after {
+      background-color: var(--td-bg-color-specialcomponent);
     }
   }
 }

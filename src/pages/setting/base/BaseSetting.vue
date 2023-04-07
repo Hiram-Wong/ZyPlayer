@@ -171,7 +171,7 @@ import DialogDnsView from './components/DialogDns.vue';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 
 const ipcRenderer = useIpcRenderer();
 

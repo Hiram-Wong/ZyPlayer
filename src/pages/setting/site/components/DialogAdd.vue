@@ -118,7 +118,7 @@ import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import getUuid from 'uuid-by-string';
 import { sites } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 
 const props = defineProps({
   visible: {

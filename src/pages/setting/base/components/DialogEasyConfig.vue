@@ -23,7 +23,7 @@ import { ref, watch } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 import { setting, sites, iptv, channelList, analyze } from '@/lib/dexie';
 
 const props = defineProps({

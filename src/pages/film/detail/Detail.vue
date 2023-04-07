@@ -118,7 +118,7 @@ import _ from 'lodash';
 import { usePlayStore } from '@/store';
 
 import { history, star } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 
 const { ipcRenderer } = require('electron');
 

@@ -51,7 +51,7 @@ import { useIpcRenderer } from '@vueuse/electron';
 import InfiniteLoading from 'v3-infinite-loading';
 import { usePlayStore } from '@/store';
 import { star } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 import 'v3-infinite-loading/lib/style.css';
 
 const ipcRenderer = useIpcRenderer();

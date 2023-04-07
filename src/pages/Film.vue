@@ -196,7 +196,7 @@ import { useIpcRenderer } from '@vueuse/electron';
 import HotView from './film/hot/Hot.vue';
 
 import { sites, setting } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
 
 const ipcRenderer = useIpcRenderer();

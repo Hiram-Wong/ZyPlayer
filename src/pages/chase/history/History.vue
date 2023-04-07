@@ -57,7 +57,7 @@ import moment from 'moment';
 import InfiniteLoading from 'v3-infinite-loading';
 import { usePlayStore } from '@/store';
 import { history } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 
 import 'v3-infinite-loading/lib/style.css';
 

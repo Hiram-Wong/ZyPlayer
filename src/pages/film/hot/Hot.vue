@@ -30,7 +30,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { ChevronRightIcon } from 'tdesign-icons-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
 import { setting } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 
 import { usePlayStore } from '@/store';
 

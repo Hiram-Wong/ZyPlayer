@@ -115,7 +115,7 @@ import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import 'v3-infinite-loading/lib/style.css';
 
 import { channelList, setting, iptv } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 
 const ipcRenderer = useIpcRenderer();
 
