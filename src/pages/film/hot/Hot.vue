@@ -95,13 +95,14 @@ const detailEvent = async (item) => {
   const defaultHot = await setting.get('defaultHot');
   const { key } = formData.value;
   try {
+    MessagePlugin.info('请等待,正在搜索相关资源!');
     if (defaultHot === 'site') {
       formDetailData.value = await zy.detail(key, item.vod_id);
     } else if (defaultHot === 'douban') {
       const res = await zy.searchFirstDetail(key, item.vod_name);
       formDetailData.value = res;
       if (!res) {
-        MessagePlugin.warning('暂无在本源搜索到相关资源');
+        MessagePlugin.warning('暂无在本源搜索到相关资源!');
         return;
       }
     }
