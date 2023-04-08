@@ -403,9 +403,8 @@ const changeClassEvent = async (item) => {
   FilmSiteSetting.value.class.id = type_id;
   FilmSiteSetting.value.class.name = type_name;
   FilmDataList.value.list = [];
-  pagination.value.pageIndex = 1;
   infiniteId.value++;
-  await getFilmList();
+  pagination.value.pageIndex = 0;
 };
 
 // 获取资源
@@ -439,10 +438,12 @@ const load = async ($state) => {
   }
   try {
     const resLength = searchTxt.value ? 0 : await getFilmList();
-
+    console.log(resLength);
     if (resLength === 0) $state.complete();
     else {
-      await Promise.all([getFilmArea(), getFilmYear()]);
+      getFilmArea();
+      getFilmYear();
+
       $state.loaded();
     }
   } catch (err) {
@@ -455,7 +456,7 @@ const load = async ($state) => {
 const searchEvent = async () => {
   console.log('search');
   FilmDataList.value.list = [];
-  if (!_.size(FilmDataList.value.list)) infiniteId.value++;
+  infiniteId.value++;
   pagination.value.pageIndex = 0;
 
   const wd = searchTxt.value;
@@ -485,10 +486,10 @@ const searchEvent = async () => {
 };
 
 // 切换站点
-const changeSitesEvent = async (event) => {
-  if (FilmSiteSetting.value.change) await setting.update({ defaultSite: event });
+const changeSitesEvent = async (item) => {
+  if (FilmSiteSetting.value.change) await setting.update({ defaultSite: item });
 
-  const res = await sites.get(event);
+  const res = await sites.get(item);
   sitesListSelect.value = res.id;
   FilmSiteSetting.value.basic.name = res.name;
   FilmSiteSetting.value.basic.key = res.key;
@@ -496,13 +497,11 @@ const changeSitesEvent = async (event) => {
     id: 0,
     name: '最新',
   };
-  await getClass();
   FilmDataList.value = { list: [], rawList: [] };
-  if (_.isEmpty(FilmDataList.value.list)) infiniteId.value++;
+  infiniteId.value++;
   pagination.value.pageIndex = 0;
-  await getFilmList();
-  await getFilmSite();
-  await getFilmArea();
+
+  getClass();
 };
 
 // 播放
@@ -535,7 +534,7 @@ eventBus.on(async () => {
   };
   await getClass();
   FilmDataList.value = { list: [], rawList: [] };
-  if (_.isEmpty(FilmDataList.value.list)) infiniteId.value++;
+  infiniteId.value++;
   pagination.value.pageIndex = 0;
   await getFilmList();
   await getFilmSite();
