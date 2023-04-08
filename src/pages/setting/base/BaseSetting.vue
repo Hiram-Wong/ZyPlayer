@@ -221,7 +221,9 @@ const getModeIcon = (mode) => {
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 
-const formData = ref({});
+const formData = ref({
+  theme: storeSetting.getStateMode,
+});
 
 const filmEmitReload = useEventBus('film-reload');
 const iptvEmitReload = useEventBus('iptv-reload');
