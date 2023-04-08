@@ -749,7 +749,7 @@ const bingeEvnet = async () => {
 // 格式化剧集名称
 const formatName = (e) => {
   const [first] = e.split('$');
-  return first.length > 0 ? first : '正片';
+  return first.includes('http') ? '正片' : first;
 };
 
 // 获取播放源及剧集
@@ -769,9 +769,16 @@ const getDetailInfo = async () => {
     item
       .replace(/\$+/g, '$')
       .split('#')
-      .filter((e) => e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http')))),
+      .filter((e) => {
+        if (e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http')))) return true;
+        if (!e.includes('$')) return true;
+        return false;
+      })
+      .map((e) => {
+        if (!e.includes('$')) e = `正片$${e}`;
+        return e;
+      }),
   );
-  console.log(playEpisodes);
   if (!selectPlayIndex.value) selectPlayIndex.value = playEpisodes[0][0].split('$')[0];
 
   // 合并播放源和剧集
@@ -780,7 +787,7 @@ const getDetailInfo = async () => {
   videoList.fullList = fullList;
   info.value = videoList;
   season.value = fullList;
-  console.log(info.value, season.value);
+  // console.log(info.value, season.value);
 };
 
 // 切换选集
