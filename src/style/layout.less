@@ -247,12 +247,16 @@
   background-color: var(--td-scrollbar-color);
 }
 
-.window-item:hover {
-  background-color: #e3e5e7 !important;
-}
-
 :root[theme-mode='dark'] {
   .window-item:hover {
     background-color: #2f3134 !important;
+  }
+}
+
+:root,
+:root[theme-mode="light"] {
+  --td-bg-color-specialcomponent: #fbfbfb;
+  .window-item:hover {
+    background-color: #e3e5e7 !important;
   }
 }
