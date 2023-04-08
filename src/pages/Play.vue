@@ -504,6 +504,8 @@ const QR_CODE_OPTIONS = {
   margin: 4,
 };
 
+const VIP_LIST = ['iqiyi.com', 'mgtv.com', 'qq.com', 'youku.com', 'le.com', 'sohu.com', 'pptv.com', 'bilibili.com'];
+
 const shareUrl = computed(() => {
   const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
   let params = `${config.value.url}&name=${info.value.name}`;
@@ -640,6 +642,7 @@ const destroyPlayer = () => {
     xg.value.destroy();
     xg.value = null;
   }
+  if (onlineUrl.value) onlineUrl.value = '';
 };
 
 // 初始化iptv
@@ -656,9 +659,12 @@ const initIptvPlayer = async () => {
 // 初始化film
 const initFilmPlayer = async (isFirst) => {
   await getDetailInfo();
-  await Promise.allSettled([getDoubanRecommend(), getBinge()]);
+
   if (!isFirst) {
     await getHistoryData();
+    getDoubanRecommend();
+    getBinge();
+
     const item = season.value[selectPlaySource.value].find(
       (item) => item.split('$')[0] === dataHistory.value.videoIndex,
     );
@@ -674,11 +680,20 @@ const initFilmPlayer = async (isFirst) => {
       config.value.startTime = set.value.skipTimeInStart;
     }
   }
+
   if (!config.value.url.endsWith('m3u8')) {
-    try {
-      config.value.url = await zy.parserFilmUrl(config.value.url);
-    } catch (err) {
+    const { hostname } = new URL(config.value.url);
+    if (VIP_LIST.some((item) => hostname.includes(item))) {
       onlineUrl.value = analyzeUrl.value + config.value.url;
+    } else {
+      // 尝试提取ck/dp播放器中的m3u8
+      try {
+        config.value.url = await zy.parserFilmUrl(config.value.url);
+        console.info(config.value.url);
+      } catch (err) {
+        onlineUrl.value = analyzeUrl.value + config.value.url;
+        console.error(err);
+      }
     }
   }
   xg.value = new Player(config.value);
@@ -879,9 +894,8 @@ const timerUpdatePlayProcess = () => {
 const getBinge = async () => {
   const { key } = ext.value.site;
   const { vod_id } = info.value;
-  console.log(key, vod_id);
   const res = await star.find({ siteKey: key, videoId: vod_id });
-  isBinge.value = res.length === 0;
+  isBinge.value = !res;
 };
 
 // 电子节目单播放状态
@@ -911,7 +925,7 @@ const isIpv6 = (url: string) => {
 
   // ipv6规则
   const ipv6Regex =
-    /^(?:(?:(?:(?:[0-9A-Fa-f]{1,4}:){6}|(?=(?:[0-9A-Fa-f]{0,4}:){2,6}(?:\d{1,3}\.){3}\d{1,3}$)(([0-9A-Fa-f]{0,4}:){1,5}|:)((:[0-9A-Fa-f]{0,4}){1,5}:|:)|::(?:[0-9A-Fa-f]{0,4}:){0,4}(?:(?<=::)|(?:(?<=:)0{0,4})))|::(?:[0-9A-Fa-f]{0,4}:){0,5}(?:(?<=::)|(?:(?<=:)0{0,4}[0-9A-Fa-f]{1,4}))|(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?=(?:[0-9A-Fa-f]{0,4}:){0,7}[0-9A-Fa-f]{0,4}$)([0-9A-Fa-f]{0,4}:){0,6}[0-9A-Fa-f]{0,4}))(?:%[0-9A-Za-z]{1,})?(?:\:\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$/;
+    /^(?:(?:(?:(?:[0-9A-Fa-f]{1,4}:){6}|(?=(?:[0-9A-Fa-f]{0,4}:){2,6}(?:\d{1,3}\.){3}\d{1,3}$)(([0-9A-Fa-f]{0,4}:){1,5}|:)((:[0-9A-Fa-f]{0,4}){1,5}:|:)|::(?:[0-9A-Fa-f]{0,4}:){0,4}(?:(?<=::)|(?:(?<=:)0{0,4})))|::(?:[0-9A-Fa-f]{0,4}:){0,5}(?:(?<=::)|(?:(?<=:)0{0,4}[0-9A-Fa-f]{1,4}))|(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?=(?:[0-9A-Fa-f]{0,4}:){0,7}[0-9A-Fa-f]{0,4}$)([0-9A-Fa-f]{0,4}:){0,6}[0-9A-Fa-f]{0,4}))(?:%[0-9A-Za-z]{1,})?(?:::\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$/;
   return ipv6Regex.test(ipv6Address);
 };
 
@@ -1758,51 +1772,34 @@ const openMainWinEvent = () => {
   border-radius: 5px;
 }
 
-@tab-content-height: calc(100% - 90px);
-@tab-content-item-padding: 10px;
-@tab-content-item-color: #f0f0f1;
-@tab-content-item-font-weight: bold;
-@tab-content-item-cursor: pointer;
-@tab-content-item-time-width: 40px;
-@tab-content-item-status-width: 60px;
-@tab-content-item-logo-width: 60px;
-
 .t-tabs {
-  background-color: transparent !important;
-
+  background-color: rgba(0, 0, 0, 0);
   .contents-wrap,
   .epg-warp {
-    height: @tab-content-height;
+    height: calc(100% - 90px);
     width: 100%;
     overflow-y: scroll;
     display: flex;
     flex-direction: column;
-
     .content {
       .content-item-start {
         justify-content: flex-start;
       }
-
       .content-item-between {
         justify-content: space-between;
       }
-
       .content-item {
         display: flex;
         align-items: center;
-        font-weight: @tab-content-item-font-weight;
-        cursor: @tab-content-item-cursor;
-        padding: @tab-content-item-padding;
-        color: @tab-content-item-color;
-
+        font-weight: 500;
+        cursor: pointer;
         .time-warp {
-          width: @tab-content-item-time-width;
+          width: 40px;
           color: #f09736;
-          margin-right: @tab-content-item-padding;
+          margin-right: 10px;
         }
-
         .status-wrap {
-          width: @tab-content-item-status-width;
+          width: 60px;
           text-align: right;
           .played {
             color: #2774f6;
@@ -1814,30 +1811,20 @@ const openMainWinEvent = () => {
             color: #f0f0f1;
           }
         }
-
         .logo-wrap {
-          max-width: @tab-content-item-logo-width;
-          margin-right: @tab-content-item-padding;
+          max-width: 60px;
+          margin-right: 10px;
         }
-
         .title-wrap {
-          font-weight: @tab-content-item-font-weight;
+          color: #f0f0f1;
+          font-weight: bold;
         }
-
         .title-warp-channel {
-          width: calc(
-            100% - @tab-content-item-status-width - @tab-content-item-time-width - @tab-content-item-logo-width - 3 *
-              @tab-content-item-padding
-          );
+          width: calc(100% - 120px);
         }
-
         .title-warp-epg {
-          width: calc(
-            100% - @tab-content-item-status-width - @tab-content-item-time-width - @tab-content-item-logo-width - 2 *
-              @tab-content-item-padding
-          );
+          width: calc(100% - 110px);
         }
-
         &:hover {
           background-color: #2f3134;
           border-radius: var(--td-radius-small);

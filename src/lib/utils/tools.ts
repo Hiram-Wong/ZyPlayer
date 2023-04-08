@@ -228,13 +228,12 @@ const zy = {
    */
   async checkChannel(url) {
     try {
-      const response = await axios.get(url);
-      const manifest = response.data;
+      const res = await axios.get(url);
+      const manifest = res.data;
       const parser = new M3u8Parser();
       parser.push(manifest);
       parser.end();
       const parsedManifest = parser.manifest;
-      console.log(parsedManifest);
   
       if (parsedManifest.segments.length > 0) {
         return true;
@@ -251,24 +250,24 @@ const zy = {
         const index = responseURL.lastIndexOf("\/");
         const urlLastParam= responseURL.substring(0, index+1);
         newUrl = urlLastParam + uri;
-        return checkChannel(newUrl);
+        return this.checkChannel(newUrl);
       } else if (uri.indexOf("http")  === 0|| uri.indexOf("//") === 0) {
         // request1: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/index.m3u8?IASHttpSessionId=OTT8798520230127055253191816
         // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8468480 http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8798520230127055253191816&zte_bandwidth=1000&bandwidth=8468480&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
         // request2: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8867820230127053805215983&zte_bandwidth=1000&bandwidth=8467456&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
         newUrl = uri
-        return checkChannel(newUrl);
-      } else if (/^\/[^\/]/.test(uri) || (/^[^\/]/.test(uri) && uri.indexOf("http" === 0))) {
+        return this.checkChannel(newUrl);
+      } else if (/^\/[^\/]/.test(uri) || (/^[^\/]/.test(uri) && uri.indexOf("http") === 0)) {
         // request1: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//index.m3u8
         // #EXT-X-STREAM-INF:BANDWIDTH=15435519,AVERAGE-BANDWIDTH=15435519,RESOLUTION=3840x2160,CODECS="hvc1.1.6.L150.b0,mp4a.40.2",AUDIO="audio_mp4a.40.2_48000",CLOSED-CAPTIONS=NONE,FRAME-RATE=25 1/v15M/index.m3u8
         // request2: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//1/v15M/index.m3u8
         const index = responseURL.lastIndexOf("\/");
         const urlLastParam= responseURL.substring(0, index+1);
         newUrl = urlLastParam + uri;
-        return checkChannel(newUrl);
+        return this.checkChannel(newUrl);
       }
       return false;
-    } catch (error) {
+    } catch (err) {
       throw err;
     }
   },
@@ -278,7 +277,6 @@ const zy = {
    * @returns boolean
    */
   async parserFilmUrl(url) {
-    const vipList = ['iqiyi.com', 'mgtv.com', 'qq.com', 'youku.com', 'le.com', 'sohu.com', 'pptv.com', 'bilibili.com'];
     const urlDomain = url.match(/(\w+):\/\/([^\:|\/]+)(\:\d*)?(\/)/)[0];
     try {
       const response = await axios.get(url);
@@ -288,11 +286,6 @@ const zy = {
       if (urlGlobal) {
         urlPlay = urlGlobal[0];
         return urlPlay;
-      }
-      for (const vip of vipList) {
-        if (url.includes(vip)) {
-          throw vip;
-        }
       }
       // 局部提取地址 提取参数拼接域名
       const urlParm = response.data.match(/\/(.*?)(\.m3u8)/);
@@ -381,7 +374,7 @@ const zy = {
    */
   async doubanRate(id, name, year) {
     try {
-      const link = await doubanLink(id, name, year);
+      const link = await this.doubanLink(id, name, year);
       if (link.includes('https://www.douban.com/search')) {
         return '暂无评分';
       } else {
