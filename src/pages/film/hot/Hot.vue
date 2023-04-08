@@ -94,24 +94,31 @@ const getHotList = async () => {
 const detailEvent = async (item) => {
   const defaultHot = await setting.get('defaultHot');
   const { key } = formData.value;
-  if (defaultHot === 'site') {
-    formDetailData.value = await zy.detail(key, item.vod_id);
-  } else if (defaultHot === 'douban') {
-    const res = await zy.searchFirstDetail(key, item.vod_name);
-    if (!res) {
-      MessagePlugin.warning('暂无在本源搜索到相关资源');
-      return;
+  try {
+    if (defaultHot === 'site') {
+      formDetailData.value = await zy.detail(key, item.vod_id);
+    } else if (defaultHot === 'douban') {
+      const res = await zy.searchFirstDetail(key, item.vod_name);
+      formDetailData.value = res;
+      if (!res) {
+        MessagePlugin.warning('暂无在本源搜索到相关资源');
+        return;
+      }
     }
-    formDetailData.value = res;
+
+    store.updateConfig({
+      type: 'film',
+      data: {
+        info: formDetailData.value,
+        ext: { site: formData.value },
+      },
+    });
+
+    if (formDetailData.value) ipcRenderer.send('openPlayWindow', item.vod_name);
+  } catch (err) {
+    console.error(err);
+    MessagePlugin.error('网络出错啦,请稍后再试!');
   }
-  store.updateConfig({
-    type: 'film',
-    data: {
-      info: formDetailData.value,
-      ext: { site: formData.value },
-    },
-  });
-  ipcRenderer.send('openPlayWindow', item.vod_name);
 };
 </script>
 
