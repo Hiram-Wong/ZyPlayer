@@ -61,19 +61,15 @@
           <p class="support-tip">
             <t-link theme="default" hover="color" @click="openCurrentUrl">
               <template #suffixIcon>
-                <jump-icon />
+                <jump-icon style="align-items: center; display: inherit" />
               </template>
-
               支持平台
             </t-link>
           </p>
-          <!-- <p class="support-tip">支持平台</p> -->
         </div>
         <div class="support-platform">
-          <div v-for="(item, index) in VIDEOSITES" :key="index" class="logo-item">
-            <div @click="openPlatform(item)">
-              <img class="img-responsive" :src="item.img" />
-            </div>
+          <div v-for="(item, index) in VIDEOSITES" :key="index" class="logo-item" @click="openPlatform(item)">
+            <div class="logo" v-html="item.img"></div>
           </div>
         </div>
       </div>
@@ -106,7 +102,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import InfiniteLoading from 'v3-infinite-loading';
 import { setting, analyze, analyzeHistory } from '@/lib/dexie';
-import zy from '@/lib/site/tools';
+import zy from '@/lib/utils/tools';
 import DialogPlatformAnalysisView from './analysis/PlatformAnalysis.vue';
 
 import 'v3-infinite-loading/lib/style.css';
@@ -365,10 +361,10 @@ const platformPlayClose = () => {
     }
     .analysis-main-play {
       .analysis-play-box-show {
-        height: calc(100vh - 10em);
+        height: calc(100vh - 8.5rem);
       }
       .analysis-play-box-hidden {
-        height: calc(100vh - 15em);
+        height: calc(100vh - 12.5rem);
       }
       .analysis-play-box {
         width: 100%;
@@ -425,15 +421,17 @@ const platformPlayClose = () => {
     }
     .analysis-main-bottom {
       .support-title {
+        margin: 5px 0;
         .support-separator {
           border: 0.1rem solid var(--td-brand-color);
+          height: 0.6rem;
           border-radius: var(--td-radius-default);
+          display: inline-block;
         }
         .support-tip {
           margin-left: 5px;
           display: inline-block;
           text-align: left;
-          line-height: 40px;
           a {
             font-weight: 500;
           }
@@ -441,14 +439,20 @@ const platformPlayClose = () => {
       }
       .support-platform {
         display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
       }
       .logo-item {
         cursor: pointer;
         margin-right: 8px;
-        border-radius: var(--td-radius-default);
-        background: var(--td-text-color-anti);
-        img {
-          width: 80px;
+        padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-s);
+        border-radius: var(--td-radius-medium);
+        background: #f5f5f7;
+        .logo {
+          width: 70px;
+          height: 15px;
+          color: #000;
         }
       }
     }
@@ -458,14 +462,14 @@ const platformPlayClose = () => {
       position: fixed;
       .mini-box {
         border-radius: var(--td-radius-round);
-        height: 30px;
+        height: 31px;
         width: 140px;
         background-color: #f5f5f7;
         display: flex;
         align-items: center;
         cursor: pointer;
         &-close {
-          margin: 0 5px 0 10px;
+          margin-left: var(--td-comp-margin-s);
           width: 15px;
           display: flex;
           justify-content: center;
@@ -475,6 +479,7 @@ const platformPlayClose = () => {
           }
         }
         &-title-warp {
+          margin: 0 var(--td-comp-margin-l) 0 var(--td-comp-margin-xs);
           overflow: hidden;
           width: 100%;
           .mini-box-title {
@@ -505,6 +510,14 @@ const platformPlayClose = () => {
   .analysis-main-flex {
     .mini-box {
       background-color: var(--td-bg-color-container) !important;
+    }
+  }
+  .analysis-main-bottom {
+    .logo-item {
+      background-color: var(--td-bg-color-container) !important;
+      .logo {
+        color: #fdfdfd !important;
+      }
     }
   }
 }
