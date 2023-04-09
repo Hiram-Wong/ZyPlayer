@@ -40,7 +40,7 @@ import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
 
-import DNS_CONFIG from '@/config/doh.js';
+import DNS_CONFIG from '@/config/doh';
 
 const props = defineProps({
   visible: {
