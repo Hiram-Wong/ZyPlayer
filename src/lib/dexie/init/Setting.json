@@ -54,5 +54,6 @@
   "recordShortcut": "",
   "selfBoot": false,
   "hardwareAcceleration": true,
-  "doh": ""
+  "doh": "",
+  "ua": ""
 }]

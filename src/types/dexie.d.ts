@@ -25,6 +25,7 @@ interface Setting {
   selfBoot: boolean;
   hardwareAcceleration: boolean;
   doh: string;
+  ua: string;
 }
 
 interface Star {
@@ -51,7 +52,7 @@ interface Site {
 
 interface History {
   id?: number;
-  date: string;
+  date: string | number | Date;
   siteKey: string;
   siteSource: string;
   duration?: number | null;
@@ -89,7 +90,7 @@ interface Analyze {
 
 interface AnalyzeHistory {
   id?: number;
-  date: string;
+  date: string | number | Date;
   analyzeId: number;
   videoUrl: string;
   videoName: string;
