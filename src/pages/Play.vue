@@ -939,7 +939,6 @@ const filterEpgStatus = (start, end) => {
   if (nowTimestamp.isAfter(endTimestamp)) return '已播放';
 };
 
-
 const load = async ($state) => {
   console.log('loading...');
   try {
@@ -958,6 +957,7 @@ const getChannelCount = () => {
     pagination.value.count = res;
   });
 };
+
 // 获取直播列表
 const getChannelList = async () => {
   const res = await channelList.pagination(pagination.value.pageIndex, pagination.value.pageSize);
@@ -989,6 +989,7 @@ const getChannelList = async () => {
   }
   pagination.value.pageIndex++;
   return length;
+};
 
 // 获取电子节目单
 const getEpgList = async (url, name, date) => {
