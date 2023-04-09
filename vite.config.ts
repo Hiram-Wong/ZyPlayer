@@ -5,9 +5,14 @@ import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
 import svgLoader from 'vite-svg-loader';
 
+// 按需加载T-Desgin组件
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
 import { TDesignResolver } from 'unplugin-vue-components/resolvers';
+
+// 通过触发冷启动时的预构建来解决
+import OptimizationPersist from 'vite-plugin-optimize-persist';
+import PkgConfig from 'vite-plugin-package-config';
 
 import path from 'path';
 import { dependencies } from './package.json';
@@ -44,12 +49,11 @@ export default defineConfig(({ mode }) => {
     plugins: [
       createVuePlugin({
         template: {
-          compilerOptions: {
-            // 注册electron中webview
-            isCustomElement: (tag) => tag === 'webview',
-          },
+          compilerOptions: {},
         },
       }),
+      PkgConfig(),
+      OptimizationPersist(),
       vueJsx(),
       svgLoader(),
       AutoImport({
