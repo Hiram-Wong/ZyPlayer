@@ -5,7 +5,9 @@ import * as cheerio from 'cheerio';
 import { Parser as M3u8Parser } from 'm3u8-parser';
 import _ from 'lodash';
 
-const iconv = require('iconv-lite')
+const iconv = require('iconv-lite');
+const dns = require('dns');
+const net = require('net');
 
 // 初始化对象xml转json https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/docs/v4/1.GettingStarted.md
 const options = { // XML 转 JSON 配置
@@ -483,6 +485,44 @@ const zy = {
       throw err;
     }
   },
+  /**
+   * 判断url是否为ipv6
+   * @returns ture/false
+  */
+  async checkUrlIpv6(url) {
+    let hostname = new URL(url).hostname;
+    const ipv6Regex = /^\[([\da-fA-F:]+)\]$/; // 匹配 IPv6 地址
+    const match = ipv6Regex.exec(hostname);
+    if(match){
+      // console.log(match[1])
+      hostname = match[1];
+    }
+    const ipType = net.isIP(hostname);
+    if (ipType === 4) {
+      // console.log(`1.ipv4:${hostname}`)
+      return 'IPv4';
+    } else if (ipType === 6) {
+      // console.log(`1.ipv6:${hostname}`)
+      return 'IPv6';
+    } else {
+      try {
+        const addresses = await dns.promises.resolve(hostname);
+        const ipType = net.isIP(addresses[0]);
+        if (ipType === 4) {
+          // console.log(`2.ipv4:${addresses[0]}`)
+          return 'IPv4';
+        } else if (ipType === 6) {
+          // console.log(`2.ipv6:${addresses[0]}`)
+          return 'IPv6';
+        } else {
+          return 'Unknown';
+        }
+      } catch (err) {
+        console.log(url,hostname)
+        throw err;
+      }
+    }
+  }
 }
 
 export default zy
