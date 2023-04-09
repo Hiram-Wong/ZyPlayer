@@ -42,6 +42,11 @@ if (doh === undefined) {
   store.set('settings.doh', '');
 }
 
+let ua: any = store.get('settings.ua');
+if (ua === undefined) {
+  store.set('settings.ua', '');
+}
+
 // 默认数据处理
 if (!hardwareAcceleration) {
   app.disableHardwareAcceleration();
@@ -104,6 +109,7 @@ function createWindow(): void {
     const requestUrl = new URL(url);
 
     requestHeaders.Origin = requestUrl.origin;
+    if (ua) requestHeaders['User-Agent'] = ua;
     if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
       requestHeaders.Referer = requestUrl.origin;
     }
@@ -243,6 +249,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
     const requestUrl = new URL(url);
 
     requestHeaders.Origin = requestUrl.origin;
+    if (ua) requestHeaders['User-Agent'] = ua;
     if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
       requestHeaders.Referer = requestUrl.origin;
     }
@@ -334,17 +341,21 @@ ipcMain.on('open-proxy-setting', () => {
   if (platform === 'darwin') shell.openExternal('x-apple.systempreferences:com.apple.preference.network?Proxies');
 });
 
-ipcMain.on('update-dns', (_, status, doh) => {
-  log.info(`[ipcMain] status:${doh} update-dns: ${doh}`);
-  store.set('settings.doh', doh);
+ipcMain.on('update-dns', (_, status, value) => {
+  log.info(`[ipcMain] status:${status} update-dns: ${value}`);
+  store.set('settings.doh', value);
   // "off", "automatic", "secure"
-  app.configureHostResolver({});
-
   if (status) {
     app.configureHostResolver({
       enableBuiltInResolver: false,
       secureDnsMode: 'secure',
-      secureDnsServers: [doh],
+      secureDnsServers: [value],
     });
   }
+});
+
+ipcMain.on('update-ua', (_, status, value) => {
+  log.info(`[ipcMain] status:${status} update-dns: ${value}`);
+  store.set('settings.ua', value);
+  ua = value;
 });
