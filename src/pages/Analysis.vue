@@ -446,7 +446,7 @@ const platformPlayClose = () => {
       .logo-item {
         cursor: pointer;
         margin-right: 8px;
-        padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-s);
+        padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-s) var(--td-comp-paddingTB-m);
         border-radius: var(--td-radius-medium);
         background: #f5f5f7;
         .logo {
