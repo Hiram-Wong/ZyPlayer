@@ -1,13 +1,12 @@
 <template>
   <t-dialog
     v-model:visible="formVisible"
+    mode="full-screen"
     :header="platformData.name"
-    width="85%"
-    placement="center"
     :footer="false"
     @close="closeEvent"
   >
-    <div class="platform-container">
+    <div v-if="platformData.url" class="platform-container">
       <iframe
         ref="iframeRef"
         :key="key"
@@ -15,31 +14,45 @@
         :src="platformData.url"
         scrolling="yes"
         frameborder="no"
-        style="width: 100%; height: 65vh; border-radius: 10px"
+        muted="true"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       ></iframe>
       <p class="tip">Tip: 如遇加载缓慢没出画面，请耐心等待！</p>
       <div class="side-floatbtn">
-        <div class="btn-list">
-          <div class="jx" @click="analysisEvent">
+        <div class="btn-lists">
+          <div class="btn-list jx" @click="analysisEvent">
             <div class="btn">
               <play-circle-stroke-icon size="20px" class="icon" />
             </div>
           </div>
-        </div>
-      </div>
-      <!-- <div class="host" @click="analysisEvent">
-        <div class="analysis">
-          <div class="analysis-inner">
-            <play-circle-stroke-icon size="20px" />
+          <!-- <div class="btn-list back" @click="backEvent">
+            <div class="btn">
+              <rollback-icon size="20px" class="icon" />
+            </div>
+          </div>
+          <div class="btn-list forward" @click="forwardEvent">
+            <div class="btn">
+              <rollfront-icon size="20px" class="icon" />
+            </div>
+          </div> -->
+          <div class="btn-list refresh" @click="refreshEvent">
+            <div class="btn">
+              <refresh-icon size="20px" class="icon" />
+            </div>
+          </div>
+          <div class="btn-list mini" @click="miniEvent">
+            <div class="btn">
+              <layers-icon size="20px" class="icon" />
+            </div>
           </div>
         </div>
-      </div> -->
+      </div>
     </div>
   </t-dialog>
 </template>
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import { PlayCircleStrokeIcon } from 'tdesign-icons-vue-next';
+import { PlayCircleStrokeIcon, RollbackIcon, RollfrontIcon, RefreshIcon, LayersIcon } from 'tdesign-icons-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 
@@ -62,7 +75,7 @@ const iframeRef = ref(); // iframe dom节点
 const key = new Date().getTime(); // 解决iframe不刷新问题
 const ipcRenderer = useIpcRenderer();
 
-const emit = defineEmits(['update:visible', 'platformPlay']);
+const emit = defineEmits(['update:visible', 'platformPlay', 'platform-play-status']);
 
 watch(
   () => formVisible.value,
@@ -95,7 +108,8 @@ onMounted(() => {
 
 // 关闭dialog
 const closeEvent = () => {
-  platformData.value.url = '';
+  clearIframe();
+
   formVisible.value = false;
 };
 
@@ -104,8 +118,56 @@ const analysisEvent = () => {
   const iframeCurrentUrl = iframeRef.value.contentWindow.location.href;
   console.log(iframeCurrentUrl);
   emit('platformPlay', iframeCurrentUrl);
-  platformData.value.url = '';
+  clearIframe();
+
   formVisible.value = false;
+};
+
+// 后退
+const backEvent = () => {
+  iframeRef.value.contentWindow.history.back();
+};
+
+// 前进
+const forwardEvent = () => {
+  iframeRef.value.contentWindow.history.forward();
+};
+
+// 刷新
+const refreshEvent = () => {
+  iframeRef.value.contentWindow.location.reload();
+};
+
+// 最小化
+const miniEvent = () => {
+  emit(
+    'platform-play-status',
+    true,
+    iframeRef.value.contentWindow.location.href,
+    iframeRef.value.contentWindow.document.title,
+  );
+
+  clearIframe();
+
+  formVisible.value = false;
+};
+
+// 设置src为空，且不记录到history
+const clearIframe = () => {
+  platformData.value.url = '';
+  iframeRef.value.contentWindow.history.replaceState(null, '', '');
+  // const stateObj = { url: iframeRef.value.contentWindow.location.href };
+  // iframeRef.value.contentWindow.history.replaceState(stateObj, '', iframeRef.value.contentWindow.location.href);
+  // 获取当前浏览器历史记录中的最新记录
+  // const latestHistory = iframeRef.value.contentWindow.history.state;
+  // console.log(latestHistory);
+  // // 判断最新记录中是否包含需要删除的 URL
+  // if (latestHistory && latestHistory.url === '') {
+  //   // 创建一个新的浏览器历史记录对象，并将其替换为最新的历史记录
+  //   const newHistory = { ...latestHistory };
+  //   delete newHistory.url; // 删除需要删除的 URL 属性
+  //   iframeRef.value.contentWindow.history.replaceState(newHistory, '');
+  // }
 };
 </script>
 
@@ -114,6 +176,7 @@ const analysisEvent = () => {
 @import '@/style/index.less';
 
 .platform-container {
+  height: 100%;
   .platform-play-box {
     background-color: #f5f5f7;
     border-radius: var(--td-radius-extraLarge);
@@ -133,16 +196,15 @@ const analysisEvent = () => {
   .side-floatbtn {
     position: absolute;
     left: var(--td-comp-paddingLR-xxl);
-    bottom: 90px;
+    bottom: 40px;
     display: inline-block;
-    .btn-list {
+    .btn-lists {
       float: right;
       width: 52px;
-      .jx {
+      .btn-list {
         position: relative;
         float: left;
         display: block;
-        display: inline;
         width: 100%;
         margin-bottom: 10px;
         .btn {
@@ -169,7 +231,7 @@ const analysisEvent = () => {
   .tip {
     position: absolute;
     left: var(--td-comp-paddingLR-xxl);
-    bottom: var(--td-comp-paddingTB-l);
+    bottom: 0;
     color: var(--td-gray-color-6);
     font-size: var(--td-font-size-link-small);
   }
