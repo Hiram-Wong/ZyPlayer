@@ -121,13 +121,15 @@
           </t-space>
         </div>
       </t-form-item>
-      <t-form-item label="安全" name="proxy">
+      <t-form-item label="安全" name="security">
         <t-space>
           <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">打开计算机的代理设置</span>
           <span class="title" @click="dnsEvnet">安全DNS</span>
+          <span class="title" @click="uaEvnet">User-Agent</span>
         </t-space>
 
         <dialog-dns-view v-model:visible="isDnsDialog" :data="dnsDialogData" @receive-dns-data="flushDialogData" />
+        <dialog-ua-view v-model:visible="isUaDialog" :data="uaDialogData" @receive-dns-data="flushDialogData" />
       </t-form-item>
       <t-form-item label="权限" name="data">
         <t-space>
@@ -168,6 +170,7 @@ import DialogClassView from './components/DialogClass.vue';
 import DialogEasyConfigView from './components/DialogEasyConfig.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogDnsView from './components/DialogDns.vue';
+import DialogUaView from './components/DialogUA.vue';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
@@ -186,6 +189,8 @@ const isEasyConfigDialog = ref(false);
 const isUpdateDialog = ref(false);
 const isDnsDialog = ref(false);
 const dnsDialogData = ref({ data: '', type: 'dns' });
+const isUaDialog = ref(false);
+const uaDialogData = ref({ data: '', type: 'dns' });
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -236,16 +241,20 @@ watch(
     formData.value.defaultChangeModel,
     formData.value.defaultCheckModel,
   ],
-  () => {
-    filmEmitReload.emit('film-reload');
+  (_, oldValue) => {
+    if (oldValue.every((item) => typeof item !== 'undefined')) {
+      filmEmitReload.emit('film-reload');
+    }
   },
 );
 
 // 监听刷新iptv
 watch(
   () => [formData.value.iptvSkipIpv6, formData.value.iptvStatus, formData.value.defaultIptvEpg],
-  () => {
-    iptvEmitReload.emit('film-reload');
+  (_, oldValue) => {
+    if (oldValue.every((item) => typeof item !== 'undefined')) {
+      iptvEmitReload.emit('iptv-reload');
+    }
   },
 );
 
@@ -540,6 +549,17 @@ const dnsEvnet = () => {
   };
 
   isDnsDialog.value = true;
+};
+
+// ua：打开dialog并设置数据
+const uaEvnet = () => {
+  const { ua } = formData.value;
+  uaDialogData.value = {
+    data: ua,
+    type: 'ua',
+  };
+
+  isUaDialog.value = true;
 };
 
 // 分类：刷新dialog数据class
