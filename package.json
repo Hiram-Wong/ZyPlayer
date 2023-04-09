@@ -5,7 +5,7 @@
     "email": "admin@catni.cn"
   },
   "private": true,
-  "version": "3.1.6",
+  "version": "3.1.7",
   "license": "MIT",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -58,11 +58,13 @@
     "v3-infinite-loading": "^1.2.2",
     "vite-plugin-electron": "^0.11.1",
     "vite-plugin-electron-renderer": "^0.13.14",
+    "vite-plugin-optimize-persist": "^0.1.2",
+    "vite-plugin-package-config": "^0.1.1",
     "vite-plugin-require-transform": "^1.0.12",
     "vite-svg-loader": "^4.0.0",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6",
-    "xgplayer": "^3.0.0-alpha.110-18",
+    "xgplayer": "^3.0.0-next.55",
     "xgplayer-hls": "^3.0.0-next.37-1",
     "xgplayer-livevideo": "^3.0.0-next.8"
   },

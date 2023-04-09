@@ -2247,7 +2247,7 @@ debounce-fn@^4.0.0:
   dependencies:
     mimic-fn "^3.0.0"
 
-debug@4, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.4:
+debug@4, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.3, debug@^4.3.4:
   version "4.3.4"
   resolved "https://registry.npmmirror.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
   integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
@@ -5809,6 +5809,21 @@ vite-plugin-electron@^0.11.1:
   resolved "https://registry.npmmirror.com/vite-plugin-electron/-/vite-plugin-electron-0.11.1.tgz#1a909c42e13c391e0700e03a0ed5192b67d2bf9a"
   integrity sha512-pi9Wy4KCGjKIRvp7/5VUOT8BYEAJdZrpy3gI+GhGc5vYs2V9yPxLOtfCqNfSTYqH3uM6hYY6MyifFVku3Wg+2A==
 
+vite-plugin-optimize-persist@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.npmmirror.com/vite-plugin-optimize-persist/-/vite-plugin-optimize-persist-0.1.2.tgz#c2aa2712afa74db55f580e3d1656e8cc0b783019"
+  integrity sha512-H/Ebn2kZO8PvwUF08SsT5K5xMJNCWKoGX71+e9/ER3yNj7GHiFjNQlvGg5ih/zEx09MZ9m7WCxOwmEKbeIVzww==
+  dependencies:
+    debug "^4.3.2"
+    fs-extra "^10.0.0"
+
+vite-plugin-package-config@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.npmmirror.com/vite-plugin-package-config/-/vite-plugin-package-config-0.1.1.tgz#6bd579f71db7582ef9dcc05e9f7920e689c498c9"
+  integrity sha512-w9B3I8ZnqoyhlbzimXjXNk85imrMZgvI9m8f6j3zonK5IVA5KXzpT+PZOHlDz8lqh1vqvoEI1uhy+ZDoLAiA/w==
+  dependencies:
+    debug "^4.3.3"
+
 vite-plugin-require-transform@^1.0.12:
   version "1.0.12"
   resolved "https://registry.npmmirror.com/vite-plugin-require-transform/-/vite-plugin-require-transform-1.0.12.tgz#81b990b555d3fb4b678bd317249bc0f571d12a6e"
@@ -6042,7 +6057,7 @@ xgplayer-livevideo@^3.0.0-next.8:
     xgplayer-helper-transmuxers "3.0.0-rc.3-1"
     xgplayer-helper-utils "3.0.0-rc.3-1"
 
-xgplayer@^3.0.0-alpha.110-18:
+xgplayer@^3.0.0-next.55:
   version "3.0.0-rc.2"
   resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.0-rc.2.tgz#fd479d3fc80314ef29593ba6a21f916a135f4077"
   integrity sha512-rXH5oUxVPxjNlWM1Vam/GUaY77rZIPx45VOaBfC2KH27gdInEBfckaGb3yvZLkOGw6tFpsuxUAOiFjvvoVJGZQ==
