@@ -214,13 +214,23 @@ const getIptvClass = async () => {
 // 获取直播列表
 const getChannelList = async () => {
   const res = await channelList.pagination(
-    searchTxt.value,
-    iptvClassSelect.value,
     pagination.value.pageIndex,
     pagination.value.pageSize,
+    searchTxt.value,
+    iptvClassSelect.value,
   );
   const sourceLength = res.list.length;
-  if (iptvSetting.value.skipIpv6) res.list = res.list.filter((item: { url: string }) => !isIpv6(item.url));
+  if (iptvSetting.value.skipIpv6) {
+    const filteredList = await Promise.all(
+      res.list.map(async (item: { url: string }) => {
+        if ((await zy.checkUrlIpv6(item.url)) !== 'IPv6') {
+          return item;
+        }
+      }),
+    );
+    res.list = filteredList.filter(Boolean);
+  }
+
   const restultLength = res.list.length;
   iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
   if (iptvSetting.value.iptvStatus) await checkChannelList(pagination.value.pageIndex, pagination.value.pageSize);
@@ -242,25 +252,6 @@ const getChannelList = async () => {
   }
   pagination.value.pageIndex++;
   return length;
-};
-
-const isIpv6 = (url: string) => {
-  // 去除协议
-  const urlWithoutProtocol = url.replace(/^(https?:)?\/\//i, '');
-  // 去除路径
-  const hostname = urlWithoutProtocol.split('/')[0];
-  // 直接提取[]
-  const reg = /^\[(.+)\](:\d+)?\/?/;
-  const match = hostname.match(reg);
-  if (!match) {
-    return false;
-  }
-  const ipv6Address = match[1];
-
-  // ipv6规则
-  const ipv6Regex =
-    /^(?:(?:(?:(?:[0-9A-Fa-f]{1,4}:){6}|(?=(?:[0-9A-Fa-f]{0,4}:){2,6}(?:\d{1,3}\.){3}\d{1,3}$)(([0-9A-Fa-f]{0,4}:){1,5}|:)((:[0-9A-Fa-f]{0,4}){1,5}:|:)|::(?:[0-9A-Fa-f]{0,4}:){0,4}(?:(?<=::)|(?:(?<=:)0{0,4})))|::(?:[0-9A-Fa-f]{0,4}:){0,5}(?:(?<=::)|(?:(?<=:)0{0,4}[0-9A-Fa-f]{1,4}))|(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?=(?:[0-9A-Fa-f]{0,4}:){0,7}[0-9A-Fa-f]{0,4}$)([0-9A-Fa-f]{0,4}:){0,6}[0-9A-Fa-f]{0,4}))(?:%[0-9A-Za-z]{1,})?(?:\:\:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$/;
-  return ipv6Regex.test(ipv6Address);
 };
 
 const load = async ($state: { complete: () => void; loaded: () => void; error: () => void }) => {
@@ -303,7 +294,10 @@ const playEvent = (item: { name: any }) => {
   console.log(epg);
   storePlayer.updateConfig({
     type: 'iptv',
-    data: { info: item, ext: { epg } },
+    data: {
+      info: item,
+      ext: { epg, skipIpv6: iptvSetting.value.skipIpv6 },
+    },
   });
   ipcRenderer.send('openPlayWindow', item.name);
 };

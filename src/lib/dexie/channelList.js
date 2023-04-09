@@ -22,7 +22,7 @@ export default {
   async remove (id) {
     return await channelList.delete(id)
   },
-  async pagination(key = none, group, pageIndex = 0, pageSize = 10) {
+  async pagination(pageIndex = 0, pageSize = 10, key = '', group = '全部') {
     let list = []
     let total = []
     const jumpCount = pageIndex > 0 ? pageIndex*pageSize : 0

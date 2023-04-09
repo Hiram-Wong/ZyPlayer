@@ -196,7 +196,7 @@
                   <t-tab-panel value="channel" label="频道">
                     <div class="channel-items">
                       <div class="contents-wrap scroll">
-                        <div v-for="(item, index) in channelListData" :key="index" class="content">
+                        <div v-for="item in iptvDataList.list" :key="item.id" class="content">
                           <div class="content-item content-item-start" @click="changeIptvEvent(item)">
                             <div class="logo-wrap">
                               <t-image
@@ -219,6 +219,10 @@
                           </div>
                           <t-divider dashed style="margin: 5px 0" />
                         </div>
+                        <infinite-loading style="text-align: center; color: #fdfdfd" :distance="200" @infinite="load">
+                          <template #complete>人家是有底线的</template>
+                          <template #error>哎呀，出了点差错</template>
+                        </infinite-loading>
                       </div>
                     </div>
                   </t-tab-panel>
@@ -389,11 +393,17 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import QRCode from 'qrcode';
+import InfiniteLoading from 'v3-infinite-loading';
 import Player, { Events } from 'xgplayer';
 import HlsPlugin from 'xgplayer-hls';
-import 'xgplayer/dist/xgplayer.min.css';
 import 'xgplayer-livevideo';
 import LivePreset from 'xgplayer/es/presets/live';
+import zy from '@/lib/utils/tools';
+import { setting, sites, analyze, history, star, channelList } from '@/lib/dexie';
+import { usePlayStore } from '@/store';
+
+import windowView from '@/layouts/components/Window.vue';
+
 import playerPlayIcon from '@/assets/player/play.svg?raw';
 import playerPauseIcon from '@/assets/player/pause.svg?raw';
 import playerPlayNextIcon from '@/assets/player/play-next.svg?raw';
@@ -402,10 +412,9 @@ import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
 import playerVoiceIcon from '@/assets/player/voice.svg?raw';
 import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
-import windowView from '@/layouts/components/Window.vue';
-import zy from '@/lib/utils/tools';
-import { setting, sites, analyze, history, star, channelList } from '@/lib/dexie';
-import { usePlayStore } from '@/store';
+
+import 'xgplayer/dist/xgplayer.min.css';
+import 'v3-infinite-loading/lib/style.css';
 
 // 用于窗口管理
 const ipcRenderer = useIpcRenderer();
@@ -496,6 +505,14 @@ const analyzeUrl = ref(); // 解析接口
 const onlineUrl = ref(); // 解析接口+需解析的地址
 const iframeRef = ref(); // iframe dom节点
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
+
+const iptvDataList = ref({});
+
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 32,
+  count: 0,
+});
 
 const QR_CODE_OPTIONS = {
   errorCorrectionLevel: 'H',
@@ -647,12 +664,18 @@ const destroyPlayer = () => {
 
 // 初始化iptv
 const initIptvPlayer = async () => {
+  getChannelCount();
+  if (data.value.ext.epg) getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
+
   config.value.url = info.value.url;
-  await getChannelList();
-  if (data.value.ext.epg) await getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
-  const isLive = await zy.isLiveM3U8(info.value.url);
-  config.value.isLive = isLive;
-  config.value.presets = isLive ? [LivePreset] : [];
+  try {
+    const isLive = await zy.isLiveM3U8(info.value.url);
+    config.value.isLive = isLive;
+    config.value.presets = isLive ? [LivePreset] : [];
+  } catch (err) {
+    console.error(err);
+  }
+
   xg.value = new Player(config.value);
 };
 
@@ -916,43 +939,64 @@ const filterEpgStatus = (start, end) => {
   if (nowTimestamp.isAfter(endTimestamp)) return '已播放';
 };
 
-// ipv6规则校验
-const isIpv6 = (url: string) => {
-  // 去除协议
-  const urlWithoutProtocol = url.replace(/^(https?:)?\/\//i, '');
-  // 去除路径
-  const hostname = urlWithoutProtocol.split('/')[0];
-  // 直接提取[]
-  const reg = /^\[(.+)\](:\d+)?\/?/;
-  const match = hostname.match(reg);
-  if (!match) {
-    return false;
-  }
-  const ipv6Address = match[1];
 
-  // ipv6规则
-  const ipv6Regex =
-    /^(?:(?:(?:(?:[0-9A-Fa-f]{1,4}:){6}|(?=(?:[0-9A-Fa-f]{0,4}:){2,6}(?:\d{1,3}\.){3}\d{1,3}$)(([0-9A-Fa-f]{0,4}:){1,5}|:)((:[0-9A-Fa-f]{0,4}){1,5}:|:)|::(?:[0-9A-Fa-f]{0,4}:){0,4}(?:(?<=::)|(?:(?<=:)0{0,4})))|::(?:[0-9A-Fa-f]{0,4}:){0,5}(?:(?<=::)|(?:(?<=:)0{0,4}[0-9A-Fa-f]{1,4}))|(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|(?=(?:[0-9A-Fa-f]{0,4}:){0,7}[0-9A-Fa-f]{0,4}$)([0-9A-Fa-f]{0,4}:){0,6}[0-9A-Fa-f]{0,4}))(?:%[0-9A-Za-z]{1,})?(?:::\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?$/;
-  return ipv6Regex.test(ipv6Address);
+const load = async ($state) => {
+  console.log('loading...');
+  try {
+    const resLength = await getChannelList();
+    if (resLength === 0) $state.complete();
+    else $state.loaded();
+  } catch (err) {
+    console.error(err);
+    $state.error();
+  }
 };
 
+// 获取直播列表个数
+const getChannelCount = () => {
+  channelList.total().then((res) => {
+    pagination.value.count = res;
+  });
+};
 // 获取直播列表
 const getChannelList = async () => {
-  const res = await setting.get('iptvSkipIpv6');
-  let channelSourceData = await channelList.all();
-  if (res) {
-    channelSourceData = channelSourceData.filter((item) => !isIpv6(item.url));
+  const res = await channelList.pagination(pagination.value.pageIndex, pagination.value.pageSize);
+  const sourceLength = res.list.length;
+
+  if (data.value.ext.skipIpv6) {
+    const filteredList = await Promise.all(
+      res.list.map(async (item: { url: string }) => {
+        if ((await zy.checkUrlIpv6(item.url)) !== 'IPv6') {
+          return item;
+        }
+      }),
+    );
+    res.list = filteredList.filter(Boolean);
   }
-  channelListData.value = channelSourceData;
-};
+
+  const restultLength = res.list.length;
+  iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
+  let length;
+
+  if (data.value.ext.skipIpv6) {
+    if (sourceLength) {
+      if (sourceLength === restultLength) length = sourceLength;
+      if (restultLength === 0) {
+        pagination.value.pageIndex++;
+        await getChannelList();
+      }
+    } else length = sourceLength;
+  }
+  pagination.value.pageIndex++;
+  return length;
 
 // 获取电子节目单
 const getEpgList = async (url, name, date) => {
   try {
     const res = await zy.iptvEpg(url, name, date);
     epgData.value = res;
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
   }
 };
 
