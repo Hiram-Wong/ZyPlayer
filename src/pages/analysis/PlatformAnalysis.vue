@@ -15,7 +15,6 @@
         scrolling="yes"
         frameborder="no"
         muted="true"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       ></iframe>
       <p class="tip">Tip: 如遇加载缓慢没出画面，请耐心等待！</p>
       <div class="side-floatbtn">
