@@ -483,8 +483,6 @@ const config = ref({
 }); // 西瓜播放器参数
 
 const selectIptvTab = ref('epg');
-const channelListData = ref();
-
 const recommend = ref([]); // 推荐
 const season = ref(); // 选集
 const selectPlaySource = ref(); // 选择的播放源
@@ -504,6 +502,8 @@ const isProfile = ref(false); // 简介
 const analyzeUrl = ref(); // 解析接口
 const onlineUrl = ref(); // 解析接口+需解析的地址
 const iframeRef = ref(); // iframe dom节点
+const webviewRef = ref(); // webview dom节点
+
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
 const iptvDataList = ref({});
@@ -591,7 +591,6 @@ watch(
 
 onMounted(() => {
   initPlayer();
-  if (type.value === 'film') getAnalysisData();
   minMaxEvent();
 });
 
@@ -685,6 +684,8 @@ const initFilmPlayer = async (isFirst) => {
 
   if (!isFirst) {
     await getHistoryData();
+    await getAnalysisData();
+
     getDoubanRecommend();
     getBinge();
 
