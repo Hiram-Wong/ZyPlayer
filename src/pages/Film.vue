@@ -457,6 +457,7 @@ const load = async ($state) => {
 const searchEvent = async () => {
   console.log('search');
   FilmDataList.value.list = [];
+  FilmDataList.value.rawList = [];
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 
