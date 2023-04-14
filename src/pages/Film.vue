@@ -261,7 +261,6 @@ watch(
 onMounted(async () => {
   await getFilmSetting();
   await getClass();
-  await getFilmList();
   await getFilmSite();
   await getFilmArea();
   await getFilmYear();
@@ -403,8 +402,9 @@ const changeClassEvent = async (item) => {
   FilmSiteSetting.value.class.id = type_id;
   FilmSiteSetting.value.class.name = type_name;
   FilmDataList.value.list = [];
+  FilmDataList.value.rawList = [];
   infiniteId.value++;
-  pagination.value.pageIndex = 0;
+  pagination.value.pageIndex = 1;
 };
 
 // 获取资源
@@ -415,7 +415,7 @@ const getFilmList = async () => {
 
   try {
     const res = await zy.list(key, pg, t);
-    const newFilms = _.differenceWith(res, FilmDataList.value.rawList, _.isEqual);
+    const newFilms = _.differenceWith(res, FilmDataList.value.list, _.isEqual);
     FilmDataList.value.list = [...FilmDataList.value.list, ...newFilms];
     FilmDataList.value.rawList = [...FilmDataList.value.rawList, ...res];
     pagination.value.pageIndex++;
@@ -457,7 +457,7 @@ const searchEvent = async () => {
   console.log('search');
   FilmDataList.value.list = [];
   infiniteId.value++;
-  pagination.value.pageIndex = 0;
+  pagination.value.pageIndex = 1;
 
   const wd = searchTxt.value;
   if (wd) {
@@ -499,7 +499,7 @@ const changeSitesEvent = async (item) => {
   };
   FilmDataList.value = { list: [], rawList: [] };
   infiniteId.value++;
-  pagination.value.pageIndex = 0;
+  pagination.value.pageIndex = 1;
 
   getClass();
 };
@@ -535,7 +535,7 @@ eventBus.on(async () => {
   await getClass();
   FilmDataList.value = { list: [], rawList: [] };
   infiniteId.value++;
-  pagination.value.pageIndex = 0;
+  pagination.value.pageIndex = 1;
   await getFilmList();
   await getFilmSite();
   await getFilmArea();
