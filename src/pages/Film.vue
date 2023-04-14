@@ -260,6 +260,7 @@ watch(
 
 onMounted(async () => {
   await getFilmSetting();
+  await getFilmList();
   await getClass();
   await getFilmSite();
   await getFilmArea();
