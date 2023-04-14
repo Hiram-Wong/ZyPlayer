@@ -151,7 +151,7 @@ const refreshEvent = () => {
     border-radius: var(--td-radius-large);
   }
   .t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
-    background-color: #161616 ;
+    background-color: #161616;
   }
   .tdesign-starter-sidebar-compact {
     background: #000 !important;
