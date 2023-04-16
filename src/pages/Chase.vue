@@ -31,6 +31,13 @@
       </div>
     </div>
     <div class="chase-container-dialog"></div>
+    <t-back-top
+      container=".container-item"
+      :visible-height="200"
+      size="small"
+      :offset="['1.4rem', '0.5rem']"
+      :duration="2000"
+    ></t-back-top>
   </div>
 </template>
 <script setup lang="ts">
