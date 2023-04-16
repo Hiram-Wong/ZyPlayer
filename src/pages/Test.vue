@@ -8,10 +8,11 @@
 import { ref, onMounted } from 'vue';
 import Player from 'xgplayer';
 import HlsPlugin from 'xgplayer-hls';
-import 'xgplayer/dist/xgplayer.min.css';
+import 'xgplayer/dist/index.min.css';
 import 'xgplayer-livevideo';
 
 const xg = ref();
+// https://pps.sd-play.com/20220427/pyqCdBbv/index.m3u8
 const config = ref({
   id: 'xgplayer',
   url: 'https://hnzy.bfvvs.com/play/yb8OOYma/index.m3u8',
