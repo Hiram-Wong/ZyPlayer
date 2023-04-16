@@ -114,7 +114,7 @@
               </div>
               <br />
               <div class="skip">
-                <span>结尾 [自动播放下一级]</span>
+                <span>结尾 [自动播放下一集]</span>
                 <t-slider v-model="formData.skipTimeInEnd" :show-tooltip="true" :marks="MASKS" :max="180" />
               </div>
             </div>
