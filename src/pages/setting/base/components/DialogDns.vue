@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="DNS-over-HTTP" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="DNS-over-HTTP" placement="center" :footer="false">
     <template #body>
       <div class="doh-dialog-container">
         <div class="header">
@@ -21,7 +21,7 @@
           </t-radio-group>
           <p class="tip recommend">推荐使用腾讯国密级，为空使用普通dns查询</p>
           <div class="optios">
-            <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
+            <t-form-item style="float: right; margin: ">
               <t-space>
                 <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
                 <t-button theme="primary" type="submit">确定</t-button>
@@ -123,11 +123,6 @@ const onClickCloseBtn = () => {
   .tip {
     color: var(--td-gray-color-6);
     font-size: var(--td-font-size-link-small);
-  }
-  .recommend {
-    position: absolute;
-    left: var(--td-comp-paddingLR-xxl) + var(--td-size-1);
-    bottom: 54px;
   }
 
   .dns-input {

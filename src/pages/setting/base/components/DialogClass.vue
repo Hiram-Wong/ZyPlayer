@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="classHeader" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="classHeader" placement="center" :footer="false">
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" :data="formData" @submit="onSubmit">
@@ -12,7 +12,7 @@
         />
         <p class="tip">分隔符请使用英文状态下","</p>
         <div class="optios">
-          <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
+          <t-form-item style="float: right; margin: ">
             <t-space>
               <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
               <t-button theme="primary" type="submit">确定</t-button>

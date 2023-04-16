@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="User-Agent" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="User-Agent" placement="center" :footer="false">
     <template #body>
       <div class="ua-dialog-container">
         <div class="header">
@@ -13,7 +13,7 @@
             class="dns-input"
             placeholder="请输入User-Agent"
             autofocus
-            :autosize="{ minRows: 3, maxRows: 4 }"
+            :autosize="{ minRows: 2, maxRows: 4 }"
             @change="changeUatextarea"
           />
           <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeUaSelect">
@@ -21,7 +21,7 @@
           </t-radio-group>
           <p class="tip recommend">推荐使用Chrome，为空使用默认</p>
           <div class="optios">
-            <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
+            <t-form-item style="float: right; margin: ">
               <t-space>
                 <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
                 <t-button theme="primary" type="submit">确定</t-button>
@@ -122,11 +122,6 @@ const onClickCloseBtn = () => {
   .tip {
     color: var(--td-gray-color-6);
     font-size: var(--td-font-size-link-small);
-  }
-  .recommend {
-    position: absolute;
-    left: var(--td-comp-paddingLR-xxl) + var(--td-size-1);
-    bottom: 54px;
   }
 
   .dns-input {

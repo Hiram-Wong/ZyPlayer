@@ -1,114 +1,107 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加源站" :width="680" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加源站" :width="646" placement="center" :footer="false">
     <template #body>
-      <t-space direction="vertical">
-        <t-radio-group v-model="selectWay" variant="default-filled" style="width: auto">
-          <t-radio-button value="add-single">订阅配置</t-radio-button>
-          <t-radio-button value="add-file">文件导入</t-radio-button>
-          <t-radio-button value="add-api">源站接口</t-radio-button>
-        </t-radio-group>
-        <!-- 表单内容-单个添加 -->
-        <t-form
-          v-if="selectWay == 'add-single'"
-          colon
-          :data="formData.siteInfo"
-          :rules="rulesSingle"
-          :label-width="100"
-          @submit="onSubmit($event, 'single')"
-        >
-          <t-form-item label="源站名" name="name">
-            <t-input v-model="formData.siteInfo.name" class="input-item" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="API接口" name="api">
-            <t-input v-model="formData.siteInfo.api" class="input-item" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="下载接口" name="download">
-            <t-input v-model="formData.siteInfo.download" class="input-item" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="解析接口" name="jiexiUrl">
-            <t-input v-model="formData.siteInfo.jiexiUrl" class="input-item" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="分组" name="type">
-            <t-select v-model="formData.siteInfo.group" class="input-item" clearable>
-              <t-option v-for="item in siteGroup" :key="item.value" :value="item.value" :label="item.label"></t-option>
-              <template #panelBottomContent>
-                <div class="select-panel-footer">
-                  <t-button v-if="editOrCreate === 'create'" theme="primary" variant="text" block @click="onAdd"
-                    >新增选项</t-button
-                  >
-                  <div v-else>
-                    <t-input v-model="newOption" autofocus></t-input>
-                    <t-button size="small" style="margin: 8px 0 0" @click="onAddConfirm"> 确认 </t-button>
-                    <t-button theme="default" size="small" style="margin: 8px 0 0 8px" @click="onAddCancel">
-                      取消
-                    </t-button>
-                  </div>
+      <t-radio-group v-model="selectWay" variant="default-filled">
+        <t-radio-button value="add-single">订阅配置</t-radio-button>
+        <t-radio-button value="add-file">文件导入</t-radio-button>
+        <t-radio-button value="add-api">源站接口</t-radio-button>
+      </t-radio-group>
+
+      <!-- 表单内容-单个添加 -->
+      <t-form
+        v-if="selectWay == 'add-single'"
+        colon
+        :data="formData.siteInfo"
+        :rules="rulesSingle"
+        :label-width="100"
+        @submit="onSubmit($event, 'single')"
+      >
+        <t-form-item label="源站名" name="name">
+          <t-input v-model="formData.siteInfo.name" class="input-item" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="API接口" name="api">
+          <t-input v-model="formData.siteInfo.api" class="input-item" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="下载接口" name="download">
+          <t-input v-model="formData.siteInfo.download" class="input-item" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="解析接口" name="jiexiUrl">
+          <t-input v-model="formData.siteInfo.jiexiUrl" class="input-item" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="分组" name="type">
+          <t-select v-model="formData.siteInfo.group" class="input-item" clearable>
+            <t-option v-for="item in siteGroup" :key="item.value" :value="item.value" :label="item.label"></t-option>
+            <template #panelBottomContent>
+              <div class="select-panel-footer">
+                <t-button v-if="editOrCreate === 'create'" theme="primary" variant="text" block @click="onAdd"
+                  >新增选项</t-button
+                >
+                <div v-else>
+                  <t-input v-model="newOption" autofocus></t-input>
+                  <t-button size="small" style="margin: 8px 0 0" @click="onAddConfirm"> 确认 </t-button>
+                  <t-button theme="default" size="small" style="margin: 8px 0 0 8px" @click="onAddCancel">
+                    取消
+                  </t-button>
                 </div>
-              </template>
-            </t-select>
+              </div>
+            </template>
+          </t-select>
+        </t-form-item>
+        <t-form-item label="源站标识" name="key">
+          <t-input v-model="formData.siteInfo.key" class="input-item" placeholder="请输入内容" />
+        </t-form-item>
+        <div class="optios">
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
-          <t-form-item label="源站标识" name="key">
-            <t-input v-model="formData.siteInfo.key" class="input-item" placeholder="请输入内容" />
+        </div>
+      </t-form>
+      <!-- 表单内容-上传文件 -->
+      <t-form
+        v-if="selectWay == 'add-file'"
+        colon
+        :data="formData.file"
+        :rules="rulesFile"
+        :label-width="100"
+        @submit="onSubmit($event, 'file')"
+      >
+        <t-form-item label="文件" name="file">
+          <t-upload
+            v-model="formData.file.file"
+            class="input-item"
+            theme="file"
+            accept="application/json"
+            :draggable="true"
+            :request-method="requestMethod"
+          />
+        </t-form-item>
+        <div class="optios">
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
-          <div class="optios">
-            <t-form-item style="float: right">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
-            </t-form-item>
-          </div>
-        </t-form>
-        <!-- 表单内容-上传文件 -->
-        <t-form
-          v-if="selectWay == 'add-file'"
-          colon
-          :data="formData.file"
-          :rules="rulesFile"
-          :label-width="100"
-          @submit="onSubmit($event, 'file')"
-        >
-          <t-form-item label="文件" name="file">
-            <t-upload
-              v-model="formData.file.file"
-              class="input-item"
-              theme="file"
-              accept="application/json"
-              :draggable="true"
-              :request-method="requestMethod"
-            />
+        </div>
+      </t-form>
+      <!-- 表单内容-接口 -->
+      <t-form
+        v-if="selectWay == 'add-api'"
+        colon
+        :data="formData.url"
+        :rules="rulesApi"
+        :label-width="100"
+        @submit="onSubmit($event, 'api')"
+      >
+        <t-form-item label="接口地址" name="sitesDataURL">
+          <t-input v-model="formData.url.sitesDataURL" class="input-item" placeholder="请输入接口url" />
+        </t-form-item>
+        <div class="optios">
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
-          <div class="optios">
-            <t-form-item style="float: right">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
-            </t-form-item>
-          </div>
-        </t-form>
-        <!-- 表单内容-接口 -->
-        <t-form
-          v-if="selectWay == 'add-api'"
-          colon
-          :data="formData.url"
-          :rules="rulesApi"
-          :label-width="100"
-          @submit="onSubmit($event, 'api')"
-        >
-          <t-form-item label="接口地址" name="sitesDataURL">
-            <t-input v-model="formData.url.sitesDataURL" class="input-item" placeholder="请输入接口url" />
-          </t-form-item>
-          <div class="optios">
-            <t-form-item style="float: right">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
-            </t-form-item>
-          </div>
-        </t-form>
-      </t-space>
+        </div>
+      </t-form>
     </template>
   </t-dialog>
 </template>
@@ -323,12 +316,10 @@ const onAddCancel = () => {
 </script>
 <style lang="less" scoped>
 @import '@/style/variables.less';
-:deep(.t-form:not(.t-form-inline) .t-form__item:last-of-type) {
-  margin-bottom: var(--td-comp-margin-xxl);
-}
+
 .input-item,
 :deep(.t-upload__dragger) {
-  width: 480px;
+  width: calc(480px - var(--td-size-1));
 }
 .select-panel-footer {
   border-top: 1px solid var(--td-component-stroke);

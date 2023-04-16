@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="热榜" :footer="false" placement="center">
+  <t-dialog v-model:visible="formVisible" header="热榜" placement="center" :footer="false">
     <template #body>
       <div class="hot-container">
         <div class="hot-heading">

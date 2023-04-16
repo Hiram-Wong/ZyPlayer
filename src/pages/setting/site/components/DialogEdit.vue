@@ -1,50 +1,47 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="编辑源站" :width="680" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="编辑源站" :width="680" placement="center" :footer="false">
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" colon :data="formData" :rules="rules" :label-width="100" @submit="onSubmit">
-        <div class="add-once">
-          <t-form-item label="源站名" name="name">
-            <t-input v-model="formData.name" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="API接口" name="api">
-            <t-input v-model="formData.api" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="下载接口" name="download">
-            <t-input v-model="formData.download" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="解析接口" name="jiexiUrl">
-            <t-input v-model="formData.jiexiUrl" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="分组" name="group">
-            <t-select v-model="formData.group" placeholder="请选择分组" :style="{ width: '514px' }">
-              <t-option v-for="item in formGroup" :key="item.value" :value="item.value" :label="item.label"></t-option>
-              <template #panelBottomContent>
-                <div class="select-panel-footer">
-                  <t-button v-if="editOrCreate === 'create'" theme="primary" variant="text" block @click="onAdd"
-                    >新增选项</t-button
-                  >
-                  <div v-else>
-                    <t-input v-model="newOption" autofocus></t-input>
-                    <t-button size="small" style="margin: 8px 0 0" @click="onAddConfirm"> 确认 </t-button>
-                    <t-button theme="default" size="small" style="margin: 8px 0 0 8px" @click="onAddCancel">
-                      取消
-                    </t-button>
-                  </div>
+        <t-form-item label="源站名" name="name">
+          <t-input v-model="formData.name" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="API接口" name="api">
+          <t-input v-model="formData.api" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="下载接口" name="download">
+          <t-input v-model="formData.download" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="解析接口" name="jiexiUrl">
+          <t-input v-model="formData.jiexiUrl" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="分组" name="group">
+          <t-select v-model="formData.group" placeholder="请选择分组" :style="{ width: '514px' }">
+            <t-option v-for="item in formGroup" :key="item.value" :value="item.value" :label="item.label"></t-option>
+            <template #panelBottomContent>
+              <div class="select-panel-footer">
+                <t-button v-if="editOrCreate === 'create'" theme="primary" variant="text" block @click="onAdd"
+                  >新增选项</t-button
+                >
+                <div v-else>
+                  <t-input v-model="newOption" autofocus></t-input>
+                  <t-button size="small" style="margin: 8px 0 0" @click="onAddConfirm"> 确认 </t-button>
+                  <t-button theme="default" size="small" style="margin: 8px 0 0 8px" @click="onAddCancel">
+                    取消
+                  </t-button>
                 </div>
-              </template>
-            </t-select>
-          </t-form-item>
-          <t-form-item label="源站标识" name="key">
-            <t-input v-model="formData.key" placeholder="请输入内容" />
-          </t-form-item>
-        </div>
+              </div>
+            </template>
+          </t-select>
+        </t-form-item>
+        <t-form-item label="源站标识" name="key">
+          <t-input v-model="formData.key" placeholder="请输入内容" />
+        </t-form-item>
+
         <div class="optios">
-          <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
-            <t-space>
-              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-              <t-button theme="primary" type="submit">确定</t-button>
-            </t-space>
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
         </div>
       </t-form>

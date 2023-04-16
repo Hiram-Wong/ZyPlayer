@@ -1,86 +1,79 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加解析源" :width="680" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加解析源" :width="646" placement="center" :footer="false">
     <template #body>
-      <t-space direction="vertical">
-        <t-radio-group v-model="selectWay" variant="default-filled" style="width: auto">
-          <t-radio-button value="add-single">订阅配置</t-radio-button>
-          <t-radio-button value="add-file">文件导入</t-radio-button>
-          <t-radio-button value="add-api">源站接口</t-radio-button>
-        </t-radio-group>
-        <!-- 表单内容-单个添加 -->
-        <t-form
-          v-if="selectWay == 'add-single'"
-          colon
-          :data="formData.single"
-          :rules="rulesSingle"
-          :label-width="100"
-          @submit="onSubmit($event, 'single')"
-        >
-          <t-form-item label="接口名称" name="name">
-            <t-input v-model="formData.single.name" class="input-item" placeholder="请输入内容" />
+      <t-radio-group v-model="selectWay" variant="default-filled">
+        <t-radio-button value="add-single">订阅配置</t-radio-button>
+        <t-radio-button value="add-file">文件导入</t-radio-button>
+        <t-radio-button value="add-api">源站接口</t-radio-button>
+      </t-radio-group>
+
+      <!-- 表单内容-单个添加 -->
+      <t-form
+        v-if="selectWay == 'add-single'"
+        colon
+        :data="formData.single"
+        :rules="rulesSingle"
+        :label-width="100"
+        @submit="onSubmit($event, 'single')"
+      >
+        <t-form-item label="接口名称" name="name">
+          <t-input v-model="formData.single.name" class="input-item" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="解析接口" name="url">
+          <t-input v-model="formData.single.url" class="input-item" placeholder="请输入内容" />
+        </t-form-item>
+        <div class="optios">
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
-          <t-form-item label="解析接口" name="url">
-            <t-input v-model="formData.single.url" class="input-item" placeholder="请输入内容" />
+        </div>
+      </t-form>
+      <!-- 表单内容-上传文件 -->
+      <t-form
+        v-if="selectWay == 'add-file'"
+        colon
+        :data="formData.file"
+        :rules="rulesFile"
+        :label-width="100"
+        @submit="onSubmit($event, 'file')"
+      >
+        <t-form-item label="文件" name="file">
+          <t-upload
+            v-model="formData.file.file"
+            class="input-item"
+            theme="file"
+            accept="application/json"
+            :draggable="true"
+            :request-method="requestMethod"
+          />
+        </t-form-item>
+        <div class="optios">
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
-          <div class="optios">
-            <t-form-item style="float: right">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
-            </t-form-item>
-          </div>
-        </t-form>
-        <!-- 表单内容-上传文件 -->
-        <t-form
-          v-if="selectWay == 'add-file'"
-          colon
-          :data="formData.file"
-          :rules="rulesFile"
-          :label-width="100"
-          @submit="onSubmit($event, 'file')"
-        >
-          <t-form-item label="文件" name="file">
-            <t-upload
-              v-model="formData.file.file"
-              class="input-item"
-              theme="file"
-              accept="application/json"
-              :draggable="true"
-              :request-method="requestMethod"
-            />
+        </div>
+      </t-form>
+      <!-- 表单内容-接口 -->
+      <t-form
+        v-if="selectWay == 'add-api'"
+        colon
+        :data="formData.url"
+        :rules="rulesApi"
+        :label-width="100"
+        @submit="onSubmit($event, 'api')"
+      >
+        <t-form-item label="接口地址" name="sitesDataURL">
+          <t-input v-model="formData.url.sitesDataURL" class="input-item" placeholder="请输入接口url" />
+        </t-form-item>
+        <div class="optios">
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
-          <div class="optios">
-            <t-form-item style="float: right">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
-            </t-form-item>
-          </div>
-        </t-form>
-        <!-- 表单内容-接口 -->
-        <t-form
-          v-if="selectWay == 'add-api'"
-          colon
-          :data="formData.url"
-          :rules="rulesApi"
-          :label-width="100"
-          @submit="onSubmit($event, 'api')"
-        >
-          <t-form-item label="接口地址" name="sitesDataURL">
-            <t-input v-model="formData.url.sitesDataURL" class="input-item" placeholder="请输入接口url" />
-          </t-form-item>
-          <div class="optios">
-            <t-form-item style="float: right">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
-            </t-form-item>
-          </div>
-        </t-form>
-      </t-space>
+        </div>
+      </t-form>
     </template>
   </t-dialog>
 </template>
@@ -246,11 +239,9 @@ const urlEvent = async (url) => {
 </script>
 <style lang="less" scoped>
 @import '@/style/variables.less';
-:deep(.t-form:not(.t-form-inline) .t-form__item:last-of-type) {
-  margin-bottom: var(--td-comp-margin-xxl);
-}
+
 .input-item,
 :deep(.t-upload__dragger) {
-  width: 480px;
+  width: calc(480px - var(--td-size-1));
 }
 </style>

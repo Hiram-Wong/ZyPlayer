@@ -2,6 +2,7 @@
   <t-dialog
     v-model:visible="formVisible"
     header="检查更新"
+    placement="center"
     :footer="false"
     :close-on-esc-keydown="false"
     :close-on-overlay-click="false"

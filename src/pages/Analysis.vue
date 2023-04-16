@@ -368,7 +368,7 @@ const platformPlayClose = () => {
       }
       .analysis-play-box {
         width: 100%;
-        background-color: #f5f5f7;
+        background-color: var(--td-bg-color-page);
         border-radius: var(--td-radius-extraLarge);
       }
       .analysis-setting {
@@ -377,7 +377,7 @@ const platformPlayClose = () => {
           height: 40px;
           padding: 0;
           border-radius: 20px;
-          background-color: #f5f5f7;
+          background-color: var(--td-bg-color-page);
           :deep(.t-input-adornment__prepend) {
             border-radius: 20px 0 0 20px;
             background-color: rgba(0, 0, 0, 0);
@@ -393,12 +393,12 @@ const platformPlayClose = () => {
           .analysis-url {
             overflow: visible;
             outline: none;
-            border: 0;
             background: none;
+            border: 0;
             width: 100%;
             font-size: 15px;
             line-height: 40px;
-            color: #99999a;
+            color: var(--td-text-color-primary);
           }
           :deep(.t-input-adornment__append) {
             background: linear-gradient(90deg, var(--td-brand-color-4), var(--td-brand-color));
@@ -411,6 +411,7 @@ const platformPlayClose = () => {
                 display: block;
                 color: hsl(0deg 0% 0% / 60%);
                 font-size: 15px;
+                font-weight: 500;
                 line-height: 40px;
                 text-align: center;
               }
@@ -448,11 +449,11 @@ const platformPlayClose = () => {
         margin-right: 8px;
         padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-s) var(--td-comp-paddingTB-m);
         border-radius: var(--td-radius-medium);
-        background: #f5f5f7;
+        background-color: var(--td-bg-color-page);
+
         .logo {
           width: 70px;
           height: 15px;
-          color: #000;
         }
       }
     }
@@ -464,7 +465,7 @@ const platformPlayClose = () => {
         border-radius: var(--td-radius-round);
         height: 31px;
         width: 140px;
-        background-color: #f5f5f7;
+        background-color: var(--td-bg-color-component);
         display: flex;
         align-items: center;
         cursor: pointer;
@@ -496,27 +497,6 @@ const platformPlayClose = () => {
             }
           }
         }
-      }
-    }
-  }
-}
-:root[theme-mode='dark'] {
-  .analysis-play-box {
-    background-color: var(--td-bg-color-container) !important;
-  }
-  .analysis-setting-group {
-    background-color: var(--td-bg-color-container) !important;
-  }
-  .analysis-main-flex {
-    .mini-box {
-      background-color: var(--td-bg-color-container) !important;
-    }
-  }
-  .analysis-main-bottom {
-    .logo-item {
-      background-color: var(--td-bg-color-container) !important;
-      .logo {
-        color: #fdfdfd !important;
       }
     }
   }

@@ -1,12 +1,12 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="一键配置" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="一键配置" placement="center" :footer="false">
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" :data="formData" @submit="onSubmit">
         <t-input v-model="formData.url" autofocus clearable placeholder="请输入一键配置链接!" class="input" />
         <p class="tip">请保障网络连通性</p>
         <div class="optios">
-          <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
+          <t-form-item style="float: right; margin: ">
             <t-space>
               <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
               <t-button theme="primary" type="submit">确定</t-button>

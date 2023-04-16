@@ -1,22 +1,26 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="编辑解析源" :width="680" :footer="false">
+  <t-dialog
+    v-model:visible="formVisible"
+    header="编辑解析源"
+    :width="680"
+    placement="center"
+    :footer="false"
+    class="dialog-edit"
+  >
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" colon :data="formData" :rules="rules" :label-width="100" @submit="onSubmit">
-        <div class="add-once">
-          <t-form-item label="接口名称" name="name">
-            <t-input v-model="formData.name" placeholder="请输入内容" />
-          </t-form-item>
-          <t-form-item label="解析接口" name="url">
-            <t-input v-model="formData.url" placeholder="请输入内容" />
-          </t-form-item>
-        </div>
+        <t-form-item label="接口名称" name="name">
+          <t-input v-model="formData.name" placeholder="请输入内容" />
+        </t-form-item>
+        <t-form-item label="解析接口" name="url">
+          <t-input v-model="formData.url" placeholder="请输入内容" />
+        </t-form-item>
+
         <div class="optios">
-          <t-form-item style="float: right; margin: var(--td-comp-margin-xxl) 0 0 0">
-            <t-space>
-              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-              <t-button theme="primary" type="submit">确定</t-button>
-            </t-space>
+          <t-form-item style="float: right">
+            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+            <t-button theme="primary" type="submit">确定</t-button>
           </t-form-item>
         </div>
       </t-form>
