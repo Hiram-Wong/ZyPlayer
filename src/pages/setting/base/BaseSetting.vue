@@ -105,27 +105,27 @@
             <t-space>
               <t-radio v-model="formData.pauseWhenMinimize" allow-uncheck>最小化暂停播放</t-radio>
               <t-radio v-model="formData.softSolution" allow-uncheck>软解</t-radio>
-              <t-radio v-model="formData.skipStartEnd" allow-uncheck>跳过开头</t-radio>
+              <t-radio v-model="formData.skipStartEnd" allow-uncheck>自动跳过</t-radio>
             </t-space>
             <div v-if="formData.skipStartEnd" class="">
               <div class="skip">
-                <span>开始</span>
+                <span>开始 [记忆播放]</span>
                 <t-slider v-model="formData.skipTimeInStart" :show-tooltip="true" :marks="MASKS" :max="180" />
               </div>
               <br />
-              <!-- <div class="skip">
-                <span>结尾</span>
+              <div class="skip">
+                <span>结尾 [自动播放下一级]</span>
                 <t-slider v-model="formData.skipTimeInEnd" :show-tooltip="true" :marks="MASKS" :max="180" />
-              </div> -->
+              </div>
             </div>
           </t-space>
         </div>
       </t-form-item>
       <t-form-item label="安全" name="security">
         <t-space>
-          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">打开计算机的代理设置</span>
+          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">网络代理</span>
           <span class="title" @click="dnsEvnet">安全DNS</span>
-          <span class="title" @click="uaEvnet">User-Agent</span>
+          <span class="title" @click="uaEvnet">用户代理</span>
         </t-space>
 
         <dialog-dns-view v-model:visible="isDnsDialog" :data="dnsDialogData" @receive-dns-data="flushDialogData" />
@@ -600,10 +600,6 @@ const checkIpv6 = async () => {
     color: var(--td-brand-color);
     cursor: pointer;
     font-weight: 500;
-  }
-  :deep(.t-input) {
-    background-color: var(--td-bg-color-component);
-    border-color: transparent;
   }
   :deep(.t-input-adornment__append) {
     border-width: 1px;

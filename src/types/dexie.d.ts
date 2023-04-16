@@ -57,7 +57,7 @@ interface History {
   siteSource: string;
   duration?: number | null;
   playType: string;
-  playEnd: number;
+  playEnd: boolean;
   videoId: number;
   videoImage: string;
   videoName: string;

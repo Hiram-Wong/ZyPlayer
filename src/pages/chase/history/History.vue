@@ -33,7 +33,8 @@
               </span>
               <p class="history-item-time card-footer-item nowrap">
                 <laptop-icon />
-                <span>观看到{{ filterPlayProgress(detail.watchTime, detail.duration) }}</span>
+                <span v-if="detail.playEnd">已看完</span>
+                <span v-else>观看到{{ filterPlayProgress(detail.watchTime, detail.duration) }}</span>
               </p>
             </div>
           </div>

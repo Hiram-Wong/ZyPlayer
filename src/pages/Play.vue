@@ -2,7 +2,10 @@
   <div class="container">
     <div class="container-header">
       <div class="player-top">
-        <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' && !isMacFull ? '60px' : '0' }">
+        <div
+          class="player-top-left"
+          :style="{ 'padding-left': platform === 'darwin' && !isMacMaximize ? '60px' : '0' }"
+        >
           <div class="open-main-win player-center" @click="openMainWinEvent">
             <home-icon size="1.5em" />
             <span class="tip-gotomain">回到主界面</span>
@@ -413,7 +416,7 @@ import playerVoiceIcon from '@/assets/player/voice.svg?raw';
 import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
 
-import 'xgplayer/dist/xgplayer.min.css';
+import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
 
 // 用于窗口管理
@@ -495,14 +498,14 @@ const isBinge = ref(true); // true未收藏 false收藏
 const isPinned = ref(true); // true未置顶 false置顶
 const qrCodeUrl = ref(); // 二维码图片流
 const dataHistory = ref({}); // 历史
-const isMacFull = ref(false); // mac最大化
+const isMacMaximize = ref(false); // mac最大化
 // const iswideBtn = ref(false); // 视频划过显示按钮
 const isProfile = ref(false); // 简介
 
 const analyzeUrl = ref(); // 解析接口
 const onlineUrl = ref(); // 解析接口+需解析的地址
 const iframeRef = ref(); // iframe dom节点
-const webviewRef = ref(); // webview dom节点
+const currentUrl = ref(); // 当前未解析前的url
 
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
@@ -521,12 +524,23 @@ const QR_CODE_OPTIONS = {
   margin: 4,
 };
 
-const VIP_LIST = ['iqiyi.com', 'mgtv.com', 'qq.com', 'youku.com', 'le.com', 'sohu.com', 'pptv.com', 'bilibili.com'];
+const VIP_LIST = [
+  'iqiyi.com',
+  'iq.com',
+  'mgtv.com',
+  'qq.com',
+  'youku.com',
+  'le.com',
+  'sohu.com',
+  'pptv.com',
+  'bilibili.com',
+  'tudou.com',
+];
 
 const shareUrl = computed(() => {
   const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
   let params = `${config.value.url}&name=${info.value.name}`;
-  if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name}  ${selectPlayIndex.value}`;
+  if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name} ${selectPlayIndex.value}`;
   return onlineUrl.value || sourceUrl + params;
 }); // 分享地址
 
@@ -624,7 +638,7 @@ const getHistoryData = async (type = false) => {
       date: moment().format('YYYY-MM-DD'),
       siteKey: key,
       siteSource: selectPlaySource.value,
-      playEnd: 0,
+      playEnd: false,
       videoId: id,
       videoImage: info.value.vod_pic,
       videoName: info.value.vod_name,
@@ -692,6 +706,7 @@ const initFilmPlayer = async (isFirst) => {
     const item = season.value[selectPlaySource.value].find(
       (item) => item.split('$')[0] === dataHistory.value.videoIndex,
     );
+    currentUrl.value = item;
     config.value.url = item ? item.split('$')[1] : season.value[selectPlaySource.value][0].split('$')[1];
     if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
       config.value.startTime = set.value.skipTimeInStart;
@@ -817,6 +832,7 @@ const getDetailInfo = async () => {
 // 切换选集
 const changeEvent = async (e) => {
   if (timer.value) clearInterval(timer.value);
+  currentUrl.value = e;
   const [index, url] = e.split('$');
   console.log(index, url);
   selectPlayIndex.value = index;
@@ -824,6 +840,7 @@ const changeEvent = async (e) => {
   const doc = {
     watchTime: xg.value ? xg.value.currentTime : 0,
     duration: null,
+    playEnd: false,
     siteSource: selectPlaySource.value,
     videoIndex: selectPlayIndex.value,
   };
@@ -912,13 +929,38 @@ const timerUpdatePlayProcess = () => {
   timer.value = setInterval(() => {
     const doc = {
       date: moment().format('YYYY-MM-DD'),
+      playEnd: false,
       watchTime: xg.value.currentTime,
       duration: xg.value.duration,
     };
     history.update(dataHistory.value.id, doc);
 
-    console.log(timer.value);
+    autoPlayNext();
+
+    console.log(`timeInterval:${timer.value}`);
   }, 10000);
+};
+
+// 是否自动进入下一集
+const autoPlayNext = () => {
+  let time = xg.value.currentTime;
+  if (set.value.skipTimeInEnd) time += set.value.skipTimeInEnd;
+  if (time >= xg.value.duration && (xg.value.hasStart || xg.value.ended)) {
+    const { siteSource } = dataHistory.value;
+    const index = season.value[siteSource].indexOf(currentUrl.value);
+
+    const doc = {
+      playEnd: true,
+    };
+    history.update(dataHistory.value.id, doc);
+
+    if (season.value[siteSource].length === index + 1) {
+      xg.value.pause();
+      return;
+    }
+    changeEvent(season.value[siteSource][index + 1]);
+    MessagePlugin.info('请稍候,正在切换下一级');
+  }
 };
 
 // 获取是否追剧
@@ -1094,13 +1136,24 @@ const toggleAlwaysOnTop = () => {
 const minMaxEvent = () => {
   win.on('minimize', () => {
     if (xg.value && xg.value.hasStart && set.value.pauseWhenMinimize) {
+      console.log('进入最小化');
       xg.value.pause();
     }
   });
   win.on('restore', () => {
     if (xg.value && xg.value.hasStart) {
+      console.log('恢复最小化');
       xg.value.play();
     }
+  });
+
+  win.on('enter-full-screen', () => {
+    console.log('进入全屏模式');
+    isMacMaximize.value = true;
+  });
+  win.on('leave-full-screen', () => {
+    console.log('退出全屏模式');
+    isMacMaximize.value = false;
   });
 };
 
@@ -1148,6 +1201,7 @@ const openMainWinEvent = () => {
 
       .player-top-left {
         -webkit-app-region: no-drag;
+        transition: 0.15s linear;
 
         .open-main-win {
           height: 30px;
@@ -1224,6 +1278,7 @@ const openMainWinEvent = () => {
             margin-top: 5px;
             position: relative;
             background-color: #2a2a31;
+            cursor: default;
 
             &-main {
               display: flex;
@@ -1300,6 +1355,7 @@ const openMainWinEvent = () => {
               color: #777;
               font-size: 12px;
               line-height: 35px;
+              cursor: pointer;
 
               &-url {
                 float: left;
