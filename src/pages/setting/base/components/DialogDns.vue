@@ -1,7 +1,7 @@
 <template>
   <t-dialog v-model:visible="formVisible" header="DNS-over-HTTP" placement="center" :footer="false">
     <template #body>
-      <div class="doh-dialog-container">
+      <div class="doh-dialog-container dialog-container-padding">
         <div class="header">
           <p class="tip">确定如何通过安全连接来连接到网站</p>
         </div>
@@ -19,13 +19,11 @@
           <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeDnsSelect">
             <t-radio-button v-for="item in DNS_LIST" :key="item.name" :value="item.dns">{{ item.name }}</t-radio-button>
           </t-radio-group>
-          <p class="tip recommend">推荐使用腾讯国密级，为空使用普通dns查询</p>
+          <p class="tip bottom-tip">推荐使用腾讯国密级，为空使用普通dns查询</p>
           <div class="optios">
-            <t-form-item style="float: right; margin: ">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
+            <t-form-item style="float: right">
+              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+              <t-button theme="primary" type="submit">确定</t-button>
             </t-form-item>
           </div>
         </t-form>
@@ -117,21 +115,4 @@ const onClickCloseBtn = () => {
 </script>
 <style lang="less" scoped>
 @import '@/style/variables.less';
-
-.doh-dialog-container {
-  padding: 0 var(--td-size-1);
-  .tip {
-    color: var(--td-gray-color-6);
-    font-size: var(--td-font-size-link-small);
-  }
-
-  .dns-input {
-    margin-top: 5px;
-    :deep(.t-textarea__inner) {
-      border: var(--td-size-1) solid transparent;
-      background-color: var(--td-bg-color-component);
-      border-radius: var(--td-radius-medium);
-    }
-  }
-}
 </style>

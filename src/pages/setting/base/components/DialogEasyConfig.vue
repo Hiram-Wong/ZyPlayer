@@ -1,19 +1,25 @@
 <template>
   <t-dialog v-model:visible="formVisible" header="一键配置" placement="center" :footer="false">
     <template #body>
-      <!-- 表单内容 -->
-      <t-form ref="form" :data="formData" @submit="onSubmit">
-        <t-input v-model="formData.url" autofocus clearable placeholder="请输入一键配置链接!" class="input" />
-        <p class="tip">请保障网络连通性</p>
-        <div class="optios">
-          <t-form-item style="float: right; margin: ">
-            <t-space>
+      <div class="easy-config-dialog-container dialog-container-padding">
+        <!-- 表单内容 -->
+        <t-form ref="form" :data="formData" @submit="onSubmit">
+          <t-textarea
+            v-model="formData.url"
+            class="dns-input"
+            placeholder="请输入一键配置链接"
+            autofocus
+            :autosize="{ minRows: 2, maxRows: 4 }"
+          />
+          <p class="tip bottom-tip">请保障网络连通性</p>
+          <div class="optios">
+            <t-form-item style="float: right">
               <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
               <t-button theme="primary" type="submit">确定</t-button>
-            </t-space>
-          </t-form-item>
-        </div>
-      </t-form>
+            </t-form-item>
+          </div>
+        </t-form>
+      </div>
     </template>
   </t-dialog>
 </template>
@@ -179,12 +185,4 @@ const txt = (text) => {
 </script>
 <style lang="less" scoped>
 @import '@/style/variables.less';
-
-.tip {
-  color: var(--td-gray-color-6);
-  font-size: var(--td-font-size-link-small);
-}
-.input {
-  padding: var(--td-size-1);
-}
 </style>

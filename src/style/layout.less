@@ -245,6 +245,28 @@
     .t-radio-group {
       margin-bottom: var(--td-comp-margin-s);
     }
+    .t-textarea{
+      .t-textarea__inner {
+        border: var(--td-size-1) solid transparent;
+        background-color: var(--td-bg-color-component);
+        border-radius: var(--td-radius-medium);
+      }
+    }
+    .dialog-container-padding {
+      padding: var(--td-size-1);
+      .tip {
+        color: var(--td-gray-color-6);
+        font-size: var(--td-font-size-link-small);
+      }
+      .bottom-tip {
+        position: absolute;
+        left: calc(var(--td-comp-paddingLR-xxl) + var(--td-size-1));
+        bottom: calc(var(--td-comp-paddingTB-xxl) + 8px);
+      }
+      .optios {
+        margin-top: var(--td-comp-margin-s);
+      }
+    }
   }
   border: none;
 }

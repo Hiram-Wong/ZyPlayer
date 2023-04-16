@@ -1,25 +1,25 @@
 <template>
   <t-dialog v-model:visible="formVisible" :header="classHeader" placement="center" :footer="false">
     <template #body>
-      <!-- 表单内容 -->
-      <t-form ref="form" :data="formData" @submit="onSubmit">
-        <t-textarea
-          v-model="classData"
-          class="textarea"
-          placeholder="请输入过滤关键词,逗号分隔"
-          autofocus
-          :autosize="{ minRows: 3, maxRows: 5 }"
-        />
-        <p class="tip">分隔符请使用英文状态下","</p>
-        <div class="optios">
-          <t-form-item style="float: right; margin: ">
-            <t-space>
+      <div class="class-dialog-container dialog-container-padding">
+        <!-- 表单内容 -->
+        <t-form ref="form" :data="formData" @submit="onSubmit">
+          <t-textarea
+            v-model="classData"
+            class="textarea"
+            placeholder="请输入过滤关键词,逗号分隔"
+            autofocus
+            :autosize="{ minRows: 3, maxRows: 5 }"
+          />
+          <p class="tip bottom-tip">分隔符请使用英文状态下","</p>
+          <div class="optios">
+            <t-form-item style="float: right; margin: ">
               <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
               <t-button theme="primary" type="submit">确定</t-button>
-            </t-space>
-          </t-form-item>
-        </div>
-      </t-form>
+            </t-form-item>
+          </div>
+        </t-form>
+      </div>
     </template>
   </t-dialog>
 </template>
@@ -94,17 +94,4 @@ const onClickCloseBtn = () => {
 </script>
 <style lang="less" scoped>
 @import '@/style/variables.less';
-
-.tip {
-  color: var(--td-gray-color-6);
-  font-size: var(--td-font-size-link-small);
-}
-.textarea {
-  padding: var(--td-size-1);
-  :deep(.t-textarea__inner) {
-    border: var(--td-size-1) solid transparent;
-    background-color: var(--td-bg-color-component);
-    border-radius: var(--td-radius-medium);
-  }
-}
 </style>

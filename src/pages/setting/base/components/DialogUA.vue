@@ -1,7 +1,7 @@
 <template>
   <t-dialog v-model:visible="formVisible" header="User-Agent" placement="center" :footer="false">
     <template #body>
-      <div class="ua-dialog-container">
+      <div class="ua-dialog-container dialog-container-padding">
         <div class="header">
           <p class="tip">模拟用户代理</p>
         </div>
@@ -19,13 +19,11 @@
           <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeUaSelect">
             <t-radio-button v-for="item in UA_LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
           </t-radio-group>
-          <p class="tip recommend">推荐使用Chrome，为空使用默认</p>
+          <p class="tip bottom-tip">推荐使用Chrome，为空使用默认</p>
           <div class="optios">
-            <t-form-item style="float: right; margin: ">
-              <t-space>
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
-              </t-space>
+            <t-form-item style="float: right">
+              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+              <t-button theme="primary" type="submit">确定</t-button>
             </t-form-item>
           </div>
         </t-form>
@@ -37,7 +35,6 @@
 <script setup lang="ts">
 import { ref, watch, reactive } from 'vue';
 import _ from 'lodash';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
 
 import UA_CONFIG from '@/config/ua';
@@ -116,21 +113,4 @@ const onClickCloseBtn = () => {
 </script>
 <style lang="less" scoped>
 @import '@/style/variables.less';
-
-.ua-dialog-container {
-  padding: 0 var(--td-size-1);
-  .tip {
-    color: var(--td-gray-color-6);
-    font-size: var(--td-font-size-link-small);
-  }
-
-  .dns-input {
-    margin-top: 5px;
-    :deep(.t-textarea__inner) {
-      border: var(--td-size-1) solid transparent;
-      background-color: var(--td-bg-color-component);
-      border-radius: var(--td-radius-medium);
-    }
-  }
-}
 </style>
