@@ -1,13 +1,22 @@
-import { sites } from '../dexie';
-import axios, { AxiosRequestConfig, AxiosResponse, CancelTokenSource } from 'axios';
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { XMLParser } from 'fast-xml-parser';
 import * as cheerio from 'cheerio';
 import { Parser as M3u8Parser } from 'm3u8-parser';
 import _ from 'lodash';
 
+import { sites } from '@/lib/dexie';
+
 const iconv = require('iconv-lite');
 const dns = require('dns');
 const net = require('net');
+
+axiosRetry(axios, {
+  retries: 3,
+  retryDelay: (retryCount) => {
+    return retryCount * 1000;
+  }
+});
 
 // 初始化对象xml转json https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/docs/v4/1.GettingStarted.md
 const options = { // XML 转 JSON 配置
