@@ -14,9 +14,9 @@ interface Setting {
   iptvThumbnail: boolean;
   restoreWindowPositionAndSize: boolean;
   pauseWhenMinimize: boolean;
-  defaultSite: number;
-  defaultIptv: number;
-  defaultAnalyze: number;
+  defaultSite: number | null;
+  defaultIptv: number | null;
+  defaultAnalyze: number | null;
   analyzeSupport: boolean;
   softSolution: boolean;
   skipStartEnd: boolean;
