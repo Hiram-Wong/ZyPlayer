@@ -23,24 +23,28 @@
                   </span>
                 </div>
               </div>
-              <div v-if="classKeywords" class="head-center">
+              <div v-if="classKeywords.length !== 1" class="head-center">
                 <p class="head-center-class">{{ FilmSiteSetting.class.name }}</p>
                 <t-popup
                   placement="bottom-left"
-                  :overlay-inner-style="{ marginTop: '16px', maxWidth: '60%' }"
+                  :overlay-inner-style="{
+                    marginTop: '16px',
+                    width: '570px',
+                    boxShadow: 'none',
+                    lineHeight: '46px',
+                    padding: '5px 0',
+                    zIndex: '999',
+                  }"
                   attach=".head-center"
                 >
                   <more-icon size="1.5rem" style="transform: rotate(90deg)" />
                   <template #content>
-                    <div class="content">
-                      <span
-                        v-for="item in classKeywords"
-                        :key="item.type_id"
-                        variant="text"
-                        @click="changeClassEvent(item)"
-                      >
-                        {{ item.type_name }}
-                      </span>
+                    <div class="content-items">
+                      <div v-for="item in classKeywords" :key="item.type_id" class="content-item">
+                        <span variant="text" @click="changeClassEvent(item)">
+                          {{ item.type_name }}
+                        </span>
+                      </div>
                     </div>
                   </template>
                 </t-popup>
@@ -171,8 +175,8 @@
       </div>
       <infinite-loading
         :identifier="infiniteId"
-        style="text-align: center; margin-bottom: 2em"
         :distance="200"
+        style="text-align: center; margin-bottom: 2em"
         @infinite="load"
       >
         <template #complete>{{ infiniteCompleteTip }}</template>
@@ -180,9 +184,16 @@
       </infinite-loading>
     </div>
     <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
+    <t-back-top
+      container=".main"
+      :visible-height="200"
+      size="small"
+      :offset="['1.4rem', '0.5rem']"
+      :duration="2000"
+    ></t-back-top>
   </div>
 </template>
-<script setup lang="jsx">
+<script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { MoreIcon, ChartBarIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
@@ -208,7 +219,8 @@ const searchTxt = ref(''); // 搜索框
 const sortKeywords = ['按更新时间', '按上映年份', '按片名']; // 过滤排序条件
 const areasKeywords = ref(['全部']); // 过滤地区
 const yearsKeywords = ref(['全部']); // 过滤年份
-const classKeywords = ref([]); // 过滤类型
+const classKeywords = ref([{ type_id: 0, type_name: '最新' }]); // 过滤类型
+
 const filterData = ref({
   site: '',
   sort: '按更新时间',
@@ -220,7 +232,7 @@ const filterData = ref({
 const formSiteData = ref({}); // 详情组件源传参
 const formDialogHot = ref(false); // dialog是否显示热播榜
 const pagination = ref({
-  pageIndex: 0,
+  pageIndex: 1,
   pageSize: 36,
   count: 0,
 }); // 分页请求
@@ -243,10 +255,9 @@ const FilmDataList = ref({
   list: [],
   rawList: [],
 }); // Waterfall
-const FilmSiteList = ref(); // 站点
 const sitesList = ref({}); // 全部源
 const sitesListSelect = ref(); // 选择的源
-const infiniteCompleteTip = ref('没有更多内容了');
+const infiniteCompleteTip = ref('没有更多内容了!');
 
 // 深度监听过滤条件变更
 watch(
@@ -258,13 +269,25 @@ watch(
   { deep: true },
 );
 
-onMounted(async () => {
-  await getFilmSetting();
-  await getClass();
-  await getFilmList();
-  await getFilmSite();
-  await getFilmArea();
-  await getFilmYear();
+// 初始化key完成后请求class分类
+watch(
+  () => FilmSiteSetting.value.basic,
+  () => {
+    getClass();
+  },
+);
+
+// 数据变化重新分类year area
+watch(
+  () => FilmDataList.value.list,
+  () => {
+    getFilmArea();
+    getFilmYear();
+  },
+);
+
+onMounted(() => {
+  getFilmSetting();
 });
 
 // 筛选
@@ -307,11 +330,12 @@ const getFilmSetting = async () => {
       setting.get('defaultSearch'),
     ],
   );
-
   if (defaultSite) {
-    const basic = await sites.get(defaultSite);
-    const { id } = basic;
-    sitesListSelect.value = id;
+    sitesListSelect.value = defaultSite;
+
+    const basic = await sites.get(defaultSite).catch(() => {
+      infiniteCompleteTip.value = '查无此id,请前往设置-影视源重新设置默认源!';
+    });
     FilmSiteSetting.value.basic = basic;
   } else {
     infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
@@ -358,19 +382,14 @@ const getFilmYear = () => {
   yearsKeywords.value = yearsKeywords.value.sort((a, b) => b - a);
 };
 
-// 获取所有站点资源
-const getFilmSite = async () => {
-  const res = await sites.all();
-  FilmSiteList.value = res.filter((item) => item.isActive);
-};
-
 // 青少年过滤
 const containsClassFilterKeyword = (name) => {
   const { rootClassFilter, r18ClassFilter } = FilmSiteSetting.value;
   let ret = false;
   // 主分类过滤, 检测关键词是否包含分类名
   if (FilmSiteSetting.value.rootClassFilter) {
-    ret = rootClassFilter.includes(name);
+    // ret = rootClassFilter.includes(name);
+    ret = rootClassFilter?.some((v) => name?.includes(v));
   }
   // 福利过滤,检测分类名是否包含关键词
   if (r18ClassFilter?.length && !ret) {
@@ -382,19 +401,23 @@ const containsClassFilterKeyword = (name) => {
 // 获取分类
 const getClass = async () => {
   const { key } = FilmSiteSetting.value.basic;
-  const res = await zy.class(key);
+  try {
+    const res = await zy.class(key);
 
-  const { page, pagecount, pagesize, recordcount, class: classList } = res;
-  pagination.value.pageIndex = page;
-  pagination.value.count = pagecount;
-  pagination.value.pageSize = pagesize;
-  FilmSiteSetting.value.basic.recordcount = recordcount;
+    const { page, pagecount, pagesize, recordcount, class: classList } = res;
+    pagination.value.pageIndex = page;
+    pagination.value.count = pagecount;
+    pagination.value.pageSize = pagesize;
+    FilmSiteSetting.value.basic.recordcount = recordcount;
 
-  const allClass = [
-    { type_id: 0, type_name: '最新' },
-    ...classList.filter((item) => !containsClassFilterKeyword(item.type_name)),
-  ];
-  classKeywords.value = allClass;
+    const allClass = [
+      { type_id: 0, type_name: '最新' },
+      ...classList.filter((item) => !containsClassFilterKeyword(item.type_name)),
+    ];
+    classKeywords.value = allClass;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // 切换分类
@@ -423,7 +446,8 @@ const getFilmList = async () => {
     if (showToolbar.value) filterEvent();
     return newFilms.length;
   } catch (err) {
-    console.log(err);
+    infiniteCompleteTip.value = '网络请求失败, 请尝试手动刷新!';
+    console.error(err);
     return 0;
   }
 };
@@ -431,17 +455,23 @@ const getFilmList = async () => {
 // 加载
 const load = async ($state) => {
   console.log('loading...');
-  if (!sitesListSelect.value) {
-    if (infiniteCompleteTip.value.indexOf('暂无数据') > -1) {
+  if (!sitesListSelect.value || !FilmSiteSetting.value.basic.key) {
+    const hasNoData = infiniteCompleteTip.value.indexOf('暂无数据');
+    if (hasNoData > -1) {
       $state.complete();
+      return;
     }
+    infiniteId.value++;
     return;
   }
+
   try {
     const resLength = searchTxt.value ? 0 : await getFilmList();
     console.log(resLength);
-    if (resLength === 0) $state.complete();
-    else {
+    if (resLength === 0) {
+      if (infiniteCompleteTip.value.indexOf('刷新') === -1) infiniteCompleteTip.value = '没有更多内容了!';
+      $state.complete();
+    } else {
       getFilmArea();
       getFilmYear();
 
@@ -539,7 +569,6 @@ eventBus.on(async () => {
   infiniteId.value++;
   pagination.value.pageIndex = 1;
   await getFilmList();
-  await getFilmSite();
   await getFilmArea();
 });
 </script>
@@ -552,7 +581,7 @@ eventBus.on(async () => {
   overflow: hidden;
   position: relative;
   .tool-ext {
-    height: 190px !important;
+    height: 200px !important;
   }
   .tool {
     height: 50px;
@@ -596,21 +625,29 @@ eventBus.on(async () => {
             margin-right: 5px;
           }
 
-          .content {
-            padding: 10px 0 10px 25px;
-            span {
-              display: inline-block;
-              line-height: 20px;
-              margin-right: 25px;
-              width: 60px;
-              overflow: hidden;
-              text-overflow: inherit;
-              white-space: nowrap;
-              text-align: center;
+          .content-items {
+            overflow: hidden;
+            width: 100%;
+            .content-item {
+              float: left;
+              box-sizing: border-box;
+              width: 92px;
+              padding-left: 30px;
+              height: 46px;
               cursor: pointer;
-              &:hover {
-                background-color: var(--td-bg-color-component);
-                border-radius: var(--td-radius-default);
+              span {
+                text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+                font-size: 15px;
+                font-weight: 500;
+                display: inline-block;
+                width: 62px;
+                max-width: 62px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                &:hover {
+                  color: var(--td-brand-color);
+                }
               }
             }
           }
@@ -751,7 +788,7 @@ eventBus.on(async () => {
   }
 
   .main-ext {
-    height: calc(100vh - 55px - 140px - var(--td-comp-size-l)) !important;
+    height: calc(100vh - 55px - 150px - var(--td-comp-size-l)) !important;
   }
   .main {
     overflow-y: auto;
@@ -830,11 +867,6 @@ eventBus.on(async () => {
             :deep(img) {
               transition: all 0.25s ease-in-out;
               transform: scale(1.05);
-            }
-            .op {
-              transition: all 0.25s ease-in-out;
-              transform: scale(1.05);
-              bottom: -6px;
             }
           }
         }

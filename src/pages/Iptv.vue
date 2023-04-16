@@ -18,19 +18,28 @@
               </t-select>
               <span class="data-item data">共{{ pagination.count ? pagination.count : 0 }}频道</span>
             </div>
-            <div v-if="iptvClassList" class="head-center">
+            <div v-if="iptvClassList.length !== 1" class="head-center">
               <p class="head-center-class">{{ iptvClassSelect }}</p>
               <t-popup
                 placement="bottom-left"
-                :overlay-inner-style="{ marginTop: '16px', maxWidth: '60%' }"
+                :overlay-inner-style="{
+                  marginTop: '16px',
+                  width: '570px',
+                  boxShadow: 'none',
+                  lineHeight: '46px',
+                  padding: '5px 0',
+                  zIndex: '999',
+                }"
                 attach=".head-center"
               >
                 <more-icon size="1.5rem" style="transform: rotate(90deg)" />
                 <template #content>
-                  <div class="content">
-                    <span v-for="item in iptvClassList" :key="item.id" variant="text" @click="changeClassEvent(item)">
-                      {{ item.name }}
-                    </span>
+                  <div class="content-items">
+                    <div v-for="item in iptvClassList" :key="item.id" class="content-item">
+                      <span variant="text" @click="changeClassEvent(item)">
+                        {{ item.name }}
+                      </span>
+                    </div>
                   </div>
                 </template>
               </t-popup>
@@ -96,6 +105,13 @@
         <template #error>哎呀，出了点差错</template>
       </infinite-loading>
     </div>
+    <t-back-top
+      container=".main"
+      :visible-height="200"
+      size="small"
+      :offset="['1.4rem', '0.5rem']"
+      :duration="2000"
+    ></t-back-top>
   </div>
 </template>
 <script setup lang="tsx">
@@ -479,23 +495,29 @@ const copyChannelEvent = () => {
           float: left;
           margin-right: 5px;
         }
-        .content {
-          padding: 10px 0 10px 25px;
-
-          span {
-            display: inline-block;
-            line-height: 20px;
-            margin-right: 25px;
-            width: 60px;
-            overflow: hidden;
-            text-overflow: inherit;
-            white-space: nowrap;
-            text-align: center;
+        .content-items {
+          overflow: hidden;
+          width: 100%;
+          .content-item {
+            float: left;
+            box-sizing: border-box;
+            width: 92px;
+            padding-left: 30px;
+            height: 46px;
             cursor: pointer;
-
-            &:hover {
-              background-color: var(--td-bg-color-component);
-              border-radius: var(--td-radius-default);
+            span {
+              text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+              font-size: 15px;
+              font-weight: 500;
+              display: inline-block;
+              width: 62px;
+              max-width: 62px;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              &:hover {
+                color: var(--td-brand-color);
+              }
             }
           }
         }
