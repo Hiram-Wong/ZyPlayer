@@ -52,10 +52,10 @@ const classHeader = computed(() => {
 });
 const classData = computed({
   get() {
-    return _.join(formData.value.data, ',');
+    return _.join((formData.value.data||[]).filter(p=> p!==''), ',');
   },
   set(val) {
-    formData.value.data = _.split(val, ',');
+    formData.value.data = _.split(val, ',').filter(p=> p!=='');
   },
 });
 
