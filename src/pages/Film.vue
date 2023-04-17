@@ -389,11 +389,11 @@ const containsClassFilterKeyword = (name) => {
   // 主分类过滤, 检测关键词是否包含分类名
   if (FilmSiteSetting.value.rootClassFilter) {
     // ret = rootClassFilter.includes(name);
-    ret = rootClassFilter?.some((v) => name?.includes(v));
+    ret = rootClassFilter?.some((v) => v!=='' && name?.includes(v));
   }
   // 福利过滤,检测分类名是否包含关键词
   if (r18ClassFilter?.length && !ret) {
-    ret = r18ClassFilter?.some((v) => name?.includes(v));
+    ret = r18ClassFilter?.some((v) => v!=='' && name?.includes(v));
   }
   return ret;
 };
