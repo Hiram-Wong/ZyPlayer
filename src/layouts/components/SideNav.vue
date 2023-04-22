@@ -30,13 +30,14 @@
 </template>
 
 <script setup lang="tsx">
-import { computed } from 'vue';
-import type { PropType } from 'vue';
-import { RefreshIcon } from 'tdesign-icons-vue-next';
 import { useEventBus } from '@vueuse/core';
+import { RefreshIcon } from 'tdesign-icons-vue-next';
+import type { PropType } from 'vue';
+import { computed } from 'vue';
+
+import { prefix } from '@/config/global';
 import { getActive } from '@/router';
 import type { MenuRoute } from '@/types/interface';
-import { prefix } from '@/config/global';
 
 type ListItemType = MenuRoute & { icon?: string };
 
@@ -124,64 +125,8 @@ const refreshEvent = () => {
 @import '@/style/variables.less';
 
 .logo {
-  width: 42px;
-  height: 42px;
+  width: var(--td-size-12);
+  height: var(--td-size-12);
   padding: var(--td-pop-padding-s);
-}
-.t-default-menu {
-  background: #fbfbfb !important;
-}
-.t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
-  background-color: #fff;
-  color: #000;
-  box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
-  border-radius: var(--td-radius-large);
-}
-.tdesign-starter-sidebar-compact {
-  background: #fbfbfb !important;
-}
-
-:root[theme-mode='dark'] {
-  .t-default-menu {
-    background: #000 !important;
-  }
-  .t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) {
-    color: #fff;
-    box-shadow: 0 2px 14px -6px rgb(0 0 0 / 15%);
-    border-radius: var(--td-radius-large);
-  }
-  .t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
-    background-color: #161616;
-  }
-  .tdesign-starter-sidebar-compact {
-    background: #000 !important;
-  }
-}
-
-:deep(.t-default-menu.t-is-collapsed .t-menu .t-menu__item),
-:deep(.t-menu__item) {
-  padding: 0;
-  width: 42px;
-  height: 42px;
-  margin-bottom: 21px;
-  border-radius: var(--td-radius-large);
-  justify-content: center;
-}
-
-.tdesign-block-column {
-  display: flex;
-  flex-direction: row;
-  grid-row: 40px;
-}
-
-:deep(.t-menu) {
-  width: 80px !important;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-:deep(.t-menu__operations) {
-  border-top: 0 !important;
 }
 </style>

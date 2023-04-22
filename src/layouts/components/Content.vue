@@ -9,9 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
 import { useEventBus } from '@vueuse/core';
+import { computed, nextTick, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 import { prefix } from '@/config/global';
 
 const activeRouteFullPath = computed(() => {
