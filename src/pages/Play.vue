@@ -129,6 +129,35 @@
               <pin-filled-icon v-else size="1.5em" />
             </div>
           </div>
+          <div v-if="!onlineUrl" class="player-top-right-player-info">
+            <div class="player-top-right-item player-top-right-popup" @click="playerInfoEvent">
+              <tools-icon size="1.5em" />
+            </div>
+            <t-dialog
+              v-model:visible="isPlayerInfoVisible"
+              header="统计信息"
+              width="508"
+              placement="center"
+              :footer="false"
+            >
+              <div class="player-info-warp">
+                <t-list :split="true" size="small" class="player-info-items">
+                  <t-list-item v-for="(value, key) in playerInfo.stats" :key="key">{{ key }} : {{ value }}</t-list-item>
+                </t-list>
+                <div class="tip-warp">
+                  <span>参数属性参考：</span>
+                  <t-link
+                    theme="primary"
+                    underline
+                    href="https://v3.h5player.bytedance.com/plugins/extension/xgplayer-hls.html#api"
+                    target="_blank"
+                  >
+                    西瓜播放器 ~ v{{ playerInfo.version }}
+                  </t-link>
+                </div>
+              </div>
+            </t-dialog>
+          </div>
           <div class="player-top-right-window">
             <span v-show="platform !== 'darwin'" class="window-separator"></span>
             <window-view />
@@ -397,6 +426,7 @@ import {
   PinFilledIcon,
   PinIcon,
   ShareIcon,
+  ToolsIcon,
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -445,9 +475,14 @@ const ext = ref(data.value.ext);
 const { isSupported, copy } = useClipboard();
 const isShareVisible = ref(false);
 const isDownloadVisible = ref(false);
+const isPlayerInfoVisible = ref(false);
 const downloadSource = ref();
 const downloadEpisodes = ref([]);
 const downloadTarget = ref([]);
+const playerInfo = ref({
+  version: '',
+  stats: {},
+});
 
 const config = ref({
   id: 'xgplayer',
@@ -945,6 +980,12 @@ const autoPlayNext = () => {
   let time = xg.value.currentTime;
   if (set.value.skipTimeInEnd) time += set.value.skipTimeInEnd;
   if (time >= xg.value.duration && (xg.value.hasStart || xg.value.ended)) {
+    const pipInstance = xg.value.plugins.pip;
+    if (pipInstance.isPip) {
+      xg.value.pause();
+      clearInterval(timer.value);
+      return;
+    }
     const { siteSource } = dataHistory.value;
     const index = season.value[siteSource].indexOf(currentUrl.value);
 
@@ -1097,6 +1138,7 @@ const copyToClipboard = (content, successMessage, errorMessage) => {
 
 // 复制下载链接
 const copyDownloadUrl = () => {
+  console.log(xg.value.plugins.hls.core.getStats());
   if (downloadTarget.value.length !== 0) {
     const downloadUrl = _.join(downloadTarget.value, '\n');
     console.log(downloadUrl);
@@ -1118,6 +1160,14 @@ const copyShareUrl = () => {
   isShareVisible.value = false;
 };
 
+// 播放器参数
+const playerInfoEvent = () => {
+  isPlayerInfoVisible.value = true;
+  playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
+  playerInfo.value.version = xg.value.plugins.hls.core.version;
+  console.log(playerInfo.value);
+};
+
 // electron窗口置顶
 const toggleAlwaysOnTop = () => {
   if (win.isAlwaysOnTop()) {
@@ -1131,21 +1181,8 @@ const toggleAlwaysOnTop = () => {
   }
 };
 
-// 最小化暂停播放
+// 全屏事件
 const minMaxEvent = () => {
-  win.on('minimize', () => {
-    if (xg.value && xg.value.hasStart && set.value.pauseWhenMinimize) {
-      console.log('进入最小化');
-      xg.value.pause();
-    }
-  });
-  win.on('restore', () => {
-    if (xg.value && xg.value.hasStart) {
-      console.log('恢复最小化');
-      xg.value.play();
-    }
-  });
-
   win.on('enter-full-screen', () => {
     console.log('进入全屏模式');
     isMacMaximize.value = true;
@@ -1975,7 +2012,32 @@ const openMainWinEvent = () => {
   }
 
   .tip-warp {
+    bottom: calc(var(--td-comp-paddingTB-xxl) + 8px);
+  }
+}
+
+.player-info-warp {
+  .player-info-items {
+    max-height: 300px;
+    border-radius: 5px;
+    background-color: var(--td-bg-color-page);
+  }
+  .tip-warp {
+    bottom: 4px;
+  }
+}
+
+.player-info-warp,
+.download-warp {
+  .tip-warp {
     color: var(--td-gray-color-6);
+    font-size: var(--td-font-size-link-small);
+    position: absolute;
+    left: calc(var(--td-comp-paddingLR-xxl) + var(--td-size-1));
+    vertical-align: middle;
+    a {
+      font-size: var(--td-font-size-link-small);
+    }
   }
 }
 
@@ -2078,5 +2140,9 @@ const openMainWinEvent = () => {
       color: var(--td-font-white-4);
     }
   }
+}
+
+:deep(.t-list.t-size-s .t-list-item) {
+  background-color: var(--td-bg-color-page);
 }
 </style>
