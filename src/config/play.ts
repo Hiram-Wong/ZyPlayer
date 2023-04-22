@@ -1,7 +1,6 @@
 export default {
   type: 'film',
   setting: {
-    pauseWhenMinimize: true,
     softSolution: false,
     skipStartEnd: false,
     skipTimeInStart: '',

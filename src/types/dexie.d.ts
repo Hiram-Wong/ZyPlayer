@@ -13,7 +13,6 @@ interface Setting {
   iptvSkipIpv6: boolean;
   iptvThumbnail: boolean;
   restoreWindowPositionAndSize: boolean;
-  pauseWhenMinimize: boolean;
   defaultSite: number | null;
   defaultIptv: number | null;
   defaultAnalyze: number | null;

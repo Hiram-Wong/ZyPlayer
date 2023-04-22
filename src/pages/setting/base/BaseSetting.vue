@@ -101,11 +101,10 @@
       </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
-          <t-space direction="vertical">
+          <t-space direction="vertical" style="width: 280px">
             <t-space>
-              <t-radio v-model="formData.pauseWhenMinimize" allow-uncheck>最小化暂停播放</t-radio>
               <t-radio v-model="formData.softSolution" allow-uncheck>软解</t-radio>
-              <t-radio v-model="formData.skipStartEnd" allow-uncheck>自动跳过</t-radio>
+              <t-radio v-model="formData.skipStartEnd" allow-uncheck>跳过片头片尾</t-radio>
             </t-space>
             <div v-if="formData.skipStartEnd" class="">
               <div class="skip">
@@ -269,7 +268,6 @@ watchEffect(() => {
     storeSetting.updateConfig({ mode: formData.value.theme });
     storePlayer.updateConfig({
       setting: {
-        pauseWhenMinimize: formData.value.pauseWhenMinimize,
         softSolution: formData.value.softSolution,
         skipStartEnd: formData.value.skipStartEnd,
         skipTimeInStart: formData.value.skipTimeInStart,

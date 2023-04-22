@@ -53,7 +53,6 @@ const initPlayerSetting = async () => {
   };
 
   init.softSolution = await setting.get('softSolution');
-  init.pauseWhenMinimize = await setting.get('pauseWhenMinimize');
   const isSkip = await setting.get('skipStartEnd');
   init.skipStartEnd = isSkip;
 
