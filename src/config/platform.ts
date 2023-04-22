@@ -1,10 +1,10 @@
 import logoIqiyi from '@/assets/platform/iqiyi.svg?raw';
 import logoLe from '@/assets/platform/le.svg?raw';
+import logoMgtv from '@/assets/platform/mgtv.svg?raw';
+import logoPptv from '@/assets/platform/pptv.svg?raw';
+import logoSohu from '@/assets/platform/sohu.svg?raw';
 import logoVqq from '@/assets/platform/vqq.svg?raw';
 import logoYouku from '@/assets/platform/youku.svg?raw';
-import logoMgtv from '@/assets/platform/mgtv.svg?raw';
-import logoSohu from '@/assets/platform/sohu.svg?raw';
-import logoPptv from '@/assets/platform/pptv.svg?raw';
 
 export default {
   site: [

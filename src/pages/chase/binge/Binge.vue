@@ -43,16 +43,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import 'v3-infinite-loading/lib/style.css';
+
 import { useEventBus } from '@vueuse/core';
-import { MessagePlugin } from 'tdesign-vue-next';
-import _ from 'lodash';
 import { useIpcRenderer } from '@vueuse/electron';
+import _ from 'lodash';
+import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { usePlayStore } from '@/store';
+import { ref } from 'vue';
+
 import { star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
-import 'v3-infinite-loading/lib/style.css';
+import { usePlayStore } from '@/store';
 
 const ipcRenderer = useIpcRenderer();
 

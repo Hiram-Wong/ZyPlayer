@@ -157,24 +157,26 @@
 </template>
 
 <script setup lang="jsx">
-import { ref, computed, watch, watchEffect, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
-import { MessagePlugin } from 'tdesign-vue-next';
-import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import _ from 'lodash';
-import db from '@/lib/dexie/dexie';
-import { setting } from '@/lib/dexie';
-import { useSettingStore, usePlayStore } from '@/store';
-import DialogClassView from './components/DialogClass.vue';
-import DialogEasyConfigView from './components/DialogEasyConfig.vue';
-import DialogUpdateView from './components/DialogUpdate.vue';
-import DialogDnsView from './components/DialogDns.vue';
-import DialogUaView from './components/DialogUA.vue';
+import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { computed, onMounted, ref, watch, watchEffect } from 'vue';
+
+import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
-import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
+import { setting } from '@/lib/dexie';
+import db from '@/lib/dexie/dexie';
 import zy from '@/lib/utils/tools';
+import { usePlayStore, useSettingStore } from '@/store';
+
+import DialogClassView from './components/DialogClass.vue';
+import DialogDnsView from './components/DialogDns.vue';
+import DialogEasyConfigView from './components/DialogEasyConfig.vue';
+import DialogUaView from './components/DialogUA.vue';
+import DialogUpdateView from './components/DialogUpdate.vue';
 
 const ipcRenderer = useIpcRenderer();
 

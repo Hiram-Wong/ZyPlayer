@@ -194,21 +194,20 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { useEventBus } from '@vueuse/core';
-import { MoreIcon, ChartBarIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
-
-import InfiniteLoading from 'v3-infinite-loading';
 import 'v3-infinite-loading/lib/style.css';
 
-import _ from 'lodash';
-
+import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
-import HotView from './film/hot/Hot.vue';
+import _ from 'lodash';
+import { ChartBarIcon, MoreIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
+import InfiniteLoading from 'v3-infinite-loading';
+import { onMounted, ref, watch } from 'vue';
 
-import { sites, setting } from '@/lib/dexie';
+import { setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
+
+import HotView from './film/hot/Hot.vue';
 
 const ipcRenderer = useIpcRenderer();
 

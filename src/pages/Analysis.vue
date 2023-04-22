@@ -94,20 +94,21 @@
 </template>
 <script setup lang="ts">
 // TODO：JXU1NzI4JXU2NzJDJXU0RTFBJXU2NDFDJXU3RDIyc2hvd1N1cHBvcnRFdmVudCV1RkYwQyV1NjdFNSV1NzcwQiV1NjcyQyV1NjVCOSV1NkNENSV1NzY4NCV1ODlFNiV1NTNEMSV1N0M3QiV1NTc4Qg==
-import { ref, reactive, onMounted } from 'vue';
-import { useEventBus } from '@vueuse/core';
-import { MessagePlugin } from 'tdesign-vue-next';
-import { HistoryIcon, ClearIcon, JumpIcon, CloseIcon } from 'tdesign-icons-vue-next';
-import _ from 'lodash';
-import moment from 'moment';
-import InfiniteLoading from 'v3-infinite-loading';
-import { setting, analyze, analyzeHistory } from '@/lib/dexie';
-import zy from '@/lib/utils/tools';
-import DialogPlatformAnalysisView from './analysis/PlatformAnalysis.vue';
-
 import 'v3-infinite-loading/lib/style.css';
 
+import { useEventBus } from '@vueuse/core';
+import _ from 'lodash';
+import moment from 'moment';
+import { ClearIcon, CloseIcon, HistoryIcon, JumpIcon } from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import InfiniteLoading from 'v3-infinite-loading';
+import { onMounted, reactive, ref } from 'vue';
+
 import PLATFORM_CONFIG from '@/config/platform';
+import { analyze, analyzeHistory, setting } from '@/lib/dexie';
+import zy from '@/lib/utils/tools';
+
+import DialogPlatformAnalysisView from './analysis/PlatformAnalysis.vue';
 
 const formDialogVisiblePlatformAnalysis = ref(false);
 const platformAnalysisData = ref();

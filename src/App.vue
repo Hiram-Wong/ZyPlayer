@@ -4,14 +4,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
 import { useIpcRenderer } from '@vueuse/electron';
-
-import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
-import { useSettingStore, usePlayStore } from '@/store';
-import { setting } from '@/lib/dexie';
+import { computed, onMounted, ref } from 'vue';
 
 import PLAY_CONFIG from '@/config/play';
+import { setting } from '@/lib/dexie';
+import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
+import { usePlayStore, useSettingStore } from '@/store';
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();

@@ -41,9 +41,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
 import { DeleteIcon, TimeIcon } from 'tdesign-icons-vue-next';
-import { MessagePlugin, DialogPlugin } from 'tdesign-vue-next';
+import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
+import { ref } from 'vue';
+
 import bingeView from './chase/binge/Binge.vue';
 import historyView from './chase/history/History.vue';
 

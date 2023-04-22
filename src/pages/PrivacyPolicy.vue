@@ -31,8 +31,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { ref, watch } from 'vue';
+
 import { setting } from '@/lib/dexie';
 
 const { getCurrentWindow } = window.require('@electron/remote');

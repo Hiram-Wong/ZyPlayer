@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { prefix } from '@/config/global';
+
 import windowView from './Window.vue';
 </script>
 

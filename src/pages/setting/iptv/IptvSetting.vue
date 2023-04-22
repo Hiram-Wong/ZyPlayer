@@ -60,15 +60,17 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
 import { saveAs } from 'file-saver';
-import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { onMounted, ref } from 'vue';
+
+import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
+
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
-import { iptv, channelList, setting } from '@/lib/dexie';
 import { COLUMNS } from './constants';
 
 // Define item form data & dialog status

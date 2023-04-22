@@ -50,10 +50,10 @@
   </t-dialog>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { PlayCircleStrokeIcon, RollbackIcon, RollfrontIcon, RefreshIcon, LayersIcon } from 'tdesign-icons-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
+import { LayersIcon, PlayCircleStrokeIcon, RefreshIcon, RollbackIcon, RollfrontIcon } from 'tdesign-icons-vue-next';
+import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
   visible: {

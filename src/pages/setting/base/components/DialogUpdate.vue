@@ -39,9 +39,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { useIpcRenderer } from '@vueuse/electron';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
   visible: {

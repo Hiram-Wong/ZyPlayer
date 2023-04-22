@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+
 import PLAY_CONFIG from '@/config/play';
 import { store } from '@/store';
 

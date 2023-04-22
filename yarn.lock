@@ -2822,6 +2822,11 @@ eslint-plugin-prettier@^4.2.1:
   dependencies:
     prettier-linter-helpers "^1.0.0"
 
+eslint-plugin-simple-import-sort@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.npmmirror.com/eslint-plugin-simple-import-sort/-/eslint-plugin-simple-import-sort-10.0.0.tgz#cc4ceaa81ba73252427062705b64321946f61351"
+  integrity sha512-AeTvO9UCMSNzIHRkg8S6c3RPy5YEwKWSQPx3DYghLedo2ZQxowPFLGDN1AZ2evfg6r6mjBSZSLxLFsWSu3acsw==
+
 eslint-plugin-vue-scoped-css@^2.4.0:
   version "2.4.0"
   resolved "https://registry.npmmirror.com/eslint-plugin-vue-scoped-css/-/eslint-plugin-vue-scoped-css-2.4.0.tgz#5f500fa5d4703f6851828a673a080e3316a8c279"
@@ -5434,10 +5439,10 @@ tdesign-icons-vue-next@^0.1.8:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.3.0.tgz#760047ac45949bd50be760d261e747b2c6721de2"
-  integrity sha512-F6PXSmZ5vQNq/M6igMbUhVrkfpUmgsBs1BL6hnhJw5DhnX9nJ/4kmNbeONamEERTN0Z/hssO5/usWigbC3ZIng==
+tdesign-vue-next@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.3.1.tgz#d8c6727a753689ab9a3a4023381962d1620a7300"
+  integrity sha512-KHnDu9DX20mEIXIXM6jrYTbeD5mIxyDIsUUjXBY2cdyXn1oAneQJwg6Ceph8Ih7a3sm4/Q8dQVFpqo1/12aWGw==
   dependencies:
     "@babel/runtime" "^7.14.8"
     "@popperjs/core" "^2.9.3"
@@ -6077,7 +6082,7 @@ xgplayer-transmuxer@3.0.1:
     concat-typed-array "^1.0.2"
     crypto-es "^1.2.4"
 
-xgplayer@^3.0.0-next.55-2:
+xgplayer@^3.0.1:
   version "3.0.1"
   resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.1.tgz#cc8116ce271268650a59d0ac2c43981f39128f9c"
   integrity sha512-Cdu5AF+jZfGyLWAbzgfVOBgkLHko+EWFQJrldioCRCc6ukeuHFMHxqtNmE0p5LXXq6IefGY2sqSP28nv7fCQSg==

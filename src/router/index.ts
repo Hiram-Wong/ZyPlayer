@@ -1,5 +1,5 @@
-import { useRoute, createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import uniq from 'lodash/uniq';
+import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vue-router';
 
 // 自动导入modules文件夹下所有ts文件
 const modules = import.meta.glob<{ install: (ctx: any) => void }>('./modules/**/*.ts', { eager: true });

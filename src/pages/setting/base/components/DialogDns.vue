@@ -33,10 +33,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue';
+import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { useIpcRenderer } from '@vueuse/electron';
+import { reactive, ref, watch } from 'vue';
 
 import DNS_CONFIG from '@/config/doh';
 

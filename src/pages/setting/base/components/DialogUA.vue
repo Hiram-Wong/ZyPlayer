@@ -33,9 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue';
-import _ from 'lodash';
 import { useIpcRenderer } from '@vueuse/electron';
+import _ from 'lodash';
+import { reactive, ref, watch } from 'vue';
 
 import UA_CONFIG from '@/config/ua';
 

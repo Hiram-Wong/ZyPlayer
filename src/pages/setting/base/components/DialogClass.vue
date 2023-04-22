@@ -25,8 +25,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
 import _ from 'lodash';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
   visible: {
@@ -52,10 +52,13 @@ const classHeader = computed(() => {
 });
 const classData = computed({
   get() {
-    return _.join((formData.value.data||[]).filter(p=> p!==''), ',');
+    return _.join(
+      (formData.value.data || []).filter((p) => p !== ''),
+      ',',
+    );
   },
   set(val) {
-    formData.value.data = _.split(val, ',').filter(p=> p!=='');
+    formData.value.data = _.split(val, ',').filter((p) => p !== '');
   },
 });
 

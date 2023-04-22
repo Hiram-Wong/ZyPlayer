@@ -1,13 +1,13 @@
-import { app, shell, BrowserWindow, protocol, globalShortcut, ipcMain, nativeTheme } from 'electron';
-
+// import { createMenu } from './core/menu';
+import remote from '@electron/remote/main';
+import { electronApp } from '@electron-toolkit/utils';
+import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
-import { electronApp } from '@electron-toolkit/utils';
-// import { createMenu } from './core/menu';
-import remote from '@electron/remote/main';
-import log from './core/log';
+
 import initUpdater from './core/auto-update';
+import log from './core/log';
 
 const { platform } = process;
 

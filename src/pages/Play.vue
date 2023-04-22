@@ -376,48 +376,47 @@
   </div>
 </template>
 <script setup lang="tsx">
-import { ref, onMounted, computed, watch, onDeactivated } from 'vue';
+import 'xgplayer-livevideo';
+import 'xgplayer/dist/index.min.css';
+import 'v3-infinite-loading/lib/style.css';
+
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
-import { MessagePlugin } from 'tdesign-vue-next';
-import {
-  HomeIcon,
-  HeartIcon,
-  PhotoIcon,
-  ShareIcon,
-  DownloadIcon,
-  PinIcon,
-  PinFilledIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DesktopIcon,
-  LoadingIcon,
-} from 'tdesign-icons-vue-next';
 import _ from 'lodash';
 import moment from 'moment';
 import QRCode from 'qrcode';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DesktopIcon,
+  DownloadIcon,
+  HeartIcon,
+  HomeIcon,
+  LoadingIcon,
+  PhotoIcon,
+  PinFilledIcon,
+  PinIcon,
+  ShareIcon,
+} from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
+import { computed, onDeactivated, onMounted, ref, watch } from 'vue';
 import Player, { Events } from 'xgplayer';
-import HlsPlugin from 'xgplayer-hls';
-import 'xgplayer-livevideo';
 import LivePreset from 'xgplayer/es/presets/live';
-import zy from '@/lib/utils/tools';
-import { setting, sites, analyze, history, star, channelList } from '@/lib/dexie';
-import { usePlayStore } from '@/store';
+import HlsPlugin from 'xgplayer-hls';
 
-import windowView from '@/layouts/components/Window.vue';
-
-import playerPlayIcon from '@/assets/player/play.svg?raw';
 import playerPauseIcon from '@/assets/player/pause.svg?raw';
+import playerPipIcon from '@/assets/player/pip.svg?raw';
+import playerPlayIcon from '@/assets/player/play.svg?raw';
 import playerPlayNextIcon from '@/assets/player/play-next.svg?raw';
-import playerZoomIcon from '@/assets/player/zoom.svg?raw';
-import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
 import playerVoiceIcon from '@/assets/player/voice.svg?raw';
 import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
-import playerPipIcon from '@/assets/player/pip.svg?raw';
-
-import 'xgplayer/dist/index.min.css';
-import 'v3-infinite-loading/lib/style.css';
+import playerZoomIcon from '@/assets/player/zoom.svg?raw';
+import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
+import windowView from '@/layouts/components/Window.vue';
+import { analyze, channelList, history, setting, sites, star } from '@/lib/dexie';
+import zy from '@/lib/utils/tools';
+import { usePlayStore } from '@/store';
 
 // 用于窗口管理
 const ipcRenderer = useIpcRenderer();

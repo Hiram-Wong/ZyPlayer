@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
+
 import log from './log';
 
 // log.info(autoUpdater.app.baseCachePath);

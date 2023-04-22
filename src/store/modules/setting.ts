@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { Color } from 'tvision-color';
+
 import STYLE_CONFIG from '@/config/style';
-import { insertThemeStylesheet, generateColorMap } from '@/lib/utils/color';
+import { generateColorMap, insertThemeStylesheet } from '@/lib/utils/color';
 import { store } from '@/store';
 
 const state = {

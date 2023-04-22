@@ -13,8 +13,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { CloseIcon, RectangleIcon, RelativityIcon, RemoveIcon } from 'tdesign-icons-vue-next';
 import { ref } from 'vue';
-import { RectangleIcon, RelativityIcon, RemoveIcon, CloseIcon } from 'tdesign-icons-vue-next';
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();

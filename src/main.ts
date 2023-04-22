@@ -1,3 +1,4 @@
+/* eslint-disable simple-import-sort/imports */
 import { createApp } from 'vue';
 
 // import TDesign from 'tdesign-vue-next';

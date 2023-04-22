@@ -50,9 +50,10 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import getUuid from 'uuid-by-string';
+import { ref, watch } from 'vue';
+
 import { sites } from '@/lib/dexie';
 
 const props = defineProps({

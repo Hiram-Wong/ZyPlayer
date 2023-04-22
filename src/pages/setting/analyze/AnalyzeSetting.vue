@@ -61,11 +61,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
 import { useEventBus } from '@vueuse/core';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { saveAs } from 'file-saver';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { onMounted, ref } from 'vue';
+
 import { analyze, setting } from '@/lib/dexie';
+
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
 import { COLUMNS } from './constants';

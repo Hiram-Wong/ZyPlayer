@@ -115,23 +115,22 @@
   </div>
 </template>
 <script setup lang="tsx">
-import { ref, computed, onMounted } from 'vue';
-import { useEventBus, useClipboard } from '@vueuse/core';
-import { MessagePlugin } from 'tdesign-vue-next';
-import { MoreIcon, LoadingIcon, LinkUnlinkIcon } from 'tdesign-icons-vue-next';
-
-import axios from 'axios';
-import _ from 'lodash';
-import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
-import InfiniteLoading from 'v3-infinite-loading';
-import { useIpcRenderer } from '@vueuse/electron';
-import { useSettingStore, usePlayStore } from '@/store';
-
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import 'v3-infinite-loading/lib/style.css';
 
-import { channelList, setting, iptv } from '@/lib/dexie';
+import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
+import { useClipboard, useEventBus } from '@vueuse/core';
+import { useIpcRenderer } from '@vueuse/electron';
+import axios from 'axios';
+import _ from 'lodash';
+import { LinkUnlinkIcon, LoadingIcon, MoreIcon } from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import InfiniteLoading from 'v3-infinite-loading';
+import { computed, onMounted, ref } from 'vue';
+
+import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
+import { usePlayStore, useSettingStore } from '@/store';
 
 const ipcRenderer = useIpcRenderer();
 

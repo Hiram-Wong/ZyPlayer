@@ -17,7 +17,7 @@
     "defineProps": "readonly",
     "defineEmits": "readonly"
   },
-  "plugins": ["vue", "@typescript-eslint"],
+  "plugins": ["vue", "@typescript-eslint", "simple-import-sort"],
   "parserOptions": {
     "parser": "@typescript-eslint/parser",
     "sourceType": "module",
@@ -65,7 +65,9 @@
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/ban-types": "off",
-    "class-methods-use-this": "off" // 因为AxiosCancel必须实例化而能静态化所以加的规则，如果有办法解决可以取消
+    "class-methods-use-this": "off", // 因为AxiosCancel必须实例化而能静态化所以加的规则，如果有办法解决可以取消
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error"
   },
   "overrides": [
     {

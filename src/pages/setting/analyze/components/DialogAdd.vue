@@ -79,8 +79,9 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { ref, watch } from 'vue';
+
 import { analyze } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 

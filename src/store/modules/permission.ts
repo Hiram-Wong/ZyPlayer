@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { RouteRecordRaw } from 'vue-router';
 
-import router, { asyncRouterList } from '@/router';
+import router, { allRoutes } from '@/router';
 import { store } from '@/store';
 
 function filterPermissionsRouters(routes: Array<RouteRecordRaw>, roles: Array<unknown>) {
@@ -38,9 +38,9 @@ export const usePermissionStore = defineStore('permission', {
       let removeRoutes = [];
       // special token
       if (roles.includes('all')) {
-        accessedRouters = asyncRouterList;
+        accessedRouters = allRoutes;
       } else {
-        const res = filterPermissionsRouters(asyncRouterList, roles);
+        const res = filterPermissionsRouters(allRoutes, roles);
         accessedRouters = res.accessedRouters;
         removeRoutes = res.removeRoutes;
       }

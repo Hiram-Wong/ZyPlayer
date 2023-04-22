@@ -25,12 +25,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { useEventBus } from '@vueuse/core';
-import { MessagePlugin } from 'tdesign-vue-next';
 import _ from 'lodash';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { ref, watch } from 'vue';
+
+import { analyze, channelList, iptv, setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
-import { setting, sites, iptv, channelList, analyze } from '@/lib/dexie';
 
 const props = defineProps({
   visible: {

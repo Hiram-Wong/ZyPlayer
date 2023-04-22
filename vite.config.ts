@@ -1,6 +1,8 @@
-import { defineConfig, loadEnv } from 'vite';
-import createVuePlugin from '@vitejs/plugin-vue';
+import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
+import path from 'path';
+import { ConfigEnv, loadEnv, UserConfig } from 'vite';
+import createVuePlugin from '@vitejs/plugin-vue';
 import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
 import svgLoader from 'vite-svg-loader';
@@ -14,12 +16,12 @@ import { TDesignResolver } from 'unplugin-vue-components/resolvers';
 import OptimizationPersist from 'vite-plugin-optimize-persist';
 import PkgConfig from 'vite-plugin-package-config';
 
-import path from 'path';
 import { dependencies } from './package.json';
 
 const CWD = process.cwd();
 
-export default defineConfig(({ mode }) => {
+// https://vitejs.dev/config/
+export default ({ mode }: ConfigEnv): UserConfig => {
   const { VITE_BASE_URL } = loadEnv(mode, CWD);
   return {
     base: VITE_BASE_URL,
@@ -115,4 +117,4 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
     },
   };
-});
+};

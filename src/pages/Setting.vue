@@ -19,10 +19,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+
+import analyzeView from './setting/analyze/AnalyzeSetting.vue';
 import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
-import analyzeView from './setting/analyze/AnalyzeSetting.vue';
 
 const settingTag = ref('ConfigBase');
 </script>
