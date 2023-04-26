@@ -359,3 +359,13 @@ ipcMain.on('update-ua', (_, status, value) => {
   store.set('settings.ua', value);
   ua = value;
 });
+
+ipcMain.on('reset-store', () => {
+  log.info(`[ipcMain] reset-store`);
+  store.clear();
+  store.reset('settings.ua');
+  store.set('settings.shortcuts', '');
+  store.set('settings.hardwareAcceleration', true);
+  store.set('settings.ua', '');
+  store.set('settings.doh', '');
+});

@@ -293,6 +293,7 @@ const openProxySetting = () => {
 
 // 出厂恢复
 const resetEvent = () => {
+  ipcRenderer.send('reset-store'); // 清除config.json
   clearDB();
   clearCache();
   MessagePlugin.success('重置成功, 即将自动刷新页面！');
