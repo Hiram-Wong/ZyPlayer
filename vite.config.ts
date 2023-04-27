@@ -1,20 +1,17 @@
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import path from 'path';
-import { ConfigEnv, loadEnv, UserConfig } from 'vite';
-import createVuePlugin from '@vitejs/plugin-vue';
-import electron from 'vite-plugin-electron';
-import renderer from 'vite-plugin-electron-renderer';
-import svgLoader from 'vite-svg-loader';
-
 // 按需加载T-Desgin组件
 import AutoImport from 'unplugin-auto-import/vite';
-import Components from 'unplugin-vue-components/vite';
 import { TDesignResolver } from 'unplugin-vue-components/resolvers';
-
+import Components from 'unplugin-vue-components/vite';
+import { ConfigEnv, loadEnv, UserConfig } from 'vite';
+import electron from 'vite-plugin-electron';
+import renderer from 'vite-plugin-electron-renderer';
 // 通过触发冷启动时的预构建来解决
 import OptimizationPersist from 'vite-plugin-optimize-persist';
 import PkgConfig from 'vite-plugin-package-config';
+import svgLoader from 'vite-svg-loader';
 
 import { dependencies } from './package.json';
 
@@ -49,7 +46,7 @@ export default ({ mode }: ConfigEnv): UserConfig => {
     },
 
     plugins: [
-      createVuePlugin({
+      vue({
         template: {
           compilerOptions: {},
         },
