@@ -20,29 +20,33 @@
           <t-input v-model="formData.IptvInfo.name" class="input-item" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="订阅配置" name="url">
-          <t-input v-model="formData.IptvInfo.url" class="input-item" placeholder="请输入内容" />
-          <!-- <t-space direction="vertical">
-              <t-space>
-                <t-radio-group v-model="urlType">
-                  <t-radio value="text">手动输入</t-radio>
-                  <t-radio value="local">本地</t-radio>
-                </t-radio-group>
-              </t-space>
+          <t-space direction="vertical">
+            <t-space>
+              <t-radio-group v-model="formData.IptvInfo.type">
+                <t-radio value="remote">远程m3u链接</t-radio>
+                <t-radio value="local">本地m3u文件</t-radio>
+              </t-radio-group>
+            </t-space>
+            <t-space>
               <t-input
-                v-if="urlType === 'text'"
                 v-model="formData.IptvInfo.url"
                 class="input-item"
+                :class="formData.IptvInfo.type === 'local' ? 'input-item-split' : ''"
                 placeholder="请输入内容"
               />
               <t-upload
-                v-if="urlType === 'local'"
-                v-model="formData.IptvInfo.url"
-                class="input-item"
+                v-if="formData.IptvInfo.type === 'local'"
+                v-model="formData.file.file"
                 theme="file"
-                :draggable="true"
+                accept="audio/mpegurl"
+                auto-upload
+                :max="1"
+                :allow-upload-duplicate-file="true"
+                :show-upload-progress="false"
                 :request-method="requestMethod"
               />
-            </t-space> -->
+            </t-space>
+          </t-space>
         </t-form-item>
         <t-form-item label="节目单接口" name="epg">
           <t-input v-model="formData.IptvInfo.epg" class="input-item" placeholder="请输入内容" />
@@ -119,13 +123,13 @@ const props = defineProps({
 });
 const iptvData = ref(props.data);
 const selectWay = ref('add-single');
-// const urlType = ref('text');
 const formVisible = ref(false);
 const formData = ref({
   IptvInfo: {
     name: '',
     url: '',
     epg: '',
+    type: 'remote',
     isActive: true,
   },
   file: { file: [] },
@@ -244,7 +248,8 @@ const requestMethod = (file) => {
     file.percent = 0;
     const timer = setTimeout(() => {
       // resolve 参数为关键代码
-      resolve({ status: 'success', response: { url: file.name } });
+      resolve({ status: 'success', response: { url: file.name, address: file.raw.path } });
+      if (formData.value.IptvInfo.type === 'local') formData.value.IptvInfo.url = file.raw.path;
       file.percent = 100;
       clearTimeout(timer);
     }, 1000);
@@ -271,5 +276,9 @@ const urlEvent = async (url) => {
 .input-item,
 :deep(.t-upload__dragger) {
   width: calc(480px - var(--td-size-1));
+}
+
+.input-item-split {
+  width: calc(480px - 130px);
 }
 </style>

@@ -43,6 +43,9 @@
         <t-badge v-if="row.id === defaultIptv" size="small" :offset="[-5, 0]" count="默认">{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
+      <template #type="{ row }">
+        <span>{{ row.type === 'remote' ? '远程链接' : '本地配置' }}</span>
+      </template>
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
@@ -73,6 +76,8 @@ import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
 import { COLUMNS } from './constants';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('fs');
 // Define item form data & dialog status
 const formDialogVisibleAddIptv = ref(false);
 const formDialogVisibleEditIptv = ref(false);
@@ -134,17 +139,38 @@ const exportEvent = () => {
 const emitReload = useEventBus<string>('iptv-reload');
 
 const defaultEvent = async (row) => {
-  const m3uUrl = row.row.url;
-  await zy.getConfig(m3uUrl).then((res) => {
-    if (res) {
-      if (res.trim().startsWith('#EXTM3U')) m3u(res);
-      else txt(res);
-      MessagePlugin.success('设置成功');
+  const { url, type } = row.row;
+  let fileContent;
+
+  try {
+    if (type === 'local') {
+      fileContent = await fs.promises.readFile(url, 'utf8');
+    } else if (type === 'remote') {
+      fileContent = await zy.getConfig(url);
     }
-  });
-  setting.update({ defaultIptv: row.row.id });
+    console.log(fileContent);
+
+    if (fileContent) {
+      if (fileContent.trim().startsWith('#EXTM3U')) {
+        m3u(fileContent);
+      } else txt(fileContent);
+      setting.update({ defaultIptv: row.row.id });
+      defaultIptv.value = row.row.id;
+    }
+
+    MessagePlugin.success('设置成功');
+  } catch (err) {
+    const errMsg = err.message || err;
+    console.error(`失败: ${errMsg}`);
+    if (type === 'local') {
+      MessagePlugin.error(`读取失败: ${errMsg}`);
+    } else {
+      MessagePlugin.error(`请求失败: ${errMsg}`);
+    }
+  }
+
+  console.log(fileContent);
   emitReload.emit('iptv-reload');
-  defaultIptv.value = row.row.id;
 };
 
 const m3u = (text) => {

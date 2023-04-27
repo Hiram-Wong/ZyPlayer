@@ -47,6 +47,14 @@ db.version(16).stores({
   })
 })
 
+db.version(17).stores({
+  iptv: '++id, name, url, epg, type, isActive',
+}).upgrade(trans => {
+  trans.iptv.toCollection().modify(iptv => {
+    iptv.type = 'local'
+  })
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)
