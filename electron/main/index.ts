@@ -355,7 +355,7 @@ ipcMain.on('update-dns', (_, status, value) => {
 });
 
 ipcMain.on('update-ua', (_, status, value) => {
-  log.info(`[ipcMain] status:${status} update-dns: ${value}`);
+  log.info(`[ipcMain] status:${status} update-ua: ${value}`);
   store.set('settings.ua', value);
   ua = value;
 });
