@@ -61,6 +61,7 @@
         "name": "APTV", // 名称
         "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
         "epg": "", // 电子节目单地址
+        "type": "remote", // remote为远程m3u local本地m3u文件路径
         "isActive": true // 是否启用 true启用 false 禁用
       }
     ]
@@ -106,6 +107,7 @@
     "name": "APTV",
     "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
     "epg": "",
+    "type": "remote",
     "isActive": true
   }
 ]
