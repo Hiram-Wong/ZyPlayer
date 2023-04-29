@@ -270,7 +270,11 @@ ipcMain.on('openPlayWindow', (_, arg) => {
 
 ipcMain.on('showMainWin', () => {
   log.info(`[ipcMain] show main windows`);
-  mainWindow.show();
+  if (mainWindow.isDestroyed()) {
+    createWindow();
+  } else {
+    mainWindow.show();
+  }
 });
 
 ipcMain.on('uninstallShortcut', () => {
