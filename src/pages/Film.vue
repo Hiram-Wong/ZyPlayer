@@ -34,6 +34,7 @@
                     lineHeight: '46px',
                     padding: '5px 0',
                     zIndex: '999',
+                    background: 'var(--td-bg-color-page)',
                   }"
                   attach=".head-center"
                 >

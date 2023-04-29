@@ -34,6 +34,7 @@
           :src="iframeUrl"
           allowtransparency="true"
           frameborder="0"
+          framespacing="0"
           scrolling="no"
           allowfullscreen="true"
         ></iframe>
@@ -369,7 +370,7 @@ const platformPlayClose = () => {
       }
       .analysis-play-box {
         width: 100%;
-        background-color: var(--td-bg-color-page);
+        background: var(--td-bg-color-page) url(../assets/bg-player.jpg) no-repeat center center;
         border-radius: var(--td-radius-extraLarge);
       }
       .analysis-setting {
