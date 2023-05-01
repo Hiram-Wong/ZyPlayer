@@ -25,10 +25,12 @@
               <t-radio-group v-model="formData.IptvInfo.type">
                 <t-radio value="remote">远程m3u链接</t-radio>
                 <t-radio value="local">本地m3u文件</t-radio>
+                <t-radio value="batches">批量m3u8频道</t-radio>
               </t-radio-group>
             </t-space>
             <t-space>
               <t-input
+                v-if="formData.IptvInfo.type !== 'batches'"
                 v-model="formData.IptvInfo.url"
                 class="input-item"
                 :class="formData.IptvInfo.type === 'local' ? 'input-item-split' : ''"
@@ -44,6 +46,13 @@
                 :allow-upload-duplicate-file="true"
                 :show-upload-progress="false"
                 :request-method="requestMethod"
+              />
+              <t-textarea
+                v-if="formData.IptvInfo.type === 'batches'"
+                v-model="formData.IptvInfo.url"
+                class="input-item input-textarea"
+                :placeholder="'M3u格式示例:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\ngenre格式示例\nChannel,https://channel-url'"
+                :autosize="{ minRows: 7, maxRows: 8 }"
               />
             </t-space>
           </t-space>
@@ -280,5 +289,9 @@ const urlEvent = async (url) => {
 
 .input-item-split {
   width: calc(480px - 130px);
+}
+
+.input-textarea {
+  width: calc(480px - var(--td-size-2)) !important;
 }
 </style>

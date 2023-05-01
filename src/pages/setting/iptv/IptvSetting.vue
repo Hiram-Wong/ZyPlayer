@@ -44,7 +44,9 @@
         <span v-else>{{ row.name }}</span>
       </template>
       <template #type="{ row }">
-        <span>{{ row.type === 'remote' ? '远程链接' : '本地配置' }}</span>
+        <span v-if="row.type === 'remote'">远程链接</span>
+        <span v-if="row.type === 'local'">本地文件</span>
+        <span v-if="row.type === 'batches'">手动配置</span>
       </template>
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
@@ -147,6 +149,8 @@ const defaultEvent = async (row) => {
       fileContent = await fs.promises.readFile(url, 'utf8');
     } else if (type === 'remote') {
       fileContent = await zy.getConfig(url);
+    } else {
+      fileContent = url;
     }
     console.log(fileContent);
 
