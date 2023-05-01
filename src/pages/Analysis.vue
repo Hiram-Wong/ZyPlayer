@@ -382,7 +382,7 @@ const platformPlayClose = () => {
           background-color: var(--td-bg-color-page);
           :deep(.t-input-adornment__prepend) {
             border-radius: 20px 0 0 20px;
-            background-color: rgba(0, 0, 0, 0);
+            background-color: var(--td-bg-color-page);
             .t-input {
               border: none;
               outline: none;
