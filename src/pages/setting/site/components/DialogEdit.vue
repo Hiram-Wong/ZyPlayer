@@ -16,22 +16,21 @@
           <t-input v-model="formData.jiexiUrl" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="分组" name="group">
-          <t-select v-model="formData.group" placeholder="请选择分组" :style="{ width: '514px' }">
-            <t-option v-for="item in formGroup" :key="item.value" :value="item.value" :label="item.label"></t-option>
-            <template #panelBottomContent>
-              <div class="select-panel-footer">
-                <t-button v-if="editOrCreate === 'create'" theme="primary" variant="text" block @click="onAdd"
-                  >新增选项</t-button
-                >
-                <div v-else>
-                  <t-input v-model="newOption" autofocus></t-input>
-                  <t-button size="small" style="margin: 8px 0 0" @click="onAddConfirm"> 确认 </t-button>
-                  <t-button theme="default" size="small" style="margin: 8px 0 0 8px" @click="onAddCancel">
-                    取消
-                  </t-button>
-                </div>
-              </div>
-            </template>
+          <t-select
+            v-model="formData.group"
+            creatable
+            filterable
+            placeholder="请选择分组"
+            class="input-item"
+            @create="createOptions"
+          >
+            <t-option
+              v-for="item in formGroup"
+              :key="item.value"
+              :value="item.value"
+              :label="item.label"
+              class="select-options"
+            />
           </t-select>
         </t-form-item>
         <t-form-item label="源站标识" name="key">
@@ -77,8 +76,6 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = ref(props.data);
 const formGroup = ref(props.group);
-const editOrCreate = ref('create');
-const newOption = ref('');
 const onSubmit = ({ result, firstError }) => {
   console.log(result, firstError);
   if (!firstError) {
@@ -111,8 +108,7 @@ watch(
   () => props.visible,
   (val) => {
     formVisible.value = val;
-    newOption.value = '';
-    // if (!val) emit('refreshTableGroup');
+    if (!val) emit('refreshTableGroup');
   },
 );
 watch(
@@ -127,26 +123,18 @@ watch(
     formGroup.value = val;
   },
 );
+
+const createOptions = (val) => {
+  const targetIndex = formGroup.value.findIndex((obj) => obj.label === val);
+  if (targetIndex === -1) formGroup.value.push({ value: val, label: val });
+};
+
 const rules = {
   name: [{ required: true, message: '请输入源站名', type: 'error' }],
   api: [{ required: true, message: '请输入Api接口url', type: 'error' }],
 };
-const onAdd = () => {
-  editOrCreate.value = 'edit';
-};
-const onAddConfirm = () => {
-  formGroup.value.push({ value: newOption, label: newOption });
-  editOrCreate.value = 'create';
-};
-const onAddCancel = () => {
-  editOrCreate.value = 'create';
-  newOption.value = '';
-};
 </script>
+
 <style lang="less" scoped>
 @import '@/style/variables.less';
-.select-panel-footer {
-  border-top: 1px solid var(--td-component-stroke);
-  padding: 10px 5px;
-}
 </style>

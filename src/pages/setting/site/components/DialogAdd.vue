@@ -29,22 +29,21 @@
           <t-input v-model="formData.siteInfo.jiexiUrl" class="input-item" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="分组" name="type">
-          <t-select v-model="formData.siteInfo.group" class="input-item" clearable>
-            <t-option v-for="item in siteGroup" :key="item.value" :value="item.value" :label="item.label"></t-option>
-            <template #panelBottomContent>
-              <div class="select-panel-footer">
-                <t-button v-if="editOrCreate === 'create'" theme="primary" variant="text" block @click="onAdd"
-                  >新增选项</t-button
-                >
-                <div v-else>
-                  <t-input v-model="newOption" autofocus></t-input>
-                  <t-button size="small" style="margin: 8px 0 0" @click="onAddConfirm"> 确认 </t-button>
-                  <t-button theme="default" size="small" style="margin: 8px 0 0 8px" @click="onAddCancel">
-                    取消
-                  </t-button>
-                </div>
-              </div>
-            </template>
+          <t-select
+            v-model="formData.siteInfo.group"
+            creatable
+            filterable
+            placeholder="请选择分组"
+            class="input-item"
+            @create="createOptions"
+          >
+            <t-option
+              v-for="item in siteGroup"
+              :key="item.value"
+              :value="item.value"
+              :label="item.label"
+              class="select-options"
+            />
           </t-select>
         </t-form-item>
         <t-form-item label="源站标识" name="key">
@@ -134,8 +133,6 @@ const props = defineProps({
 });
 const siteData = ref(props.data);
 const siteGroup = ref(props.group);
-const editOrCreate = ref('create');
-const newOption = ref('');
 const selectWay = ref('add-single');
 
 const formVisible = ref(false);
@@ -188,7 +185,6 @@ watch(
   () => props.visible,
   (val) => {
     formVisible.value = val;
-    newOption.value = '';
     if (!val) emit('refreshTableData');
   },
 );
@@ -202,6 +198,7 @@ watch(
   () => props.group,
   (val) => {
     siteGroup.value = val;
+    console.log(siteGroup.value);
   },
 );
 const rulesSingle = {
@@ -303,27 +300,18 @@ const requestMethod = (file) => {
     }, 1000);
   });
 };
-const onAdd = () => {
-  editOrCreate.value = 'edit';
-};
-const onAddConfirm = () => {
-  siteGroup.value.push({ value: newOption, label: newOption });
-  editOrCreate.value = 'create';
-};
-const onAddCancel = () => {
-  editOrCreate.value = 'create';
-  newOption.value = '';
+
+const createOptions = (val) => {
+  const targetIndex = siteGroup.value.findIndex((obj) => obj.label === val);
+  if (targetIndex === -1) siteGroup.value.push({ value: val, label: val });
 };
 </script>
+
 <style lang="less" scoped>
 @import '@/style/variables.less';
 
 .input-item,
 :deep(.t-upload__dragger) {
   width: calc(480px - var(--td-size-1));
-}
-.select-panel-footer {
-  border-top: 1px solid var(--td-component-stroke);
-  padding: 10px 5px;
 }
 </style>
