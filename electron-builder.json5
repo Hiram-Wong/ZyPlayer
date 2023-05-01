@@ -18,12 +18,12 @@
     "target": [
       {
         "target":"dmg",
-         "arch": ["x64", "arm64", "universal"]
+        "arch": ["x64", "arm64", "universal"]
       },
-        {
-          "target": "zip",
-           "arch": ["x64", "arm64", "universal"]
-        }
+      {
+        "target": "zip",
+        "arch": ["x64", "arm64", "universal"]
+      }
     ],
     "darkModeSupport": true,
     "category": "public.app-category.utilities"
@@ -33,7 +33,7 @@
     "target": [
       {
         "target": "nsis",
-         "arch": ["x64", "ia32", "arm64"]
+        "arch": ["x64", "ia32", "arm64"]
       }
     ],
   },
