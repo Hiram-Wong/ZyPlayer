@@ -135,25 +135,19 @@
             </div>
             <t-dialog
               v-model:visible="isPlayerInfoVisible"
-              header="统计信息"
+              :header="`统计信息 ~ 西瓜播放器v${playerInfo.version}`"
               width="508"
               placement="center"
               :footer="false"
             >
               <div class="player-info-warp">
                 <t-list :split="true" size="small" class="player-info-items">
-                  <t-list-item v-for="(value, key) in playerInfo.stats" :key="key">{{ key }} : {{ value }}</t-list-item>
+                  <t-list-item v-for="(value, key) in playerInfo.stats" :key="key">
+                    {{ formatPlayerInfo(key) }} : {{ value }}
+                  </t-list-item>
                 </t-list>
                 <div class="tip-warp">
-                  <span>参数属性参考：</span>
-                  <t-link
-                    theme="primary"
-                    underline
-                    href="https://v3.h5player.bytedance.com/plugins/extension/xgplayer-hls.html#api"
-                    target="_blank"
-                  >
-                    西瓜播放器 ~ v{{ playerInfo.version }}
-                  </t-link>
+                  <span>5s轮训一次参数</span>
                 </div>
               </div>
             </t-dialog>
@@ -430,7 +424,7 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onDeactivated, onMounted, ref, watch } from 'vue';
+import { computed, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
 import Player, { Events } from 'xgplayer';
 import LivePreset from 'xgplayer/es/presets/live';
 import HlsPlugin from 'xgplayer-hls';
@@ -443,6 +437,7 @@ import playerVoiceIcon from '@/assets/player/voice.svg?raw';
 import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerZoomIcon from '@/assets/player/zoom.svg?raw';
 import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
+import PLAYER_INFO_CONFIG from '@/config/playerInfo';
 import windowView from '@/layouts/components/Window.vue';
 import { analyze, channelList, history, setting, sites, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
@@ -507,6 +502,7 @@ const config = ref({
   },
   plugins: [HlsPlugin],
   hls: {
+    preloadTime: 90, // [点播]预加载时长，单位秒
     retryCount: 3, // 重试 3 次，默认值
     retryDelay: 1000, // 每次重试间隔 1 秒，默认值
     loadTimeout: 10000, // 请求超时时间为 10 秒，默认值
@@ -528,6 +524,7 @@ const xg = ref(null); // 西瓜播放器
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
 const timer = ref(); // 定时器 用于刷新历史进度
+const playerInfoTimer = ref(); // 定时器 用于刷新播放器参数
 const isBinge = ref(true); // true未收藏 false收藏
 const isPinned = ref(true); // true未置顶 false置顶
 const qrCodeUrl = ref(); // 二维码图片流
@@ -549,6 +546,10 @@ const pagination = ref({
   pageIndex: 0,
   pageSize: 32,
   count: 0,
+});
+
+const PLAYER_INFO = reactive({
+  ...PLAYER_INFO_CONFIG.playerInfo,
 });
 
 const QR_CODE_OPTIONS = {
@@ -633,6 +634,23 @@ watch(
         console.log('isPip', isPip);
         ipcRenderer.send('toggle-playerPip', isPip);
       });
+    }
+  },
+);
+
+// 实时更新视频数据
+watch(
+  () => isPlayerInfoVisible.value,
+  (val) => {
+    if (val) {
+      playerInfoTimer.value = setInterval(() => {
+        console.log('Interval: Refresh playerInfo');
+        playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
+        playerInfo.value.version = xg.value.plugins.hls.core.version;
+      }, 5000);
+    } else {
+      console.log('Interval: Clear playerInfo');
+      clearInterval(playerInfoTimer.value);
     }
   },
 );
@@ -1165,7 +1183,10 @@ const playerInfoEvent = () => {
   isPlayerInfoVisible.value = true;
   playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
   playerInfo.value.version = xg.value.plugins.hls.core.version;
-  console.log(playerInfo.value);
+};
+
+const formatPlayerInfo = (val) => {
+  return _.find(PLAYER_INFO, { key: val }) ? { ..._.find(PLAYER_INFO, { key: val }) }.desc : val;
 };
 
 // electron窗口置顶
@@ -2034,10 +2055,6 @@ const openMainWinEvent = () => {
     font-size: var(--td-font-size-link-small);
     position: absolute;
     left: calc(var(--td-comp-paddingLR-xxl) + var(--td-size-1));
-    vertical-align: middle;
-    a {
-      font-size: var(--td-font-size-link-small);
-    }
   }
 }
 
