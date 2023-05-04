@@ -5,11 +5,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import Player from 'xgplayer';
-import HlsPlugin from 'xgplayer-hls';
 import 'xgplayer/dist/index.min.css';
 import 'xgplayer-livevideo';
+
+import { onMounted, ref } from 'vue';
+import Player from 'xgplayer';
+import HlsPlugin from 'xgplayer-hls';
 
 const xg = ref();
 // https://pps.sd-play.com/20220427/pyqCdBbv/index.m3u8

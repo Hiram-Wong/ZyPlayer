@@ -298,19 +298,19 @@ const defaultEvent = async (row) => {
   }
 
   :deep(.t-table) {
-    background-color: #fbfbfb;
+    background-color: var(--td-bg-color-container);
     tr {
-      background-color: #fbfbfb;
+      background-color: var(--td-bg-color-container);
       &:hover {
         background-color: var(--td-bg-color-container-hover);
       }
     }
   }
   :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
-    background-color: #fbfbfb;
+    background-color: var(--td-bg-color-container) !important;
   }
   :deep(.t-table__pagination) {
-    background-color: #fbfbfb;
+    background-color: var(--td-bg-color-container) !important;
   }
 }
 
@@ -322,21 +322,6 @@ const defaultEvent = async (row) => {
       .item:hover {
         background: #5e5e5e;
       }
-    }
-    :deep(.t-table) {
-      background-color: #000;
-      tr {
-        background-color: #000;
-        &:hover {
-          background-color: var(--td-bg-color-container-hover);
-        }
-      }
-    }
-    :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
-      background-color: #000 !important;
-    }
-    :deep(.t-table__pagination) {
-      background-color: #000 !important;
     }
   }
 }

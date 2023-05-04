@@ -47,6 +47,7 @@
   "defaultSite": null,
   "defaultIptv": null,
   "defaultAnalyze": null,
+  "analyzeQuickSearchType": "platform",
   "analyzeSupport": false,
   "softSolution": false,
   "skipStartEnd": false,

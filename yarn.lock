@@ -2580,10 +2580,10 @@ electron-updater@^5.3.0:
     semver "^7.3.5"
     typed-emitter "^2.1.0"
 
-electron@^24.1.2:
-  version "24.1.2"
-  resolved "https://registry.npmmirror.com/electron/-/electron-24.1.2.tgz#8dd0b4928a08236be4791d39535d1d35cc05f04b"
-  integrity sha512-V0isWbyLYiXrSCcB4lrSVhS/U56NFGfuqHyc+yEPkyhhvY+h4F85cYGdEiZlXp6XjHT+/CLHmw0ltK54g9lvDw==
+electron@^24.1.3:
+  version "24.1.3"
+  resolved "https://registry.npmmirror.com/electron/-/electron-24.1.3.tgz#4c16501db715cc5e60bf0c0cb91efd7b70aebefc"
+  integrity sha512-lHFRf2CgeOxPLje4BayzaLz1e/SbNejUU4NDarFjBlcYfuH4ceGevYRVjyDZJLbSGdhmM2dLraeku30LGEigCg==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^18.11.18"
@@ -4344,10 +4344,17 @@ minimatch@^5.0.1:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimatch@^7.4.2, minimatch@^7.4.3:
+minimatch@^7.4.2:
   version "7.4.5"
   resolved "https://registry.npmmirror.com/minimatch/-/minimatch-7.4.5.tgz#e721f2a6faba6846f3b891ccff9966dcf728813e"
   integrity sha512-OzOamaOmNBJZUv2qqY1OSWa+++4YPpOkLgkc0w30Oov5ufKlWWXnFUl0l4dgmSv5Shq/zRVkEOXAe2NaqO4l5Q==
+  dependencies:
+    brace-expansion "^2.0.1"
+
+minimatch@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.npmmirror.com/minimatch/-/minimatch-9.0.0.tgz#bfc8e88a1c40ffd40c172ddac3decb8451503b56"
+  integrity sha512-0jJj8AvgKqWN05mrwuqi8QYKx1WmYSUoKSxu5Qhs9prezTz10sxAHGNZe9J9cqIJzta8DWsleh2KaVaLl6Ru2w==
   dependencies:
     brace-expansion "^2.0.1"
 
@@ -4443,6 +4450,11 @@ nanoid@^3.3.4:
   version "3.3.4"
   resolved "https://registry.npmmirror.com/nanoid/-/nanoid-3.3.4.tgz#730b67e3cd09e2deacf03c027c81c9d9dbc5e8ab"
   integrity sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==
+
+nanoid@^3.3.6:
+  version "3.3.6"
+  resolved "https://registry.npmmirror.com/nanoid/-/nanoid-3.3.6.tgz#443380c856d6e9f9824267d960b4236ad583ea4c"
+  integrity sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==
 
 natural-compare-lite@^1.4.0:
   version "1.4.0"
@@ -4804,12 +4816,21 @@ postcss-styl@^0.12.0:
     postcss "^7.0.27 || ^8.0.0"
     stylus "^0.57.0"
 
-"postcss@^7.0.27 || ^8.0.0", postcss@^8.1.10, postcss@^8.4.21, postcss@^8.4.6:
+"postcss@^7.0.27 || ^8.0.0", postcss@^8.1.10, postcss@^8.4.6:
   version "8.4.21"
   resolved "https://registry.npmmirror.com/postcss/-/postcss-8.4.21.tgz#c639b719a57efc3187b13a1d765675485f4134f4"
   integrity sha512-tP7u/Sn/dVxK2NnruI4H9BG+x+Wxz6oeZ1cJ8P6G/PZY0IKk4k/63TDsQf2kQq3+qoJeLm2kIBUNlZe3zgb4Zg==
   dependencies:
     nanoid "^3.3.4"
+    picocolors "^1.0.0"
+    source-map-js "^1.0.2"
+
+postcss@^8.4.23:
+  version "8.4.23"
+  resolved "https://registry.npmmirror.com/postcss/-/postcss-8.4.23.tgz#df0aee9ac7c5e53e1075c24a3613496f9e6552ab"
+  integrity sha512-bQ3qMcpF6A/YjR55xtoTr0jGOlnPOKAIMdOWiv0EIT6HVPEaJiJB4NLljSbiHoC2RX7DN5Uvjtpbg1NPdwv1oA==
+  dependencies:
+    nanoid "^3.3.6"
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
@@ -5066,10 +5087,10 @@ roarr@^2.15.3:
     semver-compare "^1.0.0"
     sprintf-js "^1.1.2"
 
-rollup@^3.18.0:
-  version "3.20.2"
-  resolved "https://registry.npmmirror.com/rollup/-/rollup-3.20.2.tgz#f798c600317f216de2e4ad9f4d9ab30a89b690ff"
-  integrity sha512-3zwkBQl7Ai7MFYQE0y1MeQ15+9jsi7XxfrqwTb/9EK8D9C9+//EBR4M+CuA1KODRaNbFez/lWxA5vhEGZp4MUg==
+rollup@^3.21.0:
+  version "3.21.0"
+  resolved "https://registry.npmmirror.com/rollup/-/rollup-3.21.0.tgz#0a71517db56e150222670f88e5e7acfa4fede7c8"
+  integrity sha512-ANPhVcyeHvYdQMUyCbczy33nbLzI7RzrBje4uvNiTDJGIMtlKoOStmympwr9OtS1LZxiDmE2wvxHyVhoLtf1KQ==
   optionalDependencies:
     fsevents "~2.3.2"
 
@@ -5498,10 +5519,10 @@ tdesign-icons-vue-next@^0.1.8:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.3.1.tgz#d8c6727a753689ab9a3a4023381962d1620a7300"
-  integrity sha512-KHnDu9DX20mEIXIXM6jrYTbeD5mIxyDIsUUjXBY2cdyXn1oAneQJwg6Ceph8Ih7a3sm4/Q8dQVFpqo1/12aWGw==
+tdesign-vue-next@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.3.2.tgz#659ae6150ddabcd325b835ca6eb32beac699480b"
+  integrity sha512-i8+GXVcwvL0aQ4J8+7pMGTceu+DaGqugPK2hVAVWZcqskOzgxAspBQpHNPCs9067mSwZIa6VZWzeu7I7Oswhhw==
   dependencies:
     "@babel/runtime" "^7.14.8"
     "@popperjs/core" "^2.9.3"
@@ -5641,10 +5662,10 @@ tsutils@^3.21.0:
   dependencies:
     tslib "^1.8.1"
 
-tvision-color@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.npmmirror.com/tvision-color/-/tvision-color-1.5.0.tgz#eb5d0bc43c0f94e1d3c810aba79b4aa1b7910761"
-  integrity sha512-9gsV2l9HPoiYTXooQK5CtUtkJAB8EsCuktjdfkUs3aN20CBkDhAG6XP5T+SRdp/onTshb8OXbil4vRDFiUnXvQ==
+tvision-color@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.npmmirror.com/tvision-color/-/tvision-color-1.6.0.tgz#54424da9eca6cf642fe9cdac89fabae644293ec3"
+  integrity sha512-pu8LkA4ZLBjbnmC9keqce4TLnExcQphKSoExauncSybmbqAhslXQvGdsI/FeWpxItGa4mcjGsHz5YE8bjpLjRw==
   dependencies:
     "@babel/runtime-corejs3" "7.18.9"
     "@material/material-color-utilities" "0.1.2"
@@ -5739,10 +5760,10 @@ unbox-primitive@^1.0.2:
     has-symbols "^1.0.3"
     which-boxed-primitive "^1.0.2"
 
-unimport@^3.0.3:
-  version "3.0.5"
-  resolved "https://registry.npmmirror.com/unimport/-/unimport-3.0.5.tgz#a2b2c1ed41aaaff4b3702260878a159d1f921da2"
-  integrity sha512-enRW0sVcTBxUZY6R2iumWMUsPbGC5GW9jM89VtF0pFUz9vDPrvEmOAklbSE/a4fqhjW/7dMWBvfLw/IDlBaPdQ==
+unimport@^3.0.6:
+  version "3.0.6"
+  resolved "https://registry.npmmirror.com/unimport/-/unimport-3.0.6.tgz#20caac4cf9a94e9233cdbe3a16f7599ae75a7df8"
+  integrity sha512-GYxGJ1Bri1oqx8VFDjdgooGzeK7jBk3bvhXmamTIpu3nONOcUMGwZbX7X0L5RA7OWMXpR4vzpSQP7pXUzJg1/Q==
   dependencies:
     "@rollup/pluginutils" "^5.0.2"
     escape-string-regexp "^5.0.0"
@@ -5766,17 +5787,17 @@ universalify@^2.0.0:
   resolved "https://registry.npmmirror.com/universalify/-/universalify-2.0.0.tgz#75a4984efedc4b08975c5aeb73f530d02df25717"
   integrity sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==
 
-unplugin-auto-import@^0.15.2:
-  version "0.15.2"
-  resolved "https://registry.npmmirror.com/unplugin-auto-import/-/unplugin-auto-import-0.15.2.tgz#e0eaaa45a64192eaa0f03b993a4a773ddbf82f3b"
-  integrity sha512-Wivfu+xccgvEZG8QtZcIvt6napfX9wyOFqM//7FHOtev8+k+dp3ykiqsEl6TODgHmqTTBeQX4Ah1JvRgUNjlkg==
+unplugin-auto-import@^0.15.3:
+  version "0.15.3"
+  resolved "https://registry.npmmirror.com/unplugin-auto-import/-/unplugin-auto-import-0.15.3.tgz#abf5f1bf42f8c181e9dd1067bd5645aad727df6e"
+  integrity sha512-RLT8SqbPn4bT7yBshZId0uPSofKWnwr66RyDaxWaFb/+f7OTDOWAsVNz+hOQLBWSjvbekr2xZY9ccS8TDHJbCQ==
   dependencies:
     "@antfu/utils" "^0.7.2"
     "@rollup/pluginutils" "^5.0.2"
     local-pkg "^0.4.3"
     magic-string "^0.30.0"
-    minimatch "^7.4.3"
-    unimport "^3.0.3"
+    minimatch "^9.0.0"
+    unimport "^3.0.6"
     unplugin "^1.3.1"
 
 unplugin-vue-components@^0.24.1:
@@ -5889,17 +5910,17 @@ verror@^1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vite-plugin-electron-renderer@^0.13.14:
-  version "0.13.14"
-  resolved "https://registry.npmmirror.com/vite-plugin-electron-renderer/-/vite-plugin-electron-renderer-0.13.14.tgz#294bf0e0ad692b82958bee2317a7b48126de8809"
-  integrity sha512-H1vktJILT+e+bK9P47DQl/UKev+AqLRC+09nhlJju1dpXxB78rRYSsU4UxpCcbJB/yhBvVMcQcRYQqfmxxHMHQ==
+vite-plugin-electron-renderer@^0.14.1:
+  version "0.14.1"
+  resolved "https://registry.npmmirror.com/vite-plugin-electron-renderer/-/vite-plugin-electron-renderer-0.14.1.tgz#2546ad03a7b2faafaf1d46b5e273469937df102c"
+  integrity sha512-1s+FwZs+m4PUFPwtpYfxs3SNYEGOTdQlz3HCuRs3st/kWX20582gCTf/30PysF/uewexe6laSL151TqsENbmHg==
   dependencies:
     lib-esm "~0.3.0"
 
-vite-plugin-electron@^0.11.1:
-  version "0.11.1"
-  resolved "https://registry.npmmirror.com/vite-plugin-electron/-/vite-plugin-electron-0.11.1.tgz#1a909c42e13c391e0700e03a0ed5192b67d2bf9a"
-  integrity sha512-pi9Wy4KCGjKIRvp7/5VUOT8BYEAJdZrpy3gI+GhGc5vYs2V9yPxLOtfCqNfSTYqH3uM6hYY6MyifFVku3Wg+2A==
+vite-plugin-electron@^0.11.2:
+  version "0.11.2"
+  resolved "https://registry.npmmirror.com/vite-plugin-electron/-/vite-plugin-electron-0.11.2.tgz#bdb14aeb011fbea0f7cfec0550110fc111951c15"
+  integrity sha512-umQRmSuA80JVxKB3PfO55o8mFTrW+sEtu7kZ5TYKAnkuYpKw7qgxl4f/65gp8x5BGHJjYh/iIRIE26x3Xqc4mQ==
 
 vite-plugin-optimize-persist@^0.1.2:
   version "0.1.2"
@@ -5934,15 +5955,14 @@ vite-svg-loader@^4.0.0:
     "@vue/compiler-sfc" "^3.2.20"
     svgo "^3.0.2"
 
-vite@^4.2.1:
-  version "4.2.1"
-  resolved "https://registry.npmmirror.com/vite/-/vite-4.2.1.tgz#6c2eb337b0dfd80a9ded5922163b94949d7fc254"
-  integrity sha512-7MKhqdy0ISo4wnvwtqZkjke6XN4taqQ2TBaTccLIpOKv7Vp2h4Y+NpmWCnGDeSvvn45KxvWgGyb0MkHvY1vgbg==
+vite@^4.3.3:
+  version "4.3.3"
+  resolved "https://registry.npmmirror.com/vite/-/vite-4.3.3.tgz#26adb4aa01439fc4546c480ea547674d87289396"
+  integrity sha512-MwFlLBO4udZXd+VBcezo3u8mC77YQk+ik+fbc0GZWGgzfbPP+8Kf0fldhARqvSYmtIWoAJ5BXPClUbMTlqFxrA==
   dependencies:
     esbuild "^0.17.5"
-    postcss "^8.4.21"
-    resolve "^1.22.1"
-    rollup "^3.18.0"
+    postcss "^8.4.23"
+    rollup "^3.21.0"
   optionalDependencies:
     fsevents "~2.3.2"
 
@@ -6178,6 +6198,16 @@ xmlbuilder@>=11.0.1, xmlbuilder@^15.1.1:
   version "15.1.1"
   resolved "https://registry.npmmirror.com/xmlbuilder/-/xmlbuilder-15.1.1.tgz#9dcdce49eea66d8d10b42cae94a79c3c8d0c2ec5"
   integrity sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==
+
+xmldom@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.npmmirror.com/xmldom/-/xmldom-0.6.0.tgz#43a96ecb8beece991cef382c08397d82d4d0c46f"
+  integrity sha512-iAcin401y58LckRZ0TkI4k0VSM1Qg0KGSc3i8rU+xrxe19A/BN1zHyVSJY7uoutVlaTSzYyk/v5AmkewAP7jtg==
+
+xpath@^0.0.32:
+  version "0.0.32"
+  resolved "https://registry.npmmirror.com/xpath/-/xpath-0.0.32.tgz#1b73d3351af736e17ec078d6da4b8175405c48af"
+  integrity sha512-rxMJhSIoiO8vXcWvSifKqhvV96GjiD5wYb8/QHdoRyQvraTpp4IEv944nhGausZZ3u7dhQXteZuZbaqfpB7uYw==
 
 y18n@^4.0.0:
   version "4.0.3"

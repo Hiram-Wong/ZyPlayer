@@ -36,7 +36,7 @@
           </t-input>
 
           <t-popup content="重置快捷键">
-            <t-button theme="default" variant="base" @click="resetShortcut">
+            <t-button theme="default" variant="base" class="reset-boss-key" @click="resetShortcut">
               <refresh-icon size="11px" style="margin-top: 3px" />
             </t-button>
           </t-popup>
@@ -97,6 +97,20 @@
             placeholder="仅支持DIYP"
             :style="{ width: '300px' }"
           />
+        </div>
+      </t-form-item>
+      <t-form-item v-if="formData.analyzeSupport" label="解析" name="analyse">
+        <div class="analyse">
+          <t-radio-group v-model="formData.analyzeQuickSearchType">
+            <t-radio value="search">快捷搜索</t-radio>
+            <t-radio value="platform">支持平台</t-radio>
+            <t-radio value="all">小孩子才做选择</t-radio>
+          </t-radio-group>
+        </div>
+      </t-form-item>
+      <t-form-item label="保险箱密码" name="analyse">
+        <div class="analyse">
+          <t-input v-model="formData.vaultPasswd" placeholder="请输入保险箱密码" :style="{ width: '300px' }" />
         </div>
       </t-form-item>
       <t-form-item label="播放器" name="player">
@@ -233,6 +247,7 @@ const formData = ref({
 
 const filmEmitReload = useEventBus('film-reload');
 const iptvEmitReload = useEventBus('iptv-reload');
+const analyzeEmitReload = useEventBus('analyze-reload');
 
 // 监听刷新film
 watch(
@@ -255,6 +270,16 @@ watch(
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
       iptvEmitReload.emit('iptv-reload');
+    }
+  },
+);
+
+// 监听刷新iptv
+watch(
+  () => [formData.value.analyzeQuickSearchType],
+  (_, oldValue) => {
+    if (oldValue.every((item) => typeof item !== 'undefined')) {
+      analyzeEmitReload.emit('analyze-reload');
     }
   },
 );
@@ -582,6 +607,12 @@ const checkIpv6 = async () => {
       console.log(err);
     });
 };
+
+// 监听设置默认源变更
+const eventBus = useEventBus('base-setting-reload');
+eventBus.on(async () => {
+  getSetting();
+});
 </script>
 
 <style lang="less" scoped>
@@ -601,13 +632,6 @@ const checkIpv6 = async () => {
     color: var(--td-brand-color);
     cursor: pointer;
     font-weight: 500;
-  }
-  :deep(.t-input-adornment__append) {
-    border-width: 1px;
-    border-style: solid;
-    border-color: var(--td-bg-color-component);
-    background-color: var(--td-bg-color-component);
-    cursor: pointer;
   }
   .setting-layout-drawer {
     display: flex;
@@ -643,6 +667,10 @@ const checkIpv6 = async () => {
       font-size: 13px;
       font-weight: 400;
     }
+  }
+  .reset-boss-key {
+    background-color: var(--td-bg-input);
+    border: transparent;
   }
 }
 </style>

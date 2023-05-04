@@ -448,6 +448,26 @@ const zy = {
     }
   },
   /**
+  * 获取酷云热点视频列表
+  * @param {*} date 日期2023-5-3
+  * @param {*} type 类型 1.电影  2.剧集  3.综艺
+  * @param {*} plat 平台 1.腾讯视频  2.爱奇艺  3.优酷  4.芒果
+  * @returns 酷云热点视频推荐列表
+  */
+  async kuyunHot( date, type, plat) {
+    const kuyunHotLink = `https://eye.kuyun.com/api/netplat/ranking?date=${date}&type=${type}&plat=${plat}`;
+    try {
+      const { data: { data: { list } } } = await axios.get(kuyunHotLink);
+      return list.map(item => ({
+        vod_id: item.ca_id,
+        vod_name: item.name,
+        vod_hot: item.num
+      }));
+    } catch (err) {
+      throw err;
+    }
+  },
+  /**
    * 获取解析url链接的标题
    * @param {*} url 需要解析的地址
    * @returns 解析标题

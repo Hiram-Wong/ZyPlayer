@@ -2,39 +2,40 @@
   <t-dialog v-model:visible="formVisible" header="热榜" placement="center" :footer="false">
     <template #body>
       <div class="hot-container">
-        <div class="hot-heading">
-          <span class="hot-heading-tip">根据当前热度整理 不定时更新</span>
+        <div class="rax-view-v2 tab-container">
+          <div class="rax-view-v2 tab-wrap">
+            <div v-for="item in MODE_OPTIONS" :key="item.key" class="rax-view-v2 tab-item">
+              {{ item.name }}
+            </div>
+          </div>
+          <t-radio-group v-model="hotSource" variant="default-filled" size="small">
+            <t-radio-button v-for="(item, key) in MODE_OPTIONS[hotClass - 1].source" :key="key" :value="key">
+              {{ item }}{{ hotClass }}
+            </t-radio-button>
+          </t-radio-group>
         </div>
-        <t-skeleton theme="paragraph" :loading="loading">
-          <div class="hot-main">
-            <div v-for="(item, index) in hotList" :key="index" class="hot-paper-item-main" @click="detailEvent(item)">
-              <div class="hot-paper-item-num" :class="`hot-paper-item-num-${index + 1}`">{{ index + 1 }}</div>
-              <div class="hot-paper-item-info">
-                <span class="hot-paper-item-infotitle">{{ item.vod_name }}</span>
-                <p>{{ item.vod_remarks }}</p>
-              </div>
-              <div class="hot-paper-item-icon">
-                <chevron-right-icon size="1.5em" />
+        <div class="swiper swiper-initialized swiper-horizontal swiper-ios">
+          <div class="swiper-wrapper">
+            <div v-for="(item, index) in hotList" :key="item.vod_id" class="rax-view-v2 news-item">
+              <div class="rax-view-v2 news-rank rank-1">{{ index + 1 }}</div>
+              <div class="rax-view-v2 normal-view">
+                <div class="rax-view-v2 normal-title">{{ item.vod_name }}</div>
+                <div class="rax-view-v2 normal-tip-icon">{{ item.vod_hot }}</div>
               </div>
             </div>
           </div>
-        </t-skeleton>
+        </div>
+        <p class="tip bottom-tip">数据来源: 酷云EVE</p>
       </div>
     </template>
   </t-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { MessagePlugin } from 'tdesign-vue-next';
-import { ChevronRightIcon } from 'tdesign-icons-vue-next';
-import { useIpcRenderer } from '@vueuse/electron';
-import { setting } from '@/lib/dexie';
+import { reactive, ref, watch } from 'vue';
+
 import zy from '@/lib/utils/tools';
-
 import { usePlayStore } from '@/store';
-
-const ipcRenderer = useIpcRenderer();
 
 const props = defineProps({
   visible: {
@@ -49,15 +50,14 @@ const props = defineProps({
   },
 });
 
-const store = usePlayStore();
+const hotClass = ref(2);
+const hotSource = ref(1);
 
 const loading = ref(true); // 骨架屏是否显示热播
 
 const formVisible = ref(false); // dialog是否显示热播
-const formData = ref(props.site); // 接受父组件参数
 const hotList = ref([]); // 热播列表
 
-const formDetailData = ref({}); // 详情组件传参
 const emit = defineEmits(['update:visible']);
 
 watch(
@@ -70,56 +70,28 @@ watch(
   () => props.visible,
   (val) => {
     formVisible.value = val;
-    getHotList();
+    if (val) getHotList();
   },
 );
-watch(
-  () => props.site,
-  (val) => {
-    formData.value = val;
+
+const MODE_OPTIONS = reactive([
+  {
+    key: 1,
+    name: '电影',
+    source: { 1: '腾讯视频', 2: '爱奇艺', 3: '优酷', 4: '芒果' },
   },
-);
+  { key: 2, name: '剧集', source: { 1: '腾讯视频', 2: '爱奇艺', 3: '优酷', 4: '芒果' } },
+  {
+    key: 3,
+    name: '综艺',
+    source: { 1: '腾讯视频', 2: '爱奇艺', 3: '优酷' },
+  },
+]);
 
 const getHotList = async () => {
-  const defaultHot = await setting.get('defaultHot');
-  const { key } = formData.value;
-  if (defaultHot === 'site') {
-    hotList.value = await zy.hot(key, 24);
-  } else if (defaultHot === 'douban') {
-    hotList.value = await zy.doubanHot('tv', '热门', 20, 0);
-  }
+  hotList.value = await zy.kuyunHot('2023-05-03', hotClass.value, hotSource.value);
+  console.log(hotList.value);
   if (hotList.value.length) loading.value = false;
-};
-
-const detailEvent = async (item) => {
-  const defaultHot = await setting.get('defaultHot');
-  const { key } = formData.value;
-  try {
-    MessagePlugin.info('请等待,正在搜索相关资源!');
-    if (defaultHot === 'site') {
-      formDetailData.value = await zy.detail(key, item.vod_id);
-    } else if (defaultHot === 'douban') {
-      const res = await zy.searchFirstDetail(key, item.vod_name);
-      formDetailData.value = res;
-      if (!res) {
-        MessagePlugin.warning('暂无在本源搜索到相关资源!');
-        return;
-      }
-    }
-
-    store.updateConfig({
-      type: 'film',
-      data: {
-        info: formDetailData.value,
-        ext: { site: formData.value },
-      },
-    });
-
-    if (formDetailData.value) ipcRenderer.send('openPlayWindow', item.vod_name);
-  } catch (err) {
-    console.error(err);
-    MessagePlugin.error('网络出错啦,请稍后再试!');
-  }
 };
 </script>
 
@@ -127,64 +99,101 @@ const detailEvent = async (item) => {
 @import '@/style/variables.less';
 @import '@/style/index.less';
 
-:deep(.t-dialog) {
-  background-image: url(../../../assets/bg-left-circle.svg), url(../../../assets/bg-right-circle.svg);
-  background-position: 0 0, 100% 280px;
-  background-repeat: no-repeat;
-}
-
 .hot-container {
-  .hot-heading {
-    .hot-heading-tip {
-      margin-bottom: 10px;
-      display: inline-block;
+  .rax-view-v2 {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-content: flex-start;
+    border: 0 solid #000;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  .tab-container {
+    overflow-y: hidden;
+    overflow-x: auto;
+    width: 100%;
+    scroll-behavior: smooth;
+    .tab-wrap {
+      position: relative;
+      flex-direction: row;
+      align-items: center;
+      .tab-item {
+        width: 65px;
+        position: relative;
+        color: #777;
+        text-align: center;
+        z-index: 1;
+        font-weight: 700;
+        user-select: none;
+      }
+      .active {
+        background-color: var(--td-bg-input);
+        border-radius: 5px;
+      }
     }
   }
-  .hot-main {
+  .swiper {
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    overflow: hidden;
+    list-style: none;
+    padding: 0;
+    z-index: 1;
     height: 400px;
     overflow-x: hidden;
     overflow-y: scroll;
-    .hot-paper-item-main {
-      padding: 10px 0;
-      margin: 0 10px;
-      min-height: 45px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
+    .swiper-wrapper {
       position: relative;
-      .hot-paper-item-num {
-        font-weight: 700;
-        position: relative;
-        color: #bcbcbc;
-        font-size: 24px;
-        line-height: 1;
-        width: 50px;
-        text-align: center;
-      }
-      .hot-paper-item-num-1 {
-        color: #ff3d5e;
-      }
-      .hot-paper-item-num-2 {
-        color: #f73;
-      }
-      .hot-paper-item-num-3 {
-        color: #ffa82e;
-      }
-      .hot-paper-item-info {
-        max-width: 70%;
-        display: block;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        p {
-          color: #9e9e9e;
-          font-size: 12px;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      transition-property: transform;
+      box-sizing: content-box;
+      .news-item {
+        flex-direction: row;
+        width: 100%;
+        margin-bottom: 12px;
+        align-items: flex-start;
+        padding-right: 22px;
+        .news-rank {
+          text-align: right;
+          color: hsla(0, 0%, 40%, 0.6);
+          font-weight: 700;
+          margin-right: 12px;
+          background-repeat: no-repeat;
+          margin-top: 2px;
         }
-      }
-      .hot-paper-item-icon {
-        position: absolute;
-        right: 10px;
-        color: #c2c6d0;
+        .rank-1 {
+          color: #f7534f;
+          padding-right: 2px;
+        }
+        .normal-view {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          flex: 1;
+          .normal-title {
+            flex: 1;
+            font-weight: 700;
+            margin-right: 10px;
+            word-break: break-all;
+            display: -webkit-box;
+            text-overflow: ellipsis;
+            overflow: hidden;
+          }
+          .normal-tip-icon {
+            border-radius: 2px;
+            text-align: center;
+            padding: 0.5px 3px;
+            font-weight: 700;
+          }
+        }
       }
     }
   }

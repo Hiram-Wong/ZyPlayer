@@ -55,6 +55,15 @@ db.version(17).stores({
   })
 })
 
+db.version(19).stores({
+  setting: 'id, theme, externalPlayer, rootClassFilter, r18ClassFilter, defaultHot, defaultSearch, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeSupport, analyzeQuickSearchType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, vaultPasswd',
+}).upgrade(trans => {
+  trans.setting.toCollection().modify(setting => {
+    setting.analyzeQuickSearchType = 'platform'
+    setting.vaultPasswd = 'zyplayer'
+  })
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)

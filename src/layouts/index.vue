@@ -48,11 +48,6 @@ watch(
 
 <style lang="less" scoped>
 .t-layout {
-  background: #fbfbfb !important;
-}
-:root[theme-mode='dark'] {
-  .t-layout {
-    background: #000 !important;
-  }
+  background: var(--td-bg-color-container);
 }
 </style>

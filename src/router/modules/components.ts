@@ -52,17 +52,32 @@ export default [
     ],
   },
   {
-    path: '/analysis/',
-    name: 'analysis',
-    redirect: '/analysis/index',
+    path: '/analyze/',
+    name: 'Analyze',
+    redirect: '/analyze/index',
     component: Layout,
     meta: { title: '解析', icon: 'chart-bubble' },
     children: [
       {
         path: 'index',
-        name: 'AnalysisIndex',
-        component: () => import('@/pages/Analysis.vue'),
+        name: 'AnalyzeIndex',
+        component: () => import('@/pages/Analyze.vue'),
         meta: { title: '解析', icon: 'chart-bubble' },
+      },
+    ],
+  },
+  {
+    path: '/vault/',
+    name: 'Vault',
+    redirect: '/vault/index',
+    component: Layout,
+    meta: { title: '密码箱', icon: 'gift' },
+    children: [
+      {
+        path: 'index',
+        name: 'VaultIndex',
+        component: () => import('@/pages/Vault.vue'),
+        meta: { title: '密码箱', icon: 'gift' },
       },
     ],
   },
