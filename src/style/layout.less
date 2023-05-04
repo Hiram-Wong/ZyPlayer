@@ -83,6 +83,14 @@
   background: var(--td-gray-color-13);
 }
 
+.t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
+  background-color: var(--td-bg-menu-active);
+}
+
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon {
+  color: var(--td-text-color-primary);
+}
+
 .@{starter-prefix} {
   // 布局元素调整
   &-header, &-aside {
@@ -261,14 +269,14 @@
 
 .t-dialog--default {
   .t-dialog__body{
-    padding: var(--td-comp-paddingTB-l) 0 0 0;
+    padding: var(--td-comp-paddingTB-l) var(--td-size-1) 0 var(--td-size-1);
     .t-radio-group {
       margin-bottom: var(--td-comp-margin-s);
     }
     .t-textarea{
       .t-textarea__inner {
         border: var(--td-size-1) solid transparent;
-        background-color: var(--td-bg-color-component);
+        background-color: var(--td-bg-input);
         border-radius: var(--td-radius-medium);
       }
     }
@@ -288,16 +296,19 @@
       }
     }
   }
+  border: none;
+  background-color: var(--td-bg-color-page);
+  box-shadow: var(--td-shadow-3);
 }
 
 .t-popup__content {
-  background-color: var(--td-bg-color-component)
+  background-color: var(--td-bg-color-page);
 }
 
 .t-form__controls-content{
   padding: var(--td-size-1);
   .t-input {
-    background-color: var(--td-bg-color-component) !important;
+    background-color: var(--td-bg-input) !important;
     border-color: transparent;
   };
 }
@@ -315,7 +326,9 @@
 }
 
 :root[theme-mode='dark'] {
-  --td-bg-color-container: #000;
+  --td-bg-color-container: #282828;
+  --td-bg-menu-active: #373737;
+  --td-bg-input: #323233;
   .window-item:hover {
     background-color: #2f3134 !important;
   }
@@ -323,8 +336,11 @@
 
 :root,
 :root[theme-mode="light"] {
-  --td-bg-color-container: #fbfbfb;
-  --td-bg-color-specialcomponent: #fbfbfb;
+  --td-bg-color-container: #f6f6f6;
+  --td-bg-color-specialcomponent: #f6f6f6;
+  --td-bg-color-page: #fff;
+  --td-bg-menu-active: #fff;
+  --td-bg-input: #e9e9e9;
   .window-item:hover {
     background-color: #e3e5e7 !important;
   }
