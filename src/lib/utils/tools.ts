@@ -441,7 +441,8 @@ const zy = {
       return subjects.map(item => ({
         vod_id: item.id,
         vod_name: item.title,
-        vod_remarks: item.episodes_info
+        vod_remarks: item.episodes_info,
+        vod_pic: item.cover,
       }));
     } catch (err) {
       throw err;
@@ -461,7 +462,7 @@ const zy = {
       return list.map(item => ({
         vod_id: item.ca_id,
         vod_name: item.name,
-        vod_hot: item.num
+        vod_hot: item.num,
       }));
     } catch (err) {
       throw err;
