@@ -242,16 +242,10 @@ const searchEvent = async (item) => {
     }
   }
   .swiper {
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-    overflow: hidden;
+    margin: 0 auto;
+    overflow: auto;
     list-style: none;
-    padding: 0;
-    z-index: 1;
-    height: 360px;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    max-height: 360px;
     .swiper-wrapper {
       position: relative;
       width: 100%;
