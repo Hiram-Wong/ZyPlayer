@@ -161,6 +161,7 @@ const searchHotEvent = (kw) => {
 
 const searchInputEvent = () => {
   emit('search', searchTxt.value);
+  isFocus.value = false;
 };
 
 const focusEvent = async () => {
