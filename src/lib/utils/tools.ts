@@ -91,7 +91,16 @@ const zy = {
       const json = res.data;
       const jsondata = json.rss || json;
       const videoList = jsondata.list || [];
-      return videoList;
+      const data = [];
+      for (let i = 0; i < 10; i++) {
+        const item = videoList[i]
+        if ( i in [0, 1, 2, 3 ]) {
+          const pic = await this.detail(key, item.vod_id);
+          item['vod_pic'] = pic.vod_pic
+        }
+        data.push(item);
+      }
+      return data;
     } catch (err) {
       throw err;
     }

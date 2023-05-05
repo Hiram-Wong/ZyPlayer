@@ -14,12 +14,6 @@ export default [
         component: () => import('@/pages/Film.vue'),
         meta: { title: '首页', icon: 'home' },
       },
-      {
-        path: 'detail',
-        name: 'DetailIndex',
-        component: () => import('@/pages/film/detail/Detail.vue'),
-        meta: { title: '详情', icon: 'laptop' },
-      },
     ],
   },
   {
@@ -71,7 +65,7 @@ export default [
     name: 'Vault',
     redirect: '/vault/index',
     component: Layout,
-    meta: { title: '密码箱', icon: 'gift' },
+    meta: { title: '密码箱', icon: 'gift', hidden: true },
     children: [
       {
         path: 'index',
