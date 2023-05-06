@@ -321,9 +321,10 @@ const resetEvent = () => {
   ipcRenderer.send('reset-store'); // 清除config.json
   clearDB();
   clearCache();
-  MessagePlugin.success('重置成功, 即将自动刷新页面！');
+
+  MessagePlugin.success('重置成功, 即将重启应用!');
   setTimeout(() => {
-    window?.location.reload();
+    ipcRenderer.send('reboot-app');
   }, 1000);
 };
 

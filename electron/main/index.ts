@@ -373,3 +373,9 @@ ipcMain.on('reset-store', () => {
   store.set('settings.ua', '');
   store.set('settings.doh', '');
 });
+
+ipcMain.on('reboot-app', () => {
+  log.info(`[ipcMain] reboot-app`);
+  app.relaunch();
+  app.exit();
+});
