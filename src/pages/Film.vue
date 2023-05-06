@@ -498,7 +498,7 @@ const searchEvent = async (kw) => {
     } catch (err) {
       console.error(err);
     }
-  } else await getFilmList();
+  }
 };
 
 // 切换站点

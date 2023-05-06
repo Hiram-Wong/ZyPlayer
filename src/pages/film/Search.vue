@@ -216,7 +216,6 @@ const focusEvent = async () => {
   }
 
   .hd-search {
-    z-index: 9999;
     position: relative;
     width: 100%;
     display: flex;
