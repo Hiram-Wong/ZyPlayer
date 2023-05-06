@@ -883,7 +883,6 @@ const getDetailInfo = async () => {
 
 // 切换选集
 const changeEvent = async (e) => {
-  if (timer.value) clearInterval(timer.value);
   currentUrl.value = e;
   const [index, url] = e.split('$');
   console.log(index, url);
@@ -975,50 +974,62 @@ const filterContent = (item) => {
   return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
 };
 
+const VIDEO_PROCESS_DOC = {
+  date: moment().format('YYYY-MM-DD'),
+  playEnd: false,
+  watchTime: 0,
+  duration: 0,
+};
+
 // 定时更新播放进度
 const timerUpdatePlayProcess = () => {
-  if (onlineUrl.value) return;
-  timer.value = setInterval(() => {
-    const doc = {
-      date: moment().format('YYYY-MM-DD'),
-      playEnd: false,
-      watchTime: xg.value.currentTime,
-      duration: xg.value.duration,
-    };
-    history.update(dataHistory.value.id, doc);
+  xg.value.on(Events.TIME_UPDATE, (timeupdate) => {
+    const { currentTime, duration } = timeupdate;
 
+    VIDEO_PROCESS_DOC.watchTime = currentTime;
+    VIDEO_PROCESS_DOC.duration = duration;
+    history.update(dataHistory.value.id, VIDEO_PROCESS_DOC);
+
+    const watchTime = set.value.skipTimeInEnd ? currentTime + set.value.skipTimeInEnd : currentTime;
+
+    if (watchTime >= duration) {
+      const pipInstance = xg.value.plugins.pip;
+      if (pipInstance.isPip) {
+        xg.value.pause();
+        return;
+      }
+      autoPlayNext();
+    }
+
+    console.log(
+      `timeupdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
+        (currentTime / duration) * 100,
+      )}%`,
+    );
+  });
+
+  xg.value.on(Events.ENDED, (ended) => {
+    console.log(ended);
     autoPlayNext();
-
-    console.log(`timeInterval:${timer.value}`);
-  }, 10000);
+  });
 };
 
 // 是否自动进入下一集
 const autoPlayNext = () => {
-  let time = xg.value.currentTime;
-  if (set.value.skipTimeInEnd) time += set.value.skipTimeInEnd;
-  if (time >= xg.value.duration && (xg.value.hasStart || xg.value.ended)) {
-    const pipInstance = xg.value.plugins.pip;
-    if (pipInstance.isPip) {
-      xg.value.pause();
-      clearInterval(timer.value);
-      return;
-    }
-    const { siteSource } = dataHistory.value;
-    const index = season.value[siteSource].indexOf(currentUrl.value);
+  const { siteSource } = dataHistory.value;
+  const index = season.value[siteSource].indexOf(currentUrl.value);
 
-    const doc = {
-      playEnd: true,
-    };
-    history.update(dataHistory.value.id, doc);
+  const doc = {
+    playEnd: true,
+  };
+  history.update(dataHistory.value.id, doc);
 
-    if (season.value[siteSource].length === index + 1) {
-      xg.value.pause();
-      return;
-    }
-    changeEvent(season.value[siteSource][index + 1]);
-    MessagePlugin.info('请稍候,正在切换下一级');
+  if (season.value[siteSource].length === index + 1) {
+    xg.value.pause();
+    return;
   }
+  changeEvent(season.value[siteSource][index + 1]);
+  MessagePlugin.info('请稍候,正在切换下一级');
 };
 
 // 获取是否追剧
