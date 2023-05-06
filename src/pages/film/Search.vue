@@ -85,7 +85,7 @@
         </div>
       </div>
     </div>
-    <hot-view v-model:visible="isDialogHot" />
+    <hot-view v-model:visible="isDialogHot" @search="searchHotEvent" />
   </div>
 </template>
 

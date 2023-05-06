@@ -29,7 +29,7 @@
                 v-for="(item, index) in hotList"
                 :key="item.vod_id"
                 class="rax-view-v2 news-item"
-                @click="searchEvent(item)"
+                @click="searchEvent(item.vod_name)"
               >
                 <div class="rax-view-v2 news-rank" :class="[index in [0, 1, 2] ? `rank-${index + 1}` : '']">
                   {{ index + 1 }}
@@ -61,13 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import { useIpcRenderer } from '@vueuse/electron';
 import moment from 'moment';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { reactive, ref, watch } from 'vue';
 
 import zy from '@/lib/utils/tools';
-import { usePlayStore } from '@/store';
 
 const props = defineProps({
   visible: {
@@ -82,9 +80,6 @@ const props = defineProps({
   },
 });
 
-const store = usePlayStore();
-const ipcRenderer = useIpcRenderer();
-
 const hotClass = ref('movie');
 const hotSource = ref(1);
 
@@ -93,8 +88,7 @@ const loading = ref(true); // 骨架屏是否显示热播
 const formVisible = ref(false); // dialog是否显示热播
 const hotList = ref([]); // 热播列表
 const formData = ref(props.site); // 接受父组件参数
-const formDetailData = ref({}); // 详情组件传参
-const emit = defineEmits(['update:visible']);
+const emit = defineEmits(['update:visible', 'search']);
 
 watch(
   () => formVisible.value,
@@ -167,7 +161,6 @@ const getHotList = async () => {
   try {
     const date = moment().subtract(1, 'days').format('YYYY-MM-DD');
     hotList.value = await zy.kuyunHot(date, MODE_OPTIONS[hotClass.value].key, hotSource.value);
-    console.log(hotList.value);
     if (hotList.value.length) loading.value = false;
   } catch (err) {
     MessagePlugin.warning(`error:${err}`);
@@ -177,30 +170,7 @@ const getHotList = async () => {
 
 // 搜索资源
 const searchEvent = async (item) => {
-  const { key } = formData.value;
-  try {
-    MessagePlugin.info('请等待,正在搜索相关资源!');
-
-    const res = await zy.searchFirstDetail(key, item.vod_name);
-    formDetailData.value = res;
-    if (!res) {
-      MessagePlugin.warning('暂无在本源搜索到相关资源!');
-      return;
-    }
-
-    store.updateConfig({
-      type: 'film',
-      data: {
-        info: formDetailData.value,
-        ext: { site: formData.value },
-      },
-    });
-
-    if (formDetailData.value) ipcRenderer.send('openPlayWindow', item.vod_name);
-  } catch (err) {
-    console.error(err);
-    MessagePlugin.error('网络出错啦,请稍后再试!');
-  }
+  emit('search', item);
 };
 </script>
 

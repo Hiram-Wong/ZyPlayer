@@ -240,7 +240,6 @@ const FilmDataList = ref({
 const sitesList = ref({}); // 全部源
 const sitesListSelect = ref(); // 选择的源
 const infiniteCompleteTip = ref('没有更多内容了!');
-const isFocus = ref(false);
 
 // 深度监听过滤条件变更
 watch(
