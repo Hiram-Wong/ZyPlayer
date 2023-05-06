@@ -523,7 +523,6 @@ const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
-const timer = ref(); // 定时器 用于刷新历史进度
 const playerInfoTimer = ref(); // 定时器 用于刷新播放器参数
 const isBinge = ref(true); // true未收藏 false收藏
 const isPinned = ref(true); // true未置顶 false置顶
@@ -643,10 +642,11 @@ watch(
   () => isPlayerInfoVisible.value,
   (val) => {
     if (val) {
+      playerInfo.value.version = xg.value.plugins.hls.core.version;
+
       playerInfoTimer.value = setInterval(() => {
         console.log('Interval: Refresh playerInfo');
         playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
-        playerInfo.value.version = xg.value.plugins.hls.core.version;
       }, 5000);
     } else {
       console.log('Interval: Clear playerInfo');
@@ -658,10 +658,6 @@ watch(
 onMounted(() => {
   initPlayer();
   minMaxEvent();
-});
-
-onDeactivated(() => {
-  clearInterval(timer.value);
 });
 
 // 获取解析地址
