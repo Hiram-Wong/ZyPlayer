@@ -171,6 +171,7 @@ const getHotList = async () => {
 // 搜索资源
 const searchEvent = async (item) => {
   emit('search', item);
+  formVisible.value = false;
 };
 </script>
 
