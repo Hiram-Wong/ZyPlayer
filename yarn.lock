@@ -2580,10 +2580,10 @@ electron-updater@^5.3.0:
     semver "^7.3.5"
     typed-emitter "^2.1.0"
 
-electron@^24.1.3:
-  version "24.1.3"
-  resolved "https://registry.npmmirror.com/electron/-/electron-24.1.3.tgz#4c16501db715cc5e60bf0c0cb91efd7b70aebefc"
-  integrity sha512-lHFRf2CgeOxPLje4BayzaLz1e/SbNejUU4NDarFjBlcYfuH4ceGevYRVjyDZJLbSGdhmM2dLraeku30LGEigCg==
+electron@^24.2.0:
+  version "24.2.0"
+  resolved "https://registry.npmmirror.com/electron/-/electron-24.2.0.tgz#54623a909e2e5d53a69d5fd8bf22ab37e61c188b"
+  integrity sha512-fEYAftYqFhveniWJbEHXjNMWjooFFIuqNj/eEFJkGzycInfBJq/c4E/dew++s6s0YLubxFnjoF2qZiqapLj0gA==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^18.11.18"
@@ -6162,10 +6162,10 @@ xgplayer-streaming-shared@3.0.1:
   dependencies:
     eventemitter3 "^4.0.7"
 
-xgplayer-subtitles@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.npmmirror.com/xgplayer-subtitles/-/xgplayer-subtitles-1.1.0.tgz#cd2ee74e477645950db60ddadb6510a7180c4fd4"
-  integrity sha512-V9KWIUl2jo9FgLdlMqFwwG5G7HVIZaXC5ED0vu3ZqidvcRoFtr4eMG3POtVStZY+lUucHSWLHM2sRGVD27gPYQ==
+xgplayer-subtitles@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmmirror.com/xgplayer-subtitles/-/xgplayer-subtitles-1.1.1.tgz#060814c654d82f90aaec2aa98f84ed73c8dde8da"
+  integrity sha512-GYzrK/e4ydAATP3Xg06sXYliiSCcyNIqqQSwnWbs7pw+cc5NwyrYXuLfa3Bp9skIxT6pT+A7qTicUps58N3eEQ==
   dependencies:
     eventemitter3 "^4.0.7"
 
@@ -6178,16 +6178,16 @@ xgplayer-transmuxer@3.0.1:
     concat-typed-array "^1.0.2"
     crypto-es "^1.2.4"
 
-xgplayer@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.1.tgz#cc8116ce271268650a59d0ac2c43981f39128f9c"
-  integrity sha512-Cdu5AF+jZfGyLWAbzgfVOBgkLHko+EWFQJrldioCRCc6ukeuHFMHxqtNmE0p5LXXq6IefGY2sqSP28nv7fCQSg==
+xgplayer@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.2.tgz#e9a02a7491aec15c0215a4d66e248860f0af36e0"
+  integrity sha512-vgSo5exPlyl7BxxxOWeYA1+x1nLmZDiWDjPJmaaxeW9jFghGBSf3XP+yLKSOJmKOlTw/LpmOcNAsJxqNhi6Bzw==
   dependencies:
     danmu.js ">=1.1.6"
     delegate "^3.2.0"
     downloadjs "1.4.7"
     eventemitter3 "^4.0.7"
-    xgplayer-subtitles "1.1.0"
+    xgplayer-subtitles "1.1.1"
 
 xml-name-validator@^4.0.0:
   version "4.0.0"
@@ -6198,16 +6198,6 @@ xmlbuilder@>=11.0.1, xmlbuilder@^15.1.1:
   version "15.1.1"
   resolved "https://registry.npmmirror.com/xmlbuilder/-/xmlbuilder-15.1.1.tgz#9dcdce49eea66d8d10b42cae94a79c3c8d0c2ec5"
   integrity sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==
-
-xmldom@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.npmmirror.com/xmldom/-/xmldom-0.6.0.tgz#43a96ecb8beece991cef382c08397d82d4d0c46f"
-  integrity sha512-iAcin401y58LckRZ0TkI4k0VSM1Qg0KGSc3i8rU+xrxe19A/BN1zHyVSJY7uoutVlaTSzYyk/v5AmkewAP7jtg==
-
-xpath@^0.0.32:
-  version "0.0.32"
-  resolved "https://registry.npmmirror.com/xpath/-/xpath-0.0.32.tgz#1b73d3351af736e17ec078d6da4b8175405c48af"
-  integrity sha512-rxMJhSIoiO8vXcWvSifKqhvV96GjiD5wYb8/QHdoRyQvraTpp4IEv944nhGausZZ3u7dhQXteZuZbaqfpB7uYw==
 
 y18n@^4.0.0:
   version "4.0.3"
