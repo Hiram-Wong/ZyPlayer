@@ -23,26 +23,27 @@
           </div>
         </div>
         <div class="swiper">
-          <t-skeleton theme="paragraph" :loading="loading">
-            <div class="swiper-wrapper">
-              <div
-                v-for="(item, index) in hotList"
-                :key="item.vod_id"
-                class="rax-view-v2 news-item"
-                @click="searchEvent(item.vod_name)"
-              >
-                <div class="rax-view-v2 news-rank" :class="[index in [0, 1, 2] ? `rank-${index + 1}` : '']">
-                  {{ index + 1 }}
-                </div>
-                <div class="rax-view-v2 normal-view">
-                  <div class="rax-view-v2 normal-title">{{ item.vod_name }}</div>
-                  <div class="rax-view-v2 normal-tip" :class="[index in [0, 1, 2] ? `color-${index + 1}` : '']">
-                    {{ item.vod_hot }}
-                  </div>
+          <div class="swiper-wrapper">
+            <template v-for="i in 10" :key="i">
+              <t-skeleton theme="text" :loading="loading" class="news-skeleton"> </t-skeleton>
+            </template>
+            <div
+              v-for="(item, index) in hotList"
+              :key="item.vod_id"
+              class="rax-view-v2 news-item"
+              @click="searchEvent(item.vod_name)"
+            >
+              <div class="rax-view-v2 news-rank" :class="[index in [0, 1, 2] ? `rank-${index + 1}` : '']">
+                {{ index + 1 }}
+              </div>
+              <div class="rax-view-v2 normal-view">
+                <div class="rax-view-v2 normal-title">{{ item.vod_name }}</div>
+                <div class="rax-view-v2 normal-tip" :class="[index in [0, 1, 2] ? `color-${index + 1}` : '']">
+                  {{ item.vod_hot }}
                 </div>
               </div>
             </div>
-          </t-skeleton>
+          </div>
         </div>
         <div class="tip-warp">
           <span>数据来源：</span>
@@ -226,6 +227,11 @@ const searchEvent = async (item) => {
       flex-direction: column;
       transition-property: transform;
       box-sizing: content-box;
+      .news-skeleton {
+        width: 100%;
+        height: 24px;
+        margin-bottom: 12px;
+      }
       .news-item {
         flex-direction: row;
         width: 100%;
