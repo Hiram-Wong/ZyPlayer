@@ -56,5 +56,6 @@
   "selfBoot": false,
   "hardwareAcceleration": true,
   "doh": "",
-  "ua": ""
+  "ua": "",
+  "communitySubscribe": ""
 }]

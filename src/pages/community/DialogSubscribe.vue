@@ -25,37 +25,20 @@
 </template>
 
 <script setup lang="ts">
-import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
-import { MessagePlugin } from 'tdesign-vue-next';
-import { reactive, ref, watch } from 'vue';
-
-import DNS_CONFIG from '@/config/doh';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
   visible: {
     type: Boolean,
     default: false,
   },
-  data: {
-    type: Object,
-    default: () => {
-      return {
-        data: '',
-        type: '',
-      };
-    },
-  },
 });
 const formVisible = ref(false);
-const formData = ref(props.data);
-const ipcRenderer = useIpcRenderer();
 
-const DNS_LIST = reactive([...DNS_CONFIG.doh]);
+const formData = ref({ data: '' });
 
-const dnsSelect = ref('');
-
-const emit = defineEmits(['update:visible', 'receiveDnsData']);
+const emit = defineEmits(['update:visible', 'receiveCommunityData']);
 
 watch(
   () => formVisible.value,
@@ -69,25 +52,10 @@ watch(
     formVisible.value = val;
   },
 );
-watch(
-  () => props.data,
-  (val) => {
-    formData.value = val;
-
-    const index = _.findIndex(DNS_LIST, ['dns', val.data]);
-    if (index > -1) dnsSelect.value = val.data;
-  },
-);
 
 const onSubmit = async () => {
-  const { data, type } = formData.value;
-  emit('receiveDnsData', {
-    data,
-    type,
-  });
-
-  ipcRenderer.send('update-dns', !!data, data);
-  MessagePlugin.info('重启软件生效');
+  const { data } = formData.value;
+  emit('receiveCommunityData', { data });
 
   formVisible.value = false;
 };

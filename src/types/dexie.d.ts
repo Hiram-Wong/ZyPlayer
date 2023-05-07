@@ -26,6 +26,7 @@ interface Setting {
   hardwareAcceleration: boolean;
   doh: string;
   ua: string;
+  communitySubscribe: string;
 }
 
 interface Star {

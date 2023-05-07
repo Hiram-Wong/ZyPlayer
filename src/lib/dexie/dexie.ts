@@ -49,13 +49,14 @@ db.version(16).stores({
 
 db.version(17).stores({
   iptv: '++id, name, url, epg, type, isActive',
-  setting: 'id, theme, externalPlayer, rootClassFilter, r18ClassFilter, defaultHot, defaultSearch, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeSupport, analyzeQuickSearchType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh',
+  setting: 'id, theme, externalPlayer, rootClassFilter, r18ClassFilter, defaultHot, defaultSearch, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeSupport, analyzeQuickSearchType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, communitySubscribe',
 }).upgrade(trans => {
   trans.iptv.toCollection().modify(iptv => {
     iptv.type = 'local'
   })
   trans.setting.toCollection().modify(setting => {
     setting.analyzeQuickSearchType = 'platform'
+    setting.communitySubscribe = ''
   })
 })
 

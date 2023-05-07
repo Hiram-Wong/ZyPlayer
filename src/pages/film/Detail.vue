@@ -108,19 +108,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-
-import { MessagePlugin } from 'tdesign-vue-next';
-import { HeartIcon } from 'tdesign-icons-vue-next';
-
+import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
-
-import { usePlayStore } from '@/store';
+import { HeartIcon } from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { ref, watch } from 'vue';
 
 import { history, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
-
-const { ipcRenderer } = require('electron');
+import { usePlayStore } from '@/store';
 
 const props = defineProps({
   visible: {
@@ -140,6 +136,9 @@ const props = defineProps({
     },
   },
 });
+
+const ipcRenderer = useIpcRenderer();
+
 const store = usePlayStore();
 const selectPlayableSource = ref([]);
 const formVisible = ref(false);
