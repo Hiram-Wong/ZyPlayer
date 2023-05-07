@@ -96,7 +96,13 @@ function createWindow(): void {
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     mainWindow.webContents.send('blockUrl', details.url);
-    if (details.url.indexOf('github') > -1) shell.openExternal(details.url);
+    const allowUrlList = ['github.com', 'kuyun.com'];
+    const urlIsAllowed = allowUrlList.some((url) => details.url.includes(url));
+
+    if (urlIsAllowed) {
+      shell.openExternal(details.url);
+    }
+
     return { action: 'deny' };
   });
 
