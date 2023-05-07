@@ -168,14 +168,16 @@
 
 ### 🎨 截图
 
-|                           影视 (首页)                           |                             影视 (搜索)                             |
+|                           影视(首页)                           |                             影视(搜索)                             |
 | :-------------------------------------------------------------: | :-----------------------------------------------------------------: |
-| ![影视.png](https://s2.loli.net/2023/02/27/fQb9HhwlKtLTYRj.png) | ![影视搜素.png](https://s2.loli.net/2023/02/27/Feb1wdrLxNqi9Ju.png) |
-|                           影视 (播放)                           |                             影视 (介绍)                             |
-| ![影视播放](https://s2.loli.net/2023/02/27/k4omTLsg178tfyV.png) |   ![影视详情](https://s2.loli.net/2023/02/27/gsIiHVk32WNeFml.png)   |
-|                          影视 (热榜）                           |                             直播(首页)                              |
-| ![热榜.png](https://s2.loli.net/2023/02/27/q1lbRejL9pYKOZF.png) |   ![直播首页](https://s2.loli.net/2023/02/27/JztFEq8xKHSsGXZ.png)   |
+| ![影视](https://s2.loli.net/2023/05/07/dBApoeKhWjsbM1v.png) | ![影视搜索](https://s2.loli.net/2023/05/07/t3bNq8dHXTeyB9A.png) |
+|                           影视(播放)                           |                             影视 (介绍)                             |
+| ![影视播放](https://s2.loli.net/2023/05/07/fgmbdXQvPE73WCY.png) |   ![影视详情](https://s2.loli.net/2023/05/07/LrJY4EVK5WhZ3XR.png)   |
+|                          影视(热搜榜）                           |                             直播(首页)                              |
+| ![热榜](https://s2.loli.net/2023/05/07/6qyjHCKnS9wUXWF.png) |   ![直播首页](https://s2.loli.net/2023/05/07/Xf4aTpDbZF9niuW.png)   |
 |                           直播(播放)                            |                                解析                                 |
-| ![直播播放](https://s2.loli.net/2023/02/28/SVzaNq21yhTZFQH.png) |     ![解析](https://s2.loli.net/2023/02/28/Djtb5ArKwuMgUlx.png)     |
+| ![直播播放](https://s2.loli.net/2023/05/07/e3GufyD1Um6h2iK.png) |     ![解析](https://s2.loli.net/2023/05/07/qoAfuET4Lvn1kl7.png)     |
 |                            历史记录                             |                                在追                                 |
-| ![历史.png](https://s2.loli.net/2023/02/27/CdR7Wo2nK6ZjOyI.png) |     ![在追](https://s2.loli.net/2023/02/27/SH53tleP9o8mX4Q.png)     |
+| ![历史](https://s2.loli.net/2023/05/07/KYUpQA7g2MGVIZb.png) |     ![在追](https://s2.loli.net/2023/05/07/xuMkzWQLYCSl5XZ.png)     |
+|                            社区                             |                                设置                                 |
+| ![社区](https://s2.loli.net/2023/05/07/r31qEmNPTGouOXb.png) |     ![设置](https://s2.loli.net/2023/05/07/RgDOlzJKBcop2d6.png)     |
