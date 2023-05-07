@@ -112,7 +112,7 @@ const emitReload = useEventBus<string>('reload');
 const refreshEvent = () => {
   console.log('reload');
   // 声明具有局部刷新钩子的模块
-  const reloadHookModules = ['/film/index', '/iptv/index', '/analyze/index', '/chase/index'];
+  const reloadHookModules = ['/film/index', '/iptv/index', '/analyze/index', '/chase/index', '/community/index'];
   if (active.value && reloadHookModules.includes(active.value)) {
     emitReload.emit('reload');
   } else {
