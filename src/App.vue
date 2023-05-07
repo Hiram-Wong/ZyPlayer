@@ -9,7 +9,6 @@ import { computed, onMounted, ref } from 'vue';
 
 import PLAY_CONFIG from '@/config/play';
 import { setting } from '@/lib/dexie';
-import spider from '@/lib/utils/spider';
 import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
 import { usePlayStore, useSettingStore } from '@/store';
 
@@ -28,7 +27,6 @@ onMounted(() => {
   initTheme();
   initAgreementMask();
   initPlayerSetting();
-  // spider.getHome();
 });
 
 const initTheme = async () => {
