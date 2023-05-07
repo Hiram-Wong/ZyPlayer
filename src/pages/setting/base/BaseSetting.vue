@@ -108,11 +108,6 @@
           </t-radio-group>
         </div>
       </t-form-item>
-      <t-form-item label="保险箱密码" name="analyse">
-        <div class="analyse">
-          <t-input v-model="formData.vaultPasswd" placeholder="请输入保险箱密码" :style="{ width: '300px' }" />
-        </div>
-      </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
           <t-space direction="vertical" style="width: 280px">
@@ -127,7 +122,7 @@
               </div>
               <br />
               <div class="skip">
-                <span>结尾 [自动播放下一集]</span>
+                <span>结尾 [自动下集]</span>
                 <t-slider v-model="formData.skipTimeInEnd" :show-tooltip="true" :marks="MASKS" :max="180" />
               </div>
             </div>
