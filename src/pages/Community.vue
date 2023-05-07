@@ -73,7 +73,7 @@
         </div>
       </div>
 
-      <div v-if="data.share.length !== 0" class="feed-creator">
+      <div v-if="data.user.name" class="feed-creator">
         <div class="profile">
           <div class="avatar">
             <t-image class="img" :src="data.user.avatar" :lazy="true"> </t-image>
@@ -104,7 +104,7 @@ const store = usePlayStore();
 
 import DialogSubscribeView from './community/DialogSubscribe.vue';
 
-const data = ref({ user: { avatar: '', name: '' }, share: [] });
+const data = ref({ user: { avatar: '', name: '', desc: '' }, share: [] });
 const site = ref();
 
 const isSubscribeDialog = ref(false);
@@ -127,7 +127,7 @@ const getSetting = async () => {
   if (res) site.value = await sites.get(res);
 
   const url = await setting.get('communitySubscribe');
-  getShareData(url);
+  if (url) getShareData(url);
 };
 
 const filmSearch = async (item) => {
