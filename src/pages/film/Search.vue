@@ -246,7 +246,7 @@ const focusEvent = async () => {
         }
       }
       .search-hotlink {
-        color: rgba(255, 255, 255, 0.6);
+        color: var(--td-text-color-primary);
         display: flex;
         align-items: center;
         flex-shrink: 0;
@@ -263,7 +263,6 @@ const focusEvent = async () => {
         .search-hotlink-icon {
           width: 14px;
           height: 14px;
-          // color: rgba(255, 255, 255, 0.6);
           vertical-align: middle;
         }
       }
