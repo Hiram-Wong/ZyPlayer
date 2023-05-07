@@ -65,13 +65,13 @@ export default [
     name: 'Vault',
     redirect: '/vault/index',
     component: Layout,
-    meta: { title: '密码箱', icon: 'gift', hidden: true },
+    meta: { title: '密码箱', icon: 'books', hidden: false },
     children: [
       {
         path: 'index',
         name: 'VaultIndex',
         component: () => import('@/pages/Vault.vue'),
-        meta: { title: '密码箱', icon: 'gift' },
+        meta: { title: '密码箱', icon: 'books' },
       },
     ],
   },
