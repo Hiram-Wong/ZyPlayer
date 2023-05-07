@@ -18,7 +18,15 @@
               {{ searchTag }}
             </t-tag>
             <div class="input-wrapper">
-              <input v-model="searchText" type="text" class="input" placeholder="搜索影视" @keyup.enter="searchEvent" />
+              <input
+                ref="searchInputRef"
+                v-model="searchText"
+                type="text"
+                class="input"
+                placeholder="搜索影视"
+                @keyup.enter="searchEvent"
+                @keyup.delete="deleteEvent"
+              />
             </div>
             <span v-if="isFilter || searchText" class="clear" @click="clearSearchEvent">清空</span>
           </div>
@@ -65,7 +73,7 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import { CloseIcon, InfoCircleIcon, SearchIcon } from 'tdesign-icons-vue-next';
-import { reactive, ref, watch } from 'vue';
+import { nextTick, reactive, ref, watch } from 'vue';
 
 import PLATFORM_CONFIG from '@/config/platform';
 
@@ -82,6 +90,7 @@ const emit = defineEmits(['update:visible', 'open-platform']);
 const isFilter = ref(false);
 const searchText = ref('');
 const searchTag = ref('');
+const searchInputRef = ref(null);
 const VIDEOSITES = reactive({
   ...PLATFORM_CONFIG.site,
 }); // 视频网站列表
@@ -96,6 +105,11 @@ watch(
   () => props.visible,
   (val) => {
     formVisible.value = val;
+    if (val) {
+      nextTick(() => {
+        focusSearchInput();
+      });
+    }
   },
 );
 
@@ -115,6 +129,11 @@ watch(
   },
 );
 
+// 删除事件
+const deleteEvent = () => {
+  if (!searchText.value && searchTag.value) clearSearchEvent();
+};
+
 // 清空搜索选项
 const clearSearchEvent = () => {
   isFilter.value = false;
@@ -122,11 +141,21 @@ const clearSearchEvent = () => {
   searchTag.value = '';
 };
 
+// 聚焦 input
+const focusSearchInput = () => {
+  searchInputRef.value.focus();
+  searchInputRef.value.select();
+  nextTick(() => {
+    searchInputRef.value.scrollIntoViewIfNeeded();
+  });
+};
+
 // 手动选择搜索源
 const selectFilterSearchEvent = (item) => {
   isFilter.value = true;
   searchText.value = '';
   searchTag.value = `${item}@`;
+  focusSearchInput();
 };
 
 // 搜索
