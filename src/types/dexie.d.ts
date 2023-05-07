@@ -16,8 +16,7 @@ interface Setting {
   defaultSite: number | null;
   defaultIptv: number | null;
   defaultAnalyze: number | null;
-  platform: string;
-  vaultPasswd: string;
+  analyzeQuickSearchType: string;
   analyzeSupport: boolean;
   softSolution: boolean;
   skipStartEnd: boolean;
