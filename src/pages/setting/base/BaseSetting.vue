@@ -354,7 +354,7 @@ const formatShortcut = computed(() => {
     .replace('Right', '→')
     .replace('Left', '←')
     .replace('Space', '空格');
-  if (process.platform === 'darwin') {
+  if (platform === 'darwin') {
     shortcut = val
       .replace('CommandOrControl', '⌘')
       .replace('Command', '⌘')
@@ -512,7 +512,8 @@ const cancelShortcut = () => {
 // 重置快捷键
 const resetShortcut = () => {
   console.log('resetShortcut');
-  formData.value.recordShortcut = 'Shift+Command+Z';
+  if (platform === 'darwin') formData.value.recordShortcut = 'Shift+Command+Z';
+  else formData.value.recordShortcut = 'Shift+Alt+Z';
   shortcutInputRef.value.blur();
   ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
 };
