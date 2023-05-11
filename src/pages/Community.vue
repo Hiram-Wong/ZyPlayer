@@ -115,7 +115,8 @@ onMounted(() => {
 
 const getShareData = async (url) => {
   try {
-    data.value = await zy.getConfig(url);
+    const res = await zy.getConfig(url);
+    if (res.hasOwnProperty('user') && res.hasOwnProperty('share')) data.value = res;
     console.log(data.value);
   } catch (err) {
     console.log(err);
