@@ -52,6 +52,18 @@ if (!hardwareAcceleration) {
   app.disableHardwareAcceleration();
 }
 
+// 老板键隐藏恢复事件
+const showOrHidden = () => {
+  if (isHidden) {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide();
+    if (playWindow && !playWindow.isDestroyed()) playWindow.hide();
+  } else {
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show();
+    if (playWindow && !playWindow.isDestroyed()) playWindow.show();
+  }
+  isHidden = !isHidden;
+};
+
 // const { NODE_ENV } = process.env;
 
 // 保持window对象的: BrowserWindow | null全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
@@ -149,14 +161,7 @@ app.whenReady().then(() => {
   if (shortcuts) {
     globalShortcut.register(shortcuts, () => {
       // Do stuff when Y and either Command/Control is pressed.
-      if (isHidden) {
-        if (mainWindow) mainWindow.hide();
-        if (playWindow) playWindow.hide();
-      } else {
-        if (mainWindow) mainWindow.show();
-        if (playWindow) playWindow.show();
-      }
-      isHidden = !isHidden;
+      showOrHidden();
     });
   }
 
@@ -295,14 +300,7 @@ ipcMain.on('updateShortcut', (_, { shortcut }) => {
   globalShortcut.unregisterAll();
   log.info(`[ipcMain] globalShortcut-install: ${shortcut}`);
   globalShortcut.register(shortcut, () => {
-    if (isHidden) {
-      if (mainWindow) mainWindow.hide();
-      if (playWindow) playWindow.hide();
-    } else {
-      if (mainWindow) mainWindow.show();
-      if (playWindow) playWindow.show();
-    }
-    isHidden = !isHidden;
+    showOrHidden();
   });
 });
 
