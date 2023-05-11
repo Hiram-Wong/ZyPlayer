@@ -165,7 +165,7 @@
           <div class="player-container">
             <div v-show="!onlineUrl" id="xgplayer" class="xgplayer"></div>
             <iframe
-              v-show="onlineUrl"
+              v-show="onlineUrl && isSniff"
               ref="iframeRef"
               :key="onlinekey"
               class="analysis-play-box"
@@ -174,6 +174,8 @@
               frameborder="0"
               scrolling="no"
               allowfullscreen="true"
+              webkit-playsinline
+              playsinline
             ></iframe>
           </div>
         </div>
@@ -424,7 +426,7 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onDeactivated, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import Player, { Events } from 'xgplayer';
 import LivePreset from 'xgplayer/es/presets/live';
 import HlsPlugin from 'xgplayer-hls';
@@ -534,8 +536,10 @@ const isProfile = ref(false); // 简介
 
 const analyzeUrl = ref(); // 解析接口
 const onlineUrl = ref(); // 解析接口+需解析的地址
+const isSniff = ref(true); // 嗅探标识
 const iframeRef = ref(); // iframe dom节点
 const currentUrl = ref(); // 当前未解析前的url
+const snifferTimer = ref();
 
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
@@ -774,17 +778,91 @@ const initFilmPlayer = async (isFirst) => {
       onlineUrl.value = analyzeUrl.value + config.value.url;
     } else {
       // 尝试提取ck/dp播放器中的m3u8
+      console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
       try {
-        config.value.url = await zy.parserFilmUrl(config.value.url);
-        console.info(config.value.url);
+        if (ext.value.site.type === 1) {
+          console.log('正常cms提取');
+          config.value.url = await zy.parserFilmUrl(config.value.url);
+          console.info(`最终提取到的地址：${config.value.url}`);
+          xg.value = new Player(config.value);
+          timerUpdatePlayProcess();
+        } else if (ext.value.site.type === 2) {
+          console.log('嗅探');
+          MessagePlugin.info('嗅探资源中，如10s没有结果请换源,咻咻咻!');
+
+          onlineUrl.value = config.value.url;
+          isSniff.value = false;
+          sniffer();
+        }
       } catch (err) {
-        onlineUrl.value = analyzeUrl.value + config.value.url;
+        // onlineUrl.value = analyzeUrl.value + config.value.url;
         console.error(err);
       }
     }
+  } else {
+    xg.value = new Player(config.value);
+    await timerUpdatePlayProcess();
   }
-  xg.value = new Player(config.value);
-  await timerUpdatePlayProcess();
+};
+
+// 嗅探
+const sniffer = () => {
+  win.webContents.setAudioMuted(true);
+
+  const iframeWindow = iframeRef.value.contentWindow;
+
+  // 1. 只在 iframe 加载完成后执行定时器
+  iframeRef.value.addEventListener('load', () => {
+    const total_time = 20000;
+    const speeder = 2500;
+    let counter = 1;
+    const total_counter = total_time / speeder;
+    clearInterval(snifferTimer.value);
+
+    snifferTimer.value = setInterval(() => {
+      console.log(`第${counter}次嗅探开始`);
+
+      if (counter >= total_counter) {
+        clearInterval(snifferTimer.value);
+        console.log(`嗅探超时并结束，共计嗅探:${counter}次`);
+        return;
+      }
+
+      // 2. 只在加载完成后执行一次获取视频资源和 iframe 窗口的代码
+      try {
+        const resources = iframeWindow.performance.getEntriesByType('resource');
+
+        for (const resource of resources) {
+          if (resource.name.indexOf('.m3u8') > -1) {
+            console.log(`嗅探到m3u8文件:${resource.name},共计嗅探:${counter}次`);
+
+            const sniffUrl = resource.name;
+            const regex = /https?:\/\/.*(https?:\/\/([^\s"]+\/)+[^\s"]+\.m3u8)/;
+            const match = sniffUrl.match(regex);
+            console.log(match);
+
+            if (match && match.length > 1) {
+              onlineUrl.value = '';
+              console.log(`最终嗅探地址：${match[1]}`);
+              config.value.url = match[1];
+              xg.value = new Player(config.value);
+              win.webContents.setAudioMuted(false);
+              timerUpdatePlayProcess();
+            }
+
+            // 3. 如果视频资源已经被嗅探到并处理成功，可以停止定时器的执行
+            clearInterval(snifferTimer.value);
+            break;
+            return;
+          }
+        }
+      } catch (err) {
+        MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
+        console.log(`第${counter}次嗅探发生错误:${err}`);
+      }
+      counter += 1;
+    }, speeder);
+  });
 };
 
 // 初始化播放器
@@ -874,7 +952,7 @@ const getDetailInfo = async () => {
   videoList.fullList = fullList;
   info.value = videoList;
   season.value = fullList;
-  // console.log(info.value, season.value);
+  console.log(info.value, season.value);
 };
 
 // 切换选集
@@ -1512,6 +1590,7 @@ const openMainWinEvent = () => {
           width: 100%;
           height: 100vh;
           overflow: hidden;
+          background: var(--td-bg-color-page) url(../assets/bg-player.jpg) no-repeat center center;
           .analysis-play-box {
             width: 100%;
             height: 100%;

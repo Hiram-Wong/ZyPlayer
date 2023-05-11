@@ -18,9 +18,7 @@
                   >
                     <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
                   </t-select>
-                  <span class="data-item data">
-                    共{{ FilmSiteSetting.basic.recordcount ? FilmSiteSetting.basic.recordcount : 0 }}资源
-                  </span>
+                  <span class="data-item data"> 共{{ pagination.total || 0 }}资源 </span>
                 </div>
               </div>
               <div v-if="classKeywords.length !== 1" class="head-center">
@@ -217,13 +215,13 @@ const pagination = ref({
   pageIndex: 1,
   pageSize: 36,
   count: 0,
+  total: 0,
 }); // 分页请求
 const FilmSiteSetting = ref({
   basic: {
     name: '',
     key: '',
     group: '',
-    recordcount: 0,
   },
   class: {
     id: 0,
@@ -256,15 +254,6 @@ watch(
   () => FilmSiteSetting.value.basic,
   () => {
     getClass();
-  },
-);
-
-// 数据变化重新分类year area
-watch(
-  () => FilmDataList.value.list,
-  () => {
-    getFilmArea();
-    getFilmYear();
   },
 );
 
@@ -386,11 +375,10 @@ const getClass = async () => {
   try {
     const res = await zy.class(key);
 
-    const { page, pagecount, pagesize, recordcount, class: classList } = res;
-    pagination.value.pageIndex = page;
+    const { pagecount, limit, total, class: classList } = res;
     pagination.value.count = pagecount;
-    pagination.value.pageSize = pagesize;
-    FilmSiteSetting.value.basic.recordcount = recordcount;
+    pagination.value.pageSize = limit;
+    pagination.value.total = total;
 
     const allClass = [
       { type_id: 0, type_name: '最新' },
@@ -418,7 +406,6 @@ const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
-
   try {
     const res = await zy.list(key, pg, t);
     const newFilms = _.differenceWith(res, FilmDataList.value.list, _.isEqual);
@@ -454,9 +441,10 @@ const load = async ($state) => {
       if (infiniteCompleteTip.value.indexOf('刷新') === -1) infiniteCompleteTip.value = '没有更多内容了!';
       $state.complete();
     } else {
-      getFilmArea();
-      getFilmYear();
-
+      if (FilmSiteSetting.value.basic.type === 1) {
+        getFilmArea();
+        getFilmYear();
+      }
       $state.loaded();
     }
   } catch (err) {
@@ -479,6 +467,7 @@ const searchEvent = async (kw) => {
     try {
       const searchPromises = FilmSiteSetting.value.searchGroup.map((site) => {
         return zy.search(site.key, kw).then(async (res) => {
+          console.log(res);
           if (res) {
             await Promise.all(
               res.map(async (item) => {
@@ -508,6 +497,7 @@ const changeSitesEvent = async (item) => {
   sitesListSelect.value = res.id;
   FilmSiteSetting.value.basic.name = res.name;
   FilmSiteSetting.value.basic.key = res.key;
+  FilmSiteSetting.value.basic.type = res.type;
   FilmSiteSetting.value.class = {
     id: 0,
     name: '最新',
@@ -520,13 +510,19 @@ const changeSitesEvent = async (item) => {
 };
 
 // 播放
-const playEvent = (item) => {
+const playEvent = async (item) => {
   const { siteName, siteKey, vod_name } = item;
+  const { name, key, type } = FilmSiteSetting.value.basic;
 
   formSiteData.value = {
-    name: siteName || FilmSiteSetting.value.basic.name,
-    key: siteKey || FilmSiteSetting.value.basic.key,
+    name: siteName || name,
+    key: siteKey || key,
+    type,
   };
+
+  if (type === 2) {
+    item = await zy.detail(formSiteData.value.key, item.vod_id);
+  }
 
   store.updateConfig({
     type: 'film',

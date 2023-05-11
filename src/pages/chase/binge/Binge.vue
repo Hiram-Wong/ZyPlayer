@@ -52,7 +52,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref } from 'vue';
 
-import { star } from '@/lib/dexie';
+import { sites, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
 
@@ -97,6 +97,8 @@ const load = async ($state) => {
 
 // 播放
 const playEvent = async (item) => {
+  const { type } = await sites.get({ key: item.siteKey });
+
   await zy
     .detail(item.siteKey, item.videoId)
     .then((res) => {
@@ -104,7 +106,7 @@ const playEvent = async (item) => {
         type: 'film',
         data: {
           info: res,
-          ext: { site: { key: item.siteKey } },
+          ext: { site: { key: item.siteKey, type } },
         },
       });
 
