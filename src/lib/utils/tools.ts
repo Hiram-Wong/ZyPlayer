@@ -503,12 +503,17 @@ const zy = {
   async kuyunHot( date, type, plat) {
     const kuyunHotLink = `https://eye.kuyun.com/api/netplat/ranking?date=${date}&type=${type}&plat=${plat}`;
     try {
-      const { data: { data: { list } } } = await axios.get(kuyunHotLink);
-      return list.map(item => ({
-        vod_id: item.ca_id,
-        vod_name: item.name,
-        vod_hot: item.num,
-      }));
+      const res = await axios.get(kuyunHotLink);
+      const resData = res.data
+      if(resData.status){
+        return resData.data.list.map(item => ({
+          vod_id: item.ca_id,
+          vod_name: item.name,
+          vod_hot: item.num,
+        }));
+      } else {
+        return false
+      }
     } catch (err) {
       throw err;
     }

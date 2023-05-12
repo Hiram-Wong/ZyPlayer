@@ -46,15 +46,11 @@
           </div>
         </div>
         <div class="tip-warp">
-          <span>数据来源：</span>
-          <t-link
-            theme="primary"
-            underline
-            href="http://eye.kuyun.com/pages/whole-network/whole-network"
-            target="_blank"
-          >
+          <span>数据来源:</span>
+          <t-link theme="primary" href="http://eye.kuyun.com/pages/whole-network/whole-network" target="_blank">
             酷云EVE
           </t-link>
+          <span class="tip-title">更新于:{{ hotSourceUpdateTime }}</span>
         </div>
       </div>
     </template>
@@ -83,6 +79,7 @@ const props = defineProps({
 
 const hotClass = ref('movie');
 const hotSource = ref(1);
+const hotSourceUpdateTime = ref(moment().format('YYYY-MM-DD'));
 
 const loading = ref(true); // 骨架屏是否显示热播
 
@@ -160,11 +157,22 @@ const changeHotSource = () => {
 // 获取数据
 const getHotList = async () => {
   try {
-    const date = moment().subtract(1, 'days').format('YYYY-MM-DD');
-    hotList.value = await zy.kuyunHot(date, MODE_OPTIONS[hotClass.value].key, hotSource.value);
-    if (hotList.value.length) loading.value = false;
+    const retryLimit = 2; // 重试次数
+    let date = moment().format('YYYY-MM-DD');
+    for (let retry = 0; retry < retryLimit; retry++) {
+      // eslint-disable-next-line no-await-in-loop
+      const queryHotList = await zy.kuyunHot(date, MODE_OPTIONS[hotClass.value].key, hotSource.value);
+      if (queryHotList) {
+        loading.value = false;
+        hotList.value = queryHotList;
+        hotSourceUpdateTime.value = date;
+        return;
+      }
+      date = moment(date).subtract(1, 'days').format('YYYY-MM-DD');
+    }
+    MessagePlugin.warning(`获取失败: 尝试请求次数:${retryLimit}`);
   } catch (err) {
-    MessagePlugin.warning(`error:${err}`);
+    MessagePlugin.error(`error:${err}`);
     console.error(err);
   }
 };
@@ -294,6 +302,9 @@ const searchEvent = async (item) => {
     span,
     a {
       font-size: var(--td-font-size-link-small);
+    }
+    .tip-title {
+      margin-left: 10px;
     }
   }
 }
