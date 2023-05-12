@@ -28,6 +28,27 @@ const options = { // XML 转 JSON 配置
 }
 const parser = new XMLParser(options);
 
+Object.fromEntries = function fromEntries (iterable) {
+  return [...iterable].reduce((obj, [key, val]) => {
+    obj[key] = val;
+    return obj;
+  }, {});
+};
+
+const buildUrl = (url, params_str) => {
+  const u = new URL(url);
+  const p = new URLSearchParams(params_str);
+  const api = u.origin + u.pathname;
+  let params = Object.fromEntries(u.searchParams.entries());
+  let params_obj = Object.fromEntries(p.entries());
+  Object.assign(params, params_obj);
+  let plist = [];
+  for(let key in params){
+    plist.push(`${key}=${params[key]}`);
+  }
+  return api + '?' + plist.join('&')
+};
+
 // 资源爬虫
 const zy = {
   /**
@@ -38,17 +59,32 @@ const zy = {
   async class (key) {
     try {
       const site = await sites.find({key:key});
-      const url = site.api;
+      let url;
+      if(site.type === 1) {
+        url = site.api;
+      } else if(site.type === 2) {
+        url = buildUrl(site.api,`&t=1&ac=videolist`);
+      }
       const res = await axios.get(url);
       const json = res.data;
       const jsondata = json?.rss === undefined ? json : json.rss;
-      if (!jsondata?.class || !jsondata?.list) return null;
+      let classData;
+      if ( site.type === 1 ) {
+        classData = jsondata.class;
+      } else if ( site.type === 2 ) {
+        const resClass = await axios.get(site.api);
+        const jsonClass = resClass.data;
+        const jsondataClass = jsonClass?.rss === undefined ? jsonClass : jsonClass.rss;
+        classData = jsondataClass.class
+      }
+      console.log(classData)
+      if (!classData || !jsondata?.list) return null;
       return {
-        class: jsondata.class,
+        class: classData,
         page: jsondata.page,
         pagecount: jsondata.pagecount,
-        pagesize: parseInt(jsondata.limit),
-        recordcount: jsondata.total
+        limit: parseInt(jsondata.limit),
+        total: jsondata.total
       };
     } catch (err) {
       throw err;
@@ -64,7 +100,7 @@ const zy = {
   async list(key, pg = 1, t) {
     try {
       const site = await sites.find({key:key});
-      const url = t ? `${site.api}?ac=videolist&t=${t}&pg=${pg}` : `${site.api}?ac=videolist&pg=${pg}`;
+      const url = buildUrl(site.api,`?ac=videolist&t=${t}&pg=${pg}`);
       const res = await axios.get(url);
       const json = res.data;
       const jsondata = json.rss || json;
@@ -86,7 +122,7 @@ const zy = {
   async hot(key, h) {
     try {
       const site = await sites.find({key:key});
-      const url = `${site.api}?ac=hot&h=${h}`;
+      const url = buildUrl(site.api,`?ac=hot&h=${h}`);
       const res = await axios.get(url);
       const json = res.data;
       const jsondata = json.rss || json;
@@ -114,7 +150,7 @@ const zy = {
   async page (key, t) {
     try {
       const site = await sites.find({key:key});
-      let url = `${site.api}?ac=videolist`;
+      let url = buildUrl(site.api,`?ac=videolist`);
       if (t) url += `&t=${t}`;
       const res = await axios.get(url);
       // 某些源站不含页码时获取到的数据parser无法解析
@@ -148,11 +184,11 @@ const zy = {
   async search(key, wd) {
     try {
       const site = await sites.find({key:key});
-      const url = `${site.api}?wd=${encodeURIComponent(wd)}`;
+      const url = buildUrl(site.api,`?wd=${encodeURIComponent(wd)}`);
       const res = await axios.get(url, { timeout: 3000 });
       const json = res.data;
       const jsondata = json?.rss ?? json;
-      if (json && jsondata.total > 0) {
+      if (jsondata || jsondata?.list) {
         let videoList = jsondata.list;
         if (Array.isArray(videoList)) {
           return videoList;
@@ -171,7 +207,7 @@ const zy = {
   async searchFirstDetail(key, wd) {
     try {
       const site = await sites.find({key:key});
-      const url = `${site.api}?wd=${encodeURI(wd)}`
+      const url = buildUrl(site.api,`?wd=${encodeURI(wd)}`)
       const res = await axios.get(url, { timeout: 3000 })
       const json = res.data
       const jsondata = json?.rss === undefined ? json : json.rss
@@ -196,7 +232,7 @@ const zy = {
   async detail(key, id) {
     try {
       const site = await sites.find({key:key});
-      const url = `${site.api}?ac=videolist&ids=${id}`;
+      const url = buildUrl(site.api,`?ac=videolist&ids=${id}`);
       const res = await axios.get(url);
       const json = res.data;
       const jsondata = json?.rss ?? json;

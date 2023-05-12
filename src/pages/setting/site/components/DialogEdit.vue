@@ -6,6 +6,12 @@
         <t-form-item label="源站名" name="name">
           <t-input v-model="formData.name" placeholder="请输入内容" />
         </t-form-item>
+        <t-form-item label="类型" name="type">
+          <t-radio-group v-model="formData.type">
+            <t-radio :value="1">cms</t-radio>
+            <t-radio :value="2">dy</t-radio>
+          </t-radio-group>
+        </t-form-item>
         <t-form-item label="API接口" name="api">
           <t-input v-model="formData.api" placeholder="请输入内容" />
         </t-form-item>

@@ -90,6 +90,7 @@
 </template>
 
 <script setup lang="ts">
+import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import { GiftIcon, SettingIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -115,7 +116,8 @@ onMounted(() => {
 
 const getShareData = async (url) => {
   try {
-    data.value = await zy.getConfig(url);
+    const res = await zy.getConfig(url);
+    if (res.hasOwnProperty('user') && res.hasOwnProperty('share')) data.value = res;
     console.log(data.value);
   } catch (err) {
     console.log(err);
@@ -187,6 +189,13 @@ const setCommunityEvent = async (item) => {
 
   getShareData(data);
 };
+
+// 监听设置默认源变更
+const eventBus = useEventBus('community-reload');
+eventBus.on(async () => {
+  data.value = { user: { avatar: '', name: '', desc: '' }, share: [] };
+  getSetting();
+});
 </script>
 
 <style lang="less" scoped>
