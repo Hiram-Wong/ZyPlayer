@@ -19,11 +19,8 @@
                 :lazy="true"
                 fit="cover"
               >
-                <template #overlayContent>
-                  <div class="op" @click.stop="removeEvent(detail)">
-                    <!-- <delete-icon style="color: #fdfdfd" /> -->
-                    {{ detail.videoRemarks }}
-                  </div>
+                <template v-if="detail.videoRemarks" #overlayContent>
+                  <div class="op" @click.stop="removeEvent(detail)">{{ detail.videoRemarks }}</div>
                 </template>
               </t-image>
             </div>
