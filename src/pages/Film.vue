@@ -383,17 +383,21 @@ const containsClassFilterKeyword = (name) => {
 const getClass = async () => {
   const { key } = FilmSiteSetting.value.basic;
   try {
-    const res = await zy.class(key);
+    const res = await zy.classify(key);
 
-    const { pagecount, limit, total, class: classList } = res;
-    pagination.value.count = pagecount;
-    pagination.value.pageSize = limit;
-    pagination.value.total = total;
+    const { pagecount, limit, total, classData } = res;
+
+    const { pageIndex, ...rest } = pagination.value;
+    pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
+
+    let firstTypeId = 0;
+    if (FilmSiteSetting.value.basic.type === 2) firstTypeId = classData[0].type_id;
 
     const allClass = [
-      { type_id: 0, type_name: '最新' },
-      ...classList.filter((item) => !containsClassFilterKeyword(item.type_name)),
+      { type_id: firstTypeId, type_name: '最新' },
+      ...classData.filter((item) => !containsClassFilterKeyword(item.type_name)),
     ];
+
     classKeywords.value = allClass;
   } catch (err) {
     console.log(err);
@@ -402,6 +406,7 @@ const getClass = async () => {
 
 // 切换分类
 const changeClassEvent = async (item) => {
+  console.log(`切换分类${item.type_id}:${item.type_id}`);
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
   FilmDataList.value.list = [];

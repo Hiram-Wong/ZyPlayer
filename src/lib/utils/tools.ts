@@ -56,7 +56,7 @@ const zy = {
    * @param {*} key 资源网 key
    * @returns
    */
-  async class (key) {
+  async classify (key) {
     try {
       const site = await sites.find({key:key});
       let url;
@@ -80,7 +80,7 @@ const zy = {
       console.log(classData)
       if (!classData || !jsondata?.list) return null;
       return {
-        class: classData,
+        classData,
         page: jsondata.page,
         pagecount: jsondata.pagecount,
         limit: parseInt(jsondata.limit),
@@ -269,7 +269,7 @@ const zy = {
    */
   async check (key) {
     try {
-      const cls = await this.class(key)
+      const cls = await this.classify(key)
       if (cls) return true
       else return false
     } catch (err) {
