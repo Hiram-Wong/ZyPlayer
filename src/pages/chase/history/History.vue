@@ -213,11 +213,6 @@ defineExpose({
       }
     }
     &-main {
-      &:after {
-        content: '';
-        display: block;
-        clear: both;
-      }
       display: grid;
       grid-template-columns: repeat(auto-fill, 190px);
       grid-column-gap: 20px;
@@ -226,7 +221,6 @@ defineExpose({
       width: inherit;
       &-content {
         flex-direction: column;
-        float: left;
         display: inline-block;
         width: 190px;
         margin: 10px 15px 10px 0;

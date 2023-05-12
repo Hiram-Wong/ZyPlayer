@@ -182,31 +182,8 @@ defineExpose({
   overflow-y: auto;
   height: inherit;
   .main {
-    // display: flex;
-    // flex-direction: column;
-    // align-items: center;
-    // position: relative;
-    // overflow-y: auto;
-    // width: 100%;
-
     &-flow-wrap {
-      // display: grid;
-      // grid-template-columns: repeat(auto-fill, 190px);
-      // grid-column-gap: 20px;
-      // grid-row-gap: 10px;
-      // justify-content: center;
-      // width: inherit;
-
-      &:after {
-        content: '';
-        display: block;
-        clear: both;
-      }
-
       .card-wrap {
-        // flex-direction: column;
-        // position: relative;
-        float: left;
         display: inline-block;
         width: 190px;
         margin: 10px 15px 10px 0;
