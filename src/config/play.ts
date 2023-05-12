@@ -8,6 +8,6 @@ export default {
   },
   data: {
     info: {},
-    ext: [],
+    ext: {},
   },
 };

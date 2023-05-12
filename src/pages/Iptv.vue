@@ -140,28 +140,31 @@ const storeSetting = useSettingStore();
 
 const renderError = () => {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <LinkUnlinkIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
+    <div class="renderIcon">
+      <LinkUnlinkIcon size="1.5em" stroke-width=".8" />
     </div>
   );
 };
 const renderLoading = () => {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <LoadingIcon size="1.5em" stroke="#f2f2f2" stroke-width=".8" />
+    <div class="renderIcon">
+      <LoadingIcon size="1.5em" stroke-width=".8" />
     </div>
   );
 };
 
 const iptvSetting = ref({
   name: '',
-  epg: '',
+  epg: '' as string,
   skipIpv6: false,
   iptvStatus: false,
 });
-const iptvList = ref({});
+const iptvList = ref([]);
 const iptvListSelect = ref();
-const iptvDataList = ref({});
+const iptvDataList = ref({
+  list: [],
+  total: 0,
+});
 const iptvClassList = ref([{ id: '全部', name: '全部' }]);
 const iptvClassSelect = ref('全部');
 
@@ -238,15 +241,15 @@ const getChannelList = async () => {
   const sourceLength = res.list.length;
   if (iptvSetting.value.skipIpv6) {
     const filteredList = await Promise.all(
-      res.list.map(async (item: { url: string }) => {
+      res.list.map(async (item) => {
         if ((await zy.checkUrlIpv6(item.url)) !== 'IPv6') {
           return item;
         }
+        return res;
       }),
     );
     res.list = filteredList.filter(Boolean);
   }
-
   const restultLength = res.list.length;
   iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
   if (iptvSetting.value.iptvStatus) await checkChannelList(pagination.value.pageIndex, pagination.value.pageSize);
@@ -287,7 +290,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
 // 搜索
 const searchEvent = async () => {
   console.log('search');
-  iptvDataList.value = {};
+  iptvDataList.value = { list: [], total: 0 };
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
   await getChannelList();
@@ -298,7 +301,7 @@ const changeClassEvent = async (item: { name: string }) => {
   console.log('class');
   iptvClassSelect.value = item.name;
 
-  iptvDataList.value = {};
+  iptvDataList.value = { list: [], total: 0 };
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
   await getChannelList();
@@ -315,6 +318,7 @@ const playEvent = (item: { name: any }) => {
       ext: { epg, skipIpv6: iptvSetting.value.skipIpv6 },
     },
   });
+  console.log({ epg, skipIpv6: iptvSetting.value.skipIpv6 });
   ipcRenderer.send('openPlayWindow', item.name);
 };
 
@@ -326,6 +330,7 @@ const checkChannelListStatus = async (pageIndex: number, pageSize: number) => {
 
     promises.push(zy.checkChannel(iptvDataList.value.list[i].url));
 
+    // eslint-disable-next-line no-await-in-loop
     const results = await Promise.all(promises.map((p) => p.catch((error: any) => error)));
     for (let i = 0; i < results.length; i++) {
       if (results[i] !== undefined) {
@@ -355,7 +360,7 @@ const changeDefaultIptvEvent = async (event: any) => {
   getIptvSetting();
   getChannelCount();
   getIptvClass();
-  iptvDataList.value = {};
+  iptvDataList.value = { list: [], total: 0 };
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   // $state.loaded();
   pagination.value.pageIndex = 0;
@@ -418,7 +423,7 @@ const txt = (text: string) => {
 const eventBus = useEventBus('iptv-reload');
 eventBus.on(async () => {
   await Promise.all([getIptvSetting(), getChannelCount(), getIptvClass(), getChannelList()]);
-  iptvDataList.value = {};
+  iptvDataList.value = { list: [], total: 0 };
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
 });
@@ -681,5 +686,14 @@ const copyChannelEvent = () => {
       }
     }
   }
+}
+
+:deep(.renderIcon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  stroke: #f2f2f2;
 }
 </style>

@@ -209,7 +209,11 @@ const filterData = ref({
   year: '全部',
   date: [],
 }); // 过滤选择值
-const formSiteData = ref({}); // 详情组件源传参
+const formSiteData = ref({
+  neme: '',
+  key: '',
+  type: 1,
+}); // 详情组件源传参
 const formDialogHot = ref(false); // dialog是否显示热播榜
 const pagination = ref({
   pageIndex: 1,
@@ -222,6 +226,7 @@ const FilmSiteSetting = ref({
     name: '',
     key: '',
     group: '',
+    type: 1,
   },
   class: {
     id: 0,
@@ -235,7 +240,7 @@ const FilmDataList = ref({
   list: [],
   rawList: [],
 }); // Waterfall
-const sitesList = ref({}); // 全部源
+const sitesList = ref([]); // 全部源
 const sitesListSelect = ref(); // 选择的源
 const infiniteCompleteTip = ref('没有更多内容了!');
 
@@ -276,7 +281,7 @@ const filterEvent = () => {
         case '按片名':
           return a.vod_name.localeCompare(b.vod_name, 'zh-Hans-CN');
         default:
-          return new Date(b.vod_time) - new Date(a.vod_time);
+          return +new Date(b.vod_time) - +new Date(a.vod_time);
       }
     });
 
@@ -314,17 +319,22 @@ const getFilmSetting = async () => {
 
   sitesList.value = sitesAll.filter((item) => item.isActive);
 
+  const searchGroup = () => {
+    if (defaultSearch === 'site') {
+      return [{ ...FilmSiteSetting.value.basic }];
+    }
+    if (defaultSearch === 'group') {
+      return sitesList.value.filter((item) => item.group === FilmSiteSetting.value.basic.group);
+    }
+    return sitesList.value;
+  };
+
   Object.assign(FilmSiteSetting.value, {
     rootClassFilter,
     r18ClassFilter,
     change: defaultChangeModel,
     searchType: defaultSearch,
-    searchGroup:
-      defaultSearch === 'site'
-        ? [{ ...FilmSiteSetting.value.basic }]
-        : defaultSearch === 'group'
-        ? sitesList.value.filter((item) => item.group === FilmSiteSetting.value.basic.group)
-        : sitesList.value,
+    searchGroup: searchGroup(),
   });
 };
 
@@ -350,7 +360,7 @@ const getFilmYear = () => {
       _.isEqual,
     ),
   ]);
-  yearsKeywords.value = yearsKeywords.value.sort((a, b) => b - a);
+  yearsKeywords.value = yearsKeywords.value.sort((a, b) => (b as unknown as number) - (a as unknown as number));
 };
 
 // 青少年过滤
@@ -392,9 +402,8 @@ const getClass = async () => {
 
 // 切换分类
 const changeClassEvent = async (item) => {
-  const { type_id, type_name } = item;
-  FilmSiteSetting.value.class.id = type_id;
-  FilmSiteSetting.value.class.name = type_name;
+  FilmSiteSetting.value.class.id = item.type_id;
+  FilmSiteSetting.value.class.name = item.type_name;
   FilmDataList.value.list = [];
   FilmDataList.value.rawList = [];
   infiniteId.value++;
@@ -484,7 +493,7 @@ const searchEvent = async (kw) => {
       await Promise.all(searchPromises);
       console.log('complete');
     } catch (err) {
-      console.error(err);
+      console.info(err);
     }
   }
 };
@@ -511,7 +520,7 @@ const changeSitesEvent = async (item) => {
 
 // 播放
 const playEvent = async (item) => {
-  const { siteName, siteKey, vod_name } = item;
+  const { siteName, siteKey } = item;
   const { name, key, type } = FilmSiteSetting.value.basic;
 
   formSiteData.value = {
@@ -532,7 +541,7 @@ const playEvent = async (item) => {
     },
   });
 
-  ipcRenderer.send('openPlayWindow', vod_name);
+  ipcRenderer.send('openPlayWindow', item.vod_name);
 };
 
 // 监听设置默认源变更
