@@ -254,14 +254,6 @@ watch(
   { deep: true },
 );
 
-// 初始化key完成后请求class分类
-watch(
-  () => FilmSiteSetting.value.basic,
-  () => {
-    getClass();
-  },
-);
-
 onMounted(() => {
   getFilmSetting();
 });
@@ -308,11 +300,12 @@ const getFilmSetting = async () => {
   );
   if (defaultSite) {
     sitesListSelect.value = defaultSite;
-
-    const basic = await sites.get(defaultSite).catch(() => {
+    try {
+      const basic = await sites.get(defaultSite);
+      FilmSiteSetting.value.basic = basic;
+    } catch {
       infiniteCompleteTip.value = '查无此id,请前往设置-影视源重新设置默认源!';
-    });
-    FilmSiteSetting.value.basic = basic;
+    }
   } else {
     infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
   }
@@ -391,7 +384,10 @@ const getClass = async () => {
     pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
 
     let firstTypeId = 0;
-    if (FilmSiteSetting.value.basic.type === 2) firstTypeId = classData[0].type_id;
+    if (FilmSiteSetting.value.basic.type === 2) {
+      firstTypeId = classData[0].type_id;
+      FilmSiteSetting.value.class.id = firstTypeId;
+    }
 
     const allClass = [
       { type_id: firstTypeId, type_name: '最新' },
@@ -420,6 +416,7 @@ const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
+  console.log(t);
   try {
     const res = await zy.list(key, pg, t);
     const newFilms = _.differenceWith(res, FilmDataList.value.list, _.isEqual);
@@ -439,8 +436,8 @@ const getFilmList = async () => {
 const load = async ($state) => {
   console.log('loading...');
   if (!sitesListSelect.value || !FilmSiteSetting.value.basic.key) {
-    const hasNoData = infiniteCompleteTip.value.indexOf('暂无数据');
-    if (hasNoData > -1) {
+    const isNoData = infiniteCompleteTip.value.indexOf('暂无数据');
+    if (isNoData > -1) {
       $state.complete();
       return;
     }
@@ -449,6 +446,7 @@ const load = async ($state) => {
   }
 
   try {
+    await getClass();
     const resLength = searchTxt.value ? 0 : await getFilmList();
     console.log(resLength);
     if (resLength === 0) {
