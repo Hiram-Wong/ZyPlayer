@@ -270,6 +270,9 @@
 .t-dialog--default {
   .t-dialog__body{
     padding: var(--td-comp-paddingTB-l) var(--td-size-1) 0 var(--td-size-1);
+    .t-form__item {
+      margin-bottom: var(--td-comp-margin-m);
+    }
     .t-radio-group {
       margin-bottom: var(--td-comp-margin-s);
     }
@@ -288,7 +291,6 @@
       }
       .bottom-tip {
         position: absolute;
-        left: calc(var(--td-comp-paddingLR-xxl) + var(--td-size-1));
         bottom: calc(var(--td-comp-paddingTB-xxl) + 8px);
       }
       .optios {
@@ -303,10 +305,6 @@
 
 .t-popup__content {
   background-color: var(--td-bg-color-page);
-}
-
-.t-form__item {
-  margin-bottom: var(--td-comp-margin-m) !important;
 }
 
 .t-form__controls-content{
