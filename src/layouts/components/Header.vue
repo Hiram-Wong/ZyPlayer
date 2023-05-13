@@ -1,9 +1,9 @@
 <template>
-  <div class="titlebar" :class="platform === 'win32' ? 'windows' : 'linux'" @dblclick="minMaxEvent">
+  <div class="titlebar" :class="platform === 'win32' ? 'windows' : 'linux'">
     <div class="drag-region"></div>
 
     <div v-if="platform !== 'darwin'" class="window-controls">
-      <div class="control-minimize control-icon">
+      <div class="control-minimize control-icon" @click="win.minimize()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11"><path d="M11,4.9v1.1H0V4.399h11z"></path></svg>
       </div>
       <div class="control-maximize control-icon" @click="minMaxEvent">
