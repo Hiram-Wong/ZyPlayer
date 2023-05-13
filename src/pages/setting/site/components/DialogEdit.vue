@@ -8,7 +8,7 @@
         </t-form-item>
         <t-form-item label="类型" name="type">
           <t-radio-group v-model="formData.type">
-            <t-radio :value="1">cms</t-radio>
+            <t-radio :value="1">cms(json)</t-radio>
             <t-radio :value="2">drpy</t-radio>
           </t-radio-group>
         </t-form-item>
