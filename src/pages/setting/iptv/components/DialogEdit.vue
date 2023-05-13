@@ -13,9 +13,9 @@
           <t-space direction="vertical">
             <t-space>
               <t-radio-group v-model="formData.type">
-                <t-radio value="remote">远程m3u链接</t-radio>
-                <t-radio value="local">本地m3u文件</t-radio>
-                <t-radio value="batches">批量m3u8频道</t-radio>
+                <t-radio value="remote">远程链接</t-radio>
+                <t-radio value="local">本地文件</t-radio>
+                <t-radio value="batches">批量频道</t-radio>
               </t-radio-group>
             </t-space>
             <t-space>
@@ -50,7 +50,6 @@
         <t-form-item label="节目单地址" name="epg">
           <t-input v-model="formData.epg" placeholder="请输入内容" />
         </t-form-item>
-
         <div class="optios">
           <t-form-item style="float: right">
             <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>

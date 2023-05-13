@@ -23,9 +23,9 @@
           <t-space direction="vertical">
             <t-space>
               <t-radio-group v-model="formData.IptvInfo.type">
-                <t-radio value="remote">远程m3u链接</t-radio>
-                <t-radio value="local">本地m3u文件</t-radio>
-                <t-radio value="batches">批量m3u8频道</t-radio>
+                <t-radio value="remote">远程链接</t-radio>
+                <t-radio value="local">本地文件</t-radio>
+                <t-radio value="batches">批量频道</t-radio>
               </t-radio-group>
             </t-space>
             <t-space>
