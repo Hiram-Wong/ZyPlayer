@@ -138,6 +138,7 @@ const createOptions = (val) => {
 const rules = {
   name: [{ required: true, message: '请输入源站名', type: 'error' }],
   api: [{ required: true, message: '请输入Api接口url', type: 'error' }],
+  type: [{ required: true, message: ' 请选择类型', type: 'error' }],
 };
 </script>
 
