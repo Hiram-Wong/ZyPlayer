@@ -772,7 +772,7 @@ const initIptvPlayer = async () => {
     console.error(err);
   }
 
-  createPlayer('hls');
+  createPlayer('m3u8');
   // xg.value = new Player(config.value);
 };
 
@@ -817,7 +817,7 @@ const initFilmPlayer = async (isFirst) => {
           config.value.url = await zy.parserFilmUrl(config.value.url);
           console.info(`最终提取到的地址：${config.value.url}`);
           // xg.value = new Player(config.value);
-          createPlayer('hls');
+          createPlayer('m3u8');
           timerUpdatePlayProcess();
         } else if (ext.value.site.type === 2) {
           console.log('嗅探');
@@ -833,7 +833,7 @@ const initFilmPlayer = async (isFirst) => {
       }
     }
   } else {
-    createPlayer('hls');
+    createPlayer('m3u8');
     // xg.value = new Player(config.value);
     await timerUpdatePlayProcess();
   }
@@ -861,7 +861,6 @@ const sniffer = () => {
       return;
     }
 
-    // 2. 只在加载完成后执行一次获取视频资源和 iframe 窗口的代码
     try {
       const resources = iframeWindow.performance.getEntriesByType('resource');
 
@@ -886,7 +885,6 @@ const sniffer = () => {
             timerUpdatePlayProcess();
           }
 
-          // 3. 如果视频资源已经被嗅探到并处理成功，可以停止定时器的执行
           clearInterval(snifferTimer.value);
           break;
         }
