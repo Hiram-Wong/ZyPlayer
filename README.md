@@ -45,7 +45,7 @@
         "key": "39kan",
         "name": "39影视", // 名称
         "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
-        "type": 1, // 1cms资源 预留
+        "type": 1, // 1:cms(json) 2:drpy
         "jiexiUrl": "", // 需要配合解析的地址 预留
         "group": "影视", // 分组
         "isActive": true, // 是否启用 true启用 false 禁用
