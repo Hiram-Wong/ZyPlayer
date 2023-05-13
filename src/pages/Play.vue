@@ -683,7 +683,7 @@ const createPlayer = (videoType) => {
     case 'flv':
       config.value.plugins = [FlvPlugin];
       break;
-    case 'hls':
+    case 'm3u8':
       config.value.plugins = [HlsPlugin];
       break;
     default:
@@ -697,11 +697,13 @@ const createPlayer = (videoType) => {
 // 获取解析地址
 const getAnalysisData = async () => {
   try {
-    const currentSite = await sites.find({ key: ext.value.site.key });
+    let currentSite;
+    if (ext.value.site.key) currentSite = await sites.find({ key: ext.value.site.key });
     if (currentSite.jiexiUrl) {
       analyzeUrl.value = currentSite.jiexiUrl;
     } else {
       const id = await setting.get('defaultAnalyze');
+      if (!id) return;
       const item = await analyze.get(id);
       analyzeUrl.value = item.url;
       console.log(item.url);
@@ -841,7 +843,7 @@ const initFilmPlayer = async (isFirst) => {
 const sniffer = () => {
   win.webContents.setAudioMuted(true);
   const iframeWindow = iframeRef.value.contentWindow;
-  const videoFormats = ['.m3u8', '.mp4', '.flv'];
+  const videoFormats = ['m3u8', 'mp4', 'flv'];
 
   const totalTime = 10000;
   const speeder = 250;
@@ -867,7 +869,6 @@ const sniffer = () => {
         const resourceName = resource.name;
         const sniffUrl = resourceName.toLowerCase();
         const formatIndex = videoFormats.findIndex((format) => sniffUrl.indexOf(format) > -1);
-        console.log(`formatIndex${formatIndex}`);
         if (formatIndex > -1) {
           const videoFormat = videoFormats[formatIndex];
           console.log(`嗅探到${videoFormat}文件:${resourceName},共计嗅探:${counter}次`);
@@ -880,7 +881,7 @@ const sniffer = () => {
             console.log(`最终嗅探地址：${match[1]}`);
             // eslint-disable-next-line prefer-destructuring
             config.value.url = match[1];
-            createPlayer(videoFormat.slice(1));
+            createPlayer(videoFormat);
             win.webContents.setAudioMuted(false);
             timerUpdatePlayProcess();
           }
@@ -1105,7 +1106,7 @@ const timerUpdatePlayProcess = () => {
         xg.value.pause();
         return;
       }
-      autoPlayNext();
+      if (duration !== 0) autoPlayNext();
     }
 
     console.log(
