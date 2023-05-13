@@ -119,6 +119,7 @@ const onSubmit = async () => {
           type: 2,
           api: item.api,
           group: 'drpy',
+          search: item.searchable,
           isActive: true,
           status: true,
         }));

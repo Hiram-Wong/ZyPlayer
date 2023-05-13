@@ -28,9 +28,16 @@
         <t-form-item label="API接口" name="api">
           <t-input v-model="formData.siteInfo.api" class="input-item" placeholder="请输入内容" />
         </t-form-item>
-        <t-form-item label="下载接口" name="download">
-          <t-input v-model="formData.siteInfo.download" class="input-item" placeholder="请输入内容" />
+        <t-form-item label="搜索" name="search">
+          <t-radio-group v-model="formData.siteInfo.search">
+            <t-radio :value="0">关闭</t-radio>
+            <t-radio :value="1">聚合搜索</t-radio>
+            <t-radio :value="2">本站搜索</t-radio>
+          </t-radio-group>
         </t-form-item>
+        <!-- <t-form-item label="下载接口" name="download">
+          <t-input v-model="formData.siteInfo.download" class="input-item" placeholder="请输入内容" />
+        </t-form-item> -->
         <t-form-item label="解析接口" name="jiexiUrl">
           <t-input v-model="formData.siteInfo.jiexiUrl" class="input-item" placeholder="请输入内容" />
         </t-form-item>
@@ -151,6 +158,7 @@ const formData = ref({
     download: '',
     jiexiUrl: '',
     group: '',
+    search: 2,
     status: true,
     isActive: true,
     type: 1,
@@ -209,8 +217,9 @@ watch(
 );
 const rulesSingle = {
   name: [{ required: true, message: '请输入源站名', type: 'error' }],
-  api: [{ required: true, message: '请输入Api接口url', type: 'error' }],
-  type: [{ required: true, message: ' 请选择类型', type: 'error' }],
+  api: [{ required: true, message: '请输入接口', type: 'error' }],
+  type: [{ required: true, message: '请选择类型', type: 'error' }],
+  search: [{ required: true, message: '请选择搜索', type: 'error' }],
 };
 const rulesFile = {
   file: [{ required: true, message: '请上传文件', type: 'error' }],

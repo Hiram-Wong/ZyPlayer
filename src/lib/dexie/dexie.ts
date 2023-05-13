@@ -61,6 +61,14 @@ db.version(17).stores({
 })
 
 
+db.version(18).stores({
+  sites: '++id, key, name, api, download, jiexiUrl, type, isActive, group, search',
+}).upgrade(trans => {
+  trans.sites.toCollection().modify(sites => {
+    sites.search = 1
+  })
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)

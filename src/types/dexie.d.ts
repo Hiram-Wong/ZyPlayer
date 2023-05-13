@@ -47,6 +47,7 @@ interface Site {
   download: string;
   jiexiUrl?: string;
   type: number;
+  search: number;
   isActive: boolean;
   group: string;
 }

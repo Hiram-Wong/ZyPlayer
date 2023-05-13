@@ -313,13 +313,17 @@ const getFilmSetting = async () => {
   sitesList.value = sitesAll.filter((item) => item.isActive);
 
   const searchGroup = () => {
+    let selfSearch;
+    if (FilmSiteSetting.value.basic.search !== 0) selfSearch = [{ ...FilmSiteSetting.value.basic }];
     if (defaultSearch === 'site') {
-      return [{ ...FilmSiteSetting.value.basic }];
+      return selfSearch;
     }
     if (defaultSearch === 'group') {
-      return sitesList.value.filter((item) => item.group === FilmSiteSetting.value.basic.group);
+      return sitesList.value
+        .filter((item) => item.group === FilmSiteSetting.value.basic.group && item.search === 1)
+        .concat(selfSearch);
     }
-    return sitesList.value;
+    return sitesList.value.filter((item) => item.search === 1).concat(selfSearch);
   };
 
   Object.assign(FilmSiteSetting.value, {
