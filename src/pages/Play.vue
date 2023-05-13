@@ -876,14 +876,17 @@ const sniffer = () => {
           console.log(match);
 
           if (match && match.length > 1) {
-            onlineUrl.value = '';
             console.log(`最终嗅探地址：${match[1]}`);
-            // eslint-disable-next-line prefer-destructuring
             config.value.url = match[1];
-            createPlayer(videoFormat);
-            win.webContents.setAudioMuted(false);
-            timerUpdatePlayProcess();
+          } else {
+            console.log(`最终嗅探地址：${resourceName}`);
+            config.value.url = resourceName;
           }
+
+          onlineUrl.value = '';
+          createPlayer(videoFormat);
+          win.webContents.setAudioMuted(false);
+          timerUpdatePlayProcess();
 
           clearInterval(snifferTimer.value);
           break;
