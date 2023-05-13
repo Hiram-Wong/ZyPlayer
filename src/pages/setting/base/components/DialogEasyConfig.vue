@@ -4,6 +4,11 @@
       <div class="easy-config-dialog-container dialog-container-padding">
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
+          <t-radio-group v-model="formData.type">
+            <t-radio :value="1">软件接口</t-radio>
+            <t-radio :value="2">drpy接口</t-radio>
+          </t-radio-group>
+          <p v-show="formData.type === 2" class="tip">目前仅支持sites中type:1的数据</p>
           <t-textarea
             v-model="formData.url"
             class="dns-input"
@@ -11,7 +16,7 @@
             autofocus
             :autosize="{ minRows: 2, maxRows: 4 }"
           />
-          <p class="tip bottom-tip">请保障网络连通性</p>
+          <p class="tip bottom-tip">一键配置会清除已有数据源呦～</p>
           <div class="optios">
             <t-form-item style="float: right">
               <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
@@ -42,6 +47,7 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = ref({
   url: '',
+  type: 1,
 });
 
 const emit = defineEmits(['update:visible']);
@@ -64,7 +70,7 @@ const iptvEmitReload = useEventBus<string>('iptv-reload');
 const analyzeEmitReload = useEventBus<string>('analyze-reload');
 
 const onSubmit = async () => {
-  const { url } = formData.value;
+  const { url, type } = formData.value;
   if (!url) return;
   const config = await zy.getConfig(url).catch((error) => {
     MessagePlugin.error(`请求一键配置地址失败：${error}`);
@@ -86,21 +92,38 @@ const onSubmit = async () => {
       defaultIptv: '',
       defaultAnalyze: '',
     };
-    if (config.sites) {
-      if (config.sites.data) sites.bulkAdd(config.sites.data);
-      if (config.sites.default) defaultObject.defaultSite = config.sites.default;
-    }
-    if (config.iptv) {
-      if (config.iptv.data) iptv.bulkAdd(config.iptv.data);
-      if (config.iptv.default) {
-        defaultObject.defaultIptv = config.iptv.default;
-        const iptvItem = _.find(config.iptv.data, { id: config.iptv.default });
-        if (iptvItem) setChannelList(iptvItem.url);
+
+    if (type === 1) {
+      if (config.sites) {
+        if (config.sites.data) sites.bulkAdd(config.sites.data);
+        if (config.sites.default) defaultObject.defaultSite = config.sites.default;
       }
-    }
-    if (config.analyzes) {
-      if (config.analyzes.data) analyze.bulkAdd(config.analyzes.data);
-      if (config.analyzes.default) defaultObject.defaultAnalyze = config.analyzes.default;
+      if (config.iptv) {
+        if (config.iptv.data) iptv.bulkAdd(config.iptv.data);
+        if (config.iptv.default) {
+          defaultObject.defaultIptv = config.iptv.default;
+          const iptvItem = _.find(config.iptv.data, { id: config.iptv.default });
+          if (iptvItem) setChannelList(iptvItem.url);
+        }
+      }
+      if (config.analyzes) {
+        if (config.analyzes.data) analyze.bulkAdd(config.analyzes.data);
+        if (config.analyzes.default) defaultObject.defaultAnalyze = config.analyzes.default;
+      }
+    } else if (type === 2) {
+      const drpyResFilter = config.sites
+        .filter((item) => item.type === 1) // 先过滤掉不需要的数据
+        .map((item) => ({
+          key: item.key,
+          name: item.name,
+          type: 2,
+          api: item.api,
+          group: 'drpy',
+          isActive: true,
+          status: true,
+        }));
+      console.log(drpyResFilter);
+      sites.bulkAdd(drpyResFilter);
     }
     setting.update(defaultObject);
 
