@@ -269,12 +269,12 @@ const zy = {
    */
   async check (key) {
     try {
-      const cls = await this.classify(key)
-      if (cls) return true
-      else return false
+      const data = await this.list(key, 1, 1);
+      if (data) return true;
+      else return false;
     } catch (err) {
-      console.log(err)
-      return false
+      console.log(err);
+      return false;
     }
   },
   /**
