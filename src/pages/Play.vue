@@ -429,7 +429,9 @@ import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import Player, { Events } from 'xgplayer';
 import LivePreset from 'xgplayer/es/presets/live';
+import FlvPlugin from 'xgplayer-flv';
 import HlsPlugin from 'xgplayer-hls';
+import Mp4Plugin from 'xgplayer-mp4';
 
 import playerPauseIcon from '@/assets/player/pause.svg?raw';
 import playerPipIcon from '@/assets/player/pip.svg?raw';
@@ -502,7 +504,7 @@ const config = ref({
     pipIcon: playerPipIcon,
     pipIconExit: playerPipIcon,
   },
-  plugins: [HlsPlugin],
+  plugins: [],
   hls: {
     preloadTime: 90, // [点播]预加载时长，单位秒
     retryCount: 3, // 重试 3 次，默认值
@@ -513,6 +515,14 @@ const config = ref({
       mode: 'cors',
     },
   },
+  mp4plugin: {
+    maxBufferLength: 30,
+    minBufferLength: 10,
+    reqOptions: {
+      mode: 'cors',
+    },
+  },
+  flv: {},
   width: 'auto',
   height: 'calc(100vh - 50px)',
 }); // 西瓜播放器参数
@@ -664,6 +674,26 @@ onMounted(() => {
   minMaxEvent();
 });
 
+// 根据不同类型加载不同播放器
+const createPlayer = (videoType) => {
+  switch (videoType) {
+    case 'mp4':
+      config.value.plugins = [Mp4Plugin];
+      break;
+    case 'flv':
+      config.value.plugins = [FlvPlugin];
+      break;
+    case 'hls':
+      config.value.plugins = [HlsPlugin];
+      break;
+    default:
+      console.error(`unsupported video type: ${videoType}`);
+      break;
+  }
+  console.log(`加载${videoType}播放器类型`);
+  xg.value = new Player(config.value);
+};
+
 // 获取解析地址
 const getAnalysisData = async () => {
   try {
@@ -731,7 +761,6 @@ const destroyPlayer = () => {
 const initIptvPlayer = async () => {
   getChannelCount();
   if (data.value.ext.epg) getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
-
   config.value.url = info.value.url;
   try {
     const isLive = await zy.isLiveM3U8(info.value.url);
@@ -741,7 +770,8 @@ const initIptvPlayer = async () => {
     console.error(err);
   }
 
-  xg.value = new Player(config.value);
+  createPlayer('hls');
+  // xg.value = new Player(config.value);
 };
 
 // 初始化film
@@ -784,7 +814,8 @@ const initFilmPlayer = async (isFirst) => {
           console.log('正常cms提取');
           config.value.url = await zy.parserFilmUrl(config.value.url);
           console.info(`最终提取到的地址：${config.value.url}`);
-          xg.value = new Player(config.value);
+          // xg.value = new Player(config.value);
+          createPlayer('hls');
           timerUpdatePlayProcess();
         } else if (ext.value.site.type === 2) {
           console.log('嗅探');
@@ -800,7 +831,8 @@ const initFilmPlayer = async (isFirst) => {
       }
     }
   } else {
-    xg.value = new Player(config.value);
+    createPlayer('hls');
+    // xg.value = new Player(config.value);
     await timerUpdatePlayProcess();
   }
 };
@@ -808,61 +840,62 @@ const initFilmPlayer = async (isFirst) => {
 // 嗅探
 const sniffer = () => {
   win.webContents.setAudioMuted(true);
-
   const iframeWindow = iframeRef.value.contentWindow;
+  const videoFormats = ['.m3u8', '.mp4', '.flv'];
 
-  // 1. 只在 iframe 加载完成后执行定时器
-  iframeRef.value.addEventListener('load', () => {
-    const total_time = 20000;
-    const speeder = 2500;
-    let counter = 1;
-    const total_counter = total_time / speeder;
-    clearInterval(snifferTimer.value);
+  const totalTime = 10000;
+  const speeder = 250;
+  let counter = 1;
+  const totalCounter = totalTime / speeder;
+  clearInterval(snifferTimer.value);
 
-    snifferTimer.value = setInterval(() => {
-      console.log(`第${counter}次嗅探开始`);
+  snifferTimer.value = setInterval(() => {
+    console.log(`第${counter}次嗅探开始`);
 
-      if (counter >= total_counter) {
-        clearInterval(snifferTimer.value);
-        console.log(`嗅探超时并结束，共计嗅探:${counter}次`);
-        return;
-      }
+    if (counter >= totalCounter) {
+      clearInterval(snifferTimer.value);
+      MessagePlugin.warning(`嗅探超时并结束, 共计嗅探:${counter}次, 请换源`);
+      console.log(`嗅探超时并结束，共计嗅探:${counter}次`);
+      return;
+    }
 
-      // 2. 只在加载完成后执行一次获取视频资源和 iframe 窗口的代码
-      try {
-        const resources = iframeWindow.performance.getEntriesByType('resource');
+    // 2. 只在加载完成后执行一次获取视频资源和 iframe 窗口的代码
+    try {
+      const resources = iframeWindow.performance.getEntriesByType('resource');
 
-        for (const resource of resources) {
-          if (resource.name.indexOf('.m3u8') > -1) {
-            console.log(`嗅探到m3u8文件:${resource.name},共计嗅探:${counter}次`);
+      for (const resource of resources) {
+        const resourceName = resource.name;
+        const sniffUrl = resourceName.toLowerCase();
+        const formatIndex = videoFormats.findIndex((format) => sniffUrl.indexOf(format) > -1);
+        console.log(`formatIndex${formatIndex}`);
+        if (formatIndex > -1) {
+          const videoFormat = videoFormats[formatIndex];
+          console.log(`嗅探到${videoFormat}文件:${resourceName},共计嗅探:${counter}次`);
+          const regex = new RegExp(`https?:\\/\\/.*(https?:\\/\\/(?:[^\\s"]+\\/)+[^\\s"]+\\${videoFormat})`);
+          const match = sniffUrl.match(regex);
+          console.log(match);
 
-            const sniffUrl = resource.name;
-            const regex = /https?:\/\/.*(https?:\/\/([^\s"]+\/)+[^\s"]+\.m3u8)/;
-            const match = sniffUrl.match(regex);
-            console.log(match);
-
-            if (match && match.length > 1) {
-              onlineUrl.value = '';
-              console.log(`最终嗅探地址：${match[1]}`);
-              config.value.url = match[1];
-              xg.value = new Player(config.value);
-              win.webContents.setAudioMuted(false);
-              timerUpdatePlayProcess();
-            }
-
-            // 3. 如果视频资源已经被嗅探到并处理成功，可以停止定时器的执行
-            clearInterval(snifferTimer.value);
-            break;
-            return;
+          if (match && match.length > 1) {
+            onlineUrl.value = '';
+            console.log(`最终嗅探地址：${match[1]}`);
+            // eslint-disable-next-line prefer-destructuring
+            config.value.url = match[1];
+            createPlayer(videoFormat.slice(1));
+            win.webContents.setAudioMuted(false);
+            timerUpdatePlayProcess();
           }
+
+          // 3. 如果视频资源已经被嗅探到并处理成功，可以停止定时器的执行
+          clearInterval(snifferTimer.value);
+          break;
         }
-      } catch (err) {
-        MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
-        console.log(`第${counter}次嗅探发生错误:${err}`);
       }
-      counter += 1;
-    }, speeder);
-  });
+    } catch (err) {
+      MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
+      console.log(`第${counter}次嗅探发生错误:${err}`);
+    }
+    counter += 1;
+  }, speeder);
 };
 
 // 初始化播放器
