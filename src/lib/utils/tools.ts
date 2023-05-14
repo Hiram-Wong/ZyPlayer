@@ -4,6 +4,7 @@ import { XMLParser } from 'fast-xml-parser';
 import * as cheerio from 'cheerio';
 import { Parser as M3u8Parser } from 'm3u8-parser';
 import _ from 'lodash';
+import JSON5 from 'json5';
 
 import { sites } from '@/lib/dexie';
 
@@ -546,9 +547,17 @@ const zy = {
   async getConfig(url) {
     try {
       const res = await axios.get(url);
-      return res.data || false;
+      let response;
+
+      try {
+          response = JSON5.parse(res.data);
+      } catch (err) {
+          response = res.data;
+      }
+
+      return response || false;
     } catch (err) {
-      throw err;
+       throw err;
     }
   },
   /**
