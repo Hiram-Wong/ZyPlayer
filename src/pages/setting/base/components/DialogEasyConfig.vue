@@ -11,7 +11,7 @@
           </t-radio-group>
           <p v-show="formData.type === 0" class="tip">请严格遵守本软件接口格式</p>
           <p v-show="formData.type === 1" class="tip">目前仅支持sites中type:1的数据,请将js模式设置为0</p>
-          <p v-show="formData.type === 2" class="tip">目前仅支持sites中type:1且为cms(json)类型的数据,非 drpy 接口</p>
+          <p v-show="formData.type === 2" class="tip">目前仅支持sites中type:0或1且的cms类型的数据</p>
           <t-textarea
             v-model="formData.url"
             class="dns-input"

@@ -489,9 +489,12 @@ const config = ref({
   autoplay: true,
   pip: true,
   cssFullscreen: false,
-  playbackRate: { index: 7 }, // pip:6 volume:1 fullscreen:1 playbackrate:0
   enableContextmenu: true, // 允许右键
   lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
+  playbackRate: {
+    list: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+    index: 7, // pip:6 volume:1 fullscreen:1 playbackrate:0
+  },
   icons: {
     play: playerPlayIcon,
     pause: playerPauseIcon,
@@ -955,6 +958,7 @@ const formatName = (e) => {
 // 获取播放源及剧集
 const getDetailInfo = async () => {
   const videoList = info.value;
+  console.log(videoList);
 
   // 播放源
   const playFrom = videoList.vod_play_from;

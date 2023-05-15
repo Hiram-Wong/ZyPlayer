@@ -350,13 +350,23 @@ const getFilmArea = () => {
 // 获取年份
 const getFilmYear = () => {
   const { list } = FilmDataList.value;
-  [yearsKeywords.value] = _.sortedUniq([
-    _.unionWith(
-      yearsKeywords.value,
-      _.map(list, (item) => item.vod_year.split('–')[0]),
-      _.isEqual,
-    ),
-  ]);
+  if (FilmSiteSetting.value.basic.type === 0) {
+    [yearsKeywords.value] = _.sortedUniq([
+      _.unionWith(
+        yearsKeywords.value,
+        _.map(list, (item) => item.vod_year),
+        _.isEqual,
+      ),
+    ]);
+  } else {
+    [yearsKeywords.value] = _.sortedUniq([
+      _.unionWith(
+        yearsKeywords.value,
+        _.map(list, (item) => item.vod_year.split('–')[0]),
+        _.isEqual,
+      ),
+    ]);
+  }
   yearsKeywords.value = yearsKeywords.value.sort((a, b) => (b as unknown as number) - (a as unknown as number));
 };
 
@@ -457,7 +467,7 @@ const load = async ($state) => {
       if (infiniteCompleteTip.value.indexOf('刷新') === -1) infiniteCompleteTip.value = '没有更多内容了!';
       $state.complete();
     } else {
-      if (FilmSiteSetting.value.basic.type === 1) {
+      if (FilmSiteSetting.value.basic.type === 0 || FilmSiteSetting.value.basic.type === 1) {
         getFilmArea();
         getFilmYear();
       }
@@ -536,7 +546,7 @@ const playEvent = async (item) => {
     type,
   };
 
-  if (type === 2) {
+  if (type === 2 || type === 0) {
     item = await zy.detail(formSiteData.value.key, item.vod_id);
   }
 
