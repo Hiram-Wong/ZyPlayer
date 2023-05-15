@@ -13,6 +13,9 @@
       <t-tab-panel value="analyze" label="解析源">
         <analyze-view class="container-item" />
       </t-tab-panel>
+      <t-tab-panel value="lab" label=" 实验室">
+        <lab-view class="container-item" />
+      </t-tab-panel>
     </t-tabs>
   </div>
 </template>
@@ -23,6 +26,7 @@ import { ref } from 'vue';
 import analyzeView from './setting/analyze/AnalyzeSetting.vue';
 import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
+import labView from './setting/lab/labSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
 
 const settingTag = ref('ConfigBase');

@@ -1,3 +1,4 @@
+import { COLUMNS } from './../../pages/setting/analyze/constants';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import { XMLParser } from 'fast-xml-parser';
@@ -544,9 +545,12 @@ const zy = {
    * @param {*} url 需要获取的地址
    * @returns 配置文件
   */
-  async getConfig(url) {
+  async getConfig(url, header) {
     try {
-      const res = await axios.get(url);
+      let res
+      console.log(header)
+      if( header ) res = await axios.get(url, {headers: { ...header }});
+      else res = await axios.get(url);
       let response;
 
       try {

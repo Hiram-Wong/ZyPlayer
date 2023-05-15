@@ -5,10 +5,13 @@
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
           <t-radio-group v-model="formData.type">
-            <t-radio :value="1">软件接口</t-radio>
-            <t-radio :value="2">drpy接口</t-radio>
+            <t-radio :value="0">软件接口</t-radio>
+            <t-radio :value="1">drpy接口</t-radio>
+            <t-radio :value="2">tvbox接口</t-radio>
           </t-radio-group>
-          <p v-show="formData.type === 2" class="tip">目前仅支持sites中type:1的数据</p>
+          <p v-show="formData.type === 0" class="tip">请严格遵守本软件接口格式</p>
+          <p v-show="formData.type === 1" class="tip">目前仅支持sites中type:1的数据,请将js模式设置为0</p>
+          <p v-show="formData.type === 2" class="tip">目前仅支持sites中type:1且为cms(json)类型的数据,非 drpy 接口</p>
           <t-textarea
             v-model="formData.url"
             class="dns-input"
@@ -47,7 +50,7 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = ref({
   url: '',
-  type: 1,
+  type: 0,
 });
 
 const emit = defineEmits(['update:visible']);
@@ -93,7 +96,7 @@ const onSubmit = async () => {
       defaultAnalyze: '',
     };
 
-    if (type === 1) {
+    if (type === 0) {
       if (config.sites) {
         if (config.sites.data) sites.bulkAdd(config.sites.data);
         if (config.sites.default) defaultObject.defaultSite = config.sites.default;
@@ -110,15 +113,15 @@ const onSubmit = async () => {
         if (config.analyzes.data) analyze.bulkAdd(config.analyzes.data);
         if (config.analyzes.default) defaultObject.defaultAnalyze = config.analyzes.default;
       }
-    } else if (type === 2) {
+    } else {
       const drpyResFilter = config.sites
         .filter((item) => item.type === 1) // 先过滤掉不需要的数据
         .map((item) => ({
           key: item.key,
           name: item.name,
-          type: 2,
+          type: formData.value.type === 1 ? 2 : 1,
           api: item.api,
-          group: 'drpy',
+          group: formData.value.type === 1 ? 'drpy' : 'tvbox',
           search: item.searchable,
           isActive: true,
           status: true,

@@ -1,7 +1,7 @@
 // import { createMenu } from './core/menu';
 import remote from '@electron/remote/main';
 import { electronApp } from '@electron-toolkit/utils';
-import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, protocol, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
@@ -265,6 +265,11 @@ ipcMain.on('openPlayWindow', (_, arg) => {
       requestHeaders.Referer = requestUrl.origin;
     }
     callback({ requestHeaders });
+  });
+
+  // 禁止下载
+  playWindow.webContents.session.on('will-download', (event, item, webContents) => {
+    event.preventDefault();
   });
 
   playWindow.on('ready-to-show', () => {
