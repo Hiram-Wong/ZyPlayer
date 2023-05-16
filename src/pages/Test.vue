@@ -12,8 +12,7 @@ import { defineAsyncComponent, onMounted, ref } from 'vue';
 import Player from 'xgplayer';
 import HlsPlugin from 'xgplayer-hls';
 
-// import { addJS } from '@/lib/utils/utils';
-import drpy from '@/lib/drpy/drpy2';
+// import drpy from '@/lib/utils/drpy/drpy2';
 
 const xg = ref();
 // https://pps.sd-play.com/20220427/pyqCdBbv/index.m3u8
@@ -24,7 +23,7 @@ const config = ref({
 }); // 西瓜播放器参数
 onMounted(() => {
   // xg.value = new Player(config.value);
-  drpy.init('http://dy.catni.cn/js/%E6%9D%A5%E7%9C%8B%E7%82%B9%E6%92%AD.js');
+  // drpy.init('http://dy.catni.cn/js/%E6%9D%A5%E7%9C%8B%E7%82%B9%E6%92%AD.js');
 });
 </script>
 
