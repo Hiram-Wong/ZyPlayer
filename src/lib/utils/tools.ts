@@ -73,7 +73,7 @@ const zy = {
 
       let url;
       if(site.type === 1 || site.type === 0) {
-        url = site.api;
+        url = buildUrl(site.api,`?ac=class`);
       } else if(site.type === 2) {
         url = buildUrl(site.api,`&t=1&ac=videolist`);
       }
@@ -265,7 +265,7 @@ const zy = {
   async searchFirstDetail(key, wd) {
     try {
       const site = await sites.find({key:key});
-      const url = buildUrl(site.api,`?wd=${encodeURI(wd)}`)
+      const url = buildUrl(site.api,`?ac=search&wd=${encodeURI(wd)}`)
       const res = await axios.get(url)
       let json;
       if ( site.type === 0 ) json = parser.parse(res.data)
