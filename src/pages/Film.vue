@@ -1,128 +1,141 @@
 <template>
   <div class="film-container">
-    <div class="tool" :class="{ 'tool-ext': showToolbar }">
-      <div class="header">
-        <t-row justify="space-between">
-          <div class="left-operation-container">
-            <t-space align="center">
-              <div class="header-title-wrap">
-                <div class="title">
-                  <t-select
-                    v-model="sitesListSelect"
-                    placeholder="暂无选择源"
-                    size="small"
-                    :show-arrow="false"
-                    style="max-width: 80px"
-                    class="data-item source"
-                    @change="changeSitesEvent"
-                  >
-                    <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
-                  </t-select>
-                  <span class="data-item data"> 共{{ pagination.total || 0 }}资源 </span>
-                </div>
-              </div>
-              <div v-if="classKeywords.length !== 1" class="head-center">
-                <p class="head-center-class">{{ FilmSiteSetting.class.name }}</p>
-                <t-popup
-                  placement="bottom-left"
-                  :overlay-inner-style="{
-                    marginTop: '16px',
-                    width: '570px',
-                    boxShadow: 'none',
-                    lineHeight: '46px',
-                    padding: '5px 0',
-                    zIndex: '999',
-                    background: 'var(--td-bg-color-page)',
-                  }"
-                  attach=".head-center"
+    <div class="header">
+      <t-row justify="space-between">
+        <div class="left-operation-container">
+          <t-space align="center">
+            <div class="header-title-wrap">
+              <div class="title">
+                <t-select
+                  v-model="sitesListSelect"
+                  placeholder="暂无选择源"
+                  size="small"
+                  :show-arrow="false"
+                  style="max-width: 80px"
+                  class="data-item source"
+                  @change="changeSitesEvent"
                 >
-                  <more-icon size="1.5rem" style="transform: rotate(90deg)" />
-                  <template #content>
-                    <div class="content-items">
-                      <div v-for="item in classKeywords" :key="item.type_id" class="content-item">
-                        <span variant="text" @click="changeClassEvent(item)">
-                          {{ item.type_name }}
-                        </span>
-                      </div>
-                    </div>
-                  </template>
-                </t-popup>
+                  <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
+                </t-select>
+                <span class="data-item data"> 共{{ pagination.total || 0 }}资源 </span>
               </div>
-            </t-space>
-          </div>
-          <div class="right-operation-container">
-            <t-space align="center">
-              <search-view :site="FilmSiteSetting.basic" @search="searchEvent" />
-              <div class="quick_item quick_filter">
-                <view-module-icon size="large" @click="showToolbar = !showToolbar" />
-              </div>
-            </t-space>
-          </div>
-        </t-row>
-      </div>
-      <!-- 过滤工具栏 -->
-      <div v-show="showToolbar" class="toolbar">
-        <!-- 地区 -->
-        <div class="tags">
-          <div class="tags-list">
-            <div class="item title">地区</div>
-            <div class="wp">
-              <div
-                v-for="item in areasKeywords"
-                :key="item"
-                class="item"
-                :class="{ active: filterData.area === item }"
-                :label="item"
-                :value="item"
-                @click="changeFilterEvent('area', item)"
+            </div>
+            <div v-if="classKeywords.length !== 1" class="head-center">
+              <p class="head-center-class">{{ FilmSiteSetting.class.name }}</p>
+              <t-popup
+                placement="bottom-left"
+                :overlay-inner-style="{
+                  marginTop: '16px',
+                  width: '570px',
+                  boxShadow: 'none',
+                  lineHeight: '46px',
+                  padding: '5px 0',
+                  zIndex: '999',
+                  background: 'var(--td-bg-color-page)',
+                }"
+                attach=".head-center"
               >
-                {{ item }}
-              </div>
+                <more-icon size="1.5rem" style="transform: rotate(90deg)" />
+                <template #content>
+                  <div class="content-items">
+                    <div v-for="item in classKeywords" :key="item.type_id" class="content-item">
+                      <span variant="text" @click="changeClassEvent(item)">
+                        {{ item.type_name }}
+                      </span>
+                    </div>
+                  </div>
+                </template>
+              </t-popup>
+            </div>
+          </t-space>
+        </div>
+        <div class="right-operation-container">
+          <t-space align="center">
+            <search-view :site="FilmSiteSetting.basic" @search="searchEvent" />
+            <div v-if="!(FilmSiteSetting.basic.type === 2 && filter.data.length === 0)" class="quick_item quick_filter">
+              <view-module-icon size="large" @click="showToolbar = !showToolbar" />
+            </div>
+          </t-space>
+        </div>
+      </t-row>
+    </div>
+    <!-- 过滤工具栏 -->
+    <div v-show="showToolbar" class="filter">
+      <!-- drpy -->
+      <div v-if="FilmSiteSetting.basic.type === 2" class="tags">
+        <div v-for="filterItem in filter.data" :key="filterItem.key" class="tags-list">
+          <div class="item title">{{ filterItem.name }}</div>
+          <div class="wp">
+            <div
+              v-for="item in filterItem.value"
+              :key="item"
+              class="item"
+              :class="{ active: filter.select[filterItem.key] === item.v }"
+              :label="item.n"
+              :value="item.v"
+              @click="changeFilterEvent(filterItem.key, item.v)"
+            >
+              {{ item.n }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- cms -->
+      <div v-else class="tags">
+        <!-- 地区 -->
+        <div class="tags-list">
+          <div class="item title">地区</div>
+          <div class="wp">
+            <div
+              v-for="item in areasKeywords"
+              :key="item"
+              class="item"
+              :class="{ active: filter.select.area === item }"
+              :label="item"
+              :value="item"
+              @click="changeFilterEvent('area', item)"
+            >
+              {{ item }}
             </div>
           </div>
         </div>
         <!-- 日期 -->
-        <div class="tags">
-          <div class="tags-list">
-            <div class="item title">年份</div>
-            <div class="wp">
-              <div
-                v-for="item in yearsKeywords"
-                :key="item"
-                class="item"
-                :class="{ active: filterData.year === item }"
-                :label="item"
-                :value="item"
-                @click="changeFilterEvent('year', item)"
-              >
-                {{ item }}
-              </div>
+        <div class="tags-list">
+          <div class="item title">年份</div>
+          <div class="wp">
+            <div
+              v-for="item in yearsKeywords"
+              :key="item"
+              class="item"
+              :class="{ active: filter.select.year === item }"
+              :label="item"
+              :value="item"
+              @click="changeFilterEvent('year', item)"
+            >
+              {{ item }}
             </div>
           </div>
         </div>
-
         <!-- 排序 -->
-        <div class="tags">
-          <div class="tags-list">
-            <div class="item title">排序</div>
-            <div class="wp">
-              <div
-                v-for="item in sortKeywords"
-                :key="item"
-                class="item"
-                :class="{ active: filterData.sort === item }"
-                :label="item"
-                :value="item"
-                @click="changeFilterEvent('sort', item)"
-              >
-                {{ item }}
-              </div>
+        <div class="tags-list">
+          <div class="item title">排序</div>
+          <div class="wp">
+            <div
+              v-for="item in sortKeywords"
+              :key="item"
+              class="item"
+              :class="{ active: filter.select.sort === item }"
+              :label="item"
+              :value="item"
+              @click="changeFilterEvent('sort', item)"
+            >
+              {{ item }}
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="main" :class="{ 'main-ext': showToolbar }">
+    <div class="main">
       <div class="main-flow-wrap">
         <div v-for="item in FilmDataList.list" :key="item.id" class="card-wrap">
           <div class="card" @click="playEvent(item)">
@@ -201,14 +214,6 @@ const areasKeywords = ref(['全部']); // 过滤地区
 const yearsKeywords = ref(['全部']); // 过滤年份
 const classKeywords = ref([{ type_id: 0, type_name: '最新' }]); // 过滤类型
 
-const filterData = ref({
-  site: '',
-  sort: '按更新时间',
-  class: '',
-  area: '全部',
-  year: '全部',
-  date: [],
-}); // 过滤选择值
 const formSiteData = ref({
   neme: '',
   key: '',
@@ -240,28 +245,30 @@ const FilmDataList = ref({
   list: [],
   rawList: [],
 }); // Waterfall
+const filter = ref({
+  data: {},
+  format: {},
+  select: {
+    site: '',
+    sort: '按更新时间',
+    class: '',
+    area: '全部',
+    year: '全部',
+    date: [],
+  },
+});
 const sitesList = ref([]); // 全部源
 const sitesListSelect = ref(); // 选择的源
 const infiniteCompleteTip = ref('没有更多内容了!');
-
-// 深度监听过滤条件变更
-watch(
-  () => filterData.value,
-  (val) => {
-    console.log(val);
-    filterEvent();
-  },
-  { deep: true },
-);
 
 onMounted(() => {
   getFilmSetting();
 });
 
-// 筛选
+// cms筛选：基于已有数据
 const filterEvent = () => {
   const { rawList } = FilmDataList.value;
-  const { area, year, sort } = filterData.value;
+  const { area, year, sort } = filter.value.select;
 
   const filteredData = rawList
     .filter((item) => area === '全部' || item.vod_area.includes(area))
@@ -282,9 +289,32 @@ const filterEvent = () => {
   FilmDataList.value.list = uniqueData;
 };
 
+// drpy筛选：基于接口
+const filterDrpyEvent = async () => {
+  const filterFormat = Object.entries(filter.value.select).reduce((item, [key, value]) => {
+    if (value !== '' && value.length !== 0) {
+      item[key] = value;
+    }
+    return item;
+  }, {});
+
+  console.log(filterFormat);
+  filter.value.format = filterFormat;
+  console.log(filter.value.format);
+
+  FilmDataList.value.list = [];
+  FilmDataList.value.rawList = [];
+  infiniteId.value++;
+  pagination.value.pageIndex = 1;
+};
+
 // 筛选条件切换
 const changeFilterEvent = (type, item) => {
-  filterData.value[type] = item;
+  console.log(`[筛选变更] ${type}:${item}`);
+  filter.value.select[type] = item;
+
+  if (FilmSiteSetting.value.basic.type === 2) filterDrpyEvent();
+  else filterEvent();
 };
 
 const getFilmSetting = async () => {
@@ -309,6 +339,8 @@ const getFilmSetting = async () => {
   } else {
     infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
   }
+
+  await getClass();
 
   sitesList.value = sitesAll.filter((item) => item.isActive);
 
@@ -392,15 +424,25 @@ const getClass = async () => {
   try {
     const res = await zy.classify(key);
 
-    const { pagecount, limit, total, classData } = res;
+    const { pagecount, limit, total, classData, filters } = res;
 
     const { pageIndex, ...rest } = pagination.value;
     pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
+    filter.value.data = filters;
 
     let firstTypeId = 0;
     if (FilmSiteSetting.value.basic.type === 2) {
       firstTypeId = classData[0].type_id;
       FilmSiteSetting.value.class.id = firstTypeId;
+
+      if (filters.length !== 0) {
+        const result = {};
+        filters.forEach((item) => {
+          result[item.key] = item.value[0].v;
+        });
+        filter.value.select = result;
+        console.log(filter.value.select);
+      }
     }
 
     const allClass = [
@@ -416,7 +458,7 @@ const getClass = async () => {
 
 // 切换分类
 const changeClassEvent = async (item) => {
-  console.log(`切换分类${item.type_id}:${item.type_id}`);
+  console.log(`[分类变更] ${item.type_id}:${item.type_id}`);
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
   FilmDataList.value.list = [];
@@ -430,14 +472,19 @@ const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
-  console.log(t);
+  const f = JSON.stringify({ ...filter.value.format });
+  console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${f}`);
+
   try {
-    const res = await zy.list(key, pg, t);
+    let res;
+    if (f) res = await zy.list(key, pg, t, f);
+    else res = await zy.list(key, pg, t);
+
     const newFilms = _.differenceWith(res, FilmDataList.value.list, _.isEqual);
     FilmDataList.value.list = [...FilmDataList.value.list, ...newFilms];
     FilmDataList.value.rawList = [...FilmDataList.value.rawList, ...res];
     pagination.value.pageIndex++;
-    if (showToolbar.value) filterEvent();
+    if (showToolbar.value && FilmSiteSetting.value.basic.type !== 2) filterEvent();
     return newFilms.length;
   } catch (err) {
     infiniteCompleteTip.value = '网络请求失败, 请尝试手动刷新!';
@@ -460,7 +507,6 @@ const load = async ($state) => {
   }
 
   try {
-    await getClass();
     const resLength = searchTxt.value ? 0 : await getFilmList();
     console.log(resLength);
     if (resLength === 0) {
@@ -529,6 +575,18 @@ const changeSitesEvent = async (item) => {
     name: '最新',
   };
   FilmDataList.value = { list: [], rawList: [] };
+  filter.value = {
+    data: {},
+    format: {},
+    select: {
+      site: '',
+      sort: '按更新时间',
+      class: '',
+      area: '全部',
+      year: '全部',
+      data: [],
+    },
+  };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 
@@ -571,6 +629,18 @@ eventBus.on(async () => {
   };
   await getClass();
   FilmDataList.value = { list: [], rawList: [] };
+  filter.value = {
+    data: {},
+    format: {},
+    select: {
+      site: '',
+      sort: '按更新时间',
+      class: '',
+      area: '全部',
+      year: '全部',
+      data: [],
+    },
+  };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
   await getFilmList();
@@ -585,343 +655,341 @@ eventBus.on(async () => {
 .film-container {
   overflow: hidden;
   position: relative;
-  .tool-ext {
-    height: 200px !important;
-  }
-  .tool {
-    height: 50px;
-    padding: 0 10px 0 0;
-    .header,
-    .toolbar {
-      margin-bottom: 10px;
-    }
-    .header {
-      .left-operation-container {
-        .header-title-wrap {
-          .title {
-            .data-item {
-              display: block;
-              line-height: 1rem;
-            }
-            .source {
-              :deep(.t-input) {
-                padding: 0;
-                border-style: none !important;
-                font-size: 0.8rem;
-                font-weight: bold;
-              }
-              :deep(.t-input--focused) {
-                border-color: rgba(255, 255, 255, 0) !important;
-                box-shadow: none !important;
-              }
-            }
-            .data {
-              font-size: 0.7rem;
-            }
-          }
-        }
-        .head-center {
-          .head-center-class {
-            max-width: 75px;
-            height: 23px;
-            font-size: 18px;
-            font-weight: bold;
-            float: left;
-            margin-right: 5px;
-          }
+  height: calc(100vh - var(--td-comp-size-l));
+  display: flex;
+  flex-direction: column;
 
-          .content-items {
-            overflow: hidden;
-            width: 100%;
-            .content-item {
-              float: left;
-              box-sizing: border-box;
-              width: 92px;
-              padding-left: 30px;
-              height: 46px;
-              cursor: pointer;
-              span {
-                text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
-                font-size: 15px;
-                font-weight: 500;
-                display: inline-block;
-                width: 62px;
-                max-width: 62px;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                &:hover {
-                  color: var(--td-brand-color);
-                }
-              }
+  .header,
+  .filter {
+    margin-bottom: 10px;
+  }
+  .header {
+    .left-operation-container {
+      .header-title-wrap {
+        .title {
+          .data-item {
+            display: block;
+            line-height: 1rem;
+          }
+          .source {
+            :deep(.t-input) {
+              padding: 0;
+              border-style: none !important;
+              font-size: 0.8rem;
+              font-weight: bold;
             }
+            :deep(.t-input--focused) {
+              border-color: rgba(255, 255, 255, 0) !important;
+              box-shadow: none !important;
+            }
+          }
+          .data {
+            font-size: 0.7rem;
           }
         }
       }
-      .right-operation-container {
-        .act {
-          width: 518px !important;
+      .head-center {
+        .head-center-class {
+          max-width: 75px;
+          height: 23px;
+          font-size: 18px;
+          font-weight: bold;
+          float: left;
+          margin-right: 5px;
         }
-        .search-box {
-          z-index: 999;
 
-          position: relative;
-          // width: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          // background-image: linear-gradient(130deg, rgba(85, 187, 56, 0.3) 0%, rgba(124, 212, 118, 0.2) 100%);
-          // background-image: linear-gradient(140deg, rgba(255, 228, 231, 0.8) 0%, rgba(244, 244, 255, 0.85) 100%);
-          background-color: var(--bg-color-theme-transparent);
-          border-radius: 25px;
+        .content-items {
           overflow: hidden;
-          font-size: 14px;
-          backdrop-filter: blur(40px);
-
-          animation: fs-mask-hide 0.2s ease both;
-          width: 260px;
-          .hd-search-inner {
-            width: 100%;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            .hd-input {
-              flex-grow: 1;
-              border: none;
-              box-sizing: border-box;
-              width: 0;
-              height: 100%;
-              // color: rgba(255, 255, 255, 0.6);
-              padding-left: 20px;
-              background: none;
-              outline: none;
-              font-size: 14px;
+          width: 100%;
+          .content-item {
+            float: left;
+            box-sizing: border-box;
+            width: 92px;
+            padding-left: 30px;
+            height: 46px;
+            cursor: pointer;
+            span {
+              text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+              font-size: 15px;
+              font-weight: 500;
+              display: inline-block;
+              width: 62px;
+              max-width: 62px;
+              overflow: hidden;
+              white-space: nowrap;
               text-overflow: ellipsis;
-              ::input-placeholder {
-                color: red;
-              }
-            }
-            .search-hotlink {
-              color: rgba(255, 255, 255, 0.6);
-              display: flex;
-              align-items: center;
-              flex-shrink: 0;
-              height: 100%;
-              text-decoration: none;
               &:hover {
                 color: var(--td-brand-color);
-                .search-hotlink-icon {
-                  color: var(--td-brand-color);
-                }
-              }
-              .search-hotlink-icon {
-                width: 14px;
-                height: 14px;
-                color: rgba(255, 255, 255, 0.6);
-                vertical-align: middle;
-              }
-            }
-            .search-button-box {
-              flex-shrink: 0;
-              width: 40px;
-              height: 45px;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              padding-left: 10px;
-              box-sizing: border-box;
-            }
-          }
-          .hd-result {
-            width: 100%;
-            // display: none;
-            max-height: calc(100vh - 75px);
-            overflow-x: hidden;
-            overflow-y: auto;
-            .top-line {
-              border-top: 1px solid rgba(0, 0, 0, 0.04);
-              margin: 0 20px;
-            }
-
-            .search-hot {
-              .search-head {
-                display: flex;
-                justify-content: space-between;
-                position: relative;
-                margin: 18px 20px 5px;
-                overflow: hidden;
-                color: #999;
-                .search-title {
-                  color: rgba(255, 255, 255, 0.5);
-                  font-weight: 600;
-                }
-              }
-              .search-body {
-                margin: 12px 16px 0 20px;
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                .num-svg {
-                  flex-shrink: 0;
-                  width: 60px;
-                  color: #fff;
-                  opacity: 0.3;
-                  font-weight: 700;
-                }
-
-                .txt {
-                  width: 100px;
-                  display: flex;
-                  flex-direction: column;
-                  justify-content: center;
-                  flex-grow: 1;
-                  line-height: 22px;
-                  margin-top: 8px;
-                }
-
-                a:nth-child(-n + 4) {
-                  margin-bottom: 20px;
-                  width: 25%;
-                }
-
-                a:nth-child(-n + 4) .num,
-                a:nth-child(n + 5) .num-svg {
-                  display: none;
-                }
-
-                a:nth-child(n + 5) {
-                  width: 50%;
-                  align-items: center;
-                  margin-left: -10px;
-                  .num {
-                    width: 20px;
-                    font-size: 18px;
-                    opacity: 0.4;
-                    text-align: right;
-                    font-weight: 700;
-                    flex-shrink: 0;
-                    line-height: 18px;
-                  }
-                  .name {
-                    width: auto;
-                    margin-top: 0;
-                    margin-left: 9px;
-                  }
-                  .info {
-                    margin-left: 0;
-                    width: 0;
-                  }
-                  .txt {
-                    width: 100%;
-                    margin: 0;
-                    line-height: 18px;
-                  }
-                  .name {
-                    width: auto;
-                    margin-top: 0;
-                    margin-left: 9px;
-                  }
-                }
-
-                a:nth-child(n + 5) .pic,
-                a:nth-child(n + 5) .remarks {
-                  display: none;
-                }
-
-                a {
-                  display: flex;
-                  flex-direction: row;
-                  margin-bottom: 16px;
-                  color: rgba(0, 0, 0, 0.9);
-                }
-
-                .info {
-                  display: flex;
-                  flex-direction: column;
-                  flex-grow: 1;
-                  margin-left: -25px;
-                  z-index: 1;
-                }
-
-                .pic {
-                  width: 64px;
-                  height: 87px;
-                  flex-shrink: 0;
-                  box-shadow: -6px 0 12px 0 rgba(0, 0, 0, 0.4);
-                  border-radius: 4px;
-                  overflow: hidden;
-                  img {
-                    width: 100%;
-                    height: 100%;
-                  }
-                }
-
-                .name,
-                .remarks {
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
-                  overflow: hidden;
-                }
               }
             }
           }
         }
       }
     }
-    .toolbar {
-      position: relative;
-      margin-bottom: 10px;
-      .tags {
-        .tags-list {
-          padding: 5px 0;
-          &:after {
-            clear: both;
-            display: block;
-            height: 0;
-            visibility: hidden;
-            content: '';
-          }
-          .title {
-            float: left;
-            width: 50px;
-            overflow: hidden;
+    .right-operation-container {
+      .act {
+        width: 518px !important;
+      }
+      .search-box {
+        z-index: 999;
+
+        position: relative;
+        // width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        // background-image: linear-gradient(130deg, rgba(85, 187, 56, 0.3) 0%, rgba(124, 212, 118, 0.2) 100%);
+        // background-image: linear-gradient(140deg, rgba(255, 228, 231, 0.8) 0%, rgba(244, 244, 255, 0.85) 100%);
+        background-color: var(--bg-color-theme-transparent);
+        border-radius: 25px;
+        overflow: hidden;
+        font-size: 14px;
+        backdrop-filter: blur(40px);
+
+        animation: fs-mask-hide 0.2s ease both;
+        width: 260px;
+        .hd-search-inner {
+          width: 100%;
+          height: 38px;
+          display: flex;
+          align-items: center;
+          .hd-input {
+            flex-grow: 1;
+            border: none;
+            box-sizing: border-box;
+            width: 0;
+            height: 100%;
+            // color: rgba(255, 255, 255, 0.6);
+            padding-left: 20px;
+            background: none;
+            outline: none;
+            font-size: 14px;
             text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: left;
-            cursor: auto;
+            ::input-placeholder {
+              color: red;
+            }
+          }
+          .search-hotlink {
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            height: 100%;
+            text-decoration: none;
+            &:hover {
+              color: var(--td-brand-color);
+              .search-hotlink-icon {
+                color: var(--td-brand-color);
+              }
+            }
+            .search-hotlink-icon {
+              width: 14px;
+              height: 14px;
+              color: rgba(255, 255, 255, 0.6);
+              vertical-align: middle;
+            }
+          }
+          .search-button-box {
+            flex-shrink: 0;
+            width: 40px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            box-sizing: border-box;
+          }
+        }
+        .hd-result {
+          width: 100%;
+          // display: none;
+          max-height: calc(100vh - 75px);
+          overflow-x: hidden;
+          overflow-y: auto;
+          .top-line {
+            border-top: 1px solid rgba(0, 0, 0, 0.04);
+            margin: 0 20px;
+          }
+
+          .search-hot {
+            .search-head {
+              display: flex;
+              justify-content: space-between;
+              position: relative;
+              margin: 18px 20px 5px;
+              overflow: hidden;
+              color: #999;
+              .search-title {
+                color: rgba(255, 255, 255, 0.5);
+                font-weight: 600;
+              }
+            }
+            .search-body {
+              margin: 12px 16px 0 20px;
+              display: flex;
+              flex-direction: row;
+              flex-wrap: wrap;
+              justify-content: space-between;
+              .num-svg {
+                flex-shrink: 0;
+                width: 60px;
+                color: #fff;
+                opacity: 0.3;
+                font-weight: 700;
+              }
+
+              .txt {
+                width: 100px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                flex-grow: 1;
+                line-height: 22px;
+                margin-top: 8px;
+              }
+
+              a:nth-child(-n + 4) {
+                margin-bottom: 20px;
+                width: 25%;
+              }
+
+              a:nth-child(-n + 4) .num,
+              a:nth-child(n + 5) .num-svg {
+                display: none;
+              }
+
+              a:nth-child(n + 5) {
+                width: 50%;
+                align-items: center;
+                margin-left: -10px;
+                .num {
+                  width: 20px;
+                  font-size: 18px;
+                  opacity: 0.4;
+                  text-align: right;
+                  font-weight: 700;
+                  flex-shrink: 0;
+                  line-height: 18px;
+                }
+                .name {
+                  width: auto;
+                  margin-top: 0;
+                  margin-left: 9px;
+                }
+                .info {
+                  margin-left: 0;
+                  width: 0;
+                }
+                .txt {
+                  width: 100%;
+                  margin: 0;
+                  line-height: 18px;
+                }
+                .name {
+                  width: auto;
+                  margin-top: 0;
+                  margin-left: 9px;
+                }
+              }
+
+              a:nth-child(n + 5) .pic,
+              a:nth-child(n + 5) .remarks {
+                display: none;
+              }
+
+              a {
+                display: flex;
+                flex-direction: row;
+                margin-bottom: 16px;
+                color: rgba(0, 0, 0, 0.9);
+              }
+
+              .info {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+                margin-left: -25px;
+                z-index: 1;
+              }
+
+              .pic {
+                width: 64px;
+                height: 87px;
+                flex-shrink: 0;
+                box-shadow: -6px 0 12px 0 rgba(0, 0, 0, 0.4);
+                border-radius: 4px;
+                overflow: hidden;
+                img {
+                  width: 100%;
+                  height: 100%;
+                }
+              }
+
+              .name,
+              .remarks {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  .filter {
+    position: relative;
+    height: auto;
+    transition: height 0.3s;
+    .tags {
+      .tags-list {
+        padding-top: var(--td-comp-paddingTB-xs);
+        &:after {
+          clear: both;
+          display: block;
+          height: 0;
+          visibility: hidden;
+          content: '';
+        }
+        .title {
+          float: left;
+          width: 50px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          text-align: left;
+          cursor: auto;
+          box-sizing: border-box;
+          height: 30px;
+          font-weight: 400;
+          font-size: 15px;
+          line-height: 30px;
+        }
+        .wp {
+          float: left;
+          width: calc(100% - 50px);
+          overflow-y: auto;
+          white-space: nowrap;
+          &::-webkit-scrollbar {
+            height: 8px;
+            background: transparent;
+          }
+          .item {
+            display: inline-block;
+            padding: 0 14px;
+            margin-right: 5px;
             box-sizing: border-box;
             height: 30px;
             font-weight: 400;
-            font-size: 15px;
+            font-size: 13px;
             line-height: 30px;
+            text-align: center;
+            cursor: pointer;
           }
-          .wp {
-            float: left;
-            width: calc(100% - 50px);
-            overflow-y: auto;
-            white-space: nowrap;
-            &::-webkit-scrollbar {
-              height: 8px;
-              background: transparent;
-            }
-            .item {
-              display: inline-block;
-              padding: 0 14px;
-              margin-right: 5px;
-              box-sizing: border-box;
-              height: 30px;
-              font-weight: 400;
-              font-size: 13px;
-              line-height: 30px;
-              text-align: center;
-              cursor: pointer;
-            }
-            .active {
-              height: 30px;
-              border-radius: 20px;
-              background: var(--td-bg-color-component);
-            }
+          .active {
+            height: 30px;
+            border-radius: 20px;
+            background: var(--td-bg-color-component);
           }
         }
       }
@@ -932,8 +1000,8 @@ eventBus.on(async () => {
     height: calc(100vh - 55px - 150px - var(--td-comp-size-l)) !important;
   }
   .main {
+    flex-grow: 1;
     overflow-y: auto;
-    height: calc(100vh - 55px - var(--td-comp-size-l));
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -1,4 +1,3 @@
-import { COLUMNS } from './../../pages/setting/analyze/constants';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import { XMLParser } from 'fast-xml-parser';
@@ -90,6 +89,7 @@ const zy = {
       let pagecount;
       let limit;
       let total;
+      let filters;
 
       if ( site.type === 0 ) {
         const arr = []
@@ -107,12 +107,14 @@ const zy = {
         pagecount = jsondata.list._pagecount;
         limit = parseInt(jsondata.list._pagesize);
         total = jsondata.list._recordcount;
+        filters = [];
       } else if ( site.type === 1 ) {
         classData = jsondata.class;
         page = jsondata.page;
         pagecount = jsondata.pagecount;
         limit = parseInt(jsondata.limit);
         total = jsondata.total;
+        filters = [];
       } else if ( site.type === 2 ) {
         const resClass = await axios.get(site.api);
         const jsonClass = resClass.data;
@@ -122,8 +124,10 @@ const zy = {
         pagecount = jsondata.pagecount;
         limit = parseInt(jsondata.limit);
         total = jsondata.total;
+        filters = jsonClass?.filters === undefined ? [] : jsonClass.filters[1];
       }
-      console.log(classData)
+      console.log(classData);
+      console.log(filters);
 
       if (!classData || !jsondata?.list) return null;
 
@@ -132,7 +136,8 @@ const zy = {
         page,
         pagecount,
         limit,
-        total
+        total,
+        filters
       };
     } catch (err) {
       throw err;
@@ -161,10 +166,12 @@ const zy = {
       vod_actor: item.actor,
     }))
   },
-  async list(key, pg = 1, t) {
+  async list(key, pg = 1, t, f = {}) {
     try {
       const site = await sites.find({key:key});
-      const url = buildUrl(site.api,`?ac=videolist&t=${t}&pg=${pg}`);
+      let url;
+      url = buildUrl(site.api,`?ac=videolist&t=${t}&pg=${pg}`);
+      if ( f ) url = buildUrl(site.api,`?ac=videolist&t=${t}&pg=${pg}&f=${f}`);
       const res = await axios.get(url);
       let json;
       if ( site.type === 0 ) json = parser.parse(res.data)
