@@ -1,71 +1,83 @@
 <template>
   <div class="iptv-container">
-    <div class="tool">
-      <t-row justify="space-between">
-        <div class="left-operation-container">
-          <t-space align="center">
-            <div class="title">
-              <t-select
-                v-model="iptvListSelect"
-                placeholder="暂无选择源"
-                size="small"
-                :show-arrow="false"
-                style="max-width: 80px"
-                class="data-item source"
-                @change="changeDefaultIptvEvent"
-              >
-                <t-option v-for="item in iptvList" :key="item.id" :label="item.name" :value="item.id" />
-              </t-select>
-              <span class="data-item data">共{{ pagination.count ? pagination.count : 0 }}频道</span>
-            </div>
-            <div v-if="iptvClassList.length !== 1" class="head-center">
-              <p class="head-center-class">{{ iptvClassSelect }}</p>
-              <t-popup
-                placement="bottom-left"
-                :overlay-inner-style="{
-                  marginTop: '16px',
-                  width: '570px',
-                  boxShadow: 'none',
-                  lineHeight: '46px',
-                  padding: '5px 0',
-                  zIndex: '999',
-                  background: 'var(--td-bg-color-page)',
-                }"
-                attach=".head-center"
-              >
-                <more-icon size="1.5rem" style="transform: rotate(90deg)" />
-                <template #content>
-                  <div class="content-items">
-                    <div v-for="item in iptvClassList" :key="item.id" class="content-item">
-                      <span variant="text" @click="changeClassEvent(item)">
-                        {{ item.name }}
-                      </span>
-                    </div>
-                  </div>
-                </template>
-              </t-popup>
-            </div>
-          </t-space>
+    <div class="header">
+      <div class="left-operation-container">
+        <div class="header-title-wrap">
+          <div class="title">
+            <t-select
+              v-model="iptvListSelect"
+              placeholder="暂无选择源"
+              size="small"
+              :show-arrow="false"
+              style="max-width: 80px"
+              class="data-item source"
+              @change="changeDefaultIptvEvent"
+            >
+              <t-option v-for="item in iptvList" :key="item.id" :label="item.name" :value="item.id" />
+            </t-select>
+            <span class="data-item data">共{{ pagination.count ? pagination.count : 0 }}频道</span>
+          </div>
         </div>
-        <div class="right-operation-container">
-          <div class="search-box">
-            <div class="search-input">
-              <input
-                v-model.trim="searchTxt"
-                placeholder="输入关键词搜索"
-                class="search-input-item"
-                @keyup.enter="searchEvent"
-              />
-              <div class="search-button-box" @click="searchEvent">
-                <div class="search-button">
-                  <t-icon name="search" style="color: #fff" class="search-button-icon" />
+        <div v-if="iptvClassList.length !== 1" class="head-center">
+          <p class="head-center-class">{{ iptvClassSelect }}</p>
+          <t-popup
+            placement="bottom-left"
+            :overlay-inner-style="{
+              marginTop: '16px',
+              width: '570px',
+              boxShadow: 'none',
+              lineHeight: '46px',
+              padding: '5px 0',
+              zIndex: '999',
+              background: 'var(--td-bg-color-page)',
+            }"
+            attach=".head-center"
+          >
+            <more-icon size="1.5rem" style="transform: rotate(90deg)" />
+            <template #content>
+              <div class="content-items">
+                <div v-for="item in iptvClassList" :key="item.id" class="content-item">
+                  <span variant="text" @click="changeClassEvent(item)">
+                    {{ item.name }}
+                  </span>
+                </div>
+              </div>
+            </template>
+          </t-popup>
+        </div>
+      </div>
+      <div class="right-operation-container">
+        <div class="hd-search">
+          <div class="sh-search">
+            <div class="hd-search skin1">
+              <div class="hd-search-inner">
+                <input
+                  v-model.trim="searchTxt"
+                  placeholder="输入关键词搜索"
+                  class="hd-input"
+                  @keyup.enter="searchEvent"
+                />
+
+                <div class="hd-submit" @click="searchEvent">
+                  <svg width="18" height="18" viewBox="0 0 18 18">
+                    <g transform="translate(1.5 1.461)" stroke="currentColor" fill="none" fill-rule="evenodd">
+                      <path d="M7.5 15a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z" stroke-width="2"></path>
+                      <rect
+                        transform="rotate(-45 13.975 14.014)"
+                        x="13.475"
+                        y="12.014"
+                        width="1"
+                        height="4"
+                        rx=".5"
+                      ></rect>
+                    </g>
+                  </svg>
                 </div>
               </div>
             </div>
-            <div class="search-list"></div>
           </div>
         </div>
-      </t-row>
+      </div>
     </div>
     <div class="main">
       <div class="main-flow-wrap">
@@ -463,24 +475,34 @@ const copyChannelEvent = () => {
   position: relative;
   height: calc(100vh - var(--td-comp-size-l));
 
-  .tool {
-    height: 50px;
-    margin-right: 10px;
+  .header {
+    margin-bottom: 10px;
+  }
+
+  .header {
+    height: 45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
     .left-operation-container {
-      .title {
-        .data-item {
-          display: block;
-          line-height: 1rem;
-        }
-        .source {
-          :deep(.t-input) {
-            padding: 0;
-            border-style: none !important;
-            font-size: 0.8rem;
-            font-weight: bold;
-
-            &--focused {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      .header-title-wrap {
+        .title {
+          .data-item {
+            display: block;
+            line-height: 1rem;
+          }
+          .source {
+            :deep(.t-input) {
+              padding: 0;
+              border-style: none !important;
+              font-size: 0.8rem;
+              font-weight: bold;
+            }
+            :deep(.t-input--focused) {
               border-color: rgba(255, 255, 255, 0) !important;
               box-shadow: none !important;
             }
@@ -490,7 +512,6 @@ const copyChannelEvent = () => {
           }
         }
       }
-
       .head-center {
         .head-center-class {
           max-width: 75px;
@@ -500,6 +521,7 @@ const copyChannelEvent = () => {
           float: left;
           margin-right: 5px;
         }
+
         .content-items {
           overflow: hidden;
           width: 100%;
@@ -530,61 +552,52 @@ const copyChannelEvent = () => {
     }
 
     .right-operation-container {
-      .search-box {
-        width: 220px;
-        position: relative;
-        height: 34px;
-        border-radius: 21px;
-        border: 1px solid rgba(0, 0, 0, 0);
+      .hd-search {
+        width: auto;
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        width: 200px;
+        .sh-search {
+          width: 200px;
+          display: block;
+          transition: width 0.2s ease;
+        }
+        .skin1 {
+          background-image: linear-gradient(130deg, rgba(216, 244, 222, 0.3) 0%, rgba(146, 218, 178, 0.2) 100%);
+        }
 
-        .search-input {
-          border: 1px solid hsla(0, 0%, 100%, 0);
-          background: linear-gradient(
-            90deg,
-            rgba(85, 187, 56, 0.2),
-            rgba(216, 244, 222, 0.2) 50%,
-            rgba(124, 212, 118, 0.2)
-          );
-          border-radius: 100px;
+        .hd-search-inner {
           width: 100%;
-          white-space: nowrap;
-
-          .search-input-item {
-            background: rgba(255, 25, 255, 0);
-            border: 0;
-            font-size: 14px;
-            color: hsla(0, 0%, 0%, 0.6);
+          display: flex;
+          align-items: center;
+          .hd-input::placeholder {
+            color: var(--td-text-color-primary);
+          }
+          .hd-input {
+            flex-grow: 1;
+            border: none;
+            box-sizing: border-box;
+            width: 0;
+            height: 100%;
+            padding-left: 20px;
+            background: none;
             outline: none;
-            padding: 0 0 0 20px;
-            vertical-align: middle;
-            height: 34px;
-            width: calc(100% - 80px);
+            font-size: 14px;
+            text-overflow: ellipsis;
+            color: var(--td-text-color-primary);
           }
 
-          .search-button-box {
-            width: 44px;
-            height: 28px;
-            position: absolute;
-            right: 0;
-            top: 4px;
+          .hd-submit {
+            flex-shrink: 0;
+            width: 54px;
+            height: 45px;
             cursor: pointer;
-
-            .search-button {
-              display: inline-block;
-              font-size: 14px;
-              background-color: var(--td-brand-color);
-              margin: 0 0 0 12px;
-              width: 28px;
-              height: 28px;
-              border-radius: 100%;
-              text-align: center;
-              line-height: 24px;
-
-              .search-button-icon {
-                width: 14px;
-                height: 14px;
-                display: inline-block;
-              }
+            display: flex;
+            align-items: center;
+            padding-left: 16px;
+            box-sizing: border-box;
+            &:hover {
+              color: var(--td-brand-color);
             }
           }
         }
@@ -677,7 +690,7 @@ const copyChannelEvent = () => {
 :root[theme-mode='dark'] {
   .right-operation-container {
     .search-box {
-      .search-input-item,
+      .hd-input,
       .hot-search-button {
         color: hsla(0, 0%, 100%, 0.6) !important;
         &-icon {

@@ -229,6 +229,9 @@ const focusEvent = async () => {
       width: 100%;
       display: flex;
       align-items: center;
+      .hd-input::placeholder {
+        color: var(--td-text-color-primary);
+      }
       .hd-input {
         flex-grow: 1;
         border: none;

@@ -2,51 +2,49 @@
   <div class="film-container">
     <div class="header">
       <div class="left-operation-container">
-        <t-space align="center">
-          <div class="header-title-wrap">
-            <div class="title">
-              <t-select
-                v-model="sitesListSelect"
-                placeholder="暂无选择源"
-                size="small"
-                :show-arrow="false"
-                style="max-width: 80px"
-                class="data-item source"
-                @change="changeSitesEvent"
-              >
-                <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
-              </t-select>
-              <span class="data-item data"> 共{{ pagination.total || 0 }}资源 </span>
-            </div>
-          </div>
-          <div v-if="classKeywords.length !== 1" class="head-center">
-            <p class="head-center-class">{{ FilmSiteSetting.class.name }}</p>
-            <t-popup
-              placement="bottom-left"
-              :overlay-inner-style="{
-                marginTop: '16px',
-                width: '570px',
-                boxShadow: 'none',
-                lineHeight: '46px',
-                padding: '5px 0',
-                zIndex: '999',
-                background: 'var(--td-bg-color-page)',
-              }"
-              attach=".head-center"
+        <div class="header-title-wrap">
+          <div class="title">
+            <t-select
+              v-model="sitesListSelect"
+              placeholder="暂无选择源"
+              size="small"
+              :show-arrow="false"
+              style="max-width: 80px"
+              class="data-item source"
+              @change="changeSitesEvent"
             >
-              <more-icon size="1.5rem" style="transform: rotate(90deg)" />
-              <template #content>
-                <div class="content-items">
-                  <div v-for="item in classKeywords" :key="item.type_id" class="content-item">
-                    <span variant="text" @click="changeClassEvent(item)">
-                      {{ item.type_name }}
-                    </span>
-                  </div>
-                </div>
-              </template>
-            </t-popup>
+              <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
+            </t-select>
+            <span class="data-item data"> 共{{ pagination.total || 0 }}资源 </span>
           </div>
-        </t-space>
+        </div>
+        <div v-if="classKeywords.length !== 1" class="head-center">
+          <p class="head-center-class">{{ FilmSiteSetting.class.name }}</p>
+          <t-popup
+            placement="bottom-left"
+            :overlay-inner-style="{
+              marginTop: '16px',
+              width: '570px',
+              boxShadow: 'none',
+              lineHeight: '46px',
+              padding: '5px 0',
+              zIndex: '999',
+              background: 'var(--td-bg-color-page)',
+            }"
+            attach=".head-center"
+          >
+            <more-icon size="1.5rem" style="transform: rotate(90deg)" />
+            <template #content>
+              <div class="content-items">
+                <div v-for="item in classKeywords" :key="item.type_id" class="content-item">
+                  <span variant="text" @click="changeClassEvent(item)">
+                    {{ item.type_name }}
+                  </span>
+                </div>
+              </div>
+            </template>
+          </t-popup>
+        </div>
       </div>
       <div class="right-operation-container">
         <search-view
@@ -677,11 +675,14 @@ eventBus.on(async () => {
     margin-bottom: 10px;
   }
   .header {
-    height: 40px;
+    height: 45px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     .left-operation-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
       .header-title-wrap {
         .title {
           .data-item {
