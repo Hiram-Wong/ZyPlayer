@@ -50,12 +50,14 @@
           </t-space>
         </div>
         <div class="right-operation-container">
-          <t-space align="center">
-            <search-view :site="FilmSiteSetting.basic" @search="searchEvent" />
-            <div v-if="!(FilmSiteSetting.basic.type === 2 && filter.data.length === 0)" class="quick_item quick_filter">
-              <view-module-icon size="large" @click="showToolbar = !showToolbar" />
-            </div>
-          </t-space>
+          <search-view
+            :site="FilmSiteSetting.basic"
+            :class="{ 'no-filter': FilmSiteSetting.basic.type === 2 && filter.data.length === 0 }"
+            @search="searchEvent"
+          />
+          <div v-if="!(FilmSiteSetting.basic.type === 2 && filter.data.length === 0)" class="quick_item quick_filter">
+            <view-module-icon size="large" @click="showToolbar = !showToolbar" />
+          </div>
         </div>
       </t-row>
     </div>
@@ -183,6 +185,7 @@
       size="small"
       :offset="['1.4rem', '0.5rem']"
       :duration="2000"
+      :firstload="false"
     ></t-back-top>
   </div>
 </template>
@@ -194,7 +197,7 @@ import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { MoreIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
@@ -259,6 +262,7 @@ const filter = ref({
 });
 const sitesList = ref([]); // 全部源
 const sitesListSelect = ref(); // 选择的源
+const isLoadClass = ref(false); // 是否加载 class
 const infiniteCompleteTip = ref('没有更多内容了!');
 
 onMounted(() => {
@@ -339,8 +343,6 @@ const getFilmSetting = async () => {
   } else {
     infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
   }
-
-  await getClass();
 
   sitesList.value = sitesAll.filter((item) => item.isActive);
 
@@ -451,8 +453,10 @@ const getClass = async () => {
     ];
 
     classKeywords.value = allClass;
+    isLoadClass.value = true;
   } catch (err) {
     console.log(err);
+    infiniteCompleteTip.value = '网络请求失败, 请尝试手动刷新!';
   }
 };
 
@@ -506,9 +510,17 @@ const load = async ($state) => {
     return;
   }
 
+  if (!isLoadClass.value) {
+    await getClass();
+    if (infiniteCompleteTip.value.indexOf('刷新') > -1) {
+      $state.complete();
+      return;
+    }
+  }
+
   try {
     const resLength = searchTxt.value ? 0 : await getFilmList();
-    console.log(resLength);
+    console.log(`[list] 返回数据长度${resLength}`);
     if (resLength === 0) {
       if (infiniteCompleteTip.value.indexOf('刷新') === -1) infiniteCompleteTip.value = '没有更多内容了!';
       $state.complete();
@@ -564,7 +576,8 @@ const searchEvent = async (kw) => {
 // 切换站点
 const changeSitesEvent = async (item) => {
   if (FilmSiteSetting.value.change) await setting.update({ defaultSite: item });
-
+  isLoadClass.value = false;
+  infiniteCompleteTip.value = '没有更多内容了!';
   const res = await sites.get(item);
   sitesListSelect.value = res.id;
   FilmSiteSetting.value.basic.name = res.name;
@@ -622,6 +635,8 @@ const playEvent = async (item) => {
 // 监听设置默认源变更
 const eventBus = useEventBus('film-reload');
 eventBus.on(async () => {
+  isLoadClass.value = false;
+  infiniteCompleteTip.value = '没有更多内容了!';
   await getFilmSetting();
   FilmSiteSetting.value.class = {
     id: 0,
@@ -664,6 +679,9 @@ eventBus.on(async () => {
     margin-bottom: 10px;
   }
   .header {
+    // display: flex;
+    // justify-content: space-between;
+    // align-items: center;
     .left-operation-container {
       .header-title-wrap {
         .title {
@@ -727,213 +745,11 @@ eventBus.on(async () => {
       }
     }
     .right-operation-container {
-      .act {
-        width: 518px !important;
-      }
-      .search-box {
-        z-index: 999;
-
-        position: relative;
-        // width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        // background-image: linear-gradient(130deg, rgba(85, 187, 56, 0.3) 0%, rgba(124, 212, 118, 0.2) 100%);
-        // background-image: linear-gradient(140deg, rgba(255, 228, 231, 0.8) 0%, rgba(244, 244, 255, 0.85) 100%);
-        background-color: var(--bg-color-theme-transparent);
-        border-radius: 25px;
-        overflow: hidden;
-        font-size: 14px;
-        backdrop-filter: blur(40px);
-
-        animation: fs-mask-hide 0.2s ease both;
-        width: 260px;
-        .hd-search-inner {
-          width: 100%;
-          height: 38px;
-          display: flex;
-          align-items: center;
-          .hd-input {
-            flex-grow: 1;
-            border: none;
-            box-sizing: border-box;
-            width: 0;
-            height: 100%;
-            // color: rgba(255, 255, 255, 0.6);
-            padding-left: 20px;
-            background: none;
-            outline: none;
-            font-size: 14px;
-            text-overflow: ellipsis;
-            ::input-placeholder {
-              color: red;
-            }
-          }
-          .search-hotlink {
-            color: rgba(255, 255, 255, 0.6);
-            display: flex;
-            align-items: center;
-            flex-shrink: 0;
-            height: 100%;
-            text-decoration: none;
-            &:hover {
-              color: var(--td-brand-color);
-              .search-hotlink-icon {
-                color: var(--td-brand-color);
-              }
-            }
-            .search-hotlink-icon {
-              width: 14px;
-              height: 14px;
-              color: rgba(255, 255, 255, 0.6);
-              vertical-align: middle;
-            }
-          }
-          .search-button-box {
-            flex-shrink: 0;
-            width: 40px;
-            height: 45px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            padding-left: 10px;
-            box-sizing: border-box;
-          }
-        }
-        .hd-result {
-          width: 100%;
-          // display: none;
-          max-height: calc(100vh - 75px);
-          overflow-x: hidden;
-          overflow-y: auto;
-          .top-line {
-            border-top: 1px solid rgba(0, 0, 0, 0.04);
-            margin: 0 20px;
-          }
-
-          .search-hot {
-            .search-head {
-              display: flex;
-              justify-content: space-between;
-              position: relative;
-              margin: 18px 20px 5px;
-              overflow: hidden;
-              color: #999;
-              .search-title {
-                color: rgba(255, 255, 255, 0.5);
-                font-weight: 600;
-              }
-            }
-            .search-body {
-              margin: 12px 16px 0 20px;
-              display: flex;
-              flex-direction: row;
-              flex-wrap: wrap;
-              justify-content: space-between;
-              .num-svg {
-                flex-shrink: 0;
-                width: 60px;
-                color: #fff;
-                opacity: 0.3;
-                font-weight: 700;
-              }
-
-              .txt {
-                width: 100px;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                flex-grow: 1;
-                line-height: 22px;
-                margin-top: 8px;
-              }
-
-              a:nth-child(-n + 4) {
-                margin-bottom: 20px;
-                width: 25%;
-              }
-
-              a:nth-child(-n + 4) .num,
-              a:nth-child(n + 5) .num-svg {
-                display: none;
-              }
-
-              a:nth-child(n + 5) {
-                width: 50%;
-                align-items: center;
-                margin-left: -10px;
-                .num {
-                  width: 20px;
-                  font-size: 18px;
-                  opacity: 0.4;
-                  text-align: right;
-                  font-weight: 700;
-                  flex-shrink: 0;
-                  line-height: 18px;
-                }
-                .name {
-                  width: auto;
-                  margin-top: 0;
-                  margin-left: 9px;
-                }
-                .info {
-                  margin-left: 0;
-                  width: 0;
-                }
-                .txt {
-                  width: 100%;
-                  margin: 0;
-                  line-height: 18px;
-                }
-                .name {
-                  width: auto;
-                  margin-top: 0;
-                  margin-left: 9px;
-                }
-              }
-
-              a:nth-child(n + 5) .pic,
-              a:nth-child(n + 5) .remarks {
-                display: none;
-              }
-
-              a {
-                display: flex;
-                flex-direction: row;
-                margin-bottom: 16px;
-                color: rgba(0, 0, 0, 0.9);
-              }
-
-              .info {
-                display: flex;
-                flex-direction: column;
-                flex-grow: 1;
-                margin-left: -25px;
-                z-index: 1;
-              }
-
-              .pic {
-                width: 64px;
-                height: 87px;
-                flex-shrink: 0;
-                box-shadow: -6px 0 12px 0 rgba(0, 0, 0, 0.4);
-                border-radius: 4px;
-                overflow: hidden;
-                img {
-                  width: 100%;
-                  height: 100%;
-                }
-              }
-
-              .name,
-              .remarks {
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-              }
-            }
-          }
-        }
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      .no-filter {
+        right: 5px !important;
       }
     }
   }

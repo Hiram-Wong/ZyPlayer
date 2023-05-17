@@ -13,9 +13,9 @@ const dns = require('dns');
 const net = require('net');
 
 axiosRetry(axios, {
-  retries: 3,
+  retries: 2,
   retryDelay: (retryCount) => {
-    return retryCount * 1000;
+    return retryCount * 500;
   }
 });
 
