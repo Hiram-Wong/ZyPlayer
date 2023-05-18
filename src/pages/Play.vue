@@ -147,7 +147,7 @@
                   </t-list-item>
                 </t-list>
                 <div class="tip-warp">
-                  <span>5s轮训一次参数</span>
+                  <span>5s轮询一次参数</span>
                 </div>
               </div>
             </t-dialog>
