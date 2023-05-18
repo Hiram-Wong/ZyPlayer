@@ -839,20 +839,20 @@ const initFilmPlayer = async (isFirst) => {
       // 尝试提取ck/dp播放器中的m3u8
       console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
       try {
-        if (ext.value.site.type === 1) {
-          console.log('正常cms提取');
-          config.value.url = await zy.parserFilmUrl(config.value.url);
-          console.info(`最终提取到的地址：${config.value.url}`);
-          createPlayer('m3u8');
-          timerUpdatePlayProcess();
-        } else if (ext.value.site.type === 2) {
-          console.log('嗅探');
-          MessagePlugin.info('嗅探资源中，如10s没有结果请换源,咻咻咻!');
+        // if (ext.value.site.type === 0 || ext.value.site.type === 1) {
+        //   console.log('正常cms提取');
+        //   config.value.url = await zy.parserFilmUrl(config.value.url);
+        //   console.info(`最终提取到的地址：${config.value.url}`);
+        //   createPlayer('m3u8');
+        //   timerUpdatePlayProcess();
+        // } else if (ext.value.site.type === 2) {
+        console.log('嗅探');
+        MessagePlugin.info('嗅探资源中，如10s没有结果请换源,咻咻咻!');
 
-          onlineUrl.value = config.value.url;
-          isSniff.value = false;
-          sniffer();
-        }
+        onlineUrl.value = config.value.url;
+        isSniff.value = false;
+        sniffer();
+        // }
       } catch (err) {
         console.error(err);
       }

@@ -126,8 +126,6 @@ const zy = {
         total = jsondata.total;
         filters = jsonClass?.filters === undefined ? [] : jsonClass.filters[1];
       }
-      console.log(classData);
-      console.log(filters);
 
       if (!classData || !jsondata?.list) return null;
 
@@ -150,21 +148,21 @@ const zy = {
    * @param {*} t 分类 type
    * @returns
    */
-  convertVideoList (videoItems) {
-    return videoItems.map(item => ({
-      vod_id: item.id,
-      type_id: item.tid,
-      type_name: item.type,
-      vod_pic: item.pic,
-      vod_remark: item.note,
-      vod_name: item.name,
-      vod_blurb: removeHTMLTagsAndSpaces(item.des),
-      vod_year: item.year,
-      vod_area: item.area,
-      vod_content: item.des,
-      vod_director: item.director,
-      vod_actor: item.actor,
-    }))
+  convertVideoList(videoItems) {
+    return videoItems.map(({ id: vod_id, tid: type_id, type: type_name, pic: vod_pic, note: vod_remark, name: vod_name, des: vod_content, year: vod_year, area: vod_area, director: vod_director, actor: vod_actor }) => ({
+      vod_id,
+      type_id,
+      type_name,
+      vod_pic,
+      vod_remark,
+      vod_name,
+      vod_blurb: removeHTMLTagsAndSpaces(vod_content),
+      vod_year,
+      vod_area,
+      vod_content,
+      vod_director,
+      vod_actor
+    }));
   },
   async list(key, pg = 1, t, f = {}) {
     try {
@@ -195,14 +193,14 @@ const zy = {
    * @param {*} h 时间 time
    * @returns
    */
-  convertHotList (hotItems) {
-    return hotItems.map(item => ({
-      vod_id: item.id,
-      type_id: item.tid,
-      type_name: item.type,
-      vod_remark: item.note,
-      vod_name: item.name,
-    }))
+  convertHotList(hotItems) {
+    return hotItems.map(({ id: vod_id, tid: type_id, type: type_name, note: vod_remark, name: vod_name }) => ({
+      vod_id,
+      type_id,
+      type_name,
+      vod_remark,
+      vod_name
+    }));
   },
   // https://y.ioszxc123.me/api/v1/Vod/hot?limit=10&order=1&os=2&page=1&type=2
   async hot(key, h) {
@@ -240,25 +238,35 @@ const zy = {
    * @param {*} wd 搜索关键字
    * @returns
    */
+  convertSearchList(searchItem) {
+    const result = searchItem.map(item => {
+      const { id: vod_id, tid: type_id, type: type_name, note: vod_remark, name: vod_name, last: vod_time, dt: vod_play_from } = item;
+      return { vod_id, type_id, type_name, vod_remark, vod_name, vod_time, vod_play_from };
+    });
+    
+    return result;
+  },
   async search(key, wd) {
+    // xml坑: 单条结果是dict 多条结果list
     try {
       const site = await sites.find({key:key});
       const url = buildUrl(site.api,`?wd=${encodeURIComponent(wd)}`);
       const res = await axios.get(url, { timeout: 3000 });
+
       let json;
       if ( site.type === 0 ) json = parser.parse(res.data)
       else json = res.data;
-      const jsondata = json?.rss ?? json;
 
-      if (jsondata || jsondata?.list) {
-        let videoList = jsondata.list;
-        if ( site.type === 0 ) videoList = jsondata.list.video
-        else videoList = jsondata.list;
-        
-        if (Array.isArray(videoList)) {
-          return videoList;
-        }
+      const jsondata = json?.rss ?? json;
+      if (!jsondata) return null;
+
+      let videoList = jsondata.list;
+      if ( site.type === 0 ) {
+        videoList = jsondata.list.video;
+        if (!_.isArray(videoList)) videoList = [videoList];
+        videoList = this.convertSearchList(videoList);
       }
+      return videoList;
     } catch (err) {
       throw err;
     }
@@ -273,19 +281,25 @@ const zy = {
     try {
       const site = await sites.find({key:key});
       const url = buildUrl(site.api,`?ac=search&wd=${encodeURI(wd)}`)
-      const res = await axios.get(url)
+      const res = await axios.get(url);
+
       let json;
       if ( site.type === 0 ) json = parser.parse(res.data)
       else json = res.data;
-      const jsondata = json?.rss === undefined ? json : json.rss
-      if (jsondata || jsondata?.list) {
-        let videoList = jsondata.list
-        if (Object.prototype.toString.call(videoList) === '[object Object]') videoList = [].concat(videoList)
-        if (videoList?.length) {
-          const detailRes = await this.detail(key, videoList[0].vod_id)
-          return detailRes
-        } else return null
-      } else return null
+
+      const jsondata = json?.rss === undefined ? json : json.rss;
+      if (!jsondata) return null;
+
+      let videoList = jsondata.list;
+      if (site.type === 0) {
+        videoList = jsondata.list.video;
+        if (!videoList) return null;
+        if (!_.isArray(videoList)) videoList = [videoList];
+        videoList = this.convertSearchList(videoList);
+      }
+
+      const detailRes = await this.detail(key, videoList[0].vod_id);
+      return detailRes;
     } catch (err) {
       throw err;
     }
@@ -296,23 +310,37 @@ const zy = {
    * @param {*} id 资源唯一标识符 id
    * @returns
    */
-  convertDetailList (detailItems) {
-    console.log(detailItems)
+  convertDetailList(detailItems) {
+    const {
+      id: vod_id,
+      tid: type_id,
+      type: type_name,
+      pic: vod_pic,
+      note: vod_remark,
+      name: vod_name,
+      des: vod_content,
+      year: vod_year,
+      area: vod_area,
+      director: vod_director,
+      actor: vod_actor,
+      dl: { dd: { _flag: vod_play_from, _t: vod_play_url } }
+    } = detailItems;
+  
     return {
-      vod_id: detailItems.id,
-      type_id: detailItems.tid,
-      type_name: detailItems.type,
-      vod_pic: detailItems.pic,
-      vod_remark: detailItems.note,
-      vod_name: detailItems.name,
+      vod_id,
+      type_id,
+      type_name,
+      vod_pic,
+      vod_remark,
+      vod_name,
       vod_blurb: removeHTMLTagsAndSpaces(detailItems.des),
-      vod_year: detailItems.year,
-      vod_area: detailItems.area,
-      vod_content: detailItems.des,
-      vod_director: detailItems.director,
-      vod_actor: detailItems.actor,
-      vod_play_from: detailItems.dl.dd._flag,
-      vod_play_url: detailItems.dl.dd._t,
+      vod_year,
+      vod_area,
+      vod_content,
+      vod_director,
+      vod_actor,
+      vod_play_from,
+      vod_play_url
     };
   },
   async detail(key, id) {
@@ -326,7 +354,6 @@ const zy = {
       const jsondata = json?.rss ?? json;
       let videoList = jsondata?.list?.[0];
       if ( site.type === 0 ) videoList = this.convertDetailList(jsondata?.list?.video);
-      console.log(videoList);
       if (!videoList) return;
 
       // 播放源
@@ -345,7 +372,6 @@ const zy = {
       });
       const fullList = Object.fromEntries(playSource.map((key, index) => [key, playEpisodes[index]]));
       
-      console.log(fullList);
       videoList.fullList = fullList;
       return videoList;
     } catch (err) {
@@ -423,7 +449,7 @@ const zy = {
    * @returns boolean
    */
   async parserFilmUrl(url) {
-    const urlDomain = url.match(/(\w+):\/\/([^\:|\/]+)(\:\d*)?(\/)/)[0];
+    const hostname = new URL(url).hostname;
     try {
       const response = await axios.get(url);
       let urlPlay;
@@ -435,7 +461,7 @@ const zy = {
       }
       // 局部提取地址 提取参数拼接域名
       const urlParm = response.data.match(/\/(.*?)(\.m3u8)/);
-      if (urlParm) urlPlay = urlDomain + urlParm[0];
+      if (urlParm) urlPlay = hostname + urlParm[0];
       return urlPlay;
     } catch (err) {
       throw err;
