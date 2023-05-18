@@ -115,7 +115,7 @@ const onSubmit = async () => {
       }
     } else {
       const drpyResFilter = config.sites
-        .filter((item) => item.type === 1) // 先过滤掉不需要的数据
+        .filter((item) => item.type === 0 || item.type === 1) // 先过滤掉不需要的数据
         .map((item) => ({
           key: item.key,
           name: item.name,
