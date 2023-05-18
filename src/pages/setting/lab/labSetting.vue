@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import * as cheerio from 'cheerio';
-import * as monaco from 'monaco-editor';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { SearchIcon } from 'tdesign-icons-vue-next';
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
@@ -76,6 +76,8 @@ import zy from '@/lib/utils/tools';
 
 import DialogExportView from './components/DialogExport.vue';
 import DialogRequestHeaderView from './components/DialogRequestHeader.vue';
+
+// import * as monaco from 'monaco-editor';
 
 const searchUrl = ref('');
 const htmlInputRef = ref();

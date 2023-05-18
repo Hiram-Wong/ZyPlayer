@@ -47,6 +47,17 @@
   "defaultSite": null,
   "defaultIptv": null,
   "defaultAnalyze": null,
+  "analyzeFlag": [
+    "youku",
+    "qq",
+    "iqiyi",
+    "qiyi",
+    "letv",
+    "sohu",
+    "tudou",
+    "pptv",
+    "mgtv"
+  ],
   "analyzeQuickSearchType": "platform",
   "analyzeSupport": false,
   "softSolution": false,

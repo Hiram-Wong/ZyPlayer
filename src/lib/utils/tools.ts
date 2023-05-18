@@ -633,12 +633,13 @@ const zy = {
    * @param {*} url 需要获取的地址
    * @returns 配置文件
   */
-  async getConfig(url, header) {
+  async getConfig(url, header={}) {
     try {
       let res
-      console.log(header)
-      if( header ) res = await axios.get(url, {headers: { ...header }});
-      else res = await axios.get(url);
+      console.log(url,encodeURI(url),header)
+      // if( header ) res = await axios.get(url, {headers: { ...header }});
+      // else res = await axios.get(url);
+      res = await axios.get(url);
       let response;
 
       try {

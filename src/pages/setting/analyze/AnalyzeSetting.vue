@@ -8,16 +8,20 @@
         <div class="right-operation-container">
           <div class="component-op">
             <div class="item" @click="exportEvent">
-              <t-icon size="1.5em" name="arrow-up" />
+              <arrow-up-icon size="1.5em" />
               <span>导出</span>
             </div>
             <div class="item" @click="removeAllEvent">
-              <t-icon size="1.5em" name="remove" />
+              <remove-icon size="1.5em" />
               <span>删除</span>
             </div>
             <div class="item" @click="formDialogVisibleAddAnalyze = true">
-              <t-icon size="1.5em" name="add" />
+              <add-icon size="1.5em" />
               <span>添加</span>
+            </div>
+            <div class="item" @click="flagEvent">
+              <discount-icon size="1.5em" />
+              <span>标识</span>
             </div>
           </div>
         </div>
@@ -58,11 +62,17 @@
     </t-table>
     <dialog-add-view v-model:visible="formDialogVisibleAddAnalyze" :data="data" @refresh-table-data="getAnalyze" />
     <dialog-edit-view v-model:visible="formDialogVisibleEditAnalyze" :data="formData" />
+    <dialog-flag-view
+      v-model:visible="formDialogVisibleFlagAnalyze"
+      :data="analyzeFlagData"
+      @receive-flag-data="setAnalyzeFlag"
+    />
   </div>
 </template>
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
 import { saveAs } from 'file-saver';
+import { AddIcon, ArrowUpIcon, DiscountIcon, RemoveIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref } from 'vue';
 
@@ -70,13 +80,16 @@ import { analyze, setting } from '@/lib/dexie';
 
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
+import DialogFlagView from './components/DialogFlag.vue';
 import { COLUMNS } from './constants';
 
 // Define item form data & dialog status
 const formDialogVisibleAddAnalyze = ref(false);
 const formDialogVisibleEditAnalyze = ref(false);
+const formDialogVisibleFlagAnalyze = ref(false);
 const formData = ref();
 const defaultAnalyze = ref();
+const analyzeFlagData = ref([]);
 const sort = ref();
 
 // Define table
@@ -95,6 +108,7 @@ const rehandleSelectChange = (val) => {
 
 onMounted(() => {
   getAnalyze();
+  getAnalyzeFlag();
 });
 
 const rehandlePageChange = (curr) => {
@@ -125,6 +139,11 @@ const getAnalyze = async () => {
   }
 };
 
+// 获取标识
+const getAnalyzeFlag = async () => {
+  analyzeFlagData.value = await setting.get('analyzeFlag');
+};
+
 // 是否启用
 const propChangeEvent = (row) => {
   analyze.update(row.id, { isActive: row.isActive });
@@ -134,6 +153,17 @@ const propChangeEvent = (row) => {
 const editEvent = (row) => {
   formData.value = data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
   formDialogVisibleEditAnalyze.value = true;
+};
+
+const flagEvent = () => {
+  formDialogVisibleFlagAnalyze.value = true;
+};
+
+const setAnalyzeFlag = (item) => {
+  const itemJson = JSON.parse(JSON.stringify(item));
+  console.log(itemJson);
+  analyzeFlagData.value = itemJson;
+  setting.update({ analyzeFlag: itemJson });
 };
 
 // 删除

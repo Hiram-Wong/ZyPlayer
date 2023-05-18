@@ -548,6 +548,7 @@ const isMacMaximize = ref(false); // mac最大化
 const isProfile = ref(false); // 简介
 
 const analyzeUrl = ref(); // 解析接口
+const analyzeFlagData = ref([]); // 解析标识
 const onlineUrl = ref(); // 解析接口+需解析的地址
 const isSniff = ref(true); // 嗅探标识
 const iframeRef = ref(); // iframe dom节点
@@ -690,7 +691,7 @@ const createPlayer = (videoType) => {
       config.value.plugins = [HlsPlugin];
       break;
     default:
-      console.error(`unsupported video type: ${videoType}`);
+      config.value.plugins = [HlsPlugin];
       break;
   }
   console.log(`加载${videoType}播放器类型`);
@@ -700,17 +701,13 @@ const createPlayer = (videoType) => {
 // 获取解析地址
 const getAnalysisData = async () => {
   try {
-    let currentSite;
-    if (ext.value.site.key) currentSite = await sites.find({ key: ext.value.site.key });
-    if (currentSite.jiexiUrl) {
-      analyzeUrl.value = currentSite.jiexiUrl;
-    } else {
-      const id = await setting.get('defaultAnalyze');
-      if (!id) return;
-      const item = await analyze.get(id);
-      analyzeUrl.value = item.url;
-      console.log(item.url);
-    }
+    const id = await setting.get('defaultAnalyze');
+    if (!id) return;
+    const item = await analyze.get(id);
+    analyzeUrl.value = item.url;
+
+    analyzeFlagData.value = await setting.get('analyzeFlag');
+    console.log(`[analyze] jx:${analyzeUrl.value}; flag:${[...analyzeFlagData.value]}`);
   } catch (error) {
     console.error(error);
   }
@@ -765,8 +762,10 @@ const destroyPlayer = () => {
 // 初始化iptv
 const initIptvPlayer = async () => {
   getChannelCount();
+
   if (data.value.ext.epg) getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
   config.value.url = info.value.url;
+
   try {
     const isLive = await zy.isLiveM3U8(info.value.url);
     config.value.isLive = isLive;
@@ -775,8 +774,13 @@ const initIptvPlayer = async () => {
     console.error(err);
   }
 
-  createPlayer('m3u8');
-  // xg.value = new Player(config.value);
+  if (config.value.url.indexOf('mp4') > -1) {
+    createPlayer('mp4');
+  } else if (config.value.url.indexOf('flv') > -1) {
+    createPlayer('flv');
+  } else {
+    createPlayer('m3u8');
+  }
 };
 
 // 初始化film
@@ -795,6 +799,8 @@ const initFilmPlayer = async (isFirst) => {
     );
     currentUrl.value = item;
     config.value.url = item ? item.split('$')[1] : season.value[selectPlaySource.value][0].split('$')[1];
+
+    // 跳过时间
     if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
       config.value.startTime = set.value.skipTimeInStart;
     } else {
@@ -807,10 +813,28 @@ const initFilmPlayer = async (isFirst) => {
     }
   }
 
-  if (!config.value.url.endsWith('m3u8')) {
+  if (config.value.url.indexOf('mp4') > -1) {
+    createPlayer('mp4');
+  } else if (config.value.url.indexOf('flv') > -1) {
+    createPlayer('flv');
+  } else {
+    const { playUrl } = ext.value.site;
+
+    if (playUrl) {
+      const play = await zy.getConfig(`${playUrl}${config.value.url}`);
+      if (play.url) config.value.url = play.url;
+    }
+
     const { hostname } = new URL(config.value.url);
-    if (VIP_LIST.some((item) => hostname.includes(item))) {
+    if (
+      VIP_LIST.some((item) => hostname.includes(item)) ||
+      analyzeFlagData.value.some((item) => selectPlaySource.value.includes(item))
+    ) {
       onlineUrl.value = analyzeUrl.value + config.value.url;
+    } else if (config.value.url.indexOf('m3u8') > -1) {
+      console.log(`[player] 直链:${config.value.url}`);
+      createPlayer('m3u8');
+      await timerUpdatePlayProcess();
     } else {
       // 尝试提取ck/dp播放器中的m3u8
       console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
@@ -819,7 +843,6 @@ const initFilmPlayer = async (isFirst) => {
           console.log('正常cms提取');
           config.value.url = await zy.parserFilmUrl(config.value.url);
           console.info(`最终提取到的地址：${config.value.url}`);
-          // xg.value = new Player(config.value);
           createPlayer('m3u8');
           timerUpdatePlayProcess();
         } else if (ext.value.site.type === 2) {
@@ -831,14 +854,9 @@ const initFilmPlayer = async (isFirst) => {
           sniffer();
         }
       } catch (err) {
-        // onlineUrl.value = analyzeUrl.value + config.value.url;
         console.error(err);
       }
     }
-  } else {
-    createPlayer('m3u8');
-    // xg.value = new Player(config.value);
-    await timerUpdatePlayProcess();
   }
 };
 

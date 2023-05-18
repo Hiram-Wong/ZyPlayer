@@ -62,10 +62,24 @@ db.version(17).stores({
 
 
 db.version(18).stores({
-  sites: '++id, key, name, api, download, jiexiUrl, type, isActive, group, search',
+  sites: '++id, key, name, api, download, playUrl, type, isActive, group, search',
+  setting: 'id, theme, externalPlayer, rootClassFilter, r18ClassFilter, defaultHot, defaultSearch, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh',
 }).upgrade(trans => {
   trans.sites.toCollection().modify(sites => {
     sites.search = 1
+  })
+  trans.setting.toCollection().modify(setting => {
+    setting.analyzeFlag = [
+      "youku",
+      "qq",
+      "iqiyi",
+      "qiyi",
+      "letv",
+      "sohu",
+      "tudou",
+      "pptv",
+      "mgtv"
+    ]
   })
 })
 

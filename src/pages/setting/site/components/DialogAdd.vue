@@ -39,8 +39,8 @@
         <!-- <t-form-item label="下载接口" name="download">
           <t-input v-model="formData.siteInfo.download" class="input-item" placeholder="请输入内容" />
         </t-form-item> -->
-        <t-form-item label="解析接口" name="jiexiUrl">
-          <t-input v-model="formData.siteInfo.jiexiUrl" class="input-item" placeholder="请输入内容" />
+        <t-form-item label="解析接口" name="playUrl">
+          <t-input v-model="formData.siteInfo.playUrl" class="input-item" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="分组" name="type">
           <t-select
@@ -150,14 +150,14 @@ const siteGroup = ref(props.group);
 const selectWay = ref('add-single');
 
 const formVisible = ref(false);
-// key, name, api, download, jiexiUrl, isActive, group;
+// key, name, api, download, playUrl, isActive, group;
 const formData = ref({
   siteInfo: {
     key: '',
     name: '',
     api: '',
     download: '',
-    jiexiUrl: '',
+    playUrl: '',
     group: '',
     search: 2,
     status: true,

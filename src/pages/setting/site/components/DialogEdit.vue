@@ -26,8 +26,8 @@
         <!-- <t-form-item label="下载接口" name="download">
           <t-input v-model="formData.download" placeholder="请输入内容" />
         </t-form-item> -->
-        <t-form-item label="解析接口" name="jiexiUrl">
-          <t-input v-model="formData.jiexiUrl" placeholder="请输入内容" />
+        <t-form-item label="解析接口" name="playUrl">
+          <t-input v-model="formData.playUrl" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="分组" name="group">
           <t-select

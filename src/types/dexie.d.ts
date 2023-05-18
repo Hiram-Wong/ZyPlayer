@@ -16,6 +16,7 @@ interface Setting {
   defaultSite: number | null;
   defaultIptv: number | null;
   defaultAnalyze: number | null;
+  analyzeFlag: string[];
   analyzeQuickSearchType: string;
   analyzeSupport: boolean;
   softSolution: boolean;
@@ -45,7 +46,7 @@ interface Site {
   name: string;
   api: string;
   download: string;
-  jiexiUrl?: string;
+  playUrl?: string;
   type: number;
   search: number;
   isActive: boolean;

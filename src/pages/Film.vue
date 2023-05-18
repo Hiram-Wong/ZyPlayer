@@ -605,11 +605,12 @@ const changeSitesEvent = async (item) => {
 // 播放
 const playEvent = async (item) => {
   const { siteName, siteKey } = item;
-  const { name, key, type } = FilmSiteSetting.value.basic;
+  const { name, key, type, playUrl } = FilmSiteSetting.value.basic;
 
   formSiteData.value = {
     name: siteName || name,
     key: siteKey || key,
+    playUrl,
     type,
   };
 

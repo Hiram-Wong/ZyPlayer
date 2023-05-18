@@ -47,7 +47,7 @@
         "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
         "type": 1, // 1:cms(json) 2:drpy
         "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
-        "jiexiUrl": "", // 需要配合解析的地址 预留
+        "playUrl": "", // 需要配合解析的地址 预留
         "group": "影视", // 分组
         "isActive": true, // 是否启用 true启用 false 禁用
         "status": true, // 状态 true可用 false 失效
@@ -91,7 +91,7 @@
     "api": "https://www.39kan.com/api.php/provide/vod/",
     "type": 1,
     "search": 1,
-    "jiexiUrl": "",
+    "playUrl": "",
     "group": "影视",
     "isActive": true,
     "status": true,

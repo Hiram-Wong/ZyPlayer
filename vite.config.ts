@@ -8,6 +8,7 @@ import Components from 'unplugin-vue-components/vite';
 import { ConfigEnv, loadEnv, UserConfig } from 'vite';
 import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
+import viteImagemin from 'vite-plugin-imagemin';
 // 通过触发冷启动时的预构建来解决
 import OptimizationPersist from 'vite-plugin-optimize-persist';
 import PkgConfig from 'vite-plugin-package-config';
@@ -41,8 +42,19 @@ export default ({ mode }: ConfigEnv): UserConfig => {
     },
 
     build: {
-      emptyOutDir: true,
-      chunkSizeWarningLimit: 2500,
+      emptyOutDir: true, // 打包时先清空上一次构建生成的目录
+      reportCompressedSize: false, // 关闭文件计算
+      sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
+
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              return id.toString().split('node_modules/')[1].split('/')[0].toString();
+            }
+          },
+        },
+      },
     },
 
     plugins: [
@@ -68,6 +80,13 @@ export default ({ mode }: ConfigEnv): UserConfig => {
             library: 'vue-next',
           }),
         ],
+      }),
+      viteImagemin({
+        gifsicle: { optimizationLevel: 3, interlaced: true },
+        mozjpeg: { quality: 75, progressive: true },
+        optipng: { optimizationLevel: 7 },
+        pngquant: { quality: [0.65, 0.9], speed: 4 },
+        webp: { quality: 75 },
       }),
       electron([
         {
