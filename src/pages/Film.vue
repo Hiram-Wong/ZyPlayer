@@ -675,7 +675,9 @@ eventBus.on(async () => {
   .filter {
     margin-bottom: 10px;
   }
+
   .header {
+    flex-shrink: 0;
     height: 45px;
     display: flex;
     justify-content: space-between;
@@ -685,6 +687,7 @@ eventBus.on(async () => {
       flex-direction: row;
       align-items: center;
       .header-title-wrap {
+        margin-right: var(--td-comp-margin-s);
         .title {
           .data-item {
             display: block;
@@ -708,13 +711,15 @@ eventBus.on(async () => {
         }
       }
       .head-center {
+        display: flex;
         .head-center-class {
-          max-width: 75px;
-          height: 23px;
+          max-width: 150px;
           font-size: 18px;
           font-weight: bold;
-          float: left;
           margin-right: 5px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
         }
 
         .content-items {
@@ -812,13 +817,8 @@ eventBus.on(async () => {
       }
     }
   }
-
-  .main-ext {
-    height: calc(100vh - 55px - 150px - var(--td-comp-size-l)) !important;
-  }
   .main {
     flex-grow: 1;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -474,6 +474,8 @@ const copyChannelEvent = () => {
   overflow: hidden;
   position: relative;
   height: calc(100vh - var(--td-comp-size-l));
+  display: flex;
+  flex-direction: column;
 
   .header {
     margin-bottom: 10px;
@@ -481,15 +483,18 @@ const copyChannelEvent = () => {
 
   .header {
     height: 45px;
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
 
     .left-operation-container {
       display: flex;
       flex-direction: row;
       align-items: center;
       .header-title-wrap {
+        margin-right: var(--td-comp-margin-s);
         .title {
           .data-item {
             display: block;
@@ -513,13 +518,15 @@ const copyChannelEvent = () => {
         }
       }
       .head-center {
+        display: flex;
         .head-center-class {
-          max-width: 75px;
-          height: 23px;
+          max-width: 150px;
           font-size: 18px;
           font-weight: bold;
-          float: left;
           margin-right: 5px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
         }
 
         .content-items {
