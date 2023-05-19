@@ -48,6 +48,7 @@
       </div>
       <div class="right-operation-container">
         <search-view
+          v-model="searchTxt"
           :site="FilmSiteSetting.basic"
           :class="{ 'no-filter': FilmSiteSetting.basic.type === 2 && filter.data.length === 0 }"
           @search="searchEvent"
@@ -538,9 +539,9 @@ const load = async ($state) => {
 };
 
 // 搜索
-const searchEvent = async (kw) => {
-  console.log(`search: ${kw}`);
-  searchTxt.value = kw;
+const searchEvent = async () => {
+  console.log(`search: ${searchTxt.value}`);
+  const kw = searchTxt.value;
   FilmDataList.value.list = [];
   FilmDataList.value.rawList = [];
   infiniteId.value++;
@@ -658,8 +659,6 @@ eventBus.on(async () => {
   infiniteId.value++;
   pagination.value.pageIndex = 1;
   FilmSiteSetting.value.searchGroup = await searchGroup(FilmSiteSetting.value.searchType);
-  await getFilmList();
-  await getFilmArea();
 });
 </script>
 
