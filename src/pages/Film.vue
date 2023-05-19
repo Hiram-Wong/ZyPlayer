@@ -285,11 +285,13 @@ const filterEvent = () => {
     });
 
   // Get unique film data
-  const uniqueData = Array.from(new Set(filteredData));
-  FilmDataList.value.list = uniqueData;
+  // const uniqueData = Array.from(new Set(filteredData));
+  // FilmDataList.value.list = uniqueData;
+
+  FilmDataList.value.list = filteredData;
 };
 
-// drpy筛选：基于接口
+// 非cms筛选：基于请求数据
 const filterDrpyEvent = async () => {
   const filterFormat = Object.entries(filter.value.select).reduce((item, [key, value]) => {
     if (value !== '' && value.length !== 0) {
@@ -317,6 +319,20 @@ const changeFilterEvent = (type, item) => {
   else filterEvent();
 };
 
+const searchGroup = (defaultSearch) => {
+  let selfSearch;
+  if (FilmSiteSetting.value.basic.search !== 0) selfSearch = [{ ...FilmSiteSetting.value.basic }];
+  if (defaultSearch === 'site') {
+    return selfSearch;
+  }
+  if (defaultSearch === 'group') {
+    return sitesList.value
+      .filter((item) => item.group === FilmSiteSetting.value.basic.group && item.search === 1)
+      .concat(selfSearch);
+  }
+  return sitesList.value.filter((item) => item.search === 1).concat(selfSearch);
+};
+
 const getFilmSetting = async () => {
   const [defaultSite, rootClassFilter, r18ClassFilter, defaultChangeModel, sitesAll, defaultSearch] = await Promise.all(
     [
@@ -342,26 +358,12 @@ const getFilmSetting = async () => {
 
   sitesList.value = sitesAll.filter((item) => item.isActive);
 
-  const searchGroup = () => {
-    let selfSearch;
-    if (FilmSiteSetting.value.basic.search !== 0) selfSearch = [{ ...FilmSiteSetting.value.basic }];
-    if (defaultSearch === 'site') {
-      return selfSearch;
-    }
-    if (defaultSearch === 'group') {
-      return sitesList.value
-        .filter((item) => item.group === FilmSiteSetting.value.basic.group && item.search === 1)
-        .concat(selfSearch);
-    }
-    return sitesList.value.filter((item) => item.search === 1).concat(selfSearch);
-  };
-
   Object.assign(FilmSiteSetting.value, {
     rootClassFilter,
     r18ClassFilter,
     change: defaultChangeModel,
     searchType: defaultSearch,
-    searchGroup: searchGroup(),
+    searchGroup: searchGroup(defaultSearch),
   });
 };
 
@@ -461,6 +463,8 @@ const changeClassEvent = async (item) => {
   console.log(`[分类变更] ${item.type_id}:${item.type_id}`);
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
+  searchTxt.value = '';
+  infiniteCompleteTip.value = '没有更多内容了!';
   FilmDataList.value.list = [];
   FilmDataList.value.rawList = [];
   infiniteId.value++;
@@ -547,7 +551,6 @@ const searchEvent = async (kw) => {
     try {
       const searchPromises = FilmSiteSetting.value.searchGroup.map((site) => {
         return zy.search(site.key, kw).then(async (res) => {
-          console.log(res);
           if (res) {
             await Promise.all(
               res.map(async (item) => {
@@ -574,11 +577,10 @@ const changeSitesEvent = async (item) => {
   if (FilmSiteSetting.value.change) await setting.update({ defaultSite: item });
   isLoadClass.value = false;
   infiniteCompleteTip.value = '没有更多内容了!';
+  searchTxt.value = '';
   const res = await sites.get(item);
   sitesListSelect.value = res.id;
-  FilmSiteSetting.value.basic.name = res.name;
-  FilmSiteSetting.value.basic.key = res.key;
-  FilmSiteSetting.value.basic.type = res.type;
+  FilmSiteSetting.value.basic = res;
   FilmSiteSetting.value.class = {
     id: 0,
     name: '最新',
@@ -598,8 +600,7 @@ const changeSitesEvent = async (item) => {
   };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
-
-  getClass();
+  FilmSiteSetting.value.searchGroup = await searchGroup(FilmSiteSetting.value.searchType);
 };
 
 // 播放
@@ -634,6 +635,7 @@ const eventBus = useEventBus('film-reload');
 eventBus.on(async () => {
   isLoadClass.value = false;
   infiniteCompleteTip.value = '没有更多内容了!';
+  searchTxt.value = '';
   await getFilmSetting();
   FilmSiteSetting.value.class = {
     id: 0,
@@ -655,6 +657,7 @@ eventBus.on(async () => {
   };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
+  FilmSiteSetting.value.searchGroup = await searchGroup(FilmSiteSetting.value.searchType);
   await getFilmList();
   await getFilmArea();
 });
