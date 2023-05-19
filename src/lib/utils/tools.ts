@@ -266,6 +266,8 @@ const zy = {
         if (!_.isArray(videoList)) videoList = [videoList];
         videoList = this.convertSearchList(videoList);
       }
+      if (videoList.length === 0) return null;
+
       return videoList;
     } catch (err) {
       throw err;
@@ -297,6 +299,7 @@ const zy = {
         if (!_.isArray(videoList)) videoList = [videoList];
         videoList = this.convertSearchList(videoList);
       }
+      if (videoList.length === 0) return null;
 
       const detailRes = await this.detail(key, videoList[0].vod_id);
       return detailRes;
@@ -323,8 +326,19 @@ const zy = {
       area: vod_area,
       director: vod_director,
       actor: vod_actor,
-      dl: { dd: { _flag: vod_play_from, _t: vod_play_url } }
+      dl: { dd: dldd }
     } = detailItems;
+
+    let vod_play_from = "";
+    let vod_play_url = "";
+
+    if (_.isArray(dldd)) {
+      vod_play_from = dldd.map(item => item._flag).join("$$$");
+      vod_play_url = dldd.map(item => item._t).join("$$$");
+    } else {
+      vod_play_from = dldd._flag;
+      vod_play_url = dldd._t;
+    }
   
     return {
       vod_id,

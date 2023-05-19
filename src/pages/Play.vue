@@ -129,7 +129,7 @@
               <pin-filled-icon v-else size="1.5em" />
             </div>
           </div>
-          <div v-if="!onlineUrl" class="player-top-right-player-info">
+          <div v-if="!onlineUrl && playerType !== 'mp4'" class="player-top-right-player-info">
             <div class="player-top-right-item player-top-right-popup" @click="playerInfoEvent">
               <tools-icon size="1.5em" />
             </div>
@@ -558,6 +558,7 @@ const snifferTimer = ref();
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
 const iptvDataList = ref({});
+const playerType = ref('hls');
 
 const pagination = ref({
   pageIndex: 0,
@@ -660,11 +661,11 @@ watch(
   () => isPlayerInfoVisible.value,
   (val) => {
     if (val) {
-      playerInfo.value.version = xg.value.plugins.hls.core.version;
+      playerInfo.value.version = xg.value.plugins[playerType.value].core.version;
 
       playerInfoTimer.value = setInterval(() => {
         console.log('Interval: Refresh playerInfo');
-        playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
+        playerInfo.value.stats = xg.value.plugins[playerType.value].core.getStats();
       }, 5000);
     } else {
       console.log('Interval: Clear playerInfo');
@@ -683,15 +684,19 @@ const createPlayer = (videoType) => {
   switch (videoType) {
     case 'mp4':
       config.value.plugins = [Mp4Plugin];
+      playerType.value = 'mp4';
       break;
     case 'flv':
       config.value.plugins = [FlvPlugin];
+      playerType.value = 'flv';
       break;
     case 'm3u8':
       config.value.plugins = [HlsPlugin];
+      playerType.value = 'hls';
       break;
     default:
       config.value.plugins = [HlsPlugin];
+      playerType.value = 'hls';
       break;
   }
   console.log(`加载${videoType}播放器类型`);
@@ -831,7 +836,7 @@ const initFilmPlayer = async (isFirst) => {
       analyzeFlagData.value.some((item) => selectPlaySource.value.includes(item))
     ) {
       onlineUrl.value = analyzeUrl.value + config.value.url;
-    } else if (config.value.url.indexOf('m3u8') > -1) {
+    } else if (config.value.url.indexOf('m3u8') > -1 && config.value.url.split('http').length - 1 === 1) {
       console.log(`[player] 直链:${config.value.url}`);
       createPlayer('m3u8');
       await timerUpdatePlayProcess();
@@ -864,7 +869,7 @@ const initFilmPlayer = async (isFirst) => {
 const sniffer = () => {
   win.webContents.setAudioMuted(true);
   const iframeWindow = iframeRef.value.contentWindow;
-  const videoFormats = ['m3u8', 'mp4', 'flv'];
+  const videoFormats = ['.m3u8', '.mp4', '.flv'];
 
   const totalTime = 10000;
   const speeder = 250;
@@ -905,7 +910,7 @@ const sniffer = () => {
           }
 
           onlineUrl.value = '';
-          createPlayer(videoFormat);
+          createPlayer(videoFormat.slice(1));
           win.webContents.setAudioMuted(false);
           timerUpdatePlayProcess();
 
