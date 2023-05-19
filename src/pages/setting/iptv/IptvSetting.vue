@@ -8,15 +8,15 @@
         <div class="right-operation-container">
           <div class="component-op">
             <div class="item" @click="exportEvent">
-              <t-icon size="1.5em" name="arrow-up" />
+              <arrow-up-icon size="1.5em" />
               <span>导出</span>
             </div>
             <div class="item" @click="removeAllEvent">
-              <t-icon size="1.5em" name="remove" />
+              <remove-icon size="1.5em" />
               <span>删除</span>
             </div>
             <div class="item" @click="formDialogVisibleAddIptv = true">
-              <t-icon size="1.5em" name="add" />
+              <add-icon size="1.5em" />
               <span>添加</span>
             </div>
           </div>
@@ -68,6 +68,7 @@
 import { useEventBus } from '@vueuse/core';
 import { saveAs } from 'file-saver';
 import _ from 'lodash';
+import { AddIcon, ArrowUpIcon, RemoveIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref } from 'vue';
 
@@ -283,12 +284,10 @@ const removeAllEvent = () => {
       display: flex;
       padding: 4px;
       height: 40px;
-      background: #f0f0f0;
+      background-color: var(--td-bg-input);
       backdrop-filter: blur(10px);
       border-radius: 6px;
-      color: #161616;
       align-items: center;
-      box-shadow: 10px;
       .item {
         border-radius: 5px;
         transition: all 0.2s ease 0s;
@@ -300,7 +299,8 @@ const removeAllEvent = () => {
         text-decoration: none;
       }
       .item:hover {
-        background: #dcdcdc;
+        color: var(--td-text-color-primary);
+        background-color: var(--td-bg-color-component-hover);
       }
     }
   }
@@ -319,18 +319,6 @@ const removeAllEvent = () => {
   }
   :deep(.t-table__pagination) {
     background-color: var(--td-bg-color-container);
-  }
-}
-
-:root[theme-mode='dark'] {
-  .setting-iptv-container {
-    .component-op {
-      background: #484848;
-      color: #eee;
-      .item:hover {
-        background: #5e5e5e;
-      }
-    }
   }
 }
 </style>

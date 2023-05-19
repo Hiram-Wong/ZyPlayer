@@ -232,12 +232,10 @@ const defaultEvent = async (row) => {
       display: flex;
       padding: 4px;
       height: 40px;
-      background: #f0f0f0;
+      background-color: var(--td-bg-input);
       backdrop-filter: blur(10px);
       border-radius: 6px;
-      color: #161616;
       align-items: center;
-      box-shadow: 10px;
       .item {
         border-radius: 5px;
         transition: all 0.2s ease 0s;
@@ -249,7 +247,8 @@ const defaultEvent = async (row) => {
         text-decoration: none;
       }
       .item:hover {
-        background: #dcdcdc;
+        color: var(--td-text-color-primary);
+        background-color: var(--td-bg-color-component-hover);
       }
     }
   }
@@ -268,18 +267,6 @@ const defaultEvent = async (row) => {
   }
   :deep(.t-table__pagination) {
     background-color: var(--td-bg-color-container);
-  }
-}
-
-:root[theme-mode='dark'] {
-  .setting-analyze-container {
-    .component-op {
-      background: #484848;
-      color: #eee;
-      .item:hover {
-        background: #5e5e5e;
-      }
-    }
   }
 }
 </style>

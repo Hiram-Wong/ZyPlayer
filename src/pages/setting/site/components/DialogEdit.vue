@@ -1,9 +1,9 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="编辑源站" :width="680" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="编辑" :width="680" placement="center" :footer="false">
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" colon :data="formData" :rules="rules" :label-width="100" @submit="onSubmit">
-        <t-form-item label="源站名" name="name">
+        <t-form-item label="名称" name="name">
           <t-input v-model="formData.name" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="类型" name="type">
@@ -13,7 +13,7 @@
             <t-radio :value="2">drpy</t-radio>
           </t-radio-group>
         </t-form-item>
-        <t-form-item label="API接口" name="api">
+        <t-form-item label="接口" name="api">
           <t-input v-model="formData.api" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="搜索" name="search">
@@ -23,10 +23,10 @@
             <t-radio :value="2">本站搜索</t-radio>
           </t-radio-group>
         </t-form-item>
-        <!-- <t-form-item label="下载接口" name="download">
+        <!-- <t-form-item label="下载" name="download">
           <t-input v-model="formData.download" placeholder="请输入内容" />
         </t-form-item> -->
-        <t-form-item label="解析接口" name="playUrl">
+        <t-form-item label="解析" name="playUrl">
           <t-input v-model="formData.playUrl" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="分组" name="group">
@@ -47,7 +47,7 @@
             />
           </t-select>
         </t-form-item>
-        <t-form-item label="源站标识" name="key">
+        <t-form-item label="标识" name="key">
           <t-input v-model="formData.key" placeholder="请输入内容" />
         </t-form-item>
 

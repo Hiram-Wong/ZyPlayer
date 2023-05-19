@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加直播源" :width="646" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加" :width="646" placement="center" :footer="false">
     <template #body>
       <t-radio-group v-model="selectWay" variant="default-filled">
         <t-radio-button value="add-single">订阅配置</t-radio-button>
@@ -16,10 +16,10 @@
         :label-width="100"
         @submit="onSubmit($event, 'single')"
       >
-        <t-form-item label="直播源名" name="name">
+        <t-form-item label="名称" name="name">
           <t-input v-model="formData.IptvInfo.name" class="input-item" placeholder="请输入内容" />
         </t-form-item>
-        <t-form-item label="订阅配置" name="url">
+        <t-form-item label="配置" name="url">
           <t-space direction="vertical">
             <t-space>
               <t-radio-group v-model="formData.IptvInfo.type">
@@ -57,7 +57,7 @@
             </t-space>
           </t-space>
         </t-form-item>
-        <t-form-item label="节目单接口" name="epg">
+        <t-form-item label="节目单" name="epg">
           <t-input v-model="formData.IptvInfo.epg" class="input-item" placeholder="请输入内容" />
         </t-form-item>
         <div class="optios">

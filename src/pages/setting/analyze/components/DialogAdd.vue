@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加解析源" :width="646" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加" :width="646" placement="center" :footer="false">
     <template #body>
       <t-radio-group v-model="selectWay" variant="default-filled">
         <t-radio-button value="add-single">订阅配置</t-radio-button>
@@ -16,10 +16,10 @@
         :label-width="100"
         @submit="onSubmit($event, 'single')"
       >
-        <t-form-item label="接口名称" name="name">
+        <t-form-item label="名称" name="name">
           <t-input v-model="formData.single.name" class="input-item" placeholder="请输入内容" />
         </t-form-item>
-        <t-form-item label="解析接口" name="url">
+        <t-form-item label="接口" name="url">
           <t-input v-model="formData.single.url" class="input-item" placeholder="请输入内容" />
         </t-form-item>
         <div class="optios">
