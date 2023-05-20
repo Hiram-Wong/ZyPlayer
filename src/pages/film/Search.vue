@@ -209,7 +209,7 @@ const focusEvent = async () => {
 @import '@/style/index.less';
 
 .hd-search {
-  top: 0;
+  top: 1px;
   position: absolute;
   right: 35px;
   left: unset;
