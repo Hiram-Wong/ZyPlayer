@@ -54,7 +54,7 @@
       <template #search="{ row }">
         <t-tag v-if="row.search === 0" shape="round" theme="danger" variant="light-outline">关闭</t-tag>
         <t-tag v-else-if="row.search === 1" theme="success" shape="round" variant="light-outline">聚合</t-tag>
-        <t-tag v-else theme="warning" shape="round" variant="light-outline">本站</t-tag>
+        <t-tag v-else-if="row.search === 2" theme="warning" shape="round" variant="light-outline">本站</t-tag>
       </template>
       <template #status="{ row }">
         <t-tag v-if="row.status" shape="round" theme="success" variant="light-outline">可用</t-tag>
