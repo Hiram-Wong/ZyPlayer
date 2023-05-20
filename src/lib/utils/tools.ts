@@ -399,8 +399,8 @@ const zy = {
    */
   async check (key) {
     try {
-      const data = await this.list(key, 1, 1);
-      if (data) return true;
+      const data = await this.classify(key);
+      if (data.classData) return true;
       else return false;
     } catch (err) {
       console.log(err);
