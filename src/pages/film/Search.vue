@@ -1,6 +1,6 @@
 <template>
-  <div class="hd-search">
-    <div v-show="isFocus && hotList.length !== 0" class="modal" @click.self="isFocus = false"></div>
+  <div class="hd-search" @click.self="isFocus = false">
+    <div v-show="isFocus && hotList.length !== 0" class="modal"></div>
     <div class="sh-search" :class="{ act: isFocus && hotList.length !== 0 }">
       <div ref="searchRef" class="hd-search skin1" :class="[isFocus && hotList.length !== 0 ? 'open focus' : 'hide']">
         <div class="hd-search-inner">
@@ -10,12 +10,13 @@
             class="hd-input"
             @keyup.enter="searchInputEvent"
             @focus="focusEvent"
+            @input="emit('update:modelValue', searchTxt)"
           />
           <a class="search-hotlink" @click="isDialogHot = true">
             <chart-bar-icon size="14" class="search-hotlink-icon" />
             热榜
           </a>
-          <div class="hd-submit" @mousedown="searchInputEvent">
+          <div class="hd-submit" @mousedown.stop="searchInputEvent">
             <svg width="18" height="18" viewBox="0 0 18 18">
               <g transform="translate(1.5 1.461)" stroke="currentColor" fill="none" fill-rule="evenodd">
                 <path d="M7.5 15a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z" stroke-width="2"></path>
@@ -70,7 +71,13 @@
                 </span>
                 <div class="info">
                   <div v-if="index < 4" class="pic">
-                    <img :src="item.vod_pic" alt="" />
+                    <t-image
+                      class="img"
+                      :src="item.vod_pic"
+                      :lazy="true"
+                      :loading="renderLoading"
+                      :error="renderError"
+                    ></t-image>
                   </div>
                   <div class="txt">
                     <span class="name">{{ item.vod_name }}</span>
@@ -89,8 +96,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ChartBarIcon } from 'tdesign-icons-vue-next';
+<script setup lang="tsx">
+import { ChartBarIcon, LinkUnlinkIcon, LoadingIcon } from 'tdesign-icons-vue-next';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 import { setting } from '@/lib/dexie';
@@ -99,9 +106,9 @@ import zy from '@/lib/utils/tools';
 import HotView from './Hot.vue';
 
 const props = defineProps({
-  visible: {
-    type: Boolean,
-    default: false,
+  modelValue: {
+    type: String,
+    default: '',
   },
   site: {
     type: Object,
@@ -112,18 +119,42 @@ const props = defineProps({
 const formData = ref(props.site); // 接受父组件参数
 const hotList = ref([]); // 热播列表
 
-const searchTxt = ref('');
+const searchTxt = ref(props.modelValue);
 const isFocus = ref(false);
+const isChange = ref(false);
 const isDialogHot = ref(false);
 
 const searchRef = ref(null);
 
-const emit = defineEmits(['search']);
+const emit = defineEmits(['update:modelValue', 'search']);
+
+const renderError = () => {
+  return (
+    <div class="renderIcon">
+      <LinkUnlinkIcon size="1.5em" stroke-width=".8" />
+    </div>
+  );
+};
+const renderLoading = () => {
+  return (
+    <div class="renderIcon">
+      <LoadingIcon size="1.5em" stroke-width=".8" />
+    </div>
+  );
+};
 
 watch(
   () => props.site,
   (val) => {
     formData.value = val;
+    if (val) isChange.value = true;
+  },
+);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    searchTxt.value = val;
   },
 );
 
@@ -152,21 +183,24 @@ const getHotList = async () => {
   } else if (defaultHot === 'douban') {
     hotList.value = await zy.doubanHot('tv', '热门', 10, 0);
   }
+
+  isChange.value = false;
 };
 
 const searchHotEvent = (kw) => {
   searchTxt.value = kw;
+  emit('update:modelValue', kw);
   searchInputEvent();
 };
 
 const searchInputEvent = () => {
-  emit('search', searchTxt.value);
+  emit('search');
   isFocus.value = false;
 };
 
 const focusEvent = async () => {
   isFocus.value = true;
-  await getHotList();
+  if (isChange.value) await getHotList();
 };
 </script>
 
@@ -396,7 +430,7 @@ const focusEvent = async () => {
             box-shadow: -6px 0 12px 0 rgba(0, 0, 0, 0.4);
             border-radius: 4px;
             overflow: hidden;
-            img {
+            .img {
               width: 100%;
               height: 100%;
             }
