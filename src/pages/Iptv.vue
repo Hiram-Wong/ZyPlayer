@@ -51,12 +51,7 @@
           <div class="sh-search">
             <div class="hd-search skin1">
               <div class="hd-search-inner">
-                <input
-                  v-model.trim="searchTxt"
-                  placeholder="输入关键词搜索"
-                  class="hd-input"
-                  @keyup.enter="searchEvent"
-                />
+                <input v-model.trim="searchTxt" placeholder="输入关键词" class="hd-input" @keyup.enter="searchEvent" />
 
                 <div class="hd-submit" @click="searchEvent">
                   <svg width="18" height="18" viewBox="0 0 18 18">
@@ -373,8 +368,8 @@ const changeDefaultIptvEvent = async (event: any) => {
   getChannelCount();
   getIptvClass();
   iptvDataList.value = { list: [], total: 0 };
+  iptvClassSelect.value = '全部';
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
-  // $state.loaded();
   pagination.value.pageIndex = 0;
   getChannelList();
 };
