@@ -9,6 +9,7 @@ import JSON5 from 'json5';
 import { sites } from '@/lib/dexie';
 
 const iconv = require('iconv-lite');
+const prettier = require('prettier');
 const dns = require('dns');
 const net = require('net');
 
@@ -421,14 +422,12 @@ const zy = {
       parser.end();
       const parsedManifest = parser.manifest;
   
-      if (parsedManifest.segments.length > 0) {
-        return true;
-      }
+      if (parsedManifest.segments.length > 0) return true;
   
       // 兼容性处理 抓包多次请求规则 #EXT-X-STREAM-INF 带文件路径的相对路径
-      const responseURL = res.request.responseURL
-      const { uri } = parsedManifest.playlists[0]
-      let newUrl
+      const responseURL = res.request.responseURL;
+      const { uri } = parsedManifest.playlists[0];
+      let newUrl = '';
       if (res.data.indexOf("encoder") > 0) {
         // request1: http://1.204.169.243/live.aishang.ctlcdn.com/00000110240389_1/playlist.m3u8?CONTENTID=00000110240389_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
         // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8000000,CODECS="avc,mp21" encoder/0/playlist.m3u8?CONTENTID=00000110240127_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
@@ -436,13 +435,11 @@ const zy = {
         const index = responseURL.lastIndexOf("\/");
         const urlLastParam= responseURL.substring(0, index+1);
         newUrl = urlLastParam + uri;
-        return this.checkChannel(newUrl);
       } else if (uri.indexOf("http")  === 0|| uri.indexOf("//") === 0) {
         // request1: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/index.m3u8?IASHttpSessionId=OTT8798520230127055253191816
         // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8468480 http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8798520230127055253191816&zte_bandwidth=1000&bandwidth=8468480&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
         // request2: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8867820230127053805215983&zte_bandwidth=1000&bandwidth=8467456&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
-        newUrl = uri
-        return this.checkChannel(newUrl);
+        newUrl = uri;
       } else if (/^\/[^\/]/.test(uri) || (/^[^\/]/.test(uri) && uri.indexOf("http") === 0)) {
         // request1: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//index.m3u8
         // #EXT-X-STREAM-INF:BANDWIDTH=15435519,AVERAGE-BANDWIDTH=15435519,RESOLUTION=3840x2160,CODECS="hvc1.1.6.L150.b0,mp4a.40.2",AUDIO="audio_mp4a.40.2_48000",CLOSED-CAPTIONS=NONE,FRAME-RATE=25 1/v15M/index.m3u8
@@ -450,8 +447,10 @@ const zy = {
         const index = responseURL.lastIndexOf("\/");
         const urlLastParam= responseURL.substring(0, index+1);
         newUrl = urlLastParam + uri;
-        return this.checkChannel(newUrl);
       }
+
+      if (newUrl) return this.checkChannel(newUrl);
+
       return false;
     } catch (err) {
       throw err;
@@ -694,8 +693,8 @@ const zy = {
     }
   },
   /**
-   * 判断是否支持ipv6
-   * @returns ture/false
+   * 判断网络环境是否为 ipv6
+   * @return {Boolean}
   */
   async checkSupportIpv6() {
     try {
@@ -709,7 +708,8 @@ const zy = {
   },
   /**
    * 判断url是否为ipv6
-   * @returns ture/false
+   * @param {String} url  请求地址
+   * @return {Boolean}
   */
   async checkUrlIpv6(url) {
     let hostname = new URL(url).hostname;
@@ -743,6 +743,26 @@ const zy = {
         console.log(url,hostname)
         throw err;
       }
+    }
+  },
+  /**
+   * 格式化 html
+   * @param {String} url  请求地址
+   * @return
+  */
+  async formatHTML(url) {
+    try {
+      const res = await axios.get(url);
+      const html = res.data;
+      const $ = cheerio.load(html);
+
+      // 对HTML进行格式化
+      const formattedHTML = prettier.format($.html(), { parser: 'html' });
+
+      // 返回格式化后的HTML
+      return formattedHTML;
+    } catch (err) {
+      console.error('Error:', err);
     }
   }
 }
