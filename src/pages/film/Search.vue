@@ -13,7 +13,17 @@
             @input="emit('update:modelValue', searchTxt)"
           />
           <a class="search-hotlink" @click="isDialogHot = true">
-            <chart-bar-icon size="14" class="search-hotlink-icon" />
+            <svg class="search-hotlink-icon" viewBox="0 0 18 18">
+              <g fill-rule="nonzero" fill="none" opacity=".85">
+                <path d="M1 1h16v16H1z"></path>
+                <path
+                  d="M9 16.461c3.294 0 6-2.503 6-5.716 0-.788-.042-1.634-.498-2.948s-.548-1.484-1.03-2.295c-.206 1.656-1.308 2.346-1.588 2.552 0-.214-.667-2.587-1.678-4.007C9.214 2.653 7.864 2.08 7.073 1.46c0 1.178-.345 2.586-.84 3.478-.495.892-.588.924-1.205 1.588-.618.664-.902.869-1.419 1.674-.516.806-.61 1.878-.61 2.667 0 3.213 2.706 5.593 6 5.593Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                ></path>
+              </g>
+            </svg>
             热榜
           </a>
           <div class="hd-submit" @mousedown.stop="searchInputEvent">
@@ -97,7 +107,7 @@
 </template>
 
 <script setup lang="tsx">
-import { ChartBarIcon, LinkUnlinkIcon, LoadingIcon } from 'tdesign-icons-vue-next';
+import { LinkUnlinkIcon, LoadingIcon } from 'tdesign-icons-vue-next';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 import { setting } from '@/lib/dexie';
@@ -209,13 +219,12 @@ const focusEvent = async () => {
 @import '@/style/index.less';
 
 .hd-search {
-  top: 1px;
+  top: 2px;
   position: absolute;
   right: 35px;
   left: unset;
   width: auto;
   z-index: 20;
-  margin: 0 0 0 35px;
   background: rgba(0, 0, 0, 0.08);
   border-radius: 20px;
   .modal {
@@ -250,6 +259,8 @@ const focusEvent = async () => {
   }
 
   .hd-search {
+    top: 0;
+    left: 0;
     position: relative;
     width: 100%;
     display: flex;

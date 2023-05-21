@@ -170,7 +170,7 @@ const getHotList = async () => {
       }
       date = moment(date).subtract(1, 'days').format('YYYY-MM-DD');
     }
-    MessagePlugin.warning(`获取失败: 尝试请求次数:${retryLimit}`);
+    MessagePlugin.warning(`获取失败: 尝试获取最近:${retryLimit + 1}天数据`);
   } catch (err) {
     MessagePlugin.error(`error:${err}`);
     console.error(err);
