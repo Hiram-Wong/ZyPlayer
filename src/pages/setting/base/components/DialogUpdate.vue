@@ -132,4 +132,10 @@ const installUpdate = () => {
 .tip {
   margin-top: var(--td-size-4);
 }
+
+.content {
+  height: 300px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
 </style>
