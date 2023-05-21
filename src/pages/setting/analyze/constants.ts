@@ -10,6 +10,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     fixed: 'left',
     sorter: (a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'),
   },
+  // { title: '类型', colKey: 'type', width: 100 },
   { title: '启用', colKey: 'isActive', width: 100 },
   {
     align: 'center',

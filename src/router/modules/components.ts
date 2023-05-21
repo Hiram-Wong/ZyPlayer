@@ -110,7 +110,7 @@ export default [
     name: 'test',
     component: Layout,
     redirect: '/test/index',
-    meta: { title: '测试', icon: 'setting', hidden: false },
+    meta: { title: '测试', icon: 'setting', hidden: true },
     children: [
       {
         path: 'index',

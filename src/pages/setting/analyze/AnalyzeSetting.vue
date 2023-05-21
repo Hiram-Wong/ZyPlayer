@@ -46,6 +46,12 @@
         <t-badge v-if="row.id === defaultAnalyze" size="small" :offset="[-5, 0]" count="默认">{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
+      <!-- <template #type="{ row }">
+        <span v-if="row.type === 0">普通</span>
+        <span v-if="row.type === 1">json</span>
+        <span v-if="row.type === 2">多json</span>
+        <span v-if="row.type === 3">聚合</span>
+      </template> -->
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>

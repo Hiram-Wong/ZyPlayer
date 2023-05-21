@@ -6,7 +6,7 @@
           <search-icon :style="{ cursor: 'pointer' }" @click.self="loadSourceHtml" />
         </template>
       </t-input>
-      <t-button class="request_header" @click="formDialogVisibleRequestHeader = true">请求头</t-button>
+      <!-- <t-button class="request_header" @click="formDialogVisibleRequestHeader = true">请求头</t-button> -->
     </div>
     <div class="main">
       <div class="left bg">
@@ -43,11 +43,11 @@
                 <t-input v-model="testData.detail" class="input"></t-input>
                 <t-button @click="test('detail')">测试</t-button>
               </div>
-              <div class="rule-item export">
+              <!-- <div class="rule-item export">
                 <t-button block shape="round" theme="default" @click="formDialogVisibleExport = true">
                   导出配置
                 </t-button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -57,31 +57,39 @@
         </div>
       </div>
     </div>
-    <dialog-export-view v-model:visible="formDialogVisibleExport" :data="testData" />
+    <!-- <dialog-export-view v-model:visible="formDialogVisibleExport" :data="testData" />
     <dialog-request-header-view
       v-model:visible="formDialogVisibleRequestHeader"
       :data="requestHeader"
       @receive-request-header="setRequestHeader"
-    />
+    /> -->
   </div>
 </template>
 
 <script setup lang="ts">
 import * as cheerio from 'cheerio';
+// import * as monaco from 'monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { SearchIcon } from 'tdesign-icons-vue-next';
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
+import htmlParser from '@/lib/drpy/htmlParser';
 import zy from '@/lib/utils/tools';
+import { useSettingStore } from '@/store';
 
-import DialogExportView from './components/DialogExport.vue';
-import DialogRequestHeaderView from './components/DialogRequestHeader.vue';
+// import DialogExportView from './components/DialogExport.vue';
+// import DialogRequestHeaderView from './components/DialogRequestHeader.vue';
 
-// import * as monaco from 'monaco-editor';
+const storeSetting = useSettingStore();
+
+const theme = computed(() => {
+  return storeSetting.displayMode;
+});
 
 const searchUrl = ref('');
-const htmlInputRef = ref();
-const htmlOutputRef = ref();
+const htmlInputRef = ref(null);
+const htmlOutputRef = ref(null);
 const sourceHtml = ref();
 const restultHtml = ref();
 const testData = ref({
@@ -91,12 +99,15 @@ const testData = ref({
   search: '',
   detail: '',
 });
-const requestHeader = ref();
-const formDialogVisibleExport = ref(false);
-const formDialogVisibleRequestHeader = ref(false);
+
+// const requestHeader = ref();
+// const formDialogVisibleExport = ref(false);
+// const formDialogVisibleRequestHeader = ref(false);
+
 const EDITOR_CONFIG = {
+  language: 'html',
   automaticLayout: true, // 自适应布局
-  theme: 'vs-dark', // 官方自带三种主题vs, hc-black, or vs-dark
+  theme: theme.value === 'light' ? 'vs' : 'vs-dark', // 官方自带三种主题vs, hc-black, or vs-dark
   renderLineHighlight: 'all', // 行亮
   selectOnLineNumbers: true, // 显示行号
   minimap: {
@@ -107,8 +118,8 @@ const EDITOR_CONFIG = {
   overviewRulerBorder: false, // 不要滚动条的边框
 };
 
-let editorInput: monaco.editor.IStandaloneCodeEditor;
-let editorOutput: monaco.editor.IStandaloneCodeEditor;
+let editorInput;
+let editorOutput;
 
 onBeforeUnmount(() => {
   editorInput.dispose();
@@ -120,8 +131,13 @@ onMounted(() => {
 });
 
 const loadSourceHtml = async () => {
-  sourceHtml.value = await zy.getConfig(searchUrl.value, requestHeader.value);
-  editorInput.setValue(sourceHtml.value);
+  try {
+    sourceHtml.value = await zy.formatHTML(searchUrl.value);
+    editorInput.setValue(sourceHtml.value);
+    MessagePlugin.success(`获取成功`);
+  } catch (err) {
+    MessagePlugin.error(`获取失败: ${err}`);
+  }
 };
 
 const editorInit = () => {
@@ -129,56 +145,69 @@ const editorInit = () => {
     editorInput = monaco.editor.create(htmlInputRef.value as HTMLElement, EDITOR_CONFIG);
     editorOutput = monaco.editor.create(htmlOutputRef.value as HTMLElement, EDITOR_CONFIG);
 
-    // console.log(editor)
     // 监听值的变化
-    // editor.onDidChangeModelContent((val) => {
-    //   text.value = editor.getValue();
-    // });
+    editorInput.onDidChangeModelContent(() => {
+      sourceHtml.value = editorInput.getValue();
+    });
+    editorOutput.onDidChangeModelContent(() => {
+      restultHtml.value = editorInput.getValue();
+    });
   });
 };
 
 const test = (type) => {
   console.log(type);
-  const $ = cheerio.load(sourceHtml.value);
-  console.log($('.lazyload').attr('data-original'));
   const patSource = testData.value[type];
-  console.log(patSource);
-  const patRestult = patSource.split(';');
-  console.log(patRestult);
-  const matchs = [];
-  let firstNode = '';
-  for (let i = 0; i < patRestult.length; i++) {
-    console.log(patRestult[i]);
-    if (i === 0) firstNode = patRestult[i];
-    if (patRestult[i] && patRestult[i] !== '*') {
-      let match;
-      const patRestultSpilt = patRestult[i].split('&&');
-
-      if (patRestultSpilt.length > 1) {
-        console.log(`${firstNode} ${patRestultSpilt[0]} .attr(${patRestultSpilt[1]})`);
-        const arry = [];
-        $(`${firstNode} ${patRestultSpilt[0]}`).each((i, el) => {
-          const key = $(el).attr(patRestultSpilt[1]);
-          arry.push(key);
-          console.log(key);
-        });
-        match = arry;
-        console.log(match);
-      } else match = $(patRestult[i]).text().trim().replace(/\s+/g, ',');
-
-      matchs.push(match);
-      console.log(matchs);
-    }
-  }
-
-  restultHtml.value = matchs.join('\n');
-  editorOutput.setValue(restultHtml.value);
+  const res = htmlParser.parseDomForUrl(sourceHtml.value, patSource, '');
+  console.log(res);
 };
+// const test = (type) => {
+//   console.log(type);
+//   const $ = cheerio.load(sourceHtml.value);
+//   const patSource = testData.value[type];
+//   console.log(patSource);
+//   const patRestult = patSource.split(';');
+//   console.log(patRestult);
+//   const matchs = [];
+//   let firstNode = '';
+//   for (let i = 0; i < patRestult.length; i++) {
+//     console.log(patRestult[i]);
+//     if (i === 0) firstNode = patRestult[i];
+//     if (patRestult[i] && patRestult[i] !== '*') {
+//       let match;
+//       const patRestultSpilt = patRestult[i].split('&&');
+//       console.log(patRestultSpilt);
 
-const setRequestHeader = (item) => {
-  requestHeader.value = item;
-  console.log(requestHeader.value);
-};
+//       if (patRestultSpilt.length > 1) {
+//         const selector = `${firstNode} ${patRestultSpilt.slice(0, -1).join(' ')}[${
+//           patRestultSpilt[patRestultSpilt.length - 1]
+//         }]`;
+
+//         console.log(selector);
+
+//         const arry = [];
+//         $(selector).each((i, el) => {
+//           const key = $(el).attr(patRestultSpilt[patRestultSpilt.length - 1]);
+//           arry.push(key);
+//           console.log(key);
+//         });
+//         match = arry;
+//         console.log(match);
+//       } else match = $(patRestult[i]).text().trim().replace(/\s+/g, ',');
+
+//       matchs.push(match);
+//       console.log(matchs);
+//     }
+//   }
+
+//   restultHtml.value = matchs.join('\n');
+//   editorOutput.setValue(restultHtml.value);
+// };
+
+// const setRequestHeader = (item) => {
+//   requestHeader.value = item;
+//   console.log(requestHeader.value);
+// };
 </script>
 
 <style lang="less" scoped>
@@ -198,10 +227,11 @@ const setRequestHeader = (item) => {
   .bg {
     background: var(--td-bg-color-page);
     border-radius: 5px;
-    padding: 0 10px;
+    padding: 0 10px 10px 10px;
   }
   .title {
-    font-weight: 700;
+    color: var(--td-text-color-secondary);
+    font-weight: 500;
   }
   .main {
     display: flex;
@@ -218,6 +248,7 @@ const setRequestHeader = (item) => {
       width: calc((100% - 10px) / 2);
       height: 100%;
       .top {
+        margin-bottom: 10px;
         .rule-items {
           .rule-item {
             display: flex;
@@ -241,8 +272,7 @@ const setRequestHeader = (item) => {
         }
       }
       .bottom {
-        padding: 0 10px;
-        height: calc(100% - 285px);
+        height: calc(100% - 252px);
         .codeEditBox {
           height: calc(100% - 22px);
           width: 100%;

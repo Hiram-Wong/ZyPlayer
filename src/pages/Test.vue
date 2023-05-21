@@ -18,7 +18,7 @@ const xg = ref();
 // https://pps.sd-play.com/20220427/pyqCdBbv/index.m3u8
 const config = ref({
   id: 'xgplayer',
-  url: 'https://m3u8.qwertwe.top/cache/efad6de3773567f659ff4ed73c35d259.m3u8?auth_key=1684385344-0-0-72553574f80fc83a2aed64e87f965fcd',
+  url: 'https://cdn.oss-cn-m3u8.tv-nanjing-chengdu.myqcloud.com.zh188.net/Play-QY.php?url=M3EvQmdSaEtGZ2c0NWU0MnFqWHA3SjYrQTcwL2FwaldmLytnMC9wTVNwbjUwaGdET3VvZFhxcndpa1FDU0ZaTllOTkk5Y0NhQUllSDdpK3YycmdkckZidGZGVW80ZHR5cHFsUnVUQmU2M1laT1RUOFJRNDhaR0gvSitCOEpSODI1NEhXTFNMK0l2blBNQ1M1RW02amxUSklCTDZVbllCWXNrNlFSWEZmNHdsSzdDdTYrNVVDMG82QVcya1ZrVVJUa0RqSVhaS2FLdE1mNUNjeitNN2tTV2MzWVVxUW1oVktqYkdxRWwyVnBVTDE2R1FKWVlCeStDTzEySnhaSmF6VFpDUXdEeWtSRkhLTjJKaXluRXJ1Rmc9PQ==.m3u8',
   plugins: [HlsPlugin],
 }); // 西瓜播放器参数
 onMounted(() => {
