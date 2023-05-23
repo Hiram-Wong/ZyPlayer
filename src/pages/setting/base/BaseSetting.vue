@@ -4,12 +4,13 @@
       <t-form-item label="外观" name="theme">
         <t-radio-group v-model="formData.theme">
           <div v-for="(item, index) in MODE_OPTIONS" :key="index" class="setting-layout-drawer">
-            <t-radio-button :value="item.type">
-              <component :is="getModeIcon(item.type)" class="theme-item" />
-            </t-radio-button>
-            <p class="theme-info">
-              {{ item.text }}
-            </p>
+            <div>
+              <t-radio-button :key="index" :value="item.type">
+                <component :is="getModeIcon(item.type)" class="mode-img" />
+                <picked-icon v-if="formData.theme === item.type" class="picked" />
+              </t-radio-button>
+              <p :style="{ textAlign: 'center', marginTop: '8px' }">{{ item.text }}</p>
+            </div>
           </div>
         </t-radio-group>
       </t-form-item>
@@ -112,7 +113,7 @@
         <div class="player">
           <t-space direction="vertical" style="width: 280px">
             <t-space>
-              <t-radio v-model="formData.softSolution" allow-uncheck>软解</t-radio>
+              <t-radio v-model="formData.softSolution" allow-uncheck>软解(千万别开)</t-radio>
               <t-radio v-model="formData.skipStartEnd" allow-uncheck>跳过片头片尾</t-radio>
             </t-space>
             <div v-if="formData.skipStartEnd" class="">
@@ -172,6 +173,7 @@ import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 
+import PickedIcon from '@/assets/assets-picked.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
@@ -224,13 +226,12 @@ const statusShortcut = ref('default');
 const tipShortcut = ref('');
 
 const getModeIcon = (mode) => {
-  if (mode === 'light') {
-    return SettingLightIcon;
-  }
-  if (mode === 'dark') {
-    return SettingDarkIcon;
-  }
-  return SettingAutoIcon;
+  const modeIconMap = {
+    light: SettingLightIcon,
+    dark: SettingDarkIcon,
+    auto: SettingAutoIcon,
+  };
+  return modeIconMap[mode];
 };
 
 const storePlayer = usePlayStore();
@@ -635,34 +636,31 @@ eventBus.on(async () => {
     flex-direction: column;
     align-items: center;
     margin-right: 35px;
-    box-sizing: content-box;
     .t-radio-button {
       display: inline-flex;
-      border: 2px solid transparent;
+      max-height: 78px;
       padding: 0;
-      > :deep(.t-radio-button__label) {
+      border-radius: var(--td-radius-default);
+      border: none;
+      > .t-radio-button__label {
         display: inline-flex;
-        height: 44px !important;
-      }
-      .theme-item {
-        width: 68px;
-        height: 44px;
-        border-radius: 5px;
-        :deep(.appearance) {
-          width: 68px;
-          height: 44px;
+        position: relative;
+        .mode-img,
+        .layout-img {
+          border-radius: 9px;
+        }
+        .picked {
+          position: absolute;
+          right: 0;
+          bottom: 0;
         }
       }
     }
     .t-is-checked {
-      border-radius: 7px;
-      border: 2px solid var(--td-brand-color);
+      border: none;
     }
-    .theme-info {
-      text-align: center;
-      margin-top: 3px;
-      font-size: 13px;
-      font-weight: 400;
+    .t-form__controls-content {
+      justify-content: end;
     }
   }
   .reset-boss-key {
