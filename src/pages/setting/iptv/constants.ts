@@ -3,7 +3,7 @@ import { PrimaryTableCol, TableRowData } from 'tdesign-vue-next';
 export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
   { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
   {
-    title: '资源名',
+    title: '名称',
     colKey: 'name',
     width: 200,
     align: 'left',
