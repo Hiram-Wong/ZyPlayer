@@ -239,18 +239,23 @@ const getIptvClass = async () => {
 
 // 获取直播列表
 const getChannelList = async () => {
-  const res = await channelList.pagination(
-    pagination.value.pageIndex,
-    pagination.value.pageSize,
-    searchTxt.value,
-    iptvClassSelect.value,
-  );
+  const { pageIndex, pageSize } = pagination.value;
+  const { skipIpv6, iptvStatus } = iptvSetting.value;
+  const { list } = iptvDataList.value;
+
+  const res = await channelList.pagination(pageIndex, pageSize, searchTxt.value, iptvClassSelect.value);
   const sourceLength = res.list.length;
-  if (iptvSetting.value.skipIpv6) {
+
+  if (skipIpv6) {
     const filteredList = await Promise.all(
       res.list.map(async (item) => {
-        if ((await zy.checkUrlIpv6(item.url)) !== 'IPv6') {
-          return item;
+        try {
+          if ((await zy.checkUrlIpv6(item.url)) !== 'IPv6') {
+            return item;
+          }
+        } catch (err) {
+          console.log(err);
+          return false;
         }
         return res;
       }),
@@ -258,8 +263,8 @@ const getChannelList = async () => {
     res.list = filteredList.filter(Boolean);
   }
   const restultLength = res.list.length;
-  iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
-  if (iptvSetting.value.iptvStatus) await checkChannelList(pagination.value.pageIndex, pagination.value.pageSize);
+  iptvDataList.value.list = _.unionWith(list, res.list, _.isEqual);
+  if (iptvStatus) await checkChannelList(pageIndex, pageSize);
 
   // 判断是否开启检查；判断原数据；判断原和目的
   // 1. 开启检查：为0  1).返回原或0
@@ -267,7 +272,7 @@ const getChannelList = async () => {
   // 3. 非开启检查     1).直接返回原
   let length;
 
-  if (iptvSetting.value.skipIpv6) {
+  if (skipIpv6) {
     if (sourceLength) {
       if (sourceLength === restultLength) length = sourceLength;
       if (restultLength === 0) {
@@ -276,6 +281,7 @@ const getChannelList = async () => {
       }
     } else length = sourceLength;
   }
+
   pagination.value.pageIndex++;
   return length;
 };
