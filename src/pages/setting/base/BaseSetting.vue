@@ -7,7 +7,6 @@
             <div>
               <t-radio-button :key="index" :value="item.type">
                 <component :is="getModeIcon(item.type)" class="mode-img" />
-                <picked-icon v-if="formData.theme === item.type" class="picked" />
               </t-radio-button>
               <p :style="{ textAlign: 'center', marginTop: '8px' }">{{ item.text }}</p>
             </div>
@@ -15,7 +14,7 @@
         </t-radio-group>
       </t-form-item>
       <t-form-item label="老板键" name="shortcutKey">
-        <t-space>
+        <t-space align="center">
           <t-input
             ref="shortcutInputRef"
             v-model="formatShortcut"
@@ -23,24 +22,18 @@
             :placeholder="placeholderShortcut"
             :status="statusShortcut"
             :tips="tipShortcut"
+            :style="{ width: '250px' }"
             @keydown="getShortKeys"
             @focus="focusShortcut"
             @blur="blurShortcut"
           >
             <template #suffix>
               <div @click.stop="cancelShortcut">
-                <t-popup content="取消快捷键">
-                  <close-icon />
-                </t-popup>
+                <close-icon />
               </div>
             </template>
           </t-input>
-
-          <t-popup content="重置快捷键">
-            <t-button theme="default" variant="base" class="reset-boss-key" @click="resetShortcut">
-              <refresh-icon size="11px" style="margin-top: 3px" />
-            </t-button>
-          </t-popup>
+          <span class="title" @click="resetShortcut">重置</span>
         </t-space>
       </t-form-item>
       <t-form-item label="热榜" name="hotRecommend">
@@ -169,11 +162,10 @@
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
-import { CloseIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { CloseIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
 
-import PickedIcon from '@/assets/assets-picked.svg';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
@@ -636,36 +628,29 @@ eventBus.on(async () => {
     flex-direction: column;
     align-items: center;
     margin-right: 35px;
+    box-sizing: content-box;
     .t-radio-button {
       display: inline-flex;
       max-height: 78px;
       padding: 0;
       border-radius: var(--td-radius-default);
-      border: none;
-      > .t-radio-button__label {
+      border: 2px solid transparent;
+      > :deep(.t-radio-button__label) {
         display: inline-flex;
         position: relative;
         .mode-img,
         .layout-img {
           border-radius: 9px;
         }
-        .picked {
-          position: absolute;
-          right: 0;
-          bottom: 0;
-        }
       }
     }
     .t-is-checked {
-      border: none;
+      border-radius: 10px;
+      border: 2px solid var(--td-brand-color);
     }
     .t-form__controls-content {
       justify-content: end;
     }
-  }
-  .reset-boss-key {
-    background-color: var(--td-bg-input);
-    border: transparent;
   }
 }
 </style>
