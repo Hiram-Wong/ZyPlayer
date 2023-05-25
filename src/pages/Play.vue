@@ -445,6 +445,7 @@ import PLAYER_INFO_CONFIG from '@/config/playerInfo';
 import windowView from '@/layouts/components/Window.vue';
 import { analyze, channelList, history, setting, sites, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
+import settingPlugin from '@/lib/xgplayer/setting/index';
 import { usePlayStore } from '@/store';
 
 // 用于窗口管理
@@ -492,8 +493,16 @@ const config = ref({
   enableContextmenu: true, // 允许右键
   lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
   playbackRate: {
-    list: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+    list: [0.5, 0.75, 1, 1.25, 1.5, 2],
     index: 7, // pip:6 volume:1 fullscreen:1 playbackrate:0
+  },
+  setting: {
+    data: {
+      skipStatus: false, // 是否启用跳过首尾
+      skipStartTime: 30, // 开头跳过时长
+      skipEndTime: 30, // 结尾跳过时长
+    },
+    index: 2,
   },
   icons: {
     play: playerPlayIcon,
@@ -701,6 +710,7 @@ const createPlayer = (videoType) => {
   }
   console.log(`加载${videoType}播放器类型`);
   xg.value = new Player(config.value);
+  xg.value.registerPlugin(settingPlugin);
 };
 
 // 获取解析地址
@@ -928,7 +938,7 @@ const sniffer = () => {
 
 // 初始化播放器
 const initPlayer = async (isFirst = false) => {
-  if (set.value.softSolution) config.value.mediaType = 'live-video';
+  // if (set.value.softSolution) config.value.mediaType = 'live-video';
 
   destroyPlayer();
 
