@@ -192,7 +192,13 @@ const getHotList = async () => {
     hotList.value = await zy.hot(key, 24);
   } else if (defaultHot === 'douban') {
     hotList.value = await zy.doubanHot('tv', '热门', 10, 0);
+  } else if (defaultHot === 'quark') {
+    hotList.value = await zy.quarkHot();
+  } else if (defaultHot === 'baidu') {
+    hotList.value = await zy.baiduHot();
   }
+
+  if (hotList.value.length > 10) hotList.value = hotList.value.slice(0, 10);
 
   isChange.value = false;
 };

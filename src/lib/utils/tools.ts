@@ -623,6 +623,53 @@ const zy = {
     }
   },
   /**
+  * 获取夸克电影实时热门列表
+  * @returns 夸克电影实时热门列表
+  */
+  async quarkHot() {
+    const quarkHotLink = `https://com-cms.quark.cn/cms?partner_id=quark-covid&group=quark-covid&uc_param_str=dnfrpfbivessbtbmnilauputogpintnwmtsvcppcprsnnnchmicckpgi&uid=`;
+    try {
+      const res = await axios.get(quarkHotLink);
+      const resData = res.data
+      if ( resData.success ) {
+        return resData.data.allUserRes.hot_search_movie[0].items[0].list.map(item => ({
+          vod_id: item.name,
+          vod_name: item.name,
+          vod_remarks: item.video_tag,
+          vod_pic: item.cover_url,
+        }));
+      } else {
+        return false
+      }
+    } catch (err) {
+      throw err;
+    }
+  },
+  /**
+  * 获取百度实时热门列表
+  * @returns 百度实时热门列表
+  */
+  async baiduHot() {
+    const quarkHotLink = `https://opendata.baidu.com/api.php?resource_id=51274&ks_from=aladdin&new_need_di=1&from_mid=1&sort_type=1&query=%E7%94%B5%E8%A7%86%E5%89%A7%E6%8E%92%E8%A1%8C%E6%A6%9C&tn=wisexmlnew&dsp=iphone&format=json&ie=utf-8&oe=utf-8&q_ext=%7B%22query_key%22%3A1%2C%22is_person_related%22%3A0%2C%22video_type_list%22%3A%5B%5D%7D&sort_key=1&stat0=%E7%94%B5%E8%A7%86%E5%89%A7&stat1=%E5%85%A8%E9%83%A8&stat2=%E5%85%A8%E9%83%A8&stat3=%E5%85%A8%E9%83%A8&rn=10&pn=0&trigger_srcid=51251&sid=38515_36559_38540_38591_38596_38582_36804_38434_38414_38640_26350_38623`;
+    try {
+      const res = await axios.get(quarkHotLink);
+      const resData = res.data
+      if ( resData.ResultCode  === 0 ) {
+        console.log(resData.Result[0].DisplayData.resultData.tplData.result.result);
+        return resData.Result[0].DisplayData.resultData.tplData.result.result.map(item => ({
+          vod_id: item.urlsign,
+          vod_name: item.ename,
+          vod_remarks: item.additional,
+          vod_pic: item.img,
+        }));
+      } else {
+        return false
+      }
+    } catch (err) {
+      throw err;
+    }
+  },
+  /**
   * 获取酷云热点视频列表
   * @param {*} date 日期2023-5-3
   * @param {*} type 类型 1.电影  2.剧集  3.综艺
@@ -634,7 +681,7 @@ const zy = {
     try {
       const res = await axios.get(kuyunHotLink);
       const resData = res.data
-      if(resData.status){
+      if ( resData.status ) {
         return resData.data.list.map(item => ({
           vod_id: item.ca_id,
           vod_name: item.name,
@@ -682,14 +729,39 @@ const zy = {
       let response;
 
       try {
-          response = JSON5.parse(res.data);
+        response = JSON5.parse(res.data);
       } catch (err) {
-          response = res.data;
+        response = res.data;
       }
 
       return response || false;
     } catch (err) {
-       throw err;
+      throw err;
+    }
+  },
+
+  /**
+   * 获取配置文件
+   * @param {*} url 需要获取的地址
+   * @returns 配置文件
+  */
+  async getRealUrl(key, url) {
+    try {
+      const site = await sites.find({key:key});
+      const parsusePrefix = site.api;
+
+      const hostname = new URL(parsusePrefix).hostname;
+      const protocol = new URL(parsusePrefix).protocol;
+      const port = new URL(parsusePrefix).port;
+
+      let parsueUrl;
+      if ( port ) parsueUrl = `${protocol}//${hostname}:${port}/web/302redirect?url=${encodeURIComponent(url)}`;
+      else parsueUrl = `${protocol}//${hostname}/web/302redirect?url=${encodeURIComponent(url)}`;
+
+      const res = await axios.get(parsueUrl);
+      return res.data
+    } catch (err) {
+      throw err;
     }
   },
   /**
