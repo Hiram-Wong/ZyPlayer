@@ -163,7 +163,22 @@
       <div class="container-main-left">
         <div class="container-player" :class="{ 'container-player-ext': showEpisode }">
           <div class="player-container">
-            <div v-show="!onlineUrl" id="xgplayer" class="xgplayer"></div>
+            <div
+              v-show="!onlineUrl"
+              v-if="set.broadcasterType === 'xgplayer'"
+              id="xgplayer"
+              class="xgplayer player"
+            ></div>
+            <div ref="tcplayerRef" class="tcplayer player">
+              <video
+                v-if="set.broadcasterType === 'tcplayer'"
+                id="tcplayer"
+                preload="auto"
+                playsinline
+                webkit-playsinline
+                style="width: 100%; height: calc(100vh - 50px)"
+              ></video>
+            </div>
             <iframe
               v-show="onlineUrl && isSniff"
               ref="iframeRef"
@@ -404,12 +419,14 @@
 import 'xgplayer-livevideo';
 import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
+import 'tcplayer.js/dist/tcplayer.min.css';
 
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import moment from 'moment';
 import QRCode from 'qrcode';
+import TCPlayer from 'tcplayer.js';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -443,9 +460,8 @@ import playerZoomIcon from '@/assets/player/zoom.svg?raw';
 import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
 import PLAYER_INFO_CONFIG from '@/config/playerInfo';
 import windowView from '@/layouts/components/Window.vue';
-import { analyze, channelList, history, setting, sites, star } from '@/lib/dexie';
+import { analyze, channelList, history, setting, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
-import settingPlugin from '@/lib/xgplayer/setting/index';
 import { usePlayStore } from '@/store';
 
 // 用于窗口管理
@@ -496,14 +512,6 @@ const config = ref({
     list: [0.5, 0.75, 1, 1.25, 1.5, 2],
     index: 7, // pip:6 volume:1 fullscreen:1 playbackrate:0
   },
-  setting: {
-    data: {
-      skipStatus: false, // 是否启用跳过首尾
-      skipStartTime: 30, // 开头跳过时长
-      skipEndTime: 30, // 结尾跳过时长
-    },
-    index: 2,
-  },
   icons: {
     play: playerPlayIcon,
     pause: playerPauseIcon,
@@ -538,6 +546,16 @@ const config = ref({
   width: 'auto',
   height: 'calc(100vh - 50px)',
 }); // 西瓜播放器参数
+const tcConfig = ref({
+  autoplay: true,
+  playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+  plugins: {
+    ProgressMarker: true,
+    ContextMenu: {
+      statistic: true,
+    },
+  },
+}); // 腾讯播放器参数
 
 const selectIptvTab = ref('epg');
 const recommend = ref([]); // 推荐
@@ -545,6 +563,8 @@ const season = ref(); // 选集
 const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
+const tc = ref(null); // 腾讯云播放器
+const tcplayerRef = ref(null); // 腾讯云播放器dom 节点 s
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
 const playerInfoTimer = ref(); // 定时器 用于刷新播放器参数
@@ -598,6 +618,13 @@ const VIP_LIST = [
   'bilibili.com',
   'tudou.com',
 ];
+
+const VIDEO_PROCESS_DOC = {
+  date: moment().format('YYYY-MM-DD'),
+  playEnd: false,
+  watchTime: 0,
+  duration: 0,
+};
 
 const shareUrl = computed(() => {
   const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
@@ -689,28 +716,37 @@ onMounted(() => {
 });
 
 // 根据不同类型加载不同播放器
-const createPlayer = (videoType) => {
-  switch (videoType) {
-    case 'mp4':
-      config.value.plugins = [Mp4Plugin];
-      playerType.value = 'mp4';
-      break;
-    case 'flv':
-      config.value.plugins = [FlvPlugin];
-      playerType.value = 'flv';
-      break;
-    case 'm3u8':
-      config.value.plugins = [HlsPlugin];
-      playerType.value = 'hls';
-      break;
-    default:
-      config.value.plugins = [HlsPlugin];
-      playerType.value = 'hls';
-      break;
+const createPlayer = async (videoType) => {
+  if (set.value.broadcasterType === 'xgplayer') {
+    switch (videoType) {
+      case 'mp4':
+        config.value.plugins = [Mp4Plugin];
+        playerType.value = 'mp4';
+        break;
+      case 'flv':
+        config.value.plugins = [FlvPlugin];
+        playerType.value = 'flv';
+        break;
+      case 'm3u8':
+        config.value.plugins = [HlsPlugin];
+        playerType.value = 'hls';
+        break;
+      default:
+        config.value.plugins = [HlsPlugin];
+        playerType.value = 'hls';
+        break;
+    }
+    console.log(`[player] 加载西瓜${videoType}播放器`);
+    xg.value = new Player(config.value);
+  } else {
+    if (!tc.value) tc.value = TCPlayer('tcplayer', { ...tcConfig.value });
+    console.log(config.value.startTime);
+    tc.value.currentTime(config.value.startTime);
+    tc.value.src(config.value.url);
+    console.log(`[player] 加载腾讯云播放器`);
   }
-  console.log(`加载${videoType}播放器类型`);
-  xg.value = new Player(config.value);
-  xg.value.registerPlugin(settingPlugin);
+
+  if (type.value === 'film') await timerUpdatePlayProcess();
 };
 
 // 获取解析地址
@@ -771,6 +807,20 @@ const destroyPlayer = () => {
     xg.value.destroy();
     xg.value = null;
   }
+  if (tc.value) {
+    tc.value.dispose();
+    tc.value = null;
+
+    const newVideoElement = document.createElement('video');
+    newVideoElement.setAttribute('id', 'tcplayer');
+    newVideoElement.setAttribute('class', 'player');
+    newVideoElement.setAttribute('preload', 'auto');
+    newVideoElement.setAttribute('style', 'height:calc(100vh - 50px);width:100%');
+
+    tcplayerRef.value.innerHTML = '';
+    tcplayerRef.value.appendChild(newVideoElement);
+  }
+
   if (onlineUrl.value) onlineUrl.value = '';
 };
 
@@ -781,12 +831,14 @@ const initIptvPlayer = async () => {
   if (data.value.ext.epg) getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
   config.value.url = info.value.url;
 
-  try {
-    const isLive = await zy.isLiveM3U8(info.value.url);
-    config.value.isLive = isLive;
-    config.value.presets = isLive ? [LivePreset] : [];
-  } catch (err) {
-    console.error(err);
+  if (set.value.broadcasterType === 'xgplayer') {
+    try {
+      const isLive = await zy.isLiveM3U8(info.value.url);
+      config.value.isLive = isLive;
+      config.value.presets = isLive ? [LivePreset] : [];
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   if (config.value.url.indexOf('mp4') > -1) {
@@ -828,6 +880,22 @@ const initFilmPlayer = async (isFirst) => {
     }
   }
 
+  if (ext.value.site.type === 2) {
+    MessagePlugin.info('免嗅资源中, 请等待!');
+    console.log('[player] drpy免嗅流程开始');
+    const { key } = ext.value.site;
+    try {
+      const drpySniffFree = await zy.getRealUrl(key, config.value.url);
+      if (drpySniffFree.redirect) {
+        config.value.url = drpySniffFree.url;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    console.log(`[player] drpy免嗅流程结束`);
+  }
+
   if (config.value.url.indexOf('mp4') > -1) {
     createPlayer('mp4');
   } else if (config.value.url.indexOf('flv') > -1) {
@@ -849,7 +917,6 @@ const initFilmPlayer = async (isFirst) => {
     } else if (config.value.url.indexOf('m3u8') > -1 && config.value.url.split('http').length - 1 === 1) {
       console.log(`[player] 直链:${config.value.url}`);
       createPlayer('m3u8');
-      await timerUpdatePlayProcess();
     } else {
       // 尝试提取ck/dp播放器中的m3u8
       console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
@@ -902,8 +969,8 @@ const sniffer = () => {
 
       for (const resource of resources) {
         const resourceName = resource.name;
-        const sniffUrl = resourceName.toLowerCase();
-        const formatIndex = videoFormats.findIndex((format) => sniffUrl.indexOf(format) > -1);
+        const sniffUrl = resourceName;
+        const formatIndex = videoFormats.findIndex((format) => sniffUrl.toLowerCase().indexOf(format) > -1);
         if (formatIndex > -1) {
           const videoFormat = videoFormats[formatIndex];
           console.log(`嗅探到${videoFormat}文件:${resourceName},共计嗅探:${counter}次`);
@@ -922,7 +989,6 @@ const sniffer = () => {
           onlineUrl.value = '';
           createPlayer(videoFormat.slice(1));
           win.webContents.setAudioMuted(false);
-          timerUpdatePlayProcess();
 
           clearInterval(snifferTimer.value);
           break;
@@ -1120,44 +1186,58 @@ const filterContent = (item) => {
   return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
 };
 
-const VIDEO_PROCESS_DOC = {
-  date: moment().format('YYYY-MM-DD'),
-  playEnd: false,
-  watchTime: 0,
-  duration: 0,
-};
-
 // 定时更新播放进度
 const timerUpdatePlayProcess = () => {
-  xg.value.on(Events.TIME_UPDATE, (timeupdate) => {
-    const { currentTime, duration } = timeupdate;
-
+  const onTimeUpdate = (currentTime, duration) => {
     VIDEO_PROCESS_DOC.watchTime = currentTime;
     VIDEO_PROCESS_DOC.duration = duration;
     history.update(dataHistory.value.id, VIDEO_PROCESS_DOC);
 
-    const watchTime = set.value.skipTimeInEnd ? currentTime + set.value.skipTimeInEnd : currentTime;
+    const watchTime = set.value.skipStartEnd ? currentTime + set.value.skipTimeInEnd : currentTime;
 
     if (watchTime >= duration) {
-      const pipInstance = xg.value.plugins.pip;
-      if (pipInstance.isPip) {
-        xg.value.pause();
-        return;
+      if (set.value.broadcasterType === 'xgplayer') {
+        const pipInstance = xg.value.plugins.pip;
+        if (pipInstance.isPip) {
+          xg.value.pause();
+          return;
+        }
       }
+
       if (duration !== 0) autoPlayNext();
     }
 
     console.log(
-      `timeupdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
+      `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
         (currentTime / duration) * 100,
       )}%`,
     );
-  });
+  };
 
-  xg.value.on(Events.ENDED, (ended) => {
-    console.log(ended);
+  const onEnded = () => {
+    console.log('[player] ProgressBar ended');
     autoPlayNext();
-  });
+  };
+
+  if (set.value.broadcasterType === 'xgplayer') {
+    xg.value.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
+      onTimeUpdate(currentTime, duration);
+    });
+
+    xg.value.on(Events.ENDED, () => {
+      onEnded();
+    });
+  } else if (set.value.broadcasterType === 'tcplayer') {
+    tc.value.on('timeupdate', () => {
+      const duration = tc.value.duration();
+      const currentTime = tc.value.currentTime();
+      onTimeUpdate(currentTime, duration);
+    });
+
+    tc.value.on('ended', () => {
+      onEnded();
+    });
+  }
 };
 
 // 是否自动进入下一集
@@ -1313,7 +1393,6 @@ const copyToClipboard = (content, successMessage, errorMessage) => {
 
 // 复制下载链接
 const copyDownloadUrl = () => {
-  console.log(xg.value.plugins.hls.core.getStats());
   if (downloadTarget.value.length !== 0) {
     const downloadUrl = _.join(downloadTarget.value, '\n');
     console.log(downloadUrl);
@@ -1337,9 +1416,13 @@ const copyShareUrl = () => {
 
 // 播放器参数
 const playerInfoEvent = () => {
-  isPlayerInfoVisible.value = true;
-  playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
-  playerInfo.value.version = xg.value.plugins.hls.core.version;
+  if (set.value.broadcasterType === 'xgplayer') {
+    isPlayerInfoVisible.value = true;
+    playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
+    playerInfo.value.version = xg.value.plugins.hls.core.version;
+  } else if (set.value.broadcasterType === 'tcplayer') {
+    MessagePlugin.info('右键视频区域选择视频统计信息');
+  }
 };
 
 const formatPlayerInfo = (val) => {
@@ -1642,6 +1725,10 @@ const openMainWinEvent = () => {
       width: 100vw;
       position: relative;
       transition: 0.15s ease-out;
+      .player {
+        width: auto;
+        height: calc(100vh - 50px);
+      }
 
       .container-player-ext {
         width: 100vw !important;
@@ -2306,7 +2393,7 @@ const openMainWinEvent = () => {
   }
 
   .t-button--variant-outline {
-    background-color: var(--td-gray-color-11);
+    background-color: var(--td-gray-color-13);
     border-color: transparent;
 
     &.t-is-disabled {

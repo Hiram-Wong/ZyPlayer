@@ -53,6 +53,7 @@ const initPlayerSetting = async () => {
   };
 
   init.softSolution = await setting.get('softSolution');
+  init.broadcasterType = await setting.get('broadcasterType');
   const isSkip = await setting.get('skipStartEnd');
   init.skipStartEnd = isSkip;
 

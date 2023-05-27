@@ -19,6 +19,7 @@ interface Setting {
   analyzeFlag: string[];
   analyzeQuickSearchType: string;
   analyzeSupport: boolean;
+  broadcasterType: Setting;
   softSolution: boolean;
   skipStartEnd: boolean;
   agreementMask: boolean;

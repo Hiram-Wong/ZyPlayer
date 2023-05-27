@@ -61,7 +61,7 @@
     </t-table>
 
     <dialog-add-view v-model:visible="formDialogVisibleAddIptv" :data="data" @refresh-table-data="getIptv" />
-    <dialog-edit-view v-model:visible="formDialogVisibleEditIptv" :data="formData" />
+    <dialog-edit-view v-model:visible="formDialogVisibleEditIptv" :data="rowEditData" />
   </div>
 </template>
 <script setup lang="ts">
@@ -84,7 +84,14 @@ const fs = require('fs');
 // Define item form data & dialog status
 const formDialogVisibleAddIptv = ref(false);
 const formDialogVisibleEditIptv = ref(false);
-const formData = ref();
+const searchForm = {
+  name: '',
+  isActive: undefined,
+  type: '',
+};
+
+const formData = ref({ ...searchForm });
+const rowEditData = ref();
 const rowKey = 'id';
 const dataLoading = ref(false);
 const pagination = ref({
@@ -130,6 +137,12 @@ onMounted(() => {
   getIptv();
 });
 
+const onReset = (val) => {
+  console.log(val);
+};
+const onSubmit = (val) => {
+  console.log(val);
+};
 // op
 const exportEvent = () => {
   iptv.all().then((res) => {
@@ -233,7 +246,8 @@ const txt = (text) => {
 };
 
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
+  rowEditData.value =
+    data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
   formDialogVisibleEditIptv.value = true;
 };
 

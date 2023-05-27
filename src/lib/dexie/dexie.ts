@@ -83,6 +83,15 @@ db.version(18).stores({
   })
 })
 
+db.version(19).stores({
+  setting: 'id, theme, externalPlayer, rootClassFilter, r18ClassFilter, defaultHot, defaultSearch, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh',
+}).upgrade(trans => {
+  trans.setting.toCollection().modify(setting => {
+    setting.broadcasterType = "xgplayer"
+    setting.softSolution = false
+  })
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)

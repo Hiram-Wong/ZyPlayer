@@ -60,6 +60,7 @@
   ],
   "analyzeQuickSearchType": "platform",
   "analyzeSupport": false,
+  "broadcasterType": "xgplayer",
   "softSolution": false,
   "skipStartEnd": false,
   "agreementMask": false,
