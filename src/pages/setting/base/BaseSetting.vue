@@ -39,8 +39,10 @@
       <t-form-item label="热榜" name="hotRecommend">
         <div class="hot-recommend">
           <t-radio-group v-model="formData.defaultHot">
-            <t-radio value="site">站内推荐</t-radio>
-            <t-radio value="douban">豆瓣推荐</t-radio>
+            <t-radio value="site">站内</t-radio>
+            <t-radio value="douban">豆瓣</t-radio>
+            <t-radio value="quark">夸克</t-radio>
+            <t-radio value="baidu">百度</t-radio>
           </t-radio-group>
         </div>
       </t-form-item>
@@ -104,9 +106,15 @@
       </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
-          <t-space direction="vertical" style="width: 280px">
-            <t-space>
-              <t-radio v-model="formData.softSolution" allow-uncheck>软解(千万别开)</t-radio>
+          <t-space direction="vertical">
+            <t-space align="center">
+              <!-- <t-radio v-model="formData.softSolution" allow-uncheck>软解(千万别开)</t-radio> -->
+              <t-select
+                v-model="formData.broadcasterType"
+                :options="PLAYER_OPTIONS"
+                placeholder="请选择播放器"
+                style="width: 150px"
+              ></t-select>
               <t-radio v-model="formData.skipStartEnd" allow-uncheck>跳过片头片尾</t-radio>
             </t-space>
             <div v-if="formData.skipStartEnd" class="">
@@ -202,6 +210,11 @@ const MODE_OPTIONS = [
   { type: 'auto', text: '跟随系统' },
 ];
 
+const PLAYER_OPTIONS = [
+  { label: '西瓜播放器', value: 'xgplayer' },
+  { label: '腾讯云播放器', value: 'tcplayer' },
+];
+
 const MASKS = {
   0: '0s',
   30: '30s',
@@ -285,6 +298,7 @@ watchEffect(() => {
         skipStartEnd: formData.value.skipStartEnd,
         skipTimeInStart: formData.value.skipTimeInStart,
         skipTimeInEnd: formData.value.skipTimeInEnd,
+        broadcasterType: formData.value.broadcasterType,
       },
     });
   }
