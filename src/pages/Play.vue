@@ -169,7 +169,7 @@
               id="xgplayer"
               class="xgplayer player"
             ></div>
-            <div ref="tcplayerRef" class="tcplayer player">
+            <div v-show="!onlineUrl" ref="tcplayerRef" class="tcplayer player">
               <video
                 v-if="set.broadcasterType === 'tcplayer'"
                 id="tcplayer"
@@ -914,6 +914,8 @@ const initFilmPlayer = async (isFirst) => {
       analyzeFlagData.value.some((item) => selectPlaySource.value.includes(item))
     ) {
       onlineUrl.value = analyzeUrl.value + config.value.url;
+      isSniff.value = true;
+      console.log(onlineUrl.value);
     } else if (config.value.url.indexOf('m3u8') > -1 && config.value.url.split('http').length - 1 === 1) {
       console.log(`[player] 直链:${config.value.url}`);
       createPlayer('m3u8');
