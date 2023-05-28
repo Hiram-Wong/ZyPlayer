@@ -83,7 +83,6 @@
 </template>
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
-import { saveAs } from 'file-saver';
 import { AddIcon, ArrowUpIcon, RefreshIcon, RemoveIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref } from 'vue';
@@ -94,6 +93,8 @@ import zy from '@/lib/utils/tools';
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
 import { COLUMNS } from './constants';
+
+const remote = window.require('@electron/remote');
 
 // Define item form data & dialog status
 const formDialogVisibleAddApi = ref(false);
@@ -241,8 +242,36 @@ const exportEvent = () => {
   const arr = [...data.value];
   const str = JSON.stringify(arr, null, 2);
   const blob = new Blob([str], { type: 'text/plain;charset=utf-8' });
-  saveAs(blob, `sites.json`);
-  MessagePlugin.success('导出成功');
+  const reader = new FileReader();
+  reader.onload = () => {
+    const result: ArrayBuffer = reader.result as ArrayBuffer;
+    const buffer = Buffer.from(result);
+    remote.dialog
+      .showSaveDialog(remote.getCurrentWindow(), {
+        defaultPath: 'sites.json',
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+      })
+      .then((saveDialogResult) => {
+        if (!saveDialogResult.canceled) {
+          const { filePath } = saveDialogResult;
+          const fs = remote.require('fs');
+          fs.writeFile(filePath, buffer, 'utf-8', (err) => {
+            if (err) {
+              console.error('Failed to save file:', err);
+              MessagePlugin.error('Failed to save file');
+            } else {
+              console.log('File saved successfully');
+              MessagePlugin.success('File saved successfully');
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to open save dialog:', err);
+        MessagePlugin.error('Failed to open save dialog');
+      });
+  };
+  reader.readAsArrayBuffer(blob);
 };
 
 const emitReload = useEventBus<string>('film-reload');
