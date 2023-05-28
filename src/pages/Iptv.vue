@@ -79,8 +79,11 @@
         <div v-for="item in iptvDataList.list" :key="item.id" class="card-wrap">
           <div class="card" @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
             <div v-show="iptvSetting.iptvStatus" class="card-header">
-              <t-tag v-if="item.status" disabled size="small" variant="outline" theme="success">有效</t-tag>
-              <t-tag v-else disabled size="small" variant="outline" theme="danger">无效</t-tag>
+              <t-tag v-if="item.status === true" disabled size="small" variant="outline" theme="success">有效</t-tag>
+              <t-tag v-else-if="item.status === false" disabled size="small" variant="outline" theme="danger">
+                无效
+              </t-tag>
+              <t-tag v-else disabled size="small" variant="outline" theme="warning">检查中</t-tag>
             </div>
             <div class="card-main">
               <t-image
@@ -132,6 +135,7 @@ import { useClipboard, useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import axios from 'axios';
 import _ from 'lodash';
+import PQueue from 'p-queue';
 import { LinkUnlinkIcon, LoadingIcon, MoreIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -195,9 +199,11 @@ const optionsComponent = ref({
   width: 160,
   x: 500,
   y: 200,
-  theme: mode.value === 'light' ? 'default' : 'default dark',
+  theme: mode.value === 'light' ? 'default' : 'mac dark',
 });
 const channelItem = ref(null);
+
+const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
 onMounted(() => {
   getIptvSetting();
@@ -230,8 +236,6 @@ const getIptvSetting = async () => {
 
   iptvSetting.value.skipIpv6 = iptvSkipIpv6;
   iptvSetting.value.iptvStatus = iptvStatus;
-
-  console.log(iptvSetting.value.skipIpv6, iptvSetting.value.iptvStatus);
 
   getIptvClass();
 
@@ -281,7 +285,7 @@ const getChannelList = async () => {
   const restultLength = res.list.length;
   iptvDataList.value.list = _.unionWith(list, res.list, _.isEqual);
 
-  if (iptvStatus) await checkChannelList(pageIndex, pageSize);
+  if (iptvStatus) await checkChannelListStatus(pageIndex, pageSize);
 
   // 判断是否开启检查；判断原数据；判断原和目的
   // 1. 开启检查：为0  1).返回原或0
@@ -337,6 +341,7 @@ const searchEvent = async () => {
 // 切换分类
 const changeClassEvent = async (item: { name: string }) => {
   console.log('class');
+  clearQueue();
   infiniteCompleteTip.value = '没有更多内容了!';
   iptvClassSelect.value = item.name;
 
@@ -362,28 +367,49 @@ const playEvent = (item: { name: any }) => {
 
 // 检查状态
 const checkChannelListStatus = async (pageIndex: number, pageSize: number) => {
-  const promises = [];
-  for (let i = pageIndex * pageSize; i < (pageIndex + 1) * pageSize; i++) {
-    if (!iptvDataList.value.list[i]) return;
+  console.log(`[iptv] checkChannelListStatus`);
+  const start = pageIndex * pageSize;
+  const end = (pageIndex + 1) * pageSize;
+  const dataList = iptvDataList.value.list.slice(start, end); // 从原数组中截取需要处理的数据段
 
-    promises.push(zy.checkChannel(iptvDataList.value.list[i].url));
+  const updateStatus = async (item) => {
+    try {
+      const result = await zy.checkChannel(item.url);
+      return result;
+    } catch (error) {
+      return false;
+    }
+  };
 
+  for (let i = 0; i < dataList.length; i++) {
+    const item = dataList[i];
     // eslint-disable-next-line no-await-in-loop
-    const results = await Promise.all(promises.map((p) => p.catch((error: any) => error)));
-    for (let i = 0; i < results.length; i++) {
-      if (results[i] !== undefined) {
-        iptvDataList.value.list[pageIndex * pageSize + i].status = true;
-      } else {
-        iptvDataList.value.list[pageIndex * pageSize + i].status = false;
-      }
+    const result = await queue.add(() => {
+      return updateStatus(item);
+    });
+
+    console.log(`${i} ${result}`);
+
+    const index = start + i;
+    if (index < iptvDataList.value.list.length) {
+      iptvDataList.value.list[index].status = result;
     }
   }
 };
-// 500毫秒检测一次，防止异步阻塞
-const checkChannelList = _.debounce(checkChannelListStatus, 500);
+
+// 清空队列，并终止请求
+const clearQueue = () => {
+  if (queue.size > 0) {
+    console.log(`[queue] clear queuectasks and cancel axios request`);
+    queue.pause(); // 暂停队列，阻止新的任务加入
+    zy.stopCheckChannel(); // 中止正在执行的任务
+    queue.clear(); // 清空队列中的任务
+    queue.start(); // 继续接管任务加入
+  }
+};
 
 // 切换源
-const changeDefaultIptvEvent = async (item) => {
+const changeDefaultIptvEvent = async (item: any) => {
   console.log(item);
 
   infiniteCompleteTip.value = '没有更多内容了!';

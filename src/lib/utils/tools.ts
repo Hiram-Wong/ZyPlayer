@@ -13,6 +13,8 @@ const prettier = require('prettier');
 const dns = require('dns');
 const net = require('net');
 
+let controller = new AbortController();
+
 axiosRetry(axios, {
   retries: 2,
   retryDelay: (retryCount) => {
@@ -415,7 +417,10 @@ const zy = {
    */
   async checkChannel(url) {
     try {
-      const res = await axios.get(url);
+      const res = await axios.get(url, {
+        signal: controller.signal,
+        timeout: 3000
+      });
       const manifest = res.data;
       const parser = new M3u8Parser();
       parser.push(manifest);
@@ -427,34 +432,39 @@ const zy = {
       // 兼容性处理 抓包多次请求规则 #EXT-X-STREAM-INF 带文件路径的相对路径
       const responseURL = res.request.responseURL;
       const { uri } = parsedManifest.playlists[0];
-      let newUrl = '';
       if (res.data.indexOf("encoder") > 0) {
         // request1: http://1.204.169.243/live.aishang.ctlcdn.com/00000110240389_1/playlist.m3u8?CONTENTID=00000110240389_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
         // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8000000,CODECS="avc,mp21" encoder/0/playlist.m3u8?CONTENTID=00000110240127_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
         // request2: http://1.204.169.243/live.aishang.ctlcdn.com/00000110240303_1/encoder/0/playlist.m3u8?CONTENTID=00000110240303_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
         const index = responseURL.lastIndexOf("\/");
-        const urlLastParam= responseURL.substring(0, index+1);
-        newUrl = urlLastParam + uri;
-      } else if (uri.indexOf("http")  === 0|| uri.indexOf("//") === 0) {
+        const urlLastParam= responseURL.substring(0, index + 1);
+        const newUrl = urlLastParam + uri;
+        return this.checkChannel(newUrl);
+      } else if (uri.startsWith("http") || uri.startsWith("//")) {
         // request1: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/index.m3u8?IASHttpSessionId=OTT8798520230127055253191816
         // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8468480 http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8798520230127055253191816&zte_bandwidth=1000&bandwidth=8468480&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
         // request2: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8867820230127053805215983&zte_bandwidth=1000&bandwidth=8467456&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
-        newUrl = uri;
-      } else if (/^\/[^\/]/.test(uri) || (/^[^\/]/.test(uri) && uri.indexOf("http") === 0)) {
+        const newUrl = uri;
+        return this.checkChannel(newUrl);
+      } else if (/^\/[^\/]/.test(uri) || (/^[^\/]/.test(uri) && uri.startsWith("http"))) {
         // request1: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//index.m3u8
         // #EXT-X-STREAM-INF:BANDWIDTH=15435519,AVERAGE-BANDWIDTH=15435519,RESOLUTION=3840x2160,CODECS="hvc1.1.6.L150.b0,mp4a.40.2",AUDIO="audio_mp4a.40.2_48000",CLOSED-CAPTIONS=NONE,FRAME-RATE=25 1/v15M/index.m3u8
         // request2: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//1/v15M/index.m3u8
         const index = responseURL.lastIndexOf("\/");
-        const urlLastParam= responseURL.substring(0, index+1);
-        newUrl = urlLastParam + uri;
+        const urlLastParam= responseURL.substring(0, index + 1);
+        const newUrl = urlLastParam + uri;
+        return this.checkChannel(newUrl);
       }
-
-      if (newUrl) return this.checkChannel(newUrl);
 
       return false;
     } catch (err) {
       throw err;
     }
+  },
+  async stopCheckChannel() {
+    controller.abort();
+
+    controller = new AbortController()
   },
   /**
    * 提取ck/dp播放器m3u8
