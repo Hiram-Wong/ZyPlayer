@@ -67,6 +67,8 @@ interface History {
   videoName: string;
   videoIndex: string;
   watchTime: number;
+  skipTimeInStart: number;
+  skipTimeInEnd: number;
 }
 
 interface Iptv {

@@ -22,7 +22,7 @@
             :placeholder="placeholderShortcut"
             :status="statusShortcut"
             :tips="tipShortcut"
-            :style="{ width: '250px' }"
+            :style="{ width: '255px' }"
             @keydown="getShortKeys"
             @focus="focusShortcut"
             @blur="blurShortcut"
@@ -108,26 +108,12 @@
         <div class="player">
           <t-space direction="vertical">
             <t-space align="center">
-              <!-- <t-radio v-model="formData.softSolution" allow-uncheck>软解(千万别开)</t-radio> -->
               <t-select
                 v-model="formData.broadcasterType"
                 :options="PLAYER_OPTIONS"
                 placeholder="请选择播放器"
-                style="width: 150px"
               ></t-select>
-              <t-radio v-model="formData.skipStartEnd" allow-uncheck>跳过片头片尾</t-radio>
             </t-space>
-            <div v-if="formData.skipStartEnd" class="">
-              <div class="skip">
-                <span>开始 [记忆播放]</span>
-                <t-slider v-model="formData.skipTimeInStart" :show-tooltip="true" :marks="MASKS" :max="180" />
-              </div>
-              <br />
-              <div class="skip">
-                <span>结尾 [自动下集]</span>
-                <t-slider v-model="formData.skipTimeInEnd" :show-tooltip="true" :marks="MASKS" :max="180" />
-              </div>
-            </div>
           </t-space>
         </div>
       </t-form-item>
@@ -215,16 +201,6 @@ const PLAYER_OPTIONS = [
   { label: '腾讯云播放器', value: 'tcplayer' },
 ];
 
-const MASKS = {
-  0: '0s',
-  30: '30s',
-  60: '60s',
-  90: '90s',
-  120: '120s',
-  150: '150s',
-  180: '180s',
-};
-
 const shortcutInputRef = ref(null);
 const placeholderShortcut = ref('点击设置快捷键');
 const statusShortcut = ref('default');
@@ -294,10 +270,6 @@ watchEffect(() => {
     storeSetting.updateConfig({ mode: formData.value.theme });
     storePlayer.updateConfig({
       setting: {
-        softSolution: formData.value.softSolution,
-        skipStartEnd: formData.value.skipStartEnd,
-        skipTimeInStart: formData.value.skipTimeInStart,
-        skipTimeInEnd: formData.value.skipTimeInEnd,
         broadcasterType: formData.value.broadcasterType,
       },
     });

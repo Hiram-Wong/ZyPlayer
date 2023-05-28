@@ -51,17 +51,8 @@ const initPlayerSetting = async () => {
   const init = {
     ...PLAY_CONFIG.setting,
   };
-
-  init.softSolution = await setting.get('softSolution');
   init.broadcasterType = await setting.get('broadcasterType');
-  const isSkip = await setting.get('skipStartEnd');
-  init.skipStartEnd = isSkip;
-
-  if (isSkip) {
-    init.skipTimeInStart = await setting.get('skipTimeInStart');
-    init.skipTimeInEnd = await setting.get('skipTimeInEnd');
-  }
-
+  init.skipStartEnd = await setting.get('skipStartEnd');
   storePlayer.updateConfig({ setting: init });
 };
 </script>

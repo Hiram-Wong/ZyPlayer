@@ -129,9 +129,42 @@
               <pin-filled-icon v-else size="1.5em" />
             </div>
           </div>
+          <div v-if="type === 'film'" class="player-top-right-setting">
+            <div class="player-top-right-item player-top-right-popup" @click="isSettingVisible = true">
+              <setting-icon size="1.5em" />
+            </div>
+            <t-dialog v-model:visible="isSettingVisible" header="设置" placement="center" :footer="false" width="508">
+              <div class="setting-warp">
+                <div class="setting-item-warp">
+                  <span>自动跳过片头片尾</span>
+                  <t-switch v-model="set.skipStartEnd" @change="updateLocalPlayer">
+                    <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
+                  </t-switch>
+                </div>
+                <div v-if="set.skipStartEnd" class="setting-item-warp">
+                  <div class="skip-time-in-start">
+                    <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right">
+                      <template #label>开头: </template>
+                      <template #suffix> 秒</template>
+                    </t-input-number>
+                  </div>
+                  <div class="skip-time-in-end">
+                    <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right">
+                      <template #label>结尾: </template>
+                      <template #suffix> 秒</template>
+                    </t-input-number>
+                  </div>
+                </div>
+
+                <div class="tip-warp">
+                  <span>开关全局生效，跳过时间仅资源生效</span>
+                </div>
+              </div>
+            </t-dialog>
+          </div>
           <div v-if="!onlineUrl && playerType !== 'mp4'" class="player-top-right-player-info">
             <div class="player-top-right-item player-top-right-popup" @click="playerInfoEvent">
-              <tools-icon size="1.5em" />
+              <info-circle-icon size="1.5em" />
             </div>
             <t-dialog
               v-model:visible="isPlayerInfoVisible"
@@ -166,12 +199,23 @@
             <div
               v-show="!onlineUrl"
               v-if="set.broadcasterType === 'xgplayer'"
-              id="xgplayer"
+              ref="xgpayerRef"
               class="xgplayer player"
-            ></div>
-            <div v-show="!onlineUrl" ref="tcplayerRef" class="tcplayer player">
+              @contextmenu="
+                () => {
+                  console.log(123);
+                }
+              "
+            >
+              <div id="xgplayer"></div>
+            </div>
+            <div
+              v-show="!onlineUrl"
+              v-if="set.broadcasterType === 'tcplayer'"
+              ref="tcplayerRef"
+              class="tcplayer player"
+            >
               <video
-                v-if="set.broadcasterType === 'tcplayer'"
                 id="tcplayer"
                 preload="auto"
                 playsinline
@@ -192,6 +236,10 @@
               webkit-playsinline
               playsinline
             ></iframe>
+            <context-menu :show="isContextMenu" :options="optionsComponent" @close="isContextMenu = false">
+              <context-menu-item label="西瓜视频提供技术支持" />
+              <context-menu-item label="视频统计信息" @click="playerInfoEvent" />
+            </context-menu>
           </div>
         </div>
 
@@ -420,7 +468,9 @@ import 'xgplayer-livevideo';
 import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
 import 'tcplayer.js/dist/tcplayer.min.css';
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 
+import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
@@ -434,12 +484,13 @@ import {
   DownloadIcon,
   HeartIcon,
   HomeIcon,
+  InfoCircleIcon,
   LoadingIcon,
   PhotoIcon,
   PinFilledIcon,
   PinIcon,
+  SettingIcon,
   ShareIcon,
-  ToolsIcon,
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -507,6 +558,8 @@ const config = ref({
   pip: true,
   cssFullscreen: false,
   enableContextmenu: true, // 允许右键
+  topBarAutoHide: false,
+  closeVideoDblclick: true,
   lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
   playbackRate: {
     list: [0.5, 0.75, 1, 1.25, 1.5, 2],
@@ -564,12 +617,37 @@ const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
 const tc = ref(null); // 腾讯云播放器
-const tcplayerRef = ref(null); // 腾讯云播放器dom 节点 s
+const tcplayerRef = ref(null); // 腾讯云播放器dom节点
+const xgpayerRef = ref(null); // x西瓜播放器dom节点
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
 const playerInfoTimer = ref(); // 定时器 用于刷新播放器参数
 const isBinge = ref(true); // true未收藏 false收藏
 const isPinned = ref(true); // true未置顶 false置顶
+const isSettingVisible = ref(false);
+const isContextMenu = ref(false);
+const optionsComponent = ref({
+  zIndex: 3,
+  width: 160,
+  x: 500,
+  y: 200,
+  theme: 'mac dark',
+});
+
+function onContextMenu(e: MouseEvent) {
+  const scaledPosition = ContextMenu.transformMenuPosition(
+    e.target as HTMLElement,
+    e.offsetX,
+    e.offsetY,
+    xgpayerRef.value,
+  ); // myMenuContainer 是挂载容器
+  // show menu
+  ContextMenu.showContextMenu({
+    x: scaledPosition.x,
+    y: scaledPosition.y,
+    // ...
+  });
+}
 const qrCodeUrl = ref(); // 二维码图片流
 const dataHistory = ref({}); // 历史
 const isMacMaximize = ref(false); // mac最大化
@@ -588,6 +666,10 @@ const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
 const iptvDataList = ref({});
 const playerType = ref('hls');
+const skipConfig = ref({
+  skipTimeInStart: 30,
+  skipTimeInEnd: 30,
+});
 
 const pagination = ref({
   pageIndex: 0,
@@ -710,9 +792,19 @@ watch(
   },
 );
 
+// 更新跳过数据
+watch(
+  () => skipConfig.value,
+  () => {
+    skipHistoryConfig();
+  },
+  { deep: true },
+);
+
 onMounted(() => {
   initPlayer();
   minMaxEvent();
+  console.log(skipConfig.value);
 });
 
 // 根据不同类型加载不同播放器
@@ -738,6 +830,7 @@ const createPlayer = async (videoType) => {
     }
     console.log(`[player] 加载西瓜${videoType}播放器`);
     xg.value = new Player(config.value);
+    // onContextMenu();
   } else {
     if (!tc.value) tc.value = TCPlayer('tcplayer', { ...tcConfig.value });
     console.log(config.value.startTime);
@@ -780,6 +873,8 @@ const getHistoryData = async (type = false) => {
       videoIndex: selectPlayIndex.value,
       watchTime: 0,
       duration: null,
+      skipTimeInStart: 30,
+      skipTimeInEnd: 30,
     };
     if (res) {
       if (!type) {
@@ -792,8 +887,13 @@ const getHistoryData = async (type = false) => {
       } else {
         dataHistory.value = { ...res };
       }
+      const { skipTimeInStart, skipTimeInEnd } = res;
+      skipConfig.value = { skipTimeInStart, skipTimeInEnd };
     } else {
       const id = await history.add(doc);
+      const { skipTimeInStart, skipTimeInEnd } = doc;
+
+      skipConfig.value = { skipTimeInStart, skipTimeInEnd };
       dataHistory.value = { ...doc, id };
     }
   } catch (error) {
@@ -868,15 +968,17 @@ const initFilmPlayer = async (isFirst) => {
     config.value.url = item ? item.split('$')[1] : season.value[selectPlaySource.value][0].split('$')[1];
 
     // 跳过时间
-    if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
-      config.value.startTime = set.value.skipTimeInStart;
+    // if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
+    if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
+      config.value.startTime = skipConfig.value.skipTimeInStart;
     } else {
       config.value.startTime = dataHistory.value.watchTime || 0;
     }
   } else {
     config.value.startTime = dataHistory.value.watchTime || 0;
-    if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
-      config.value.startTime = set.value.skipTimeInStart;
+    // if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
+    if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
+      config.value.startTime = skipConfig.value.skipTimeInStart;
     }
   }
 
@@ -1195,7 +1297,8 @@ const timerUpdatePlayProcess = () => {
     VIDEO_PROCESS_DOC.duration = duration;
     history.update(dataHistory.value.id, VIDEO_PROCESS_DOC);
 
-    const watchTime = set.value.skipStartEnd ? currentTime + set.value.skipTimeInEnd : currentTime;
+    // const watchTime = set.value.skipStartEnd ? currentTime + set.value.skipTimeInEnd : currentTime;
+    const watchTime = set.value.skipStartEnd ? currentTime + skipConfig.value.skipTimeInEnd : currentTime;
 
     if (watchTime >= duration) {
       if (set.value.broadcasterType === 'xgplayer') {
@@ -1209,11 +1312,11 @@ const timerUpdatePlayProcess = () => {
       if (duration !== 0) autoPlayNext();
     }
 
-    console.log(
-      `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
-        (currentTime / duration) * 100,
-      )}%`,
-    );
+    // console.log(
+    //   `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
+    //     (currentTime / duration) * 100,
+    //   )}%`,
+    // );
   };
 
   const onEnded = () => {
@@ -1414,6 +1517,30 @@ const copyShareUrl = () => {
   copyToClipboard(shareUrl.value, successMessage, errorMessage);
 
   isShareVisible.value = false;
+};
+
+// 更新历史跳过参数
+const skipHistoryConfig = async () => {
+  const { skipTimeInStart, skipTimeInEnd } = skipConfig.value;
+  await history.update(dataHistory.value.id, { skipTimeInStart, skipTimeInEnd });
+};
+
+// 更新跳过开关全局存储
+const updateLocalPlayer = async (item) => {
+  await store.updateConfig({
+    setting: {
+      skipStartEnd: item,
+    },
+  });
+
+  await setting.update({ skipStartEnd: item });
+};
+
+// 西瓜播放器右键支持
+const conButtonClick = ({ x, y }: any) => {
+  isContextMenu.value = true;
+  // Object.assign()用于同时设置两个属性，而不是逐个分配x和y属性。
+  Object.assign(optionsComponent.value, { x, y });
 };
 
 // 播放器参数
@@ -2284,6 +2411,20 @@ const openMainWinEvent = () => {
   }
 }
 
+.setting-warp {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  .setting-item-warp {
+    display: flex;
+    justify-content: space-between;
+  }
+  .tip-warp {
+    bottom: 4px;
+  }
+}
+
 .player-info-warp {
   .player-info-items {
     max-height: 300px;
@@ -2295,6 +2436,7 @@ const openMainWinEvent = () => {
   }
 }
 
+.setting-warp,
 .player-info-warp,
 .download-warp {
   .tip-warp {

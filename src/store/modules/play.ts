@@ -33,7 +33,10 @@ export const usePlayStore = defineStore('play', {
           this.data = payload.data;
         }
         if (key === 'setting') {
-          this.setting = payload.setting;
+          this.setting = {
+            ...this.setting, // 保留原有的 setting 属性
+            ...payload.setting, // 更新传入的 setting 属性
+          };
         }
       }
     },
