@@ -9,11 +9,9 @@
 
 <h1 align="center">ZYPlayer</h1>
 
-### Introduction
+基于 Vue 全家桶 + TDesign + Electron 开发；主题色：薄荷绿。
 
-基于 vue 全家桶 + tdesign + electron 开发；主题色：薄荷绿。
-
-🎨 已有功能
+# 🎉 特性
 
 - 全平台支持 Windows、Mac、Linux
 - 适配深色模式
@@ -22,9 +20,8 @@
 - 支持主流视频平台解析（解析页面有个小彩蛋，可在代码里自行探索）
 - 老板键，一键隐藏
 - 内置两套播放器(西瓜播放器,腾讯云播发器)
-- ...
 
-### 🌴 声明
+# 🌴 声明
 
 - 请大家支持正版. 所有资源来自网上, 该软件不参与任何制作, 上传, 储存等内容, 禁止传播违法资源.
 - 该软件仅供学习交流使用，禁止个人用于非法商业用途, 请于安装后 24 小时内删除.
@@ -32,7 +29,33 @@
 - 该软件部分代码参考[ZY-Player](https://github.com/Hunlongyu/ZY-Player)
 - icon 来源于[ZY Player Issues 737](https://github.com/Hunlongyu/ZY-Player/issues/737)
 
-### 🧤 格式
+> 播放器说明: 
+- 没有完美的播放器
+- tcplayer不支持 h265(hevc),通常表现为只有声音没有画面
+- xgplayer兼容性不如tcplayer
+- 腾讯一贯风格，tcplayer每次数据都会上报云端(https://datacenter.live.qcloud.com/)
+
+> 包说明: 
+- MacOS(dmg)：arm64[Applechip]、x64[Intel]、universal[通用-不区分架构]
+- Windows(exe)：arm64[骁龙]、x64[Intel、amd]、ia32(32位操作系统)、win-版本号.exe(通用-不区分架构)
+- Linux(Image)：arm64[鲲鹏、飞腾]、x64[兆兴]
+
+> win7说明: 
+- [Chromium](https://www.chromium.org/)内核110.0.5481.100对应Electron23.1.1(续航能力的大幅优化 即降低能耗和性能优化)
+- Electron 23 将包含 Chromium 110, 不再支持[Windows(7/8/8.1)](https://www.electronjs.org/zh/blog/windows-7-to-8-1-deprecation-notice)
+- 维护两套版本成本太高，将随时停止打包[Windows(7/8/8.1)](https://www.electronjs.org/zh/blog/windows-7-to-8-1-deprecation-notice)，用户可自行打包（建议 19.1.9版本）
+
+```shell
+1.安装 node.js version16 以上
+2.克隆项目  git clone https://github.com/Hiram-Wong/ZyPlayer.git
+3.进入项目  cd ZyPlayer
+4.修改packgae.json "electron": "^19.1.9",
+5.安装依赖包  yarn
+6.打包  yarn electron:build:win
+```
+
+<details>
+<summary>展开查看接口说明</summary>
 
 > 一键格式
 ```json
@@ -157,18 +180,10 @@
   ]
 }
 ```
+</details>
 
-### 🎠 平台
-
-| 平台                                   | 链接                                                        |
-| :------------------------------------- | :---------------------------------------------------------- |
-| 🖥️ 电脑端旧 ( Windows & Mac & Linux )  | [ZY Player Old](https://github.com/Hunlongyu/ZY-Player)     |
-| 🖥️ 电脑端新 ( Windows & Mac & Linux )  | [ZY Player New](https://github.com/Hiram-Wong/ZyPlayer)     |
-| 📱 手机端 ( Android & IOS )            | [ZY Player APP](https://github.com/Hunlongyu/ZY-Player-APP) |
-| 📺 电视端 ( Android & Mac ) ( 进行中 ) | [ZY Player TV](https://github.com/cuiocean/ZY-Player-TV)    |
-| 🌐 浏览器 ( Web )                      | [ZY Player Web](https://github.com/Hunlongyu/ZY-Player-Web) |
-
-### 🎨 截图
+<details>
+<summary>展开查看软件截图</summary>
 
 |                           影视(首页)                           |                             影视(搜索)                             |
 | :-------------------------------------------------------------: | :-----------------------------------------------------------------: |
@@ -183,3 +198,5 @@
 | ![历史](https://s2.loli.net/2023/05/07/KYUpQA7g2MGVIZb.png) |     ![在追](https://s2.loli.net/2023/05/07/xuMkzWQLYCSl5XZ.png)     |
 |                            社区                             |                                设置                                 |
 | ![社区](https://s2.loli.net/2023/05/07/r31qEmNPTGouOXb.png) |     ![设置](https://s2.loli.net/2023/05/07/RgDOlzJKBcop2d6.png)     |
+
+</details>
