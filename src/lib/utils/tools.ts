@@ -172,7 +172,7 @@ const zy = {
       const site = await sites.find({key:key});
       let url;
       url = buildUrl(site.api,`?ac=videolist&t=${t}&pg=${pg}`);
-      if ( f ) url = buildUrl(site.api,`?ac=videolist&t=${t}&pg=${pg}&f=${f}`);
+      if ( Object.keys(f).length !== 0 ) url = buildUrl(site.api,`?ac=videolist&t=${t}&pg=${pg}&f=${JSON.stringify(f)}`);
       const res = await axios.get(url);
       let json;
       if ( site.type === 0 ) json = parser.parse(res.data)

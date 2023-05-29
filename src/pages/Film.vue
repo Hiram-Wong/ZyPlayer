@@ -477,13 +477,11 @@ const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
-  const f = JSON.stringify({ ...filter.value.format });
+  const f = { ...filter.value.format };
   console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${f}`);
 
   try {
-    let res;
-    if (f) res = await zy.list(key, pg, t, f);
-    else res = await zy.list(key, pg, t);
+    const res = await zy.list(key, pg, t, f);
 
     const newFilms = _.differenceWith(res, FilmDataList.value.list, _.isEqual);
     FilmDataList.value.list = [...FilmDataList.value.list, ...newFilms];
