@@ -223,6 +223,14 @@
                 style="width: 100%; height: calc(100vh - 50px)"
               ></video>
             </div>
+            <div
+              v-show="!onlineUrl"
+              v-if="set.broadcasterType === 'aliplayer'"
+              ref="aliplayerRef"
+              class="aliplayer player"
+            >
+              <div id="aliplayer"></div>
+            </div>
             <iframe
               v-show="onlineUrl && isSniff"
               ref="iframeRef"
@@ -469,6 +477,8 @@ import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
 import 'tcplayer.js/dist/tcplayer.min.css';
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
+import '@/style/player/aliplayer-h5-min.css';
+import 'https://g.alicdn.com/de/prismplayer/2.15.5/aliplayer-min.js';
 
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useClipboard } from '@vueuse/core';
@@ -562,7 +572,19 @@ const config = ref({
   closeVideoDblclick: true,
   lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
   playbackRate: {
-    list: [0.5, 0.75, 1, 1.25, 1.5, 2],
+    list: [
+      2,
+      1.5,
+      1.25,
+      {
+        rate: 1,
+        iconText: {
+          zh: '倍速',
+        },
+      },
+      0.75,
+      0.5,
+    ],
     index: 7, // pip:6 volume:1 fullscreen:1 playbackrate:0
   },
   icons: {
@@ -608,7 +630,88 @@ const tcConfig = ref({
       statistic: true,
     },
   },
-}); // 腾讯播放器参数
+}); // 腾讯云播放器参数
+const aliConfig = ref({
+  id: 'aliplayer',
+  source: '',
+  width: '100%',
+  height: 'calc(100vh - 50px)',
+  autoplay: true,
+  isLive: false,
+  playsinline: true,
+  isVBR: true,
+  useH5Prism: true,
+  keyShortCuts: true,
+  enableSystemMenu: true,
+  skinLayout: [
+    {
+      name: 'bigPlayButton',
+      align: 'blabs',
+      x: '50%',
+      y: '50%',
+    },
+    {
+      name: 'H5Loading',
+      align: 'cc',
+    },
+    {
+      name: 'errorDisplay',
+      align: 'tlabs',
+      x: 0,
+      y: 0,
+    },
+    {
+      name: 'tooltip',
+      align: 'blabs',
+      x: 0,
+      y: 56,
+    },
+    {
+      name: 'controlBar',
+      align: 'blabs',
+      x: 0,
+      y: 0,
+      children: [
+        {
+          name: 'progress',
+          align: 'blabs',
+          x: 0,
+          y: 44,
+        },
+        {
+          name: 'playButton',
+          align: 'tl',
+          x: 15,
+          y: 12,
+        },
+        {
+          name: 'timeDisplay',
+          align: 'tl',
+          x: 10,
+          y: 3,
+        },
+        {
+          name: 'fullScreenButton',
+          align: 'tr',
+          x: 10,
+          y: 12,
+        },
+        {
+          name: 'setting',
+          align: 'tr',
+          x: 16,
+          y: 12,
+        },
+        {
+          name: 'volume',
+          align: 'tr',
+          x: 16,
+          y: 12,
+        },
+      ],
+    },
+  ],
+}); // 阿里云播放器参数
 
 const selectIptvTab = ref('epg');
 const recommend = ref([]); // 推荐
@@ -617,8 +720,10 @@ const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
 const tc = ref(null); // 腾讯云播放器
+const ali = ref(null); // 阿里云播放器
 const tcplayerRef = ref(null); // 腾讯云播放器dom节点
-const xgpayerRef = ref(null); // x西瓜播放器dom节点
+const xgpayerRef = ref(null); // 西瓜播放器dom节点
+const aliplayerRef = ref(null); // 阿里云播放器dom节点
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
 const playerInfoTimer = ref(); // 定时器 用于刷新播放器参数
@@ -829,14 +934,20 @@ const createPlayer = async (videoType) => {
         break;
     }
     console.log(`[player] 加载西瓜${videoType}播放器`);
-    xg.value = new Player(config.value);
+    xg.value = new Player({ ...config.value });
     // onContextMenu();
-  } else {
+  } else if (set.value.broadcasterType === 'tcplayer') {
     if (!tc.value) tc.value = TCPlayer('tcplayer', { ...tcConfig.value });
-    console.log(config.value.startTime);
-    tc.value.currentTime(config.value.startTime);
+    if (config.value.startTime) tc.value.currentTime(config.value.startTime);
     tc.value.src(config.value.url);
     console.log(`[player] 加载腾讯云播放器`);
+  } else if (set.value.broadcasterType === 'aliplayer') {
+    aliConfig.value.source = config.value.url;
+    if (!ali.value)
+      ali.value = new Aliplayer({ ...aliConfig.value }, function (player) {
+        console.log(`[player] 加载阿里云播放器`);
+        if (config.value.startTime) player.seek(config.value.startTime);
+      });
   }
 
   if (type.value === 'film') await timerUpdatePlayProcess();
@@ -920,6 +1031,10 @@ const destroyPlayer = () => {
     tcplayerRef.value.innerHTML = '';
     tcplayerRef.value.appendChild(newVideoElement);
   }
+  if (ali.value) {
+    ali.value.dispose();
+    ali.value = null;
+  }
 
   if (onlineUrl.value) onlineUrl.value = '';
 };
@@ -931,11 +1046,14 @@ const initIptvPlayer = async () => {
   if (data.value.ext.epg) getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
   config.value.url = info.value.url;
 
-  if (set.value.broadcasterType === 'xgplayer') {
+  if (set.value.broadcasterType !== 'tcplayer') {
     try {
       const isLive = await zy.isLiveM3U8(info.value.url);
       config.value.isLive = isLive;
       config.value.presets = isLive ? [LivePreset] : [];
+      aliConfig.value.isLive = isLive;
+
+      aliConfig.value.skinLayout[4].children.push({ name: 'liveDisplay', align: 'tl', x: 20, y: 0 });
     } catch (err) {
       console.error(err);
     }
@@ -1312,11 +1430,11 @@ const timerUpdatePlayProcess = () => {
       if (duration !== 0) autoPlayNext();
     }
 
-    // console.log(
-    //   `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
-    //     (currentTime / duration) * 100,
-    //   )}%`,
-    // );
+    console.log(
+      `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
+        (currentTime / duration) * 100,
+      )}%`,
+    );
   };
 
   const onEnded = () => {
@@ -1342,10 +1460,20 @@ const timerUpdatePlayProcess = () => {
     tc.value.on('ended', () => {
       onEnded();
     });
+  } else if (set.value.broadcasterType === 'aliplayer') {
+    ali.value.on('timeupdate', () => {
+      const duration = ali.value.getDuration();
+      const currentTime = ali.value.getCurrentTime();
+      onTimeUpdate(currentTime, duration);
+    });
+
+    ali.value.on('ended', () => {
+      onEnded();
+    });
   }
 };
 
-// 是否自动进入下一集
+// 是否自动进入下集
 const autoPlayNext = () => {
   const { siteSource } = dataHistory.value;
   const index = season.value[siteSource].indexOf(currentUrl.value);
@@ -1360,7 +1488,7 @@ const autoPlayNext = () => {
     return;
   }
   changeEvent(season.value[siteSource][index + 1]);
-  MessagePlugin.info('请稍候,正在切换下一级');
+  MessagePlugin.info('请稍候,正在切换下集');
 };
 
 // 获取是否追剧
@@ -1592,7 +1720,6 @@ const openMainWinEvent = () => {
 <style lang="less" scoped>
 @import '@/style/variables.less';
 @import '@/style/index.less';
-
 .container {
   height: calc(100vh);
   overflow-y: hidden;

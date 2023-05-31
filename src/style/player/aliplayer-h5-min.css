@@ -1,0 +1,1374 @@
+.prism-player .prism-big-play-btn {
+	background:url('https://g.alicdn.com/de/prismplayer/2.15.5/skins/default/img/bigplay.png') no-repeat;
+	background-size:contain;
+	width:64px;
+	height:64px
+}
+.prism-player .prism-big-play-btn .outter {
+	border:7px solid rgba(255,255,255,.51);
+	width:64px;
+	height:64px;
+	border-radius:100%;
+	position:absolute;
+	box-sizing:border-box;
+	top:0;
+	left:0
+}
+.prism-player .prism-big-play-btn:hover {
+	cursor:pointer
+}
+.prism-player .prism-play-btn {
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/play.svg) no-repeat;
+	background-size:contain;
+}
+.prism-player .prism-play-btn:hover {
+	cursor:pointer
+}
+.prism-player .prism-live-display {
+	font-size:12px;
+	font-weight: 400;
+	color:#fff;
+	line-height:44px;
+	text-align:center;
+	margin:0
+}
+.prism-player .live-shift-display:hover {
+	cursor:pointer;
+	font-size:14px
+}
+.prism-player .prism-play-btn.playing {
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/pause.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-play-btn.playing:hover {
+	cursor:pointer
+}
+.prism-player .prism-fullscreen-btn {
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/zoom.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-fullscreen-btn:hover {
+	cursor:pointer
+}
+.prism-player .prism-fullscreen-btn.fullscreen {
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/zoom-s.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-fullscreen-btn.fullscreen:hover {
+	animation:hoverAnimationScale 1s 1;
+	-moz-animation:hoverAnimationScale 1s 1;
+	-webkit-animation:hoverAnimationScale 1s 1;
+	-o-animation:hoverAnimationScale 1s 1;
+	cursor:pointer
+}
+.prism-player .prism-volume {
+	position:relative;
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/voice.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-volume .volume-icon {
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/voice.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-volume .volume-icon .long-horizontal {
+	/* width:3px; */
+	background:#ebecec;
+	height:18px;
+	position:absolute;
+	right:5px;
+	top:50%;
+	-ms-transform:translateY(-50%);
+	transform:translateY(-50%)
+}
+.prism-player .prism-volume .volume-icon .short-horizontal {
+	/* width:3px; */
+	background:#ebecec;
+	height:8px;
+	position:absolute;
+	right:10px;
+	top:50%;
+	-ms-transform:translateY(-50%);
+	transform:translateY(-50%)
+}
+.prism-player .prism-volume .volume-icon:hover {
+	-ms-transform-origin:0 50%;
+	transform-origin:0 50%;
+	background-size:contain;
+	cursor:pointer
+}
+.prism-player .prism-volume .mute {
+	width: 1.4em;
+	height: 100%;
+	background: url(/src/assets/player/voice-no.svg) no-repeat;
+	background-size: contain;
+}
+.prism-player .prism-volume .mute .long-horizontal {
+	-ms-transform:rotate(-45deg);
+	transform:rotate(-45deg);
+	height:12px;
+	top:10px;
+	left:22px
+}
+.prism-player .prism-volume .mute .short-horizontal {
+	-ms-transform:rotate(45deg);
+	transform:rotate(45deg);
+	height:12px;
+	top:10px;
+	left:22px
+}
+.prism-player .prism-volume-control {
+	position:absolute;
+	bottom:44px;
+	display:none;
+	background:rgba(60,60,60,.95);
+	box-shadow:0 0 6px 0 rgba(0,0,0,.1);
+	width:32px;
+	height:130px;
+	z-index:10000
+}
+.prism-player .prism-volume-control .volume-control-icon {
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/voice.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-volume-control .volume-control-icon:hover {
+	cursor:pointer;
+	background:url(@/assets/player/voice.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-volume-control .volume-control-icon.mute {
+	background:url(@/assets/player/voice.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-volume-control .volume-control-icon.mute:hover {
+	background:url(@/assets/player/voice.svg) no-repeat;
+	background-size:contain;
+	cursor:pointer
+}
+.prism-player .prism-volume-control:hover {
+	cursor:pointer
+}
+.prism-player .prism-volume-control .volume-control-icon {
+	position:absolute;
+	bottom:6px;
+	left:8px;
+	width:26px;
+	height:26px
+}
+.prism-player .prism-volume-control .volume-range {
+	position:absolute;
+	left:14px;
+	bottom:10px;
+	border-radius:1px;
+	background:#6c6262;
+	box-shadow:inset 1px 1px 1px 0 rgba(0,0,0,.06);
+	width:4px;
+	height:100px
+}
+.prism-player .prism-volume-control .volume-value {
+	width:100%;
+	height:0%;
+	background:#45c58b;
+	position:absolute;
+	border-radius:1px;
+	bottom:0
+}
+.prism-player .prism-volume-control .volume-cursor {
+	position:absolute;
+	bottom:0;
+	background:#fff;
+	width:15px;
+	height:15px;
+	border-radius:15px;
+	left:-6px
+}
+.prism-player .prism-volume-control .volume-cursor:hover {
+	background:#00c1de
+}
+.prism-player .prism-animation {
+	width:64px;
+	height:64px;
+	border-radius:64px;
+	opacity:0;
+	position:absolute;
+	left:50%;
+	top:50%;
+	-ms-transform:translate(-50%,-50%);
+	transform:translate(-50%,-50%)
+}
+.prism-player .prism-play-animation {
+	/* background:url(./img/playanimation.png) no-repeat; */
+	background-size:contain
+}
+.prism-player .prism-pause-animation {
+	/* background:url(./img/pauseanimation.png) no-repeat; */
+	background-size:contain
+}
+.prism-player .play-apply-animation {
+	animation:prismplayanimation 1s 1;
+	-moz-animation:prismplayanimation 1s 1;
+	-webkit-animation:prismplayanimation 1s 1;
+	-o-animation:prismplayanimation 1s 1;
+	animation-fill-mode:both
+}
+@keyframes prismplayanimation {
+	0% {
+	width:32px;
+	height:32px;
+	border-radius:32px;
+	opacity:0
+}
+50% {
+	width:32px;
+	height:32px;
+	border-radius:32px;
+	opacity:1
+}
+99% {
+	width:76px;
+	height:76px;
+	border-radius:76px;
+	opacity:0
+}
+100% {
+	width:0;
+	height:0
+}
+}@keyframes spinoffPulse {
+	0% {
+	transform:rotate(0);
+	-webkit-transform:rotate(0);
+	-moz-transform:rotate(0)
+}
+100% {
+	transform:rotate(360deg);
+	-webkit-transform:rotate(360deg);
+	-moz-transform:rotate(360deg)
+}
+}@keyframes hoverAnimationRotate {
+	0% {
+	transform:rotate(0);
+	-webkit-transform:rotate(0);
+	-moz-transform:rotate(0)
+}
+50% {
+	transform:rotate(45deg);
+	-webkit-transform:rotate(45deg);
+	-moz-transform:rotate(45deg)
+}
+100% {
+	transform:rotate(0);
+	-webkit-transform:rotate(0);
+	-moz-transform:rotate(0)
+}
+}@keyframes hoverAnimationScale {
+	0% {
+	transform:scale(1);
+	-webkit-transform:scale(1);
+	-moz-transform:scale(1)
+}
+50% {
+	transform:scale(1.2);
+	-webkit-transform:scale(1.2);
+	-moz-transform:scale(1.2)
+}
+100% {
+	transform:scale(1);
+	-webkit-transform:scale(1);
+	-moz-transform:scale(1)
+}
+}@keyframes hoverAnimationScaleX {
+	0% {
+	transform:scaleX(1);
+	-webkit-transform:scaleX(1);
+	-moz-transform:scaleX(1)
+}
+50% {
+	transform:scaleX(1.2);
+	-webkit-transform:scaleX(1.2);
+	-moz-transform:scaleX(1.2)
+}
+100% {
+	transform:scaleX(1);
+	-webkit-transform:scaleX(1);
+	-moz-transform:scaleX(1)
+}
+}@keyframes hoverVolumeAnimation {
+	0% {
+	opacity:1
+}
+50% {
+	opacity:0
+}
+100% {
+	opacity:1
+}
+}.volume-hover-animation {
+	animation:hoverVolumeAnimation .3s 1;
+	-moz-animation:hoverVolumeAnimation .3s 1;
+	-webkit-animation:hoverVolumeAnimation .3s 1;
+	-o-animation:hoverVolumeAnimation .3s 1
+}
+@keyframes hoverPlayButtonAnimation {
+	0% {
+	width:63px;
+	height:63px;
+	border:7px solid #fff
+}
+60% {
+	width:90px;
+	height:90px;
+	border:7px solid rgba(255,255,255,.51)
+}
+100% {
+	width:97px;
+	height:97px;
+	border:14px solid rgba(255,255,255,0)
+}
+}@keyframes warn {
+	0% {
+	transform:scale(1);
+	opacity:0
+}
+25% {
+	transform:scale(1);
+	opacity:.1
+}
+50% {
+	transform:scale(1.1);
+	opacity:.3
+}
+75% {
+	transform:scale(1.5);
+	opacity:.5
+}
+100% {
+	transform:scale(2);
+	opacity:0
+}
+}.big-playbtn-hover-animation {
+	animation:warn 1s ease-out;
+	-moz-animation:warn 1s ease-out;
+	-webkit-animation:warn 1s ease-out;
+	-o-animation:warn 1s ease-out
+}
+.big-playbtn-hover-animation1 {
+	animation:hoverPlayButtonAnimation 1s 1;
+	-moz-animation:hoverPlayButtonAnimation 1s 1;
+	-webkit-animation:hoverPlayButtonAnimation 1s 1;
+	-o-animation:hoverPlayButtonAnimation 1s 1
+}
+.prism-player {
+	background-color:#000;
+	position:relative
+}
+.prism-player a {
+	text-decoration:none
+}
+.prism-player video {
+	position:absolute;
+	left:50%;
+	top:50%;
+	transform:translate(-50%,-50%);
+	-ms-transform:translate(-50%,-50%);
+	-moz-transform:translate(-50%,-50%);
+	-webkit-transform:translate(-50%,-50%);
+	-o-transform:translate(-50%,-50%);
+	-ms-transform-origin:center;
+	-moz-transform-origin:center;
+	-webkit-transform-origin:center;
+	-o-transform-origin:center
+}
+.prism-player .x5-full-screen {
+	object-fit:fill;
+	object-position:50% 50%
+}
+.prism-player .x5-top-left {
+	object-fit:contain;
+	object-position:0 0
+}
+.prism-player .prism-cover {
+	width:100%;
+	height:100%;
+	background-repeat:no-repeat;
+	background-position:center;
+	background-size:cover;
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:11
+}
+.prism-player .prism-text-overlay {
+	width:100%;
+	height:100%;
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:9;
+	pointer-events:none
+}
+.prism-player .prism-ErrorMessage {
+	width:100%;
+	height:100%;
+	background-color:#000;
+	background-repeat:no-repeat;
+	background-position:center;
+	background-size:contain;
+	position:absolute;
+	z-index:99;
+	top:0;
+	left:0;
+	overflow:hidden;
+	display:none
+}
+.prism-player .prism-ErrorMessage .prism-error-content {
+	margin-top:20px;
+	padding:0 5px
+}
+.prism-player .prism-ErrorMessage .prism-error-content p {
+	text-align:center;
+	font-size:12px;
+	color:#fff
+}
+.prism-player .prism-ErrorMessage .prism-error-operation {
+	margin-top:10px;
+	margin-bottom:10px;
+	padding-bottom:5px;
+	border-bottom:1.5px;
+	border-bottom-color:rgba(255,255,255,.15);
+	border-bottom-style:dotted;
+	text-align:center
+}
+.prism-player .prism-ErrorMessage .prism-error-operation a {
+	width:80px;
+	height:32px;
+	line-height:32px;
+	vertical-align:top;
+	display:inline-block;
+	margin-left:10px
+}
+.prism-player .prism-ErrorMessage .prism-error-operation a.prism-button-refresh {
+	color:#21c5e0;
+	border:solid 1px #21c5e0
+}
+.prism-player .prism-ErrorMessage .prism-error-operation a.prism-button-refresh:hover {
+	color:#05d3f5;
+	border-color:#05d3f5;
+	cursor:pointer
+}
+.prism-player .prism-ErrorMessage .prism-error-operation a.prism-button-refresh:active {
+	color:#026a7b;
+	border-color:#026a7b
+}
+.prism-player .prism-ErrorMessage .prism-error-operation .prism-button-orange:visited {
+	color:#05d3f5
+}
+.prism-player .prism-ErrorMessage .prism-detect-info {
+	color:#fff;
+	font-size:10px
+}
+.prism-player .prism-ErrorMessage .prism-detect-info p {
+	padding:0 5px;
+	word-break:break-all;
+	margin:0 0 4px
+}
+.prism-player .prism-ErrorMessage .prism-detect-info span.info-label {
+	display:inline-block;
+	font-weight:700
+}
+.prism-player .prism-ErrorMessage .prism-detect-info span.info-content {
+	color:gray
+}
+.prism-player .prism-big-play-btn {
+	display:none;
+	z-index:1000
+}
+.prism-player .prism-license-watermark {
+	z-index:100;
+	position:absolute;
+	width:300px;
+	height:120px;
+	display:-ms-flexbox;
+	display:flex;
+	-ms-flex-direction:column;
+	flex-direction:column;
+	-ms-flex-pack:center;
+	justify-content:center;
+	-ms-flex-align:center;
+	align-items:center;
+	right:20px;
+	top:20px;
+	border:1px solid rgba(216,216,216,.12);
+	box-shadow:0 0 12px 0 rgba(130,130,130,.2);
+	border-radius:2px;
+	backdrop-filter:blur(4px);
+	background-color:rgba(255,255,255,.12)
+}
+.prism-player .prism-license-watermark .no-authorization {
+	font-weight:500;
+	font-size:24px;
+	color:rgba(255,255,255,.9);
+	text-shadow:1px 1px 2px rgba(0,0,0,.5);
+	margin:0 50px
+}
+.prism-player .prism-license-watermark .apply-button {
+	margin-top:12px;
+	padding:5px 20px;
+	background-color:#00bcd4;
+	border:1px solid #26c5da;
+	font-weight:400;
+	font-size:14px;
+	color:#fff;
+	line-height:20px;
+	cursor:pointer
+}
+.prism-player .prism-controlbar {
+	width:100%;
+	height:44px;
+	position:relative;
+	z-index:10;
+	font-size:14px;
+}
+.prism-player .prism-controlbar .prism-controlbar-bg {
+	background-image: linear-gradient(180deg,transparent,rgba(0,0,0,.37),rgba(0,0,0,.75),rgba(0,0,0,.75));
+  transition: opacity .5s ease,visibility .5s ease;
+	width:100%;
+	height:40px;
+	position:absolute;
+	bottom:0;
+	left:0;
+	z-index:-1
+}
+.prism-player .prism-time-display {
+	height:40px;
+	line-height:40px;
+	color:#a4aab3;
+	font-size:12px
+}
+.prism-player .prism-time-display .current-time {
+	color:#fff
+}
+.prism-player .prism-live-time-display {
+	height:44px;
+	line-height:44px;
+	color:#a4aab3;
+	font-size:12px
+}
+.prism-player .prism-live-time-display span {
+	display:inline
+}
+.prism-player .prism-live-time-display .live-text {
+	margin-left:5px;
+	font-size:12px;
+	color:#ebecec
+}
+.prism-player .prism-live-time-display .current-time {
+	color:#fff
+}
+.prism-player .prism-fullscreen-btn:hover {
+	animation:hoverAnimationScale 1s 1;
+	-moz-animation:hoverAnimationScale 1s 1;
+	-webkit-animation:hoverAnimationScale 1s 1;
+	-o-animation:hoverAnimationScale 1s 1
+}
+.prism-player .prism-liveshift-progress,.prism-player .prism-progress {
+	bottom:40px!important;
+	width:100%;
+	height:4px;
+	background:rgba(195,197,198,.5);
+	box-shadow:inset 1px 1px 1px 0 rgba(0,0,0,.06);
+	position:relative;
+	cursor:pointer
+}
+.prism-player .prism-liveshift-progress .prism-progress-time,.prism-player .prism-progress .prism-progress-time {
+	position:absolute;
+	top:-25px;
+	background:rgba(0,0,0,.8);
+	box-shadow:0 0 5px 0 rgba(0,0,0,.1);
+	-webkit-box-shadow:0 0 5px 0 rgba(0,0,0,.1);
+	color:#fff;
+	font-size:14px;
+	border-radius:7.5px;
+	padding:0 6px 0 6px;
+	text-align:center;
+	white-space:nowrap
+}
+.prism-player .prism-liveshift-progress .prism-progress-loaded,.prism-player .prism-progress .prism-progress-loaded {
+	position:absolute;
+	top:0;
+	left:0;
+	width:0;
+	height:100%;
+	background:#c3c5c6
+}
+.prism-player .prism-liveshift-progress .prism-progress-played,.prism-player .prism-progress .prism-progress-played {
+	position:absolute;
+	top:0;
+	left:0;
+	width:0;
+	height:100%;
+	background-color:#45c58b
+}
+.prism-player .prism-liveshift-progress .prism-progress-cursor,.prism-player .prism-progress .prism-progress-cursor {
+	position:absolute;
+	border-radius:8px;
+	top:-5px;
+	width:16px;
+	height:16px;
+	overflow:hidden;
+	box-sizing:content-box;
+	background:url(https://g.alicdn.com/de/prismplayer/2.15.5/skins/default/img/dragcursorhover.png) center;
+	display:none
+}
+.prism-player .prism-liveshift-progress .prism-progress-cursor img,.prism-player .prism-progress .prism-progress-cursor img {
+	width:14px;
+	height:14px;
+	position:absolute;
+	top:50%;
+	left:50%;
+	-ms-transform:translate(-50%,-50%);
+	transform:translate(-50%,-50%)
+}
+.prism-player .prism-liveshift-progress .cursor-hover,.prism-player .prism-progress .cursor-hover {
+	border-radius:9px;
+	width:18px;
+	height:18px;
+	top:-5px!important
+}
+.prism-player .prism-liveshift-progress .cursor-hover img,.prism-player .prism-progress .cursor-hover img {
+	width:16px;
+	height:16px
+}
+.prism-player .prism-liveshift-progress .prism-progress-marker,.prism-player .prism-progress .prism-progress-marker {
+	width:100%;
+	height:100%;
+	position:absolute
+}
+.prism-player .prism-liveshift-progress .prism-progress-marker .prism-marker-dot,.prism-player .prism-progress .prism-progress-marker .prism-marker-dot {
+	position:absolute;
+	background:#d9edf7;
+	width:5px;
+	height:100%;
+	border-radius:20%
+}
+.prism-player .prism-progress-hover {
+	cursor:pointer;
+	height:6px;
+	transition:height .1s
+}
+.prism-player .prism-progress-hover .prism-marker-dot {
+	width:10px;
+	height:80%;
+	top:8%;
+	border-radius:30%
+}
+.prism-player .prism-progress-hover .prism-progress-cursor {
+	top:-4px
+}
+.prism-player .prism-liveshift-progress {
+	background:0 0
+}
+.prism-player .prism-liveshift-progress .prism-enable-liveshift {
+	cursor:pointer;
+	position:absolute;
+	background:#fff;
+	height:4px
+}
+.prism-player .prism-liveshift-progress .prism-enable-liveshift:hover {
+	height:6px;
+	transition:height .1s
+}
+.prism-player .prism-liveshift-progress .prism-liveshift-seperator {
+	height:15px;
+	position:absolute;
+	right:0;
+	top:-8px;
+	color:#fff;
+	margin-right:5px;
+	margin-left:5px;
+	right:-65px
+}
+.prism-player .prism-marker-text {
+	padding:5px;
+	background:rgba(0,0,0,.8);
+	position:absolute;
+	max-width:180px;
+	max-height:100px;
+	bottom:50px;
+	color:#fff;
+	border-radius:3px;
+	z-index:9999;
+	display:none;
+	overflow:auto
+}
+.prism-player .prism-marker-text p {
+	text-align:center;
+	word-break:break-all;
+	margin:0;
+	font-size:12px
+}
+.prism-player .prism-loading {
+	width:55px;
+	height:55px;
+	z-index:10
+}
+.prism-player .prism-loading .circle-androidFirefox {
+	background-color:rgba(0,0,0,0);
+	border:5px solid;
+	border-color:rgba(0,193,222,.2) rgba(0,193,222,.5) rgba(0,193,222,.7) rgba(0,193,222,.1);
+	opacity:.9;
+	border-radius:50px;
+	width:45px;
+	height:45px;
+	margin:0 auto
+}
+.prism-player .prism-loading .circle {
+	background-color:rgba(0,0,0,0);
+	border:5px solid;
+	border-color:rgba(0,193,222,.2) rgba(0,193,222,.5) rgba(0,193,222,.7) rgba(0,193,222,.1);
+	opacity:.9;
+	border-radius:50px;
+	width:45px;
+	height:45px;
+	margin:0 auto;
+	-moz-animation:spinoffPulse .9s infinite linear;
+	-webkit-animation:spinoffPulse .9s infinite linear
+}
+.prism-player .prism-hide {
+	display:none
+}
+.prism-player .prism-snapshot-btn {
+	width:32px;
+	height:32px;
+	background:url(./img/snapshot.png) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-snapshot-btn:hover {
+	animation:hoverAnimationScale 1s 1;
+	-moz-animation:hoverAnimationScale 1s 1;
+	-webkit-animation:hoverAnimationScale 1s 1;
+	-o-animation:hoverAnimationScale 1s 1;
+	cursor:pointer
+}
+.prism-player .prism-snapshot-btn:active {
+	displa:block
+}
+.prism-player .prism-info-display {
+	width:100%;
+	color:#fff;
+	font-size:18px;
+	text-align:center;
+	top:50%;
+	position:absolute;
+	z-index:900;
+	height:44px;
+	line-height:28px;
+	font-size:16px;
+	padding:10px 12px 10px 12px
+}
+.prism-player .prism-info-display span {
+	color:#45c58b
+}
+.prism-player .prism-info-left-bottom {
+	width:auto!important;
+	top:auto!important;
+	bottom:70px;
+	left:20px!important;
+	text-align:left
+}
+.prism-player .prism-info-top-center {
+	width:auto!important;
+	top:20px!important;
+	left:50%!important;
+	text-align:left!important;
+	-ms-transform:translateX(-50%)!important;
+	transform:translateX(-50%)!important;
+	color:red!important
+}
+.prism-player .prism-info-black {
+	color:#000!important
+}
+.prism-player .prism-auto-stream-selector {
+	position:absolute;
+	bottom:50%;
+	width:100%;
+	margin:auto;
+	color:#efeff4;
+	display:none
+}
+.prism-player .prism-auto-stream-selector p.tip-text {
+	text-align:center
+}
+.prism-player .prism-auto-stream-selector .operators {
+	width:100px;
+	margin:auto
+}
+.prism-player .prism-button-cancel {
+	font-size:16px;
+	border:1px #ffffffa8 solid;
+	padding:2px 5px 2px 5px;
+	color:#ffffffa8;
+	margin-left:5px;
+	background:#503f3f3d
+}
+.prism-player .prism-button-ok {
+	font-size:16px;
+	border:1px #fff solid;
+	padding:2px 5px 2px 5px;
+	color:#fff;
+	background:#503f3f63
+}
+.prism-player .prism-button-cancel:hover,.prism-player .prism-button-ok:hover {
+	color:#f5f5f5
+}
+.prism-player .prism-cc-btn {
+	height:24px;
+	width:24px;
+	background:url(./img/cc.png) center no-repeat;
+	background-size:contain
+}
+.prism-player .prism-cc-btn:hover {
+	cursor:pointer;
+	animation:hoverAnimationScale 1s 1;
+	-moz-animation:hoverAnimationScale 1s 1;
+	-webkit-animation:hoverAnimationScale 1s 1;
+	-o-animation:hoverAnimationScale 1s 1
+}
+.prism-player .prism-setting-btn {
+	width: 1.4em;
+  height: 100%;
+	background:url(@/assets/player/setting.svg) no-repeat;
+	background-size:contain
+}
+.prism-player .prism-setting-list {
+	color: #fff;
+	font-size: 14px;
+	border-radius: 4px;
+	background:#000000b3;
+	width:220px;
+	position:absolute;
+	right:14px;
+	bottom:45px;
+	display:none;
+	z-index:10000;
+	text-align:left
+}
+.prism-player .prism-setting-list .prism-setting-item {
+	font-size:14px;
+	color:#ebecec;
+	height:30px
+}
+.prism-player .prism-setting-list .prism-setting-item .setting-content {
+	width:100%
+}
+.prism-player .prism-setting-list .prism-setting-item .setting-content:hover {
+	background:rgba(216,216,216,.1);
+	cursor:pointer
+}
+.prism-player .prism-setting-list .prism-setting-item .setting-content span {
+	line-height:30px
+}
+.prism-player .prism-setting-list .prism-setting-item .setting-content .setting-title {
+	margin-left:15px
+}
+.prism-player .prism-setting-list .prism-setting-item .setting-content .current-setting {
+	float:right;
+	max-width:120px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis
+}
+.prism-player .prism-setting-list .prism-setting-item .array {
+	display:inline-block;
+	border-right:2px solid;
+	border-bottom:2px solid;
+	border-color:#fff;
+	width:8px;
+	height:8px;
+	-ms-transform:rotate(-45deg);
+	transform:rotate(-45deg);
+	margin-right:10px;
+	margin-top:10px;
+	margin-left:10px;
+	float:right
+}
+.prism-player .prism-setting-selector {
+	right:40px;
+	position:absolute;
+	bottom:45px;
+	width:150px;
+	background:rgba(60,60,60,.95);
+	font-size:14px;
+	color:#ebecec;
+	display:none;
+	z-index:10000;
+	text-align:left
+}
+.prism-player .prism-setting-selector .header {
+	background:#242424;
+	width:150px;
+	height:30px
+}
+.prism-player .prism-setting-selector .header:hover {
+	cursor:pointer
+}
+.prism-player .prism-setting-selector .header .left-array {
+	display:inline-block;
+	border-left:2px solid;
+	border-bottom:2px solid;
+	border-color:#fff;
+	width:8px;
+	height:8px;
+	-ms-transform:rotate(45deg);
+	transform:rotate(45deg);
+	margin-right:6px;
+	margin-top:12px;
+	margin-left:16px;
+	float:left
+}
+.prism-player .prism-setting-selector .header span {
+	line-height:30px
+}
+.prism-player .prism-setting-selector ul.selector-list::-webkit-scrollbar {
+	width:10px;
+	background-color:#424242
+}
+.prism-player .prism-setting-selector ul.selector-list::-webkit-scrollbar-track {
+	background-color:#424242
+}
+.prism-player .prism-setting-selector ul.selector-list::-webkit-scrollbar-thumb {
+	background-color:#8e8e8e;
+	border:1px solid #424242;
+	border-radius:5px
+}
+.prism-player .prism-setting-selector ul {
+	list-style-type:none;
+	padding-left:0;
+	max-height:150px;
+	overflow-y:auto;
+	padding-left:13px;
+	margin-top:5px
+}
+.prism-player .prism-setting-selector ul li {
+	height:28px;
+	padding-left:10px
+}
+.prism-player .prism-setting-selector ul li.current {
+	color:#30adf2;
+	padding-left:0
+}
+.prism-player .prism-setting-selector ul li.current:before {
+	content:"";
+	display:inline-block;
+	line-height:0;
+	border:5px solid transparent;
+	border-left-color:#30adf2;
+	border-right-width:0;
+	margin-top:5px;
+	padding-right:5px
+}
+.prism-player .prism-setting-selector ul li:hover {
+	background:rgba(216,216,216,.1);
+	cursor:pointer
+}
+.prism-player .prism-setting-selector ul span {
+	line-height:28px;
+	max-width:110px;
+	display:inline-block;
+	vertical-align:middle;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis
+}
+.prism-player .prism-thumbnail {
+	border:1px solid rgba(0,0,0,.8);
+	width:174px;
+	height:98px;
+	position:absolute;
+	bottom:50px;
+	display:none;
+	z-index:10
+}
+.prism-player .prism-thumbnail .none {
+	border:none
+}
+.prism-player .prism-thumbnail span {
+	font-size:12px;
+	color:#fff;
+	line-height:20px;
+	background:rgba(0,0,0,.8);
+	text-align:center;
+	text-shadow:1px 1px 4px #373d41;
+	padding-left:5px;
+	padding-right:5px;
+	display:inline-block;
+	position:absolute;
+	bottom:0;
+	left:33%
+}
+.prism-player .prism-tooltip {
+	background:#3c3c3c;
+	box-shadow:0 0 5px 0 rgba(0,0,0,.1);
+	height:28px;
+	margin:0;
+	padding-left:5px;
+	padding-right:5px;
+	padding-top:0;
+	padding-bottom:0;
+	position:absolute;
+	bottom:50px;
+	color:#fff;
+	line-height:28px;
+	font-size:10px;
+	white-space:nowrap;
+	display:none;
+	z-index:10
+}
+.prism-player .disabled {
+	pointer-events:none;
+	color:gray
+}
+:-webkit-full-screen {
+	width:100%!important;
+	height:100%!important
+}
+:-moz-full-screen {
+	width:100%!important;
+	height:100%!important
+}
+:-ms-full-screen {
+	width:100%!important;
+	height:100%!important
+}
+:-ms-fullscreen {
+	width:100%!important;
+	height:100%!important
+}
+:-webkit-full-screen {
+	width:100%!important;
+	height:100%!important
+}
+:fullscreen {
+	width:100%!important;
+	height:100%!important
+}
+body.prism-full-window {
+	padding:0;
+	margin:0;
+	height:100%;
+	overflow-y:auto
+}
+.prism-fullscreen {
+	position:fixed;
+	overflow:hidden;
+	z-index:99999;
+	left:0!important;
+	top:0!important;
+	bottom:0!important;
+	right:0!important;
+	width:100%!important;
+	height:100%!important;
+	position:absolute!important
+}
+.prism-button {
+	cursor:pointer;
+	text-align:center;
+	text-shadow:0 1px 1px rgba(0,0,0,.3);
+	border-radius:.5em;
+	box-shadow:0 1px 2px rgba(0,0,0,.2)
+}
+.prism-button-orange {
+	color:#a56117;
+	border:solid 1px #a56117
+}
+.prism-button-retry {
+	color:#f2dede;
+	border:solid 1px #f2dede
+}
+.prism-button-orange:hover {
+	color:#d67400;
+	border-color:#d67400
+}
+.prism-button-orange:active {
+	color:#d67400;
+	border-color:#d67400
+}
+.prism-button-orange:visited {
+	color:#d67400
+}
+.prism-button-retry:hover {
+	color:#fcf8e3;
+	border-color:#fcf8e3
+}
+.prism-button-retry:active {
+	color:#fcf8e3;
+	border-color:#fcf8e3
+}
+.prism-button-retry:visited {
+	color:#fcf8e3
+}
+.prism-center {
+	position:absolute;
+	left:50%;
+	-ms-transform:translateX(-50%);
+	transform:translateX(-50%)
+}
+.prism-width90 {
+	width:90%
+}
+.prism-stream-selector {
+	font-size:16px;
+	position:relative;
+	line-height:32px
+}
+.prism-stream-selector .current-stream-selector {
+	text-align:center;
+	width:70px;
+	display:none;
+	color:#efeff4
+}
+.prism-stream-selector .current-stream-selector:hover {
+	cursor:pointer;
+	color:#00c1de
+}
+.prism-stream-selector .stream-selector-tip {
+	color:#fff;
+	text-align:center;
+	padding:2px 5px 2px 5px;
+	display:none;
+	position:absolute;
+	bottom:61.5px;
+	white-space:nowrap;
+	left:43%;
+	font-size:18px
+}
+.prism-stream-selector .stream-selector-list {
+	position:absolute;
+	bottom:32px;
+	background:rgba(0,0,0,.5);
+	color:#efeff4;
+	padding:5px 5px 0 5px;
+	width:70px;
+	margin:0;
+	display:none
+}
+.prism-stream-selector .stream-selector-list li {
+	list-style-type:none;
+	text-align:center;
+	white-space:nowrap;
+	padding:0 2px 0 2px;
+	line-height:24px
+}
+.prism-stream-selector .stream-selector-list li:last-child {
+	margin-bottom:10px
+}
+.prism-stream-selector .stream-selector-list li.current {
+	color:#00c1de
+}
+.prism-stream-selector .stream-selector-list li span.current {
+	color:#00c1de
+}
+.prism-stream-selector .stream-selector-list li:hover {
+	cursor:pointer;
+	color:#00c1de
+}
+.prism-speed-selector {
+	font-size:16px;
+	position:relative;
+	line-height:32px
+}
+.prism-speed-selector .current-speed-selector {
+	color:#efeff4;
+	text-align:center;
+	width:60px
+}
+.prism-speed-selector .current-speed-selector:hover {
+	cursor:pointer;
+	color:#00c1de
+}
+.prism-speed-selector .speed-selector-list {
+	position:absolute;
+	bottom:32px;
+	background:rgba(0,0,0,.5);
+	color:#efeff4;
+	padding:5px 5px 0 5px;
+	display:none;
+	margin:0
+}
+.prism-speed-selector .speed-selector-list li {
+	list-style-type:none;
+	text-align:center;
+	white-space:nowrap;
+	padding:0 2px 0 2px;
+	line-height:24px
+}
+.prism-speed-selector .speed-selector-list li:last-child {
+	margin-bottom:10px
+}
+.prism-speed-selector .speed-selector-list li.current {
+	color:#00c1de
+}
+.prism-speed-selector .speed-selector-list li span.current {
+	color:#00c1de
+}
+.prism-speed-selector .speed-selector-list li:hover {
+	cursor:pointer;
+	color:#00c1de
+}
+.prism-ai-container {
+	position:absolute;
+	overflow:hidden
+}
+.prism-ai-container .prism-ai-marking {
+	font-size:12px;
+	position:absolute
+}
+.prism-ai-container .prism-ai-marking[vh=large] {
+	font-size:18px
+}
+.prism-ai-container .prism-ai-marking[vh=middle] {
+	font-size:16px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region {
+	position:relative;
+	display:inline-block
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-title {
+	height:0;
+	-ms-transform:translateY(-40px);
+	transform:translateY(-40px)
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-title p {
+	background:#ff1d00;
+	text-align:center;
+	width:100%;
+	color:#fff;
+	word-break:keep-all;
+	margin:10px 0 0 0
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-title .top-left-anchor {
+	width:5px;
+	height:5px;
+	border-top-color:red;
+	border-top-style:solid;
+	border-left-color:red;
+	border-left-style:solid;
+	border-width:1px;
+	-ms-transform:translate(-5px,10px);
+	transform:translate(-5px,10px)
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-title .top-right-anchor {
+	width:5px;
+	height:5px;
+	border-top-color:red;
+	border-top-style:solid;
+	border-right-color:red;
+	border-right-style:solid;
+	border-width:1px;
+	-ms-transform:translate(5px,5px);
+	transform:translate(5px,5px);
+	float:right
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-rect {
+	border-style:solid;
+	border-color:#ff1d00;
+	border-width:1px;
+	box-sizing:content-box;
+	-moz-box-sizing:content-box;
+	-webkit-box-sizing:content-box;
+	color:rgba(255,29,0,.3);
+	background:rgba(255,29,0,.1)
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-rect .prism-ai-slash-container {
+	overflow:hidden;
+	width:100%;
+	height:100%;
+	position:absolute
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-rect .prism-ai-slash {
+	content:"";
+	display:block;
+	box-sizing:border-box;
+	border-top-width:1px;
+	border-top-style:solid;
+	height:10px;
+	margin-top:15px;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	transform:rotateZ(-45deg) scaleX(2);
+	-ms-transform-origin:bottom center;
+	transform-origin:bottom center
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .prism-ai-rect .prism-ai-top-slash {
+	margin-top:-10px!important
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .anchor-plug {
+	position:absolute
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .top-left {
+	top:-7px;
+	left:-2px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .top-right {
+	top:-7px;
+	right:-2px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .bottom-left {
+	bottom:-8px;
+	left:-2px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-rect-region .bottom-right {
+	bottom:-8px;
+	right:-2px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-labels {
+	color:#fff;
+	float:right;
+	background:rgba(0,0,0,.4);
+	padding-top:5px;
+	padding-bottom:5px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-labels p {
+	text-align:left;
+	padding-left:5px;
+	padding-right:5px;
+	margin:0
+}
+.prism-ai-container .prism-ai-marking .prism-ai-labels a {
+	padding-left:5px;
+	padding-right:5px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-labels p[vh=large] {
+	padding-left:25px;
+	padding-right:25px
+}
+.prism-ai-container .prism-ai-marking .prism-ai-labels p[vh=middle] {
+	padding-left:15px;
+	padding-right:15px
+}
+video::-webkit-media-text-track-container {
+	overflow:visible!important
+}
+video::cue {
+	line-height:1.7
+}
+.loading-center {
+	position:absolute;
+	top:50%;
+	left:50%;
+	-ms-transform:translate(-50%,-50%);
+	transform:translate(-50%,-50%)
+}
