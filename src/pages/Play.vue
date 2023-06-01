@@ -173,44 +173,49 @@
       <div class="container-main-left">
         <div class="container-player" :class="{ 'container-player-ext': showEpisode }">
           <div class="player-container">
-            <div v-show="!onlineUrl" v-if="set.broadcasterType === 'xgplayer'" ref="xgpayerRef" class="xgplayer player">
-              <div id="xgplayer"></div>
+            <div v-show="!onlineUrl" class="player-media">
+              <div
+                v-if="set.broadcasterType === 'xgplayer'"
+                id="xgplayer"
+                ref="xgpayerRef"
+                class="xgplayer player"
+              ></div>
+              <div
+                v-if="set.broadcasterType === 'veplayer'"
+                id="veplayer"
+                ref="vepayerRef"
+                class="veplayer player"
+              ></div>
+              <div v-if="set.broadcasterType === 'tcplayer'" ref="tcplayerRef" class="tcplayer player">
+                <video
+                  id="tcplayer"
+                  preload="auto"
+                  playsinline
+                  webkit-playsinline
+                  style="width: 100%; height: calc(100vh - 50px)"
+                ></video>
+              </div>
+              <div
+                v-if="set.broadcasterType === 'aliplayer'"
+                id="aliplayer"
+                ref="aliplayerRef"
+                class="aliplayer player"
+              ></div>
             </div>
-            <div
-              v-show="!onlineUrl"
-              v-if="set.broadcasterType === 'tcplayer'"
-              ref="tcplayerRef"
-              class="tcplayer player"
-            >
-              <video
-                id="tcplayer"
-                preload="auto"
-                playsinline
+            <div v-show="onlineUrl && isSniff" class="player-webview">
+              <iframe
+                ref="iframeRef"
+                :key="onlinekey"
+                class="analysis-play-box"
+                :src="onlineUrl"
+                allowtransparency="true"
+                frameborder="0"
+                scrolling="no"
+                allowfullscreen="true"
                 webkit-playsinline
-                style="width: 100%; height: calc(100vh - 50px)"
-              ></video>
+                playsinline
+              ></iframe>
             </div>
-            <div
-              v-show="!onlineUrl"
-              v-if="set.broadcasterType === 'aliplayer'"
-              ref="aliplayerRef"
-              class="aliplayer player"
-            >
-              <div id="aliplayer"></div>
-            </div>
-            <iframe
-              v-show="onlineUrl && isSniff"
-              ref="iframeRef"
-              :key="onlinekey"
-              class="analysis-play-box"
-              :src="onlineUrl"
-              allowtransparency="true"
-              frameborder="0"
-              scrolling="no"
-              allowfullscreen="true"
-              webkit-playsinline
-              playsinline
-            ></iframe>
           </div>
         </div>
 
@@ -439,7 +444,6 @@ import '@volcengine/veplayer/dist/index.min.css';
 import 'xgplayer-livevideo';
 import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
-// import 'tcplayer.js/dist/tcplayer.min.css';
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import '@/style/player/aliplayer-h5-min.css';
 import '@/style/player/tcplayer.min.css';
@@ -525,16 +529,15 @@ const playerInfo = ref({
   stats: {},
 });
 
-const config = ref({
-  id: 'xgplayer',
+const commonConfig = {
   url: '',
   autoplay: true,
   pip: true,
   cssFullscreen: false,
-  enableContextmenu: true, // 允许右键
+  enableContextmenu: true,
   topBarAutoHide: false,
   closeVideoDblclick: true,
-  lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
+  lastPlayTimeHideDelay: 5,
   playbackRate: {
     list: [
       2,
@@ -549,7 +552,7 @@ const config = ref({
       0.75,
       0.5,
     ],
-    index: 7, // pip:6 volume:1 fullscreen:1 playbackrate:0
+    index: 7,
   },
   icons: {
     play: playerPlayIcon,
@@ -563,14 +566,28 @@ const config = ref({
     pipIcon: playerPipIcon,
     pipIconExit: playerPipIcon,
   },
+  commonStyle: {
+    // 播放完成部分进度条底色
+    playedColor: '#45c58b',
+    // 进度条滑块样式，支持字符串或 Style 样式对象
+    sliderBtnStyle: {
+      backgroundColor: '#45c58b',
+    },
+    // 音量颜色
+    volumeColor: '#45c58b',
+  },
   plugins: [],
+}; // 西瓜、火山公共部分
+
+const config = ref({
+  ...commonConfig,
+  id: 'xgplayer',
   hls: {
-    preloadTime: 90, // [点播]预加载时长，单位秒
-    retryCount: 3, // 重试 3 次，默认值
-    retryDelay: 1000, // 每次重试间隔 1 秒，默认值
-    loadTimeout: 10000, // 请求超时时间为 10 秒，默认值
+    preloadTime: 90,
+    retryCount: 3,
+    retryDelay: 1000,
+    loadTimeout: 10000,
     fetchOptions: {
-      // 该参数会透传给 fetch，默认值为 undefined
       mode: 'cors',
     },
   },
@@ -585,51 +602,17 @@ const config = ref({
   width: 'auto',
   height: 'calc(100vh - 50px)',
 }); // 西瓜播放器参数
+
 const veConfig = ref({
-  id: 'xgplayer',
+  ...commonConfig,
+  id: 'veplayer',
   url: '',
   streamType: 'hls',
   isLive: false,
-  autoplay: true,
-  pip: true,
-  cssFullscreen: false,
-  enableContextmenu: true, // 允许右键
-  topBarAutoHide: false,
-  closeVideoDblclick: true,
-  lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
-  enableH265Degrade: true, // H.265 兼容模式
-  playbackRate: {
-    list: [
-      2,
-      1.5,
-      1.25,
-      {
-        rate: 1,
-        iconText: {
-          zh: '倍速',
-        },
-      },
-      0.75,
-      0.5,
-    ],
-    index: 7, // pip:6 volume:1 fullscreen:1 playbackrate:0
-  },
-  icons: {
-    play: playerPlayIcon,
-    pause: playerPauseIcon,
-    playNext: playerPlayNextIcon,
-    fullscreen: playerZoomIcon,
-    exitFullscreen: playerZoomExitIcon,
-    volumeSmall: playerVoiceIcon,
-    volumeLarge: playerVoiceIcon,
-    volumeMuted: playerVoiceNoIcon,
-    pipIcon: playerPipIcon,
-    pipIconExit: playerPipIcon,
-  },
+  enableH265Degrade: true,
   plugins: [],
-  height: '100%',
-  width: '100%',
 }); // 火山播放器参数
+
 const tcConfig = ref({
   autoplay: true,
   playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
@@ -728,6 +711,7 @@ const season = ref(); // 选集
 const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
+const ve = ref(null); // 火山播放器
 const tc = ref(null); // 腾讯云播放器
 const ali = ref(null); // 阿里云播放器
 const tcplayerRef = ref(null); // 腾讯云播放器dom节点
@@ -757,7 +741,6 @@ const snifferTimer = ref();
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
 const iptvDataList = ref({});
-const playerType = ref('hls');
 const skipConfig = ref({
   skipTimeInStart: 30,
   skipTimeInEnd: 30,
@@ -866,24 +849,6 @@ watch(
   },
 );
 
-// 实时更新视频数据
-watch(
-  () => isPlayerInfoVisible.value,
-  (val) => {
-    if (val) {
-      playerInfo.value.version = xg.value.plugins[playerType.value].core.version;
-
-      playerInfoTimer.value = setInterval(() => {
-        console.log('Interval: Refresh playerInfo');
-        playerInfo.value.stats = xg.value.plugins[playerType.value].core.getStats();
-      }, 5000);
-    } else {
-      console.log('Interval: Clear playerInfo');
-      clearInterval(playerInfoTimer.value);
-    }
-  },
-);
-
 // 更新跳过数据
 watch(
   () => skipConfig.value,
@@ -905,28 +870,38 @@ const createPlayer = async (videoType) => {
     switch (videoType) {
       case 'mp4':
         config.value.plugins = [Mp4Plugin];
-        veConfig.value.streamType = 'mp4';
-        playerType.value = 'mp4';
         break;
       case 'flv':
         config.value.plugins = [FlvPlugin];
-        veConfig.value.streamType = 'flv';
-        playerType.value = 'flv';
         break;
       case 'm3u8':
         config.value.plugins = [HlsPlugin];
-        veConfig.value.streamType = 'hls';
-        playerType.value = 'hls';
         break;
       default:
         config.value.plugins = [HlsPlugin];
+        break;
+    }
+    xg.value = new Player({ ...config.value });
+    console.log(`[player] 加载西瓜${videoType}播放器`);
+  } else if (set.value.broadcasterType === 'veplayer') {
+    switch (videoType) {
+      case 'mp4':
+        veConfig.value.streamType = 'mp4';
+        break;
+      case 'flv':
+        veConfig.value.streamType = 'flv';
+        break;
+      case 'm3u8':
         veConfig.value.streamType = 'hls';
-        playerType.value = 'hls';
+        break;
+      default:
+        veConfig.value.streamType = 'hls';
         break;
     }
     veConfig.value.url = config.value.url;
-    console.log(`[player] 加载西瓜${videoType}播放器`);
-    xg.value = new VePlayer({ ...veConfig.value });
+    if (config.value.startTime) veConfig.value.startTime = config.value.startTime;
+    ve.value = new VePlayer({ ...veConfig.value });
+    console.log(`[player] 加载火山${videoType}播放器`);
   } else if (set.value.broadcasterType === 'tcplayer') {
     if (!tc.value) tc.value = TCPlayer('tcplayer', { ...tcConfig.value });
     if (config.value.startTime) tc.value.currentTime(config.value.startTime);
@@ -934,11 +909,10 @@ const createPlayer = async (videoType) => {
     console.log(`[player] 加载腾讯云播放器`);
   } else if (set.value.broadcasterType === 'aliplayer') {
     aliConfig.value.source = config.value.url;
-    if (!ali.value)
-      ali.value = new Aliplayer({ ...aliConfig.value }, function (player) {
-        console.log(`[player] 加载阿里云播放器`);
-        if (config.value.startTime) player.seek(config.value.startTime);
-      });
+    ali.value = new Aliplayer({ ...aliConfig.value }, function (player) {
+      console.log(`[player] 加载阿里云播放器`);
+      if (config.value.startTime) player.seek(config.value.startTime);
+    });
   }
 
   if (type.value === 'film') await timerUpdatePlayProcess();
@@ -1009,6 +983,10 @@ const destroyPlayer = () => {
     xg.value.destroy();
     xg.value = null;
   }
+  if (ve.value) {
+    ve.value.destroy();
+    ve.value = null;
+  }
   if (tc.value) {
     tc.value.dispose();
     tc.value = null;
@@ -1051,9 +1029,9 @@ const initIptvPlayer = async () => {
     }
   }
 
-  if (config.value.url.indexOf('mp4') > -1) {
+  if (config.value.url.includes('mp4')) {
     createPlayer('mp4');
-  } else if (config.value.url.indexOf('flv') > -1) {
+  } else if (config.value.url.includes('flv')) {
     createPlayer('flv');
   } else {
     createPlayer('m3u8');
@@ -1108,9 +1086,9 @@ const initFilmPlayer = async (isFirst) => {
     console.log(`[player] drpy免嗅流程结束`);
   }
 
-  if (config.value.url.indexOf('mp4') > -1) {
+  if (config.value.url.includes('mp4')) {
     createPlayer('mp4');
-  } else if (config.value.url.indexOf('flv') > -1) {
+  } else if (config.value.url.includes('flv')) {
     createPlayer('flv');
   } else {
     const { playUrl } = ext.value.site;
@@ -1128,7 +1106,7 @@ const initFilmPlayer = async (isFirst) => {
       onlineUrl.value = analyzeUrl.value + config.value.url;
       isSniff.value = true;
       console.log(onlineUrl.value);
-    } else if (config.value.url.indexOf('m3u8') > -1 && config.value.url.split('http').length - 1 === 1) {
+    } else if (config.value.url.includes('m3u8') && config.value.url.split('http').length - 1 === 1) {
       console.log(`[player] 直链:${config.value.url}`);
       createPlayer('m3u8');
     } else {
@@ -1442,6 +1420,14 @@ const timerUpdatePlayProcess = () => {
     xg.value.on(Events.ENDED, () => {
       onEnded();
     });
+  } else if (set.value.broadcasterType === 'veplayer') {
+    ve.value.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
+      onTimeUpdate(currentTime, duration);
+    });
+
+    ve.value.on(Events.ENDED, () => {
+      onEnded();
+    });
   } else if (set.value.broadcasterType === 'tcplayer') {
     tc.value.on('timeupdate', () => {
       const duration = tc.value.duration();
@@ -1654,21 +1640,6 @@ const updateLocalPlayer = async (item) => {
   });
 
   await setting.update({ skipStartEnd: item });
-};
-
-// 播放器参数
-const playerInfoEvent = () => {
-  if (set.value.broadcasterType === 'xgplayer') {
-    isPlayerInfoVisible.value = true;
-    playerInfo.value.stats = xg.value.plugins.hls.core.getStats();
-    playerInfo.value.version = xg.value.plugins.hls.core.version;
-  } else if (set.value.broadcasterType === 'tcplayer') {
-    MessagePlugin.info('右键视频区域选择视频统计信息');
-  }
-};
-
-const formatPlayerInfo = (val) => {
-  return _.find(PLAYER_INFO, { key: val }) ? { ..._.find(PLAYER_INFO, { key: val }) }.desc : val;
 };
 
 // electron窗口置顶
@@ -2529,6 +2500,7 @@ const openMainWinEvent = () => {
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  padding-bottom: 2px;
   .setting-item-warp {
     display: flex;
     justify-content: space-between;

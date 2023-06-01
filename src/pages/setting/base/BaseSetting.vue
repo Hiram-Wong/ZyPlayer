@@ -197,9 +197,10 @@ const MODE_OPTIONS = [
 ];
 
 const PLAYER_OPTIONS = [
+  { label: '火山播放器', value: 'veplayer' },
   { label: '西瓜播放器', value: 'xgplayer' },
-  { label: '腾讯云播放器', value: 'tcplayer' },
-  { label: '阿里云播放器', value: 'aliplayer' },
+  { label: '腾讯播放器', value: 'tcplayer' },
+  { label: '阿里播放器', value: 'aliplayer' },
 ];
 
 const shortcutInputRef = ref(null);
