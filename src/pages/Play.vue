@@ -183,14 +183,8 @@
                 ref="vepayerRef"
                 class="veplayer player"
               ></div>
-              <div v-if="set.broadcasterType === 'tcplayer'" ref="tcplayerRef" class="tcplayer player">
-                <video
-                  id="tcplayer"
-                  preload="auto"
-                  playsinline
-                  webkit-playsinline
-                  style="width: 100%; height: calc(100vh - 50px)"
-                ></video>
+              <div v-if="set.broadcasterType === 'tcplayer'" ref="tcplayerRef">
+                <video id="tcplayer" preload="auto" playsinline webkit-playsinline class="tcplayer player"></video>
               </div>
               <div
                 v-if="set.broadcasterType === 'aliplayer'"
