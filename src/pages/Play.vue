@@ -162,29 +162,6 @@
               </div>
             </t-dialog>
           </div>
-          <div v-if="!onlineUrl && playerType !== 'mp4'" class="player-top-right-player-info">
-            <div class="player-top-right-item player-top-right-popup" @click="playerInfoEvent">
-              <info-circle-icon size="1.5em" />
-            </div>
-            <t-dialog
-              v-model:visible="isPlayerInfoVisible"
-              :header="`统计信息 ~ 西瓜播放器v${playerInfo.version}`"
-              width="508"
-              placement="center"
-              :footer="false"
-            >
-              <div class="player-info-warp">
-                <t-list :split="true" size="small" class="player-info-items">
-                  <t-list-item v-for="(value, key) in playerInfo.stats" :key="key">
-                    {{ formatPlayerInfo(key) }} : {{ value }}
-                  </t-list-item>
-                </t-list>
-                <div class="tip-warp">
-                  <span>5s轮询一次参数</span>
-                </div>
-              </div>
-            </t-dialog>
-          </div>
           <div class="player-top-right-window">
             <span v-show="platform !== 'darwin'" class="window-separator"></span>
             <window-view />
@@ -196,17 +173,7 @@
       <div class="container-main-left">
         <div class="container-player" :class="{ 'container-player-ext': showEpisode }">
           <div class="player-container">
-            <div
-              v-show="!onlineUrl"
-              v-if="set.broadcasterType === 'xgplayer'"
-              ref="xgpayerRef"
-              class="xgplayer player"
-              @contextmenu="
-                () => {
-                  console.log(123);
-                }
-              "
-            >
+            <div v-show="!onlineUrl" v-if="set.broadcasterType === 'xgplayer'" ref="xgpayerRef" class="xgplayer player">
               <div id="xgplayer"></div>
             </div>
             <div
@@ -244,10 +211,6 @@
               webkit-playsinline
               playsinline
             ></iframe>
-            <context-menu :show="isContextMenu" :options="optionsComponent" @close="isContextMenu = false">
-              <context-menu-item label="西瓜视频提供技术支持" />
-              <context-menu-item label="视频统计信息" @click="playerInfoEvent" />
-            </context-menu>
           </div>
         </div>
 
@@ -472,17 +435,19 @@
   </div>
 </template>
 <script setup lang="tsx">
+import '@volcengine/veplayer/dist/index.min.css';
 import 'xgplayer-livevideo';
 import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
-import 'tcplayer.js/dist/tcplayer.min.css';
+// import 'tcplayer.js/dist/tcplayer.min.css';
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import '@/style/player/aliplayer-h5-min.css';
-import 'https://g.alicdn.com/de/prismplayer/2.15.5/aliplayer-min.js';
+import '@/style/player/tcplayer.min.css';
 
-import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
+import VePlayer from '@volcengine/veplayer';
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
+import Aliplayer from 'aliyun-aliplayer';
 import _ from 'lodash';
 import moment from 'moment';
 import QRCode from 'qrcode';
@@ -494,7 +459,6 @@ import {
   DownloadIcon,
   HeartIcon,
   HomeIcon,
-  InfoCircleIcon,
   LoadingIcon,
   PhotoIcon,
   PinFilledIcon,
@@ -621,6 +585,51 @@ const config = ref({
   width: 'auto',
   height: 'calc(100vh - 50px)',
 }); // 西瓜播放器参数
+const veConfig = ref({
+  id: 'xgplayer',
+  url: '',
+  streamType: 'hls',
+  isLive: false,
+  autoplay: true,
+  pip: true,
+  cssFullscreen: false,
+  enableContextmenu: true, // 允许右键
+  topBarAutoHide: false,
+  closeVideoDblclick: true,
+  lastPlayTimeHideDelay: 5, // 提示文字展示时长（单位：秒）
+  enableH265Degrade: true, // H.265 兼容模式
+  playbackRate: {
+    list: [
+      2,
+      1.5,
+      1.25,
+      {
+        rate: 1,
+        iconText: {
+          zh: '倍速',
+        },
+      },
+      0.75,
+      0.5,
+    ],
+    index: 7, // pip:6 volume:1 fullscreen:1 playbackrate:0
+  },
+  icons: {
+    play: playerPlayIcon,
+    pause: playerPauseIcon,
+    playNext: playerPlayNextIcon,
+    fullscreen: playerZoomIcon,
+    exitFullscreen: playerZoomExitIcon,
+    volumeSmall: playerVoiceIcon,
+    volumeLarge: playerVoiceIcon,
+    volumeMuted: playerVoiceNoIcon,
+    pipIcon: playerPipIcon,
+    pipIconExit: playerPipIcon,
+  },
+  plugins: [],
+  height: '100%',
+  width: '100%',
+}); // 火山播放器参数
 const tcConfig = ref({
   autoplay: true,
   playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
@@ -730,29 +739,7 @@ const playerInfoTimer = ref(); // 定时器 用于刷新播放器参数
 const isBinge = ref(true); // true未收藏 false收藏
 const isPinned = ref(true); // true未置顶 false置顶
 const isSettingVisible = ref(false);
-const isContextMenu = ref(false);
-const optionsComponent = ref({
-  zIndex: 3,
-  width: 160,
-  x: 500,
-  y: 200,
-  theme: 'mac dark',
-});
 
-function onContextMenu(e: MouseEvent) {
-  const scaledPosition = ContextMenu.transformMenuPosition(
-    e.target as HTMLElement,
-    e.offsetX,
-    e.offsetY,
-    xgpayerRef.value,
-  ); // myMenuContainer 是挂载容器
-  // show menu
-  ContextMenu.showContextMenu({
-    x: scaledPosition.x,
-    y: scaledPosition.y,
-    // ...
-  });
-}
 const qrCodeUrl = ref(); // 二维码图片流
 const dataHistory = ref({}); // 历史
 const isMacMaximize = ref(false); // mac最大化
@@ -918,24 +905,28 @@ const createPlayer = async (videoType) => {
     switch (videoType) {
       case 'mp4':
         config.value.plugins = [Mp4Plugin];
+        veConfig.value.streamType = 'mp4';
         playerType.value = 'mp4';
         break;
       case 'flv':
         config.value.plugins = [FlvPlugin];
+        veConfig.value.streamType = 'flv';
         playerType.value = 'flv';
         break;
       case 'm3u8':
         config.value.plugins = [HlsPlugin];
+        veConfig.value.streamType = 'hls';
         playerType.value = 'hls';
         break;
       default:
         config.value.plugins = [HlsPlugin];
+        veConfig.value.streamType = 'hls';
         playerType.value = 'hls';
         break;
     }
+    veConfig.value.url = config.value.url;
     console.log(`[player] 加载西瓜${videoType}播放器`);
-    xg.value = new Player({ ...config.value });
-    // onContextMenu();
+    xg.value = new VePlayer({ ...veConfig.value });
   } else if (set.value.broadcasterType === 'tcplayer') {
     if (!tc.value) tc.value = TCPlayer('tcplayer', { ...tcConfig.value });
     if (config.value.startTime) tc.value.currentTime(config.value.startTime);
@@ -1051,6 +1042,7 @@ const initIptvPlayer = async () => {
       const isLive = await zy.isLiveM3U8(info.value.url);
       config.value.isLive = isLive;
       config.value.presets = isLive ? [LivePreset] : [];
+      veConfig.value.isLive = isLive;
       aliConfig.value.isLive = isLive;
 
       aliConfig.value.skinLayout[4].children.push({ name: 'liveDisplay', align: 'tl', x: 20, y: 0 });
@@ -1664,13 +1656,6 @@ const updateLocalPlayer = async (item) => {
   await setting.update({ skipStartEnd: item });
 };
 
-// 西瓜播放器右键支持
-const conButtonClick = ({ x, y }: any) => {
-  isContextMenu.value = true;
-  // Object.assign()用于同时设置两个属性，而不是逐个分配x和y属性。
-  Object.assign(optionsComponent.value, { x, y });
-};
-
 // 播放器参数
 const playerInfoEvent = () => {
   if (set.value.broadcasterType === 'xgplayer') {
@@ -1981,8 +1966,9 @@ const openMainWinEvent = () => {
       width: 100vw;
       position: relative;
       transition: 0.15s ease-out;
-      .player {
-        width: auto;
+      .player,
+      #xgplayer {
+        width: 100%;
         height: calc(100vh - 50px);
       }
 

@@ -31,9 +31,10 @@
 
 > 播放器说明: 
 - 没有完美的播放器
-- tcplayer不支持 h265(hevc),通常表现为只有声音没有画面
-- xgplayer兼容性不如tcplayer
+- tcplayer不支持h265(hevc),aliplayer(h265 收费),通常表现为只有声音没有画面
+- h264:tcplayer>xgplayer>aliplayer  h265:xgplayer
 - 腾讯一贯风格，tcplayer每次数据都会上报云端(https://datacenter.live.qcloud.com/)
+- aliplayer每次播放卡住会上报云端(https://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/newplayer/track)
 
 > 包说明: 
 - MacOS(dmg)：arm64[Applechip]、x64[Intel]、universal[通用-不区分架构]

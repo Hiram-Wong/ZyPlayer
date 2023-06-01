@@ -132,9 +132,9 @@
 	position:absolute;
 	bottom:44px;
 	display:none;
-	background:rgba(60,60,60,.95);
-	box-shadow:0 0 6px 0 rgba(0,0,0,.1);
-	width:32px;
+	background: rgba(0,0,0,.5);
+	border-radius: 8px;
+	width: 32px;
 	height:130px;
 	z-index:10000
 }
@@ -196,7 +196,7 @@
 	left:-6px
 }
 .prism-player .prism-volume-control .volume-cursor:hover {
-	background:#00c1de
+	background:#45c58b
 }
 .prism-player .prism-animation {
 	width:64px;
