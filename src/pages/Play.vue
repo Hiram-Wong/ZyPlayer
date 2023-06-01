@@ -1,11 +1,8 @@
 <template>
   <div class="container">
-    <div class="container-header">
+    <div v-if="!isMaximize" class="container-header">
       <div class="player-top">
-        <div
-          class="player-top-left"
-          :style="{ 'padding-left': platform === 'darwin' && !isMacMaximize ? '60px' : '0' }"
-        >
+        <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' && !isMaximize ? '60px' : '0' }">
           <div class="open-main-win player-center" @click="openMainWinEvent">
             <home-icon size="1.5em" />
             <span class="tip-gotomain">回到主界面</span>
@@ -123,12 +120,6 @@
               </div>
             </t-dialog>
           </div>
-          <div class="player-top-right-staple">
-            <div class="player-top-right-popup player-top-right-item" @click="toggleAlwaysOnTop">
-              <pin-icon v-if="isPinned" size="1.5em" />
-              <pin-filled-icon v-else size="1.5em" />
-            </div>
-          </div>
           <div v-if="type === 'film'" class="player-top-right-setting">
             <div class="player-top-right-item player-top-right-popup" @click="isSettingVisible = true">
               <setting-icon size="1.5em" />
@@ -161,6 +152,12 @@
                 </div>
               </div>
             </t-dialog>
+          </div>
+          <div class="player-top-right-staple">
+            <div class="player-top-right-popup player-top-right-item" @click="toggleAlwaysOnTop">
+              <pin-icon v-if="isPinned" size="1.5em" />
+              <pin-filled-icon v-else size="1.5em" />
+            </div>
           </div>
           <div class="player-top-right-window">
             <span v-show="platform !== 'darwin'" class="window-separator"></span>
@@ -726,7 +723,7 @@ const isSettingVisible = ref(false);
 
 const qrCodeUrl = ref(); // 二维码图片流
 const dataHistory = ref({}); // 历史
-const isMacMaximize = ref(false); // mac最大化
+const isMaximize = ref(false); // mac最大化
 // const iswideBtn = ref(false); // 视频划过显示按钮
 const isProfile = ref(false); // 简介
 
@@ -1659,11 +1656,11 @@ const toggleAlwaysOnTop = () => {
 const minMaxEvent = () => {
   win.on('enter-full-screen', () => {
     console.log('进入全屏模式');
-    isMacMaximize.value = true;
+    isMaximize.value = true;
   });
   win.on('leave-full-screen', () => {
     console.log('退出全屏模式');
-    isMacMaximize.value = false;
+    isMaximize.value = false;
   });
 };
 
