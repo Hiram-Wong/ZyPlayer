@@ -37,7 +37,7 @@
         class="analysis-player"
         :class="isSupport && quickSearchType !== 'search' ? 'analysis-play-box-hidden' : 'analysis-play-box-show'"
       >
-        <webview ref="webviewRef" class="webview" :src="iframeUrl" disablewebsecurity allowpopups />
+        <webview class="webview" :src="iframeUrl" disablewebsecurity allowpopups />
       </div>
       <div class="analysis-setting">
         <div class="analysis-setting-group">
@@ -58,7 +58,7 @@
       </div>
     </div>
     <div v-if="isSupport && quickSearchType !== 'search'">
-      <dialog-platform-view class="dialog-search-view" @open-platform="openPlatform" />
+      <dialog-platform-view class="dialog-platform-view" @open-platform="openPlatform" />
     </div>
     <dialog-iframem-view
       v-model:visible="formDialogVisiblePlatformAnalysis"
@@ -98,8 +98,6 @@ const analysisApi = ref([]); // 解析接口api列表
 const selectAnalysisApi = ref(null); // 选择的解析接口
 const analysisUrl = ref(null); // 输入需要解析地址
 const iframeUrl = ref(null); // 解析接口+需解析的地址
-const iframeRef = ref(null); // iframe dom节点
-const key = new Date().getTime(); // 解决iframe不刷新问题
 
 const isHistoryVisible = ref(false);
 const isSearchDialog = ref(false);
@@ -315,10 +313,10 @@ const shareEvent = () => {
   }
   .analysis-play {
     .analysis-play-box-show {
-      height: calc(100vh - 8.5rem);
+      height: calc(100vh - 9.5em);
     }
     .analysis-play-box-hidden {
-      height: calc(100vh - 12.5rem);
+      height: calc(100vh - 14em);
     }
     .analysis-player {
       width: 100%;

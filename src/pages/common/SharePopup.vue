@@ -12,7 +12,7 @@
           <div class="share-container-main-left">
             <div class="header-name">扫一扫，手机继续看</div>
             <div class="header-info">
-              推荐使用 <span class="header-info-browser">夸克浏览器</span> -<photo-icon size="1.5em" />-扫码
+              推荐使用 <span class="header-info-browser">夸克浏览器</span> -首页-<photo-icon size="1.5em" />-扫码
             </div>
             <div class="header-copyright no-warp">
               <span>{{ data.provider }}</span>
@@ -21,10 +21,7 @@
             <t-divider dashed style="margin: 5px 0" />
           </div>
           <div class="share-container-main-right">
-            <div class="bg"></div>
-            <div class="main">
-              <img class="qrcode" :src="qrCodeUrl" alt="二维码" />
-            </div>
+            <img class="qrcode" :src="qrCodeUrl" alt="二维码" />
           </div>
         </div>
         <div class="bottom-title no-warp">{{ data.name }}</div>
@@ -125,10 +122,9 @@ const copyShareUrl = () => {
 
 <style lang="less" scoped>
 .share-container {
-  width: 350px;
+  width: 340px;
   padding: 20px;
   border-radius: 8px;
-  margin-top: 5px;
   position: relative;
   background-color: #2a2a31;
   cursor: default;
@@ -142,9 +138,10 @@ const copyShareUrl = () => {
   &-main {
     display: flex;
     justify-content: flex-start;
+    height: 85px;
 
     &-left {
-      width: 190px;
+      width: 210px;
       .header-name {
         color: hsla(0, 0%, 100%, 0.87);
         font-size: 15px;
@@ -169,28 +166,12 @@ const copyShareUrl = () => {
     }
 
     &-right {
-      position: relative;
+      margin: 0 0 0 10px;
 
-      .bg {
-        position: absolute;
-        background-color: #16161a;
-        width: 20px;
-        height: 80px;
-        border-radius: var(--td-radius-medium);
-        top: 5px;
-        left: 10px;
-      }
-
-      .main {
-        position: absolute;
-        top: 0;
-        left: 30px;
-
-        .qrcode {
-          width: 90px;
-          height: 90px;
-          border-radius: var(--td-radius-large);
-        }
+      .qrcode {
+        width: 85px;
+        height: 85px;
+        border-radius: var(--td-radius-large);
       }
     }
   }

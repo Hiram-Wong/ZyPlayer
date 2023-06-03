@@ -1689,6 +1689,7 @@ div.vjs-control.vjs-button.tcp-dot-component {
   margin: 0 auto; }
 
 .vjs-live .vjs-live-display:before {
+  margin-left: 10px;
   display: inline-block;
   width: 6px;
   height: 6px;

@@ -53,7 +53,7 @@ const openPlatform = (item) => {
 <style lang="less" scoped>
 .platform-container {
   .support-title {
-    margin: 5px 0;
+    margin: var(--td-comp-margin-xs) 0;
     .support-separator {
       border: 0.1rem solid var(--td-brand-color);
       height: 0.6rem;
