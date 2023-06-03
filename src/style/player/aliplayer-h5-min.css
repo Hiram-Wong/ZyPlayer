@@ -753,7 +753,7 @@
 .prism-player .prism-snapshot-btn {
 	width:32px;
 	height:32px;
-	background:url(./img/snapshot.png) no-repeat;
+	/* background:url(./img/snapshot.png) no-repeat; */
 	background-size:contain
 }
 .prism-player .prism-snapshot-btn:hover {
@@ -837,7 +837,7 @@
 .prism-player .prism-cc-btn {
 	height:24px;
 	width:24px;
-	background:url(./img/cc.png) center no-repeat;
+	/* background:url(./img/cc.png) center no-repeat; */
 	background-size:contain
 }
 .prism-player .prism-cc-btn:hover {
