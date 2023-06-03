@@ -155,22 +155,22 @@ const changeHotSource = () => {
 };
 
 // 获取数据
-const getHotList = async () => {
+const getHotList = async (retryCount = 0) => {
   try {
-    const retryLimit = 2; // 重试次数
-    let date = moment().format('YYYY-MM-DD');
-    for (let retry = 0; retry < retryLimit; retry++) {
-      // eslint-disable-next-line no-await-in-loop
-      const queryHotList = await zy.kuyunHot(date, MODE_OPTIONS[hotClass.value].key, hotSource.value);
-      if (queryHotList) {
-        loading.value = false;
-        hotList.value = queryHotList;
-        hotSourceUpdateTime.value = date;
-        return;
-      }
-      date = moment(date).subtract(1, 'days').format('YYYY-MM-DD');
+    const retryLimit = 3; // 重试次数
+    const date = moment().subtract(retryCount, 'days').format('YYYY-MM-DD');
+    const queryHotList = await zy.kuyunHot(date, MODE_OPTIONS[hotClass.value].key, hotSource.value);
+
+    if (queryHotList) {
+      loading.value = false;
+      hotList.value = queryHotList;
+      hotSourceUpdateTime.value = date;
+    } else if (retryCount < retryLimit) {
+      // 继续递归调用函数进行下一次请求
+      await getHotList(retryCount + 1);
+    } else {
+      MessagePlugin.warning(`获取失败: 尝试获取最近:${retryLimit}天数据`);
     }
-    MessagePlugin.warning(`获取失败: 尝试获取最近:${retryLimit + 1}天数据`);
   } catch (err) {
     MessagePlugin.error(`error:${err}`);
     console.error(err);
