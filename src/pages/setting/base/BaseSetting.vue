@@ -97,24 +97,12 @@
       </t-form-item>
       <t-form-item v-if="formData.analyzeSupport" label="解析" name="analyse">
         <div class="analyse">
-          <t-radio-group v-model="formData.analyzeQuickSearchType">
-            <t-radio value="search">快捷搜索</t-radio>
-            <t-radio value="platform">支持平台</t-radio>
-            <t-radio value="all">小孩子才做选择</t-radio>
-          </t-radio-group>
+          <t-select v-model="formData.analyzeQuickSearchType" :options="ANALYZE_OPTIONS" placeholder="请选择快捷类型" />
         </div>
       </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
-          <t-space direction="vertical">
-            <t-space align="center">
-              <t-select
-                v-model="formData.broadcasterType"
-                :options="PLAYER_OPTIONS"
-                placeholder="请选择播放器"
-              ></t-select>
-            </t-space>
-          </t-space>
+          <t-select v-model="formData.broadcasterType" :options="PLAYER_OPTIONS" placeholder="请选择播放器" />
         </div>
       </t-form-item>
       <t-form-item label="安全" name="security">
@@ -196,11 +184,18 @@ const MODE_OPTIONS = [
   { type: 'auto', text: '跟随系统' },
 ];
 
+const ANALYZE_OPTIONS = [
+  { label: '快捷搜索', value: 'search' },
+  { label: '支持平台', value: 'platform' },
+  { label: '全选', value: 'all' },
+];
+
 const PLAYER_OPTIONS = [
   { label: '火山播放器', value: 'veplayer' },
   { label: '西瓜播放器', value: 'xgplayer' },
   { label: '腾讯播放器', value: 'tcplayer' },
   { label: '阿里播放器', value: 'aliplayer' },
+  { label: '艺术播放器', value: 'artplayer' },
 ];
 
 const shortcutInputRef = ref(null);

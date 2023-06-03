@@ -54,7 +54,9 @@ export default ({ mode }: ConfigEnv): UserConfig => {
     plugins: [
       vue({
         template: {
-          compilerOptions: {},
+          compilerOptions: {
+            isCustomElement: (tag) => tag === 'webview',
+          },
         },
       }),
       PkgConfig(),

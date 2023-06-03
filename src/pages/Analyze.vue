@@ -1,7 +1,7 @@
 <template>
   <div class="analysis-container">
     <div class="analysis-header">
-      <div class="analysis-header-left">
+      <div class="analysis-header-left no-warp">
         <span class="play_title" @dblclick="showSupportEvent" @click="openCurrentUrl">
           {{ urlTitle ? urlTitle : '暂无播放内容' }}
         </span>
@@ -24,30 +24,33 @@
         >
           <search-icon size="1.3rem" />
         </div>
+        <div v-if="iframeUrl" class="analysis-header-item analysis-header-popup" @click="shareEvent">
+          <share-popup v-model:visible="isShareVisible" :data="shareData" />
+        </div>
         <div class="analysis-header-item analysis-header-popup" @click="isHistoryVisible = true">
           <history-icon size="1.3rem" />
         </div>
       </div>
     </div>
     <div class="analysis-play">
-      <iframe
-        ref="iframeRef"
-        :key="key"
-        class="analysis-play-box"
+      <div
+        class="analysis-player"
         :class="isSupport && quickSearchType !== 'search' ? 'analysis-play-box-hidden' : 'analysis-play-box-show'"
-        :src="iframeUrl"
-        allowtransparency="true"
-        frameborder="0"
-        framespacing="0"
-        scrolling="no"
-        allowfullscreen="true"
-      ></iframe>
+      >
+        <webview ref="webviewRef" class="webview" :src="iframeUrl" disablewebsecurity allowpopups />
+      </div>
       <div class="analysis-setting">
         <div class="analysis-setting-group">
           <t-select v-model="selectAnalysisApi" placeholder="请选择接口" size="large" class="select-api">
             <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.id" />
           </t-select>
-          <t-input v-model="analysisUrl" class="input-url" placeholder="请输入url链接" size="large" />
+          <t-input
+            v-model="analysisUrl"
+            class="input-url"
+            placeholder="请输入链接"
+            size="large"
+            @change="formatUrlEvent"
+          />
           <t-button class="analysis-play" size="large" @click="analysisEvent">
             <p class="analysis-tip">解析</p>
           </t-button>
@@ -84,6 +87,7 @@ import DialogHistoryView from './analysis/DialogHistory.vue';
 import DialogIframemView from './analysis/DialogIframe.vue';
 import DialogPlatformView from './analysis/DialogPlatform.vue';
 import DialogSearchView from './analysis/DialogSearch.vue';
+import SharePopup from './common/SharePopup.vue';
 
 const formDialogVisiblePlatformAnalysis = ref(false);
 const platformAnalysisData = ref();
@@ -99,6 +103,13 @@ const key = new Date().getTime(); // 解决iframe不刷新问题
 
 const isHistoryVisible = ref(false);
 const isSearchDialog = ref(false);
+const isShareVisible = ref(false);
+
+const shareData = ref({
+  name: '',
+  url: '',
+  provider: '',
+});
 
 const miniOptions = ref({
   isMini: false,
@@ -127,8 +138,13 @@ const getAnalysisApi = async () => {
   quickSearchType.value = analyzeQuickSearchTypeRes;
 };
 
-// 解析函数抽离
-const getVideoInfo = async () => {
+// 格式化 url 公共方法
+const formatUrlMethod = (url) => {
+  return url.split('?')[0];
+};
+
+// 解析函数公共方法
+const getVideoInfo = async (url, title = '') => {
   if (!selectAnalysisApi.value || !analysisUrl.value) {
     MessagePlugin.error('请选择解析接口或输入需要解析的地址');
     return;
@@ -140,55 +156,51 @@ const getVideoInfo = async () => {
     return;
   }
 
-  const url = `${api?.url}${analysisUrl.value}`;
-  urlTitle.value = await zy.getAnalysizeTitle(analysisUrl.value);
+  urlTitle.value = title || (await zy.getAnalysizeTitle(url));
   MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
 
-  const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: analysisUrl.value });
+  const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: url });
   if (res) await analyzeHistory.update(res.id, { date: moment().format('YYYY-MM-DD') });
   else {
     const doc = {
       date: moment().format('YYYY-MM-DD'),
       analyzeId: selectAnalysisApi.value,
-      videoUrl: analysisUrl.value,
+      videoUrl: url,
       videoName: urlTitle.value,
     };
     await analyzeHistory.add(doc);
   }
 
-  return url;
+  const iframeurl = `${api?.url}${url}`;
+  iframeUrl.value = iframeurl;
+};
+
+// input 变化
+const formatUrlEvent = (url) => {
+  const formatUrl = formatUrlMethod(url);
+  analysisUrl.value = formatUrl;
 };
 
 // 直接解析
 const analysisEvent = async () => {
-  const url = await getVideoInfo();
-  if (url) {
-    iframeUrl.value = url;
-  }
+  await getVideoInfo(analysisUrl.value);
 };
 
-// 平台回掉解析
-const platformPlay = async (item) => {
-  analysisUrl.value = item;
-  const url = await getVideoInfo();
-  if (url) {
-    iframeUrl.value = url;
-  }
+// 平台回调解析
+const platformPlay = async (url, title) => {
+  const formatUrl = formatUrlMethod(url);
+  analysisUrl.value = formatUrl;
+  await getVideoInfo(formatUrl, title);
 };
 
 // 历史解析
 const historyPlayEvent = async (item) => {
-  const api = _.find(analysisApi.value, { id: item.analyzeId });
-  if (!api) {
-    MessagePlugin.error('该历史记录解析接口已删除');
-    return;
-  }
-
-  urlTitle.value = item.videoName;
-  analysisUrl.value = item.videoUrl;
-  iframeUrl.value = `${api?.url}${item.videoUrl}`;
+  selectAnalysisApi.value = item.analyzeId;
+  const formatUrl = formatUrlMethod(item.videoUrl);
+  analysisUrl.value = formatUrl;
+  await getVideoInfo(formatUrl, item.videoName);
+  isHistoryVisible.value = false;
   await analyzeHistory.update(item.id, { date: moment().format('YYYY-MM-DD') });
-  MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
 };
 
 // 显示支持平台
@@ -239,16 +251,30 @@ const platformPlayMax = () => {
 const platformPlayClose = () => {
   miniOptions.value.isMini = false;
 };
+
+// 分享
+const shareEvent = () => {
+  isShareVisible.value = true;
+
+  const provider = _.find(analysisApi.value, { id: selectAnalysisApi.value }).name;
+
+  shareData.value = {
+    name: urlTitle.value,
+    url: iframeUrl.value,
+    provider,
+  };
+};
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .analysis-container {
   width: 100%;
   height: calc(100vh - var(--td-comp-size-l));
-
+  .no-warp {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
   .analysis-header {
     line-height: 42px;
     font-weight: 500;
@@ -284,7 +310,7 @@ const platformPlayClose = () => {
       font-size: 13px;
       letter-spacing: 0;
       font-weight: 400;
-      margin: 0 8px;
+      margin-left: var(--td-comp-paddingLR-s);
     }
   }
   .analysis-play {
@@ -294,12 +320,18 @@ const platformPlayClose = () => {
     .analysis-play-box-hidden {
       height: calc(100vh - 12.5rem);
     }
-    .analysis-play-box {
+    .analysis-player {
       width: 100%;
       background: var(--td-bg-color-page) url(../assets/bg-player.jpg) no-repeat center center;
       border-radius: var(--td-radius-extraLarge);
+      overflow: hidden;
+      .webview {
+        height: 100%;
+        width: 100%;
+      }
     }
     .analysis-setting {
+      margin-top: 5px;
       &-group {
         position: relative;
         height: 40px;
@@ -352,7 +384,6 @@ const platformPlayClose = () => {
   }
 
   .analysis-flex {
-    margin-right: 8px;
     .mini-box {
       border-radius: var(--td-radius-round);
       height: 31px;
@@ -393,16 +424,7 @@ const platformPlayClose = () => {
   }
 }
 
-:deep(.t-dialog) {
-  .t-dialog__body--fullscreen {
-    height: calc(100% - var(--td-comp-size-xxxl));
-  }
-  .t-dialog__close {
-    -webkit-app-region: no-drag;
-  }
-}
-
-:deep(.t-dialog--default) {
-  padding: var(--td-comp-paddingTB-l) var(--td-comp-paddingLR-s) !important;
+:deep(.t-dialog__body--fullscreen--without-footer) {
+  padding: 0;
 }
 </style>

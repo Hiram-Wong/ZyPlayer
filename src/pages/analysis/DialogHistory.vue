@@ -140,15 +140,17 @@ const load = async ($state) => {
     white-space: nowrap;
     font-weight: 500;
     cursor: pointer;
+    padding: 0 var(--td-comp-paddingLR-xs);
     &:hover {
+      border-radius: var(--td-radius-medium);
       background-color: var(--td-bg-color-component-hover);
     }
   }
   .date {
-    width: 85px;
+    width: 6em;
   }
   .title {
-    padding: 0 10px;
+    padding: 0 var(--td-comp-paddingLR-xs);
     flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;

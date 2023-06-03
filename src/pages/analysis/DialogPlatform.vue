@@ -2,9 +2,7 @@
   <div class="platform-container">
     <div class="support-title">
       <span class="support-separator"></span>
-      <p class="support-tip">
-        <t-link theme="default" hover="color"> 支持平台 </t-link>
-      </p>
+      <p class="support-tip">支持平台</p>
     </div>
     <div class="support-platform">
       <div v-for="(item, index) in VIDEOSITES" :key="index" class="logo-item" @click="openPlatform(item)">
@@ -53,9 +51,6 @@ const openPlatform = (item) => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .platform-container {
   .support-title {
     margin: 5px 0;
@@ -66,12 +61,11 @@ const openPlatform = (item) => {
       display: inline-block;
     }
     .support-tip {
+      color: var(--td-brand-color);
       margin-left: 5px;
       display: inline-block;
       text-align: left;
-      a {
-        font-weight: 500;
-      }
+      font-weight: 500;
     }
   }
   .support-platform {

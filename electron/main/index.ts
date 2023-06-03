@@ -1,7 +1,7 @@
 // import { createMenu } from './core/menu';
 import remote from '@electron/remote/main';
 import { electronApp } from '@electron-toolkit/utils';
-import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, session, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
@@ -143,6 +143,14 @@ function createWindow(): void {
     }
 
     callback({ cancel: false, responseHeaders: details.responseHeaders });
+  });
+
+  mainWindow.webContents.on('did-attach-webview', (_, wc) => {
+    wc.setWindowOpenHandler((details) => {
+      mainWindow.webContents.send('blockUrl', details.url);
+      console.log(details.url);
+      return { action: 'deny' };
+    });
   });
 
   initUpdater(mainWindow);
