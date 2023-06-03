@@ -3,12 +3,7 @@
     <div class="support-title">
       <span class="support-separator"></span>
       <p class="support-tip">
-        <t-link theme="default" hover="color">
-          <template #suffixIcon>
-            <jump-icon style="align-items: center; display: inherit" />
-          </template>
-          支持平台
-        </t-link>
+        <t-link theme="default" hover="color"> 支持平台 </t-link>
       </p>
     </div>
     <div class="support-platform">
@@ -20,7 +15,6 @@
 </template>
 <script setup lang="ts">
 import _ from 'lodash';
-import { JumpIcon } from 'tdesign-icons-vue-next';
 import { reactive, ref, watch } from 'vue';
 
 import PLATFORM_CONFIG from '@/config/platform';

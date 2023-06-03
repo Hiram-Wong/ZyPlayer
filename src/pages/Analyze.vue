@@ -44,19 +44,13 @@
       ></iframe>
       <div class="analysis-setting">
         <div class="analysis-setting-group">
-          <t-input-adornment>
-            <template #prepend>
-              <t-select v-model="selectAnalysisApi" placeholder="请选择接口" size="large" style="width: 10em">
-                <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.id" />
-              </t-select>
-            </template>
-            <input v-model="analysisUrl" class="analysis-url" placeholder="请在此处粘贴视频网址" />
-            <template #append>
-              <span class="analysis-play" @click="analysisEvent">
-                <p class="analysis-tip">解析</p>
-              </span>
-            </template>
-          </t-input-adornment>
+          <t-select v-model="selectAnalysisApi" placeholder="请选择接口" size="large" class="select-api">
+            <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.id" />
+          </t-select>
+          <t-input v-model="analysisUrl" class="input-url" placeholder="请输入url链接" size="large" />
+          <t-button class="analysis-play" size="large" @click="analysisEvent">
+            <p class="analysis-tip">解析</p>
+          </t-button>
         </div>
       </div>
     </div>
@@ -312,19 +306,24 @@ const platformPlayClose = () => {
         padding: 0;
         border-radius: 20px;
         background-color: var(--td-bg-input);
-        :deep(.t-input-adornment__prepend) {
-          border-radius: 20px 0 0 20px;
+        display: flex;
+        :deep(.t-input) {
           background-color: var(--td-bg-input);
+          border: none;
+          outline: none;
+        }
+        :deep(.t-input--focused) {
+          box-shadow: none;
+          color: none;
+        }
+        :deep(.select-api) {
+          width: 10em;
+          display: inline-block;
           .t-input {
-            border: none;
-            outline: none;
-          }
-          .t-input--focused {
-            box-shadow: none;
-            color: none;
+            border-radius: 20px 0 0 20px;
           }
         }
-        .analysis-url {
+        :deep(.input-url) {
           overflow: visible;
           outline: none;
           background: none;
@@ -332,22 +331,20 @@ const platformPlayClose = () => {
           width: 100%;
           font-size: 15px;
           color: var(--td-text-color-primary);
+          display: inline-block;
+          .t-input:hover {
+            border-color: transparent;
+          }
         }
-        :deep(.t-input-adornment__append) {
-          background: var(--td-brand-color);
+        .analysis-play {
           border-radius: 20px;
-          .analysis-play {
-            cursor: pointer;
-            display: inline-block;
-            width: 82px;
-            .analysis-tip {
-              display: block;
-              color: hsl(0deg 0% 0% / 60%);
-              font-size: 15px;
-              font-weight: 500;
-              line-height: 40px;
-              text-align: center;
-            }
+          width: 5em;
+          .analysis-tip {
+            color: hsl(0deg 0% 0% / 60%);
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 40px;
+            text-align: center;
           }
         }
       }
