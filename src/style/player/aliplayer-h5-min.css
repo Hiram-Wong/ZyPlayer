@@ -764,7 +764,7 @@
 	cursor:pointer
 }
 .prism-player .prism-snapshot-btn:active {
-	displa:block
+	display:block;
 }
 .prism-player .prism-info-display {
 	width:100%;

@@ -53,6 +53,8 @@
 4.修改packgae.json "electron": "^19.1.9",
 5.安装依赖包  yarn
 6.打包  yarn electron:build:win
+
+注意 veplayer 打包时需将 //unpkg.byted-static.com改成https://unpkg.byted-static.com 否则会加载失败
 ```
 
 <details>
