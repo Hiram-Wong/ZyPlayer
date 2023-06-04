@@ -97,7 +97,7 @@ const detailEvent = async (item) => {
   try {
     MessagePlugin.info('请等待,正在搜索相关资源!');
     if (defaultHot === 'site') {
-      formDetailData.value = await zy.detail(key, item.vod_id);
+      [formDetailData.value] = await zy.detail(key, item.vod_id);
     } else if (defaultHot === 'douban') {
       const res = await zy.searchFirstDetail(key, item.vod_name);
       formDetailData.value = res;

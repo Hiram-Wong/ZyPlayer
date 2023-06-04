@@ -1,6 +1,7 @@
 <template>
   <t-popup
     v-model:visible="formVisible"
+    :on-visible-change="onShareVisibleChange"
     trigger="click"
     placement="bottom-right"
     :overlay-inner-style="{ boxShadow: 'none', padding: '0', borderRadius: '8px' }"
@@ -108,6 +109,12 @@ const copyToClipboard = (content, successMessage, errorMessage) => {
   } else {
     MessagePlugin.warning(errorMessage);
   }
+};
+
+// 点击非浮层元素触发关闭分享
+const onShareVisibleChange = (_, context) => {
+  // trigger=document 表示点击非浮层元素触发
+  if (context.trigger === 'document') formVisible.value = false;
 };
 
 // 复制分享地址

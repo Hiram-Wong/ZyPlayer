@@ -213,7 +213,7 @@ watch(
   () => props.group,
   (val) => {
     siteGroup.value = val;
-    console.log(siteGroup.value);
+    console.log(`[siteGroup] value:${val.map((item) => item.value).join(',')}`);
   },
 );
 const rulesSingle = {

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div v-if="!isMaximize" class="container-header">
+    <div class="container-header" :class="!isMaximize ? 'drag' : 'no-drag'">
       <div class="player-top">
         <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' && !isMaximize ? '60px' : '0' }">
           <div class="open-main-win player-center" @click="openMainWinEvent">
@@ -13,65 +13,9 @@
           <span v-else>{{ info.name }}</span>
         </div>
         <div class="player-top-right">
-          <div v-if="type === 'film'" class="player-top-right-share">
-            <div class="player-top-right-popup player-top-right-item" @click="isShareVisible = !isShareVisible">
-              <t-popup
-                trigger="click"
-                :visible="isShareVisible"
-                :on-visible-change="onShareVisibleChange"
-                placement="bottom-right"
-                :overlay-inner-style="{ boxShadow: 'none', padding: '0' }"
-                attach=".player-top-right-share"
-              >
-                <share-icon size="1.5em" />
-                <template #content>
-                  <div class="share-container">
-                    <div class="share-container-main">
-                      <div class="share-container-main-left">
-                        <div class="share-container-main-left-header">
-                          <div class="header-name">扫一扫，手机继续看</div>
-                          <div class="header-info">
-                            推荐使用<span class="header-info-browser">夸克浏览器</span>-首页<photo-icon />-扫码
-                          </div>
-                          <div class="header-copyright">ZyPlayer提供支持,严禁传播资源</div>
-                        </div>
-                        <t-divider dashed style="margin: 5px 0" />
-                        <div class="share-container-main-left-bottom">
-                          <div v-if="type === 'film'" class="bottom-title">
-                            {{ `${info.vod_name} ${selectPlayIndex}` }}
-                          </div>
-                          <div v-else class="bottom-title">{{ info.name }}</div>
-                        </div>
-                      </div>
-                      <div class="share-container-main-right">
-                        <div class="bg"></div>
-                        <div class="main">
-                          <img class="qrcode" :src="qrCodeUrl" alt="二维码" />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="bottom-copy">
-                      <span class="bottom-copy-url">
-                        <input id="bottom-copy-url-input" v-model="shareUrl" type="text" disabled />
-                      </span>
-                      <t-popup
-                        trigger="click"
-                        placement="right"
-                        :overlay-inner-style="{
-                          background: '#f5f5f5',
-                          boxShadow: 'none',
-                          color: '#848282',
-                          fontSize: '10px',
-                          marginTop: '5px',
-                        }"
-                        attach=".bottom-copy"
-                      >
-                        <span class="bottom-copy-btn" @click="copyShareUrl">复制地址</span>
-                      </t-popup>
-                    </div>
-                  </div>
-                </template>
-              </t-popup>
+          <div class="player-top-right-share">
+            <div class="player-top-right-popup player-top-right-item" @click="shareEvent">
+              <share-popup v-model:visible="isShareVisible" :data="shareData" />
             </div>
           </div>
           <div v-if="type === 'film'" class="player-top-right-download">
@@ -192,12 +136,18 @@
                 ref="aliplayerRef"
                 class="aliplayer player"
               ></div>
+              <div
+                v-if="set.broadcasterType === 'artplayer'"
+                id="artplayer"
+                ref="artplayerRef"
+                class="artplayer player"
+              ></div>
             </div>
             <div v-show="onlineUrl && isSniff" class="player-webview">
               <iframe
                 ref="iframeRef"
                 :key="onlinekey"
-                class="analysis-play-box"
+                class="player"
                 :src="onlineUrl"
                 allowtransparency="true"
                 frameborder="0"
@@ -205,6 +155,7 @@
                 allowfullscreen="true"
                 webkit-playsinline
                 playsinline
+                sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
               ></iframe>
             </div>
           </div>
@@ -443,9 +394,11 @@ import VePlayer from '@volcengine/veplayer';
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import Aliplayer from 'aliyun-aliplayer';
+import Artplayer from 'artplayer';
+import flvjs from 'flv.js';
+import Hls from 'hls.js';
 import _ from 'lodash';
 import moment from 'moment';
-import QRCode from 'qrcode';
 import TCPlayer from 'tcplayer.js';
 import {
   ChevronLeftIcon,
@@ -455,15 +408,13 @@ import {
   HeartIcon,
   HomeIcon,
   LoadingIcon,
-  PhotoIcon,
   PinFilledIcon,
   PinIcon,
   SettingIcon,
-  ShareIcon,
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import Player, { Events } from 'xgplayer';
 import LivePreset from 'xgplayer/es/presets/live';
 import FlvPlugin from 'xgplayer-flv';
@@ -478,11 +429,12 @@ import playerVoiceIcon from '@/assets/player/voice.svg?raw';
 import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerZoomIcon from '@/assets/player/zoom.svg?raw';
 import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
-import PLAYER_INFO_CONFIG from '@/config/playerInfo';
 import windowView from '@/layouts/components/Window.vue';
 import { analyze, channelList, history, setting, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
+
+import SharePopup from './common/SharePopup.vue';
 
 // 用于窗口管理
 const ipcRenderer = useIpcRenderer();
@@ -511,14 +463,9 @@ const ext = ref(data.value.ext);
 const { isSupported, copy } = useClipboard();
 const isShareVisible = ref(false);
 const isDownloadVisible = ref(false);
-const isPlayerInfoVisible = ref(false);
 const downloadSource = ref();
 const downloadEpisodes = ref([]);
 const downloadTarget = ref([]);
-const playerInfo = ref({
-  version: '',
-  stats: {},
-});
 
 const commonConfig = {
   url: '',
@@ -529,6 +476,7 @@ const commonConfig = {
   topBarAutoHide: false,
   closeVideoDblclick: true,
   lastPlayTimeHideDelay: 5,
+  startTime: 0,
   playbackRate: {
     list: [
       2,
@@ -558,13 +506,10 @@ const commonConfig = {
     pipIconExit: playerPipIcon,
   },
   commonStyle: {
-    // 播放完成部分进度条底色
     playedColor: '#45c58b',
-    // 进度条滑块样式，支持字符串或 Style 样式对象
     sliderBtnStyle: {
       backgroundColor: '#45c58b',
     },
-    // 音量颜色
     volumeColor: '#45c58b',
   },
   plugins: [],
@@ -598,10 +543,14 @@ const veConfig = ref({
   ...commonConfig,
   id: 'veplayer',
   url: '',
+  type: 'vod',
   streamType: 'hls',
   isLive: false,
   enableH265Degrade: true,
+  closeVideoStopPropagation: true,
+  enableMp4MSE: false,
   plugins: [],
+  options: {},
 }); // 火山播放器参数
 
 const tcConfig = ref({
@@ -696,6 +645,48 @@ const aliConfig = ref({
   ],
 }); // 阿里云播放器参数
 
+const playM3u8 = (video, url, art) => {
+  if (Hls.isSupported()) {
+    if (art.hls) art.hls.destroy();
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+    art.hls = hls;
+    art.on('destroy', () => hls.destroy());
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = url;
+  } else {
+    art.notice.show = 'Unsupported playback format: m3u8';
+  }
+};
+const playFlv = (video, url, art) => {
+  if (flvjs.isSupported()) {
+    if (art.flv) art.flv.destroy();
+    const flv = flvjs.createPlayer({ type: 'flv', url });
+    flv.attachMediaElement(video);
+    flv.load();
+    art.flv = flv;
+    art.on('destroy', () => flv.destroy());
+  } else {
+    art.notice.show = 'Unsupported playback format: flv';
+  }
+};
+const artConfig = ref({
+  container: '.artplayer',
+  url: '',
+  setting: true,
+  type: 'm3u8',
+  currentTime: 0,
+  playbackRate: true,
+  autoplay: true,
+  fullscreen: true,
+  pip: true,
+  customType: {
+    m3u8: playM3u8,
+    flv: playFlv,
+  },
+}); // art播放器参数
+
 const selectIptvTab = ref('epg');
 const recommend = ref([]); // 推荐
 const season = ref(); // 选集
@@ -703,19 +694,18 @@ const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
 const ve = ref(null); // 火山播放器
-const tc = ref(null); // 腾讯云播放器
-const ali = ref(null); // 阿里云播放器
+const tc = ref(null); // 腾讯播放器
+const ali = ref(null); // 阿里播放器
+const art = ref(null); // 艺术播放器
 const tcplayerRef = ref(null); // 腾讯云播放器dom节点
 const xgpayerRef = ref(null); // 西瓜播放器dom节点
 const aliplayerRef = ref(null); // 阿里云播放器dom节点
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
-const playerInfoTimer = ref(); // 定时器 用于刷新播放器参数
 const isBinge = ref(true); // true未收藏 false收藏
 const isPinned = ref(true); // true未置顶 false置顶
 const isSettingVisible = ref(false);
 
-const qrCodeUrl = ref(); // 二维码图片流
 const dataHistory = ref({}); // 历史
 const isMaximize = ref(false); // mac最大化
 // const iswideBtn = ref(false); // 视频划过显示按钮
@@ -743,16 +733,11 @@ const pagination = ref({
   count: 0,
 });
 
-const PLAYER_INFO = reactive({
-  ...PLAYER_INFO_CONFIG.playerInfo,
+const shareData = ref({
+  name: '',
+  url: '',
+  provider: 'zyplayer',
 });
-
-const QR_CODE_OPTIONS = {
-  errorCorrectionLevel: 'H',
-  type: 'image/jpeg',
-  quality: 0.3,
-  margin: 4,
-};
 
 const VIP_LIST = [
   'iqiyi.com',
@@ -773,13 +758,6 @@ const VIDEO_PROCESS_DOC = {
   watchTime: 0,
   duration: 0,
 };
-
-const shareUrl = computed(() => {
-  const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
-  let params = `${config.value.url}&name=${info.value.name}`;
-  if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name} ${selectPlayIndex.value}`;
-  return onlineUrl.value || sourceUrl + params;
-}); // 分享地址
 
 const renderError = () => {
   return (
@@ -816,14 +794,6 @@ watch(
       }
       downloadEpisodes.value = list;
     }
-  },
-);
-
-// 更新二维码
-watch(
-  () => selectPlayIndex.value,
-  () => {
-    generateQRCode();
   },
 );
 
@@ -897,13 +867,32 @@ const createPlayer = async (videoType) => {
     if (!tc.value) tc.value = TCPlayer('tcplayer', { ...tcConfig.value });
     if (config.value.startTime) tc.value.currentTime(config.value.startTime);
     tc.value.src(config.value.url);
-    console.log(`[player] 加载腾讯云播放器`);
+    console.log(`[player] 加载腾讯播放器`);
   } else if (set.value.broadcasterType === 'aliplayer') {
     aliConfig.value.source = config.value.url;
-    ali.value = new Aliplayer({ ...aliConfig.value }, function (player) {
-      console.log(`[player] 加载阿里云播放器`);
+    ali.value = new Aliplayer({ ...aliConfig.value }, (player) => {
+      console.log(`[player] 加载阿里播放器`);
       if (config.value.startTime) player.seek(config.value.startTime);
     });
+  } else if (set.value.broadcasterType === 'artplayer') {
+    switch (videoType) {
+      case 'mp4':
+        artConfig.value.type = 'mp4';
+        break;
+      case 'flv':
+        artConfig.value.type = 'flv';
+        break;
+      case 'm3u8':
+        artConfig.value.type = 'm3u8';
+        break;
+      default:
+        artConfig.value.type = 'm3u8';
+        break;
+    }
+    if (config.value.startTime) artConfig.value.currentTime = config.value.startTime;
+    artConfig.value.url = config.value.url;
+    console.log(`[player] 加载艺术播放器`);
+    art.value = new Artplayer({ ...artConfig.value });
   }
 
   if (type.value === 'film') await timerUpdatePlayProcess();
@@ -995,6 +984,10 @@ const destroyPlayer = () => {
     ali.value.dispose();
     ali.value = null;
   }
+  if (art.value) {
+    art.value.destroy();
+    art.value = null;
+  }
 
   if (onlineUrl.value) onlineUrl.value = '';
 };
@@ -1012,6 +1005,7 @@ const initIptvPlayer = async () => {
       config.value.isLive = isLive;
       config.value.presets = isLive ? [LivePreset] : [];
       veConfig.value.isLive = isLive;
+      if (isLive) veConfig.value.type = 'live';
       aliConfig.value.isLive = isLive;
 
       aliConfig.value.skinLayout[4].children.push({ name: 'liveDisplay', align: 'tl', x: 20, y: 0 });
@@ -1348,17 +1342,20 @@ const getDoubanRecommend = async () => {
   const name = info.value.vod_name;
   const year = info.value.vod_year;
   const id = info.value.vod_douban_id;
+  const ids = [];
 
   try {
     const resName = await zy.doubanRecommendations(id, name, year);
 
     for (const element of resName) {
-      const res = await zy.searchFirstDetail(key, element);
+      const item = await zy.search(key, element);
 
-      if (res && recommend.value.length < 10) {
-        recommend.value.push(res);
+      if (item.length > 0 && ids.length < 10) {
+        ids.push(item[0].vod_id);
       }
     }
+    const res = await zy.detail(key, ids.join(','));
+    recommend.value = res;
   } catch (err) {
     console.log(err);
   }
@@ -1391,11 +1388,11 @@ const timerUpdatePlayProcess = () => {
       if (duration !== 0) autoPlayNext();
     }
 
-    console.log(
-      `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
-        (currentTime / duration) * 100,
-      )}%`,
-    );
+    // console.log(
+    //   `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
+    //     (currentTime / duration) * 100,
+    //   )}%`,
+    // );
   };
 
   const onEnded = () => {
@@ -1437,6 +1434,16 @@ const timerUpdatePlayProcess = () => {
     });
 
     ali.value.on('ended', () => {
+      onEnded();
+    });
+  } else if (set.value.broadcasterType === 'artplayer') {
+    art.value.on('video:timeupdate', () => {
+      const { duration } = art.value;
+      const { currentTime } = art.value;
+      onTimeUpdate(currentTime, duration);
+    });
+
+    art.value.on('video:ended', () => {
       onEnded();
     });
   }
@@ -1541,30 +1548,6 @@ const getEpgList = async (url, name, date) => {
   }
 };
 
-// 生成二维码
-const generateQRCode = async () => {
-  try {
-    const url = await new Promise((resolve, reject) => {
-      QRCode.toDataURL(shareUrl.value, QR_CODE_OPTIONS, (err, url) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(url);
-        }
-      });
-    });
-    qrCodeUrl.value = url;
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-// 点击非浮层元素触发关闭分享
-const onShareVisibleChange = (_, context) => {
-  // trigger=document 表示点击非浮层元素触发
-  if (context.trigger === 'document') isShareVisible.value = false;
-};
-
 // 推荐刷新数据
 const recommendEvent = (e) => {
   info.value = e;
@@ -1607,15 +1590,6 @@ const copyDownloadUrl = () => {
   }
 };
 
-// 复制分享地址
-const copyShareUrl = () => {
-  const successMessage = '复制成功，快分享给好友吧!';
-  const errorMessage = '当前环境不支持一键复制，请手动复制链接!';
-  copyToClipboard(shareUrl.value, successMessage, errorMessage);
-
-  isShareVisible.value = false;
-};
-
 // 更新历史跳过参数
 const skipHistoryConfig = async () => {
   const { skipTimeInStart, skipTimeInEnd } = skipConfig.value;
@@ -1631,6 +1605,27 @@ const updateLocalPlayer = async (item) => {
   });
 
   await setting.update({ skipStartEnd: item });
+};
+
+// 分享
+const shareEvent = () => {
+  isShareVisible.value = true;
+
+  let name;
+  if (type.value === 'film') name = `${info.value.vod_name} ${selectPlayIndex.value}`;
+  else name = info.value.name;
+
+  const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
+  let params;
+  if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name} ${selectPlayIndex.value}`;
+  else params = `${config.value.url}&name=${info.value.name}`;
+  const url = onlineUrl.value || sourceUrl + params;
+
+  shareData.value = {
+    ...shareData.value,
+    name,
+    url,
+  };
 };
 
 // electron窗口置顶
@@ -1665,8 +1660,6 @@ const openMainWinEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
 .container {
   height: calc(100vh);
   overflow-y: hidden;
@@ -1681,8 +1674,15 @@ const openMainWinEvent = () => {
     font-weight: normal;
   }
 
-  .container-header {
+  .drag {
     -webkit-app-region: drag;
+  }
+
+  .no-drag {
+    -webkit-app-region: no-drag;
+  }
+
+  .container-header {
     height: 50px;
     flex-shrink: 0;
     background: #1e2022;
@@ -1928,11 +1928,6 @@ const openMainWinEvent = () => {
       width: 100vw;
       position: relative;
       transition: 0.15s ease-out;
-      .player,
-      #xgplayer {
-        width: 100%;
-        height: calc(100vh - 50px);
-      }
 
       .container-player-ext {
         width: 100vw !important;
@@ -1954,9 +1949,9 @@ const openMainWinEvent = () => {
           height: 100vh;
           overflow: hidden;
           background: var(--td-bg-color-page) url(../assets/bg-player.jpg) no-repeat center center;
-          .analysis-play-box {
+          .player {
             width: 100%;
-            height: 100%;
+            height: calc(100vh - 50px);
           }
         }
       }
