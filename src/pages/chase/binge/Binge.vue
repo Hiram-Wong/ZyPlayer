@@ -97,25 +97,23 @@ const load = async ($state) => {
 
 // 播放
 const playEvent = async (item) => {
-  const { type } = await sites.get({ key: item.siteKey });
+  try {
+    const site = await sites.get({ key: item.siteKey });
+    const [detailItem] = await zy.detail(item.siteKey, item.videoId);
+    const config = {
+      type: 'film',
+      data: {
+        info: detailItem,
+        ext: { site: { key: item.siteKey, type: site.type } },
+      },
+    };
 
-  await zy
-    .detail(item.siteKey, item.videoId)
-    .then((res) => {
-      store.updateConfig({
-        type: 'film',
-        data: {
-          info: res,
-          ext: { site: { key: item.siteKey, type } },
-        },
-      });
-
-      ipcRenderer.send('openPlayWindow', item.videoName);
-    })
-    .catch((err) => {
-      console.log(err);
-      MessagePlugin.warning('请求资源站失败，请检查网络!');
-    });
+    store.updateConfig(config);
+    ipcRenderer.send('openPlayWindow', item.videoName);
+  } catch (err) {
+    console.error(err);
+    MessagePlugin.warning('请求资源站失败，请检查网络!');
+  }
 };
 
 // 删除
@@ -148,7 +146,7 @@ const checkUpdaterEvent = async () => {
     bingeList.value.map(async (item) => {
       const { siteKey, videoId } = item;
       try {
-        const res = await zy.detail(siteKey, videoId);
+        const [res] = await zy.detail(siteKey, videoId);
         if (res.vod_remarks) {
           updateVideoRemarks(item, res);
         }

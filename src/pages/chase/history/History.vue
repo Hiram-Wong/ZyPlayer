@@ -111,23 +111,21 @@ const load = async ($state) => {
 
 // 播放
 const playEvent = async (item) => {
-  const { type } = await sites.get({ key: item.siteKey });
-
   try {
-    const res = await zy.detail(item.siteKey, item.videoId);
-    const { videoName } = item;
-
-    store.updateConfig({
+    const site = await sites.get({ key: item.siteKey });
+    const [detailItem] = await zy.detail(item.siteKey, item.videoId);
+    const config = {
       type: 'film',
       data: {
-        info: res,
-        ext: { site: { key: item.siteKey, type } },
+        info: detailItem,
+        ext: { site: { key: item.siteKey, type: site.type } },
       },
-    });
+    };
 
-    ipcRenderer.send('openPlayWindow', videoName);
+    store.updateConfig(config);
+    ipcRenderer.send('openPlayWindow', item.videoName);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     MessagePlugin.warning('请求资源站失败，请检查网络!');
   }
 };

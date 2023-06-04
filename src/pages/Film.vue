@@ -50,10 +50,10 @@
         <search-view
           v-model="searchTxt"
           :site="FilmSiteSetting.basic"
-          :class="{ 'no-filter': FilmSiteSetting.basic.type === 2 && filter.data.length === 0 }"
+          :class="{ 'no-filter': FilmSiteSetting.basic.type === 2 && !filter.data }"
           @search="searchEvent"
         />
-        <div v-if="!(FilmSiteSetting.basic.type === 2 && filter.data.length === 0)" class="quick_item quick_filter">
+        <div v-if="!(FilmSiteSetting.basic.type === 2 && !filter.data)" class="quick_item quick_filter">
           <view-module-icon size="large" @click="showToolbar = !showToolbar" />
         </div>
       </div>
@@ -232,6 +232,8 @@ const FilmSiteSetting = ref({
     key: '',
     group: '',
     type: 1,
+    search: 1,
+    playUrl: '',
   },
   class: {
     id: 0,
@@ -246,7 +248,7 @@ const FilmDataList = ref({
   rawList: [],
 }); // Waterfall
 const filter = ref({
-  data: {},
+  data: [],
   format: {},
   select: {
     site: '',
@@ -478,7 +480,7 @@ const getFilmList = async () => {
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
   const f = { ...filter.value.format };
-  console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${f}`);
+  console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${JSON.stringify(f)}`);
 
   try {
     const res = await zy.list(key, pg, t, f);
@@ -548,23 +550,22 @@ const searchEvent = async () => {
   console.log(FilmDataList.value.list, FilmDataList.value.rawList);
   if (kw) {
     try {
-      const searchPromises = FilmSiteSetting.value.searchGroup.map((site) => {
-        return zy.search(site.key, kw).then(async (res) => {
-          if (res) {
-            await Promise.all(
-              res.map(async (item) => {
-                const detailRes = await zy.detail(site.key, item.vod_id);
-                detailRes.siteKey = site.key; // 添加站点标识
-                detailRes.siteName = site.name; // 添加站点名称
-                detailRes.siteId = site.id; // 添加站点id
-                FilmDataList.value.list.push(detailRes);
-              }),
-            );
-          }
+      FilmSiteSetting.value.searchGroup.map(async (site) => {
+        const resultSearch = await zy.search(site.key, kw);
+        const ids = resultSearch.map((item) => item.vod_id);
+        const resultDetail = await zy.detail(site.key, ids.join(','));
+        const filmList = resultDetail.map((item) => {
+          return {
+            ...item,
+            siteKey: site.key, // 添加站点标识
+            siteName: site.name, // 添加站点名称
+            siteId: site.id, // 添加站点id
+          };
         });
+        FilmDataList.value.list.push(...filmList);
       });
-      await Promise.all(searchPromises);
-      console.log('complete');
+
+      console.log('[search] complete');
     } catch (err) {
       console.info(err);
     }
@@ -586,7 +587,7 @@ const changeSitesEvent = async (item) => {
   };
   FilmDataList.value = { list: [], rawList: [] };
   filter.value = {
-    data: {},
+    data: [],
     format: {},
     select: {
       site: '',
@@ -594,7 +595,7 @@ const changeSitesEvent = async (item) => {
       class: '',
       area: '全部',
       year: '全部',
-      data: [],
+      date: [],
     },
   };
   infiniteId.value++;
@@ -615,9 +616,10 @@ const playEvent = async (item) => {
   };
 
   if (type === 2 || type === 0) {
-    item = await zy.detail(formSiteData.value.key, item.vod_id);
+    const [detailItem] = await zy.detail(formSiteData.value.key, item.vod_id);
+    item = detailItem;
   }
-
+  console.log(item);
   store.updateConfig({
     type: 'film',
     data: {
@@ -643,7 +645,7 @@ eventBus.on(async () => {
   await getClass();
   FilmDataList.value = { list: [], rawList: [] };
   filter.value = {
-    data: {},
+    data: [],
     format: {},
     select: {
       site: '',
@@ -651,7 +653,7 @@ eventBus.on(async () => {
       class: '',
       area: '全部',
       year: '全部',
-      data: [],
+      date: [],
     },
   };
   infiniteId.value++;
