@@ -19,7 +19,7 @@
 - 支持 IPTV（m3u、genre）及电子节目单
 - 支持主流视频平台解析（解析页面有个小彩蛋，可在代码里自行探索）
 - 老板键，一键隐藏
-- 内置两套播放器(西瓜播放器,腾讯云播发器)
+- 内置多套播放器
 
 # 🌴 声明
 
@@ -32,7 +32,7 @@
 > 播放器说明: 
 - 没有完美的播放器
 - tcplayer不支持h265(hevc),aliplayer(h265 收费),通常表现为只有声音没有画面
-- h264:tcplayer>xgplayer>aliplayer  h265:xgplayer
+- h264:tcplayer>xgplayer\veplayer>artplayer>aliplayer  h265:xgplayer,veplayer
 - 腾讯一贯风格，tcplayer每次数据都会上报云端(https://datacenter.live.qcloud.com/)
 - aliplayer每次播放卡住会上报云端(https://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/newplayer/track)
 
