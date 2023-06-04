@@ -547,12 +547,13 @@ const searchEvent = async () => {
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 
-  console.log(FilmDataList.value.list, FilmDataList.value.rawList);
   if (kw) {
     try {
       FilmSiteSetting.value.searchGroup.map(async (site) => {
         const resultSearch = await zy.search(site.key, kw);
-        const ids = resultSearch.map((item) => item.vod_id);
+        let ids;
+        if (resultSearch) ids = resultSearch.map((item) => item.vod_id);
+        else return;
         const resultDetail = await zy.detail(site.key, ids.join(','));
         const filmList = resultDetail.map((item) => {
           return {
@@ -564,8 +565,6 @@ const searchEvent = async () => {
         });
         FilmDataList.value.list.push(...filmList);
       });
-
-      console.log('[search] complete');
     } catch (err) {
       console.info(err);
     }
