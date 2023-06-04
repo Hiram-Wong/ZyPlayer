@@ -35,18 +35,18 @@ jobs:
       
       - uses: actions/upload-artifact@v3
         with:
-          name: ZYPlayer-mac
+          name: zyplayer-mac
           path: dist_electron/*-universal.dmg
           if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ZYPlayer-win
+          name: zyplayer-win
           path: dist_electron/*Setup*.exe
           if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ZYPlayer-linux
+          name: zyplayer-linux
           path: dist_electron/*.AppImage
           if-no-files-found: ignore

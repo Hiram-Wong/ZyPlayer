@@ -88,7 +88,7 @@ function createWindow(): void {
     show: false,
     frame: false,
     autoHideMenuBar: true,
-    title: 'ZyPlayer',
+    title: 'zyplayer',
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       sandbox: false,

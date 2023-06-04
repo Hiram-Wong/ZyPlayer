@@ -2,9 +2,9 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  "productName": "ZYPlayer",
+  "productName": "zyplayer",
   "appId": "com.zyplayer.app",
-  "copyright": "Copyright © 2023 ZyPlayer Team Inc.",
+  "copyright": "Copyright © 2023 zyplayer Team Inc.",
   "asar": true,
   "directories": {
     "output": "release/${version}"
