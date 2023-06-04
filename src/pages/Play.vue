@@ -1350,7 +1350,7 @@ const getDoubanRecommend = async () => {
     for (const element of resName) {
       const item = await zy.search(key, element);
 
-      if (item.length > 0 && ids.length < 10) {
+      if (item && ids.length < 10) {
         ids.push(item[0].vod_id);
       }
     }
