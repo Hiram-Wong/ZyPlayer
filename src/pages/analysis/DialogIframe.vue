@@ -7,7 +7,15 @@
     @close="closeEvent"
   >
     <div v-if="platformData.url" class="platform-container">
-      <webview ref="webviewRef" :src="platformData.url" class="platform-play-box" disablewebsecurity allowpopups />
+      <iframe
+        ref="iframeRef"
+        :key="key"
+        class="platform-play-box"
+        :src="platformData.url"
+        scrolling="yes"
+        frameborder="no"
+        muted="true"
+      ></iframe>
       <div class="side-floatbtn">
         <div class="btn-lists">
           <div class="btn-list jx" @click="analysisEvent">
@@ -15,7 +23,7 @@
               <play-circle-stroke-icon size="20px" class="icon" />
             </div>
           </div>
-          <div class="btn-list back" @click="backEvent">
+          <!-- <div class="btn-list back" @click="backEvent">
             <div class="btn">
               <rollback-icon size="20px" class="icon" />
             </div>
@@ -24,7 +32,7 @@
             <div class="btn">
               <rollfront-icon size="20px" class="icon" />
             </div>
-          </div>
+          </div> -->
           <div class="btn-list refresh" @click="refreshEvent">
             <div class="btn">
               <refresh-icon size="20px" class="icon" />
@@ -41,7 +49,6 @@
   </t-dialog>
 </template>
 <script setup lang="ts">
-import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { LayersIcon, PlayCircleStrokeIcon, RefreshIcon, RollbackIcon, RollfrontIcon } from 'tdesign-icons-vue-next';
 import { onMounted, ref, watch } from 'vue';
@@ -61,8 +68,9 @@ const props = defineProps({
 
 const formVisible = ref(false);
 const platformData = ref(props.data);
-const webviewRef = ref(null);
-const ipcRenderer = useIpcRenderer();
+const iframeRef = ref(null); // iframe dom节点
+const key = new Date().getTime(); // 解决iframe不刷新问题
+// const ipcRenderer = useIpcRenderer();
 
 const emit = defineEmits(['update:visible', 'platformPlay', 'platform-play-status']);
 
@@ -87,12 +95,12 @@ watch(
 
 onMounted(() => {
   // 监听主进场拦截的url
-  ipcRenderer.on('blockUrl', async (_, url) => {
-    console.log(`blockUrl: ${url}`);
-    if (url !== 'about:blank') {
-      platformData.value.url = url;
-    }
-  });
+  // ipcRenderer.on('blockUrl', async (_, url) => {
+  //   console.log(`blockUrl: ${url}`);
+  //   if (url !== 'about:blank') {
+  //     platformData.value.url = url;
+  //   }
+  // });
 });
 
 // 关闭dialog
@@ -104,10 +112,9 @@ const closeEvent = () => {
 
 // 解析播放
 const analysisEvent = () => {
-  const webviewCurrentUrl = webviewRef.value.getURL();
-  const webviewCurrentTitle = webviewRef.value.getTitle();
-  console.log(webviewCurrentUrl, webviewCurrentTitle);
-  emit('platformPlay', webviewCurrentUrl, webviewCurrentTitle);
+  const iframeCurrentUrl = iframeRef.value.contentWindow.location.href;
+  console.log(iframeCurrentUrl);
+  emit('platformPlay', iframeCurrentUrl);
   clearIframe();
 
   formVisible.value = false;
@@ -115,25 +122,27 @@ const analysisEvent = () => {
 
 // 后退
 const backEvent = () => {
-  if (webviewRef.value.canGoBack()) webviewRef.value.goBack();
+  iframeRef.value.contentWindow.history.back();
 };
 
 // 前进
 const forwardEvent = () => {
-  if (webviewRef.value.canGoForward()) webviewRef.value.goForward();
+  iframeRef.value.contentWindow.history.forward();
 };
 
 // 刷新
 const refreshEvent = () => {
-  webviewRef.value.reload();
+  iframeRef.value.contentWindow.location.reload();
 };
 
 // 最小化
 const miniEvent = () => {
-  const webviewCurrentUrl = webviewRef.value.getURL();
-  const webviewCurrentTitle = webviewRef.value.getTitle();
-
-  emit('platform-play-status', true, webviewCurrentUrl, webviewCurrentTitle);
+  emit(
+    'platform-play-status',
+    true,
+    iframeRef.value.contentWindow.location.href,
+    iframeRef.value.contentWindow.document.title,
+  );
 
   clearIframe();
 
@@ -143,6 +152,7 @@ const miniEvent = () => {
 // 设置src为空
 const clearIframe = () => {
   platformData.value.url = '';
+  iframeRef.value.contentWindow.history.replaceState(null, '', '');
 };
 </script>
 

@@ -16,7 +16,7 @@
       <div class="privacy-policy">
         <div class="header">用户协议与免责声明</div>
         <div class="main-content">
-          <p>感谢您选择使用ZyPlayer(以下简称本软件),在使用产品和服务之前，请您仔细阅读和理解以下声明:</p>
+          <p>感谢您选择使用zyplayer(以下简称本软件),在使用产品和服务之前，请您仔细阅读和理解以下声明:</p>
           <p>
             1.若您不同意本声明的任何内容，请您立即停止使用本软件;一旦您开始使用本软件产品和服务，则表示您已同意本声明的所有内容。
           </p>
@@ -44,8 +44,7 @@ import { ref, watch } from 'vue';
 
 import { setting } from '@/lib/dexie';
 
-const { getCurrentWindow } = window.require('@electron/remote');
-const win = getCurrentWindow();
+import { appWindow } from '@tauri-apps/api/window'
 
 const props = defineProps({
   visible: {
@@ -82,15 +81,12 @@ const updateAgreementMask = async () => {
 const cancelEvent = () => {
   MessagePlugin.warning({ content: '5s后自动退出软件', duration: 5000 });
   setTimeout(() => {
-    win.destroy();
+    appWindow.close();
   }, 5000);
 };
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .privacy-policy-container {
   :deep(.t-dialog) {
     .t-dialog__footer {

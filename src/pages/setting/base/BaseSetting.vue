@@ -107,22 +107,15 @@
       </t-form-item>
       <t-form-item label="安全" name="security">
         <t-space>
-          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">网络代理</span>
-          <span class="title" @click="dnsEvnet">安全DNS</span>
+          <span v-if="platformName !== 'linux'" class="title" @click="openProxySetting">网络代理</span>
           <span class="title" @click="uaEvnet">用户代理</span>
         </t-space>
 
-        <dialog-dns-view v-model:visible="isDnsDialog" :data="dnsDialogData" @receive-dns-data="flushDialogData" />
         <dialog-ua-view v-model:visible="isUaDialog" :data="uaDialogData" @receive-dns-data="flushDialogData" />
       </t-form-item>
       <t-form-item label="权限" name="data">
         <t-space>
-          <t-radio v-if="platform !== 'linux'" v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">
-            开机自启
-          </t-radio>
-          <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="hardwareAccelerationEvnet">
-            硬件加速
-          </t-radio>
+          <t-radio v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">开机自启</t-radio>
         </t-space>
       </t-form-item>
       <t-form-item label="其他" name="data">
@@ -134,15 +127,20 @@
         </t-space>
 
         <dialog-easy-config-view v-model:visible="isEasyConfigDialog" />
-        <dialog-update-view v-model:visible="isUpdateDialog" />
+        <!-- <dialog-update-view v-model:visible="isUpdateDialog" /> -->
       </t-form-item>
     </t-form>
   </div>
 </template>
 
 <script setup lang="jsx">
+import { BaseDirectory, removeDir } from '@tauri-apps/api/fs';
+import { isRegistered, register,unregisterAll } from '@tauri-apps/api/globalShortcut';
+import { platform } from '@tauri-apps/api/os';
+import { appCacheDir } from '@tauri-apps/api/path';
+import { relaunch } from '@tauri-apps/api/process';
+import { invoke } from '@tauri-apps/api/tauri';
 import { useEventBus } from '@vueuse/core';
-import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { CloseIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -157,26 +155,17 @@ import zy from '@/lib/utils/tools';
 import { usePlayStore, useSettingStore } from '@/store';
 
 import DialogClassView from './components/DialogClass.vue';
-import DialogDnsView from './components/DialogDns.vue';
 import DialogEasyConfigView from './components/DialogEasyConfig.vue';
 import DialogUaView from './components/DialogUA.vue';
-import DialogUpdateView from './components/DialogUpdate.vue';
-
-const ipcRenderer = useIpcRenderer();
-
-const remote = window.require('@electron/remote');
-const win = remote.getCurrentWindow();
-
-const { platform } = process;
+// import DialogUpdateView from './components/DialogUpdate.vue';
 
 const isClassDialog = ref(false);
 const classDialogData = ref({ data: [], type: 'rootClassFilter' });
 const isEasyConfigDialog = ref(false);
 const isUpdateDialog = ref(false);
-const isDnsDialog = ref(false);
-const dnsDialogData = ref({ data: '', type: 'dns' });
 const isUaDialog = ref(false);
-const uaDialogData = ref({ data: '', type: 'dns' });
+const uaDialogData = ref({ data: '', type: 'ua' });
+const platformName = ref();
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -275,7 +264,12 @@ watchEffect(() => {
 
 onMounted(() => {
   getSetting();
+  getPlatform();
 });
+
+const getPlatform = async () => {
+  platformName.value = await platform();
+};
 
 const getSetting = async () => {
   await setting.find().then((res) => {
@@ -283,19 +277,33 @@ const getSetting = async () => {
   });
 };
 
-const openProxySetting = () => {
-  ipcRenderer.send('open-proxy-setting');
+const openProxySetting = async () => {
+  try {
+    if (platformName.value === 'win32') {
+      await invoke('tauri', { cmd: 'open', uri: 'ms-settings:network-proxy' });
+    } else if (platformName.value === 'darwin') {
+      await invoke('tauri', { cmd: 'open', uri: 'x-apple.systempreferences:com.apple.preference.network' });
+    } else if (platformName.value === 'linux') {
+      await invoke('tauri', { cmd: 'open', uri: 'gnome-control-center', args: ['network'] });
+    }
+  } catch (err) {
+    console.log(err);
+    MessagePlugin.warning('当前操作系统不支持打开网络代理设置');
+  }
 };
 
 // 出厂恢复
-const resetEvent = () => {
-  ipcRenderer.send('reset-store'); // 清除config.json
-  clearDB();
+const resetEvent = async () => {
+  db.delete();
   clearCache();
+  localStorage.clear();
+  sessionStorage.clear();
+  await invoke('disable_auto_launch');
+  await unregisterAll();
 
   MessagePlugin.success('重置成功, 即将重启应用!');
-  setTimeout(() => {
-    ipcRenderer.send('reboot-app');
+  setTimeout(async () => {
+    await relaunch();
   }, 1000);
 };
 
@@ -305,17 +313,11 @@ const resetCache = async () => {
   MessagePlugin.success(`清除缓存成功, 共清理 ${size} MB`);
 };
 
-// 清除数据库
-const clearDB = () => {
-  db.delete();
-};
-
 // 清除缓存
 const clearCache = async () => {
-  const ses = win.webContents.session;
-  const size = ((await ses.getCacheSize()) / 1024 / 1024).toFixed(2);
-  await ses.clearCache();
-  return size;
+  const cacheDirPath = await appCacheDir();
+  console.log(cacheDirPath);
+  await removeDir(cacheDirPath);
 };
 
 // 组合键格式化
@@ -330,7 +332,7 @@ const formatShortcut = computed(() => {
     .replace('Right', '→')
     .replace('Left', '←')
     .replace('Space', '空格');
-  if (platform === 'darwin') {
+  if (platformName.value === 'darwin') {
     shortcut = val
       .replace('CommandOrControl', '⌘')
       .replace('Command', '⌘')
@@ -403,7 +405,7 @@ const getShortKeys = (_, event) => {
 };
 
 // 判断快捷键是否合法
-const isLegalShortcut = (item) => {
+const isLegalShortcut = async (item) => {
   const specialKeys = ['Crl', 'Alt', 'Shift', 'Meta'];
   const pubilcKeys = [
     '=',
@@ -471,7 +473,11 @@ const isLegalShortcut = (item) => {
     tipShortcut.value = '';
     console.log(formData.value.recordShortcut);
     shortcutInputRef.value.blur();
-    ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
+    await unregisterAll();
+    const formatRecordShortcut = formData.value.recordShortcut.replace('Meta', 'Command');
+    await register(formatRecordShortcut, () => {
+      console.log(`Shortcut triggered:${formData.value.recordShortcut}`);
+    });
   } else {
     tipShortcut.value = '当前组合键不合规';
     statusShortcut.value = 'error';
@@ -479,34 +485,31 @@ const isLegalShortcut = (item) => {
 };
 
 // 取消快捷键
-const cancelShortcut = () => {
+const cancelShortcut = async () => {
   console.log('cancelShortcut');
   formData.value.recordShortcut = '';
-  ipcRenderer.send('uninstallShortcut');
+  await unregisterAll();
 };
 
 // 重置快捷键
-const resetShortcut = () => {
-  console.log('resetShortcut');
-  if (platform === 'darwin') formData.value.recordShortcut = 'Shift+Command+Z';
+const resetShortcut = async () => {
+  await unregisterAll();
+  if (platformName.value === 'darwin') formData.value.recordShortcut = 'Shift+Command+Z';
   else formData.value.recordShortcut = 'Shift+Alt+Z';
   shortcutInputRef.value.blur();
-  ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
+  await register(formData.value.recordShortcut, () => {
+    console.log(`Shortcut triggered:${formData.value.recordShortcut}`);
+  });
 };
 
 // 开机自启
 const selefBootEvnet = () => {
   console.log('开机自启', formData.value.selfBoot);
-  ipcRenderer.send('toggle-selfBoot', formData.value.selfBoot);
-};
-
-// 硬件加速
-const hardwareAccelerationEvnet = () => {
-  console.log('开机自启', formData.value.hardwareAcceleration);
-  ipcRenderer.send('update-hardwareAcceleration', formData.value.hardwareAcceleration);
-  MessagePlugin.success(
-    formData.value.hardwareAcceleration ? '已开启硬件加速，重启应用生效' : '已关闭硬件加速，重启应用生效',
-  );
+  if (formData.value.selfBoot) {
+    invoke('enable_auto_launch');
+  } else {
+    invoke('disable_auto_launch');
+  }
 };
 
 // 更新
@@ -537,17 +540,6 @@ const classEvent = (item) => {
       break;
   }
   isClassDialog.value = true;
-};
-
-// dns：打开dialog并设置数据
-const dnsEvnet = () => {
-  const { dns } = formData.value;
-  dnsDialogData.value = {
-    data: dns,
-    type: 'dns',
-  };
-
-  isDnsDialog.value = true;
 };
 
 // ua：打开dialog并设置数据
@@ -589,8 +581,6 @@ eventBus.on(async () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-
 .setting-base-container {
   :deep(.t-radio-group.t-size-m .t-radio-button) {
     height: auto;

@@ -1,6 +1,6 @@
 <template>
-  <div v-if="platform !== 'darwin'" class="window">
-    <div class="window-popup window-item" @click="win.minimize()">
+  <div v-if="systemPlatform !== 'darwin'" class="window">
+    <div class="window-popup window-item" @click="minimizeEvent">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11"><path d="M11,4.9v1.1H0V4.399h11z"></path></svg>
     </div>
     <div class="window-popup window-item" @click="minMaxEvent">
@@ -18,7 +18,7 @@
         <path d="M10,0H3.5v1.1h6.1c0.2,0,0.3,0.1,0.3,0.3v6.1H11V1C11,0.4,10.6,0,10,0z"></path>
       </svg>
     </div>
-    <div class="window-popup window-item" @click="win.destroy()">
+    <div class="window-popup window-item" @click="closeEvent">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11">
         <path
           d="M6.279 5.5L11 10.221l-.779.779L5.5 6.279.779 11 0 10.221 4.721 5.5 0 .779.779 0 5.5 4.721 10.221 0 11 .779 6.279 5.5z"
@@ -28,27 +28,41 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { appWindow } from '@tauri-apps/api/window';
+import { computed, ref } from 'vue';
 
-const remote = window.require('@electron/remote');
-const win = remote.getCurrentWindow();
-const { platform } = process;
+import { useSettingStore } from '@/store';
+
+const storeSetting = useSettingStore();
+
 const isMaxed = ref(false);
+const systemPlatform = computed(() => {
+  // 'linux', 'darwin', 'ios', 'freebsd', 'dragonfly', 'netbsd', 'openbsd', 'solaris', 'android', 'win32'
+  return storeSetting.systemPlatform;
+});
 
-const minMaxEvent = () => {
+const minimizeEvent = async () => {
+  await appWindow.minimize();
+};
+const closeEvent = async () => {
+  await appWindow.close();
+};
+const minMaxEvent = async () => {
   if (isMaxed.value) {
-    remote.getCurrentWindow().unmaximize();
+    await appWindow.unmaximize();
   } else {
-    remote.getCurrentWindow().maximize();
+    await appWindow.maximize();
   }
   isMaxed.value = !isMaxed.value;
 };
 
-win.on('maximize', () => {
+appWindow.listen('maximize', () => {
+  console.log('最大化');
   isMaxed.value = true;
 });
 
-win.on('unmaximize', () => {
+appWindow.listen('unmaximize', () => {
+  console.log('最大化恢复');
   isMaxed.value = false;
 });
 </script>

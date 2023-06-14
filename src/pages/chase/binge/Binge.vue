@@ -46,17 +46,15 @@
 import 'v3-infinite-loading/lib/style.css';
 
 import { useEventBus } from '@vueuse/core';
-import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref } from 'vue';
 
 import { sites, star } from '@/lib/dexie';
+import { playerWin } from '@/lib/tauri/actions';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
-
-const ipcRenderer = useIpcRenderer();
 
 const store = usePlayStore();
 const pagination = ref({
@@ -109,7 +107,7 @@ const playEvent = async (item) => {
     };
 
     store.updateConfig(config);
-    ipcRenderer.send('openPlayWindow', item.videoName);
+    playerWin();
   } catch (err) {
     console.error(err);
     MessagePlugin.warning('请求资源站失败，请检查网络!');

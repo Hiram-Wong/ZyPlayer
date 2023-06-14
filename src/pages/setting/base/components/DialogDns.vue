@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { useIpcRenderer } from '@vueuse/electron';
+// import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { reactive, ref, watch } from 'vue';
@@ -57,7 +57,7 @@ const props = defineProps({
 });
 const formVisible = ref(false);
 const formData = ref(props.data);
-const ipcRenderer = useIpcRenderer();
+// const ipcRenderer = useIpcRenderer();
 
 const DNS_LIST = reactive([...DNS_CONFIG.doh]);
 
@@ -103,7 +103,7 @@ const onSubmit = async () => {
     type,
   });
 
-  ipcRenderer.send('update-dns', !!data, data);
+  // ipcRenderer.send('update-dns', !!data, data);
   MessagePlugin.info('重启软件生效');
 
   formVisible.value = false;

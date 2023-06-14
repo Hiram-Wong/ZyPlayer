@@ -27,6 +27,9 @@ export const useSettingStore = defineStore('setting', {
       }
       return state.mode as 'dark' | 'light';
     },
+    systemPlatform: (state) => {
+      return state.platform;
+    },
   },
   actions: {
     async changeMode(mode: 'dark' | 'light' | 'auto') {

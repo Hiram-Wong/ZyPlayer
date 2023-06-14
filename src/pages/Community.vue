@@ -91,7 +91,7 @@
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
-import { useIpcRenderer } from '@vueuse/electron';
+// import { useIpcRenderer } from '@vueuse/electron';
 import { GiftIcon, SettingIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref } from 'vue';
@@ -100,7 +100,7 @@ import { analyze, iptv, setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
 
-const ipcRenderer = useIpcRenderer();
+// const ipcRenderer = useIpcRenderer();
 const store = usePlayStore();
 
 import DialogSubscribeView from './community/DialogSubscribe.vue';
@@ -151,7 +151,7 @@ const filmSearch = async (item) => {
       },
     });
 
-    if (res) ipcRenderer.send('openPlayWindow', item);
+    // if (res) ipcRenderer.send('openPlayWindow', item);
   } catch (err) {
     console.error(err);
     MessagePlugin.error('网络出错啦,请稍后再试!');

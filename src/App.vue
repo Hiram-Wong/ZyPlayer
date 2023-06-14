@@ -4,7 +4,8 @@
 </template>
 
 <script setup lang="ts">
-import { useIpcRenderer } from '@vueuse/electron';
+import { platform } from '@tauri-apps/api/os';
+import { appWindow } from '@tauri-apps/api/window';
 import { computed, onMounted, ref } from 'vue';
 
 import PLAY_CONFIG from '@/config/play';
@@ -15,11 +16,9 @@ import { usePlayStore, useSettingStore } from '@/store';
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 
-const ipcRenderer = useIpcRenderer();
-
 const formDialogPrivacyPolicy = ref(false);
 
-const theme = computed(() => {
+const appTheme = computed(() => {
   return storeSetting.getStateMode;
 });
 
@@ -27,6 +26,8 @@ onMounted(() => {
   initTheme();
   initAgreementMask();
   initPlayerSetting();
+  systemThemeListen();
+  systemPlatform();
 });
 
 const initTheme = async () => {
@@ -34,13 +35,20 @@ const initTheme = async () => {
   storeSetting.updateConfig({ mode: res });
 };
 
-ipcRenderer.on('system-theme-updated', (_, activeTheme) => {
-  if (theme.value === 'auto') {
-    const themeMode = activeTheme === 'dark' ? 'dark' : '';
-    document.documentElement.setAttribute('theme-mode', themeMode);
-    console.log(`system-theme-updated: ${activeTheme}`);
-  }
-});
+const systemPlatform = async () => {
+  const platformName = await platform();
+  storeSetting.updateConfig({ platform: platformName });
+};
+
+const systemThemeListen = async () => {
+  await appWindow.onThemeChanged(({ payload: theme }) => {
+    if (appTheme.value === 'auto') {
+      const themeMode = theme === 'dark' ? 'dark' : '';
+      document.documentElement.setAttribute('theme-mode', themeMode);
+      console.log(`system-theme-updated: ${theme}`);
+    }
+  });
+};
 
 const initAgreementMask = async () => {
   const res = await setting.get('agreementMask');

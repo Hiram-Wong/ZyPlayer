@@ -18,7 +18,7 @@
               Tips: 仅windwos支持在线更新; mac需签名(没钱); linux不支持。
               <br />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mac和linux用户请前往
-              <t-link theme="primary" href="https://github.com/Hiram-Wong/ZyPlayer/releases/" target="_blank">
+              <t-link theme="primary" href="https://github.com/Hiram-Wong/zyplayer/releases/" target="_blank">
                 github
               </t-link>
               下载
@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { useIpcRenderer } from '@vueuse/electron';
+// import { useIpcRenderer } from '@vueuse/electron';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
 
@@ -50,7 +50,7 @@ const props = defineProps({
   },
 });
 
-const ipcRenderer = useIpcRenderer();
+// const ipcRenderer = useIpcRenderer();
 
 const { platform } = process;
 
@@ -84,39 +84,39 @@ watch(
 
 const checkUpdate = () => {
   console.log('checkUpdate');
-  ipcRenderer.send('checkForUpdate');
-  ipcRenderer.on('update-available', (_, info) => {
-    console.log('存在可用更新');
-    updateInfo.value.new = true;
-    updateInfo.value.version = info.version;
-    updateInfo.value.releaseNotes = info.releaseNotes;
-    load.value = false;
-  });
-  ipcRenderer.on('update-not-available', () => {
-    console.log('没有可用更新');
-    load.value = false;
-    updateInfo.value.new = false;
-  });
+  // ipcRenderer.send('checkForUpdate');
+  // ipcRenderer.on('update-available', (_, info) => {
+  //   console.log('存在可用更新');
+  //   updateInfo.value.new = true;
+  //   updateInfo.value.version = info.version;
+  //   updateInfo.value.releaseNotes = info.releaseNotes;
+  //   load.value = false;
+  // });
+  // ipcRenderer.on('update-not-available', () => {
+  //   console.log('没有可用更新');
+  //   load.value = false;
+  //   updateInfo.value.new = false;
+  // });
   console.log(updateInfo.value);
 };
 
 const startDownload = () => {
   console.log('startDownload');
   isDownload.value = true;
-  ipcRenderer.send('downloadUpdate');
-  ipcRenderer.on('download-progress', (_, progress) => {
-    console.log(`downloadProcess: ${progress}`);
-    downloadProgress.value = progress;
-  });
-  ipcRenderer.on('update-downloaded', () => {
-    console.log('downloaded');
-    isDownloaded.value = true;
-    downloadProgress.value = 100;
-    MessagePlugin.success('安装包下载完成');
-  });
+  // ipcRenderer.send('downloadUpdate');
+  // ipcRenderer.on('download-progress', (_, progress) => {
+  //   console.log(`downloadProcess: ${progress}`);
+  //   downloadProgress.value = progress;
+  // });
+  // ipcRenderer.on('update-downloaded', () => {
+  //   console.log('downloaded');
+  //   isDownloaded.value = true;
+  //   downloadProgress.value = 100;
+  //   MessagePlugin.success('安装包下载完成');
+  // });
 };
 const installUpdate = () => {
-  ipcRenderer.send('quitAndInstall');
+  // ipcRenderer.send('quitAndInstall');
 };
 </script>
 

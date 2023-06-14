@@ -74,7 +74,8 @@ import { SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 
-import htmlParser from '@/lib/drpy/htmlParser';
+import drpy from '@/lib/drpy/drpy.js';
+// import htmlParser from '@/lib/drpy/htmlParser';
 import zy from '@/lib/utils/tools';
 import { useSettingStore } from '@/store';
 
@@ -146,20 +147,26 @@ const editorInit = () => {
     editorOutput = monaco.editor.create(htmlOutputRef.value as HTMLElement, EDITOR_CONFIG);
 
     // 监听值的变化
-    editorInput.onDidChangeModelContent(() => {
-      sourceHtml.value = editorInput.getValue();
-    });
-    editorOutput.onDidChangeModelContent(() => {
-      restultHtml.value = editorInput.getValue();
-    });
+    // editorInput.onDidChangeModelContent(() => {
+    //   sourceHtml.value = editorInput.getValue();
+    // });
+    // editorOutput.onDidChangeModelContent(() => {
+    //   restultHtml.value = editorInput.getValue();
+    // });
   });
 };
 
-const test = (type) => {
-  console.log(type);
-  const patSource = testData.value[type];
-  const res = htmlParser.parseDomForUrl(sourceHtml.value, patSource, '');
-  console.log(res);
+const test = async (type) => {
+  // console.log(type);
+  // const patSource = testData.value[type];
+  // console.log(sourceHtml.value, patSource);
+  // const res = htmlParser.parseDomForArray(sourceHtml.value, patSource);
+  // console.log(res);
+  const html = await zy.formatHTML('https://www.kyikan.co');
+  // const res = drpy.init('http://dy.catni.cn/admin/view/%E7%9C%8B%E4%B8%80%E7%9C%8B%E5%BD%B1%E8%A7%86.js');
+  // console.log(res);
+  // const $ = cheerio.load(html);
+  // console.log($('p.name'));
 };
 // const test = (type) => {
 //   console.log(type);

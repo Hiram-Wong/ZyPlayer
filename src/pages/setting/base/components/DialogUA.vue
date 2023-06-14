@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { useIpcRenderer } from '@vueuse/electron';
+// import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { reactive, ref, watch } from 'vue';
 
@@ -56,7 +56,7 @@ const props = defineProps({
 });
 const formVisible = ref(false);
 const formData = ref(props.data);
-const ipcRenderer = useIpcRenderer();
+// const ipcRenderer = useIpcRenderer();
 
 const UA_LIST = reactive([...UA_CONFIG.ua]);
 
@@ -102,7 +102,7 @@ const onSubmit = async () => {
     type,
   });
 
-  ipcRenderer.send('update-ua', !!data, data);
+  // ipcRenderer.send('update-ua', !!data, data);
 
   formVisible.value = false;
 };

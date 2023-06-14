@@ -76,6 +76,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { dialog, path } from '@tauri-apps/api';
+import { writeBinaryFile } from '@tauri-apps/api/fs';
 import { useEventBus } from '@vueuse/core';
 import { AddIcon, ArrowUpIcon, DiscountIcon, RemoveIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -87,8 +89,6 @@ import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
 import DialogFlagView from './components/DialogFlag.vue';
 import { COLUMNS } from './constants';
-
-const remote = window.require('@electron/remote');
 
 // Define item form data & dialog status
 const formDialogVisibleAddAnalyze = ref(false);
@@ -203,40 +203,30 @@ const removeAllEvent = () => {
 };
 
 // 导出接口
-const exportEvent = () => {
-  const arr = [...data.value];
-  const str = JSON.stringify(arr, null, 2);
-  const blob = new Blob([str], { type: 'text/plain;charset=utf-8' });
-  const reader = new FileReader();
-  reader.onload = () => {
-    const result: ArrayBuffer = reader.result as ArrayBuffer;
-    const buffer = Buffer.from(result);
-    remote.dialog
-      .showSaveDialog(remote.getCurrentWindow(), {
-        defaultPath: 'analyze.json',
-        filters: [{ name: 'JSON Files', extensions: ['json'] }],
-      })
-      .then((saveDialogResult) => {
-        if (!saveDialogResult.canceled) {
-          const { filePath } = saveDialogResult;
-          const fs = remote.require('fs');
-          fs.writeFile(filePath, buffer, 'utf-8', (err) => {
-            if (err) {
-              console.error('Failed to save file:', err);
-              MessagePlugin.error('Failed to save file');
-            } else {
-              console.log('File saved successfully');
-              MessagePlugin.success('File saved successfully');
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to open save dialog:', err);
-        MessagePlugin.error('Failed to open save dialog');
-      });
-  };
-  reader.readAsArrayBuffer(blob);
+const exportEvent = async () => {
+  try {
+    const saveResult = await dialog.save({
+      defaultPath: 'analyze.json',
+      filters: [
+        {
+          name: 'JSON Files',
+          extensions: ['json'],
+        },
+      ],
+    });
+
+    if (saveResult) {
+      const outputPath = await path.resolve(saveResult);
+      const arr = [...data.value];
+      const serializedJson = JSON.stringify(arr, null, 2);
+      const encodedData = new TextEncoder().encode(serializedJson);
+      await writeBinaryFile(outputPath, encodedData);
+
+      MessagePlugin.success('success');
+    }
+  } catch (err) {
+    MessagePlugin.error(`fail:${err}`);
+  }
 };
 
 const emitReload = useEventBus<string>('analyze-reload');

@@ -1,5 +1,4 @@
 import axios from "axios";
-import axiosRetry from "axios-retry";
 import { XMLParser } from "fast-xml-parser";
 import * as cheerio from "cheerio";
 import { Parser as M3u8Parser } from "m3u8-parser";
@@ -8,19 +7,16 @@ import JSON5 from "json5";
 
 import { sites } from "@/lib/dexie";
 
-const iconv = require("iconv-lite");
-const prettier = require("prettier");
-const dns = require("dns");
-const net = require("net");
+import iconv from "iconv-lite";
+import prettier from "prettier";
+import ipRegex from 'ip-regex';
+import { fetch, Body, getClient, ResponseType } from '@tauri-apps/api/http';
+import { invoke } from "@tauri-apps/api/tauri";
+
+// const iconv = require("iconv-lite");
+// const prettier = require("prettier");
 
 let controller = new AbortController();
-
-axiosRetry(axios, {
-  retries: 2,
-  retryDelay: (retryCount) => {
-    return retryCount * 500;
-  }
-});
 
 // 初始化对象xml转json https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/docs/v4/1.GettingStarted.md
 const xmlOptions = {
@@ -63,6 +59,20 @@ export const removeHTMLTagsAndSpaces = (str) => {
   return trimmedString;
 };
 
+const isIp = (ipAddress: string) => {
+  if (ipRegex({ exact: true }).test(ipAddress)) {
+    if (ipRegex.v6({ exact: true }).test(ipAddress)) {
+      return 6;
+    } else if (ipRegex.v4({ exact: true }).test(ipAddress)) {
+      return 4;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
 // 资源爬虫
 const zy = {
   /**
@@ -81,7 +91,8 @@ const zy = {
         url = buildUrl(site.api, `&t=1&ac=videolist`);
       }
 
-      const res = await axios.get(url, { timeout: 3000 });
+      // const res = await axios.get(url, { timeout: 3000 });
+      const res = await fetch(url, { timeout: 3000 });
 
       let json;
       if (site.type === 0) json = parser.parse(res.data);
@@ -120,7 +131,8 @@ const zy = {
         total = jsondata.total;
         filters = [];
       } else if (site.type === 2) {
-        const resClass = await axios.get(site.api);
+        // const resClass = await axios.get(site.api);
+        const resClass = await fetch(site.api);
         const jsonClass = resClass.data;
         const jsondataClass =
           jsonClass?.rss === undefined ? jsonClass : jsonClass.rss;
@@ -193,7 +205,8 @@ const zy = {
           site.api,
           `?ac=videolist&t=${t}&pg=${pg}&f=${JSON.stringify(f)}`
         );
-      const res = await axios.get(url);
+      // const res = await axios.get(url);
+      const res = await fetch(url);
       let json;
       if (site.type === 0) json = parser.parse(res.data);
       else json = res.data;
@@ -239,7 +252,8 @@ const zy = {
       const site = await sites.find({ key: key });
       // const url = buildUrl(site.api,`?ac=hot&h=${h}`);
       const url = buildUrl(site.api, `?ac=hot`);
-      const res = await axios.get(url);
+      // const res = await axios.get(url);
+      const res = await fetch(url);
       let json;
       if (site.type === 0) json = parser.parse(res.data);
       else json = res.data;
@@ -298,7 +312,8 @@ const zy = {
     try {
       const site = await sites.find({ key: key });
       const url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
-      const res = await axios.get(url, { timeout: 3000 });
+      // const res = await axios.get(url, { timeout: 3000 });
+      const res = await fetch(url, { timeout: 3000 });
 
       let json;
       if (site.type === 0) json = parser.parse(res.data);
@@ -330,7 +345,8 @@ const zy = {
     try {
       const site = await sites.find({ key: key });
       const url = buildUrl(site.api, `?ac=search&wd=${encodeURI(wd)}`);
-      const res = await axios.get(url);
+      // const res = await axios.get(url);
+      const res = await fetch(url);
 
       let json;
       if (site.type === 0) json = parser.parse(res.data);
@@ -412,7 +428,8 @@ const zy = {
     try {
       const site = await sites.find({ key: key });
       const url = buildUrl(site.api, `?ac=videolist&ids=${id}`);
-      const res = await axios.get(url);
+      // const res = await axios.get(url);
+      const res = await fetch(url);
       let json;
       if (site.type === 0) json = parser.parse(res.data);
       else json = res.data;
@@ -541,16 +558,17 @@ const zy = {
   async parserFilmUrl(url) {
     const hostname = new URL(url).hostname;
     try {
-      const response = await axios.get(url);
+      const res = await fetch(url);
+      // const response = await axios.get(url);
       let urlPlay;
       // 全局提取完整地址
-      const urlGlobal = response.data.match(/(https?:\/\/[^\s]+\.m3u8)/);
+      const urlGlobal = res.data.match(/(https?:\/\/[^\s]+\.m3u8)/);
       if (urlGlobal) {
         urlPlay = urlGlobal[0];
         return urlPlay;
       }
       // 局部提取地址 提取参数拼接域名
-      const urlParm = response.data.match(/\/(.*?)(\.m3u8)/);
+      const urlParm = res.data.match(/\/(.*?)(\.m3u8)/);
       if (urlParm) urlPlay = hostname + urlParm[0];
       return urlPlay;
     } catch (err) {
@@ -585,7 +603,8 @@ const zy = {
    */
   async isLiveM3U8(url) {
     try {
-      const res = await axios.get(url);
+      const res = await fetch(url);
+      // const res = await axios.get(url);
       const m3u8Content = res.data;
 
       // 从m3u8文件中解析媒体段(MEDIA-SEQUENCE)的值
@@ -617,7 +636,8 @@ const zy = {
         ? `https://movie.douban.com/subject/${id}`
         : `https://www.douban.com/search?cat=1002&q=${nameToSearch}`;
     try {
-      const res = await axios.get(doubanSearchLink);
+      const res = await fetch(doubanSearchLink);
+      // const res = await axios.get(doubanSearchLink);
       const $ = cheerio.load(res.data);
       let link = "";
       $("div.result").each(function () {
@@ -651,8 +671,9 @@ const zy = {
       if (link.includes("https://www.douban.com/search")) {
         return "暂无评分";
       } else {
-        const response = await axios.get(link);
-        const parsedHtml = cheerio.load(response.data);
+        const res = await fetch(link);
+        // const response = await axios.get(link);
+        const parsedHtml = cheerio.load(res.data);
         const rating = parsedHtml("body")
           .find("#interest_sectl")
           .first()
@@ -681,12 +702,13 @@ const zy = {
    */
   async doubanRecommendations(id, name, year) {
     try {
-      const link = await this.doubanLink(id, name, year);
-      if (link.includes("https://www.douban.com/search")) {
+      const url = await this.doubanLink(id, name, year);
+      if (url.includes("https://www.douban.com/search")) {
         return [];
       } else {
-        const response = await axios.get(link);
-        const $ = cheerio.load(response.data);
+        const res = await fetch(url);
+        // const response = await axios.get(link);
+        const $ = cheerio.load(res.data);
         const recommendations = $("div.recommendations-bd")
           .find("div>dl>dd>a")
           .map((index, element) => $(element).text())
@@ -706,13 +728,14 @@ const zy = {
    * @returns 豆瓣热点视频推荐列表
    */
   async doubanHot(type, tag, limit = 20, start = 0) {
-    const doubanHotLink = `https://movie.douban.com/j/search_subjects?type=${type}&tag=${encodeURI(
+    const url = `https://movie.douban.com/j/search_subjects?type=${type}&tag=${encodeURI(
       tag
     )}&page_limit=${limit}&page_start=${start}`;
     try {
       const {
         data: { subjects }
-      } = await axios.get(doubanHotLink);
+      } = await fetch(url);
+      // await axios.get(doubanHotLink);
       return subjects.map((item) => ({
         vod_id: item.id,
         vod_name: item.title,
@@ -728,9 +751,10 @@ const zy = {
    * @returns 夸克电影实时热门列表
    */
   async quarkHot() {
-    const quarkHotLink = `https://com-cms.quark.cn/cms?partner_id=quark-covid&group=quark-covid&uc_param_str=dnfrpfbivessbtbmnilauputogpintnwmtsvcppcprsnnnchmicckpgi&uid=`;
+    const url = `https://com-cms.quark.cn/cms?partner_id=quark-covid&group=quark-covid&uc_param_str=dnfrpfbivessbtbmnilauputogpintnwmtsvcppcprsnnnchmicckpgi&uid=`;
     try {
-      const res = await axios.get(quarkHotLink);
+      // const res = await axios.get(quarkHotLink);
+      const res = await fetch(url);
       const resData = res.data;
       if (resData.success) {
         return resData.data.allUserRes.hot_search_movie[0].items[0].list.map(
@@ -753,9 +777,10 @@ const zy = {
    * @returns 百度实时热门列表
    */
   async baiduHot() {
-    const quarkHotLink = `https://opendata.baidu.com/api.php?resource_id=51274&ks_from=aladdin&new_need_di=1&from_mid=1&sort_type=1&query=%E7%94%B5%E8%A7%86%E5%89%A7%E6%8E%92%E8%A1%8C%E6%A6%9C&tn=wisexmlnew&dsp=iphone&format=json&ie=utf-8&oe=utf-8&q_ext=%7B%22query_key%22%3A1%2C%22is_person_related%22%3A0%2C%22video_type_list%22%3A%5B%5D%7D&sort_key=1&stat0=%E7%94%B5%E8%A7%86%E5%89%A7&stat1=%E5%85%A8%E9%83%A8&stat2=%E5%85%A8%E9%83%A8&stat3=%E5%85%A8%E9%83%A8&rn=10&pn=0&trigger_srcid=51251&sid=38515_36559_38540_38591_38596_38582_36804_38434_38414_38640_26350_38623`;
+    const url = `https://opendata.baidu.com/api.php?resource_id=51274&ks_from=aladdin&new_need_di=1&from_mid=1&sort_type=1&query=%E7%94%B5%E8%A7%86%E5%89%A7%E6%8E%92%E8%A1%8C%E6%A6%9C&tn=wisexmlnew&dsp=iphone&format=json&ie=utf-8&oe=utf-8&q_ext=%7B%22query_key%22%3A1%2C%22is_person_related%22%3A0%2C%22video_type_list%22%3A%5B%5D%7D&sort_key=1&stat0=%E7%94%B5%E8%A7%86%E5%89%A7&stat1=%E5%85%A8%E9%83%A8&stat2=%E5%85%A8%E9%83%A8&stat3=%E5%85%A8%E9%83%A8&rn=10&pn=0&trigger_srcid=51251&sid=38515_36559_38540_38591_38596_38582_36804_38434_38414_38640_26350_38623`;
     try {
-      const res = await axios.get(quarkHotLink);
+      // const res = await axios.get(quarkHotLink);
+      const res = await fetch(url);
       const resData = res.data;
       if (resData.ResultCode === 0) {
         console.log(
@@ -783,10 +808,10 @@ const zy = {
    * @param {*} plat 平台 1.腾讯视频  2.爱奇艺  3.优酷  4.芒果
    * @returns 酷云热点视频推荐列表
    */
-  async kuyunHot(date, type, plat) {
+  async kuyunHot(date: Date, type: number, plat: number) {
     const kuyunHotLink = `https://eye.kuyun.com/api/netplat/ranking?date=${date}&type=${type}&plat=${plat}`;
     try {
-      const res = await axios.get(kuyunHotLink);
+      const res = await fetch(kuyunHotLink);
       const resData = res.data;
       if (resData.status) {
         return resData.data.list.map((item) => ({
@@ -806,14 +831,19 @@ const zy = {
    * @param {*} url 需要解析的地址
    * @returns 解析标题
    */
-  async getAnalysizeTitle(url) {
+  async getAnalysizeTitle(url: string) {
     try {
-      const res = await axios.get(url, { responseType: "arraybuffer" });
+      const client = await getClient();
+      const res = await client.get(url, {
+        responseType: ResponseType.Binary
+      });
+      // const res = await axios.get(url, { responseType: "arraybuffer" });
       let html = "";
+      const buffer = new Uint8Array(res.data);
       if (url.includes("sohu")) {
-        html = iconv.decode(Buffer.from(res.data), "gb2312");
+        html = iconv.decode(buffer, "gb2312");
       } else {
-        html = iconv.decode(Buffer.from(res.data), "utf-8");
+        html = iconv.decode(buffer, "utf-8");
       }
       const $ = cheerio.load(html);
       return $("title").text();
@@ -832,7 +862,8 @@ const zy = {
       console.log(url, encodeURI(url), header);
       // if( header ) res = await axios.get(url, {headers: { ...header }});
       // else res = await axios.get(url);
-      res = await axios.get(url);
+      res = await fetch(url);
+      // res = await axios.get(url);
       let response;
 
       try {
@@ -871,7 +902,8 @@ const zy = {
           url
         )}`;
 
-      const res = await axios.get(parsueUrl);
+      // const res = await axios.get(parsueUrl);
+      const res = await fetch(parsueUrl);
       return res.data;
     } catch (err) {
       throw err;
@@ -883,7 +915,8 @@ const zy = {
    */
   async checkSupportIpv6() {
     try {
-      const res = await axios.get("https://6.ipw.cn");
+      const res = await fetch("https://6.ipw.cn");
+      // const res = await axios.get("https://6.ipw.cn");
       const ip = res.data;
       const isIpv6 = /([0-9a-z]*:{1,4}){1,7}[0-9a-z]{1,4}/i.test(ip);
       return isIpv6;
@@ -894,40 +927,24 @@ const zy = {
   /**
    * 判断url是否为ipv6
    * @param {String} url  请求地址
-   * @return {Boolean}
+   * @return {String} ["IPV6","IPV4","Unknown"]
    */
-  async checkUrlIpv6(url) {
-    let hostname = new URL(url).hostname;
-    const ipv6Regex = /^\[([\da-fA-F:]+)\]$/; // 匹配 IPv6 地址
-    const match = ipv6Regex.exec(hostname);
-    if (match) {
-      // console.log(match[1])
-      hostname = match[1];
-    }
-    const ipType = net.isIP(hostname);
-    if (ipType === 4) {
-      // console.log(`1.ipv4:${hostname}`)
-      return "IPv4";
-    } else if (ipType === 6) {
-      // console.log(`1.ipv6:${hostname}`)
-      return "IPv6";
-    } else {
-      try {
-        const addresses = await dns.promises.resolve(hostname);
-        const ipType = net.isIP(addresses[0]);
-        if (ipType === 4) {
-          // console.log(`2.ipv4:${addresses[0]}`)
-          return "IPv4";
-        } else if (ipType === 6) {
-          // console.log(`2.ipv6:${addresses[0]}`)
-          return "IPv6";
-        } else {
-          return "Unknown";
-        }
-      } catch (err) {
-        console.log(url, hostname);
-        throw err;
+  async checkUrlIpv6(url: string | URL) {
+    try {
+      let hostname = url instanceof URL ? url.hostname : new URL(url).hostname;
+      const ipv6Regex = /^\[([\da-fA-F:]+)\]$/; // 匹配 IPv6 地址
+      const match = ipv6Regex.exec(hostname);
+      if (match) hostname = match[1];
+      
+      let ipType = isIp(hostname);
+      if (!ipType) {
+        const address:string = await invoke("resolve_ip_address", { address: hostname });
+        ipType = isIp(address);
       }
+      
+      return ipType === 4 ? "IPv4" : ipType === 6 ? "IPv6" : "Unknown";
+    } catch (err) {
+      throw err;
     }
   },
   /**
@@ -937,7 +954,8 @@ const zy = {
    */
   async formatHTML(url) {
     try {
-      const res = await axios.get(url);
+      const res = await fetch(url);
+      // const res = await axios.get(url);
       const html = res.data;
       const $ = cheerio.load(html);
 

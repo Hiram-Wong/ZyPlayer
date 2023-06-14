@@ -132,7 +132,7 @@ import 'v3-infinite-loading/lib/style.css';
 
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useClipboard, useEventBus } from '@vueuse/core';
-import { useIpcRenderer } from '@vueuse/electron';
+// import { useIpcRenderer } from '@vueuse/electron';
 import axios from 'axios';
 import _ from 'lodash';
 import PQueue from 'p-queue';
@@ -142,10 +142,11 @@ import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref } from 'vue';
 
 import { channelList, iptv, setting } from '@/lib/dexie';
+import { createWin, playerWin } from '@/lib/tauri/actions';
 import zy from '@/lib/utils/tools';
 import { usePlayStore, useSettingStore } from '@/store';
 
-const ipcRenderer = useIpcRenderer();
+// const ipcRenderer = useIpcRenderer();
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
@@ -362,7 +363,7 @@ const playEvent = (item: { name: any }) => {
     },
   });
   console.log({ epg, skipIpv6: iptvSetting.value.skipIpv6 });
-  ipcRenderer.send('openPlayWindow', item.name);
+  playerWin();
 };
 
 // 检查状态

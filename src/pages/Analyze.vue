@@ -33,12 +33,18 @@
       </div>
     </div>
     <div class="analysis-play">
-      <div
-        class="analysis-player"
+      <iframe
+        ref="iframeRef"
+        :key="key"
+        class="analysis-play-box"
         :class="isSupport && quickSearchType !== 'search' ? 'analysis-play-box-hidden' : 'analysis-play-box-show'"
-      >
-        <webview class="webview" :src="iframeUrl" disablewebsecurity allowpopups />
-      </div>
+        :src="iframeUrl"
+        allowtransparency="true"
+        frameborder="0"
+        framespacing="0"
+        scrolling="no"
+        allowfullscreen="true"
+      ></iframe>
       <div class="analysis-setting">
         <div class="analysis-setting-group">
           <t-select v-model="selectAnalysisApi" placeholder="请选择接口" size="large" class="select-api">
@@ -97,7 +103,9 @@ const urlTitle = ref(''); // 播放地址的标题
 const analysisApi = ref([]); // 解析接口api列表
 const selectAnalysisApi = ref(null); // 选择的解析接口
 const analysisUrl = ref(null); // 输入需要解析地址
-const iframeUrl = ref(null); // 解析接口+需解析的地址
+const iframeUrl = ref(); // 解析接口+需解析的地址
+const iframeRef = ref(null); // iframe dom节点
+const key = new Date().getTime(); // 解决iframe不刷新问题
 
 const isHistoryVisible = ref(false);
 const isSearchDialog = ref(false);
@@ -137,12 +145,12 @@ const getAnalysisApi = async () => {
 };
 
 // 格式化 url 公共方法
-const formatUrlMethod = (url) => {
+const formatUrlMethod = (url: string) => {
   return url.split('?')[0];
 };
 
 // 解析函数公共方法
-const getVideoInfo = async (url, title = '') => {
+const getVideoInfo = async (url: string, title= '') => {
   if (!selectAnalysisApi.value || !analysisUrl.value) {
     MessagePlugin.error('请选择解析接口或输入需要解析的地址');
     return;
@@ -153,8 +161,10 @@ const getVideoInfo = async (url, title = '') => {
     MessagePlugin.error('无效的解析接口');
     return;
   }
+  console.log(url)
 
   urlTitle.value = title || (await zy.getAnalysizeTitle(url));
+  console.log(urlTitle.value)
   MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
 
   const res = await analyzeHistory.find({ analyzeId: selectAnalysisApi.value, videoUrl: url });
@@ -174,7 +184,7 @@ const getVideoInfo = async (url, title = '') => {
 };
 
 // input 变化
-const formatUrlEvent = (url) => {
+const formatUrlEvent = (url: any) => {
   const formatUrl = formatUrlMethod(url);
   analysisUrl.value = formatUrl;
 };
@@ -185,14 +195,14 @@ const analysisEvent = async () => {
 };
 
 // 平台回调解析
-const platformPlay = async (url, title) => {
+const platformPlay = async (url: any, title: string | undefined) => {
   const formatUrl = formatUrlMethod(url);
   analysisUrl.value = formatUrl;
   await getVideoInfo(formatUrl, title);
 };
 
 // 历史解析
-const historyPlayEvent = async (item) => {
+const historyPlayEvent = async (item: { analyzeId: null; videoUrl: any; videoName: string | undefined; id: any }) => {
   selectAnalysisApi.value = item.analyzeId;
   const formatUrl = formatUrlMethod(item.videoUrl);
   analysisUrl.value = formatUrl;
@@ -209,7 +219,7 @@ const showSupportEvent = async () => {
 };
 
 // 打开平台iframe
-const openPlatform = (item) => {
+const openPlatform = (item: { url: any; name: any }) => {
   const { name, url } = item;
   platformAnalysisData.value = { name, url };
   console.log(platformAnalysisData.value);
@@ -232,7 +242,7 @@ eventBus.on(async () => {
   getAnalysisApi();
 });
 
-const platformPlayStatus = (status, url, title) => {
+const platformPlayStatus = (status: boolean, url: string, title: string) => {
   miniOptions.value.isMini = status;
   miniOptions.value.miniUrl = url;
   miniOptions.value.miniTitle = title;
@@ -318,15 +328,10 @@ const shareEvent = () => {
     .analysis-play-box-hidden {
       height: calc(100vh - 14em);
     }
-    .analysis-player {
+    .analysis-play-box {
       width: 100%;
       background: var(--td-bg-color-page) url(../assets/bg-player.jpg) no-repeat center center;
       border-radius: var(--td-radius-extraLarge);
-      overflow: hidden;
-      .webview {
-        height: 100%;
-        width: 100%;
-      }
     }
     .analysis-setting {
       margin-top: 5px;

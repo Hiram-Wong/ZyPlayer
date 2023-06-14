@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <div class="container-header" :class="!isMaximize ? 'drag' : 'no-drag'">
+    <div class="container-header"  data-tauri-drag-region>
       <div class="player-top">
-        <div class="player-top-left" :style="{ 'padding-left': platform === 'darwin' && !isMaximize ? '60px' : '0' }">
+        <div class="player-top-left" :style="{ 'padding-left': systemPlatform === 'darwin' && !isMaximize ? '60px' : '0' }">
           <div class="open-main-win player-center" @click="openMainWinEvent">
             <home-icon size="1.5em" />
             <span class="tip-gotomain">回到主界面</span>
@@ -104,7 +104,7 @@
             </div>
           </div>
           <div class="player-top-right-window">
-            <span v-show="platform !== 'darwin'" class="window-separator"></span>
+            <span v-show="systemPlatform !== 'darwin'" class="window-separator"></span>
             <window-view />
           </div>
         </div>
@@ -390,9 +390,10 @@ import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import '@/style/player/aliplayer-h5-min.css';
 import '@/style/player/tcplayer.min.css';
 
+import { appWindow, getAll, WebviewWindow } from '@tauri-apps/api/window';
 import VePlayer from '@volcengine/veplayer';
 import { useClipboard } from '@vueuse/core';
-import { useIpcRenderer } from '@vueuse/electron';
+// import { useIpcRenderer } from '@vueuse/electron';
 import Aliplayer from 'aliyun-aliplayer';
 import Artplayer from 'artplayer';
 import flvjs from 'flv.js';
@@ -431,23 +432,26 @@ import playerZoomIcon from '@/assets/player/zoom.svg?raw';
 import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import { analyze, channelList, history, setting, star } from '@/lib/dexie';
+import { createWin, mainWin } from '@/lib/tauri/actions';
 import zy from '@/lib/utils/tools';
-import { usePlayStore } from '@/store';
+import { usePlayStore, useSettingStore } from '@/store';
 
 import SharePopup from './common/SharePopup.vue';
 
 // 用于窗口管理
-const ipcRenderer = useIpcRenderer();
+// const ipcRenderer = useIpcRenderer();
 
-const remote = window.require('@electron/remote');
+// const remote = window.require('@electron/remote');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { BrowserWindow } = require('@electron/remote');
+// const { BrowserWindow } = require('@electron/remote');
 
-const win = remote.getCurrentWindow();
-const { platform } = process;
+// const win = remote.getCurrentWindow();
+// const { platform } = process;
 
 // 获取pinia播放数据
 const store = usePlayStore();
+const storeSetting = useSettingStore();
+
 const type = computed(() => {
   return store.getType;
 });
@@ -456,6 +460,10 @@ const data = computed(() => {
 });
 const set = computed(() => {
   return store.getSetting;
+});
+const systemPlatform = computed(() => {
+  // 'linux', 'darwin', 'ios', 'freebsd', 'dragonfly', 'netbsd', 'openbsd', 'solaris', 'android', 'win32'
+  return storeSetting.systemPlatform;
 });
 const info = ref(data.value.info);
 const ext = ref(data.value.ext);
@@ -804,7 +812,7 @@ watch(
     if (val?.hasStart) {
       val.on(Events.PIP_CHANGE, (isPip) => {
         console.log('isPip', isPip);
-        ipcRenderer.send('toggle-playerPip', isPip);
+        // ipcRenderer.send('toggle-playerPip', isPip);
       });
     }
   },
@@ -1121,7 +1129,7 @@ const initFilmPlayer = async (isFirst) => {
 
 // 嗅探
 const sniffer = () => {
-  win.webContents.setAudioMuted(true);
+  // win.webContents.setAudioMuted(true);
   const iframeWindow = iframeRef.value.contentWindow;
   const videoFormats = ['.m3u8', '.mp4', '.flv'];
 
@@ -1165,7 +1173,7 @@ const sniffer = () => {
 
           onlineUrl.value = '';
           createPlayer(videoFormat.slice(1));
-          win.webContents.setAudioMuted(false);
+          // win.webContents.setAudioMuted(false);
 
           clearInterval(snifferTimer.value);
           break;
@@ -1628,34 +1636,45 @@ const shareEvent = () => {
   };
 };
 
-// electron窗口置顶
-const toggleAlwaysOnTop = () => {
-  if (win.isAlwaysOnTop()) {
-    win.setAlwaysOnTop(false);
-    BrowserWindow.getFocusedWindow().webContents.send('alwaysOnTop', 'no');
-    isPinned.value = true;
+// 窗口置顶
+const toggleAlwaysOnTop = async () => {
+  if (isPinned.value === false) {
+    await appWindow.setAlwaysOnTop(false);
   } else {
-    win.setAlwaysOnTop(true);
-    BrowserWindow.getFocusedWindow().webContents.send('alwaysOnTop', 'yes');
-    isPinned.value = false;
+    await appWindow.setAlwaysOnTop(true);
   }
+  isPinned.value = !isPinned.value;
 };
 
 // 全屏事件
 const minMaxEvent = () => {
-  win.on('enter-full-screen', () => {
+  appWindow.listen('fullscreen', () => {
     console.log('进入全屏模式');
     isMaximize.value = true;
   });
-  win.on('leave-full-screen', () => {
+
+  appWindow.listen('unfullscreen', () => {
     console.log('退出全屏模式');
     isMaximize.value = false;
   });
+  // win.on('enter-full-screen', () => {
+  //   console.log('进入全屏模式');
+  //   isMaximize.value = true;
+  // });
+  // win.on('leave-full-screen', () => {
+  //   console.log('退出全屏模式');
+  //   isMaximize.value = false;
+  // });
 };
 
 // 打开主窗口
-const openMainWinEvent = () => {
-  ipcRenderer.send('showMainWin');
+const openMainWinEvent = async () => {
+  const mainWindow = await WebviewWindow.getByLabel('main');
+  console.log(mainWindow);
+  if (mainWindow) {
+    await mainWindow?.unminimize();
+    await mainWindow?.setFocus();
+  } else mainWin();
 };
 </script>
 

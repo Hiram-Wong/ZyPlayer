@@ -189,21 +189,23 @@
 <script setup lang="ts">
 import 'v3-infinite-loading/lib/style.css';
 
+import { WebviewWindow } from '@tauri-apps/api/window';
 import { useEventBus } from '@vueuse/core';
-import { useIpcRenderer } from '@vueuse/electron';
+// import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { MoreIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { onMounted, ref } from 'vue';
 
 import { setting, sites } from '@/lib/dexie';
+import { createWin, playerWin } from '@/lib/tauri/actions';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
 
 import HotView from './film/Hot.vue';
 import SearchView from './film/Search.vue';
 
-const ipcRenderer = useIpcRenderer();
+// const ipcRenderer = useIpcRenderer();
 
 const store = usePlayStore();
 const infiniteId = ref(+new Date()); // infinite-loading此属性更改重置组件
@@ -627,7 +629,7 @@ const playEvent = async (item) => {
     },
   });
 
-  ipcRenderer.send('openPlayWindow', item.vod_name);
+  playerWin();
 };
 
 // 监听设置默认源变更
@@ -662,9 +664,6 @@ eventBus.on(async () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .film-container {
   overflow: hidden;
   position: relative;

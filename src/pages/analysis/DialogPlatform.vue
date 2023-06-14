@@ -45,7 +45,7 @@ watch(
   },
 );
 
-const openPlatform = (item) => {
+const openPlatform = (item: any) => {
   emit('open-platform', { ...item });
 };
 </script>
