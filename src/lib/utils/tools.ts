@@ -587,18 +587,45 @@ const zy = {
     try {
       const res = await axios.get(url);
       const m3u8Content = res.data;
-
-      // 从m3u8文件中解析媒体段(MEDIA-SEQUENCE)的值
-      const mediaSequenceMatch = m3u8Content.match(
-        /#EXT-X-MEDIA-SEQUENCE:(\d+)/
-      );
-      const mediaSequence = mediaSequenceMatch
-        ? parseInt(mediaSequenceMatch[1])
-        : null;
-
-      // 判断是直播还是点播
-      const isLiveStream = mediaSequence === null || mediaSequence === 0;
-      return !isLiveStream;
+      
+      let isLiveStream = true;
+      if (isLiveStream) {
+      	// 结尾不存在 #EXT-X-ENDLIST，那么一定是 直播，不是点播；
+      	if (m3u8Content.indexOf('#EXT-X-ENDLIST') != -1) {
+      		isLiveStream = false;
+      	}
+      }
+      if (isLiveStream) {
+      	if (m3u8Content.indexOf('#EXT-X-PLAYLIST-TYPE') != -1) {
+      		const playlistTypeMatch = m3u8Content.match(
+      			/#EXT-X-PLAYLIST-TYPE:(.*)/
+      		);
+      		const playlistTypeSequence = playlistTypeMatch ?
+      			playlistTypeMatch[1] :
+      			null;
+      		// VOD 即 Video on Demand，表示该视频流为点播源
+      		if (playlistTypeSequence.toUpperCase() == 'VOD') {
+      			isLiveStream = false;
+      		}
+      	}
+      }
+      if (isLiveStream) {
+      	if (m3u8Content.indexOf('#EXT-X-MEDIA-SEQUENCE') != -1) {
+      		// 从m3u8文件中解析媒体段(MEDIA-SEQUENCE)的值
+      		const mediaSequenceMatch = m3u8Content.match(
+      			/#EXT-X-MEDIA-SEQUENCE:(\d+)/
+      		);
+      		const mediaSequence = mediaSequenceMatch ?
+      			parseInt(mediaSequenceMatch[1]) :
+      			null;
+      
+      		// 0，表示该视频流为点播源
+      		if (mediaSequence === 0) {
+      			isLiveStream = false;
+      		}
+      	}
+      }
+      return isLiveStream;
     } catch (err) {
       throw err;
     }
