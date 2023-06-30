@@ -587,18 +587,16 @@ const zy = {
     try {
       const res = await axios.get(url);
       const m3u8Content = res.data;
-
-      // 从m3u8文件中解析媒体段(MEDIA-SEQUENCE)的值
-      const mediaSequenceMatch = m3u8Content.match(
-        /#EXT-X-MEDIA-SEQUENCE:(\d+)/
+      
+      const isLiveStream = !(
+        m3u8Content.indexOf('#EXT-X-ENDLIST') !== -1 ||
+        (m3u8Content.indexOf('#EXT-X-PLAYLIST-TYPE') !== -1 &&
+          m3u8Content.match(/#EXT-X-PLAYLIST-TYPE:(.*)/)[1].toUpperCase() === 'VOD') ||
+        (m3u8Content.indexOf('#EXT-X-MEDIA-SEQUENCE') !== -1 &&
+          parseInt(m3u8Content.match(/#EXT-X-MEDIA-SEQUENCE:(\d+)/)[1]) === 0)
       );
-      const mediaSequence = mediaSequenceMatch
-        ? parseInt(mediaSequenceMatch[1])
-        : null;
-
-      // 判断是直播还是点播
-      const isLiveStream = mediaSequence === null || mediaSequence === 0;
-      return !isLiveStream;
+      
+      return isLiveStream;
     } catch (err) {
       throw err;
     }
