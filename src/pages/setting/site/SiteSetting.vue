@@ -35,7 +35,7 @@
       row-key="id"
       :data="emptyData ? [] : data"
       :sort="sort"
-      height="calc(100vh - 240px)"
+      height="calc(100vh - 205px)"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"

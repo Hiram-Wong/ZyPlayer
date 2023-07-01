@@ -33,8 +33,6 @@ const settingTag = ref('ConfigBase');
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-
 .setting-container {
   overflow: hidden;
   height: calc(100vh - var(--td-comp-size-l));
@@ -42,7 +40,7 @@ const settingTag = ref('ConfigBase');
   .container-item {
     height: calc(100vh - var(--td-comp-size-l) - var(--td-comp-size-xxl));
     overflow: auto;
-    padding: 20px 0;
+    padding: var(--td-comp-paddingTB-s) 0;
   }
 
   :deep(.t-tabs) {
