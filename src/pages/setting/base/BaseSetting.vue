@@ -128,13 +128,14 @@
       <t-form-item label="其他" name="data">
         <t-space>
           <span class="title" @click="resetEvent">恢复出厂</span>
-          <span class="title" @click="resetCache">清理缓存</span>
+          <span class="title" @click="resetCache">清理数据</span>
           <span class="title" @click="easyConfig">一键配置</span>
           <span class="title" @click="checkUpdate">检查更新</span>
         </t-space>
 
         <dialog-easy-config-view v-model:visible="isEasyConfigDialog" />
         <dialog-update-view v-model:visible="isUpdateDialog" />
+        <dialog-clear-view v-model:visible="isClearDialog" />
       </t-form-item>
     </t-form>
   </div>
@@ -157,6 +158,7 @@ import zy from '@/lib/utils/tools';
 import { usePlayStore, useSettingStore } from '@/store';
 
 import DialogClassView from './components/DialogClass.vue';
+import DialogClearView from './components/DialogClear.vue';
 import DialogDnsView from './components/DialogDns.vue';
 import DialogEasyConfigView from './components/DialogEasyConfig.vue';
 import DialogUaView from './components/DialogUA.vue';
@@ -174,9 +176,10 @@ const classDialogData = ref({ data: [], type: 'rootClassFilter' });
 const isEasyConfigDialog = ref(false);
 const isUpdateDialog = ref(false);
 const isDnsDialog = ref(false);
+const isClearDialog = ref(false);
 const dnsDialogData = ref({ data: '', type: 'dns' });
 const isUaDialog = ref(false);
-const uaDialogData = ref({ data: '', type: 'dns' });
+const uaDialogData = ref({ data: '', type: 'ua' });
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -299,10 +302,10 @@ const resetEvent = () => {
   }, 1000);
 };
 
-// 清理缓存
-const resetCache = async () => {
-  const size = await clearCache();
-  MessagePlugin.success(`清除缓存成功, 共清理 ${size} MB`);
+// 清理内存
+const resetCache = () => {
+  console.log('clearSessionAndData');
+  isClearDialog.value = true;
 };
 
 // 清除数据库
@@ -312,10 +315,8 @@ const clearDB = () => {
 
 // 清除缓存
 const clearCache = async () => {
-  const ses = win.webContents.session;
-  const size = ((await ses.getCacheSize()) / 1024 / 1024).toFixed(2);
-  await ses.clearCache();
-  return size;
+  const { session } = win.webContents;
+  await session.clearCache();
 };
 
 // 组合键格式化
@@ -515,7 +516,7 @@ const checkUpdate = () => {
 };
 
 // 一键配置
-const easyConfig = async () => {
+const easyConfig = () => {
   console.log('easyConfig');
   isEasyConfigDialog.value = true;
 };
@@ -589,8 +590,6 @@ eventBus.on(async () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-
 .setting-base-container {
   :deep(.t-radio-group.t-size-m .t-radio-button) {
     height: auto;
