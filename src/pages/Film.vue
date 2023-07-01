@@ -549,6 +549,7 @@ const searchEvent = async () => {
   searchCurrentSite.value = FilmSiteSetting.value.searchGroup[0];
 };
 
+// 搜索加载数据
 const getSearchList = async () => {
   const site = searchCurrentSite.value;
   const index = FilmSiteSetting.value.searchGroup.indexOf(searchCurrentSite.value);
