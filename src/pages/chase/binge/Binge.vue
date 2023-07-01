@@ -4,9 +4,9 @@
       <div class="main-flow-wrap">
         <div v-for="item in bingeList" :key="item.id" class="card-wrap">
           <div class="card" @click="playEvent(item)">
-            <div v-if="item.videoType" class="card-header">
+            <div v-if="item.videoUpdate" class="card-header">
               <span class="card-header-tag card-header-tag-orange">
-                <span class="card-header-tag-tagtext">{{ item.videoType }}</span>
+                <span class="card-header-tag-tagtext">有更新哟</span>
               </span>
             </div>
             <div class="card-main">
@@ -18,9 +18,9 @@
                 :lazy="true"
                 fit="cover"
               >
-                <template v-if="item.videoUpdate" #overlayContent>
+                <template #overlayContent>
                   <div class="op">
-                    <span style="color: #fdfdfd">有更新哟</span>
+                    <span v-if="item.siteName"> {{ item.siteName }}</span>
                   </div>
                 </template>
               </t-image>
@@ -72,6 +72,11 @@ const infiniteId = ref(+new Date());
 const getBingeList = async () => {
   try {
     const res = await star.pagination(pagination.value.pageIndex, pagination.value.pageSize);
+    res.list.map(async (item) => {
+      const { siteKey } = item;
+      const { name } = await sites.find({ key: siteKey });
+      item.siteName = name;
+    });
     bingeList.value = _.unionWith(bingeList.value, res.list, _.isEqual);
     pagination.value.count = res.total;
     pagination.value.pageIndex++;
@@ -174,8 +179,6 @@ defineExpose({
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
 .binge-container {
   overflow-y: auto;
   height: inherit;
@@ -252,17 +255,15 @@ defineExpose({
             }
             .card-main-item {
               .op {
-                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: saturate(180%) blur(20px);
+                background-color: rgba(22, 22, 23, 0.8);
+                border-radius: 0 0 5px 5px;
+                width: 100%;
+                color: rgba(255, 255, 255, 0.8);
                 position: absolute;
-                bottom: 5px;
-                right: 5px;
-                padding: 0 8px;
-                border-radius: 5px;
-                span {
-                  font-size: 10px;
-                  font-weight: 500;
-                  color: #fdfdfd;
-                }
+                bottom: 0px;
+                display: flex;
+                justify-content: center;
               }
             }
           }

@@ -15,12 +15,14 @@
               <t-image
                 class="card-main-item"
                 :src="detail.videoImage"
-                :style="{ width: '190px', height: '105px', borderRadius: '4px' }"
+                :style="{ width: '190px', height: '105px', borderRadius: '4px', background: 'none' }"
                 :lazy="true"
                 fit="cover"
               >
-                <template v-if="detail.videoRemarks" #overlayContent>
-                  <div class="op" @click.stop="removeEvent(detail)">{{ detail.videoRemarks }}</div>
+                <template #overlayContent>
+                  <div class="op">
+                    <span v-if="detail.siteName"> {{ detail.siteName }}</span>
+                  </div>
                 </template>
               </t-image>
             </div>
@@ -80,8 +82,11 @@ const getHistoryList = async () => {
   const { pageIndex, pageSize } = pagination.value;
   const res = await history.pagination(pageIndex, pageSize);
 
-  res.list.forEach((item) => {
-    const { date } = item;
+  res.list.forEach(async (item) => {
+    const { date, siteKey } = item;
+    const { name } = await sites.find({ key: siteKey });
+    item.siteName = name;
+    console.log(item);
     const timeDiff = filterDate(date);
     let timeKey;
     if (timeDiff === 0) timeKey = 'today';
@@ -188,9 +193,6 @@ defineExpose({
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .history-container {
   overflow-y: auto;
   height: 100%;
@@ -238,20 +240,36 @@ defineExpose({
           position: relative;
           display: inline-block;
           vertical-align: top;
-
-          // padding: 0 10px;
-          // @media screen and (min-width: 1251px) {
-          //   width: 20%;
-          // }
-          // @media screen and (min-width: 1499px) {
-          //   width: 16.666666%;
-          // }
-          // @media screen and (min-width: 1799px) {
-          //   width: 14.285714%;
-          // }
-          // @media screen and (min-width: 2048px) {
-          //   width: 12.5%;
-          // }
+          &-header {
+            position: absolute;
+            color: #fff;
+            font-size: 12px;
+            z-index: 15;
+            height: 18px;
+            line-height: 18px;
+            right: 0;
+            top: 0;
+            &-tag {
+              height: 18px;
+              line-height: 18px;
+              padding: 1px 6px;
+              border-radius: 0 7px 0 7px;
+              background: #03c8d4;
+              display: block;
+              &-tagtext {
+                display: inline-block;
+                font-size: 12px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-width: 100px;
+              }
+            }
+            &-tag-orange {
+              background: #ffdd9a;
+              color: #4e2d03;
+            }
+          }
           &-close {
             display: none;
             position: absolute;
@@ -273,12 +291,15 @@ defineExpose({
             }
             &-item {
               .op {
-                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: saturate(180%) blur(20px);
+                background-color: rgba(22, 22, 23, 0.8);
+                border-radius: 0 0 4px 4px;
+                width: 100%;
+                color: rgba(255, 255, 255, 0.8);
                 position: absolute;
-                bottom: 5px;
-                right: 5px;
-                padding: 0 3px 3px;
-                border-radius: 5px;
+                bottom: 0px;
+                display: flex;
+                justify-content: center;
               }
             }
           }
