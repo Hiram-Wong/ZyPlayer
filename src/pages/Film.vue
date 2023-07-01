@@ -662,9 +662,6 @@ eventBus.on(async () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .film-container {
   overflow: hidden;
   position: relative;
@@ -847,13 +844,13 @@ eventBus.on(async () => {
           z-index: 15;
           height: 18px;
           line-height: 18px;
-          right: 0;
+          left: 0;
           top: 0;
           &-tag {
             height: 18px;
             line-height: 18px;
             padding: 1px 6px;
-            border-radius: 0 7px 0 7px;
+            border-radius: 6px 0 6px 0;
             background: #03c8d4;
             display: block;
             &-tagtext {
