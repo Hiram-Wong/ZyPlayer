@@ -18,7 +18,7 @@
               Tips: 仅windwos支持在线更新; mac需签名(没钱); linux不支持。
               <br />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mac和linux用户请前往
-              <t-link theme="primary" href="https://github.com/Hiram-Wong/zyplayer/releases/" target="_blank">
+              <t-link theme="primary" href="https://github.com/Hiram-Wong/ZyPlayer/releases/" target="_blank">
                 github
               </t-link>
               下载

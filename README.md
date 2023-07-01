@@ -3,8 +3,8 @@
 </p>
 <p align="center">
 <a href="http://zyplayer.fun/" target="_blank">官网</a>
-<a href="https://github.com/Hiram-Wong/zyplayer/issues" target="_blank">反馈</a>
-<a href="https://github.com/Hiram-Wong/zyplayer/releases" target="_blank">下载</a>
+<a href="https://github.com/Hiram-Wong/ZyPlayer/issues" target="_blank">反馈</a>
+<a href="https://github.com/Hiram-Wong/ZyPlayer/releases" target="_blank">下载</a>
 </p>
 
 <h1 align="center">zyplayer</h1>
@@ -48,7 +48,7 @@
 
 ```shell
 1.安装 node.js version16 以上
-2.克隆项目  git clone https://github.com/Hiram-Wong/zyplayer.git
+2.克隆项目  git clone https://github.com/Hiram-Wong/ZyPlayer.git
 3.进入项目  cd zyplayer-master
 4.修改packgae.json "electron": "^19.1.9",
 5.安装依赖包  yarn
