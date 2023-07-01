@@ -417,14 +417,12 @@ const changeDefaultIptvEvent = async (item: any) => {
   iptvClassSelect.value = '全部';
   await channelList.clear();
   const { url } = await iptv.get(item);
-  await axios.get(url).then((res) => {
-    const { data } = res;
-    if (data) {
-      if (data.trim().startsWith('#EXTM3U')) m3u(data);
-      else txt(data);
-      MessagePlugin.success('设置成功');
-    }
-  });
+  const data = await zy.getConfig(url);
+  if (data) {
+    if (data.trim().startsWith('#EXTM3U')) m3u(data);
+    else txt(data);
+    MessagePlugin.success('设置成功');
+  }
   await setting.update({ defaultIptv: item });
   await Promise.all([getIptvSetting(), getChannelCount()]);
 
