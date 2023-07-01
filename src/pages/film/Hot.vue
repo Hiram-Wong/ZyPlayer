@@ -27,19 +27,29 @@
             <template v-for="i in 10" :key="i">
               <t-skeleton theme="text" :loading="loading" class="news-skeleton"> </t-skeleton>
             </template>
-            <div
-              v-for="(item, index) in hotList"
-              :key="item.vod_id"
-              class="rax-view-v2 news-item"
-              @click="searchEvent(item.vod_name)"
-            >
-              <div class="rax-view-v2 news-rank" :class="[index in [0, 1, 2] ? `rank-${index + 1}` : '']">
-                {{ index + 1 }}
+            <div v-if="!loading" class="swiper-wrapper-container">
+              <div v-if="hotList.length !== 0" class="data">
+                <div
+                  v-for="(item, index) in hotList"
+                  :key="item.vod_id"
+                  class="rax-view-v2 news-item"
+                  @click="searchEvent(item.vod_name)"
+                >
+                  <div class="rax-view-v2 news-rank" :class="[index in [0, 1, 2] ? `rank-${index + 1}` : '']">
+                    {{ index + 1 }}
+                  </div>
+                  <div class="rax-view-v2 normal-view">
+                    <div class="rax-view-v2 normal-title">{{ item.vod_name }}</div>
+                    <div class="rax-view-v2 normal-tip" :class="[index in [0, 1, 2] ? `color-${index + 1}` : '']">
+                      {{ item.vod_hot }}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="rax-view-v2 normal-view">
-                <div class="rax-view-v2 normal-title">{{ item.vod_name }}</div>
-                <div class="rax-view-v2 normal-tip" :class="[index in [0, 1, 2] ? `color-${index + 1}` : '']">
-                  {{ item.vod_hot }}
+              <div v-else class="empty">
+                <div class="image" style="width: 200px" v-html="emptyImage"></div>
+                <div class="desc">
+                  <p>暂无近三天数据, 请查看其他分类!</p>
                 </div>
               </div>
             </div>
@@ -62,6 +72,7 @@ import moment from 'moment';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { reactive, ref, watch } from 'vue';
 
+import emptyImage from '@/assets/empty.svg?raw';
 import zy from '@/lib/utils/tools';
 
 const props = defineProps({
@@ -77,7 +88,7 @@ const props = defineProps({
   },
 });
 
-const hotClass = ref('movie');
+const hotClass = ref('episode');
 const hotSource = ref(1);
 const hotSourceUpdateTime = ref(moment().format('YYYY-MM-DD'));
 
@@ -109,15 +120,6 @@ watch(
 );
 
 const MODE_OPTIONS = reactive({
-  movie: {
-    key: 1,
-    name: '电影',
-    source: [
-      { key: 1, name: '腾讯视频' },
-      { key: 2, name: '爱奇艺' },
-      { key: 3, name: '优酷' },
-    ],
-  },
   episode: {
     key: 2,
     name: '剧集',
@@ -136,6 +138,15 @@ const MODE_OPTIONS = reactive({
       { key: 2, name: '爱奇艺' },
       { key: 3, name: '优酷' },
       { key: 4, name: '芒果' },
+    ],
+  },
+  movie: {
+    key: 1,
+    name: '电影',
+    source: [
+      { key: 1, name: '腾讯视频' },
+      { key: 2, name: '爱奇艺' },
+      { key: 3, name: '优酷' },
     ],
   },
 });
@@ -169,7 +180,7 @@ const getHotList = async (retryCount = 0) => {
       // 继续递归调用函数进行下一次请求
       await getHotList(retryCount + 1);
     } else {
-      MessagePlugin.warning(`获取失败: 尝试获取最近:${retryLimit}天数据`);
+      loading.value = false;
     }
   } catch (err) {
     MessagePlugin.error(`error:${err}`);
@@ -185,9 +196,6 @@ const searchEvent = async (item) => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .hot-container {
   .rax-view-v2 {
     box-sizing: border-box;
@@ -306,6 +314,50 @@ const searchEvent = async (item) => {
     .tip-title {
       margin-left: 10px;
     }
+  }
+
+  .empty {
+    height: 360px;
+    --el-empty-fill-color-0: #fff;
+    --el-empty-fill-color-1: #fcfcfd;
+    --el-empty-fill-color-2: #f8f9fb;
+    --el-empty-fill-color-3: #f7f8fc;
+    --el-empty-fill-color-4: #eeeff3;
+    --el-empty-fill-color-5: #edeef2;
+    --el-empty-fill-color-6: #e9ebef;
+    --el-empty-fill-color-7: #e5e7e9;
+    --el-empty-fill-color-8: #e0e3e9;
+    --el-empty-fill-color-9: #d5d7de;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    box-sizing: border-box;
+    padding: var(--td-comp-paddingTB-xxl) 0;
+    .desc {
+      margin-top: var(--td-comp-margin-xl);
+      p {
+        margin: 0;
+        font-size: var(--td-font-size-title-small);
+        font-weight: 500;
+        color: var(--el-text-color-secondary);
+      }
+    }
+  }
+}
+:root[theme-mode='dark'] {
+  .empty {
+    --el-empty-fill-color-0: #000;
+    --el-empty-fill-color-1: #4b4b52;
+    --el-empty-fill-color-2: #36383d;
+    --el-empty-fill-color-3: #1e1e20;
+    --el-empty-fill-color-4: #262629;
+    --el-empty-fill-color-5: #202124;
+    --el-empty-fill-color-6: #212224;
+    --el-empty-fill-color-7: #1b1c1f;
+    --el-empty-fill-color-8: #1c1d1f;
+    --el-empty-fill-color-9: #18181a;
   }
 }
 </style>
