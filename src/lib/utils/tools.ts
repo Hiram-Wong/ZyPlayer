@@ -411,7 +411,7 @@ const zy = {
   async detail(key, id) {
     try {
       const site = await sites.find({ key: key });
-      const url = buildUrl(site.api, `?ac=videolist&ids=${id}`);
+      const url = buildUrl(site.api, `?ac=detail&ids=${id}`);
       const res = await axios.get(url);
       let json;
       if (site.type === 0) json = parser.parse(res.data);
