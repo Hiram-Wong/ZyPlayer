@@ -5,15 +5,15 @@
         <div class="left-operation-container">
           <div class="component-op">
             <div class="item" @click="formDialogVisibleAddIptv = true">
-              <add-icon size="1.5em" />
+              <add-icon />
               <span>添加</span>
-              <div class="item" @click="removeAllEvent">
-                <remove-icon size="1.5em" />
-                <span>删除</span>
-              </div>
+            </div>
+            <div class="item" @click="removeAllEvent">
+              <remove-icon />
+              <span>删除</span>
             </div>
             <div class="item" @click="exportEvent">
-              <arrow-up-icon size="1.5em" />
+              <arrow-up-icon />
               <span>导出</span>
             </div>
           </div>
@@ -311,7 +311,7 @@ const removeAllEvent = () => {
 .setting-iptv-container {
   height: calc(100vh - var(--td-comp-size-l));
   .header {
-    margin: 0 10px 10px 10px;
+    margin-bottom: var(--td-comp-margin-s);
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
@@ -319,19 +319,19 @@ const removeAllEvent = () => {
   .left-operation-container {
     .component-op {
       display: flex;
-      padding: 4px;
-      height: 40px;
+      height: 32px;
+      padding: 0 var(--td-comp-paddingLR-xs);
       background-color: var(--td-bg-input);
       backdrop-filter: blur(10px);
-      border-radius: 6px;
+      border-radius: var(--td-radius-default);
       align-items: center;
       .item {
-        border-radius: 5px;
+        border-radius: var(--td-radius-default);
         transition: all 0.2s ease 0s;
         display: flex;
         align-items: center;
-        padding: 5px 8px;
-        line-height: 22px;
+        padding: 2px 4px;
+        height: 22px;
         cursor: pointer;
         text-decoration: none;
       }
