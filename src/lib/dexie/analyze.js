@@ -25,9 +25,10 @@ export default {
   async remove (id) {
     return await analyze.delete(id)
   },
-  async pagination() {
-    const list = await analyze.toArray()
-    const total = await analyze.count()
+  async pagination(keyword) {
+    let list = await analyze.toArray()
+    if (keyword) list = list.filter(item => item.name.includes(keyword))
+    const total = list.length
     return {
       list: list,
       total: total

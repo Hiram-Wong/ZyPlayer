@@ -3,23 +3,27 @@
     <div class="header">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-tag size="large" shape="mark">添加源后需设置默认哟！</t-tag>
-        </div>
-        <div class="right-operation-container">
           <div class="component-op">
+            <div class="item" @click="formDialogVisibleAddIptv = true">
+              <add-icon size="1.5em" />
+              <span>添加</span>
+              <div class="item" @click="removeAllEvent">
+                <remove-icon size="1.5em" />
+                <span>删除</span>
+              </div>
+            </div>
             <div class="item" @click="exportEvent">
               <arrow-up-icon size="1.5em" />
               <span>导出</span>
             </div>
-            <div class="item" @click="removeAllEvent">
-              <remove-icon size="1.5em" />
-              <span>删除</span>
-            </div>
-            <div class="item" @click="formDialogVisibleAddIptv = true">
-              <add-icon size="1.5em" />
-              <span>添加</span>
-            </div>
           </div>
+        </div>
+        <div class="right-operation-container">
+          <t-input v-model="searchValue" placeholder="请输入搜索关键词" clearable @enter="getIptv">
+            <template #suffix-icon>
+              <search-icon size="16px" />
+            </template>
+          </t-input>
         </div>
       </t-row>
     </div>
@@ -33,8 +37,6 @@
       :pagination="pagination"
       :loading="dataLoading"
       :selected-row-keys="selectedRowKeys"
-      :header-affixed-top="{ offsetTop: 0, container: `.setting-iptv-container` }"
-      :reserve-selected-row-on-paginate="false"
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
@@ -67,7 +69,7 @@
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
-import { AddIcon, ArrowUpIcon, RemoveIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, ArrowUpIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref } from 'vue';
 
@@ -86,13 +88,7 @@ const remote = window.require('@electron/remote');
 // Define item form data & dialog status
 const formDialogVisibleAddIptv = ref(false);
 const formDialogVisibleEditIptv = ref(false);
-const searchForm = {
-  name: '',
-  isActive: undefined,
-  type: '',
-};
-
-const formData = ref({ ...searchForm });
+const searchValue = ref();
 const rowEditData = ref();
 const rowKey = 'id';
 const dataLoading = ref(false);
@@ -127,24 +123,21 @@ const rehandleSortChange = (sortVal, options) => {
 const getIptv = async () => {
   dataLoading.value = true;
   defaultIptv.value = await setting.get('defaultIptv');
-  iptv.pagination().then((res) => {
+  try {
+    const res = await iptv.pagination(searchValue.value);
     if (!res) emptyData.value = true;
     data.value = res.list;
     pagination.value.total = res.total;
-  });
-  dataLoading.value = false;
+  } catch (e) {
+    console.log(e);
+  } finally {
+    dataLoading.value = false;
+  }
 };
 
 onMounted(() => {
   getIptv();
 });
-
-// const onReset = (val) => {
-//   console.log(val);
-// };
-// const onSubmit = (val) => {
-//   console.log(val);
-// };
 
 // 导出接口
 const exportEvent = () => {
@@ -315,7 +308,6 @@ const removeAllEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
 .setting-iptv-container {
   height: calc(100vh - var(--td-comp-size-l));
   .header {
@@ -324,7 +316,7 @@ const removeAllEvent = () => {
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
   }
-  .right-operation-container {
+  .left-operation-container {
     .component-op {
       display: flex;
       padding: 4px;

@@ -25,9 +25,10 @@ export default {
   async remove (id) {
     return await sites.delete(id)
   },
-  async pagination() {
-    const list = await sites.toArray()
-    const total = await sites.count()
+  async pagination(keyword) {
+    let list = await sites.toArray()
+    if (keyword) list = list.filter(item => item.name.includes(keyword))
+    const total = list.length
     return {
       list: list,
       total: total
@@ -44,5 +45,5 @@ export default {
     }
     const res = groupListLabel.map((label, i) => ({ label, value: groupListValue[i] }))
     return res
-  }
+  },
 }

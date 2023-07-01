@@ -3,27 +3,31 @@
     <div class="header">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-tag size="large" shape="mark">添加源后需设置默认哟！</t-tag>
-        </div>
-        <div class="right-operation-container">
           <div class="component-op">
-            <div class="item" @click="exportEvent">
-              <arrow-up-icon size="1.5em" />
-              <span>导出</span>
+            <div class="item" @click="formDialogVisibleAddApi = true">
+              <add-icon size="1.5em" />
+              <span>添加</span>
             </div>
             <div class="item" @click="removeAllEvent">
               <remove-icon size="1.5em" />
               <span>删除</span>
             </div>
-            <div class="item" @click="formDialogVisibleAddApi = true">
-              <add-icon size="1.5em" />
-              <span>添加</span>
+            <div class="item" @click="exportEvent">
+              <arrow-up-icon size="1.5em" />
+              <span>导出</span>
             </div>
             <div class="item" @click="checkAllSite">
               <refresh-icon size="1.5em" />
               <span>检测</span>
             </div>
           </div>
+        </div>
+        <div class="right-operation-container">
+          <t-input v-model="searchValue" placeholder="请输入搜索关键词" clearable @enter="refreshEvent">
+            <template #suffix-icon>
+              <search-icon size="16px" />
+            </template>
+          </t-input>
         </div>
       </t-row>
     </div>
@@ -36,8 +40,6 @@
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
-      :header-affixed-top="{ offsetTop: 0, container: `.setting-site-container` }"
-      :reserve-selected-row-on-paginate="false"
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
@@ -83,7 +85,7 @@
 </template>
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
-import { AddIcon, ArrowUpIcon, RefreshIcon, RemoveIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, ArrowUpIcon, RefreshIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref } from 'vue';
 
@@ -103,6 +105,7 @@ const formData = ref();
 const isCheckStatusChangeActive = ref();
 const formGroup = ref();
 const sort = ref();
+const searchValue = ref();
 
 // Define table
 const emptyData = ref(false);
@@ -124,11 +127,10 @@ const getSites = async () => {
   dataLoading.value = true;
   defaultSite.value = await setting.get('defaultSite');
   try {
-    await sites.pagination().then((res) => {
-      if (!res) emptyData.value = true;
-      data.value = res.list;
-      pagination.value.total = res.total;
-    });
+    const res = await sites.pagination(searchValue.value);
+    if (!res) emptyData.value = true;
+    data.value = res.list;
+    pagination.value.total = res.total;
   } catch (e) {
     console.log(e);
   } finally {
@@ -287,7 +289,6 @@ const defaultEvent = async (row) => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
 .setting-site-container {
   height: calc(100vh - var(--td-comp-size-l));
   overflow: auto;
@@ -305,7 +306,7 @@ const defaultEvent = async (row) => {
     border-radius: var(--td-radius-circle);
     background-color: var(--td-error-color);
   }
-  .right-operation-container {
+  .left-operation-container {
     .component-op {
       display: flex;
       padding: 4px;

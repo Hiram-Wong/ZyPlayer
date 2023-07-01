@@ -25,9 +25,10 @@ export default {
   async remove (id) {
     return await iptv.delete(id)
   },
-  async pagination() {
-    const list = await iptv.toArray()
-    const total = await iptv.count()
+  async pagination(keyword) {
+    let list = await iptv.toArray()
+    if (keyword) list = list.filter(item => item.name.includes(keyword))
+    const total = list.length
     return {
       list: list,
       total: total
