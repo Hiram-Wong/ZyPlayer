@@ -65,7 +65,7 @@ export default [
     name: 'Community',
     redirect: '/community/index',
     component: Layout,
-    meta: { title: '社区', icon: 'books', hidden: false },
+    meta: { title: '社区', icon: 'books', hidden: true },
     children: [
       {
         path: 'index',
