@@ -198,7 +198,6 @@ const zy = {
       if (site.type === 0) json = parser.parse(res.data);
       else json = res.data;
       const jsondata = json.rss || json;
-      console.log(jsondata);
       let videoList = jsondata.list || [];
       if (site.type === 0) {
         videoList = this.convertVideoList(jsondata.list.video);

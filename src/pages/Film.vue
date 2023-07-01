@@ -327,19 +327,14 @@ const searchGroup = (defaultSearch) => {
   let selfSearch;
   if (FilmSiteSetting.value.basic.search !== 0) selfSearch = [{ ...FilmSiteSetting.value.basic }];
   if (defaultSearch === 'site') {
-    searchCurrentSite.value = selfSearch;
     return selfSearch;
   }
   if (defaultSearch === 'group') {
-    const res = sitesList.value
+    return sitesList.value
       .filter((item) => item.group === FilmSiteSetting.value.basic.group && item.search === 1)
       .concat(selfSearch);
-    searchCurrentSite.value = res[0];
-    return res;
   }
-  const res = sitesList.value.filter((item) => item.search === 1).concat(selfSearch);
-  searchCurrentSite.value = res[0];
-  return res;
+  return sitesList.value.filter((item) => item.search === 1).concat(selfSearch);
 };
 
 const getFilmSetting = async () => {
@@ -547,25 +542,30 @@ const load = async ($state) => {
 const searchEvent = async () => {
   console.log(`search: ${searchTxt.value}`);
   infiniteCompleteTip.value = '没有更多内容了!';
-  FilmDataList.value = { list: [], rawList: [] };
+  FilmDataList.value.list = [];
+  FilmDataList.value.rawList = [];
   infiniteId.value++;
   pagination.value.pageIndex = 1;
-
-  getSearchList();
+  searchCurrentSite.value = FilmSiteSetting.value.searchGroup[0];
 };
 
 const getSearchList = async () => {
   const site = searchCurrentSite.value;
   const index = FilmSiteSetting.value.searchGroup.indexOf(searchCurrentSite.value);
-  if (index + 1 >= FilmSiteSetting.value.searchGroup.length) {
-    return 0;
-  }
-  searchCurrentSite.value = FilmSiteSetting.value.searchGroup[index + 1];
+  const searchGroupLength = FilmSiteSetting.value.searchGroup.length;
+
+  if (!site) return 0;
+  if (index + 1 >= searchGroupLength && searchGroupLength !== 1) return 0;
+  if (searchGroupLength !== 1) searchCurrentSite.value = FilmSiteSetting.value.searchGroup[index + 1];
+  else searchCurrentSite.value = null;
+
   try {
     const resultSearch = await zy.search(site.key, searchTxt.value);
-    let ids;
-    if (resultSearch) ids = resultSearch.map((item) => item.vod_id);
-    else return 1;
+    if (!resultSearch) {
+      return 1;
+    }
+
+    const ids = resultSearch.map((item) => item.vod_id);
     const resultDetail = await zy.detail(site.key, ids.join(','));
     const filmList = resultDetail.map((item) => {
       return {
@@ -575,10 +575,13 @@ const getSearchList = async () => {
         siteId: site.id, // 添加站点id
       };
     });
-    FilmDataList.value.list.push(...filmList);
-    return filmList.length;
+
+    const newFilms = _.differenceWith(filmList, FilmDataList.value.list, _.isEqual);
+    FilmDataList.value.list.push(...newFilms);
+    return newFilms.length;
   } catch (err) {
     console.error(err);
+    if (searchGroupLength === 1) return 0;
     return 1;
   }
 };
