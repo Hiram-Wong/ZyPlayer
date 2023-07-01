@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="清理内存" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="清理数据" placement="center" :footer="false">
     <template #body>
       <div class="class-dialog-container dialog-container-padding">
         <!-- 表单内容 -->
