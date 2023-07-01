@@ -270,7 +270,13 @@
                   </div>
                 </div>
                 <div class="anthology-contents-scroll">
-                  <h4 class="box-anthology-title">选集</h4>
+                  <div class="box-anthology-header">
+                    <h4 class="box-anthology-title">选集</h4>
+                    <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
+                      <order-descending-icon v-if="reverseOrder" />
+                      <order-ascending-icon v-else />
+                    </div>
+                  </div>
                   <div class="box-anthology-items">
                     <t-tabs v-model="selectPlaySource" class="film-tabs">
                       <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key">
@@ -408,6 +414,8 @@ import {
   HeartIcon,
   HomeIcon,
   LoadingIcon,
+  OrderAscendingIcon,
+  OrderDescendingIcon,
   PinFilledIcon,
   PinIcon,
   SettingIcon,
@@ -718,6 +726,7 @@ const isSniff = ref(true); // 嗅探标识
 const iframeRef = ref(); // iframe dom节点
 const currentUrl = ref(); // 当前未解析前的url
 const snifferTimer = ref();
+const reverseOrder = ref(true); // true 正序 false 倒序
 
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
@@ -822,8 +831,22 @@ watch(
 onMounted(() => {
   initPlayer();
   minMaxEvent();
-  console.log(skipConfig.value);
 });
+
+// 选集排序
+const seasonReverseOrder = () => {
+  if (reverseOrder.value) {
+    console.log('正序');
+    for (const key in season.value) {
+      season.value[key].sort();
+    }
+  } else {
+    console.log('倒序');
+    for (const key in season.value) {
+      season.value[key].reverse();
+    }
+  }
+};
 
 // 根据不同类型加载不同播放器
 const createPlayer = async (videoType) => {
@@ -1267,6 +1290,7 @@ const getDetailInfo = async () => {
   videoList.fullList = fullList;
   info.value = videoList;
   season.value = fullList;
+  seasonReverseOrder();
   console.log(info.value, season.value);
 };
 
@@ -1546,6 +1570,12 @@ const getEpgList = async (url, name, date) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+// 选择倒序
+const reverseOrderEvent = () => {
+  reverseOrder.value = !reverseOrder.value;
+  seasonReverseOrder();
 };
 
 // 推荐刷新数据
@@ -2110,13 +2140,16 @@ const openMainWinEvent = () => {
                 margin-top: 5px;
                 overflow-y: auto;
                 overflow-x: hidden;
-
-                .box-anthology-title {
-                  position: relative;
-                  font-size: 18px;
-                  line-height: 25px;
-                  color: hsla(0, 0%, 100%, 0.9);
-                  font-weight: 600;
+                .box-anthology-header {
+                  display: flex;
+                  justify-content: space-between;
+                  .box-anthology-title {
+                    position: relative;
+                    font-size: 18px;
+                    line-height: 25px;
+                    color: hsla(0, 0%, 100%, 0.9);
+                    font-weight: 600;
+                  }
                 }
 
                 .box-anthology-items {
