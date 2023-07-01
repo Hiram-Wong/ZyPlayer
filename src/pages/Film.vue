@@ -209,6 +209,7 @@ const store = usePlayStore();
 const infiniteId = ref(+new Date()); // infinite-loading此属性更改重置组件
 const showToolbar = ref(false); // 是否显示筛选框 true显示 false隐藏
 const searchTxt = ref(''); // 搜索框
+const searchCurrentSite = ref(); // 搜索当前源
 const sortKeywords = ['按更新时间', '按上映年份', '按片名']; // 过滤排序条件
 const areasKeywords = ref(['全部']); // 过滤地区
 const yearsKeywords = ref(['全部']); // 过滤年份
@@ -326,14 +327,19 @@ const searchGroup = (defaultSearch) => {
   let selfSearch;
   if (FilmSiteSetting.value.basic.search !== 0) selfSearch = [{ ...FilmSiteSetting.value.basic }];
   if (defaultSearch === 'site') {
+    searchCurrentSite.value = selfSearch;
     return selfSearch;
   }
   if (defaultSearch === 'group') {
-    return sitesList.value
+    const res = sitesList.value
       .filter((item) => item.group === FilmSiteSetting.value.basic.group && item.search === 1)
       .concat(selfSearch);
+    searchCurrentSite.value = res[0];
+    return res;
   }
-  return sitesList.value.filter((item) => item.search === 1).concat(selfSearch);
+  const res = sitesList.value.filter((item) => item.search === 1).concat(selfSearch);
+  searchCurrentSite.value = res[0];
+  return res;
 };
 
 const getFilmSetting = async () => {
@@ -468,8 +474,7 @@ const changeClassEvent = async (item) => {
   FilmSiteSetting.value.class.name = item.type_name;
   searchTxt.value = '';
   infiniteCompleteTip.value = '没有更多内容了!';
-  FilmDataList.value.list = [];
-  FilmDataList.value.rawList = [];
+  FilmDataList.value = { list: [], rawList: [] };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 };
@@ -520,7 +525,7 @@ const load = async ($state) => {
   }
 
   try {
-    const resLength = searchTxt.value ? 0 : await getFilmList();
+    const resLength = searchTxt.value ? await getSearchList() : await getFilmList();
     console.log(`[list] 返回数据长度${resLength}`);
     if (resLength === 0) {
       if (infiniteCompleteTip.value.indexOf('刷新') === -1) infiniteCompleteTip.value = '没有更多内容了!';
@@ -541,33 +546,40 @@ const load = async ($state) => {
 // 搜索
 const searchEvent = async () => {
   console.log(`search: ${searchTxt.value}`);
-  const kw = searchTxt.value;
-  FilmDataList.value.list = [];
-  FilmDataList.value.rawList = [];
+  infiniteCompleteTip.value = '没有更多内容了!';
+  FilmDataList.value = { list: [], rawList: [] };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 
-  if (kw) {
-    try {
-      FilmSiteSetting.value.searchGroup.map(async (site) => {
-        const resultSearch = await zy.search(site.key, kw);
-        let ids;
-        if (resultSearch) ids = resultSearch.map((item) => item.vod_id);
-        else return;
-        const resultDetail = await zy.detail(site.key, ids.join(','));
-        const filmList = resultDetail.map((item) => {
-          return {
-            ...item,
-            siteKey: site.key, // 添加站点标识
-            siteName: site.name, // 添加站点名称
-            siteId: site.id, // 添加站点id
-          };
-        });
-        FilmDataList.value.list.push(...filmList);
-      });
-    } catch (err) {
-      console.info(err);
-    }
+  getSearchList();
+};
+
+const getSearchList = async () => {
+  const site = searchCurrentSite.value;
+  const index = FilmSiteSetting.value.searchGroup.indexOf(searchCurrentSite.value);
+  if (index + 1 >= FilmSiteSetting.value.searchGroup.length) {
+    return 0;
+  }
+  searchCurrentSite.value = FilmSiteSetting.value.searchGroup[index + 1];
+  try {
+    const resultSearch = await zy.search(site.key, searchTxt.value);
+    let ids;
+    if (resultSearch) ids = resultSearch.map((item) => item.vod_id);
+    else return 1;
+    const resultDetail = await zy.detail(site.key, ids.join(','));
+    const filmList = resultDetail.map((item) => {
+      return {
+        ...item,
+        siteKey: site.key, // 添加站点标识
+        siteName: site.name, // 添加站点名称
+        siteId: site.id, // 添加站点id
+      };
+    });
+    FilmDataList.value.list.push(...filmList);
+    return filmList.length;
+  } catch (err) {
+    console.error(err);
+    return 1;
   }
 };
 
