@@ -837,12 +837,12 @@ onMounted(() => {
 const seasonReverseOrder = () => {
   if (reverseOrder.value) {
     console.log('正序');
-    for (const key in season.value) {
+    for (const key in info.value.fullList) {
       season.value[key] = JSON.parse(JSON.stringify(info.value.fullList[key]))
     }
   } else {
     console.log('倒序');
-    for (const key in season.value) {
+    for (const key in info.value.fullList) {
       season.value[key] = JSON.parse(JSON.stringify(info.value.fullList[key]))
       season.value[key].reverse();
     }
@@ -1290,7 +1290,7 @@ const getDetailInfo = async () => {
 
   videoList.fullList = fullList;
   info.value = videoList;  
-  season.value = fullList;
+  season.value = {};
   seasonReverseOrder();
   console.log(info.value, season.value);
 };
