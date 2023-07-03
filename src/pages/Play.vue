@@ -698,6 +698,7 @@ const artConfig = ref({
 const selectIptvTab = ref('epg');
 const recommend = ref([]); // 推荐
 const season = ref(); // 选集
+const season_org = ref(); // 原始选集
 const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
@@ -838,11 +839,12 @@ const seasonReverseOrder = () => {
   if (reverseOrder.value) {
     console.log('正序');
     for (const key in season.value) {
-      season.value[key].sort();
+      season.value[key] = season_org.value[key]
     }
   } else {
     console.log('倒序');
     for (const key in season.value) {
+      season.value[key] = season_org.value[key]
       season.value[key].reverse();
     }
   }
@@ -1289,6 +1291,7 @@ const getDetailInfo = async () => {
 
   videoList.fullList = fullList;
   info.value = videoList;
+  season_org.value = fullList;
   season.value = fullList;
   seasonReverseOrder();
   console.log(info.value, season.value);
@@ -1586,6 +1589,7 @@ const recommendEvent = (e) => {
   selectPlaySource.value = '';
   selectPlayIndex.value = '';
   season.value = '';
+  season_org.value = '';
   isBinge.value = false;
   store.updateConfig({
     type: 'film',
