@@ -837,9 +837,7 @@ onMounted(() => {
 const seasonReverseOrder = () => {
   if (reverseOrder.value) {
     console.log('正序');
-    for (const key in season.value) {
-      season.value[key].sort();
-    }
+    season.value = JSON.parse(JSON.stringify(info.value.fullList));
   } else {
     console.log('倒序');
     for (const key in season.value) {
@@ -2149,6 +2147,9 @@ const openMainWinEvent = () => {
                     line-height: 25px;
                     color: hsla(0, 0%, 100%, 0.9);
                     font-weight: 600;
+                  }
+                  .box-anthology-reverse-order {
+                    cursor: pointer;
                   }
                 }
 
