@@ -433,16 +433,15 @@ const zy = {
         // 剧集
         const playUrl = video.vod_play_url;
         const playUrlDiffPlaySource = playUrl.split("$$$"); // 分离不同播放源
-        const playEpisodes = playUrlDiffPlaySource.map((item) => {
-          return item
-            .replace(/\$+/g, "$")
-            .split("#")
-            .filter((e) => {
-              const isHttp = e.startsWith("http");
-              const hasHttp = e.split("$")[1]?.startsWith("http");
-              return Boolean(e && (isHttp || hasHttp));
-            });
-        });
+        const playEpisodes = playUrlDiffPlaySource.map((item) =>
+          item
+            .replace(/\$+/g, '$')
+            .split('#')
+            .map((e) => {
+              if (!e.includes('$')) e = `正片$${e}`;
+              return e;
+            }),
+        );
         const fullList = Object.fromEntries(
           playSource.map((key, index) => [key, playEpisodes[index]])
         );
@@ -826,7 +825,6 @@ const zy = {
   async getConfig(url, header = {}) {
     try {
       let res;
-      console.log(url, encodeURI(url), header);
       // if( header ) res = await axios.get(url, {headers: { ...header }});
       // else res = await axios.get(url);
       res = await axios.get(url);

@@ -116,28 +116,28 @@
           <div class="player-container">
             <div v-show="!onlineUrl" class="player-media">
               <div
-                v-if="set.broadcasterType === 'xgplayer'"
+                v-show="set.broadcasterType === 'xgplayer'"
                 id="xgplayer"
                 ref="xgpayerRef"
                 class="xgplayer player"
               ></div>
               <div
-                v-if="set.broadcasterType === 'veplayer'"
+                v-show="set.broadcasterType === 'veplayer'"
                 id="veplayer"
                 ref="vepayerRef"
                 class="veplayer player"
               ></div>
-              <div v-if="set.broadcasterType === 'tcplayer'" ref="tcplayerRef">
+              <div v-show="set.broadcasterType === 'tcplayer'" ref="tcplayerRef">
                 <video id="tcplayer" preload="auto" playsinline webkit-playsinline class="tcplayer player"></video>
               </div>
               <div
-                v-if="set.broadcasterType === 'aliplayer'"
+                v-show="set.broadcasterType === 'aliplayer'"
                 id="aliplayer"
                 ref="aliplayerRef"
                 class="aliplayer player"
               ></div>
               <div
-                v-if="set.broadcasterType === 'artplayer'"
+                v-show="set.broadcasterType === 'artplayer'"
                 id="artplayer"
                 ref="artplayerRef"
                 class="artplayer player"
@@ -1075,7 +1075,6 @@ const initFilmPlayer = async (isFirst) => {
       config.value.startTime = skipConfig.value.skipTimeInStart;
     }
   }
-
   if (ext.value.site.type === 2) {
     MessagePlugin.info('免嗅资源中, 请等待!');
     console.log('[player] drpy免嗅流程开始');
@@ -1101,7 +1100,13 @@ const initFilmPlayer = async (isFirst) => {
 
     if (playUrl) {
       const play = await zy.getConfig(`${playUrl}${config.value.url}`);
-      if (play.url) config.value.url = play.url;
+      console.log(`解析地址:${play.url}`);
+      if (play.url) {
+        config.value.url = play.url;
+        const fileExtension = play.url.match(/\.([^/?#]+)(?:[?#]|$)/i)[1];
+        createPlayer(fileExtension);
+        return;
+      }
     }
 
     const { hostname } = new URL(config.value.url);
@@ -1259,7 +1264,7 @@ const getDetailInfo = async () => {
 
   // 播放源
   const playFrom = videoList.vod_play_from;
-  const playSource = playFrom.split('$').filter((e) => e);
+  const playSource = playFrom.split('$').filter(Boolean);
   const [source] = playSource;
   if (!selectPlaySource.value) selectPlaySource.value = source;
 
@@ -1270,11 +1275,6 @@ const getDetailInfo = async () => {
     item
       .replace(/\$+/g, '$')
       .split('#')
-      .filter((e) => {
-        if (e && (e.startsWith('http') || (e.split('$')[1] && e.split('$')[1].startsWith('http')))) return true;
-        if (!e.includes('$')) return true;
-        return false;
-      })
       .map((e) => {
         if (!e.includes('$')) e = `正片$${e}`;
         return e;
@@ -1283,7 +1283,7 @@ const getDetailInfo = async () => {
   if (!selectPlayIndex.value) selectPlayIndex.value = playEpisodes[0][0].split('$')[0];
 
   // 合并播放源和剧集
-  const fullList = Object.fromEntries(playSource.map((key, i) => [key, playEpisodes[i]]));
+  const fullList = Object.fromEntries(playSource.map((key, index) => [key, playEpisodes[index]]));
 
   videoList.fullList = fullList;
   info.value = videoList;
