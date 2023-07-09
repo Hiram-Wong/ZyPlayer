@@ -1,7 +1,7 @@
 // import { createMenu } from './core/menu';
 import remote from '@electron/remote/main';
 import { electronApp } from '@electron-toolkit/utils';
-import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, session, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
