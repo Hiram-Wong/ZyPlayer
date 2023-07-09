@@ -38,10 +38,12 @@
                     placeholder="请选下载源"
                     size="small"
                     style="width: 200px; display: inline-block"
+                    @change="downloadSourceChange"
                   >
-                    <t-option v-for="(value, key, index) in season" :key="index" :value="key" :label="key"></t-option>
+                    <t-option v-for="(item, key) in season" :key="key" :value="key">{{ key }}</t-option>
                   </t-select>
-                  <div>仅支持m3u8播放源</div>
+                  <t-button size="small" theme="default" @click="copyCurrentUrl">复制当前地址</t-button>
+                  <!-- <div>仅支持后缀为m3u8、flv、mp4</div> -->
                 </div>
                 <div class="content-warp">
                   <t-transfer v-model="downloadTarget" :data="downloadEpisodes">
@@ -273,8 +275,8 @@
                   <div class="box-anthology-header">
                     <h4 class="box-anthology-title">选集</h4>
                     <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
-                      <order-descending-icon v-if="reverseOrder" />
-                      <order-ascending-icon v-else />
+                      <order-descending-icon v-if="reverseOrder" size="1.3em" />
+                      <order-ascending-icon v-else size="1.3em" />
                     </div>
                   </div>
                   <div class="box-anthology-items">
@@ -438,7 +440,7 @@ import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
 import playerZoomIcon from '@/assets/player/zoom.svg?raw';
 import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
-import { analyze, channelList, history, setting, star } from '@/lib/dexie';
+import { analyze, channelList, history, setting, sites, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
 
@@ -783,28 +785,6 @@ const renderLoading = () => {
     </div>
   );
 };
-
-watch(
-  () => downloadSource.value,
-  (val) => {
-    if (val) {
-      const list = [];
-      for (const item of season.value[downloadSource.value]) {
-        const [index, url] = item.split('$');
-        if (!url.endsWith('m3u8')) {
-          MessagePlugin.info('注意: 当前选择非m3u8播放源');
-          break;
-        }
-        list.push({
-          value: url,
-          label: index,
-          disabled: false,
-        });
-      }
-      downloadEpisodes.value = list;
-    }
-  },
-);
 
 // 添加画中画事件
 watch(
@@ -1361,6 +1341,7 @@ const changeIptvEvent = async (e) => {
 // 获取豆瓣影片推荐
 const getDoubanRecommend = async () => {
   const { key } = ext.value.site;
+  const { type } = await sites.find({ key });
   const name = info.value.vod_name;
   const year = info.value.vod_year;
   const id = info.value.vod_douban_id;
@@ -1373,11 +1354,16 @@ const getDoubanRecommend = async () => {
       const item = await zy.search(key, element);
 
       if (item && ids.length < 10) {
-        ids.push(item[0].vod_id);
+        ids.push(item[0]);
       }
     }
-    const res = await zy.detail(key, ids.join(','));
-    recommend.value = res;
+
+    if (type === 3) recommend.value = ids;
+    else {
+      const vodIds = ids.map((movie) => movie.vod_id);
+      const res = await zy.detail(key, vodIds.join(','));
+      recommend.value = res;
+    }
   } catch (err) {
     console.log(err);
   }
@@ -1597,11 +1583,30 @@ const recommendEvent = (e) => {
 
 const copyToClipboard = (content, successMessage, errorMessage) => {
   copy(content);
-  if (isSupported) {
-    MessagePlugin.info(successMessage);
-  } else {
-    MessagePlugin.warning(errorMessage);
+  if (isSupported) MessagePlugin.info(successMessage);
+  else MessagePlugin.warning(errorMessage);
+};
+
+// 检查复制的复制
+const checkDownloadUrl = (url) => {
+  const allowedExtensions = ['m3u8', 'flv', 'mp4'];
+  const isValid = allowedExtensions.some((ext) => url.endsWith(ext));
+
+  if (!isValid) MessagePlugin.warning('注意: 当前选择非m3u8/flv/mp4播放源');
+};
+
+// 复制下载地址列表
+const downloadSourceChange = () => {
+  const list = [];
+  for (const item of season.value[downloadSource.value]) {
+    const [index, url] = item.split('$');
+    list.push({
+      value: url,
+      label: index,
+      disabled: false,
+    });
   }
+  downloadEpisodes.value = list;
 };
 
 // 复制下载链接
@@ -1612,10 +1617,21 @@ const copyDownloadUrl = () => {
     const successMessage = '复制成功，快到下载器里下载吧!';
     const errorMessage = '复制失败，当前环境不支持一键复制!';
     copyToClipboard(downloadUrl, successMessage, errorMessage);
+    checkDownloadUrl(downloadUrl[0]);
     isDownloadVisible.value = false;
   } else {
     MessagePlugin.warning('请先选择需要下载的内容!');
   }
+};
+
+// 复制当前播放地址
+const copyCurrentUrl = () => {
+  const successMessage = '复制成功,使用第三方播放器播放!';
+  const errorMessage = '当前环境不支持一键复制,请手动复制链接!';
+  copyToClipboard(config.value.url, successMessage, errorMessage);
+  checkDownloadUrl(config.value.url);
+
+  isDownloadVisible.value = false;
 };
 
 // 更新历史跳过参数
@@ -2154,7 +2170,6 @@ const openMainWinEvent = () => {
                 }
 
                 .box-anthology-items {
-                  padding-bottom: 18px;
                   overflow: hidden;
 
                   .film-tabs {
