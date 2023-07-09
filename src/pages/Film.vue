@@ -47,13 +47,11 @@
         </div>
       </div>
       <div class="right-operation-container">
-        <search-view
-          v-model="searchTxt"
-          :site="FilmSiteSetting.basic"
-          :class="{ 'no-filter': FilmSiteSetting.basic.type === 2 && !filter.data }"
-          @search="searchEvent"
-        />
-        <div v-if="!(FilmSiteSetting.basic.type === 2 && !filter.data)" class="quick_item quick_filter">
+        <search-view v-model="searchTxt" :site="FilmSiteSetting.basic" @search="searchEvent" />
+        <div
+          v-if="(FilmSiteSetting.basic.type === 2 && filter.data.length !== 0) || FilmSiteSetting.basic.type !== 2"
+          class="quick_item quick_filter"
+        >
           <view-module-icon size="large" @click="showToolbar = !showToolbar" />
         </div>
       </div>
@@ -77,6 +75,27 @@
               {{ item.n }}
             </div>
           </div>
+        </div>
+      </div>
+      <!-- app -->
+      <div v-else-if="FilmSiteSetting.basic.type === 3" class="tags">
+        <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.class" class="tags-list">
+          <template v-for="(items, key) in filterItem" :key="key">
+            <div class="item title">{{ formatFilterTitle(key) }}</div>
+            <div class="wp">
+              <div
+                v-for="item in items"
+                :key="item"
+                class="item"
+                :class="{ active: filter.select[key] === item }"
+                :label="item"
+                :value="item"
+                @click="changeFilterEvent(key, item)"
+              >
+                {{ item }}
+              </div>
+            </div>
+          </template>
         </div>
       </div>
       <!-- cms -->
@@ -194,8 +213,9 @@ import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { MoreIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
+import APP_FILTER_CONFIG from '@/config/appFilter';
 import { setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
@@ -214,6 +234,7 @@ const sortKeywords = ['按更新时间', '按上映年份', '按片名']; // 过
 const areasKeywords = ref(['全部']); // 过滤地区
 const yearsKeywords = ref(['全部']); // 过滤年份
 const classKeywords = ref([{ type_id: 0, type_name: '最新' }]); // 过滤类型
+const AppFilterList = reactive([...APP_FILTER_CONFIG.appFilter]);
 
 const formSiteData = ref({
   neme: '',
@@ -296,13 +317,20 @@ const filterEvent = () => {
 };
 
 // 非cms筛选：基于请求数据
-const filterDrpyEvent = async () => {
-  const filterFormat = Object.entries(filter.value.select).reduce((item, [key, value]) => {
-    if (value !== '' && value.length !== 0) {
-      item[key] = value;
-    }
-    return item;
-  }, {});
+const filterApiEvent = async () => {
+  let filterFormat;
+  if (FilmSiteSetting.value.basic.type === 2) {
+    filterFormat = Object.entries(filter.value.select).reduce((item, [key, value]) => {
+      if (value !== '' && value.length !== 0) {
+        item[key] = value;
+      }
+      return item;
+    }, {});
+  } else if (FilmSiteSetting.value.basic.type === 3) {
+    filterFormat = Object.entries(filter.value.select)
+      .map(([key, value]) => `${key}=${value === '全部' ? '' : value}`)
+      .join('&');
+  }
 
   console.log(filterFormat);
   filter.value.format = filterFormat;
@@ -319,7 +347,7 @@ const changeFilterEvent = (type, item) => {
   console.log(`[筛选变更] ${type}:${item}`);
   filter.value.select[type] = item;
 
-  if (FilmSiteSetting.value.basic.type === 2) filterDrpyEvent();
+  if (FilmSiteSetting.value.basic.type === 2 || FilmSiteSetting.value.basic.type === 3) filterApiEvent();
   else filterEvent();
 };
 
@@ -434,25 +462,36 @@ const getClass = async () => {
     pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
     filter.value.data = filters;
 
-    let firstTypeId = 0;
+    let allClass;
+    const classItem = classData[0];
+    FilmSiteSetting.value.class.id = classItem.type_id;
+    FilmSiteSetting.value.class.name = classItem.type_name;
+
     if (FilmSiteSetting.value.basic.type === 2) {
-      firstTypeId = classData[0].type_id;
-      FilmSiteSetting.value.class.id = firstTypeId;
-
-      if (filters.length !== 0) {
-        const result = {};
-        filters.forEach((item) => {
-          result[item.key] = item.value[0].v;
-        });
-        filter.value.select = result;
-        console.log(filter.value.select);
-      }
+      const result = {};
+      filters.forEach((item) => {
+        result[item.key] = item.value[0].v;
+      });
+      filter.value.select = result;
+      allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
+    } else if (FilmSiteSetting.value.basic.type === 3) {
+      const data = filter.value.data[FilmSiteSetting.value.class.id];
+      const result = {
+        class: data[0]?.class?.[0] ?? '全部',
+        area: data[1]?.area?.[0] ?? '全部',
+        lang: data[2]?.lang?.[0] ?? '全部',
+        year: data[3]?.year?.[0] ?? '全部',
+      };
+      filter.value.select = result;
+      allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
+    } else {
+      FilmSiteSetting.value.class.id = 0;
+      FilmSiteSetting.value.class.name = '最新';
+      allClass = [
+        { type_id: 0, type_name: '最新' },
+        ...classData.filter((item) => !containsClassFilterKeyword(item.type_name)),
+      ];
     }
-
-    const allClass = [
-      { type_id: firstTypeId, type_name: '最新' },
-      ...classData.filter((item) => !containsClassFilterKeyword(item.type_name)),
-    ];
 
     classKeywords.value = allClass;
     isLoadClass.value = true;
@@ -479,8 +518,12 @@ const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
-  const f = { ...filter.value.format };
-  console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${JSON.stringify(f)}`);
+  let f;
+  if (FilmSiteSetting.value.basic.type === 2) f = { ...filter.value.format };
+  else if (FilmSiteSetting.value.basic.type === 3) f = filter.value.format;
+  console.log(f);
+
+  // console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${JSON.stringify(f)}`);
 
   try {
     const res = await zy.list(key, pg, t, f);
@@ -566,8 +609,12 @@ const getSearchList = async () => {
       return 1;
     }
 
-    const ids = resultSearch.map((item) => item.vod_id);
-    const resultDetail = await zy.detail(site.key, ids.join(','));
+    let resultDetail = resultSearch;
+    if (FilmSiteSetting.value.basic.type !== 3) {
+      const ids = resultSearch.map((item) => item.vod_id);
+      resultDetail = await zy.detail(site.key, ids.join(','));
+    }
+
     const filmList = resultDetail.map((item) => {
       return {
         ...item,
@@ -618,6 +665,10 @@ const changeSitesEvent = async (item) => {
   FilmSiteSetting.value.searchGroup = await searchGroup(FilmSiteSetting.value.searchType);
 };
 
+const formatFilterTitle = (id) => {
+  return _.find(AppFilterList, { key: id }).desc;
+};
+
 // 播放
 const playEvent = async (item) => {
   const { siteName, siteKey } = item;
@@ -630,7 +681,7 @@ const playEvent = async (item) => {
     type,
   };
 
-  if (type === 2 || type === 0) {
+  if (type !== 1) {
     const [detailItem] = await zy.detail(formSiteData.value.key, item.vod_id);
     item = detailItem;
   }

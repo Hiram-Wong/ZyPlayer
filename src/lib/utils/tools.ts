@@ -41,18 +41,18 @@ Object.fromEntries = function fromEntries(iterable) {
   }, {});
 };
 
-const buildUrl = (url, params_str) => {
+const buildUrl = (url, paramsStr) => {
   const u = new URL(url);
-  const p = new URLSearchParams(params_str);
   const api = u.origin + u.pathname;
-  let params = Object.fromEntries(u.searchParams.entries());
-  let params_obj = Object.fromEntries(p.entries());
-  Object.assign(params, params_obj);
-  let plist = [];
-  for (let key in params) {
-    plist.push(`${key}=${params[key]}`);
+  const params = new URLSearchParams(u.search);
+  
+  if (paramsStr.startsWith('?') || paramsStr.startsWith('&')) {
+    const p = new URLSearchParams(paramsStr);
+    p.forEach((value, key) => params.set(key, value));
+    return api + "?" + params.toString();
+  } else {
+    return api + paramsStr;
   }
-  return api + "?" + plist.join("&");
 };
 
 export const removeHTMLTagsAndSpaces = (str) => {
@@ -79,6 +79,8 @@ const zy = {
         url = buildUrl(site.api, `?ac=class`);
       } else if (site.type === 2) {
         url = buildUrl(site.api, `&t=1&ac=videolist`);
+      } else if (site.type === 3) {
+        url = buildUrl(site.api, `/nav`);
       }
 
       const res = await axios.get(url, { timeout: 3000 });
@@ -130,6 +132,27 @@ const zy = {
         limit = parseInt(jsondata.limit);
         total = jsondata.total;
         filters = jsonClass?.filters === undefined ? [] : jsonClass.filters[1];
+      } else if (site.type === 3) {
+        classData = jsondata.list;
+        page = 1;
+        pagecount = 9999;
+        limit = 20;
+        total = 9999;
+        filters = {};
+        classData.forEach(classItem => {
+          if (classItem.type_extend) {
+            const newList = [];
+            for (const key in classItem.type_extend) {
+              const value = classItem.type_extend[key];
+              if (!_.isEmpty(value) && !['star','state','version','director'].includes(key)) {
+                const valueArray = value.split(',');
+                valueArray.unshift('全部')
+                newList.push({ [key]: valueArray });
+              }
+            }
+            filters[classItem.type_id]= newList
+          }
+        });
       }
 
       if (!classData || !jsondata?.list) return null;
@@ -187,16 +210,22 @@ const zy = {
     try {
       const site = await sites.find({ key: key });
       let url;
-      url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}`);
-      if (Object.keys(f).length !== 0)
-        url = buildUrl(
-          site.api,
-          `?ac=videolist&t=${t}&pg=${pg}&f=${JSON.stringify(f)}`
-        );
-      const res = await axios.get(url);
-      let json;
-      if (site.type === 0) json = parser.parse(res.data);
-      else json = res.data;
+      if (site.type === 3) {
+        url = buildUrl(site.api, `video?tid=${t}&pg=${pg}`);
+        if (Object.keys(f).length !== 0) {
+          url = buildUrl(url, `&${f}`);
+        }
+      } else {
+        url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}`);
+        if (Object.keys(f).length !== 0) {
+          url = buildUrl(url, `&f=${JSON.stringify(f)}`);
+        }
+      }
+
+      const { data } = await axios.get(url);
+      let json = data;
+      if (site.type === 0) json = parser.parse(data);
+
       const jsondata = json.rss || json;
       let videoList = jsondata.list || [];
       if (site.type === 0) {
@@ -232,32 +261,43 @@ const zy = {
       })
     );
   },
-  // https://y.ioszxc123.me/api/v1/Vod/hot?limit=10&order=1&os=2&page=1&type=2
   async hot(key, h) {
     try {
       const site = await sites.find({ key: key });
-      // const url = buildUrl(site.api,`?ac=hot&h=${h}`);
-      const url = buildUrl(site.api, `?ac=hot`);
-      const res = await axios.get(url);
-      let json;
-      if (site.type === 0) json = parser.parse(res.data);
-      else json = res.data;
+      let url;
+      if (site.type === 3) {
+        url = buildUrl(site.api, `/index_video`);
+      } else {
+        url = buildUrl(site.api, `?ac=hot&h=${h}`);
+      }
+
+      const { data } = await axios.get(url);
+      let json = data;
+      if ( site.type === 0 ) json = parser.parse(data);
       const jsondata = json.rss || json;
       let videoList = jsondata.list || [];
-      if (site.type === 0) {
-        console.log(jsondata.list);
-        videoList = this.convertHotList(jsondata.list.video);
+      if ( site.type === 0 ) {
+        videoList = this.convertHotList(jsondata.list.video)
+      } else if ( site.type === 2 ) {
+        videoList = data.list;
+      } else if ( site.type === 3 ) {
+        videoList = data.list.flatMap(typeObj => typeObj.vlist);
       }
-      const data = [];
-      for (let i = 0; i < 10; i++) {
-        const item = videoList[i];
-        if (i in [0, 1, 2, 3]) {
-          const pic = await this.detail(key, item.vod_id);
-          item["vod_pic"] = pic.vod_pic;
+
+      let hotList = [];
+      if (site.type === 3 || site.type === 2) {
+        hotList = videoList;
+      } else {
+        for (let i = 0; i < 10; i++) {
+          const item = videoList[i];
+          if (i in [0, 1, 2, 3]) {
+            const pic = await this.detail(key, item.vod_id);
+            item["vod_pic"] = pic[0].vod_pic;
+          }
+          hotList.push(item);
         }
-        data.push(item);
       }
-      return data;
+      return hotList;
     } catch (err) {
       throw err;
     }
@@ -296,12 +336,13 @@ const zy = {
     // xml坑: 单条结果是dict 多条结果list
     try {
       const site = await sites.find({ key: key });
-      const url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
-      const res = await axios.get(url, { timeout: 3000 });
+      let url;
+      if ( site.type === 3 ) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
+      else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
+      const { data } = await axios.get(url, { timeout: 3000 });
 
-      let json;
-      if (site.type === 0) json = parser.parse(res.data);
-      else json = res.data;
+      let json = data;
+      if (site.type === 0) json = parser.parse(data);
 
       const jsondata = json?.rss ?? json;
       if (!jsondata) return null;
@@ -328,12 +369,13 @@ const zy = {
   async searchFirstDetail(key, wd) {
     try {
       const site = await sites.find({ key: key });
-      const url = buildUrl(site.api, `?ac=search&wd=${encodeURI(wd)}`);
-      const res = await axios.get(url);
+      let url;
+      if ( site.type === 3 ) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
+      else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
+      const { data } = await axios.get(url);
 
-      let json;
-      if (site.type === 0) json = parser.parse(res.data);
-      else json = res.data;
+      let json = data;
+      if (site.type === 0) json = parser.parse(data);
 
       const jsondata = json?.rss === undefined ? json : json.rss;
       if (!jsondata) return null;
@@ -410,20 +452,29 @@ const zy = {
   async detail(key, id) {
     try {
       const site = await sites.find({ key: key });
-      const url = buildUrl(site.api, `?ac=detail&ids=${id}`);
-      const res = await axios.get(url);
+      let url;
+      if (site.type === 3) {
+        url = buildUrl(site.api, `/video_detail?id=${id}`);
+      } else{
+        url = buildUrl(site.api, `?ac=detail&ids=${id}`);
+      }
+      const { data } = await axios.get(url);
       let json;
-      if (site.type === 0) json = parser.parse(res.data);
-      else json = res.data;
+      if ( site.type === 0 ) json = parser.parse(data);
+      else json = data;
+
       const jsondata = json?.rss ?? json;
       let videoList = jsondata?.list;
-
-      // xml坑: 单条结果是dict 多条结果list
+      // 坑: 单条结果是dict 多条结果list
       if (site.type === 0) {
         videoList = jsondata.list.video;
         if (!_.isArray(videoList)) videoList = [videoList];
         videoList = this.convertDetailList(videoList);
+      } else if (site.type === 3) {
+        videoList = jsondata.data;
+        if (!_.isArray(videoList)) videoList = [videoList];
       }
+
       if (!videoList) return;
 
       const videoData = videoList.map((video) => {
