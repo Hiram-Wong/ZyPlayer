@@ -1519,14 +1519,26 @@ const getChannelList = async () => {
   const sourceLength = res.list.length;
 
   if (data.value.ext.skipIpv6) {
-    const filteredList = await Promise.all(
-      res.list.map(async (item: { url: string }) => {
-        if ((await zy.checkUrlIpv6(item.url)) !== 'IPv6') {
-          return item;
+    const newdata = await Promise.allSettled(
+      res.list.map(async (item) => {
+        try {
+          const checkStatus = await zy.checkUrlIpv6(item.url);
+          if (checkStatus !== 'IPv6') return item;
+          return false;
+        } catch (err) {
+          console.log(err);
+          return false;
         }
       }),
     );
-    res.list = filteredList.filter(Boolean);
+
+    res.list = newdata
+      .filter((result) => result.status === 'fulfilled' && result.value !== false)
+      .map((result) => {
+        if (result.status === 'fulfilled') return result.value;
+        return null;
+      })
+      .filter((item) => item !== null);
   }
 
   const restultLength = res.list.length;
