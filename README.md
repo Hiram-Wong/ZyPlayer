@@ -32,14 +32,14 @@
 > 播放器说明: 
 - 没有完美的播放器
 - tcplayer不支持h265(hevc),aliplayer(h265 收费),通常表现为只有声音没有画面
-- h264:tcplayer>xgplayer\veplayer>artplayer>aliplayer  h265:xgplayer,veplayer
+- h264:tcplayer>xgplayer\veplayer>artplayer>aliplayer  h265:xgplayer,veplayer 加密:tcplayer
 - 腾讯一贯风格，tcplayer每次数据都会上报云端(https://datacenter.live.qcloud.com/)
 - aliplayer每次播放卡住会上报云端(https://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/newplayer/track)
 
 > 包说明: 
 - MacOS(dmg)：arm64[Applechip]、x64[Intel]、universal[通用-不区分架构]
 - Windows(exe)：arm64[骁龙]、x64[Intel、amd]、ia32(32位操作系统)、win-版本号.exe(通用-不区分架构)
-- Linux(Image)：arm64[鲲鹏、飞腾]、x64[兆兴]
+- Linux(Image、deb、rpm)：arm64[鲲鹏、飞腾]、x64[兆兴]
 
 > win7说明: 
 - [Chromium](https://www.chromium.org/)内核110.0.5481.100对应Electron23.1.1(续航能力的大幅优化 即降低能耗和性能优化)
@@ -71,7 +71,7 @@
         "key": "39kan",
         "name": "39影视", // 名称
         "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
-        "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy
+        "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3)
         "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
         "playUrl": "", // 配合解析去url地址
         "group": "影视", // 分组
