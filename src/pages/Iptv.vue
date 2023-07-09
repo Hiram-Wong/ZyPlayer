@@ -133,7 +133,6 @@ import 'v3-infinite-loading/lib/style.css';
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useClipboard, useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
-import axios from 'axios';
 import _ from 'lodash';
 import PQueue from 'p-queue';
 import { LinkUnlinkIcon, LoadingIcon, MoreIcon } from 'tdesign-icons-vue-next';
@@ -144,6 +143,7 @@ import { computed, onMounted, ref } from 'vue';
 import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore, useSettingStore } from '@/store';
+import { ChannelItem } from '@/types/channelList';
 
 const ipcRenderer = useIpcRenderer();
 
@@ -266,22 +266,7 @@ const getChannelList = async () => {
   const res = await channelList.pagination(pageIndex, pageSize, searchTxt.value, iptvClassSelect.value);
   const sourceLength = res.list.length;
 
-  if (skipIpv6) {
-    const filteredList = await Promise.all(
-      res.list.map(async (item) => {
-        try {
-          if ((await zy.checkUrlIpv6(item.url)) !== 'IPv6') {
-            return item;
-          }
-        } catch (err) {
-          console.log(err);
-          return false;
-        }
-        return res;
-      }),
-    );
-    res.list = filteredList.filter(Boolean);
-  }
+  if (skipIpv6) res.list = await checkChannelListIpv6(res.list);
   const restultLength = res.list.length;
   iptvDataList.value.list = _.unionWith(list, res.list, _.isEqual);
 
@@ -363,6 +348,32 @@ const playEvent = (item: { name: any }) => {
   });
   console.log({ epg, skipIpv6: iptvSetting.value.skipIpv6 });
   ipcRenderer.send('openPlayWindow', item.name);
+};
+
+// 检查ipv6
+const checkChannelListIpv6 = async (data: ChannelItem[]): Promise<ChannelItem[]> => {
+  const newdata = await Promise.allSettled(
+    data.map(async (item) => {
+      try {
+        const checkStatus = await zy.checkUrlIpv6(item.url);
+        if (checkStatus !== 'IPv6') return item;
+        return false;
+      } catch (err) {
+        console.log(err);
+        return false;
+      }
+    }),
+  );
+
+  const filteredData = newdata
+    .filter((result) => result.status === 'fulfilled' && result.value !== false)
+    .map((result) => {
+      if (result.status === 'fulfilled') return result.value as ChannelItem;
+      return null;
+    })
+    .filter((item): item is ChannelItem => item !== null);
+
+  return filteredData;
 };
 
 // 检查状态
