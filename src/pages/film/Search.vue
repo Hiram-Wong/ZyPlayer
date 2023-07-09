@@ -160,7 +160,7 @@ watch(
   () => props.site,
   (val) => {
     formData.value = val;
-    if (val) isChange.value = true;
+    isChange.value = true;
   },
 );
 
@@ -180,7 +180,7 @@ const getHotList = async () => {
   const { key } = formData.value;
 
   if (defaultHot === 'site') {
-    hotList.value = await zy.hot(key, 24);
+    hotList.value = await zy.hot(key, 24 * 7);
   } else if (defaultHot === 'douban') {
     hotList.value = await zy.doubanHot('tv', '热门', 10, 0);
   } else if (defaultHot === 'quark') {
@@ -188,7 +188,6 @@ const getHotList = async () => {
   } else if (defaultHot === 'baidu') {
     hotList.value = await zy.baiduHot();
   }
-
   if (hotList.value.length > 10) hotList.value = hotList.value.slice(0, 10);
 
   isChange.value = false;
