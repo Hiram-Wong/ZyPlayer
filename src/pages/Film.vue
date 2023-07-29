@@ -78,7 +78,7 @@
         </div>
       </div>
       <!-- app -->
-      <div v-else-if="FilmSiteSetting.basic.type === 3" class="tags">
+      <div v-else-if="FilmSiteSetting.basic.type === 3 || FilmSiteSetting.basic.type === 4" class="tags">
         <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.class" class="tags-list">
           <template v-for="(items, key) in filterItem" :key="key">
             <div class="item title">{{ formatFilterTitle(key) }}</div>
@@ -326,7 +326,7 @@ const filterApiEvent = async () => {
       }
       return item;
     }, {});
-  } else if (FilmSiteSetting.value.basic.type === 3) {
+  } else if (FilmSiteSetting.value.basic.type === 3 || FilmSiteSetting.value.basic.type === 4) {
     filterFormat = Object.entries(filter.value.select)
       .map(([key, value]) => `${key}=${value === '全部' ? '' : value}`)
       .join('&');
@@ -347,7 +347,12 @@ const changeFilterEvent = (type, item) => {
   console.log(`[筛选变更] ${type}:${item}`);
   filter.value.select[type] = item;
 
-  if (FilmSiteSetting.value.basic.type === 2 || FilmSiteSetting.value.basic.type === 3) filterApiEvent();
+  if (
+    FilmSiteSetting.value.basic.type === 2 ||
+    FilmSiteSetting.value.basic.type === 3 ||
+    FilmSiteSetting.value.basic.type === 4
+  )
+    filterApiEvent();
   else filterEvent();
 };
 
@@ -451,6 +456,38 @@ const containsClassFilterKeyword = (name) => {
 };
 
 // 获取分类
+const processClassFilter = (type, classData, filters) => {
+  let allClass;
+
+  if (type === 2) {
+    const result = {};
+    filters.forEach((item) => {
+      result[item.key] = item.value[0]?.v ?? '全部';
+    });
+    filter.value.select = result;
+    allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
+  } else if (type === 3 || type === 4) {
+    const data = filter.value.data[FilmSiteSetting.value.class.id];
+    const result = {
+      class: data[0]?.class?.[0] ?? '全部',
+      area: data[1]?.area?.[0] ?? '全部',
+      lang: data[2]?.lang?.[0] ?? '全部',
+      year: data[3]?.year?.[0] ?? '全部',
+    };
+    filter.value.select = result;
+    allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
+  } else {
+    FilmSiteSetting.value.class.id = 0;
+    FilmSiteSetting.value.class.name = '最新';
+    allClass = [
+      { type_id: 0, type_name: '最新' },
+      ...classData.filter((item) => !containsClassFilterKeyword(item.type_name)),
+    ];
+  }
+
+  return allClass;
+};
+
 const getClass = async () => {
   const { key } = FilmSiteSetting.value.basic;
   try {
@@ -462,38 +499,11 @@ const getClass = async () => {
     pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
     filter.value.data = filters;
 
-    let allClass;
     const classItem = classData[0];
     FilmSiteSetting.value.class.id = classItem.type_id;
     FilmSiteSetting.value.class.name = classItem.type_name;
 
-    if (FilmSiteSetting.value.basic.type === 2) {
-      const result = {};
-      filters.forEach((item) => {
-        result[item.key] = item.value[0].v;
-      });
-      filter.value.select = result;
-      allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
-    } else if (FilmSiteSetting.value.basic.type === 3) {
-      const data = filter.value.data[FilmSiteSetting.value.class.id];
-      const result = {
-        class: data[0]?.class?.[0] ?? '全部',
-        area: data[1]?.area?.[0] ?? '全部',
-        lang: data[2]?.lang?.[0] ?? '全部',
-        year: data[3]?.year?.[0] ?? '全部',
-      };
-      filter.value.select = result;
-      allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
-    } else {
-      FilmSiteSetting.value.class.id = 0;
-      FilmSiteSetting.value.class.name = '最新';
-      allClass = [
-        { type_id: 0, type_name: '最新' },
-        ...classData.filter((item) => !containsClassFilterKeyword(item.type_name)),
-      ];
-    }
-
-    classKeywords.value = allClass;
+    classKeywords.value = processClassFilter(FilmSiteSetting.value.basic.type, classData, filters);
     isLoadClass.value = true;
   } catch (err) {
     console.log(err);
@@ -507,6 +517,7 @@ const changeClassEvent = async (item) => {
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
   searchTxt.value = '';
+  console.log(filter.value.select);
   infiniteCompleteTip.value = '没有更多内容了!';
   FilmDataList.value = { list: [], rawList: [] };
   infiniteId.value++;
@@ -518,21 +529,19 @@ const getFilmList = async () => {
   const { key } = FilmSiteSetting.value.basic;
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
-  let f;
-  if (FilmSiteSetting.value.basic.type === 2) f = { ...filter.value.format };
-  else if (FilmSiteSetting.value.basic.type === 3) f = filter.value.format;
-  console.log(f);
+  const { format } = filter.value;
+  console.log(format);
 
   // console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${JSON.stringify(f)}`);
 
   try {
-    const res = await zy.list(key, pg, t, f);
+    const res = await zy.list(key, pg, t, FilmSiteSetting.value.basic.type === 2 ? { ...format } : format);
 
     const newFilms = _.differenceWith(res, FilmDataList.value.list, _.isEqual);
     FilmDataList.value.list = [...FilmDataList.value.list, ...newFilms];
     FilmDataList.value.rawList = [...FilmDataList.value.rawList, ...res];
     pagination.value.pageIndex++;
-    if (showToolbar.value && FilmSiteSetting.value.basic.type !== 2) filterEvent();
+    if (FilmSiteSetting.value.basic.type === 0 || FilmSiteSetting.value.basic.type === 1) filterEvent();
     return newFilms.length;
   } catch (err) {
     infiniteCompleteTip.value = '网络请求失败, 请尝试手动刷新!';
@@ -610,7 +619,7 @@ const getSearchList = async () => {
     }
 
     let resultDetail = resultSearch;
-    if (FilmSiteSetting.value.basic.type !== 3) {
+    if (FilmSiteSetting.value.basic.type !== 3 && FilmSiteSetting.value.basic.type !== 4) {
       const ids = resultSearch.map((item) => item.vod_id);
       resultDetail = await zy.detail(site.key, ids.join(','));
     }
@@ -681,7 +690,7 @@ const playEvent = async (item) => {
     type,
   };
 
-  if (type !== 1) {
+  if (type !== 1 && type !== 4) {
     const [detailItem] = await zy.detail(formSiteData.value.key, item.vod_id);
     item = detailItem;
   }

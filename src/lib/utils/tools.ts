@@ -9,9 +9,8 @@ import JSON5 from "json5";
 import { sites } from "@/lib/dexie";
 
 const iconv = require("iconv-lite");
-const prettier = require("prettier");
-const dns = require("dns");
-const net = require("net");
+import dns from "dns";
+import net from "net";
 
 let controller = new AbortController();
 
@@ -43,7 +42,7 @@ Object.fromEntries = function fromEntries(iterable) {
 
 const buildUrl = (url, paramsStr) => {
   const u = new URL(url);
-  const api = u.origin + u.pathname;
+  const api = u.origin + u.pathname.replace(/\/$/, '');
   const params = new URLSearchParams(u.search);
   
   if (paramsStr.startsWith('?') || paramsStr.startsWith('&')) {
@@ -51,9 +50,17 @@ const buildUrl = (url, paramsStr) => {
     p.forEach((value, key) => params.set(key, value));
     return api + "?" + params.toString();
   } else {
-    return api + paramsStr;
+    const cleanParamsStr = paramsStr.startsWith('/') ? paramsStr.slice(1) : paramsStr;
+    return api + (cleanParamsStr ? '/' + cleanParamsStr : '');
   }
 };
+
+const removeTrailingSlash = (url) => {
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  return url;
+}
 
 export const removeHTMLTagsAndSpaces = (str) => {
   // 去除HTML标签
@@ -81,6 +88,8 @@ const zy = {
         url = buildUrl(site.api, `&t=1&ac=videolist`);
       } else if (site.type === 3) {
         url = buildUrl(site.api, `/nav`);
+      } else if (site.type === 4) {
+        url = buildUrl(site.api, `/types`);
       }
 
       const res = await axios.get(url, { timeout: 3000 });
@@ -89,7 +98,7 @@ const zy = {
       if (site.type === 0) json = parser.parse(res.data);
       else json = res.data;
 
-      const jsondata = json?.rss === undefined ? json : json.rss;
+      const jsondata = json.rss || json;
       let classData;
       let page;
       let pagecount;
@@ -132,13 +141,21 @@ const zy = {
         limit = parseInt(jsondata.limit);
         total = jsondata.total;
         filters = jsonClass?.filters === undefined ? [] : jsonClass.filters[1];
-      } else if (site.type === 3) {
-        classData = jsondata.list;
+      } else if (site.type === 3 || site.type === 4) {
+        if (site.type === 3) classData = jsondata.data || jsondata.list;
+        else if (site.type === 4) classData = jsondata.data.list;
         page = 1;
         pagecount = 9999;
         limit = 20;
         total = 9999;
         filters = {};
+
+        if (site.type === 4) {
+          const { data } = await axios.get(removeTrailingSlash(site.api), { timeout: 3000 });
+          limit = data.data.limit;
+          total = data.data.total;
+        }
+
         classData.forEach(classItem => {
           if (classItem.type_extend) {
             const newList = [];
@@ -154,8 +171,6 @@ const zy = {
           }
         });
       }
-
-      if (!classData || !jsondata?.list) return null;
 
       return {
         classData,
@@ -215,9 +230,14 @@ const zy = {
         if (Object.keys(f).length !== 0) {
           url = buildUrl(url, `&${f}`);
         }
+      } else if (site.type === 4) {
+        url = buildUrl(site.api, `?tid=${t}&page=${pg}`);
+        if (Object.keys(f).length !== 0) {
+          url = buildUrl(url, `&${f}`);
+        }
       } else {
         url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}`);
-        if (Object.keys(f).length !== 0) {
+        if (Object.keys(f).length !== 0 && site.type === 2) {
           url = buildUrl(url, `&f=${JSON.stringify(f)}`);
         }
       }
@@ -227,9 +247,14 @@ const zy = {
       if (site.type === 0) json = parser.parse(data);
 
       const jsondata = json.rss || json;
-      let videoList = jsondata.list || [];
+      let videoList = jsondata.list || jsondata.data || [];
+      
       if (site.type === 0) {
         videoList = this.convertVideoList(jsondata.list.video);
+      } else if (site.type === 3) {
+        videoList = jsondata.data || jsondata.list
+      } else if (site.type === 4) {
+        videoList = jsondata.data.list
       }
       return videoList;
     } catch (err) {
@@ -347,11 +372,13 @@ const zy = {
       const jsondata = json?.rss ?? json;
       if (!jsondata) return null;
 
-      let videoList = jsondata.list;
+      let videoList = jsondata.data || jsondata.list || [];
       if (site.type === 0) {
         videoList = jsondata.list.video;
         if (!_.isArray(videoList)) videoList = [videoList];
         videoList = this.convertSearchList(videoList);
+      } else if (site.type === 4) {
+        videoList = jsondata.data.list;
       }
       if (videoList.length === 0) return null;
 
@@ -380,12 +407,14 @@ const zy = {
       const jsondata = json?.rss === undefined ? json : json.rss;
       if (!jsondata) return null;
 
-      let videoList = jsondata.list;
+      let videoList = jsondata.data || jsondata.list || [];
       if (site.type === 0) {
         videoList = jsondata.list.video;
         if (!videoList) return null;
         if (!_.isArray(videoList)) videoList = [videoList];
         videoList = this.convertSearchList(videoList);
+      } else if (site.type === 4) {
+        videoList = jsondata.data.list;
       }
       if (videoList.length === 0) return null;
 
@@ -455,6 +484,8 @@ const zy = {
       let url;
       if (site.type === 3) {
         url = buildUrl(site.api, `/video_detail?id=${id}`);
+      } else if (site.type === 4) {
+        url = buildUrl(site.api, `/detail?vod_id=${id}`);
       } else{
         url = buildUrl(site.api, `?ac=detail&ids=${id}`);
       }
@@ -464,7 +495,7 @@ const zy = {
       else json = data;
 
       const jsondata = json?.rss ?? json;
-      let videoList = jsondata?.list;
+      let videoList = jsondata.data || jsondata.list || [];
       // 坑: 单条结果是dict 多条结果list
       if (site.type === 0) {
         videoList = jsondata.list.video;
@@ -473,6 +504,8 @@ const zy = {
       } else if (site.type === 3) {
         videoList = jsondata.data;
         if (!_.isArray(videoList)) videoList = [videoList];
+      } else if (site.type === 4) {
+        videoList = jsondata.data.list;
       }
 
       if (!videoList) return;
@@ -516,8 +549,10 @@ const zy = {
   async check(key) {
     try {
       const data = await this.classify(key);
-      if (data.classData) return true;
-      else return false;
+      return {
+        status: !_.isEmpty(data.classData),
+        resource: data.total
+      }
     } catch (err) {
       console.log(err);
       return false;
@@ -976,26 +1011,6 @@ const zy = {
       }
     }
   },
-  /**
-   * 格式化 html
-   * @param {String} url  请求地址
-   * @return
-   */
-  async formatHTML(url) {
-    try {
-      const res = await axios.get(url);
-      const html = res.data;
-      const $ = cheerio.load(html);
-
-      // 对HTML进行格式化
-      const formattedHTML = prettier.format($.html(), { parser: "html" });
-
-      // 返回格式化后的HTML
-      return formattedHTML;
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  }
 };
 
 export default zy;

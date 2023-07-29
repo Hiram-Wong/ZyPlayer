@@ -26,7 +26,7 @@
             <t-radio :value="2">drpy[js0]</t-radio>
             <!-- <t-radio :value="3">drpy[js1]</t-radio> -->
             <t-radio :value="3">app[v3]</t-radio>
-            <!-- <t-radio :value="4">app[v1]</t-radio> -->
+            <t-radio :value="4">app[v1]</t-radio>
             <!-- <t-radio :value="5">爬虫</t-radio> -->
           </t-radio-group>
         </t-form-item>
