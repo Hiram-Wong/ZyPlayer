@@ -53,6 +53,10 @@
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
         </t-switch>
       </template>
+      <template #resource="{ row }">
+        <span v-if="row.resource">{{ row.resource }}</span>
+        <span v-else>暂无数据</span>
+      </template>
       <template #search="{ row }">
         <t-tag v-if="row.search === 0" shape="round" theme="danger" variant="light-outline">关闭</t-tag>
         <t-tag v-else-if="row.search === 1" theme="success" shape="round" variant="light-outline">聚合</t-tag>
@@ -182,15 +186,12 @@ const checkSingleEvent = async (row, all = false) => {
   if (!all) res = row.row;
   else res = row;
 
-  const souceStatus = res.isActive; // 原状态
-  const resultStatus = await zy.check(res.key); // 检测状态
-  if (isCheckStatusChangeActive.value) res.isActive = resultStatus; // 检测是否开启变更状态
-  res.status = resultStatus;
-  console.log(souceStatus, resultStatus);
-  if (souceStatus !== resultStatus) {
-    console.log(res);
-    sites.update(res.id, res);
-  }
+  const { status, resource } = await zy.check(res.key); // 检测状态
+  if (isCheckStatusChangeActive.value) res.isActive = status; // 检测是否开启变更状态
+  res.status = status;
+  res.resource = resource;
+  console.log(status, resource);
+  sites.update(res.id, res);
   if (!all) MessagePlugin.success('源站检测完成,自动重置状态!');
   return res.status;
 };

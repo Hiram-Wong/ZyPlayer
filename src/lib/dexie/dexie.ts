@@ -97,6 +97,10 @@ db.version(19).stores({
   })
 })
 
+db.version(20).stores({
+  sites: '++id, key, name, api, download, playUrl, type, isActive, group, search, resource',
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(setting)
   db.sites.bulkAdd(sites)

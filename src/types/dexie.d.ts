@@ -52,6 +52,7 @@ interface Site {
   search: number;
   isActive: boolean;
   group: string;
+  resource: number | null;
 }
 
 interface History {
