@@ -32,6 +32,7 @@
       :data="emptyData ? [] : data"
       :sort="sort"
       height="calc(100vh - 205px)"
+      table-layout="auto"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
