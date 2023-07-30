@@ -69,13 +69,13 @@ watch(
 );
 
 const confirmEvent = () => {
-  updateAgreementMask();
+  updateAgreementMask(true);
   formVisible.value = false;
 };
 
-const updateAgreementMask = async () => {
+const updateAgreementMask = async (status) => {
   await setting.update({
-    agreementMask: 'true',
+    agreementMask: status,
   });
 };
 
@@ -88,9 +88,6 @@ const cancelEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
-
 .privacy-policy-container {
   :deep(.t-dialog) {
     .t-dialog__footer {

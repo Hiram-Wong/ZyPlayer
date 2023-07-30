@@ -82,8 +82,6 @@ const checkUpdaterEvent = () => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-@import '@/style/index.less';
 .chase-container {
   overflow: hidden;
   height: calc(100vh - var(--td-comp-size-l));
