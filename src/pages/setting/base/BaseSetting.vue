@@ -41,7 +41,7 @@
           <t-radio-group v-model="formData.defaultHot">
             <t-radio value="kuyun">酷云(旧)</t-radio>
             <t-radio value="kylive">酷云(新)</t-radio>
-            <t-radio value="enlightent">云合</t-radio>
+            <t-radio value="enlightent">云合数据</t-radio>
           </t-radio-group>
         </div>
       </t-form-item>
@@ -69,19 +69,6 @@
             <t-radio v-model="formData.defaultCheckModel" allow-uncheck>检查源变更状态</t-radio>
             <t-radio v-model="formData.defaultChangeModel" allow-uncheck>切换源设置默认</t-radio>
           </t-space>
-        </div>
-      </t-form-item>
-      <t-form-item label="过滤" name="filter">
-        <div class="filter">
-          <t-space>
-            <span class="title" @click="classEvent('main')">主要分类</span>
-            <span class="title" @click="classEvent('r18')">青少年模式</span>
-          </t-space>
-          <dialog-class-view
-            v-model:visible="isClassDialog"
-            :data="classDialogData"
-            @receive-class-data="flushDialogData"
-          />
         </div>
       </t-form-item>
       <t-form-item label="直播" name="iptv">
@@ -165,7 +152,6 @@ import db from '@/lib/dexie/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore, useSettingStore } from '@/store';
 
-import DialogClassView from './components/DialogClass.vue';
 import DialogClearView from './components/DialogClear.vue';
 import DialogDnsView from './components/DialogDns.vue';
 import DialogEasyConfigView from './components/DialogEasyConfig.vue';
@@ -179,8 +165,6 @@ const win = remote.getCurrentWindow();
 
 const { platform } = process;
 
-const isClassDialog = ref(false);
-const classDialogData = ref({ data: [], type: 'rootClassFilter' });
 const isEasyConfigDialog = ref(false);
 const isUpdateDialog = ref(false);
 const isDnsDialog = ref(false);
@@ -241,6 +225,8 @@ watch(
     formData.value.defaultSearchType,
     formData.value.defaultChangeModel,
     formData.value.defaultCheckModel,
+    formData.value.defaultSearchRecommend,
+    formData.value.defaultSearchType,
   ],
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
@@ -539,25 +525,6 @@ const checkUpdate = () => {
 const easyConfig = () => {
   console.log('easyConfig');
   isEasyConfigDialog.value = true;
-};
-
-// 分类：打开dialog并设置数据
-const classEvent = (item) => {
-  switch (item) {
-    case 'r18':
-      classDialogData.value = {
-        data: [...formData.value.r18ClassFilter],
-        type: 'r18ClassFilter',
-      };
-      break;
-    default:
-      classDialogData.value = {
-        data: [...formData.value.rootClassFilter],
-        type: 'rootClassFilter',
-      };
-      break;
-  }
-  isClassDialog.value = true;
 };
 
 // dns：打开dialog并设置数据

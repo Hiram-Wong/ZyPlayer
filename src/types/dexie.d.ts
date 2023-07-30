@@ -3,8 +3,6 @@ interface Setting {
   theme: string;
   externalPlayer: string;
   recordShortcut: string;
-  rootClassFilter: string[];
-  r18ClassFilter: string[];
   defaultHot: string;
   defaultSearchRecommend: string;
   defaultSearchType: string;
@@ -54,6 +52,7 @@ interface Site {
   isActive: boolean;
   group: string;
   resource: number | null;
+  categories: string | null;
 }
 
 interface History {

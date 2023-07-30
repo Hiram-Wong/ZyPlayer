@@ -1,11 +1,13 @@
 <template>
   <t-dialog v-model:visible="formVisible" header="添加" :width="646" placement="center" :footer="false">
     <template #body>
-      <t-radio-group v-model="selectWay" variant="default-filled">
-        <t-radio-button value="add-single">订阅配置</t-radio-button>
-        <t-radio-button value="add-file">文件导入</t-radio-button>
-        <t-radio-button value="add-api">源站接口</t-radio-button>
-      </t-radio-group>
+      <div class="t-radio-group__header">
+        <t-radio-group v-model="selectWay" variant="default-filled" size="small">
+          <t-radio-button value="add-single">订阅配置</t-radio-button>
+          <t-radio-button value="add-file">文件导入</t-radio-button>
+          <t-radio-button value="add-api">源站接口</t-radio-button>
+        </t-radio-group>
+      </div>
 
       <!-- 表单内容-单个添加 -->
       <t-form

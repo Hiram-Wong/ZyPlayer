@@ -97,23 +97,9 @@ db.version(19).stores({
   })
 })
 
-// db.version(20).stores({
-//   setting: 'id, theme, externalPlayer, rootClassFilter, r18ClassFilter, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh',
-//   sites: '++id, key, name, api, download, playUrl, type, isActive, group, search, resource',
-// }).upgrade(trans => {
-//   trans.setting.toCollection().modify(setting => {
-//     setting.defaultSearchType = setting.defaultSearch
-//     setting.defaultSearchRecommend = setting.defaultHot
-//     setting.defaultHot = "kylive"
-//   })
-// })
-
 db.version(20).stores({
-  sites: '++id, key, name, api, download, playUrl, type, isActive, group, search, resource',
-})
-
-db.version(21).stores({
-  setting: 'id, theme, externalPlayer, rootClassFilter, r18ClassFilter, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh',
+  setting: 'id, theme, externalPlayer, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh',
+  sites: '++id, key, name, api, download, playUrl, type, isActive, group, search, resource, categories',
 }).upgrade(trans => {
   trans.setting.toCollection().modify(setting => {
     setting.defaultSearchType = setting.defaultSearch

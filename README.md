@@ -71,12 +71,13 @@
         "key": "39kan",
         "name": "39影视", // 名称
         "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
-        "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3)
+        "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
         "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
         "playUrl": "", // 配合解析去url地址
         "group": "影视", // 分组
         "isActive": true, // 是否启用 true启用 false 禁用
         "status": true, // 状态 true可用 false 失效
+        "categories": "" // 按顺序展示所配置的分类 不配置则默认展示所有分类
       }
     ]
   },
@@ -121,6 +122,7 @@
     "group": "影视",
     "isActive": true,
     "status": true,
+    "categories": ""
   }
 ]
 ```
@@ -199,7 +201,5 @@
 | ![直播播放](https://s2.loli.net/2023/05/07/e3GufyD1Um6h2iK.png) |     ![解析](https://s2.loli.net/2023/05/07/qoAfuET4Lvn1kl7.png)     |
 |                            历史记录                             |                                在追                                 |
 | ![历史](https://s2.loli.net/2023/05/07/KYUpQA7g2MGVIZb.png) |     ![在追](https://s2.loli.net/2023/05/07/xuMkzWQLYCSl5XZ.png)     |
-|                            社区                             |                                设置                                 |
-| ![社区](https://s2.loli.net/2023/05/07/r31qEmNPTGouOXb.png) |     ![设置](https://s2.loli.net/2023/05/07/RgDOlzJKBcop2d6.png)     |
 
 </details>

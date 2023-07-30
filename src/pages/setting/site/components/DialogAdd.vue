@@ -1,11 +1,13 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加" :width="646" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加" :width="700" placement="center" :footer="false">
     <template #body>
-      <t-radio-group v-model="selectWay" variant="default-filled">
-        <t-radio-button value="add-single">订阅配置</t-radio-button>
-        <t-radio-button value="add-file">文件导入</t-radio-button>
-        <t-radio-button value="add-api">源站接口</t-radio-button>
-      </t-radio-group>
+      <div class="t-radio-group__header">
+        <t-radio-group v-model="selectWay" variant="default-filled" size="small">
+          <t-radio-button value="add-single">订阅配置</t-radio-button>
+          <t-radio-button value="add-file">文件导入</t-radio-button>
+          <t-radio-button value="add-api">源站接口</t-radio-button>
+        </t-radio-group>
+      </div>
 
       <!-- 表单内容-单个添加 -->
       <t-form
@@ -17,7 +19,7 @@
         @submit="onSubmit($event, 'single')"
       >
         <t-form-item label="名称" name="name">
-          <t-input v-model="formData.siteInfo.name" class="input-item" placeholder="请输入内容" />
+          <t-input v-model="formData.siteInfo.name" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="类型" name="type">
           <t-radio-group v-model="formData.siteInfo.type">
@@ -31,7 +33,7 @@
           </t-radio-group>
         </t-form-item>
         <t-form-item label="接口" name="api">
-          <t-input v-model="formData.siteInfo.api" class="input-item" placeholder="请输入内容" />
+          <t-input v-model="formData.siteInfo.api" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="搜索" name="search">
           <t-radio-group v-model="formData.siteInfo.search">
@@ -41,10 +43,10 @@
           </t-radio-group>
         </t-form-item>
         <!-- <t-form-item label="下载" name="download">
-          <t-input v-model="formData.siteInfo.download" class="input-item" placeholder="请输入内容" />
+          <t-input v-model="formData.siteInfo.download" placeholder="请输入内容" />
         </t-form-item> -->
         <t-form-item label="解析" name="playUrl">
-          <t-input v-model="formData.siteInfo.playUrl" class="input-item" placeholder="请输入内容" />
+          <t-input v-model="formData.siteInfo.playUrl" placeholder="请输入内容" />
         </t-form-item>
         <t-form-item label="分组" name="type">
           <t-select
@@ -52,7 +54,6 @@
             creatable
             filterable
             placeholder="请选择分组"
-            class="input-item"
             @create="createOptions"
           >
             <t-option
@@ -64,8 +65,8 @@
             />
           </t-select>
         </t-form-item>
-        <t-form-item label="标识" name="key">
-          <t-input v-model="formData.siteInfo.key" class="input-item" placeholder="请输入内容" />
+        <t-form-item label="类别" name="categories">
+          <t-input v-model="formData.siteInfo.categories" placeholder="请输入内容,逗号分隔" />
         </t-form-item>
         <div class="optios">
           <t-form-item style="float: right">
@@ -110,7 +111,7 @@
         @submit="onSubmit($event, 'api')"
       >
         <t-form-item label="接口地址" name="sitesDataURL">
-          <t-input v-model="formData.url.sitesDataURL" class="input-item" placeholder="请输入接口url" />
+          <t-input v-model="formData.url.sitesDataURL" placeholder="请输入接口url" />
         </t-form-item>
         <div class="optios">
           <t-form-item style="float: right">
@@ -329,10 +330,8 @@ const createOptions = (val) => {
 </script>
 
 <style lang="less" scoped>
-@import '@/style/variables.less';
-
 .input-item,
 :deep(.t-upload__dragger) {
-  width: calc(480px - var(--td-size-1));
+  width: calc(532px - var(--td-size-1));
 }
 </style>

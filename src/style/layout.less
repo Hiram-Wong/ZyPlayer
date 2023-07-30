@@ -268,8 +268,13 @@
 }
 
 .t-dialog--default {
-  .t-dialog__body{
+  .t-dialog__body {
     padding: var(--td-comp-paddingTB-l) var(--td-size-1) 0 var(--td-size-1);
+    .t-radio-group__header {
+      position: absolute;
+      left: calc(var(--td-comp-paddingLR-xxl) + 40px);
+      top: calc(var(--td-comp-paddingTB-xxl) - 0.1rem);
+    }
     .t-form__item {
       margin-bottom: var(--td-comp-margin-l);
     }
