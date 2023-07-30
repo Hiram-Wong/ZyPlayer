@@ -690,7 +690,7 @@ const playEvent = async (item) => {
     type,
   };
 
-  if (type !== 1 && type !== 4) {
+  if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
     const [detailItem] = await zy.detail(formSiteData.value.key, item.vod_id);
     item = detailItem;
   }
