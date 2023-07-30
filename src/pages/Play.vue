@@ -1315,15 +1315,15 @@ const changeEvent = async (e) => {
 };
 
 // 切换iptv
-const changeIptvEvent = async (e) => {
+const changeIptvEvent = async (item) => {
   store.updateConfig({
     type: 'iptv',
     data: {
-      info: e,
+      info: item,
       ext: { epg: data.value.ext.epg },
     },
   });
-  info.value = e;
+  info.value = item;
   await initPlayer();
 };
 
@@ -1342,28 +1342,37 @@ const changeIptvEvent = async (e) => {
 const getDoubanRecommend = async () => {
   const { key } = ext.value.site;
   const { type } = await sites.find({ key });
-  const name = info.value.vod_name;
-  const year = info.value.vod_year;
-  const id = info.value.vod_douban_id;
+  const { vod_name: name, vod_year: year, vod_douban_id: id } = info.value;
   const ids = [];
+  let flag = true;
+  let vodIds = '';
 
   try {
-    const resName = await zy.doubanRecommendations(id, name, year);
+    const doubanRecommendName = await zy.doubanRecommendations(id, name, year);
 
-    for (const element of resName) {
-      const item = await zy.search(key, element);
+    const searchPromises = doubanRecommendName.map(async (element) => {
+      try {
+        const item = await zy.search(key, element);
+        if (item && ids.length < 10) {
+          ids.push(item[0]);
+        }
+      } catch (err) {
+        // Handle the error if necessary
+      }
+    });
 
-      if (item && ids.length < 10) {
-        ids.push(item[0]);
+    await Promise.all(searchPromises);
+
+    if ( ids.length > 0 ) {
+      const idsFirst = ids[0]
+      if ( !('vod_pic' in idsFirst) ) { 
+        flag = false;
+        vodIds = ids.map((movie) => movie.vod_id).join(',');
       }
     }
 
-    if (type === 3) recommend.value = ids;
-    else {
-      const vodIds = ids.map((movie) => movie.vod_id);
-      const res = await zy.detail(key, vodIds.join(','));
-      recommend.value = res;
-    }
+    if ( flag ) recommend.value = ids;
+    else recommend.value = await zy.detail(key, vodIds);
   } catch (err) {
     console.log(err);
   }
@@ -1575,8 +1584,15 @@ const reverseOrderEvent = () => {
 };
 
 // 推荐刷新数据
-const recommendEvent = (e) => {
-  info.value = e;
+const recommendEvent = async(item) => {
+  const { key } = ext.value.site;
+
+  if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
+    const [detailItem] = await zy.detail(key, item.vod_id);
+    item = detailItem;
+  }
+
+  info.value = item;
   recommend.value = [];
   dataHistory.value = {};
   selectPlaySource.value = '';
@@ -1586,7 +1602,7 @@ const recommendEvent = (e) => {
   store.updateConfig({
     type: 'film',
     data: {
-      info: e,
+      info: item,
       ext: ext.value,
     },
   });
