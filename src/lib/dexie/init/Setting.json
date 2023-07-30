@@ -35,8 +35,9 @@
     "里番",
     "VIP"
   ],
-  "defaultHot": "site",
-  "defaultSearch": "site",
+  "defaultHot": "kylive",
+  "defaultSearchRecommend": "site",
+  "defaultSearchType": "site",
   "defaultCheckModel": true,
   "defaultChangeModel": false,
   "defaultIptvEpg": "https://epg.112114.xyz/",

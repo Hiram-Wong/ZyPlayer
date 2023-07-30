@@ -39,21 +39,29 @@
       <t-form-item label="热榜" name="hotRecommend">
         <div class="hot-recommend">
           <t-radio-group v-model="formData.defaultHot">
-            <t-radio value="site">站内</t-radio>
-            <t-radio value="douban">豆瓣</t-radio>
-            <t-radio value="quark">夸克</t-radio>
-            <t-radio value="baidu">百度</t-radio>
+            <t-radio value="kuyun">酷云(旧)</t-radio>
+            <t-radio value="kylive">酷云(新)</t-radio>
+            <t-radio value="enlightent">云合</t-radio>
           </t-radio-group>
         </div>
       </t-form-item>
       <t-form-item label="搜索" name="search">
         <div class="search">
-          <t-radio-group v-model="formData.defaultSearch">
-            <t-radio value="site">站内搜索</t-radio>
-            <t-radio value="group">组内搜索</t-radio>
-            <t-radio value="all">全站搜索</t-radio>
-          </t-radio-group>
+          <t-space direction="vertical">
+            <t-radio-group v-model="formData.defaultSearchType">
+              <t-radio value="site">本站搜索</t-radio>
+              <t-radio value="group">组内搜索</t-radio>
+              <t-radio value="all">全站搜索</t-radio>
+            </t-radio-group>
+            <t-radio-group v-model="formData.defaultSearchRecommend">
+              <t-radio value="site">站点</t-radio>
+              <t-radio value="douban">豆瓣</t-radio>
+              <t-radio value="quark">夸克</t-radio>
+              <t-radio value="baidu">百度</t-radio>
+            </t-radio-group>
+          </t-space>
         </div>
+        <div class="hot-recommend"></div>
       </t-form-item>
       <t-form-item label="站点" name="site">
         <div class="site">
@@ -223,20 +231,32 @@ const formData = ref({
 });
 
 const filmEmitReload = useEventBus('film-reload');
+const hotEmitReload = useEventBus('hot-reload');
 const iptvEmitReload = useEventBus('iptv-reload');
 const analyzeEmitReload = useEventBus('analyze-reload');
 
 // 监听刷新film
 watch(
   () => [
-    formData.value.defaultHot,
-    formData.value.defaultSearch,
+    formData.value.defaultSearchType,
     formData.value.defaultChangeModel,
     formData.value.defaultCheckModel,
   ],
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
       filmEmitReload.emit('film-reload');
+    }
+  },
+);
+
+// 监听刷新hot
+watch(
+  () => [
+    formData.value.defaultHot,
+  ],
+  (_, oldValue) => {
+    if (oldValue.every((item) => typeof item !== 'undefined')) {
+      hotEmitReload.emit('hot-reload');
     }
   },
 );
@@ -251,7 +271,7 @@ watch(
   },
 );
 
-// 监听刷新iptv
+// 监听刷新analyze
 watch(
   () => [formData.value.analyzeQuickSearchType],
   (_, oldValue) => {

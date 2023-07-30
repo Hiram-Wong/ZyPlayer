@@ -81,7 +81,7 @@ watch(
 );
 
 const getHotList = async () => {
-  const defaultHot = await setting.get('defaultHot');
+  const defaultHot = await setting.get('defaultSearchRecommend');
   const { key } = formData.value;
   if (defaultHot === 'site') {
     hotList.value = await zy.hot(key, 24);
@@ -92,7 +92,7 @@ const getHotList = async () => {
 };
 
 const detailEvent = async (item) => {
-  const defaultHot = await setting.get('defaultHot');
+  const defaultHot = await setting.get('defaultSearchRecommend');
   const { key } = formData.value;
   try {
     MessagePlugin.info('请等待,正在搜索相关资源!');

@@ -356,13 +356,13 @@ const changeFilterEvent = (type, item) => {
   else filterEvent();
 };
 
-const searchGroup = (defaultSearch) => {
+const searchGroup = (type: string) => {
   let selfSearch;
   if (FilmSiteSetting.value.basic.search !== 0) selfSearch = [{ ...FilmSiteSetting.value.basic }];
-  if (defaultSearch === 'site') {
+  if (type === 'site') {
     return selfSearch;
   }
-  if (defaultSearch === 'group') {
+  if (type === 'group') {
     return sitesList.value
       .filter((item) => item.group === FilmSiteSetting.value.basic.group && item.search === 1)
       .concat(selfSearch);
@@ -371,14 +371,14 @@ const searchGroup = (defaultSearch) => {
 };
 
 const getFilmSetting = async () => {
-  const [defaultSite, rootClassFilter, r18ClassFilter, defaultChangeModel, sitesAll, defaultSearch] = await Promise.all(
+  const [defaultSite, rootClassFilter, r18ClassFilter, defaultChangeModel, sitesAll, defaultSearchType] = await Promise.all(
     [
       setting.get('defaultSite'),
       setting.get('rootClassFilter'),
       setting.get('r18ClassFilter'),
       setting.get('defaultChangeModel'),
       sites.all(),
-      setting.get('defaultSearch'),
+      setting.get('defaultSearchType'),
     ],
   );
   if (defaultSite) {
@@ -399,8 +399,8 @@ const getFilmSetting = async () => {
     rootClassFilter,
     r18ClassFilter,
     change: defaultChangeModel,
-    searchType: defaultSearch,
-    searchGroup: searchGroup(defaultSearch),
+    searchType: defaultSearchType,
+    searchGroup: searchGroup(defaultSearchType),
   });
 };
 

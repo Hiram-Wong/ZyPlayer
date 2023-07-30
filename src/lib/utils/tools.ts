@@ -5,6 +5,7 @@ import * as cheerio from "cheerio";
 import { Parser as M3u8Parser } from "m3u8-parser";
 import _ from "lodash";
 import JSON5 from "json5";
+import qs from "qs";
 
 import { sites } from "@/lib/dexie";
 
@@ -858,28 +859,81 @@ const zy = {
       throw err;
     }
   },
-  /**
-   * 获取酷云热点视频列表
-   * @param {*} date 日期2023-5-3
-   * @param {*} type 类型 1.电影  2.剧集  3.综艺
-   * @param {*} plat 平台 1.腾讯视频  2.爱奇艺  3.优酷  4.芒果
-   * @returns 酷云热点视频推荐列表
-   */
-  async kuyunHot(date, type, plat) {
-    const kuyunHotLink = `https://eye.kuyun.com/api/netplat/ranking?date=${date}&type=${type}&plat=${plat}`;
+  // 酷云通用的异步请求函数
+  async  kyHotRequest(url) {
     try {
-      const res = await axios.get(kuyunHotLink);
-      const resData = res.data;
-      if (resData.status) {
-        return resData.data.list.map((item) => ({
-          vod_id: item.ca_id,
-          vod_name: item.name,
-          vod_hot: item.num
-        }));
-      } else {
-        return false;
+      const { data } = await axios.get(url);
+      // 根据具体的接口返回状态判断是否成功
+      if ( data.status) {
+        return data.data;
       }
     } catch (err) {
+      // 处理请求错误，返回默认值或者具体错误信息
+      console.error('Error making API request:', err.message);
+      return null; // 返回适当的默认值
+    }
+  },
+  /**
+   * 获取酷云[旧]热榜列表
+   * @param {*} date 日期2023-05-03 必须补全0
+   * @param {*} type 类型 1.电影  2.剧集  3.综艺
+   * @param {*} plat 平台 1.腾讯视频  2.爱奇艺  3.优酷  4.芒果
+   * @returns 酷云[旧]热榜推荐列表
+   */
+  async kuyunHot(date, type, plat) {
+    const url = `https://eye.kuyun.com/api/netplat/ranking?date=${date}&type=${type}&plat=${plat}`;
+    const data = await this.kyHotRequest(url);
+    return data ? data.list.map((item) => ({
+      vod_id: item.ca_id,
+      vod_name: item.name,
+      vod_hot: item.num
+    })) : [];
+  },
+  /**
+   * 获取酷云[新]热榜列表
+   * @param {*} date 日期2023-05-03 必须补全0
+   * @param {*} type 类型 1.全端播放  2.全端热度  3.实时收视  4.历史收视
+   * @param {*} plat 平台 0.全端热度  1.爱奇艺  2.腾讯视频  3.优酷  4.芒果
+   * @returns 酷云[新]热榜推荐列表
+   */
+  async kyLiveHot(date, type, plat) {
+    const url = `https://www.ky.live/api/fullhot?vt=${type}&sd=${date}&plt=${plat}`;
+    const data = await this.kyHotRequest(url);
+    return data ? data.map((item) => ({
+      vod_id: item.caid,
+      vod_name: item.epg,
+      vod_hot: item.hot
+    })) : [];
+  },
+  /**
+   * 获取云合热榜列表
+   * @param {*} date 日期2023/07/28  sort为allHot 忽略该参数
+   * @param {*} channelType 类型 tv:连续剧  art:综艺  movie.电影  tvshortVideo.微短剧  animation.动漫
+   * @param {*} sort 排序 allHot:全舆情热度  spreadHot:话题传播度  searchHot:搜索热度  feedbackHot:反馈活跃度
+   * @param {*} day  最近几天
+   * @returns 云合热榜推荐列表
+   */
+  async enlightentHot(date, sort, channelType, day) {
+    const url = `https://www.enlightent.cn/sxapi/top/getHeatTop.do`;
+    try {
+      const params = qs.stringify({
+        sort,
+        channelType,
+        day,
+        date,
+      });
+      const { data } = await axios.post(url, params)
+      if (data && !_.isEmpty(data.content)) {
+        return data.content.map((item) => ({
+          vod_id: item.nameId,
+          vod_name: item.name,
+          vod_hot: item.allHot
+        }));
+      } else {
+        return [];
+      }
+    } catch (err) {
+      console.error('Error making API request:', err.message);
       throw err;
     }
   },

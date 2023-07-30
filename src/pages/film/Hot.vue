@@ -4,18 +4,21 @@
       <div class="hot-container dialog-container-padding">
         <div class="rax-view-v2 tab-container">
           <div class="rax-view-v2 tab-wrap">
-            <div class="tab-item">
+            <div class="tab-item" v-if="hotConfig.hotType === 'kuyun'">
               <span class="title">分类</span>
-              <t-radio-group v-model="hotClass" variant="default-filled" size="small" @change="changeHotClass">
-                <t-radio-button v-for="(item, key, index) in MODE_OPTIONS" :key="index" :value="key">
+              <t-radio-group v-model="hotConfig.hotClass" variant="default-filled" size="small" @change="changeHotClass">
+                <t-radio-button v-for="(item, key, index) in hotConfig.hotOption" :key="index" :value="key">
                   {{ item.name }}
                 </t-radio-button>
               </t-radio-group>
             </div>
             <div class="tab-item">
               <span class="title">来源</span>
-              <t-radio-group v-model="hotSource" variant="default-filled" size="small" @change="changeHotSource">
-                <t-radio-button v-for="item in MODE_OPTIONS[hotClass].source" :key="item.key" :value="item.key">
+              <t-radio-group v-model="hotConfig.hotSource" variant="default-filled" size="small" @change="changeHotSource">
+                <t-radio-button v-for="item in hotConfig.hotOption[hotConfig.hotClass].source" :key="item.key" :value="item.key"  v-if="hotConfig.hotType === 'kuyun'">
+                  {{ item.name }}
+                </t-radio-button>
+                <t-radio-button v-for="item in hotConfig.hotOption" :key="item.key" :value="item.key" v-else>
                   {{ item.name }}
                 </t-radio-button>
               </t-radio-group>
@@ -28,9 +31,9 @@
               <t-skeleton theme="text" :loading="loading" class="news-skeleton"> </t-skeleton>
             </template>
             <div v-if="!loading" class="swiper-wrapper-container">
-              <div v-if="hotList.length !== 0" class="data">
+              <div v-if="hotConfig.hotData.length !== 0" class="data">
                 <div
-                  v-for="(item, index) in hotList"
+                  v-for="(item, index) in hotConfig.hotData"
                   :key="item.vod_id"
                   class="rax-view-v2 news-item"
                   @click="searchEvent(item.vod_name)"
@@ -57,10 +60,10 @@
         </div>
         <div class="tip-warp">
           <span>数据来源:</span>
-          <t-link theme="primary" href="http://eye.kuyun.com/pages/whole-network/whole-network" target="_blank">
-            酷云EVE
+          <t-link theme="primary" :href="hotConfig.hotUrl" target="_blank">
+            {{ hotConfig.hotName }}
           </t-link>
-          <span class="tip-title">更新于:{{ hotSourceUpdateTime }}</span>
+          <span class="tip-title">更新于:{{ hotConfig.hotUpdateTime }}</span>
         </div>
       </div>
     </template>
@@ -68,12 +71,15 @@
 </template>
 
 <script setup lang="ts">
+import { useEventBus } from '@vueuse/core';
 import moment from 'moment';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { reactive, ref, watch } from 'vue';
+import { reactive, ref, watch, onMounted } from 'vue';
 
-import emptyImage from '@/assets/empty.svg?raw';
 import zy from '@/lib/utils/tools';
+import { setting } from '@/lib/dexie';
+import CONFIG from '@/config/hotClass';
+import emptyImage from '@/assets/empty.svg?raw';
 
 const props = defineProps({
   visible: {
@@ -88,15 +94,21 @@ const props = defineProps({
   },
 });
 
-const hotClass = ref('episode');
-const hotSource = ref(1);
-const hotSourceUpdateTime = ref(moment().format('YYYY-MM-DD'));
+const hotConfig = reactive({
+  hotType: 'kylive',
+  hotName: '',
+  hotUrl: '',
+  hotClass: 'episode',  // 仅酷云[旧]生效
+  hotSource: 1,
+  hotUpdateTime: moment().format('YYYY-MM-DD'),
+  hotData: [],
+  hotOption: [] || {},
+})
 
 const loading = ref(true); // 骨架屏是否显示热播
-
-const formVisible = ref(false); // dialog是否显示热播
-const hotList = ref([]); // 热播列表
+const formVisible = ref(false); // dialog
 const formData = ref(props.site); // 接受父组件参数
+
 const emit = defineEmits(['update:visible', 'search']);
 
 watch(
@@ -119,49 +131,51 @@ watch(
   },
 );
 
-const MODE_OPTIONS = reactive({
-  episode: {
-    key: 2,
-    name: '剧集',
-    source: [
-      { key: 1, name: '腾讯视频' },
-      { key: 2, name: '爱奇艺' },
-      { key: 3, name: '优酷' },
-      { key: 4, name: '芒果' },
-    ],
-  },
-  variety: {
-    key: 3,
-    name: '综艺',
-    source: [
-      { key: 1, name: '腾讯视频' },
-      { key: 2, name: '爱奇艺' },
-      { key: 3, name: '优酷' },
-      { key: 4, name: '芒果' },
-    ],
-  },
-  movie: {
-    key: 1,
-    name: '电影',
-    source: [
-      { key: 1, name: '腾讯视频' },
-      { key: 2, name: '爱奇艺' },
-      { key: 3, name: '优酷' },
-    ],
-  },
-});
+onMounted(()=>{
+  getSetConfig()
+})
 
+const hotTypeMappings = {
+  enlightent: {
+    hotUpdateTime: () => moment().format('YYYY/MM/DD'),
+    hotSource: 'tv',
+  },
+  kuyun: {
+    hotUpdateTime: () => moment().format('YYYY-MM-DD'),
+    hotSource: 1,
+  },
+  kylive: {
+    hotUpdateTime: () => moment().format('YYYY-MM-DD'),
+    hotSource: 0,
+  },
+};
+
+const getSetConfig = async()=>{
+  const hotType = await setting.get('defaultHot');
+  
+  hotConfig.hotType = hotType;
+  if (hotType in hotTypeMappings) {
+    const { hotUpdateTime, hotSource } = hotTypeMappings[hotType];
+    hotConfig.hotUpdateTime = hotUpdateTime();
+    hotConfig.hotSource = hotSource;
+    hotConfig.hotName = CONFIG[hotType].name;
+    hotConfig.hotUrl = CONFIG[hotType].url;
+    hotConfig.hotOption = CONFIG[hotType].data;
+  }
+}
+
+// 切换分类
 const changeHotClass = () => {
   loading.value = true;
-  hotList.value = [];
-  hotSource.value = 1;
+  hotConfig.hotData = [];
+  hotConfig.hotSource = 1;
   getHotList();
 };
 
-//
+// 切换数据源
 const changeHotSource = () => {
   loading.value = true;
-  hotList.value = [];
+  hotConfig.hotData = [];
   getHotList();
 };
 
@@ -169,18 +183,28 @@ const changeHotSource = () => {
 const getHotList = async (retryCount = 0) => {
   try {
     const retryLimit = 3; // 重试次数
-    const date = moment().subtract(retryCount, 'days').format('YYYY-MM-DD');
-    const queryHotList = await zy.kuyunHot(date, MODE_OPTIONS[hotClass.value].key, hotSource.value);
+    const date = moment().subtract(retryCount, 'days');
+    const dateFormat = hotConfig.hotType === 'enlightent' ? date.format('YYYY/MM/DD') : date.format('YYYY-MM-DD');
 
-    if (queryHotList) {
+    let queryHotList;
+    if (hotConfig.hotType === 'kuyun') {
+      queryHotList = await zy.kuyunHot(dateFormat, hotConfig.hotOption[hotConfig.hotClass].key, hotConfig.hotSource);
+    } else if(hotConfig.hotType === 'kylive') {
+      queryHotList = await zy.kyLiveHot(dateFormat, 2, hotConfig.hotSource);
+    } else if(hotConfig.hotType === 'enlightent') {
+      queryHotList = await zy.enlightentHot(dateFormat, 'allHot', hotConfig.hotSource, 1);
+    } 
+
+    if (queryHotList.length) {
       loading.value = false;
-      hotList.value = queryHotList;
-      hotSourceUpdateTime.value = date;
-    } else if (retryCount < retryLimit) {
-      // 继续递归调用函数进行下一次请求
-      await getHotList(retryCount + 1);
+      hotConfig.hotData = queryHotList;
+      hotConfig.hotUpdateTime = dateFormat;
     } else {
-      loading.value = false;
+      if (retryCount < retryLimit) {
+        await getHotList(retryCount + 1);  // 递归请求
+      } else {
+        loading.value = false;
+      }
     }
   } catch (err) {
     MessagePlugin.error(`error:${err}`);
@@ -193,6 +217,13 @@ const searchEvent = async (item) => {
   emit('search', item);
   formVisible.value = false;
 };
+
+// 监听设置变更
+const eventBus = useEventBus('hot-reload');
+eventBus.on(() => {
+  hotConfig.hotData = [];
+  getSetConfig()
+});
 </script>
 
 <style lang="less" scoped>

@@ -6,7 +6,8 @@ interface Setting {
   rootClassFilter: string[];
   r18ClassFilter: string[];
   defaultHot: string;
-  defaultSearch: string;
+  defaultSearchRecommend: string;
+  defaultSearchType: string;
   defaultCheckModel: boolean;
   defaultChangeModel: boolean;
   defaultIptvEpg: string;

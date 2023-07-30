@@ -175,17 +175,17 @@ onClickOutside(searchRef, () => {
   isFocus.value = false;
 });
 
-const getHotList = async () => {
-  const defaultHot = await setting.get('defaultHot');
+const getSearchRecommend = async () => {
+  const searchRecommend = await setting.get('defaultSearchRecommend');
   const { key } = formData.value;
 
-  if (defaultHot === 'site') {
+  if (searchRecommend === 'site') {
     hotList.value = await zy.hot(key, 24 * 7);
-  } else if (defaultHot === 'douban') {
+  } else if (searchRecommend === 'douban') {
     hotList.value = await zy.doubanHot('tv', '热门', 10, 0);
-  } else if (defaultHot === 'quark') {
+  } else if (searchRecommend === 'quark') {
     hotList.value = await zy.quarkHot();
-  } else if (defaultHot === 'baidu') {
+  } else if (searchRecommend === 'baidu') {
     hotList.value = await zy.baiduHot();
   }
   if (hotList.value.length > 10) hotList.value = hotList.value.slice(0, 10);
@@ -206,7 +206,7 @@ const searchInputEvent = () => {
 
 const focusEvent = async () => {
   isFocus.value = true;
-  if (isChange.value) await getHotList();
+  if (isChange.value) await getSearchRecommend();
 };
 
 const openHotDialog = () => {
