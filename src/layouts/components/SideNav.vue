@@ -5,6 +5,7 @@
         <template #icon>
           <img class="logo" src="@/assets/icon.png" alt="logo" />
         </template>
+        zyplayer
       </t-menu-item>
       <template v-for="item in list" :key="item.path">
         <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)[0])">
@@ -23,6 +24,7 @@
       <template #operations>
         <t-menu-item @click="refreshEvent">
           <template #icon><refresh-icon /></template>
+          刷新
         </t-menu-item>
       </template>
     </t-menu>
