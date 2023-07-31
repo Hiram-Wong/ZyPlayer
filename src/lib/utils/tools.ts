@@ -12,6 +12,7 @@ import { sites } from "@/lib/dexie";
 const iconv = require("iconv-lite");
 import dns from "dns";
 import net from "net";
+import CLASS_FILTER_CONFIG from '@/config/appFilter';
 
 let controller = new AbortController();
 
@@ -100,37 +101,84 @@ const zy = {
       else json = res.data;
 
       const jsondata = json.rss || json;
-      let classData;
-      let page;
-      let pagecount;
-      let limit;
-      let total;
-      let filters;
+      let classData, page, pagecount, limit, total, filters;
 
-      if (site.type === 0) {
-        const arr = [];
-        // 有些网站返回的分类名里会含有一串包含在{}内的字符串,移除掉
-        const regex = /\{.*\}/i;
-        for (const item of jsondata.class.ty) {
-          const items = {
-            type_id: item._id,
-            type_name: item._t.replace(regex, "")
-          };
-          arr.push(items);
+
+      const initData = [
+        {
+          key: "area",
+          name: "地区",
+          value: [
+            {
+              "n": "全部",
+              "v": ""
+            }
+          ]
+        },
+        {
+          key: "year",
+          name:  "年份",
+          value: [
+            {
+              "n": "全部",
+              "v": ""
+            }
+          ]
+        },
+        {
+          key: "sort",
+          name: "排序",
+          value: [
+            {
+              "n": "按更新时间",
+              "v": "按更新时间"
+            },
+            {
+              "n": "按上映年份",
+              "v": "按上映年份"
+            },{
+              "n": "按片名",
+              "v": "按片名"
+            }
+          ]
         }
-        classData = arr;
+      ];
+      if (site.type === 0) {
+        // 有些网站返回的分类名里会含有一串包含在{}内的字符串,移除掉
+        classData = jsondata.class.ty.map((item) => ({
+          type_id: item._id,
+          type_name: item._t.replace(/\{.*\}/i, ''),
+        }));
+        classData.unshift({
+          type_id: 0,
+          type_name: '最新',
+        })
         page = jsondata.list._page;
         pagecount = jsondata.list._pagecount;
         limit = parseInt(jsondata.list._pagesize);
         total = jsondata.list._recordcount;
-        filters = [];
+        filters = {};
+        classData.forEach(classItem => {
+          filters[classItem.type_id] = initData
+        });
       } else if (site.type === 1) {
         classData = jsondata.class;
+        classData.unshift({
+          type_id: 0,
+          type_name: '最新',
+        })
         page = jsondata.page;
         pagecount = jsondata.pagecount;
         limit = parseInt(jsondata.limit);
         total = jsondata.total;
-        filters = [];
+        filters = {};
+        console.log(initData)
+
+        classData.forEach(classItem => {
+          filters[classItem.type_id] = initData
+
+          console.log(filters[classItem.type_id])
+        });
       } else if (site.type === 2) {
         const resClass = await axios.get(site.api);
         const jsonClass = resClass.data;
@@ -141,7 +189,7 @@ const zy = {
         pagecount = jsondata.pagecount;
         limit = parseInt(jsondata.limit);
         total = jsondata.total;
-        filters = jsonClass?.filters === undefined ? [] : jsonClass.filters[1];
+        filters = jsonClass?.filters === undefined ? [] : jsonClass.filters;
       } else if (site.type === 3 || site.type === 4) {
         if (site.type === 3) classData = jsondata.data || jsondata.list;
         else if (site.type === 4) classData = jsondata.data.list;
@@ -159,20 +207,20 @@ const zy = {
 
         classData.forEach(classItem => {
           if (classItem.type_extend) {
-            const newList = [];
+            const result = [];
             for (const key in classItem.type_extend) {
               const value = classItem.type_extend[key];
               if (!_.isEmpty(value) && !['star','state','version','director'].includes(key)) {
-                const valueArray = value.split(',');
-                valueArray.unshift('全部')
-                newList.push({ [key]: valueArray });
+                const valueList = value.split(',').map((item) => item.trim());
+                const options = valueList.map((value) => ({ n: value === "全部" ? "全部" : value, v: value }));
+                result.push({ key, name: _.find(CLASS_FILTER_CONFIG, { key }).desc, value: [{ n: "全部", v: "" }, ...options] });
               }
             }
-            filters[classItem.type_id]= newList
+            filters[classItem.type_id]= result
           }
         });
       }
-
+      console.log(filters)
       return {
         classData,
         page,

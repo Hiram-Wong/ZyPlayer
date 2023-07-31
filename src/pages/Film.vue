@@ -59,8 +59,8 @@
     <!-- 过滤工具栏 -->
     <div v-show="showToolbar" class="filter">
       <!-- drpy -->
-      <div v-if="FilmSiteSetting.basic.type === 2" class="tags">
-        <div v-for="filterItem in filter.data" :key="filterItem.key" class="tags-list">
+      <div class="tags">
+        <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.key" class="tags-list">
           <div class="item title">{{ filterItem.name }}</div>
           <div class="wp">
             <div
@@ -73,81 +73,6 @@
               @click="changeFilterEvent(filterItem.key, item.v)"
             >
               {{ item.n }}
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- app -->
-      <div v-else-if="FilmSiteSetting.basic.type === 3 || FilmSiteSetting.basic.type === 4" class="tags">
-        <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.class" class="tags-list">
-          <template v-for="(items, key) in filterItem" :key="key">
-            <div class="item title">{{ formatFilterTitle(key) }}</div>
-            <div class="wp">
-              <div
-                v-for="item in items"
-                :key="item"
-                class="item"
-                :class="{ active: filter.select[key] === item }"
-                :label="item"
-                :value="item"
-                @click="changeFilterEvent(key, item)"
-              >
-                {{ item }}
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
-      <!-- cms -->
-      <div v-else class="tags">
-        <!-- 地区 -->
-        <div class="tags-list">
-          <div class="item title">地区</div>
-          <div class="wp">
-            <div
-              v-for="item in areasKeywords"
-              :key="item"
-              class="item"
-              :class="{ active: filter.select.area === item }"
-              :label="item"
-              :value="item"
-              @click="changeFilterEvent('area', item)"
-            >
-              {{ item }}
-            </div>
-          </div>
-        </div>
-        <!-- 日期 -->
-        <div class="tags-list">
-          <div class="item title">年份</div>
-          <div class="wp">
-            <div
-              v-for="item in yearsKeywords"
-              :key="item"
-              class="item"
-              :class="{ active: filter.select.year === item }"
-              :label="item"
-              :value="item"
-              @click="changeFilterEvent('year', item)"
-            >
-              {{ item }}
-            </div>
-          </div>
-        </div>
-        <!-- 排序 -->
-        <div class="tags-list">
-          <div class="item title">排序</div>
-          <div class="wp">
-            <div
-              v-for="item in sortKeywords"
-              :key="item"
-              class="item"
-              :class="{ active: filter.select.sort === item }"
-              :label="item"
-              :value="item"
-              @click="changeFilterEvent('sort', item)"
-            >
-              {{ item }}
             </div>
           </div>
         </div>
@@ -230,11 +155,7 @@ const infiniteId = ref(+new Date()); // infinite-loading此属性更改重置组
 const showToolbar = ref(false); // 是否显示筛选框 true显示 false隐藏
 const searchTxt = ref(''); // 搜索框
 const searchCurrentSite = ref(); // 搜索当前源
-const sortKeywords = ['按更新时间', '按上映年份', '按片名']; // 过滤排序条件
-const areasKeywords = ref(['全部']); // 过滤地区
-const yearsKeywords = ref(['全部']); // 过滤年份
 const classKeywords = ref([{ type_id: 0, type_name: '最新' }]); // 过滤类型
-const AppFilterList = reactive([...APP_FILTER_CONFIG.appFilter]);
 
 const formSiteData = ref({
   neme: '',
@@ -256,6 +177,7 @@ const FilmSiteSetting = ref({
     type: 1,
     search: 1,
     playUrl: '',
+    categories: ''
   },
   class: {
     id: 0,
@@ -278,7 +200,6 @@ const filter = ref({
     class: '',
     area: '全部',
     year: '全部',
-    date: [],
   },
 });
 const sitesList = ref([]); // 全部源
@@ -371,11 +292,9 @@ const searchGroup = (type: string) => {
 };
 
 const getFilmSetting = async () => {
-  const [defaultSite, rootClassFilter, r18ClassFilter, defaultChangeModel, sitesAll, defaultSearchType] = await Promise.all(
+  const [defaultSite, defaultChangeModel, sitesAll, defaultSearchType] = await Promise.all(
     [
       setting.get('defaultSite'),
-      setting.get('rootClassFilter'),
-      setting.get('r18ClassFilter'),
       setting.get('defaultChangeModel'),
       sites.all(),
       setting.get('defaultSearchType'),
@@ -396,8 +315,6 @@ const getFilmSetting = async () => {
   sitesList.value = sitesAll.filter((item) => item.isActive);
 
   Object.assign(FilmSiteSetting.value, {
-    rootClassFilter,
-    r18ClassFilter,
     change: defaultChangeModel,
     searchType: defaultSearchType,
     searchGroup: searchGroup(defaultSearchType),
@@ -407,85 +324,76 @@ const getFilmSetting = async () => {
 // 获取地区
 const getFilmArea = () => {
   const { list } = FilmDataList.value;
-  [areasKeywords.value] = _.sortedUniq([
-    _.unionWith(
-      areasKeywords.value,
-      _.map(list, (item) => item.vod_area.split(',')[0]),
-      _.isEqual,
-    ),
-  ]);
+  const listFormat = list.map((item) => {
+    const area = item.vod_area.split(',')[0] || '';
+    return { n: area, v: area };
+  });
+  const { id } = FilmSiteSetting.value.class;
+  const currentFilter = filter.value.data[id];
+  console.log(currentFilter)
+
+  const areaIndex = _.findIndex(currentFilter, {key: 'area'});
+  const combinedValues = _.union(...currentFilter[areaIndex].value, listFormat);
+  const uniqueValues = _.uniqBy(combinedValues, 'n');
+
+  filter.value.data[id][areaIndex].value = uniqueValues;
 };
 
 // 获取年份
 const getFilmYear = () => {
   const { list } = FilmDataList.value;
+  const { id } = FilmSiteSetting.value.class;
+  const currentFilter = filter.value.data[id];
+  const yearIndex = _.findIndex(currentFilter, {key: 'year'});
+
   if (FilmSiteSetting.value.basic.type === 0) {
-    [yearsKeywords.value] = _.sortedUniq([
-      _.unionWith(
-        yearsKeywords.value,
-        _.map(list, (item) => item.vod_year),
-        _.isEqual,
-      ),
-    ]);
+    const listFormat = list.map((item) => {
+      const area = item.vod_year || '';
+      return { n: area, v: area };
+    });
+
+    const combinedValues = _.union(...currentFilter[yearIndex].value, listFormat);
+    const uniqueValues = _.uniqBy(combinedValues, 'n');
+
+    filter.value.data[id][yearIndex].value = uniqueValues;
   } else {
-    [yearsKeywords.value] = _.sortedUniq([
-      _.unionWith(
-        yearsKeywords.value,
-        _.map(list, (item) => item.vod_year.split('–')[0]),
-        _.isEqual,
-      ),
-    ]);
+    const listFormat = list.map((item) => {
+      const area = item.vod_year.split('–')[0] || '';
+      return { n: area, v: area };
+    });
+    
+    const combinedValues = _.union(...currentFilter[yearIndex].value, listFormat);
+    const uniqueValues = _.uniqBy(combinedValues, 'n');
+
+    filter.value.data[id][yearIndex].value = uniqueValues;
   }
-  yearsKeywords.value = yearsKeywords.value.sort((a, b) => (b as unknown as number) - (a as unknown as number));
 };
 
-// 青少年过滤
-const containsClassFilterKeyword = (name) => {
-  const { rootClassFilter, r18ClassFilter } = FilmSiteSetting.value;
-  let ret = false;
-  // 主分类过滤, 检测关键词是否包含分类名
-  if (FilmSiteSetting.value.rootClassFilter) {
-    // ret = rootClassFilter.includes(name);
-    ret = rootClassFilter?.some((v) => name?.includes(v));
+// 类别过滤
+const categoriesFilter = (classData: string[]): string[] => {
+  const { categories } = FilmSiteSetting.value.basic;
+  if (!categories || categories.trim() === '') return classData;
+  
+  const categoryList = categories.split(',').map((category) => category.trim());
+  const categoriesInOrder: string[] = [];
+
+  for (const category of categoryList) {
+    const foundCategory = classData.find((item) => item.type_name === category);
+    if (foundCategory) {
+      categoriesInOrder.push(foundCategory);
+    }
   }
-  // 福利过滤,检测分类名是否包含关键词
-  if (r18ClassFilter?.length && !ret) {
-    ret = r18ClassFilter?.some((v) => name?.includes(v));
-  }
-  return ret;
-};
+  return categoriesInOrder;
+}
 
 // 获取分类
-const processClassFilter = (type, classData, filters) => {
-  let allClass;
+const classFilter = (filters) => {
+  const result = {};
 
-  if (type === 2) {
-    const result = {};
-    filters.forEach((item) => {
-      result[item.key] = item.value[0]?.v ?? '全部';
-    });
-    filter.value.select = result;
-    allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
-  } else if (type === 3 || type === 4) {
-    const data = filter.value.data[FilmSiteSetting.value.class.id];
-    const result = {
-      class: data[0]?.class?.[0] ?? '全部',
-      area: data[1]?.area?.[0] ?? '全部',
-      lang: data[2]?.lang?.[0] ?? '全部',
-      year: data[3]?.year?.[0] ?? '全部',
-    };
-    filter.value.select = result;
-    allClass = [...classData.filter((item) => !containsClassFilterKeyword(item.type_name))];
-  } else {
-    FilmSiteSetting.value.class.id = 0;
-    FilmSiteSetting.value.class.name = '最新';
-    allClass = [
-      { type_id: 0, type_name: '最新' },
-      ...classData.filter((item) => !containsClassFilterKeyword(item.type_name)),
-    ];
-  }
-
-  return allClass;
+  filters[FilmSiteSetting.value.class.id].forEach((item) => {
+    result[item.key] = item.value[0]?.v ?? '全部';
+  });
+  filter.value.select = result;
 };
 
 const getClass = async () => {
@@ -494,16 +402,18 @@ const getClass = async () => {
     const res = await zy.classify(key);
 
     const { pagecount, limit, total, classData, filters } = res;
-
+    console.log(filters)
     const { pageIndex, ...rest } = pagination.value;
     pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
     filter.value.data = filters;
 
-    const classItem = classData[0];
+    const classDataFormat = categoriesFilter(classData);
+    classKeywords.value = classDataFormat;
+    const classItem = classDataFormat[0];
     FilmSiteSetting.value.class.id = classItem.type_id;
     FilmSiteSetting.value.class.name = classItem.type_name;
+    classFilter(filters);
 
-    classKeywords.value = processClassFilter(FilmSiteSetting.value.basic.type, classData, filters);
     isLoadClass.value = true;
   } catch (err) {
     console.log(err);
@@ -517,7 +427,7 @@ const changeClassEvent = async (item) => {
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
   searchTxt.value = '';
-  console.log(filter.value.select);
+  
   infiniteCompleteTip.value = '没有更多内容了!';
   FilmDataList.value = { list: [], rawList: [] };
   infiniteId.value++;
@@ -666,16 +576,11 @@ const changeSitesEvent = async (item) => {
       class: '',
       area: '全部',
       year: '全部',
-      date: [],
     },
   };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
   FilmSiteSetting.value.searchGroup = await searchGroup(FilmSiteSetting.value.searchType);
-};
-
-const formatFilterTitle = (id) => {
-  return _.find(AppFilterList, { key: id }).desc;
 };
 
 // 播放
@@ -728,7 +633,6 @@ eventBus.on(async () => {
       class: '',
       area: '全部',
       year: '全部',
-      date: [],
     },
   };
   infiniteId.value++;
