@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v3.4.1
         with:
-          node-version: 16
+          node-version: 18
           cache: 'yarn'
 
       - name: Build/release Electron app
