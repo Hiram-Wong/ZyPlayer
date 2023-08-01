@@ -322,51 +322,50 @@ const getFilmSetting = async () => {
 };
 
 // 获取地区
-const getFilmArea = () => {
+const arrangeCmsArea = () => {
   const { list } = FilmDataList.value;
   const listFormat = list.map((item) => {
     const area = item.vod_area.split(',')[0] || '';
     return { n: area, v: area };
   });
+
   const { id } = FilmSiteSetting.value.class;
   const currentFilter = filter.value.data[id];
-  console.log(currentFilter)
 
-  const areaIndex = _.findIndex(currentFilter, {key: 'area'});
-  const combinedValues = _.union(...currentFilter[areaIndex].value, listFormat);
-  const uniqueValues = _.uniqBy(combinedValues, 'n');
+  const index = _.findIndex(currentFilter, {key: 'area'});
+  const source = [...currentFilter[index].value];
+  const res = _.uniqBy([...source, ...listFormat], 'n');
 
-  filter.value.data[id][areaIndex].value = uniqueValues;
+  
+  console.log(res)
+
+  filter.value.data[id][index].value = res;
 };
 
 // 获取年份
-const getFilmYear = () => {
+const arrangeCmsYear = () => {
   const { list } = FilmDataList.value;
   const { id } = FilmSiteSetting.value.class;
+  const { type } = FilmSiteSetting.value.basic;
   const currentFilter = filter.value.data[id];
-  const yearIndex = _.findIndex(currentFilter, {key: 'year'});
+  const index = _.findIndex(currentFilter, {key: 'year'});
+  const source = [...currentFilter[index].value];
+  let listFormat;
 
-  if (FilmSiteSetting.value.basic.type === 0) {
-    const listFormat = list.map((item) => {
+  if (type === 0) {
+    listFormat = list.map((item) => {
       const area = item.vod_year || '';
       return { n: area, v: area };
     });
-
-    const combinedValues = _.union(...currentFilter[yearIndex].value, listFormat);
-    const uniqueValues = _.uniqBy(combinedValues, 'n');
-
-    filter.value.data[id][yearIndex].value = uniqueValues;
   } else {
-    const listFormat = list.map((item) => {
+    listFormat = list.map((item) => {
       const area = item.vod_year.split('–')[0] || '';
       return { n: area, v: area };
     });
-    
-    const combinedValues = _.union(...currentFilter[yearIndex].value, listFormat);
-    const uniqueValues = _.uniqBy(combinedValues, 'n');
-
-    filter.value.data[id][yearIndex].value = uniqueValues;
   }
+  
+  const res = _.unionBy([source, ...listFormat],'n');
+  filter.value.data[id][index].value = res;
 };
 
 // 类别过滤
@@ -489,8 +488,8 @@ const load = async ($state) => {
       $state.complete();
     } else {
       if (FilmSiteSetting.value.basic.type === 0 || FilmSiteSetting.value.basic.type === 1) {
-        getFilmArea();
-        getFilmYear();
+        arrangeCmsArea();
+        arrangeCmsYear();
       }
       $state.loaded();
     }

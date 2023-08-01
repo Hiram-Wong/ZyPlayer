@@ -103,8 +103,7 @@ const zy = {
       const jsondata = json.rss || json;
       let classData, page, pagecount, limit, total, filters;
 
-
-      const initData = [
+      const cmsFilterData = [
         {
           key: "area",
           name: "地区",
@@ -143,6 +142,7 @@ const zy = {
           ]
         }
       ];
+
       if (site.type === 0) {
         // 有些网站返回的分类名里会含有一串包含在{}内的字符串,移除掉
         classData = jsondata.class.ty.map((item) => ({
@@ -157,10 +157,12 @@ const zy = {
         pagecount = jsondata.list._pagecount;
         limit = parseInt(jsondata.list._pagesize);
         total = jsondata.list._recordcount;
+
         filters = {};
-        classData.forEach(classItem => {
-          filters[classItem.type_id] = initData
-        });
+        for (let item of classData) {
+          const key = item.type_id
+          filters[key]  = cmsFilterData
+        }
       } else if (site.type === 1) {
         classData = jsondata.class;
         classData.unshift({
@@ -171,14 +173,12 @@ const zy = {
         pagecount = jsondata.pagecount;
         limit = parseInt(jsondata.limit);
         total = jsondata.total;
+
         filters = {};
-        console.log(initData)
-
-        classData.forEach(classItem => {
-          filters[classItem.type_id] = initData
-
-          console.log(filters[classItem.type_id])
-        });
+        for (let item of classData) {
+          const key = item.type_id
+          filters[key]  = cmsFilterData
+        }
       } else if (site.type === 2) {
         const resClass = await axios.get(site.api);
         const jsonClass = resClass.data;
@@ -220,7 +220,7 @@ const zy = {
           }
         });
       }
-      console.log(filters)
+
       return {
         classData,
         page,
