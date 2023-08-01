@@ -317,8 +317,8 @@ const getFilmSetting = async () => {
 
 // 获取地区
 const arrangeCmsArea = () => {
-  const { list } = FilmDataList.value;
-  const data = _.compact(_.map(list, (item) => item.vod_area.split(',')[0]));
+  const { rawList } = FilmDataList.value;
+  const data = _.compact(_.map(rawList, (item) => item.vod_area.split(',')[0]));
   data.unshift('全部');
   const dataFormat = _.uniq(data);
 
@@ -336,15 +336,15 @@ const arrangeCmsArea = () => {
 
 // 获取年份
 const arrangeCmsYear = () => {
-  const { list } = FilmDataList.value;
+  const { rawList } = FilmDataList.value;
   const { id } = FilmSiteSetting.value.class;
   const { type } = FilmSiteSetting.value.basic;
   const currentFilter = filter.value.data[id];
   const index = _.findIndex(currentFilter, {key: 'year'});
 
   let data;
-  if (type === 0) data = _.compact(_.map(list, (item) => item.vod_year));
-  else data = _.compact(_.map(list, (item) => item.vod_year.split('–')[0]));
+  if (type === 0) data = _.compact(_.map(rawList, (item) => item.vod_year));
+  else data = _.compact(_.map(rawList, (item) => item.vod_year.split('–')[0]));
   data.unshift('全部');
   const dataFormat = _.uniq(data);
   const listFormat = dataFormat.map((item) => {;
