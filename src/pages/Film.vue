@@ -58,7 +58,6 @@
     </div>
     <!-- 过滤工具栏 -->
     <div v-show="showToolbar" class="filter">
-      <!-- drpy -->
       <div class="tags">
         <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.key" class="tags-list">
           <div class="item title">{{ filterItem.name }}</div>
@@ -253,9 +252,7 @@ const filterApiEvent = async () => {
       .join('&');
   }
 
-  console.log(filterFormat);
   filter.value.format = filterFormat;
-  console.log(filter.value.format);
 
   FilmDataList.value.list = [];
   FilmDataList.value.rawList = [];
@@ -264,17 +261,14 @@ const filterApiEvent = async () => {
 };
 
 // 筛选条件切换
-const changeFilterEvent = (type, item) => {
-  console.log(`[筛选变更] ${type}:${item}`);
-  filter.value.select[type] = item;
+const changeFilterEvent = (key, item) => {
+  console.log(`[筛选变更] ${key}:${item}`);
+  filter.value.select[key] = item;
 
-  if (
-    FilmSiteSetting.value.basic.type === 2 ||
-    FilmSiteSetting.value.basic.type === 3 ||
-    FilmSiteSetting.value.basic.type === 4
-  )
-    filterApiEvent();
-  else filterEvent();
+  const { type } = FilmSiteSetting.value.basic;
+
+  if (type === 1 || type === 2) filterEvent();
+  else filterApiEvent();
 };
 
 const searchGroup = (type: string) => {
@@ -324,22 +318,20 @@ const getFilmSetting = async () => {
 // 获取地区
 const arrangeCmsArea = () => {
   const { list } = FilmDataList.value;
-  const listFormat = list.map((item) => {
-    const area = item.vod_area.split(',')[0] || '';
-    return { n: area, v: area };
+  const data = _.compact(_.map(list, (item) => item.vod_area.split(',')[0]));
+  data.unshift('全部');
+  const dataFormat = _.uniq(data);
+
+  const listFormat = dataFormat.map((item) => {;
+    return { n: item, v: item === '全部'? '' : item };
   });
 
   const { id } = FilmSiteSetting.value.class;
   const currentFilter = filter.value.data[id];
 
   const index = _.findIndex(currentFilter, {key: 'area'});
-  const source = [...currentFilter[index].value];
-  const res = _.uniqBy([...source, ...listFormat], 'n');
-
   
-  console.log(res)
-
-  filter.value.data[id][index].value = res;
+  filter.value.data[id][index].value = listFormat;
 };
 
 // 获取年份
@@ -349,23 +341,17 @@ const arrangeCmsYear = () => {
   const { type } = FilmSiteSetting.value.basic;
   const currentFilter = filter.value.data[id];
   const index = _.findIndex(currentFilter, {key: 'year'});
-  const source = [...currentFilter[index].value];
-  let listFormat;
 
-  if (type === 0) {
-    listFormat = list.map((item) => {
-      const area = item.vod_year || '';
-      return { n: area, v: area };
-    });
-  } else {
-    listFormat = list.map((item) => {
-      const area = item.vod_year.split('–')[0] || '';
-      return { n: area, v: area };
-    });
-  }
+  let data;
+  if (type === 0) data = _.compact(_.map(list, (item) => item.vod_year));
+  else data = _.compact(_.map(list, (item) => item.vod_year.split('–')[0]));
+  data.unshift('全部');
+  const dataFormat = _.uniq(data);
+  const listFormat = dataFormat.map((item) => {;
+    return { n: item, v: item === '全部'? '' : item };
+  });
   
-  const res = _.unionBy([source, ...listFormat],'n');
-  filter.value.data[id][index].value = res;
+  filter.value.data[id][index].value = listFormat;
 };
 
 // 类别过滤
@@ -401,7 +387,6 @@ const getClass = async () => {
     const res = await zy.classify(key);
 
     const { pagecount, limit, total, classData, filters } = res;
-    console.log(filters)
     const { pageIndex, ...rest } = pagination.value;
     pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
     filter.value.data = filters;
@@ -421,12 +406,13 @@ const getClass = async () => {
 };
 
 // 切换分类
-const changeClassEvent = async (item) => {
+const changeClassEvent = (item) => {
   console.log(`[分类变更] ${item.type_id}:${item.type_id}`);
+  classFilter(filter.value.data);
+  filterApiEvent();
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
   searchTxt.value = '';
-  
   infiniteCompleteTip.value = '没有更多内容了!';
   FilmDataList.value = { list: [], rawList: [] };
   infiniteId.value++;
@@ -439,9 +425,8 @@ const getFilmList = async () => {
   const pg = pagination.value.pageIndex;
   const t = FilmSiteSetting.value.class.id;
   const { format } = filter.value;
-  console.log(format);
 
-  // console.log(`[list请求参数] key:${key},pg:${pg},t:${t},f:${JSON.stringify(f)}`);
+  console.log(FilmSiteSetting.value.basic.type === 2 ? { ...format } : format);
 
   try {
     const res = await zy.list(key, pg, t, FilmSiteSetting.value.basic.type === 2 ? { ...format } : format);
