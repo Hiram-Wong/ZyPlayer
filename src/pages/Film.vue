@@ -267,7 +267,7 @@ const changeFilterEvent = (key, item) => {
 
   const { type } = FilmSiteSetting.value.basic;
 
-  if (type === 1 || type === 2) filterEvent();
+  if (type === 1 || type === 0) filterEvent();
   else filterApiEvent();
 };
 
@@ -368,19 +368,22 @@ const categoriesFilter = (classData: string[]): string[] => {
       categoriesInOrder.push(foundCategory);
     }
   }
+
   return categoriesInOrder;
 }
 
-// 获取分类
+// 过滤条件-选中第一项
 const classFilter = (filters) => {
   const result = {};
 
   filters[FilmSiteSetting.value.class.id].forEach((item) => {
     result[item.key] = item.value[0]?.v ?? '全部';
   });
+
   filter.value.select = result;
 };
 
+// 获取分类
 const getClass = async () => {
   const { key } = FilmSiteSetting.value.basic;
   try {
@@ -408,10 +411,10 @@ const getClass = async () => {
 // 切换分类
 const changeClassEvent = (item) => {
   console.log(`[分类变更] ${item.type_id}:${item.type_id}`);
-  classFilter(filter.value.data);
-  filterApiEvent();
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
+  classFilter(filter.value.data);
+  filterApiEvent();
   searchTxt.value = '';
   infiniteCompleteTip.value = '没有更多内容了!';
   FilmDataList.value = { list: [], rawList: [] };
