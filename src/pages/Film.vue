@@ -359,10 +359,14 @@ const categoriesFilter = (classData: string[]): string[] => {
   const { categories } = FilmSiteSetting.value.basic;
   if (!categories || categories.trim() === '') return classData;
   
-  const categoryList = categories.split(',').map((category) => category.trim());
+  const categoryList = categories.split(',').map((item) => item.trim());
+  const classDataList = classData.map((item) => item.type_name);
   const categoriesInOrder: string[] = [];
 
   for (const category of categoryList) {
+    const isFind = classDataList.indexOf(category);
+    if (isFind === -1) continue;
+
     const foundCategory = classData.find((item) => item.type_name === category);
     if (foundCategory) {
       categoriesInOrder.push(foundCategory);
@@ -396,12 +400,19 @@ const getClass = async () => {
 
     const classDataFormat = categoriesFilter(classData);
     classKeywords.value = classDataFormat;
-    const classItem = classDataFormat[0];
-    FilmSiteSetting.value.class.id = classItem.type_id;
-    FilmSiteSetting.value.class.name = classItem.type_name;
-    classFilter(filters);
 
-    isLoadClass.value = true;
+    if (_.isEmpty(classDataFormat)) {
+      infiniteCompleteTip.value = '设置分类异常, 请前往设置检查源分类后尝试手动刷新!';
+
+      isLoadClass.value = false;
+    } else {
+      const classItem = classDataFormat[0];
+      FilmSiteSetting.value.class.id = classItem.type_id;
+      FilmSiteSetting.value.class.name = classItem.type_name;
+      classFilter(filters);
+
+      isLoadClass.value = true;
+    }
   } catch (err) {
     console.log(err);
     infiniteCompleteTip.value = '网络请求失败, 请尝试手动刷新!';
