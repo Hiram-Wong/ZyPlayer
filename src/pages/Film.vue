@@ -1,126 +1,137 @@
 <template>
   <div class="film-container">
-    <div class="header">
-      <div class="left-operation-container">
-        <div class="header-title-wrap">
+    <div class="nav-sub-tab">
+      <div class="nav-sub-tab-top">
+        <ul class="nav-menu">
+          <li class="nav-menu-item" :class="sitesListSelect === item.id ? 'is-active' : ''" v-for="item in sitesList" :key="item.id" :value="item.id" @click="changeSitesEvent(item.id)">
+            <div class="name-wrapper">
+              <span>{{ item.name }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="nav-sub-tab-bottom"></div>
+    </div>
+    <div class="content">
+      <header class="header">
+        <div class="page-title">
           <div class="title">
-            <t-select
-              v-model="sitesListSelect"
-              placeholder="暂无选择源"
-              size="small"
-              :show-arrow="false"
-              style="max-width: 80px"
-              class="data-item source"
-              @change="changeSitesEvent"
-            >
-              <t-option v-for="item in sitesList" :key="item.id" :label="item.name" :value="item.id" />
-            </t-select>
-            <span class="data-item data"> 共{{ pagination.total || 0 }}资源 </span>
+            <ul class="menu">
+              <li class="menu-item" v-for="item in classKeywords.slice(0, 3)" :key="item.type_id" @click="changeClassEvent(item)">
+                <a :class="item.type_name === FilmSiteSetting.class.name ? 'is-active' :''">{{ item.type_name }}</a>
+              </li>
+              <li class="menu-item morebtn">
+                <t-popup
+                  placement="bottom-left"
+                  :overlay-inner-style="{
+                    width: '500px',
+                    lineHeight: '46px',
+                    padding: '5px 0',
+                    zIndex: '999',
+                    background: 'var(--td-bg-color-page)',
+                    boxShadow: '0 15px 30px rgba(0,0,0,.2)',
+                    maxHeight: '500px',
+                    overflow: 'auto'
+                  }"
+                >
+                  <span class="more" :class="!formatMoreTitle(FilmSiteSetting.class.name, classKeywords.slice(0, 3)) ? 'is-active' :''">{{ formatMoreTitle(FilmSiteSetting.class.name, classKeywords.slice(0, 3)) ? '更多' : FilmSiteSetting.class.name }}</span>
+                  <span class="dot">
+                    <more-icon size="1.5rem" style="transform: rotate(90deg)" />
+                  </span>
+                  <template #content>
+                    <div class="content-items">
+                      <div v-for="item in classKeywords.slice(3)" :key="item.type_id" class="content-item">
+                        <span variant="text" @click="changeClassEvent(item)">
+                          {{ item.type_name }}
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </t-popup>
+              </li>
+            </ul>
           </div>
         </div>
-        <div v-if="classKeywords.length !== 1" class="head-center">
-          <p class="head-center-class">{{ FilmSiteSetting.class.name }}</p>
-          <t-popup
-            placement="bottom-left"
-            :overlay-inner-style="{
-              marginTop: '16px',
-              width: '570px',
-              boxShadow: 'none',
-              lineHeight: '46px',
-              padding: '5px 0',
-              zIndex: '999',
-              background: 'var(--td-bg-color-page)',
-            }"
-            attach=".head-center"
+        <div class="actions">
+          <search-view v-model="searchTxt" :site="FilmSiteSetting.basic" @search="searchEvent" style="position: relative; margin-right: 5px;"/>
+          <div
+            v-if="(FilmSiteSetting.basic.type === 2 && filter.data.length !== 0) || FilmSiteSetting.basic.type !== 2"
+            class="quick_item quick_filter"
           >
-            <more-icon size="1.5rem" style="transform: rotate(90deg)" />
-            <template #content>
-              <div class="content-items">
-                <div v-for="item in classKeywords" :key="item.type_id" class="content-item">
-                  <span variant="text" @click="changeClassEvent(item)">
-                    {{ item.type_name }}
+            <view-module-icon size="large" @click="showToolbar = !showToolbar" />
+          </div>
+        </div>
+      </header>
+      <!-- 过滤工具栏 -->
+      <div v-show="showToolbar" class="filter header-wrapper">
+        <div class="tags">
+          <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.key" class="tags-list">
+            <div class="item title">{{ filterItem.name }}</div>
+            <div class="wp">
+              <div
+                v-for="item in filterItem.value"
+                :key="item"
+                class="item"
+                :class="{ active: filter.select[filterItem.key] === item.v }"
+                :label="item.n"
+                :value="item.v"
+                @click="changeFilterEvent(filterItem.key, item.v)"
+              >
+                {{ item.n }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="content-wrapper">
+          <div class="container-flow-wrap">
+            <div v-for="item in FilmDataList.list" :key="item.id" class="card-wrap">
+              <div class="card" @click="playEvent(item)">
+                <div v-if="item.vod_remarks || item.vod_remark" class="card-header">
+                  <span class="card-header-tag card-header-tag-orange">
+                    <span class="card-header-tag-tagtext">{{ item.vod_remarks || item.vod_remark }}</span>
                   </span>
                 </div>
+                <div class="card-main">
+                  <t-image
+                    class="card-main-item"
+                    :src="item.vod_pic"
+                    :style="{ width: '100%', height: '245px', background: 'none' }"
+                    :lazy="true"
+                    fit="cover"
+                  >
+                    <template #overlayContent>
+                      <div class="op">
+                        <span v-if="item.siteName"> {{ item.siteName }}</span>
+                      </div>
+                    </template>
+                  </t-image>
+                </div>
+                <div class="card-footer">
+                  <p class="card-footer-title">{{ item.vod_name }}</p>
+                  <p class="card-footer-desc">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
+                </div>
               </div>
-            </template>
-          </t-popup>
-        </div>
-      </div>
-      <div class="right-operation-container">
-        <search-view v-model="searchTxt" :site="FilmSiteSetting.basic" @search="searchEvent" />
-        <div
-          v-if="(FilmSiteSetting.basic.type === 2 && filter.data.length !== 0) || FilmSiteSetting.basic.type !== 2"
-          class="quick_item quick_filter"
-        >
-          <view-module-icon size="large" @click="showToolbar = !showToolbar" />
-        </div>
-      </div>
-    </div>
-    <!-- 过滤工具栏 -->
-    <div v-show="showToolbar" class="filter">
-      <div class="tags">
-        <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.key" class="tags-list">
-          <div class="item title">{{ filterItem.name }}</div>
-          <div class="wp">
-            <div
-              v-for="item in filterItem.value"
-              :key="item"
-              class="item"
-              :class="{ active: filter.select[filterItem.key] === item.v }"
-              :label="item.n"
-              :value="item.v"
-              @click="changeFilterEvent(filterItem.key, item.v)"
-            >
-              {{ item.n }}
             </div>
           </div>
+          <infinite-loading
+            :identifier="infiniteId"
+            :distance="200"
+            style="text-align: center; margin-bottom: 2em"
+            @infinite="load"
+          >
+            <template #complete>{{ infiniteCompleteTip }}</template>
+            <template #error>哎呀，出了点差错</template>
+          </infinite-loading>
         </div>
       </div>
     </div>
-    <div class="main">
-      <div class="main-flow-wrap">
-        <div v-for="item in FilmDataList.list" :key="item.id" class="card-wrap">
-          <div class="card" @click="playEvent(item)">
-            <div v-if="item.vod_remarks || item.vod_remark" class="card-header">
-              <span class="card-header-tag card-header-tag-orange">
-                <span class="card-header-tag-tagtext">{{ item.vod_remarks || item.vod_remark }}</span>
-              </span>
-            </div>
-            <div class="card-main">
-              <t-image
-                class="card-main-item"
-                :src="item.vod_pic"
-                :style="{ width: '100%', height: '245px', background: 'none' }"
-                :lazy="true"
-                fit="cover"
-              >
-                <template #overlayContent>
-                  <div class="op">
-                    <span v-if="item.siteName"> {{ item.siteName }}</span>
-                  </div>
-                </template>
-              </t-image>
-            </div>
-            <div class="card-footer">
-              <p class="card-footer-title">{{ item.vod_name }}</p>
-              <p class="card-footer-desc">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <infinite-loading
-        :identifier="infiniteId"
-        :distance="200"
-        style="text-align: center; margin-bottom: 2em"
-        @infinite="load"
-      >
-        <template #complete>{{ infiniteCompleteTip }}</template>
-        <template #error>哎呀，出了点差错</template>
-      </infinite-loading>
-    </div>
+
+    
     <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
     <t-back-top
-      container=".main"
+      container=".container"
       :visible-height="200"
       size="small"
       :offset="['1.4rem', '0.5rem']"
@@ -637,273 +648,371 @@ eventBus.on(async () => {
   pagination.value.pageIndex = 1;
   FilmSiteSetting.value.searchGroup = await searchGroup(FilmSiteSetting.value.searchType);
 });
+
+const formatMoreTitle = (item, list) => {
+  console.log(item, list)
+  return _.find(list, {type_name: item});
+}
 </script>
 
 <style lang="less" scoped>
 .film-container {
-  overflow: hidden;
-  position: relative;
-  height: calc(100vh - var(--td-comp-size-l));
+  height: 100%;
   display: flex;
-  flex-direction: column;
+  position: relative;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1 1;
 
-  .header,
-  .filter {
-    margin-bottom: 10px;
-  }
-
-  .header {
-    flex-shrink: 0;
-    height: 45px;
+  .nav-sub-tab {
+    width: 170px;
+    border-right: 1px solid rgba(132,133,141,.2);
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    .left-operation-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      .header-title-wrap {
-        margin-right: var(--td-comp-margin-s);
-        .title {
-          .data-item {
-            display: block;
-            line-height: 1rem;
-          }
-          .source {
-            :deep(.t-input) {
-              padding: 0;
-              border-style: none !important;
-              font-size: 0.8rem;
-              font-weight: bold;
-            }
-            :deep(.t-input--focused) {
-              border-color: rgba(255, 255, 255, 0) !important;
-              box-shadow: none !important;
-            }
-          }
-          .data {
-            font-size: 0.7rem;
-          }
+    justify-content: space-between;
+    height: 100%;
+    z-index: 2;
+    overflow: auto;
+    .nav-sub-tab-top {
+      .nav-menu {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        line-height: 1.5;
+        .nav-menu-item {
+          width: 140px;
+          height: 40px;
+          padding-left: 8px;
+          line-height: 14px;
+          display: flex;
+          align-items: center;
+          color: var(--td-text-color-primary);
+          cursor: pointer;
+          transition: background-color .3s ease;
+          border-radius: 10px;
+          position: relative;
+        }
+        .is-active {
+          background-color: rgba(132, 133, 141, 0.24);
         }
       }
-      .head-center {
-        display: flex;
-        .head-center-class {
-          max-width: 150px;
-          font-size: 18px;
-          font-weight: bold;
-          margin-right: 5px;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
-        }
+    }
+    .nav-sub-tab-bottom {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      padding-bottom: 20px;
+    }
+  }
 
-        .content-items {
+  .content {
+    flex: 1 1;
+    position: relative;
+    overflow: hidden;
+    .header {
+      height: 40px;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      justify-content: space-between;
+      white-space: nowrap;
+      flex-shrink: 0;
+      .page-title {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-grow: 1;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+        .title {
+          font-size: 18px;
+          font-weight: 600;
+          max-width: 100%;
           overflow: hidden;
-          width: 100%;
-          .content-item {
-            float: left;
-            box-sizing: border-box;
-            width: 92px;
-            padding-left: 30px;
-            height: 46px;
-            cursor: pointer;
-            span {
-              text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
-              font-size: 15px;
-              font-weight: 500;
-              display: inline-block;
-              width: 62px;
-              max-width: 62px;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              &:hover {
-                color: var(--td-brand-color);
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          .menu {
+            .is-active {
+              font-size: 18px !important;
+              color: var(--td-text-color-primary) !important;
+            }
+            .menu-item {
+              font-size: 14px;
+              margin-right: 20px;
+              float: left;
+              display: block;
+              opacity: 1\9\0;
+              animation: blockshow .2s ease .2s forwards;
+              a {
+                display: block;
+                color: var(--td-text-color-secondary);
+                font-weight: 700;
+                font-size: 14px;
+              }
+            }
+            .morebtn {
+              position: relative;
+              display: block;
+              margin-right: 0;
+              color: var(--td-text-color-secondary);
+
+              .dot {
+                float: right;
+                padding-left: 5px;
               }
             }
           }
         }
       }
-    }
-    .right-operation-container {
-      display: flex;
-      align-items: center;
-      flex-direction: column;
-      .no-filter {
-        right: 5px !important;
+      .actions {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+        align-content: center;
+        align-items: center;
+        .no-filter {
+          right: 5px !important;
+        }
       }
     }
-  }
-  .filter {
-    position: relative;
-    height: auto;
-    transition: height 0.3s;
-    .tags {
-      .tags-list {
-        padding-top: var(--td-comp-paddingTB-xs);
-        &:after {
-          clear: both;
-          display: block;
-          height: 0;
-          visibility: hidden;
-          content: '';
-        }
-        .title {
-          float: left;
-          width: 50px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          text-align: left;
-          cursor: auto;
-          box-sizing: border-box;
-          height: 30px;
-          font-weight: 400;
-          font-size: 15px;
-          line-height: 30px;
-        }
-        .wp {
-          float: left;
-          width: calc(100% - 50px);
-          overflow-y: auto;
-          white-space: nowrap;
-          &::-webkit-scrollbar {
-            height: 8px;
-            background: transparent;
+    .header-wrapper {
+      display: flex;
+      height: 100%;
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 0 40px;
+      margin-bottom: 12px;
+      white-space: nowrap;
+      position: relative;
+    }
+    .filter {
+      position: relative;
+      height: auto;
+      padding: 0 40px;
+      margin-bottom: 5px;
+      transition: height 0.3s;
+      width: 100%;
+      .tags {
+        width: 100%;
+        .tags-list {
+          padding-top: var(--td-comp-paddingTB-xs);
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          &:after {
+            clear: both;
+            display: block;
+            height: 0;
+            visibility: hidden;
+            content: '';
           }
-          .item {
-            display: inline-block;
-            padding: 0 14px;
-            margin-right: 5px;
+          .title {
+            // float: left;
+            width: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: left;
+            cursor: auto;
             box-sizing: border-box;
             height: 30px;
             font-weight: 400;
-            font-size: 13px;
+            font-size: 15px;
             line-height: 30px;
-            text-align: center;
-            cursor: pointer;
           }
-          .active {
-            height: 30px;
-            border-radius: 20px;
-            background: var(--td-bg-color-component);
+          .wp {
+            // float: left;
+            // width: calc(100% - 50px);
+            width: 100%;
+            overflow-y: auto;
+            white-space: nowrap;
+            flex-wrap: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            align-content: center;
+            &::-webkit-scrollbar {
+              height: 8px;
+              background: transparent;
+            }
+            .item {
+              display: block;
+              padding: 0 14px;
+              margin-right: 5px;
+              box-sizing: border-box;
+              height: 30px;
+              font-weight: 400;
+              font-size: 13px;
+              line-height: 30px;
+              text-align: center;
+              cursor: pointer;
+            }
+            .active {
+              height: 30px;
+              border-radius: 20px;
+              background: var(--td-bg-color-component);
+            }
+          }
+        }
+      }
+    }
+    .container {
+      height: calc(100% - 56px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-y: auto;
+      width: 100%;
+      .content-wrapper {
+        width: 100%;
+        height: 100%;
+        padding: 0 40px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        flex-grow: 1;
+        .container-flow-wrap {
+          display: grid;
+          padding: 10px 0;
+          grid-template-columns: repeat(auto-fill, 196px);
+          grid-column-gap: 20px;
+          grid-row-gap: 15px;
+          justify-content: center;
+          width: inherit;
+          .card {
+            box-sizing: border-box;
+            width: 196px;
+            height: 310px;
+            position: relative;
+            cursor: pointer;
+            .card-header {
+              position: absolute;
+              color: #fff;
+              font-size: 12px;
+              z-index: 15;
+              height: 18px;
+              line-height: 18px;
+              left: 0;
+              top: 0;
+              &-tag {
+                height: 18px;
+                line-height: 18px;
+                padding: 1px 6px;
+                border-radius: 6px 0 6px 0;
+                background: #03c8d4;
+                display: block;
+                &-tagtext {
+                  display: inline-block;
+                  font-size: 12px;
+                  overflow: hidden;
+                  white-space: nowrap;
+                  text-overflow: ellipsis;
+                  max-width: 100px;
+                }
+              }
+              &-tag-orange {
+                background: #ffdd9a;
+                color: #4e2d03;
+              }
+            }
+            .card-main {
+              width: 100%;
+              overflow: hidden;
+              border-radius: 7px;
+              .card-main-item {
+                border-radius: 7px;
+                .op {
+                  backdrop-filter: saturate(180%) blur(20px);
+                  background-color: rgba(22, 22, 23, 0.8);
+                  border-radius: 0 0 7px 7px;
+                  width: 100%;
+                  color: rgba(255, 255, 255, 0.8);
+                  position: absolute;
+                  bottom: 0px;
+                  display: flex;
+                  justify-content: center;
+                }
+              }
+            }
+            .card-main:hover {
+              .card-main-item {
+                :deep(img) {
+                  transition: all 0.25s ease-in-out;
+                  transform: scale(1.05);
+                }
+              }
+            }
+            .card-footer {
+              height: 52px;
+              padding-top: 10px;
+              overflow: hidden;
+              height: auto;
+              line-height: 26px;
+              .card-footer-title {
+                height: auto;
+                line-height: 26px;
+                font-size: 14px;
+                font-weight: 700;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+              }
+              .card-footer-desc {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+                height: auto;
+                width: 100%;
+                line-height: 26px;
+                font-size: 13px;
+                color: #999;
+                font-weight: normal;
+              }
+            }
+          }
+          .card:hover {
+            .card-footer-title {
+              color: var(--td-brand-color);
+            }
           }
         }
       }
     }
   }
-  .main {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    overflow-y: auto;
-    width: 100%;
-    &-flow-wrap {
-      display: grid;
-      padding: 10px 0;
-      grid-template-columns: repeat(auto-fill, 196px);
-      grid-column-gap: 20px;
-      grid-row-gap: 15px;
-      justify-content: center;
-      width: inherit;
-      .card {
-        box-sizing: border-box;
-        width: 196px;
-        height: 310px;
-        position: relative;
-        cursor: pointer;
-        .card-header {
-          position: absolute;
-          color: #fff;
-          font-size: 12px;
-          z-index: 15;
-          height: 18px;
-          line-height: 18px;
-          left: 0;
-          top: 0;
-          &-tag {
-            height: 18px;
-            line-height: 18px;
-            padding: 1px 6px;
-            border-radius: 6px 0 6px 0;
-            background: #03c8d4;
-            display: block;
-            &-tagtext {
-              display: inline-block;
-              font-size: 12px;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              max-width: 100px;
-            }
-          }
-          &-tag-orange {
-            background: #ffdd9a;
-            color: #4e2d03;
-          }
-        }
-        .card-main {
-          width: 100%;
-          overflow: hidden;
-          border-radius: 7px;
-          .card-main-item {
-            border-radius: 7px;
-            .op {
-              backdrop-filter: saturate(180%) blur(20px);
-              background-color: rgba(22, 22, 23, 0.8);
-              border-radius: 0 0 7px 7px;
-              width: 100%;
-              color: rgba(255, 255, 255, 0.8);
-              position: absolute;
-              bottom: 0px;
-              display: flex;
-              justify-content: center;
-            }
-          }
-        }
-        .card-main:hover {
-          .card-main-item {
-            :deep(img) {
-              transition: all 0.25s ease-in-out;
-              transform: scale(1.05);
-            }
-          }
-        }
-        .card-footer {
-          height: 52px;
-          padding-top: 10px;
-          overflow: hidden;
-          height: auto;
-          line-height: 26px;
-          .card-footer-title {
-            height: auto;
-            line-height: 26px;
-            font-size: 14px;
-            font-weight: 700;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-          }
-          .card-footer-desc {
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-            height: auto;
-            width: 100%;
-            line-height: 26px;
-            font-size: 13px;
-            color: #999;
-            font-weight: normal;
-          }
-        }
-      }
-      .card:hover {
-        .card-footer-title {
-          color: var(--td-brand-color);
-        }
+}
+
+.content-items {
+  overflow: hidden;
+  width: 100%;
+  .content-item {
+    float: left;
+    box-sizing: border-box;
+    width: 92px;
+    padding-left: 30px;
+    height: 46px;
+    cursor: pointer;
+    span {
+      text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+      font-size: 15px;
+      font-weight: 500;
+      display: inline-block;
+      width: 62px;
+      max-width: 62px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      &:hover {
+        color: var(--td-brand-color);
       }
     }
   }

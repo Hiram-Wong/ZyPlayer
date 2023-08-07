@@ -80,10 +80,10 @@ nativeTheme.on('updated', () => {
 function createWindow(): void {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
-    width: 950,
-    minWidth: 950,
-    height: 650,
-    minHeight: 650,
+    width: 1000,
+    minWidth: 1000,
+    height: 670,
+    minHeight: 670,
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,

@@ -1,11 +1,10 @@
 <template>
-  <div :class="`${prefix}-sidebar-layout ${prefix}-sidebar-compact`">
-    <t-menu :value="active" collapsed :class="`${prefix}-block-column`" style="width: 80px">
+  <div :class="`${prefix}-sidebar-layout ${platform === 'darwin' ? 'mac_style' : ''}`">
+    <t-menu :value="active" collapsed :class="`${prefix}-block-column`">
       <t-menu-item value="logo" disabled>
         <template #icon>
           <img class="logo" src="@/assets/icon.png" alt="logo" />
         </template>
-        zyplayer
       </t-menu-item>
       <template v-for="item in list" :key="item.path">
         <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)[0])">
@@ -20,11 +19,10 @@
           </template>
           {{ item.title }}
         </t-menu-item>
-      </template>
+      </template>   
       <template #operations>
         <t-menu-item @click="refreshEvent">
           <template #icon><refresh-icon /></template>
-          刷新
         </t-menu-item>
       </template>
     </t-menu>
@@ -54,6 +52,8 @@ const props = defineProps({
   },
 });
 
+const { platform } = process;
+
 const active = computed(() => getActive());
 
 const list = computed(() => {
@@ -62,7 +62,7 @@ const list = computed(() => {
 });
 
 const menuIcon = (item: ListItemType) => {
-  if (typeof item.icon === 'string') return <t-icon name={item.icon} />;
+  if (typeof item.icon === 'string') return <t-icon name={item.icon} style=""/>;
   const RenderIcon = item.icon;
   return RenderIcon;
 };
@@ -126,9 +126,12 @@ const refreshEvent = () => {
 <style lang="less" scoped>
 @import '@/style/variables.less';
 
+.mac_style {
+  padding-top: var(--td-size-11);
+}
+
 .logo {
   width: var(--td-size-12);
   height: var(--td-size-12);
-  padding: var(--td-pop-padding-s);
 }
 </style>

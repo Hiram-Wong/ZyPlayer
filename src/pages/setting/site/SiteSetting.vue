@@ -23,11 +23,13 @@
           </div>
         </div>
         <div class="right-operation-container">
-          <t-input v-model="searchValue" placeholder="请输入搜索关键词" clearable @enter="refreshEvent">
-            <template #suffix-icon>
-              <search-icon size="16px" />
-            </template>
-          </t-input>
+          <div class="search">
+            <t-input v-model="searchValue" placeholder="搜索站点资源" clearable @enter="refreshEvent"  class="search-bar">
+              <template #prefix-icon>
+                <search-icon size="16px" />
+              </template>
+            </t-input>
+          </div>
         </div>
       </t-row>
     </div>
@@ -41,12 +43,14 @@
       :hover="true"
       :pagination="pagination"
       :loading="dataLoading"
+      dragSort='row'
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
+      @drag-sort="onDragSort"
     >
       <template #name="{ row }">
-        <t-badge v-if="row.id === defaultSite" size="small" :offset="[-5, 0]" count="默认">{{ row.name }}</t-badge>
+        <t-badge v-if="row.id === defaultSite" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
@@ -167,6 +171,10 @@ const refreshEvent = () => {
   getGroup();
 };
 // op
+const onDragSort = (params) => {
+  console.log('交换行', params);
+  data.value = params.newData;
+};
 const propChangeEvent = (row) => {
   console.log(row.isActive);
   sites.update(row.id, { isActive: row.isActive });

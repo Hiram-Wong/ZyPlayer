@@ -1,12 +1,10 @@
 <template>
   <div class="analysis-container">
-    <div class="analysis-header">
-      <div class="analysis-header-left no-warp">
-        <span class="play_title" @dblclick="showSupportEvent" @click="openCurrentUrl">
-          {{ urlTitle ? urlTitle : '暂无播放内容' }}
-        </span>
+    <header class="header">
+      <div class="page-title">
+        <p class="title" @dblclick="showSupportEvent" @click="openCurrentUrl">{{ urlTitle ? urlTitle : '解析' }}</p>
       </div>
-      <div class="analysis-header-right">
+      <div class="actions">
         <div v-if="miniOptions.isMini" class="analysis-flex">
           <div class="mini-box" @click="platformPlayMax">
             <div class="mini-box-title-warp">
@@ -31,34 +29,36 @@
           <history-icon size="1.3rem" />
         </div>
       </div>
-    </div>
-    <div class="analysis-play">
-      <div
-        class="analysis-player"
-        :class="isSupport && quickSearchType !== 'search' ? 'analysis-play-box-hidden' : 'analysis-play-box-show'"
-      >
-        <webview class="webview" :src="iframeUrl" disablewebsecurity allowpopups />
-      </div>
-      <div class="analysis-setting">
-        <div class="analysis-setting-group">
-          <t-select v-model="selectAnalysisApi" placeholder="请选择接口" size="large" class="select-api">
-            <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.id" />
-          </t-select>
-          <t-input
-            v-model="analysisUrl"
-            class="input-url"
-            placeholder="请输入链接"
-            size="large"
-            @change="formatUrlEvent"
-          />
-          <t-button class="analysis-play" size="large" @click="analysisEvent">
-            <p class="analysis-tip">解析</p>
-          </t-button>
+    </header>
+    <div class="container">
+      <div class="content-wrapper">
+        <div
+          class="analysis-player"
+          :class="isSupport && quickSearchType !== 'search' ? 'analysis-play-box-hidden' : 'analysis-play-box-show'"
+        >
+          <webview class="webview" :src="iframeUrl" disablewebsecurity allowpopups />
+        </div>
+        <div class="analysis-setting">
+          <div class="analysis-setting-group">
+            <t-select v-model="selectAnalysisApi" placeholder="请选择接口" size="large" class="select-api">
+              <t-option v-for="item in analysisApi" :key="item.id" :label="item.name" :value="item.id" />
+            </t-select>
+            <t-input
+              v-model="analysisUrl"
+              class="input-url"
+              placeholder="请输入链接"
+              size="large"
+              @change="formatUrlEvent"
+            />
+            <t-button class="analysis-play" size="large" @click="analysisEvent">
+              <p class="analysis-tip">解析</p>
+            </t-button>
+          </div>
+        </div>
+        <div v-if="isSupport && quickSearchType !== 'search'">
+          <dialog-platform-view class="dialog-platform-view" @open-platform="openPlatform" />
         </div>
       </div>
-    </div>
-    <div v-if="isSupport && quickSearchType !== 'search'">
-      <dialog-platform-view class="dialog-platform-view" @open-platform="openPlatform" />
     </div>
     <dialog-iframem-view
       v-model:visible="formDialogVisiblePlatformAnalysis"
@@ -267,29 +267,44 @@ const shareEvent = () => {
 <style lang="less" scoped>
 .analysis-container {
   width: 100%;
-  height: calc(100vh - var(--td-comp-size-l));
+  height: 100%;
   .no-warp {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
   }
-  .analysis-header {
-    line-height: 42px;
-    font-weight: 500;
+  .header {
+    height: 40px;
+    padding: 0 40px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    margin-bottom: 16px;
+    justify-content: space-between;
+    white-space: nowrap;
     flex-shrink: 0;
-    .analysis-header-left {
-      .play_title {
-        cursor: pointer;
+    .page-title {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      .title {
+        font-size: 18px;
+        line-height: 1.4;
+        font-weight: 600;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
     }
-    .analysis-header-right {
+    .actions {
+      flex-shrink: 0;
       display: flex;
-      justify-content: flex-start;
+      height: 32px;
       align-items: center;
-      height: 100%;
     }
     .analysis-header-item {
       cursor: pointer;
@@ -311,12 +326,22 @@ const shareEvent = () => {
       margin-left: var(--td-comp-paddingLR-s);
     }
   }
-  .analysis-play {
+  .container {
+    width: 100%;
+    height: calc(100% - 56px);
+    .content-wrapper {
+      width: 100%;
+      height: 100%;
+      padding: 0 40px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
     .analysis-play-box-show {
-      height: calc(100vh - 9.5em);
+      height: calc(100% - 45px - 5px);
     }
     .analysis-play-box-hidden {
-      height: calc(100vh - 14em);
+      height: calc(100% - 45px - 65px - 5px);
     }
     .analysis-player {
       width: 100%;

@@ -228,9 +228,9 @@ const openHotDialog = () => {
 }
 
 .hd-search {
-  top: 2px;
-  position: absolute;
-  right: 35px;
+  top: 0;
+  position: relative;
+  // right: 35px;
   left: unset;
   width: auto;
   z-index: 2000;
@@ -316,7 +316,7 @@ const openHotDialog = () => {
       .hd-submit {
         flex-shrink: 0;
         width: 54px;
-        height: 45px;
+        height: 40px;
         cursor: pointer;
         display: flex;
         align-items: center;

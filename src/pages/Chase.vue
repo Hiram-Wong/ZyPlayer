@@ -1,19 +1,18 @@
 <template>
   <div class="chase-container">
-    <div class="chase-container-left">
-      <t-tabs v-model="chaseTag">
-        <t-tab-panel value="history" label="历史记录">
-          <history-view ref="historyRef" class="container-item" />
-        </t-tab-panel>
-        <t-tab-panel value="binge" label="我的收藏">
-          <binge-view ref="bingeRef" class="container-item" />
-        </t-tab-panel>
-      </t-tabs>
-    </div>
-    <div class="chase-container-right">
-      <div class="chase-container-op">
+    <header class="header">
+      <div class="page-title">
+        <p class="title">看过</p>
+        <div class="container">
+          <t-radio-group v-model="chaseTag" variant="default-filled" size="small">
+          <t-radio-button value="history">历史</t-radio-button>
+          <t-radio-button value="binge">收藏</t-radio-button>
+        </t-radio-group>
+        </div>
+      </div>
+      <div class="actions">
         <div v-if="chaseTag === 'binge'" class="check-update chase-container-op-item">
-          <t-button theme="default" @click="checkUpdaterEvent">
+          <t-button theme="default" size="small" @click="checkUpdaterEvent">
             <span>更新</span>
             <template #icon>
               <time-icon />
@@ -21,7 +20,7 @@
           </t-button>
         </div>
         <div class="clear chase-container-op-item">
-          <t-button theme="default" @click="clearEvent">
+          <t-button theme="default" size="small" @click="clearEvent">
             <span>清空</span>
             <template #icon>
               <delete-icon />
@@ -29,7 +28,14 @@
           </t-button>
         </div>
       </div>
+    </header>
+    <div class="container">
+      <div class="content-wrapper">
+        <history-view ref="historyRef" class="container-item" v-if="chaseTag === 'history'"/>
+        <binge-view ref="bingeRef" class="container-item" v-else/>
+      </div>
     </div>
+    
     <div class="chase-container-dialog"></div>
     <t-back-top
       container=".container-item"
@@ -65,11 +71,12 @@ const clearEvent = () => {
   };
 
   const confirmDia = DialogPlugin({
-    body: '确认删除所有记录吗?',
-    header: false,
-    width: '300px',
-    placement: 'center',
+    body: '确定删除所有记录吗？删除后不支持找回。',
+    header: '删除记录',
+    width: '340px',
     attach: '.chase-container-dialog',
+    confirmBtn: '确认删除',
+    closeBtn: null,
     onConfirm: handleClear,
     onClose: () => confirmDia.hide(),
   });
@@ -83,39 +90,75 @@ const checkUpdaterEvent = () => {
 
 <style lang="less" scoped>
 .chase-container {
-  overflow: hidden;
-  height: calc(100vh - var(--td-comp-size-l));
-  position: relative;
-
-  &-right {
-    position: absolute;
-    top: 15px;
-    right: 10px;
-    .chase-container-op {
+  width: 100%;
+  height: 100%;
+  .header {
+    height: 40px;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    justify-content: space-between;
+    white-space: nowrap;
+    flex-shrink: 0;
+    .page-title {
       display: flex;
-      gap: 16px;
-      &-item {
-        width: inherit;
+      flex-direction: row;
+      align-items: center;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      .title {
+        font-size: 18px;
+        line-height: 1.4;
+        font-weight: 600;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .container {
+        width: 128px;
+        height: 26px;
+        margin-left: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
       }
     }
+    .actions {
+      flex-shrink: 0;
+      display: flex;
+      height: 32px;
+      justify-content: flex-end;
+      gap: 5px;
+      align-items: center;
+    }
   }
+
+  .container {
+    height: calc(100% - 56px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow-y: auto;
+    width: 100%;
+    .content-wrapper {
+      width: 100%;
+      height: 100%;
+      padding: 0 40px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      flex-grow: 1;
+    }
+  }
+
   &-dialog {
     :deep(.t-dialog__body) {
       text-align: center;
-    }
-  }
-  .container-item {
-    height: calc(86vh);
-    overflow: auto;
-    padding: 10px 0;
-  }
-  :deep(.t-tabs) {
-    background-color: var(--td-bg-color-specialcomponent);
-    .t-tabs__nav-container {
-      padding-bottom: 10px;
-    }
-    .t-tabs__nav-container.t-is-top:after {
-      background-color: var(--td-bg-color-specialcomponent);
     }
   }
 }

@@ -1,123 +1,114 @@
 <template>
   <div class="iptv-container">
-    <div class="header">
-      <div class="left-operation-container">
-        <div class="header-title-wrap">
-          <div class="title">
-            <t-select
-              v-model="iptvListSelect"
-              placeholder="暂无选择源"
-              size="small"
-              :show-arrow="false"
-              style="max-width: 80px"
-              class="data-item source"
-              @change="changeDefaultIptvEvent"
-            >
-              <t-option v-for="item in iptvList" :key="item.id" :label="item.name" :value="item.id" />
-            </t-select>
-            <span class="data-item data">共{{ pagination.count ? pagination.count : 0 }}频道</span>
-          </div>
-        </div>
-        <div v-if="iptvClassList.length !== 1" class="head-center">
-          <p class="head-center-class">{{ iptvClassSelect }}</p>
-          <t-popup
-            placement="bottom-left"
-            :overlay-inner-style="{
-              marginTop: '16px',
-              width: '570px',
-              boxShadow: 'none',
-              lineHeight: '46px',
-              padding: '5px 0',
-              zIndex: '999',
-              background: 'var(--td-bg-color-page)',
-            }"
-            attach=".head-center"
-          >
-            <more-icon size="1.5rem" style="transform: rotate(90deg)" />
-            <template #content>
-              <div class="content-items">
-                <div v-for="item in iptvClassList" :key="item.id" class="content-item">
-                  <span variant="text" @click="changeClassEvent(item)">
-                    {{ item.name }}
-                  </span>
-                </div>
-              </div>
-            </template>
-          </t-popup>
-        </div>
-      </div>
-      <div class="right-operation-container">
-        <div class="hd-search">
-          <div class="sh-search">
-            <div class="hd-search skin1">
-              <div class="hd-search-inner">
-                <input v-model.trim="searchTxt" placeholder="输入关键词" class="hd-input" @keyup.enter="searchEvent" />
-
-                <div class="hd-submit" @click="searchEvent">
-                  <svg width="18" height="18" viewBox="0 0 18 18">
-                    <g transform="translate(1.5 1.461)" stroke="currentColor" fill="none" fill-rule="evenodd">
-                      <path d="M7.5 15a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Z" stroke-width="2"></path>
-                      <rect
-                        transform="rotate(-45 13.975 14.014)"
-                        x="13.475"
-                        y="12.014"
-                        width="1"
-                        height="4"
-                        rx=".5"
-                      ></rect>
-                    </g>
-                  </svg>
-                </div>
-              </div>
+    <div class="nav-sub-tab">
+      <div class="nav-sub-tab-top">
+        <ul class="nav-menu">
+          <li class="nav-menu-item" :class=" iptvListSelect === item.id ? 'is-active' : ''" v-for="item in iptvList" :key="item.id" :value="item.id" @click="changeDefaultIptvEvent(item.id)">
+            <div class="name-wrapper">
+              <span>{{ item.name }}</span>
             </div>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
+      <div class="nav-sub-tab-bottom"></div>
     </div>
-    <div class="main">
-      <div class="main-flow-wrap">
-        <div v-for="item in iptvDataList.list" :key="item.id" class="card-wrap">
-          <div class="card" @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
-            <div v-show="iptvSetting.iptvStatus" class="card-header">
-              <t-tag v-if="item.status === true" disabled size="small" variant="outline" theme="success">有效</t-tag>
-              <t-tag v-else-if="item.status === false" disabled size="small" variant="outline" theme="danger">
-                无效
-              </t-tag>
-              <t-tag v-else disabled size="small" variant="outline" theme="warning">检查中</t-tag>
-            </div>
-            <div class="card-main">
-              <t-image
-                class="card-main-item"
-                :src="item.logo"
-                :style="{ width: '60px', height: '30px', background: 'none' }"
-                :lazy="true"
-                :loading="renderLoading"
-                :error="renderError"
-              >
-              </t-image>
-            </div>
-            <div class="card-footer">
-              <span class="card-footer-title">{{ item.name }}</span>
-            </div>
+    <div class="content">
+      <header class="header">
+        <div class="page-title">
+          <div class="title">
+            <ul class="menu">
+              <li class="menu-item" v-for="item in iptvClassList.slice(0, 3)" :key="item.id" @click="changeClassEvent(item)">
+                <a :class="item.name === iptvClassSelect ? 'is-active' :''">{{ item.name }}</a>
+              </li>
+              <li class="menu-item morebtn">
+                <t-popup
+                  placement="bottom-left"
+                  :overlay-inner-style="{
+                    width: '500px',
+                    lineHeight: '46px',
+                    padding: '5px 0',
+                    zIndex: '999',
+                    background: 'var(--td-bg-color-page)',
+                    boxShadow: '0 15px 30px rgba(0,0,0,.2)',
+                    maxHeight: '500px',
+                    overflow: 'auto'
+                  }"
+                >
+                  <span class="more" :class="!formatMoreTitle(iptvClassSelect, iptvClassList.slice(0, 3)) ? 'is-active' :''">{{ formatMoreTitle(iptvClassSelect, iptvClassList.slice(0, 3)) ? '更多' : iptvClassSelect}}</span>
+                  <span class="dot">
+                    <more-icon size="1.5rem" style="transform: rotate(90deg)" />
+                  </span>
+                  <template #content>
+                    <div class="content-items">
+                      <div v-for="item in iptvClassList.slice(3)" :key="item.id" class="content-item">
+                        <span variant="text" @click="changeClassEvent(item)">
+                          {{ item.name }}
+                        </span>
+                      </div>
+                    </div>
+                  </template>
+                </t-popup>
+              </li>
+            </ul>
           </div>
         </div>
-        <context-menu :show="show" :options="optionsComponent" @close="show = false">
-          <context-menu-item label="拷贝频道链接" @click="copyChannelEvent" />
-          <context-menu-item label="删除频道" @click="delChannelEvent" />
-        </context-menu>
+        <div class="actions">
+          <div class="search">
+            <t-input v-model="searchTxt" placeholder="搜索频道内资源" clearable @enter="searchEvent" class="search-bar">
+              <template #prefix-icon>
+                <search-icon size="16px" />
+              </template>
+            </t-input>
+          </div>
+        </div>
+      </header>
+      <div class="container">
+        <div class="content-wrapper">
+          <div class="container-flow-wrap">
+            <div v-for="item in iptvDataList.list" :key="item.id" class="card-wrap">
+              <div class="card" @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
+                <div v-show="iptvSetting.iptvStatus" class="card-header">
+                  <t-tag v-if="item.status === true" disabled size="small" variant="outline" theme="success">有效</t-tag>
+                  <t-tag v-else-if="item.status === false" disabled size="small" variant="outline" theme="danger">
+                    无效
+                  </t-tag>
+                  <t-tag v-else disabled size="small" variant="outline" theme="warning">检查中</t-tag>
+                </div>
+                <div class="card-main">
+                  <t-image
+                    class="card-main-item"
+                    :src="item.logo"
+                    :style="{ width: '60px', height: '30px', background: 'none' }"
+                    :lazy="true"
+                    :loading="renderLoading"
+                    :error="renderError"
+                  >
+                  </t-image>
+                </div>
+                <div class="card-footer">
+                  <span class="card-footer-title">{{ item.name }}</span>
+                </div>
+              </div>
+            </div>
+            <context-menu :show="show" :options="optionsComponent" @close="show = false">
+              <context-menu-item label="拷贝频道链接" @click="copyChannelEvent" />
+              <context-menu-item label="删除频道" @click="delChannelEvent" />
+            </context-menu>
+          </div>
+          <infinite-loading
+            :identifier="infiniteId"
+            style="text-align: center; margin-bottom: 2em"
+            :duration="200"
+            @infinite="load"
+          >
+            <template #complete>{{ infiniteCompleteTip }}</template>
+            <template #error>哎呀，出了点差错</template>
+          </infinite-loading>
+        </div>
       </div>
-      <infinite-loading
-        :identifier="infiniteId"
-        style="text-align: center; margin-bottom: 2em"
-        :distance="200"
-        @infinite="load"
-      >
-        <template #complete>{{ infiniteCompleteTip }}</template>
-        <template #error>哎呀，出了点差错</template>
-      </infinite-loading>
     </div>
     <t-back-top
-      container=".main"
+      container=".container"
       :visible-height="200"
       size="small"
       :offset="['1.4rem', '0.5rem']"
@@ -126,6 +117,7 @@
     ></t-back-top>
   </div>
 </template>
+
 <script setup lang="tsx">
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import 'v3-infinite-loading/lib/style.css';
@@ -135,7 +127,7 @@ import { useClipboard, useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import PQueue from 'p-queue';
-import { LinkUnlinkIcon, LoadingIcon, MoreIcon } from 'tdesign-icons-vue-next';
+import { LinkUnlinkIcon, LoadingIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref } from 'vue';
@@ -426,6 +418,7 @@ const changeDefaultIptvEvent = async (item: any) => {
   infiniteCompleteTip.value = '没有更多内容了!';
   iptvDataList.value = { list: [], total: 0 };
   iptvClassSelect.value = '全部';
+  iptvClassList.value = [{ id: '全部', name: '全部' }];
   await channelList.clear();
   const { url } = await iptv.get(item);
   const data = await zy.getConfig(url);
@@ -530,89 +523,217 @@ const copyChannelEvent = () => {
   if (isSupported) copy(channelItem.value.url);
   show.value = false;
 };
+
+const formatMoreTitle = (item, list) => {
+  return _.find(list, {id: item});
+}
 </script>
 
 <style lang="less" scoped>
 .iptv-container {
-  overflow: hidden;
-  position: relative;
-  height: calc(100vh - var(--td-comp-size-l));
+  height: 100%;
   display: flex;
-  flex-direction: column;
+  position: relative;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1 1;
 
-  .header {
-    margin-bottom: 10px;
+  .nav-sub-tab {
+    width: 170px;
+    border-right: 1px solid rgba(132,133,141,.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    z-index: 2;
+    overflow: auto;
+    .nav-sub-tab-top {
+      .nav-menu {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        line-height: 1.5;
+        .nav-menu-item {
+          width: 140px;
+          height: 40px;
+          padding-left: 8px;
+          line-height: 14px;
+          display: flex;
+          align-items: center;
+          color: var(--td-text-color-primary);
+          cursor: pointer;
+          transition: background-color .3s ease;
+          border-radius: 10px;
+          position: relative;
+        }
+        .is-active {
+          background-color: rgba(132, 133, 141, 0.24);
+        }
+      }
+    }
+    .nav-sub-tab-bottom {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      padding-bottom: 20px;
+    }
   }
 
-  .header {
-    height: 45px;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-
-    .left-operation-container {
+  .content {
+    flex: 1 1;
+    position: relative;
+    overflow: hidden;
+    .header {
+      height: 40px;
+      padding: 0 40px;
       display: flex;
-      flex-direction: row;
       align-items: center;
-      .header-title-wrap {
-        margin-right: var(--td-comp-margin-s);
+      margin-bottom: 16px;
+      justify-content: space-between;
+      white-space: nowrap;
+      flex-shrink: 0;
+      .page-title {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-grow: 1;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
         .title {
-          .data-item {
-            display: block;
-            line-height: 1rem;
-          }
-          .source {
-            :deep(.t-input) {
-              padding: 0;
-              border-style: none !important;
-              font-size: 0.8rem;
-              font-weight: bold;
+          font-size: 18px;
+          font-weight: 600;
+          max-width: 100%;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          .menu {
+            .is-active {
+              font-size: 18px !important;
+              color: var(--td-text-color-primary) !important;
             }
-            :deep(.t-input--focused) {
-              border-color: rgba(255, 255, 255, 0) !important;
-              box-shadow: none !important;
+            .menu-item {
+              font-size: 14px;
+              margin-right: 20px;
+              float: left;
+              display: block;
+              opacity: 1\9\0;
+              animation: blockshow .2s ease .2s forwards;
+              a {
+                display: block;
+                color: var(--td-text-color-secondary);
+                font-weight: 700;
+                font-size: 14px;
+              }
             }
-          }
-          .data {
-            font-size: 0.7rem;
+            .morebtn {
+              position: relative;
+              display: block;
+              margin-right: 0;
+              color: var(--td-text-color-secondary);
+
+              .dot {
+                float: right;
+                padding-left: 5px;
+              }
+            }
           }
         }
       }
-      .head-center {
+      .actions {
+        flex-shrink: 0;
         display: flex;
-        .head-center-class {
-          max-width: 150px;
-          font-size: 18px;
-          font-weight: bold;
-          margin-right: 5px;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
-        }
-
-        .content-items {
-          overflow: hidden;
-          width: 100%;
-          .content-item {
-            float: left;
-            box-sizing: border-box;
-            width: 92px;
-            padding-left: 30px;
-            height: 46px;
-            cursor: pointer;
-            span {
-              text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
-              font-size: 15px;
-              font-weight: 500;
-              display: inline-block;
-              width: 62px;
-              max-width: 62px;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              &:hover {
+        align-items: center;
+      }
+    }
+    .container {
+      height: calc(100% - 56px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow-y: auto;
+      width: 100%;
+      .content-wrapper {
+        width: 100%;
+        height: 100%;
+        padding: 0 40px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        flex-grow: 1;
+        .container-flow-wrap {
+          display: grid;
+          padding: 10px 0;
+          grid-template-columns: repeat(auto-fill, 190px);
+          grid-column-gap: 45px;
+          grid-row-gap: 10px;
+          justify-content: center;
+          width: inherit;
+          .card-wrap {
+            flex-direction: column;
+            position: relative;
+            .card {
+              box-sizing: border-box;
+              width: 190px;
+              height: 110px;
+              position: relative;
+              box-shadow: var(--td-shadow-1);
+              border-radius: var(--td-radius-medium);
+              border: 5px solid #211f20;
+              background-color: #373536;
+              cursor: pointer;
+              .card-header {
+                color: #fbfbfb;
+                .t-tag {
+                  position: absolute;
+                  top: 5px;
+                  left: 5px;
+                  font-size: 10px;
+                }
+                .card-header-title {
+                  background-color: rgba(0, 0, 0, 0.5);
+                  border-radius: 5px;
+                  padding: 0 5px;
+                  position: absolute;
+                  top: 5px;
+                  left: 5px;
+                  color: #fbfbfb;
+                  font-size: 10px;
+                }
+              }
+              .card-main {
+                width: 100%;
+                height: 100%;
+                .card-main-item {
+                  left: 50%;
+                  top: 50%;
+                  transform: translate(-50%, -50%);
+                }
+              }
+              .card-footer {
+                color: #fbfbfb;
+                .card-footer-title {
+                  position: absolute;
+                  right: 0;
+                  bottom: 0;
+                  padding: 0 5px;
+                  max-width: 90%;
+                  color: #fbfbfb;
+                  font-weight: bold;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: clip;
+                }
+              }
+            }
+            .card:hover {
+              .card-footer-title {
                 color: var(--td-brand-color);
               }
             }
@@ -620,152 +741,31 @@ const copyChannelEvent = () => {
         }
       }
     }
-
-    .right-operation-container {
-      .hd-search {
-        width: auto;
-        background: rgba(0, 0, 0, 0.08);
-        border-radius: 20px;
-        width: 200px;
-        .sh-search {
-          width: 200px;
-          display: block;
-          transition: width 0.2s ease;
-        }
-        .skin1 {
-          background-image: linear-gradient(130deg, rgba(216, 244, 222, 0.3) 0%, rgba(146, 218, 178, 0.2) 100%);
-        }
-
-        .hd-search-inner {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          .hd-input::placeholder {
-            color: var(--td-text-color-primary);
-          }
-          .hd-input {
-            flex-grow: 1;
-            border: none;
-            box-sizing: border-box;
-            width: 0;
-            height: 100%;
-            padding-left: 20px;
-            background: none;
-            outline: none;
-            font-size: 14px;
-            text-overflow: ellipsis;
-            color: var(--td-text-color-primary);
-          }
-
-          .hd-submit {
-            flex-shrink: 0;
-            width: 54px;
-            height: 45px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            padding-left: 16px;
-            box-sizing: border-box;
-            &:hover {
-              color: var(--td-brand-color);
-            }
-          }
-        }
-      }
-    }
-  }
-  .main {
-    height: calc(100% - 50px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    overflow-y: auto;
-    width: 100%;
-    &-flow-wrap {
-      display: grid;
-      padding: 10px 0;
-      grid-template-columns: repeat(auto-fill, 190px);
-      grid-column-gap: 25px;
-      grid-row-gap: 10px;
-      justify-content: center;
-      width: inherit;
-      .card-wrap {
-        flex-direction: column;
-        position: relative;
-        .card {
-          box-sizing: border-box;
-          width: 190px;
-          height: 110px;
-          position: relative;
-          box-shadow: var(--td-shadow-1);
-          border-radius: var(--td-radius-medium);
-          border: 5px solid #211f20;
-          background-color: #373536;
-          cursor: pointer;
-          .card-header {
-            color: #fbfbfb;
-            .t-tag {
-              position: absolute;
-              top: 5px;
-              left: 5px;
-              font-size: 10px;
-            }
-            .card-header-title {
-              background-color: rgba(0, 0, 0, 0.5);
-              border-radius: 5px;
-              padding: 0 5px;
-              position: absolute;
-              top: 5px;
-              left: 5px;
-              color: #fbfbfb;
-              font-size: 10px;
-            }
-          }
-          .card-main {
-            width: 100%;
-            height: 100%;
-            .card-main-item {
-              left: 50%;
-              top: 50%;
-              transform: translate(-50%, -50%);
-            }
-          }
-          .card-footer {
-            color: #fbfbfb;
-            .card-footer-title {
-              position: absolute;
-              right: 0;
-              bottom: 0;
-              padding: 0 5px;
-              max-width: 90%;
-              color: #fbfbfb;
-              font-weight: bold;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: clip;
-            }
-          }
-        }
-        .card:hover {
-          .card-footer-title {
-            color: var(--td-brand-color);
-          }
-        }
-      }
-    }
   }
 }
 
-:root[theme-mode='dark'] {
-  .right-operation-container {
-    .search-box {
-      .hd-input,
-      .hot-search-button {
-        color: hsla(0, 0%, 100%, 0.6) !important;
-        &-icon {
-          color: hsla(0, 0%, 100%, 0.6) !important;
-        }
+.content-items {
+  overflow: hidden;
+  width: 100%;
+  .content-item {
+    float: left;
+    box-sizing: border-box;
+    width: 92px;
+    padding-left: 30px;
+    height: 46px;
+    cursor: pointer;
+    span {
+      text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
+      font-size: 15px;
+      font-weight: 500;
+      display: inline-block;
+      width: 62px;
+      max-width: 62px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      &:hover {
+        color: var(--td-brand-color);
       }
     }
   }

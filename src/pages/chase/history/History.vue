@@ -40,7 +40,12 @@
         </div>
       </div>
     </div>
-    <infinite-loading :identifier="infiniteId" :distance="200" style="text-align: center" @infinite="load">
+    <infinite-loading
+      :identifier="infiniteId"
+      style="text-align: center; margin-bottom: 2em"
+      :duration="200"
+      @infinite="load"
+    >
       <template #complete>人家是有底线的</template>
       <template #error>哎呀，出了点差错</template>
     </infinite-loading>
@@ -194,7 +199,6 @@ defineExpose({
 
 <style lang="less" scoped>
 .history-container {
-  overflow-y: auto;
   height: 100%;
   .history-container-item {
     &-header {

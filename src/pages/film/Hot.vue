@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="热搜榜" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="热搜 · TOP" placement="center" :footer="false">
     <template #body>
       <div class="hot-container dialog-container-padding">
         <div class="rax-view-v2 tab-container">

@@ -1,6 +1,6 @@
 <template>
   <div class="setting-base-container">
-    <t-form ref="form" label-width="110px" :data="formData">
+    <t-form ref="form" label-width="110px" :data="formData" label-align="left">
       <t-form-item label="外观" name="theme">
         <t-radio-group v-model="formData.theme">
           <div v-for="(item, index) in MODE_OPTIONS" :key="index" class="setting-layout-drawer">

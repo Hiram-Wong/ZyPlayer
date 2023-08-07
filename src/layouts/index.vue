@@ -1,13 +1,13 @@
 <template>
-  <div>
+  <div class="layout">
     <t-layout>
-      <t-header height="36px" :class="`${prefix}-header`">
-        <layout-header />
-      </t-header>
-      <t-layout :class="`${prefix}-layout`">
-        <t-aside key="side" width="80px" :class="`${prefix}-aside`">
+      <t-aside key="side" width="78px" :class="`${prefix}-aside`">
           <layout-side-nav :nav-data="sideMenu" />
         </t-aside>
+      <t-layout>
+        <t-header height="30px" :class="`${prefix}-header`">
+          <layout-header />
+        </t-header>
         <t-content :class="`${prefix}-content`"><layout-content /></t-content>
       </t-layout>
     </t-layout>
@@ -18,7 +18,7 @@
 import '@/style/layout.less';
 
 import { storeToRefs } from 'pinia';
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { prefix } from '@/config/global';
@@ -37,13 +37,6 @@ const sideMenu = computed(() => {
   const newMenuRouters = menuRouters.value;
   return newMenuRouters;
 });
-
-watch(
-  () => route.path,
-  () => {
-    document.querySelector(`.${prefix}-layout`).scrollTo({ top: 0, behavior: 'smooth' });
-  },
-);
 </script>
 
 <style lang="less" scoped>

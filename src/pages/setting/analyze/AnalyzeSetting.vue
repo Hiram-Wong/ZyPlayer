@@ -23,11 +23,13 @@
           </div>
         </div>
         <div class="right-operation-container">
-          <t-input v-model="searchValue" placeholder="请输入搜索关键词" clearable @enter="getAnalyze">
-            <template #suffix-icon>
-              <search-icon size="16px" />
-            </template>
-          </t-input>
+          <div class="search">
+            <t-input v-model="searchValue" placeholder="搜索解析资源" clearable @enter="getAnalyze" class="search-bar">
+              <template #prefix-icon>
+                <search-icon size="16px" />
+              </template>
+            </t-input>
+          </div>
         </div>
       </t-row>
     </div>
@@ -46,7 +48,7 @@
       @page-change="rehandlePageChange"
     >
       <template #name="{ row }">
-        <t-badge v-if="row.id === defaultAnalyze" size="small" :offset="[-5, 0]" count="默认">{{ row.name }}</t-badge>
+        <t-badge v-if="row.id === defaultAnalyze" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
       <!-- <template #type="{ row }">

@@ -1,6 +1,7 @@
+import path from 'node:path';
+
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import path from 'path';
 // 按需加载T-Desgin组件
 import AutoImport from 'unplugin-auto-import/vite';
 import { TDesignResolver } from 'unplugin-vue-components/resolvers';
@@ -120,9 +121,7 @@ export default ({ mode }: ConfigEnv): UserConfig => {
           },
         },
       ]),
-      renderer({
-        nodeIntegration: true,
-      }),
+      renderer(),
     ],
     server: {
       port: 3000,

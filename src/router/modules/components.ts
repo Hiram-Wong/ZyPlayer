@@ -80,13 +80,13 @@ export default [
     name: 'Chase',
     redirect: '/chase/index',
     component: Layout,
-    meta: { title: '历史', icon: 'time' },
+    meta: { title: '看过', icon: 'time' },
     children: [
       {
         path: 'index',
         name: 'ChaseIndex',
         component: () => import('@/pages/Chase.vue'),
-        meta: { title: '历史', icon: 'time' },
+        meta: { title: '看过', icon: 'time' },
       },
     ],
   },

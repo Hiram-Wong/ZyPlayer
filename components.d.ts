@@ -9,6 +9,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TAnchor: typeof import('tdesign-vue-next')['Anchor']
+    TAnchorItem: typeof import('tdesign-vue-next')['AnchorItem']
     TAside: typeof import('tdesign-vue-next')['Aside']
     TBackTop: typeof import('tdesign-vue-next')['BackTop']
     TBadge: typeof import('tdesign-vue-next')['Badge']

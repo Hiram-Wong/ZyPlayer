@@ -89,7 +89,7 @@
     "@typescript-eslint/parser": "^5.57.1",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/eslint-config-typescript": "^11.0.2",
-    "electron": "^25.3.2",
+    "electron": "^19.1.9",
     "electron-builder": "^24.6.3",
     "eslint": "^8.37.0",
     "eslint-config-airbnb-base": "^15.0.0",
