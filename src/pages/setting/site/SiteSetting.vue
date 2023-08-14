@@ -35,14 +35,13 @@
     </div>
     <t-table
       row-key="id"
-      :data="emptyData ? [] : data"
+      :data="data"
       :sort="sort"
       height="calc(100vh - 205px)"
       table-layout="auto"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
-      :loading="dataLoading"
       dragSort='row'
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
@@ -60,22 +59,20 @@
       </template>
       <template #resource="{ row }">
         <span v-if="row.resource">{{ row.resource }}</span>
-        <span v-else>暂无数据</span>
+        <span v-else>无数据</span>
       </template>
       <template #search="{ row }">
         <t-tag v-if="row.search === 0" shape="round" theme="danger" variant="light-outline">关闭</t-tag>
         <t-tag v-else-if="row.search === 1" theme="success" shape="round" variant="light-outline">聚合</t-tag>
         <t-tag v-else-if="row.search === 2" theme="warning" shape="round" variant="light-outline">本站</t-tag>
       </template>
-      <template #status="{ row }">
-        <t-tag v-if="row.status" shape="round" theme="success" variant="light-outline">可用</t-tag>
-        <t-tag v-else theme="danger" shape="round" variant="light-outline">失效</t-tag>
-      </template>
       <template #op="slotProps">
-        <a class="t-button-link" @click="defaultEvent(slotProps)">默认</a>
-        <a class="t-button-link" @click="checkSingleEvent(slotProps)">检测</a>
+        <a class="t-button-link" @click="defaultEvent(slotProps.row)">默认</a>
+        <a class="t-button-link" @click="checkSingleEvent(slotProps.row)">检测</a>
         <a class="t-button-link" @click="editEvent(slotProps)">编辑</a>
-        <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
+        <t-popconfirm content="确认删除吗" @confirm="removeEvent(slotProps.row)">
+          <a class="t-button-link">删除</a>
+        </t-popconfirm>
       </template>
     </t-table>
     <dialog-add-view
@@ -96,7 +93,8 @@
 import { useEventBus } from '@vueuse/core';
 import { AddIcon, ArrowUpIcon, RefreshIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
+import _ from 'lodash';
 
 import { setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
@@ -111,15 +109,12 @@ const remote = window.require('@electron/remote');
 const formDialogVisibleAddApi = ref(false);
 const formDialogVisibleEditSite = ref(false);
 const formData = ref();
-const isCheckStatusChangeActive = ref();
 const formGroup = ref();
 const sort = ref();
 const searchValue = ref();
 
 // Define table
-const emptyData = ref(false);
-const dataLoading = ref(false);
-const pagination = ref({
+const pagination = reactive({
   defaultPageSize: 20,
   total: 0,
   defaultCurrent: 1,
@@ -133,17 +128,13 @@ const defaultSite = ref();
 
 // Business Processing
 const getSites = async () => {
-  dataLoading.value = true;
   defaultSite.value = await setting.get('defaultSite');
   try {
     const res = await sites.pagination(searchValue.value);
-    if (!res) emptyData.value = true;
     data.value = res.list;
-    pagination.value.total = res.total;
+    pagination.total = res.total;
   } catch (e) {
     console.log(e);
-  } finally {
-    dataLoading.value = false;
   }
 };
 
@@ -154,60 +145,56 @@ const getGroup = () => {
   });
 };
 
-const getCheckStatusChangeActive = () => {
-  setting.get('defaultCheckModel').then((res) => {
-    isCheckStatusChangeActive.value = res;
-  });
-};
-
 onMounted(() => {
-  getSites();
-  getGroup();
-  getCheckStatusChangeActive();
+  refreshEvent();
 });
 
 const refreshEvent = () => {
   getSites();
   getGroup();
 };
+
 // op
 const onDragSort = (params) => {
   console.log('交换行', params);
   data.value = params.newData;
 };
-const propChangeEvent = (row) => {
+
+const propChangeEvent = async(row) => {
   console.log(row.isActive);
-  sites.update(row.id, { isActive: row.isActive });
+  await sites.update(row.id, { isActive: row.isActive });
 };
 
 const checkAllSite = async () => {
-  const uncheckedList = data.value.filter((e) => e.status === undefined || e.status === ' '); // 未检测过的优先
-  const other = data.value.filter((e) => !uncheckedList.includes(e));
-  await Promise.all(uncheckedList.map((site) => checkSingleEvent(site, true)));
-  await Promise.all(other.map((site) => checkSingleEvent(site, true))).then(() => {
-    getSites();
-    MessagePlugin.success('源站批量检测完成,自动重置状态!');
-  });
+  let checkData = [];
+  if (selectedRowKeys.value.length === 0) {
+    checkData = [...data.value]
+  } else {
+    selectedRowKeys.value.forEach((item) => {
+      const res = _.find(data.value, {id: item})
+      checkData.push(res)
+    })
+  }
+  try {
+    await Promise.all(checkData.map((site) => checkSingleEvent(site, true)));
+    MessagePlugin.success('状态批量检测完成');
+  } catch (err) {
+    MessagePlugin.error(`状态批量检测失败, 错误信息:${err}`);
+  }
 };
 
 const checkSingleEvent = async (row, all = false) => {
-  let res;
-  if (!all) res = row.row;
-  else res = row;
-
-  const { status, resource } = await zy.check(res.key); // 检测状态
-  if (isCheckStatusChangeActive.value) res.isActive = status; // 检测是否开启变更状态
-  res.status = status;
-  res.resource = resource;
-  console.log(status, resource);
-  sites.update(res.id, res);
+  const { status, resource } = await zy.check(row.key); // 检测状态
+  row.isActive = status; // 检测是否开启变更状态
+  row.resource = resource;
+  await sites.update(row.id, row);
   if (!all) MessagePlugin.success('源站检测完成,自动重置状态!');
-  return res.status;
+  return status;
 };
 
 const rehandlePageChange = (curr) => {
-  pagination.value.defaultCurrent = curr.current;
-  pagination.value.defaultPageSize = curr.pageSize;
+  pagination.defaultCurrent = curr.current;
+  pagination.defaultPageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
@@ -217,21 +204,18 @@ const rehandleSortChange = (sortVal, options) => {
 };
 
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
+  formData.value = data.value[row.rowIndex + pagination.defaultPageSize * (pagination.defaultCurrent - 1)];
   formDialogVisibleEditSite.value = true;
 };
 
-const removeEvent = (row) => {
-  sites
-    .remove(row.row.id)
-    .then(() => {
-      getSites();
-      getGroup();
-      MessagePlugin.success('删除成功');
-    })
-    .catch((err) => {
-      MessagePlugin.error(`删除源失败, 错误信息:${err}`);
-    });
+const removeEvent = async (row) => {
+  try {
+    await sites.remove(row.id);
+    refreshEvent();
+    MessagePlugin.success('删除成功');
+  } catch (err) {
+    MessagePlugin.error(`删除源失败, 错误信息:${err}`);
+  }
 };
 
 const removeAllEvent = () => {
@@ -245,8 +229,7 @@ const removeAllEvent = () => {
       MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
     });
   });
-  getSites();
-  getGroup();
+  refreshEvent();
   MessagePlugin.success('批量删除成功');
 };
 
@@ -289,10 +272,8 @@ const exportEvent = () => {
 const emitReload = useEventBus<string>('film-reload');
 
 const defaultEvent = async (row) => {
-  setting.update({
-    defaultSite: row.row.id,
-  });
-  defaultSite.value = row.row.id;
+  await setting.update({ defaultSite: row.id });
+  defaultSite.value = row.id;
   emitReload.emit('film-reload');
   MessagePlugin.success('设置成功');
 };
@@ -301,10 +282,8 @@ const defaultEvent = async (row) => {
 <style lang="less" scoped>
 .setting-site-container {
   height: calc(100vh - var(--td-comp-size-l));
-  overflow: auto;
-
   .header {
-    margin-bottom: var(--td-comp-margin-s);
+    margin: var(--td-comp-margin-s) 0;
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);

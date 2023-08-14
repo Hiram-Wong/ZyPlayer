@@ -811,6 +811,7 @@ watch(
 onMounted(() => {
   initPlayer();
   minMaxEvent();
+  document.documentElement.setAttribute('theme-mode', 'dark');
 });
 
 // 选集排序
@@ -897,6 +898,19 @@ const createPlayer = async (videoType) => {
   }
 
   if (type.value === 'film') await timerUpdatePlayProcess();
+
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: type.value === 'film' ? info.value.vod_name : info.value.name,
+      artist: type.value === 'film' ? selectPlayIndex.value : '直播',
+      artwork: [
+        {
+          src: info.value.vod_pic,
+          type: "image/png",
+        }
+      ],
+    });
+  }
 };
 
 // 获取解析地址
@@ -1196,8 +1210,6 @@ const initPlayer = async (isFirst = false) => {
   } else if (type.value === 'film') {
     await initFilmPlayer(isFirst);
   }
-
-  document.documentElement.setAttribute('theme-mode', 'dark');
   document.title = type.value === 'iptv' ? info.value.name : `${info.value.vod_name} ${selectPlayIndex.value}`;
 };
 

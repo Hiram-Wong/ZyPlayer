@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from "axios-retry";
 import { XMLParser } from "fast-xml-parser";
 import * as cheerio from "cheerio";
@@ -15,6 +15,31 @@ import net from "net";
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 
 let controller = new AbortController();
+
+// 创建一个 Axios 实例
+const instance: AxiosInstance = axios.create();
+// 扩展 AxiosRequestConfig 接口，添加 metadata 属性
+interface MyAxiosRequestConfig extends AxiosRequestConfig {
+  metadata?: {
+    startTime: Date;
+  };
+}
+// 请求拦截器，在请求发送前记录请求开始时间
+instance.interceptors.request.use((config: MyAxiosRequestConfig) => {
+  config.metadata = { startTime: new Date() };
+  return config;
+}, (error: any) => {
+  return Promise.reject(error);
+});
+// 响应拦截器，在响应返回后计算耗时时间
+instance.interceptors.response.use((response: AxiosResponse) => {
+  const endTime = new Date();
+  const duration = endTime - response.config.metadata.startTime;
+  response.duration = duration;
+  return response;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 axiosRetry(axios, {
   retries: 2,
@@ -612,53 +637,65 @@ const zy = {
    * @param {*} channel 直播频道 url
    * @returns boolean
    */
+  // async checkChannel(url) {
+  //   try {
+  //     const res = await axios.get(url, {
+  //       signal: controller.signal,
+  //       timeout: 3000
+  //     });
+  //     const manifest = res.data;
+  //     const parser = new M3u8Parser();
+  //     parser.push(manifest);
+  //     parser.end();
+  //     const parsedManifest = parser.manifest;
+
+  //     if (parsedManifest.segments.length > 0) return true;
+
+  //     // 兼容性处理 抓包多次请求规则 #EXT-X-STREAM-INF 带文件路径的相对路径
+  //     const responseURL = res.request.responseURL;
+  //     const { uri } = parsedManifest.playlists[0];
+  //     if (res.data.indexOf("encoder") > 0) {
+  //       // request1: http://1.204.169.243/live.aishang.ctlcdn.com/00000110240389_1/playlist.m3u8?CONTENTID=00000110240389_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
+  //       // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8000000,CODECS="avc,mp21" encoder/0/playlist.m3u8?CONTENTID=00000110240127_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
+  //       // request2: http://1.204.169.243/live.aishang.ctlcdn.com/00000110240303_1/encoder/0/playlist.m3u8?CONTENTID=00000110240303_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
+  //       const index = responseURL.lastIndexOf("/");
+  //       const urlLastParam = responseURL.substring(0, index + 1);
+  //       const newUrl = urlLastParam + uri;
+  //       return this.checkChannel(newUrl);
+  //     } else if (uri.startsWith("http") || uri.startsWith("//")) {
+  //       // request1: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/index.m3u8?IASHttpSessionId=OTT8798520230127055253191816
+  //       // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8468480 http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8798520230127055253191816&zte_bandwidth=1000&bandwidth=8468480&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
+  //       // request2: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8867820230127053805215983&zte_bandwidth=1000&bandwidth=8467456&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
+  //       const newUrl = uri;
+  //       return this.checkChannel(newUrl);
+  //     } else if (
+  //       /^\/[^\/]/.test(uri) ||
+  //       (/^[^\/]/.test(uri) && uri.startsWith("http"))
+  //     ) {
+  //       // request1: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//index.m3u8
+  //       // #EXT-X-STREAM-INF:BANDWIDTH=15435519,AVERAGE-BANDWIDTH=15435519,RESOLUTION=3840x2160,CODECS="hvc1.1.6.L150.b0,mp4a.40.2",AUDIO="audio_mp4a.40.2_48000",CLOSED-CAPTIONS=NONE,FRAME-RATE=25 1/v15M/index.m3u8
+  //       // request2: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//1/v15M/index.m3u8
+  //       const index = responseURL.lastIndexOf("/");
+  //       const urlLastParam = responseURL.substring(0, index + 1);
+  //       const newUrl = urlLastParam + uri;
+  //       return this.checkChannel(newUrl);
+  //     }
+
+  //     return false;
+  //   } catch (err) {
+  //     throw err;
+  //   }
+  // },
+  
   async checkChannel(url) {
     try {
-      const res = await axios.get(url, {
-        signal: controller.signal,
-        timeout: 3000
-      });
-      const manifest = res.data;
-      const parser = new M3u8Parser();
-      parser.push(manifest);
-      parser.end();
-      const parsedManifest = parser.manifest;
-
-      if (parsedManifest.segments.length > 0) return true;
-
-      // 兼容性处理 抓包多次请求规则 #EXT-X-STREAM-INF 带文件路径的相对路径
-      const responseURL = res.request.responseURL;
-      const { uri } = parsedManifest.playlists[0];
-      if (res.data.indexOf("encoder") > 0) {
-        // request1: http://1.204.169.243/live.aishang.ctlcdn.com/00000110240389_1/playlist.m3u8?CONTENTID=00000110240389_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
-        // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8000000,CODECS="avc,mp21" encoder/0/playlist.m3u8?CONTENTID=00000110240127_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
-        // request2: http://1.204.169.243/live.aishang.ctlcdn.com/00000110240303_1/encoder/0/playlist.m3u8?CONTENTID=00000110240303_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
-        const index = responseURL.lastIndexOf("/");
-        const urlLastParam = responseURL.substring(0, index + 1);
-        const newUrl = urlLastParam + uri;
-        return this.checkChannel(newUrl);
-      } else if (uri.startsWith("http") || uri.startsWith("//")) {
-        // request1: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/index.m3u8?IASHttpSessionId=OTT8798520230127055253191816
-        // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=8468480 http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8798520230127055253191816&zte_bandwidth=1000&bandwidth=8468480&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
-        // request2: http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225491/2/1000.m3u8?IASHttpSessionId=OTT8867820230127053805215983&zte_bandwidth=1000&bandwidth=8467456&ispcode=888&timeformat=local&channel=3221225491&m3u8_level=2&ztecid=3221225491
-        const newUrl = uri;
-        return this.checkChannel(newUrl);
-      } else if (
-        /^\/[^\/]/.test(uri) ||
-        (/^[^\/]/.test(uri) && uri.startsWith("http"))
-      ) {
-        // request1: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//index.m3u8
-        // #EXT-X-STREAM-INF:BANDWIDTH=15435519,AVERAGE-BANDWIDTH=15435519,RESOLUTION=3840x2160,CODECS="hvc1.1.6.L150.b0,mp4a.40.2",AUDIO="audio_mp4a.40.2_48000",CLOSED-CAPTIONS=NONE,FRAME-RATE=25 1/v15M/index.m3u8
-        // request2: http://baidu.live.cqccn.com/__cl/cg:live/__c/hxjc_4K/__op/default/__f//1/v15M/index.m3u8
-        const index = responseURL.lastIndexOf("/");
-        const urlLastParam = responseURL.substring(0, index + 1);
-        const newUrl = urlLastParam + uri;
-        return this.checkChannel(newUrl);
-      }
-
-      return false;
+      const res = await instance.head(url);
+      const period = res.duration;
+      console.log(period)
+      return period;
     } catch (err) {
-      throw err;
+      console.log(err)
+      return false;
     }
   },
   async stopCheckChannel() {
@@ -1056,20 +1093,6 @@ const zy = {
 
       const res = await axios.get(parsueUrl);
       return res.data;
-    } catch (err) {
-      throw err;
-    }
-  },
-  /**
-   * 判断网络环境是否为 ipv6
-   * @return {Boolean}
-   */
-  async checkSupportIpv6() {
-    try {
-      const res = await axios.get("https://6.ipw.cn");
-      const ip = res.data;
-      const isIpv6 = /([0-9a-z]*:{1,4}){1,7}[0-9a-z]{1,4}/i.test(ip);
-      return isIpv6;
     } catch (err) {
       throw err;
     }

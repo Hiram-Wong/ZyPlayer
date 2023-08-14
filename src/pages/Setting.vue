@@ -128,7 +128,7 @@ const changeClassEvent = (item) => {
       padding: 0 40px;
       display: flex;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 5px;
       justify-content: space-between;
       white-space: nowrap;
       flex-shrink: 0;
@@ -157,7 +157,7 @@ const changeClassEvent = (item) => {
       }
     }
     .container {
-      height: calc(100% - 56px);
+      height: calc(100% - 45px);
       display: flex;
       flex-direction: column;
       align-items: center;

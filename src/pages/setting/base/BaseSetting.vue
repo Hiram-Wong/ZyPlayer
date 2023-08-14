@@ -33,7 +33,7 @@
               </div>
             </template>
           </t-input>
-          <span class="title" @click="resetShortcut">重置</span>
+          <span class="title" @click="reset('shortcut')">重置</span>
         </t-space>
       </t-form-item>
       <t-form-item label="热榜" name="hotRecommend">
@@ -63,31 +63,27 @@
         </div>
         <div class="hot-recommend"></div>
       </t-form-item>
-      <t-form-item label="站点" name="site">
-        <div class="site">
-          <t-space>
-            <t-radio v-model="formData.defaultCheckModel" allow-uncheck>检查源变更状态</t-radio>
-            <t-radio v-model="formData.defaultChangeModel" allow-uncheck>切换源设置默认</t-radio>
-          </t-space>
-        </div>
-      </t-form-item>
       <t-form-item label="直播" name="iptv">
         <div class="iptv">
           <t-space>
             <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
             <span class="title" @click="checkIpv6">检查</span>
-            <t-radio v-model="formData.iptvStatus" allow-uncheck>检测可用性</t-radio>
+            <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
+            <t-radio v-model="formData.thumbnail" allow-uncheck>缩略图</t-radio>
           </t-space>
         </div>
       </t-form-item>
       <t-form-item label="节目单" name="epg">
         <div class="epg">
-          <t-input
-            v-model="formData.defaultIptvEpg"
-            label="默认EPG:"
-            placeholder="仅支持DIYP"
-            :style="{ width: '300px' }"
-          />
+          <t-space align="center">
+            <t-input
+              v-model="formData.defaultIptvEpg"
+              label="默认EPG:"
+              placeholder="仅支持DIYP"
+              :style="{ width: '255px' }"
+            />
+            <span class="title" @click="reset('epg')">重置</span>
+          </t-space>
         </div>
       </t-form-item>
       <t-form-item v-if="formData.analyzeSupport" label="解析" name="analyse">
@@ -122,7 +118,7 @@
       </t-form-item>
       <t-form-item label="其他" name="data">
         <t-space>
-          <span class="title" @click="resetEvent">恢复出厂</span>
+          <span class="title" @click="resetOriginal">恢复出厂</span>
           <span class="title" @click="resetCache">清理数据</span>
           <span class="title" @click="easyConfig">一键配置</span>
           <span class="title" @click="checkUpdate">检查更新</span>
@@ -136,20 +132,20 @@
   </div>
 </template>
 
-<script setup lang="jsx">
+<script setup lang="tsx">
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { CloseIcon } from 'tdesign-icons-vue-next';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
+import {internalIpV6, internalIpV4} from 'internal-ip';
 
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import { setting } from '@/lib/dexie';
 import db from '@/lib/dexie/dexie';
-import zy from '@/lib/utils/tools';
 import { usePlayStore, useSettingStore } from '@/store';
 
 import DialogClearView from './components/DialogClear.vue';
@@ -223,8 +219,6 @@ const analyzeEmitReload = useEventBus('analyze-reload');
 watch(
   () => [
     formData.value.defaultSearchType,
-    formData.value.defaultChangeModel,
-    formData.value.defaultCheckModel,
     formData.value.defaultSearchRecommend,
     formData.value.defaultSearchType,
   ],
@@ -297,15 +291,28 @@ const openProxySetting = () => {
 };
 
 // 出厂恢复
-const resetEvent = () => {
-  ipcRenderer.send('reset-store'); // 清除config.json
-  clearDB();
-  clearCache();
+const resetOriginal = () => {
+  const handleClear = () => {
+    ipcRenderer.send('reset-store'); // 清除config.json
+    clearDB();
+    clearCache();
 
-  MessagePlugin.success('重置成功, 即将重启应用!');
-  setTimeout(() => {
-    ipcRenderer.send('reboot-app');
-  }, 1000);
+    confirmDia.hide();
+    MessagePlugin.success('重置成功, 即将重启应用!');
+    setTimeout(() => {
+      ipcRenderer.send('reboot-app');
+    }, 1000);
+  };
+
+  const confirmDia = DialogPlugin({
+    body: '确定恢复出厂吗？出厂后恢复初始状态。',
+    header: '恢复出厂',
+    width: '320px',
+    confirmBtn: '确认恢复',
+    closeBtn: null,
+    onConfirm: handleClear,
+    onClose: () => confirmDia.hide(),
+  });
 };
 
 // 清理内存
@@ -492,13 +499,17 @@ const cancelShortcut = () => {
   ipcRenderer.send('uninstallShortcut');
 };
 
-// 重置快捷键
-const resetShortcut = () => {
-  console.log('resetShortcut');
-  if (platform === 'darwin') formData.value.recordShortcut = 'Shift+Command+Z';
-  else formData.value.recordShortcut = 'Shift+Alt+Z';
-  shortcutInputRef.value.blur();
-  ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
+// 重置
+const reset = (type: string) => {
+  console.log(`reset:${type}`);
+  if (type === 'shortcut') {
+    if (platform === 'darwin') formData.value.recordShortcut = 'Shift+Command+Z';
+    else formData.value.recordShortcut = 'Shift+Alt+Z';
+    shortcutInputRef.value.blur();
+    ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
+  } else if (type === 'epg') {
+    formData.value.defaultIptvEpg = 'http://diyp.112114.xyz/';
+  }
 };
 
 // 开机自启
@@ -518,12 +529,13 @@ const hardwareAccelerationEvnet = () => {
 
 // 更新
 const checkUpdate = () => {
+  console.log('open checkUpdate');
   isUpdateDialog.value = true;
 };
 
 // 一键配置
 const easyConfig = () => {
-  console.log('easyConfig');
+  console.log('open easyConfig');
   isEasyConfigDialog.value = true;
 };
 
@@ -558,20 +570,20 @@ const flushDialogData = (item) => {
 
 // ipv6检查
 const checkIpv6 = async () => {
-  await zy
-    .checkSupportIpv6()
-    .then((res) => {
-      formData.value.iptvSkipIpv6 = !res;
-    })
-    .catch((err) => {
-      formData.value.iptvSkipIpv6 = true;
-      console.log(err);
-    });
+  try {
+    const ipv4 = await internalIpV4();
+    const ipv6 = await internalIpV6();
+    if (!ipv6) formData.value.iptvSkipIpv6 = true;
+    MessagePlugin.success(`网络地址为${ipv6 ? `ipv6: ${ipv6}`: `ipv4: ${ipv4}` }`);
+  } catch(err) {
+    MessagePlugin.error(`网络状态检测失败:${err}`);
+    console.log(err);
+  };
 };
 
 // 监听设置默认源变更
 const eventBus = useEventBus('base-setting-reload');
-eventBus.on(async () => {
+eventBus.on(() => {
   getSetting();
 });
 </script>

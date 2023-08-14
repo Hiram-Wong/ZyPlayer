@@ -12,6 +12,7 @@ import renderer from 'vite-plugin-electron-renderer';
 import viteImagemin from 'vite-plugin-imagemin';
 // 通过触发冷启动时的预构建来解决
 import OptimizationPersist from 'vite-plugin-optimize-persist';
+import fs from 'fs-extra';
 import PkgConfig from 'vite-plugin-package-config';
 import svgLoader from 'vite-svg-loader';
 
@@ -48,7 +49,16 @@ export default ({ mode }: ConfigEnv): UserConfig => {
       sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
 
       rollupOptions: {
-        output: {},
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              return id.toString().split('node_modules/')[1].split('/')[0].toString()
+            }
+          },
+          outro: () => {
+            return fs.copySync('./public/load.html', './dist/load.html');
+          },
+        },
       },
     },
 
@@ -85,6 +95,12 @@ export default ({ mode }: ConfigEnv): UserConfig => {
         pngquant: { quality: [0.65, 0.9], speed: 4 },
         webp: { quality: 75 },
       }),
+      // copy({
+      //   targets: [
+      //     { src: './load.html', dest: 'dist' },
+      //   ],
+      //   verbose: true
+      // }),
       electron([
         {
           entry: 'electron/main/index.ts',

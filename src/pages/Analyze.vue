@@ -278,7 +278,7 @@ const shareEvent = () => {
     padding: 0 40px;
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     justify-content: space-between;
     white-space: nowrap;
     flex-shrink: 0;

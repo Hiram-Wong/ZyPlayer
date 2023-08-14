@@ -22,7 +22,7 @@
       </template>   
       <template #operations>
         <t-menu-item @click="refreshEvent">
-          <template #icon><refresh-icon /></template>
+          <template #icon><IconPark type=rotation size="24" :strokeWidth="2.5" /></template>
         </t-menu-item>
       </template>
     </t-menu>
@@ -31,7 +31,7 @@
 
 <script setup lang="tsx">
 import { useEventBus } from '@vueuse/core';
-import { RefreshIcon } from 'tdesign-icons-vue-next';
+import { IconPark } from '@icon-park/vue-next/es/all';
 import type { PropType } from 'vue';
 import { computed } from 'vue';
 
@@ -62,7 +62,8 @@ const list = computed(() => {
 });
 
 const menuIcon = (item: ListItemType) => {
-  if (typeof item.icon === 'string') return <t-icon name={item.icon} style=""/>;
+  // if (typeof item.icon === 'string') return <t-icon name={item.icon} style=""/>;
+  if (typeof item.icon === 'string') return <IconPark type={item.icon} size="24" stroke-width="2.5" />;
   const RenderIcon = item.icon;
   return RenderIcon;
 };

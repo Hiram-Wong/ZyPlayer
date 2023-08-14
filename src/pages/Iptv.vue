@@ -54,7 +54,7 @@
         </div>
         <div class="actions">
           <div class="search">
-            <t-input v-model="searchTxt" placeholder="搜索频道内资源" clearable @enter="searchEvent" class="search-bar">
+            <t-input v-model="searchTxt" placeholder="搜索频道资源" clearable @enter="searchEvent" @clear="searchEvent" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -68,11 +68,15 @@
             <div v-for="item in iptvDataList.list" :key="item.id" class="card-wrap">
               <div class="card" @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
                 <div v-show="iptvSetting.iptvStatus" class="card-header">
-                  <t-tag v-if="item.status === true" disabled size="small" variant="outline" theme="success">有效</t-tag>
+                  <div class="status">
+                    <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
+                    <span v-else class="status-item error">超时</span>
+                  </div>
+                  <!-- <t-tag v-if="item.status === true" disabled size="small" variant="outline" theme="success">有效</t-tag>
                   <t-tag v-else-if="item.status === false" disabled size="small" variant="outline" theme="danger">
                     无效
                   </t-tag>
-                  <t-tag v-else disabled size="small" variant="outline" theme="warning">检查中</t-tag>
+                  <t-tag v-else disabled size="small" variant="outline" theme="warning">检查中</t-tag> -->
                 </div>
                 <div class="card-main">
                   <t-image
@@ -593,7 +597,7 @@ const formatMoreTitle = (item, list) => {
       padding: 0 40px;
       display: flex;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 5px;
       justify-content: space-between;
       white-space: nowrap;
       flex-shrink: 0;
@@ -652,7 +656,7 @@ const formatMoreTitle = (item, list) => {
       }
     }
     .container {
-      height: calc(100% - 56px);
+      height: calc(100% - 45px);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -689,13 +693,31 @@ const formatMoreTitle = (item, list) => {
               background-color: #373536;
               cursor: pointer;
               .card-header {
-                color: #fbfbfb;
-                .t-tag {
+                .status {
+                  display: flex;
+                  align-content: center;
+                  flex-direction: row;
+                  align-items: center;
+                  justify-content: center;
+                  width: 40px;
+                  height: 15px;
+                  background-color: var(--td-text-color-placeholder);
+                  border-radius: 5px;
+                  box-shadow: var(--td-shadow-1);
                   position: absolute;
                   top: 5px;
-                  left: 5px;
-                  font-size: 10px;
+                  right: 5px;
+                  .status-item {
+                    font-size: 10px;
+                  }
+                  .error {
+                    color: var(--td-error-color);
+                  }
+                  .sucess {
+                    color: var(--td-success-color);
+                  }
                 }
+                
                 .card-header-title {
                   background-color: rgba(0, 0, 0, 0.5);
                   border-radius: 5px;

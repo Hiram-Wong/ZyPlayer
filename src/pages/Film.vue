@@ -62,28 +62,28 @@
           </div>
         </div>
       </header>
-      <!-- 过滤工具栏 -->
-      <div v-show="showToolbar" class="filter header-wrapper">
-        <div class="tags">
-          <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.key" class="tags-list">
-            <div class="item title">{{ filterItem.name }}</div>
-            <div class="wp">
-              <div
-                v-for="item in filterItem.value"
-                :key="item"
-                class="item"
-                :class="{ active: filter.select[filterItem.key] === item.v }"
-                :label="item.n"
-                :value="item.v"
-                @click="changeFilterEvent(filterItem.key, item.v)"
-              >
-                {{ item.n }}
+      <div class="container">
+        <!-- 过滤工具栏 -->
+        <div v-show="showToolbar" class="filter header-wrapper">
+          <div class="tags">
+            <div v-for="filterItem in filter.data[FilmSiteSetting.class.id]" :key="filterItem.key" class="tags-list">
+              <div class="item title">{{ filterItem.name }}</div>
+              <div class="wp">
+                <div
+                  v-for="item in filterItem.value"
+                  :key="item"
+                  class="item"
+                  :class="{ active: filter.select[filterItem.key] === item.v }"
+                  :label="item.n"
+                  :value="item.v"
+                  @click="changeFilterEvent(filterItem.key, item.v)"
+                >
+                  {{ item.n }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="container">
         <div class="content-wrapper">
           <div class="container-flow-wrap">
             <div v-for="item in FilmDataList.list" :key="item.id" class="card-wrap">
@@ -97,7 +97,7 @@
                   <t-image
                     class="card-main-item"
                     :src="item.vod_pic"
-                    :style="{ width: '100%', height: '245px', background: 'none' }"
+                    :style="{ width: '100%', height: '200px', background: 'none' }"
                     :lazy="true"
                     fit="cover"
                   >
@@ -131,7 +131,7 @@
     
     <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
     <t-back-top
-      container=".container"
+      container=".content-wrapper"
       :visible-height="200"
       size="small"
       :offset="['1.4rem', '0.5rem']"
@@ -297,10 +297,9 @@ const searchGroup = (type: string) => {
 };
 
 const getFilmSetting = async () => {
-  const [defaultSite, defaultChangeModel, sitesAll, defaultSearchType] = await Promise.all(
+  const [defaultSite, sitesAll, defaultSearchType] = await Promise.all(
     [
       setting.get('defaultSite'),
-      setting.get('defaultChangeModel'),
       sites.all(),
       setting.get('defaultSearchType'),
     ],
@@ -320,7 +319,6 @@ const getFilmSetting = async () => {
   sitesList.value = sitesAll.filter((item) => item.isActive);
 
   Object.assign(FilmSiteSetting.value, {
-    change: defaultChangeModel,
     searchType: defaultSearchType,
     searchGroup: searchGroup(defaultSearchType),
   });
@@ -564,7 +562,6 @@ const getSearchList = async () => {
 
 // 切换站点
 const changeSitesEvent = async (item) => {
-  if (FilmSiteSetting.value.change) await setting.update({ defaultSite: item });
   isLoadClass.value = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';
@@ -866,14 +863,14 @@ const formatMoreTitle = (item, list) => {
       }
     }
     .container {
-      height: calc(100% - 56px);
+      height: calc(100% - 45px);
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
-      overflow-y: auto;
       width: 100%;
       .content-wrapper {
+        overflow-y: auto;
         width: 100%;
         height: 100%;
         padding: 0 40px;
@@ -883,16 +880,15 @@ const formatMoreTitle = (item, list) => {
         flex-grow: 1;
         .container-flow-wrap {
           display: grid;
-          padding: 10px 0;
-          grid-template-columns: repeat(auto-fill, 196px);
-          grid-column-gap: 20px;
+          grid-template-columns: repeat(auto-fill, 153px);
+          grid-column-gap: 15px;
           grid-row-gap: 15px;
           justify-content: center;
           width: inherit;
           .card {
             box-sizing: border-box;
-            width: 196px;
-            height: 310px;
+            width: 153px;
+            height: 250px;
             position: relative;
             cursor: pointer;
             .card-header {
@@ -953,14 +949,13 @@ const formatMoreTitle = (item, list) => {
               }
             }
             .card-footer {
-              height: 52px;
+              max-height: 44px;
               padding-top: 10px;
               overflow: hidden;
               height: auto;
-              line-height: 26px;
               .card-footer-title {
                 height: auto;
-                line-height: 26px;
+                line-height: 15px;
                 font-size: 14px;
                 font-weight: 700;
                 text-overflow: ellipsis;

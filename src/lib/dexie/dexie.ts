@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import { sites, iptv, setting, channelList, analyze, history, analyzeHistory } from './initData'
+import { initSites, initIptv, initSetting, initChannelList, initAnalyze, initHistory, initAnalyzeHistory, initSearchHistory } from './initData'
 
 interface DexieDatabase extends Dexie {
   setting: Dexie.Table<Setting, number>;
@@ -10,6 +10,7 @@ interface DexieDatabase extends Dexie {
   channelList: Dexie.Table<ChannelList, number>;
   analyze: Dexie.Table<Analyze, number>;
   analyzeHistory: Dexie.Table<AnalyzeHistory, number>;
+  searchHistory: Dexie.Table<SearchHistory, number>;
 }
 
 const db = new Dexie('zy') as DexieDatabase
@@ -108,14 +109,19 @@ db.version(20).stores({
   })
 })
 
+db.version(21).stores({
+  searchHistory: '++id, title, type',
+})
+
 db.on('populate', () => {
-  db.setting.bulkAdd(setting)
-  db.sites.bulkAdd(sites)
-  db.iptv.bulkAdd(iptv)
-  db.channelList.bulkAdd(channelList)
-  db.analyze.bulkAdd(analyze)
-  db.history.bulkAdd(history)
-  db.analyzeHistory.bulkAdd(analyzeHistory)
+  db.setting.bulkAdd(initSetting)
+  db.sites.bulkAdd(initSites)
+  db.iptv.bulkAdd(initIptv)
+  db.channelList.bulkAdd(initChannelList)
+  db.analyze.bulkAdd(initAnalyze)
+  db.history.bulkAdd(initHistory)
+  db.analyzeHistory.bulkAdd(initAnalyzeHistory)
+  db.searchHistory.bulkAdd(initSearchHistory)
 })
 
 db.open()

@@ -4,7 +4,7 @@
       <t-aside key="side" width="78px" :class="`${prefix}-aside`">
           <layout-side-nav :nav-data="sideMenu" />
         </t-aside>
-      <t-layout>
+      <t-layout style="width: calc(100% - 78px)">
         <t-header height="30px" :class="`${prefix}-header`">
           <layout-header />
         </t-header>
@@ -19,7 +19,6 @@ import '@/style/layout.less';
 
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 
 import { prefix } from '@/config/global';
 import { usePermissionStore } from '@/store';
@@ -27,8 +26,6 @@ import { usePermissionStore } from '@/store';
 import LayoutContent from './components/Content.vue';
 import LayoutHeader from './components/Header.vue';
 import LayoutSideNav from './components/SideNav.vue';
-
-const route = useRoute();
 
 const permissionStore = usePermissionStore();
 const { routers: menuRouters } = storeToRefs(permissionStore);

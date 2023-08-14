@@ -31,27 +31,28 @@
     </div>
     <t-table
       :row-key="rowKey"
-      :data="emptyData ? [] : data"
+      :data="data"
       :sort="sort"
       height="calc(100vh - 205px)"
       table-layout="auto"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
-      :loading="dataLoading"
       :selected-row-keys="selectedRowKeys"
+      dragSort='row'
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
+      @drag-sort="onDragSort"
     >
       <template #name="{ row }">
         <t-badge v-if="row.id === defaultIptv" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
       <template #type="{ row }">
-        <span v-if="row.type === 'remote'">远程链接</span>
-        <span v-if="row.type === 'local'">本地文件</span>
-        <span v-if="row.type === 'batches'">手动配置</span>
+        <t-tag v-if="row.type === 'remote'" theme="success" shape="round" variant="light-outline">远程链接</t-tag>
+        <t-tag v-else-if="row.type === 'local'" theme="warning" shape="round" variant="light-outline">本地文件</t-tag>
+        <t-tag v-else-if="row.type === 'batches'" theme="danger" shape="round" variant="light-outline">手动配置</t-tag>
       </template>
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="propChangeEvent(row)">
@@ -61,7 +62,9 @@
       <template #op="slotProps">
         <a class="t-button-link" @click="defaultEvent(slotProps)">默认</a>
         <a class="t-button-link" @click="editEvent(slotProps)">编辑</a>
-        <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
+        <t-popconfirm content="确认删除吗" @confirm="removeEvent(slotProps)">
+          <a class="t-button-link">删除</a>
+        </t-popconfirm>
       </template>
     </t-table>
 
@@ -74,7 +77,7 @@ import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { AddIcon, ArrowUpIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 
 import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
@@ -94,8 +97,7 @@ const formDialogVisibleEditIptv = ref(false);
 const searchValue = ref();
 const rowEditData = ref();
 const rowKey = 'id';
-const dataLoading = ref(false);
-const pagination = ref({
+const pagination = reactive({
   defaultPageSize: 20,
   total: 0,
   defaultCurrent: 1,
@@ -105,15 +107,14 @@ const defaultIptv = ref();
 const sort = ref();
 
 // Define table table
-const emptyData = ref(false);
 const data = ref([]);
 const rehandleSelectChange = (val) => {
   selectedRowKeys.value = val;
 };
 
 const rehandlePageChange = (curr) => {
-  pagination.value.defaultCurrent = curr.current;
-  pagination.value.defaultPageSize = curr.pageSize;
+  pagination.defaultCurrent = curr.current;
+  pagination.defaultPageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
@@ -124,17 +125,13 @@ const rehandleSortChange = (sortVal, options) => {
 
 // Business Processing
 const getIptv = async () => {
-  dataLoading.value = true;
   defaultIptv.value = await setting.get('defaultIptv');
   try {
     const res = await iptv.pagination(searchValue.value);
-    if (!res) emptyData.value = true;
     data.value = res.list;
-    pagination.value.total = res.total;
+    pagination.total = res.total;
   } catch (e) {
     console.log(e);
-  } finally {
-    dataLoading.value = false;
   }
 };
 
@@ -274,7 +271,7 @@ const txt = (text) => {
 
 const editEvent = (row) => {
   rowEditData.value =
-    data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
+    data.value[row.rowIndex + pagination.defaultPageSize * (pagination.defaultCurrent - 1)];
   formDialogVisibleEditIptv.value = true;
 };
 
@@ -314,7 +311,7 @@ const removeAllEvent = () => {
 .setting-iptv-container {
   height: calc(100vh - var(--td-comp-size-l));
   .header {
-    margin-bottom: var(--td-comp-margin-s);
+    margin: var(--td-comp-margin-s) 0;
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);

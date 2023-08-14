@@ -2,10 +2,10 @@
   <div class="chase-container">
     <header class="header">
       <div class="page-title">
-        <p class="title">看过</p>
+        <p class="title">过刻</p>
         <div class="container">
           <t-radio-group v-model="chaseTag" variant="default-filled" size="small">
-          <t-radio-button value="history">历史</t-radio-button>
+          <t-radio-button value="history">看过</t-radio-button>
           <t-radio-button value="binge">收藏</t-radio-button>
         </t-radio-group>
         </div>
@@ -97,7 +97,7 @@ const checkUpdaterEvent = () => {
     padding: 0 40px;
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     justify-content: space-between;
     white-space: nowrap;
     flex-shrink: 0;
@@ -138,7 +138,7 @@ const checkUpdaterEvent = () => {
   }
 
   .container {
-    height: calc(100% - 56px);
+    height: calc(100% - 45px);
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>zyplayer</title>
+    <style>
+			@media (prefers-color-scheme: dark) {
+        :root {
+          background: black;
+        }
+			}
+      .desktop-loading {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: transparent;
+      }
+
+      .desktop-loading-container {
+        width: 48px;
+        height: 48px;
+        backdrop-filter: blur(24px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .desktop-loading-img {
+        border-radius: 100%;
+        animation-fill-mode: both;
+        border: 3px solid #88d57e;
+        border-bottom-color: transparent;
+        display: inline-block;
+				width: 36px;
+        height: 36px;
+        animation: rotate360 infinite 1s linear;
+      }
+
+      @keyframes rotate360 {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="desktop-loading">
+        <div class="desktop-loading-container">
+          <div class="desktop-loading-img"></div>
+        </div>
+      </div>
+    </div>
+    <script lang="ts"></script>
+  </body>
+</html>

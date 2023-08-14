@@ -102,3 +102,9 @@ interface AnalyzeHistory {
   videoUrl: string;
   videoName: string;
 }
+
+interface SearchHistory {
+  id?: number;
+  title: string;
+  type: string;
+}

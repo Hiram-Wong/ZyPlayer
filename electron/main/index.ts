@@ -67,8 +67,9 @@ const showOrHidden = () => {
 // const { NODE_ENV } = process.env;
 
 // 保持window对象的: BrowserWindow | null全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
+let loadWindow: BrowserWindow | null;
 let mainWindow: BrowserWindow | null;
-let playWindow: BrowserWindow | null; // 播放窗口
+let playWindow: BrowserWindow | null;
 let isHidden = true;
 
 nativeTheme.on('updated', () => {
@@ -77,13 +78,34 @@ nativeTheme.on('updated', () => {
   log.info(`[nativeTheme] System-theme-updated: ${isDarkMode ? 'dark' : 'light'} ; send to vue app`);
 });
 
+// 加载loading页面窗口
+const showLoading = () => {
+  loadWindow = new BrowserWindow({
+    width: 1000,
+    minWidth: 1000,
+    height: 640,
+    minHeight: 640,
+    titleBarStyle: 'hiddenInset',
+    show: false,
+    frame: false,
+    autoHideMenuBar: true,
+    title: 'zyplayer',
+  });
+  loadWindow.loadURL(
+    app.isPackaged ? `file://${path.join(__dirname, '../../dist/load.html')}` : `file://${path.join(__dirname, '../../public/load.html')}`,
+  );
+  loadWindow.on('ready-to-show', () => {
+    loadWindow.show();
+  });
+};
+
 function createWindow(): void {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
     width: 1000,
     minWidth: 1000,
-    height: 670,
-    minHeight: 670,
+    height: 640,
+    minHeight: 640,
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
@@ -103,12 +125,18 @@ function createWindow(): void {
   remote.enable(mainWindow.webContents); // 启用remote
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
+    setTimeout(() => {
+      if (loadWindow && !loadWindow.isDestroyed()) {
+        loadWindow.hide();
+        loadWindow.destroy();
+      }
+      mainWindow.show();
+    }, 1000);
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     mainWindow.webContents.send('blockUrl', details.url);
-    const allowUrlList = ['github.com', 'kuyun.com'];
+    const allowUrlList = ['github.com', 'kuyun.com', 'ky.live', 'enlightent.cn'];
     const urlIsAllowed = allowUrlList.some((url) => details.url.includes(url));
 
     if (urlIsAllowed) {
@@ -188,12 +216,16 @@ app.whenReady().then(() => {
   //   optimizer.watchWindowShortcuts(window);
   // });
 
+  showLoading();
   createWindow();
 
   app.on('activate', () => {
     // 通常在 macOS 上，当点击 dock 中的应用程序图标时，如果没有其他
     // 打开的窗口，那么程序会重新创建一个窗口。
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      showLoading();
+      createWindow();
+    }
   });
 });
 

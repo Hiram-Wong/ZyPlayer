@@ -3,10 +3,10 @@ import analyzeHistory from './analyzeHistory';
 import setting from './setting';
 import star from './star';
 import sites from './sites';
-import search from './search';
 import iptv from './iptv';
 import channelList from './channelList';
 import analyze from './analyze';
+import searchHistory from './searchHistory';
 
 export {
   history,
@@ -16,6 +16,6 @@ export {
   sites,
   iptv,
   channelList,
-  search,
+  searchHistory,
   analyze
 };

@@ -25,14 +25,6 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     colKey: 'group',
     sorter: (a, b) => a.group.localeCompare(b.group, 'zh-Hans-CN'),
   },
-  {
-    title: '状态',
-    align: 'center',
-    width: 80,
-    ellipsis: true,
-    colKey: 'status',
-    sorter: (a, b) => a.status - b.status,
-  },
   { title: '启用', align: 'center', colKey: 'isActive', width: 80 },
   {
     align: 'center',

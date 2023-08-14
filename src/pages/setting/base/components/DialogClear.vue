@@ -8,7 +8,7 @@
             <t-radio v-model="formData.sites" allow-uncheck>清除站点源配置</t-radio>
             <t-radio v-model="formData.iptv" allow-uncheck>清除直播源配置</t-radio>
             <t-radio v-model="formData.analyze" allow-uncheck>清除解析源配置</t-radio>
-            <t-radio v-model="formData.history" allow-uncheck>清除历史数据(含解析历史)</t-radio>
+            <t-radio v-model="formData.history" allow-uncheck>清除历史数据(含解析历史、搜索历史)</t-radio>
             <t-radio v-model="formData.binge" allow-uncheck>清除收藏数据</t-radio>
             <t-radio v-model="formData.cache" allow-uncheck>清除缓存</t-radio>
           </t-space>
@@ -30,7 +30,7 @@ import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
 
-import { analyze, analyzeHistory, channelList, history, iptv, setting, sites, star } from '@/lib/dexie';
+import { analyze, analyzeHistory, channelList, history, iptv, setting, sites, star, searchHistory } from '@/lib/dexie';
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
@@ -104,6 +104,7 @@ const clearAnalyzeData = async () => {
 const clearHistoryData = async () => {
   await history.clear();
   await analyzeHistory.clear();
+  await searchHistory.clear();
   historyEmitReload.emit('history-reload');
 };
 

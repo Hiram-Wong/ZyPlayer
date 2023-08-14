@@ -35,17 +35,18 @@
     </div>
     <t-table
       row-key="id"
-      :data="emptyData ? [] : data"
+      :data="data"
       :sort="sort"
       height="calc(100vh - 205px)"
       table-layout="auto"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
-      :loading="dataLoading"
+      dragSort='row'
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
+      @drag-sort="onDragSort"
     >
       <template #name="{ row }">
         <t-badge v-if="row.id === defaultAnalyze" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>
@@ -68,7 +69,9 @@
       <template #op="slotProps">
         <a class="t-button-link" @click="defaultEvent(slotProps)">默认</a>
         <a class="t-button-link" @click="editEvent(slotProps)">编辑</a>
-        <a class="t-button-link" @click="removeEvent(slotProps)">删除</a>
+        <t-popconfirm content="确认删除吗" @confirm="removeEvent(slotProps)">
+          <a class="t-button-link">删除</a>
+        </t-popconfirm>
       </template>
     </t-table>
     <dialog-add-view v-model:visible="formDialogVisibleAddAnalyze" :data="data" @refresh-table-data="getAnalyze" />
@@ -84,7 +87,7 @@
 import { useEventBus } from '@vueuse/core';
 import { AddIcon, ArrowUpIcon, DiscountIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 
 import { analyze, setting } from '@/lib/dexie';
 
@@ -106,10 +109,8 @@ const sort = ref();
 const searchValue = ref();
 
 // Define table
-const emptyData = ref(false);
-const dataLoading = ref(false);
 const data = ref([]);
-const pagination = ref({
+const pagination = reactive({
   defaultPageSize: 20,
   total: 0,
   defaultCurrent: 1,
@@ -125,8 +126,8 @@ onMounted(() => {
 });
 
 const rehandlePageChange = (curr) => {
-  pagination.value.defaultCurrent = curr.current;
-  pagination.value.defaultPageSize = curr.pageSize;
+  pagination.defaultCurrent = curr.current;
+  pagination.defaultPageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
@@ -137,17 +138,13 @@ const rehandleSortChange = (sortVal, options) => {
 
 // 获取列表
 const getAnalyze = async () => {
-  dataLoading.value = true;
   defaultAnalyze.value = await setting.get('defaultAnalyze');
   try {
     const res = await analyze.pagination(searchValue.value);
-    if (!res) emptyData.value = true;
     data.value = res.list;
-    pagination.value.total = res.total;
+    pagination.total = res.total;
   } catch (e) {
     console.log(e);
-  } finally {
-    dataLoading.value = false;
   }
 };
 
@@ -163,7 +160,7 @@ const propChangeEvent = (row) => {
 
 // 编辑
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex + pagination.value.defaultPageSize * (pagination.value.defaultCurrent - 1)];
+  formData.value = data.value[row.rowIndex + pagination.defaultPageSize * (pagination.defaultCurrent - 1)];
   formDialogVisibleEditAnalyze.value = true;
 };
 
@@ -261,7 +258,7 @@ const defaultEvent = async (row) => {
 .setting-analyze-container {
   height: calc(100vh - var(--td-comp-size-l));
   .header {
-    margin-bottom: var(--td-comp-margin-s);
+    margin: var(--td-comp-margin-s) 0;
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
