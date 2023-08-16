@@ -69,7 +69,7 @@
             <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
             <span class="title" @click="checkIpv6">检查</span>
             <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
-            <t-radio v-model="formData.thumbnail" allow-uncheck>缩略图</t-radio>
+            <!-- <t-radio v-model="formData.thumbnail" allow-uncheck>缩略图</t-radio> -->
           </t-space>
         </div>
       </t-form-item>

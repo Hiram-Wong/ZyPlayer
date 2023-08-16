@@ -70,7 +70,7 @@
                 <div v-show="iptvSetting.iptvStatus" class="card-header">
                   <div class="status">
                     <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
-                    <span v-else class="status-item error">超时</span>
+                    <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : '超时' }}</span>
                   </div>
                   <!-- <t-tag v-if="item.status === true" disabled size="small" variant="outline" theme="success">有效</t-tag>
                   <t-tag v-else-if="item.status === false" disabled size="small" variant="outline" theme="danger">
@@ -140,6 +140,9 @@ import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore, useSettingStore } from '@/store';
 import { ChannelItem } from '@/types/channelList';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('fs');
 
 const ipcRenderer = useIpcRenderer();
 
@@ -422,17 +425,37 @@ const changeDefaultIptvEvent = async (item: any) => {
   infiniteCompleteTip.value = '没有更多内容了!';
   iptvDataList.value = { list: [], total: 0 };
   iptvClassSelect.value = '全部';
-  iptvClassList.value = [{ id: '全部', name: '全部' }];
   await channelList.clear();
-  const { url } = await iptv.get(item);
-  const data = await zy.getConfig(url);
-  if (data) {
-    if (data.trim().startsWith('#EXTM3U')) m3u(data);
-    else txt(data);
+
+  const { url, type } = await iptv.get(item);
+  let fileContent;
+
+  try {
+    if (type === 'local') {
+      fileContent = await fs.promises.readFile(url, 'utf8');
+    } else if (type === 'remote') {
+      fileContent = await zy.getConfig(url);
+    } else {
+      fileContent = url;
+    }
+
+    if (fileContent) {
+      if (fileContent.trim().startsWith('#EXTM3U')) {
+        m3u(fileContent);
+      } else txt(fileContent);
+      await setting.update({ defaultIptv: item });
+      await Promise.all([getIptvSetting(), getChannelCount()]);
+    }
     MessagePlugin.success('设置成功');
+  } catch (err) {
+    const errMsg = err.message || err;
+    console.error(`失败: ${errMsg}`);
+    if (type === 'local') {
+      MessagePlugin.error(`读取失败: ${errMsg}`);
+    } else {
+      MessagePlugin.error(`请求失败: ${errMsg}`);
+    }
   }
-  await setting.update({ defaultIptv: item });
-  await Promise.all([getIptvSetting(), getChannelCount()]);
 
   infiniteId.value++;
   pagination.value.pageIndex = 0;
@@ -701,7 +724,7 @@ const formatMoreTitle = (item, list) => {
                   justify-content: center;
                   width: 40px;
                   height: 15px;
-                  background-color: var(--td-text-color-placeholder);
+                  background-color: rgb(0 0 0 / 60%);
                   border-radius: 5px;
                   box-shadow: var(--td-shadow-1);
                   position: absolute;

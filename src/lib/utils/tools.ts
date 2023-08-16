@@ -690,6 +690,7 @@ const zy = {
   async checkChannel(url) {
     try {
       const res = await instance.head(url);
+      // console.log(res)
       const period = res.duration;
       console.log(period)
       return period;
