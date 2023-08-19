@@ -80,7 +80,8 @@ const updateAgreementMask = async (status) => {
 };
 
 const cancelEvent = () => {
-  MessagePlugin.warning({ content: '5s后自动退出软件', duration: 5000 });
+  updateAgreementMask(false);
+  MessagePlugin.warning({ content: '5秒后自动退出软件', duration: 5000 });
   setTimeout(() => {
     win.destroy();
   }, 5000);

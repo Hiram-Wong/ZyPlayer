@@ -10,7 +10,12 @@
           </li>
         </ul>
       </div>
-      <div class="nav-sub-tab-bottom"></div>
+      <div class="nav-sub-tab-bottom">
+        <div class="membership-wrapper nav-sub-tab-member-info" @click="formDialogPrivacyPolicy=true">
+          <PenIcon />
+          <span class="member-name">免责声明</span>
+        </div>
+      </div>
     </div>
     <div class="content">
       <header class="header">
@@ -28,17 +33,23 @@
         <analyze-view class="container-item" v-else/>
       </div>
     </div>
-  </div>
+    </div>
+   <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { ref, reactive } from 'vue';
+
+import { PenIcon } from 'tdesign-icons-vue-next';
 
 import analyzeView from './setting/analyze/AnalyzeSetting.vue';
 import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
+import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
+
+const formDialogPrivacyPolicy = ref(false);
 
 const settingSet = reactive({
   select: 'configBase',
@@ -116,6 +127,26 @@ const changeClassEvent = (item) => {
       align-items: center;
       flex-direction: column;
       padding-bottom: 20px;
+      .membership-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        width: 148px;
+        border: 2px solid rgba(132, 133, 141, 0.16);
+        transition: all .3s ease;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 20px;
+        .member-name {
+          font-size: 12px;
+          margin-left: 4px;
+        }
+      }
+      .nav-sub-tab-member-info {
+        margin-top: 16px;
+      }
     }
   }
 
