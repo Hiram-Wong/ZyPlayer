@@ -139,7 +139,8 @@ import _ from 'lodash';
 import { CloseIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch, watchEffect } from 'vue';
-import {internalIpV6, internalIpV4} from 'internal-ip';
+import { publicIp } from 'public-ip';
+import net from "net";
 
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
@@ -309,6 +310,7 @@ const resetOriginal = () => {
     header: '恢复出厂',
     width: '320px',
     confirmBtn: '确认恢复',
+    placement: 'center',
     closeBtn: null,
     onConfirm: handleClear,
     onClose: () => confirmDia.hide(),
@@ -571,10 +573,11 @@ const flushDialogData = (item) => {
 // ipv6检查
 const checkIpv6 = async () => {
   try {
-    const ipv4 = await internalIpV4();
-    const ipv6 = await internalIpV6();
-    if (!ipv6) formData.value.iptvSkipIpv6 = true;
-    MessagePlugin.success(`网络地址为${ipv6 ? `ipv6: ${ipv6}`: `ipv4: ${ipv4}` }`);
+    const ip = await publicIp(); // Falls back to IPv4
+    const ipType = net.isIP(ip);
+    if (ipType === 4) formData.value.iptvSkipIpv6 = true;
+    else if (ipType === 6) formData.value.iptvSkipIpv6 = false;
+    MessagePlugin.success(`网络地址：${ip}`);
   } catch(err) {
     MessagePlugin.error(`网络状态检测失败:${err}`);
     console.log(err);
