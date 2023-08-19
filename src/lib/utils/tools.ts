@@ -492,7 +492,8 @@ const zy = {
       }
       if (videoList.length === 0) return null;
 
-      const detailRes = await this.detail(key, videoList[0].vod_id);
+      let detailRes = await this.detail(key, videoList[0].vod_id);
+      if(_.isArray(detailRes)) detailRes = detailRes[0];
       return detailRes;
     } catch (err) {
       throw err;
@@ -692,10 +693,10 @@ const zy = {
       const res = await instance.head(url);
       // console.log(res)
       const period = res.duration;
-      console.log(period)
+      // console.log(period)
       return period;
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       return false;
     }
   },
@@ -1105,6 +1106,7 @@ const zy = {
    */
   async checkUrlIpv6(url) {
     let hostname = new URL(url).hostname;
+    // console.log(hostname)
     const ipv6Regex = /^\[([\da-fA-F:]+)\]$/; // 匹配 IPv6 地址
     const match = ipv6Regex.exec(hostname);
     if (match) {
