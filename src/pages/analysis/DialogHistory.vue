@@ -1,20 +1,24 @@
 <template>
   <t-drawer v-model:visible="formVisible" header="历史" size="small" class="history-items">
-    <div v-for="item in historyList" :key="item.id" class="" @click="historyPlayEvent(item)">
+    <div v-for="item in historyList" :key="item.id" class="" @click.self="historyPlayEvent(item)">
       <div class="history-item">
         <div class="date">{{ item.date }}</div>
         <t-popup
+          placement="bottom"
           :content="item.videoName"
-          destroy-on-close
-          :overlay-style="{ maxWidth: '300px' }"
+          :overlay-style="{ maxWidth: '290px' }"
           :overlay-inner-style="{
-            boxShadow: 'none',
             background: 'var(--td-bg-color-page)',
+            boxShadow: '0 15px 30px rgba(0,0,0,.2)',
           }"
         >
           <div class="title">{{ item.videoName }}</div>
         </t-popup>
-        <div class="clear" @click.stop="histroyDeleteEvent(item)"><clear-icon size="1rem" /></div>
+        <div class="clear">
+          <t-popconfirm content="确认删除吗" @confirm="histroyDeleteEvent(item)">
+            <delete-icon />
+          </t-popconfirm>
+        </div>
       </div>
       <t-divider dashed style="margin: 5px 0" />
     </div>
@@ -34,8 +38,8 @@
 import 'v3-infinite-loading/lib/style.css';
 
 import _ from 'lodash';
-import { ClearIcon } from 'tdesign-icons-vue-next';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { DeleteIcon } from 'tdesign-icons-vue-next';
+import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref, watch } from 'vue';
 
@@ -94,15 +98,25 @@ const histroyDeleteEvent = async (item) => {
 };
 
 // 历史清空
-const histroyClearEvent = async () => {
-  try {
+const histroyClearEvent = () => {
+  const handleClear = async () => {
     await analyzeHistory.clear();
     historyList.value = [];
-    MessagePlugin.success('sucess');
-  } catch (err) {
-    console.error(err);
-    MessagePlugin.error('failed');
-  }
+    MessagePlugin.success('删除成功');
+    confirmDia.hide();
+  };
+
+  const confirmDia = DialogPlugin({
+    body: '确定删除所有记录吗？删除后不支持找回。',
+    header: '删除记录',
+    width: '340px',
+    attach: '.history-items',
+    confirmBtn: '确认删除',
+    placement: 'center',
+    closeBtn: null,
+    onConfirm: handleClear,
+    onClose: () => confirmDia.hide(),
+  });
 };
 
 // 获取解析历史
@@ -143,7 +157,7 @@ const load = async ($state) => {
     padding: 0 var(--td-comp-paddingLR-xs);
     &:hover {
       border-radius: var(--td-radius-medium);
-      background-color: var(--td-bg-color-component-hover);
+      background-color: rgba(132, 133, 141, 0.16);
     }
   }
   .date {
