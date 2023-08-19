@@ -2,13 +2,15 @@
   <div class="layout">
     <t-layout>
       <t-aside key="side" width="78px" :class="`${prefix}-aside`">
-          <layout-side-nav :nav-data="sideMenu" />
-        </t-aside>
+        <layout-side-nav :nav-data="sideMenu" />
+      </t-aside>
       <t-layout style="width: calc(100% - 78px)">
         <t-header height="30px" :class="`${prefix}-header`">
           <layout-header />
         </t-header>
-        <t-content :class="`${prefix}-content`"><layout-content /></t-content>
+        <t-content :class="`${prefix}-content`">
+          <layout-content />
+        </t-content>
       </t-layout>
     </t-layout>
   </div>
