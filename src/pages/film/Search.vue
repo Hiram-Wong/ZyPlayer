@@ -29,7 +29,8 @@
           <div class="search-result-title">
             历史搜索
             <a class="search-result-clear" @click.stop="clearSearchHistory">
-              <delete-icon />清除
+              <delete-icon />
+              <span>清除</span>
             </a>
           </div>
           <a
@@ -213,7 +214,6 @@ const openHotDialog = () => {
 
 
 .search-result-clear {
-
 }
 
 .search-result-title {
@@ -241,7 +241,7 @@ const openHotDialog = () => {
   cursor: pointer;
   &:hover {
     color: var(--td-brand-color);
-    background-color: rgba(132, 133, 141, 0.24);
+    background-color: rgba(132, 133, 141, 0.16);
   }
   .search-result-simple {
     overflow: hidden;
@@ -253,7 +253,7 @@ const openHotDialog = () => {
       height: 18px;
       color: hsla(0,0%,100%,.9);
       border-radius: 2px;
-      background-color: rgba(132, 133, 141, 0.24);
+      background-color: rgba(132, 133, 141, 0.16);
       margin-right: 10px;
       line-height: 18px;
       display: inline-block;

@@ -58,7 +58,7 @@
             v-if="(FilmSiteSetting.basic.type === 2 && filter.data.length !== 0) || FilmSiteSetting.basic.type !== 2"
             class="quick_item quick_filter"
           >
-            <view-module-icon size="large" @click="showToolbar = !showToolbar" />
+            <root-list-icon size="large" @click="showToolbar = !showToolbar" />
           </div>
         </div>
       </header>
@@ -146,7 +146,7 @@ import 'v3-infinite-loading/lib/style.css';
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
-import { MoreIcon, ViewModuleIcon } from 'tdesign-icons-vue-next';
+import { MoreIcon, RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { onMounted, reactive, ref } from 'vue';
 
@@ -694,7 +694,7 @@ const formatMoreTitle = (item, list) => {
           position: relative;
         }
         .is-active {
-          background-color: rgba(132, 133, 141, 0.24);
+          background-color: rgba(132, 133, 141, 0.16);
         }
       }
     }

@@ -13,7 +13,7 @@
           <div class="share-container-main-left">
             <div class="header-name">扫一扫，手机继续看</div>
             <div class="header-info">
-              推荐使用 <span class="header-info-browser">夸克浏览器</span> -首页-<photo-icon size="1.5em" />-扫码
+              推荐使用 <span class="header-info-browser">夸克浏览器</span> -首页-<camera-icon />-扫码
             </div>
             <div class="header-copyright no-warp">
               <span>{{ data.provider }}</span>
@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core';
 import QRCode from 'qrcode';
-import { PhotoIcon, ShareIcon } from 'tdesign-icons-vue-next';
+import { CameraIcon, ShareIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
 

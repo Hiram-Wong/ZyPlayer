@@ -48,10 +48,10 @@ const settingSet = reactive({
       value: '基础配置'
     },{
       key: 'siteSource',
-      value: '站点配置'
+      value: '影视配置'
     },{
       key: 'iptvSource',
-      value: '直播配置'
+      value: '电视配置'
     },{
       key: 'analyzeSource',
       value: '解析配置'
@@ -106,7 +106,7 @@ const changeClassEvent = (item) => {
           position: relative;
         }
         .is-active {
-          background-color: rgba(132, 133, 141, 0.24);
+          background-color: rgba(132, 133, 141, 0.16);
         }
       }
     }
