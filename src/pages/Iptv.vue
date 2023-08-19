@@ -3,7 +3,7 @@
     <div class="nav-sub-tab">
       <div class="nav-sub-tab-top">
         <ul class="nav-menu">
-          <li class="nav-menu-item" :class=" iptvListSelect === item.id ? 'is-active' : ''" v-for="item in iptvList" :key="item.id" :value="item.id" @click="changeDefaultIptvEvent(item.id)">
+          <li class="nav-menu-item" :class="iptvListSelect === item.id ? 'is-active' : ''" v-for="item in iptvList" :key="item.id" :value="item.id" @click="changeDefaultIptvEvent(item.id)">
             <div class="name-wrapper">
               <span>{{ item.name }}</span>
             </div>
@@ -22,6 +22,7 @@
               </li>
               <li class="menu-item morebtn">
                 <t-popup
+                  v-if="iptvClassList.length > 3"
                   placement="bottom-left"
                   :overlay-inner-style="{
                     width: '500px',
@@ -129,9 +130,10 @@ import 'v3-infinite-loading/lib/style.css';
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useClipboard, useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
+
 import _ from 'lodash';
 import PQueue from 'p-queue';
-import { LinkUnlinkIcon, LoadingIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { Tv2Icon, LoadingIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref } from 'vue';
@@ -152,7 +154,7 @@ const storeSetting = useSettingStore();
 const renderError = () => {
   return (
     <div class="renderIcon">
-      <LinkUnlinkIcon size="1.5em" stroke-width=".8" />
+      <Tv2Icon size="1.5em" />
     </div>
   );
 };
@@ -398,7 +400,7 @@ const checkChannelListStatus = async (pageIndex: number, pageSize: number) => {
       return updateStatus(item);
     });
 
-    console.log(`${i} ${result}`);
+    // console.log(`${i} ${result}`);
 
     const index = start + i;
     if (index < iptvDataList.value.list.length) {
@@ -406,6 +408,19 @@ const checkChannelListStatus = async (pageIndex: number, pageSize: number) => {
     }
   }
 };
+
+// 缩略图
+const thumbnail = async() => {
+  await ipcRenderer.send('ffmpeg-thumbnail', 'http://liveshowbak2.kan0512.com/ksz-norecord/csztv4k_4k.m3u8');
+  ipcRenderer.on("ffmpeg-complete", (_, data) => {
+    // 创建 Blob 对象
+    const blob = new Blob([data], { type: "image/jpeg" });
+
+    // 在这里可以使用 blob，例如上传到服务器或在浏览器中显示
+    console.log("Converted to Blob:", blob);
+  });
+}
+thumbnail()
 
 // 清空队列，并终止请求
 const clearQueue = () => {
@@ -424,6 +439,7 @@ const changeDefaultIptvEvent = async (item: any) => {
 
   infiniteCompleteTip.value = '没有更多内容了!';
   iptvDataList.value = { list: [], total: 0 };
+  iptvClassList.value = [{ id: '全部', name: '全部' }];
   iptvClassSelect.value = '全部';
   await channelList.clear();
 
@@ -444,7 +460,7 @@ const changeDefaultIptvEvent = async (item: any) => {
         m3u(fileContent);
       } else txt(fileContent);
       await setting.update({ defaultIptv: item });
-      await Promise.all([getIptvSetting(), getChannelCount()]);
+      await Promise.all([getIptvSetting(), getChannelCount(), getIptvClass()]);
     }
     MessagePlugin.success('设置成功');
   } catch (err) {
@@ -521,7 +537,7 @@ eventBus.on(async () => {
   iptvClassList.value = [{ id: '全部', name: '全部' }];
   iptvClassSelect.value = '全部';
   iptvDataList.value = { list: [], total: 0 };
-  await Promise.all([getIptvSetting(), getChannelCount()]);
+  await Promise.all([getIptvSetting(), getChannelCount(), getIptvClass()]);
   infiniteId.value++;
   pagination.value.pageIndex = 0;
 });
@@ -598,7 +614,7 @@ const formatMoreTitle = (item, list) => {
           position: relative;
         }
         .is-active {
-          background-color: rgba(132, 133, 141, 0.24);
+          background-color: rgba(132, 133, 141, 0.16);
         }
       }
     }

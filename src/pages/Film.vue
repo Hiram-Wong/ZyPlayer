@@ -22,6 +22,7 @@
               </li>
               <li class="menu-item morebtn">
                 <t-popup
+                  v-if="classKeywords.length > 3"
                   placement="bottom-left"
                   :overlay-inner-style="{
                     width: '500px',
@@ -339,7 +340,7 @@ const arrangeCmsArea = () => {
   const currentFilter = filter.value.data[id];
 
   const index = _.findIndex(currentFilter, {key: 'area'});
-  
+  console.log(listFormat)
   filter.value.data[id][index].value = listFormat;
 };
 
@@ -359,7 +360,7 @@ const arrangeCmsYear = () => {
   const listFormat = dataFormat.map((item) => {;
     return { n: item, v: item === '全部'? '' : item };
   });
-  
+  console.log(listFormat)
   filter.value.data[id][index].value = listFormat;
 };
 
