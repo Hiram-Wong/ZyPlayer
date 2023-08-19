@@ -42,11 +42,9 @@
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
-      dragSort='row'
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
-      @drag-sort="onDragSort"
     >
       <template #name="{ row }">
         <t-badge v-if="row.id === defaultAnalyze" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>

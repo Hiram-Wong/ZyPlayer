@@ -39,11 +39,9 @@
       :hover="true"
       :pagination="pagination"
       :selected-row-keys="selectedRowKeys"
-      dragSort='row'
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
-      @drag-sort="onDragSort"
     >
       <template #name="{ row }">
         <t-badge v-if="row.id === defaultIptv" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>

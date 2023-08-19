@@ -42,11 +42,9 @@
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
-      dragSort='row'
       @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange"
       @page-change="rehandlePageChange"
-      @drag-sort="onDragSort"
     >
       <template #name="{ row }">
         <t-badge v-if="row.id === defaultSite" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>
@@ -155,11 +153,6 @@ const refreshEvent = () => {
 };
 
 // op
-const onDragSort = (params) => {
-  console.log('交换行', params);
-  data.value = params.newData;
-};
-
 const propChangeEvent = async(row) => {
   console.log(row.isActive);
   await sites.update(row.id, { isActive: row.isActive });
@@ -177,6 +170,7 @@ const checkAllSite = async () => {
   }
   try {
     await Promise.all(checkData.map((site) => checkSingleEvent(site, true)));
+    emitReload.emit('film-reload');
     MessagePlugin.success('状态批量检测完成');
   } catch (err) {
     MessagePlugin.error(`状态批量检测失败, 错误信息:${err}`);
@@ -188,7 +182,10 @@ const checkSingleEvent = async (row, all = false) => {
   row.isActive = status; // 检测是否开启变更状态
   row.resource = resource;
   await sites.update(row.id, row);
-  if (!all) MessagePlugin.success('源站检测完成,自动重置状态!');
+  if (!all) {
+    emitReload.emit('film-reload');
+    MessagePlugin.success('源站检测完成,自动重置状态!');
+  }
   return status;
 };
 
