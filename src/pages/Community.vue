@@ -1,16 +1,16 @@
 <template>
   <div class="vault-container">
-    <div class="header">
-      <div class="header-tip">
-        <span class="title">社区</span>
-        <span class="desc">汇聚时光碎片!</span>
+    <header class="header">
+      <div class="page-title">
+        <p class="title">社区</p>
       </div>
-
-      <div class="header-setting" @click="isSubscribeDialog = true">
-        <setting-icon size="1.5em" />
+      <div class="actions">
+        <div class="header-setting" @click="isSubscribeDialog = true">
+          <setting-icon size="1.5em" />
+        </div>
       </div>
-    </div>
-    <div class="main">
+    </header>
+    <div class="container">
       <div class="feed-list">
         <div class="simplebar-offset" style="right: 0px; bottom: 0px">
           <div class="simplebar-content-wrapper">
@@ -18,7 +18,7 @@
               <div class="list-wrapper">
                 <template v-for="item in data.share" :key="item.name">
                   <div class="feed-card">
-                    <div class="header">
+                    <div class="feed-card-header">
                       <div class="info">
                         <div class="user">
                           <div class="avatar">
@@ -200,56 +200,62 @@ eventBus.on(async () => {
 
 <style lang="less" scoped>
 .vault-container {
-  overflow: hidden;
-  height: calc(100vh - var(--td-comp-size-l));
-  position: relative;
+  width: 100%;
+  height: 100%;
 
   .header {
-    height: 50px;
+    height: 40px;
+    padding: 0 40px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    .header-tip {
-      height: 43px;
-      border-radius: 4px;
-      overflow: hidden;
+    margin-bottom: 5px;
+    justify-content: space-between;
+    white-space: nowrap;
+    flex-shrink: 0;
+    .page-title {
       display: flex;
+      flex-direction: row;
       align-items: center;
+      flex-grow: 1;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
       .title {
         font-size: 18px;
-        line-height: 24px;
+        line-height: 1.4;
         font-weight: 600;
-        margin-left: 0.5rem;
-        color: var(--td-text-color-primary);
-      }
-      .desc {
-        font-size: 14px;
-        line-height: 20px;
-        font-weight: 500;
-        color: var(--td-text-color-secondary);
-        margin-left: 1rem;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
     }
-    .header-setting {
-      margin-right: 5px;
-      cursor: pointer;
-      width: 30px;
-      height: 30px;
-      border-radius: 5px;
-      text-align: center;
-      line-height: 25px;
-      &:hover {
-        background-color: var(--td-bg-color-component-hover);
+    .actions {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      .header-setting {
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        text-align: center;
+        line-height: 25px;
+        &:hover {
+          background-color: var(--td-bg-color-component-hover);
+        }
       }
     }
   }
-  .main {
-    height: calc(100% - 50px);
+    
+  .container {
+    height: calc(100% - 45px);
     display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    flex-grow: 1;
+    overflow-y: auto;
+    width: 100%;
     .feed-list {
       position: relative;
       flex-shrink: 0;
@@ -293,7 +299,7 @@ eventBus.on(async () => {
           width: 100%;
           max-width: 640px;
           min-width: 320px;
-          .header {
+          .feed-card-header {
             margin-bottom: 16px;
             .info {
               display: flex;
