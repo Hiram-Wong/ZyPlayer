@@ -1,11 +1,7 @@
 <template>
   <div :class="`${prefix}-sidebar-layout ${platform === 'darwin' ? 'mac_style' : ''}`">
-    <t-menu :value="active" collapsed :class="`${prefix}-block-column`">
-      <t-menu-item value="logo" disabled>
-        <template #icon>
-          <img class="logo" src="@/assets/icon.png" alt="logo" />
-        </template>
-      </t-menu-item>
+    <t-menu :value="active"  :class="`${prefix}-block-column`">
+      <img class="logo" src="@/assets/icon.png" alt="logo" />
       <template v-for="item in list" :key="item.path">
         <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)[0])">
           <template #icon>
@@ -22,7 +18,7 @@
       </template>   
       <template #operations>
         <t-menu-item @click="refreshEvent">
-          <template #icon><IconPark type=rotation size="24" :strokeWidth="2.5" /></template>
+          <template #icon><rotate-icon /></template>
         </t-menu-item>
       </template>
     </t-menu>
@@ -31,7 +27,8 @@
 
 <script setup lang="tsx">
 import { useEventBus } from '@vueuse/core';
-import { IconPark } from '@icon-park/vue-next/es/all';
+import { RotateIcon } from 'tdesign-icons-vue-next';
+
 import type { PropType } from 'vue';
 import { computed } from 'vue';
 
@@ -62,8 +59,7 @@ const list = computed(() => {
 });
 
 const menuIcon = (item: ListItemType) => {
-  // if (typeof item.icon === 'string') return <t-icon name={item.icon} style=""/>;
-  if (typeof item.icon === 'string') return <IconPark type={item.icon} size="24" stroke-width="2.5" />;
+  if (typeof item.icon === 'string') return <t-icon name={item.icon} style="" stroke-width="2.5"/>;
   const RenderIcon = item.icon;
   return RenderIcon;
 };
@@ -134,5 +130,6 @@ const refreshEvent = () => {
 .logo {
   width: var(--td-size-12);
   height: var(--td-size-12);
+  margin: var(--td-comp-paddingTB-m) 0 var(--td-comp-paddingTB-xl) 0;
 }
 </style>

@@ -392,7 +392,7 @@ const changeDefaultEvent = async (item: any) => {
         text-align: center;
         line-height: 25px;
         &:hover {
-          background-color: rgba(132, 133, 141, 0.16);
+          background-color: var(--td-bg-color-container-hover);
         }
       }
       .analysis-header-popup {
@@ -425,7 +425,7 @@ const changeDefaultEvent = async (item: any) => {
         width: 100%;
         background: var(--td-bg-color-page) url(../assets/bg-player.jpg) no-repeat center center;
         border-radius: var(--td-radius-extraLarge);
-        border: 5px solid var(--td-bg-input);
+        border: 5px solid var(--td-bg-color-secondarycontainer);
         overflow: hidden;
         .webview {
           height: 100%;
@@ -460,9 +460,6 @@ const changeDefaultEvent = async (item: any) => {
             font-size: 15px;
             color: var(--td-text-color-primary);
             display: inline-block;
-            .t-input:hover {
-              border-color: transparent;
-            }
           }
           .analysis-play {
             border-radius: 20px;
