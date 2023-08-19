@@ -76,6 +76,7 @@ const clearEvent = () => {
     width: '340px',
     attach: '.chase-container-dialog',
     confirmBtn: '确认删除',
+    placement: 'center',
     closeBtn: null,
     onConfirm: handleClear,
     onClose: () => confirmDia.hide(),
