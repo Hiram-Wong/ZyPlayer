@@ -1,5 +1,5 @@
 <template>
-  <div class="titlebar" :class="platform === 'win32' ? 'windows' : 'linux'">
+  <div class="titlebar" :class="platform === 'win32' ? 'windows' : 'linux'" @dblclick="minMaxEvent">
     <div class="drag-region"></div>
 
     <div v-if="platform !== 'darwin'" class="window-controls">
