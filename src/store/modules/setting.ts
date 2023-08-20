@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
-import { Color } from 'tvision-color';
 
 import STYLE_CONFIG from '@/config/style';
-import { generateColorMap, insertThemeStylesheet } from '@/lib/utils/color';
 import { store } from '@/store';
 
 const state = {
@@ -43,19 +41,6 @@ export const useSettingStore = defineStore('setting', {
       const isDarkMode = theme === 'dark';
 
       document.documentElement.setAttribute('theme-mode', isDarkMode ? 'dark' : '');
-    },
-    changeBrandTheme(brandTheme: string) {
-      const { colors: newPalette, primary: brandColorIndex } = Color.getColorGradations({
-        colors: [brandTheme],
-        step: 10,
-        remainInput: false, // 是否保留输入 不保留会矫正不合适的主题色
-      })[0];
-      const { mode } = this;
-      const colorMap = generateColorMap(brandTheme, newPalette, mode as 'light' | 'dark', brandColorIndex);
-
-      insertThemeStylesheet(brandTheme, colorMap, mode as 'light' | 'dark');
-
-      document.documentElement.setAttribute('theme-color', brandTheme);
     },
     updateConfig(payload: Partial<TState>) {
       for (const key in payload) {
