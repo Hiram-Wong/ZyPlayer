@@ -59,6 +59,7 @@ export default ({ mode }: ConfigEnv): UserConfig => {
             return fs.copySync('./public/load.html', './dist/load.html');
           },
         },
+        external: ['fix-path']
       },
     },
 
