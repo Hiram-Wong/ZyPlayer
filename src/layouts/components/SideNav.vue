@@ -1,5 +1,5 @@
 <template>
-  <div :class="`${prefix}-sidebar-layout ${platform === 'darwin' ? 'mac_style' : ''}`">
+  <div :class="`${prefix}-sidebar-layout os_style`">
     <t-menu :value="active"  :class="`${prefix}-block-column`">
       <img class="logo" src="@/assets/icon.png" alt="logo" />
       <template v-for="item in list" :key="item.path">
@@ -123,8 +123,8 @@ const refreshEvent = () => {
 <style lang="less" scoped>
 @import '@/style/variables.less';
 
-.mac_style {
-  padding-top: var(--td-size-11);
+.os_style {
+  padding-top: var(--td-size-9);
 }
 
 .logo {

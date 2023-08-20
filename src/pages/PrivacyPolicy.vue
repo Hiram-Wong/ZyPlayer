@@ -119,7 +119,6 @@ const cancelEvent = () => {
       overflow-y: scroll;
       p {
         margin: 0 20px 15px;
-        color: #777;
         font-weight: 400;
         font-size: 13px;
         line-height: 22px;

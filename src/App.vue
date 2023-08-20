@@ -27,6 +27,7 @@ onMounted(() => {
   initTheme();
   initAgreementMask();
   initPlayerSetting();
+  initTmpDir();
 });
 
 const initTheme = async () => {
@@ -55,4 +56,8 @@ const initPlayerSetting = async () => {
   init.skipStartEnd = await setting.get('skipStartEnd');
   storePlayer.updateConfig({ setting: init });
 };
+
+const initTmpDir = () => {
+  ipcRenderer.send('tmpdir-manage', 'init', 'tmp/zyplayer/thumbnail')
+}
 </script>

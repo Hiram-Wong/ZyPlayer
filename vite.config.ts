@@ -95,12 +95,6 @@ export default ({ mode }: ConfigEnv): UserConfig => {
         pngquant: { quality: [0.65, 0.9], speed: 4 },
         webp: { quality: 75 },
       }),
-      // copy({
-      //   targets: [
-      //     { src: './load.html', dest: 'dist' },
-      //   ],
-      //   verbose: true
-      // }),
       electron([
         {
           entry: 'electron/main/index.ts',
