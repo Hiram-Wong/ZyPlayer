@@ -241,10 +241,6 @@ const filterEvent = () => {
       }
     });
 
-  // Get unique film data
-  // const uniqueData = Array.from(new Set(filteredData));
-  // FilmDataList.value.list = uniqueData;
-
   FilmDataList.value.list = filteredData;
 };
 
@@ -629,7 +625,6 @@ eventBus.on(async () => {
     id: 0,
     name: '最新',
   };
-  await getClass();
   FilmDataList.value = { list: [], rawList: [] };
   filter.value = {
     data: [],
