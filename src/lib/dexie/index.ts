@@ -1,12 +1,12 @@
-import history from './history';
-import analyzeHistory from './analyzeHistory';
-import setting from './setting';
-import star from './star';
-import sites from './sites';
-import iptv from './iptv';
-import channelList from './channelList';
-import analyze from './analyze';
-import searchHistory from './searchHistory';
+import history from './orm/history';
+import analyzeHistory from './orm/analyzeHistory';
+import setting from './orm/setting';
+import star from './orm/star';
+import sites from './orm/sites';
+import iptv from './orm/iptv';
+import channelList from './orm/channelList';
+import analyze from './orm/analyze';
+import searchHistory from './orm/searchHistory';
 
 export {
   history,
