@@ -73,17 +73,12 @@
                     <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
                     <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : '超时' }}</span>
                   </div>
-                  <!-- <t-tag v-if="item.status === true" disabled size="small" variant="outline" theme="success">有效</t-tag>
-                  <t-tag v-else-if="item.status === false" disabled size="small" variant="outline" theme="danger">
-                    无效
-                  </t-tag>
-                  <t-tag v-else disabled size="small" variant="outline" theme="warning">检查中</t-tag> -->
                 </div>
                 <div class="card-main">
                   <t-image
                     class="card-main-item"
-                    :src="item.logo"
-                    :style="{ width: '60px', height: '30px', background: 'none' }"
+                    :src="iptvSetting.iptvThumbnail? item.thumbnail: item.logo"
+                    :style="iptvSetting.iptvThumbnail? { width: '180px', height: '100px', background: 'none' }: { width: '60px', height: '30px', background: 'none' }"
                     :lazy="true"
                     :loading="renderLoading"
                     :error="renderError"
@@ -133,7 +128,7 @@ import { useIpcRenderer } from '@vueuse/electron';
 
 import _ from 'lodash';
 import PQueue from 'p-queue';
-import { Tv2Icon, LoadingIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { Tv1Icon, LoadingIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref } from 'vue';
@@ -154,14 +149,14 @@ const storeSetting = useSettingStore();
 const renderError = () => {
   return (
     <div class="renderIcon">
-      <Tv2Icon size="1.5em" />
+      <Tv1Icon size="1.5em" stroke-width="2" />
     </div>
   );
 };
 const renderLoading = () => {
   return (
     <div class="renderIcon">
-      <LoadingIcon size="1.5em" stroke-width=".8" />
+      <LoadingIcon size="1.5em" stroke-width="2" />
     </div>
   );
 };
@@ -171,6 +166,7 @@ const iptvSetting = ref({
   epg: '' as string,
   skipIpv6: false,
   iptvStatus: false,
+  iptvThumbnail: false,
 });
 const iptvList = ref([]);
 const iptvListSelect = ref();
@@ -196,7 +192,7 @@ const mode = computed(() => {
   return storeSetting.displayMode;
 });
 const optionsComponent = ref({
-  zIndex: 3,
+  zIndex: 15,
   width: 160,
   x: 500,
   y: 200,
@@ -213,11 +209,12 @@ onMounted(() => {
 
 // 获取配置
 const getIptvSetting = async () => {
-  const [defaultIptv, defaultIptvEpg, iptvSkipIpv6, iptvStatus, iptvAll] = await Promise.all([
+  const [defaultIptv, defaultIptvEpg, iptvSkipIpv6, iptvStatus, iptvThumbnail, iptvAll] = await Promise.all([
     setting.get('defaultIptv'),
     setting.get('defaultIptvEpg'),
     setting.get('iptvSkipIpv6'),
     setting.get('iptvStatus'),
+    setting.get('iptvThumbnail'),
     iptv.all(),
   ]);
   if (defaultIptv) {
@@ -237,6 +234,7 @@ const getIptvSetting = async () => {
 
   iptvSetting.value.skipIpv6 = iptvSkipIpv6;
   iptvSetting.value.iptvStatus = iptvStatus;
+  iptvSetting.value.iptvThumbnail = iptvThumbnail;
 
   getIptvClass();
 
@@ -261,7 +259,7 @@ const getIptvClass = async () => {
 // 获取直播列表
 const getChannelList = async () => {
   const { pageIndex, pageSize } = pagination.value;
-  const { skipIpv6, iptvStatus } = iptvSetting.value;
+  const { skipIpv6, iptvStatus, iptvThumbnail } = iptvSetting.value;
   const { list } = iptvDataList.value;
 
   const res = await channelList.pagination(pageIndex, pageSize, searchTxt.value, iptvClassSelect.value);
@@ -272,6 +270,7 @@ const getChannelList = async () => {
   iptvDataList.value.list = _.unionWith(list, res.list, _.isEqual);
 
   if (iptvStatus) await checkChannelListStatus(pageIndex, pageSize);
+  if (iptvThumbnail) await generateThumbnail(pageIndex, pageSize);
 
   // 判断是否开启检查；判断原数据；判断原和目的
   // 1. 开启检查：为0  1).返回原或0
@@ -410,17 +409,41 @@ const checkChannelListStatus = async (pageIndex: number, pageSize: number) => {
 };
 
 // 缩略图
-const thumbnail = async() => {
-  await ipcRenderer.send('ffmpeg-thumbnail', 'http://liveshowbak2.kan0512.com/ksz-norecord/csztv4k_4k.m3u8');
-  ipcRenderer.on("ffmpeg-complete", (_, data) => {
-    // 创建 Blob 对象
-    const blob = new Blob([data], { type: "image/jpeg" });
+const generateThumbnail = async (pageIndex: number, pageSize: number) => {
+  console.log(`[iptv] generateThumbnail`);
+  const start = pageIndex * pageSize;
+  const end = (pageIndex + 1) * pageSize;
+  const dataList = iptvDataList.value.list.slice(start, end); // 从原数组中截取需要处理的数据段
 
-    // 在这里可以使用 blob，例如上传到服务器或在浏览器中显示
-    console.log("Converted to Blob:", blob);
+  const updateThumbnail = async (item) => {
+    try {
+      const result = await ipcRenderer.send('ffmpeg-thumbnail', item.url, item.id);
+      return result;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  for (let i = 0; i < dataList.length; i++) {
+    const item = dataList[i];
+    // eslint-disable-next-line no-await-in-loop
+    const result = await queue.add(() => {
+      return updateThumbnail(item);
+    });
+    // console.log(`${i} ${result}`);
+
+    // const index = start + i;
+    // if (index < iptvDataList.value.list.length) {
+    //   iptvDataList.value.list[index].thumbnail = `/tmp/zyplayer/thumbnail/${item.id}.jpg`;
+    // }
+  }
+
+  ipcRenderer.on("ffmpeg-thumbnail-status", (e, key, url) => {
+    console.log(key,url)
+    const index = _.findIndex(iptvDataList.value.list, {id: key});
+    iptvDataList.value.list[index].thumbnail = url;
   });
 }
-thumbnail()
 
 // 清空队列，并终止请求
 const clearQueue = () => {
@@ -733,6 +756,7 @@ const formatMoreTitle = (item, list) => {
               cursor: pointer;
               .card-header {
                 .status {
+                  z-index: 10;
                   display: flex;
                   align-content: center;
                   flex-direction: row;
@@ -778,8 +802,8 @@ const formatMoreTitle = (item, list) => {
                 }
               }
               .card-footer {
-                color: #fbfbfb;
                 .card-footer-title {
+                  z-index: 10;
                   position: absolute;
                   right: 0;
                   bottom: 0;
@@ -838,6 +862,6 @@ const formatMoreTitle = (item, list) => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  stroke: #f2f2f2;
+  color: rgba(255,255,255, 0.72);
 }
 </style>

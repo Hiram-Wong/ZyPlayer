@@ -2,6 +2,7 @@
 import remote from '@electron/remote/main';
 import { electronApp } from '@electron-toolkit/utils';
 import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
+import fixPath from 'fix-path';
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
@@ -9,7 +10,18 @@ import url from 'url';
 import initUpdater from './core/auto-update';
 import log from './core/log';
 
-const { platform } = process;
+/**
+ * fix env is important
+ * fix before => '/usr/bin'
+ * fix after => '/usr/local/bin:/usr/bin'
+ */
+fixPath();
+log.info(`[env] ${process.env.PATH}`);
+
+const { exec } = require("child_process");
+const fs = require("fs");
+
+const { platform, cwd } = process;
 
 log.info(`[storage] storage location: ${app.getPath('userData')}`);
 remote.initialize(); // 主进程初始化
@@ -427,4 +439,84 @@ ipcMain.on('reboot-app', () => {
   log.info(`[ipcMain] reboot-app`);
   app.relaunch();
   app.exit();
+});
+
+
+const getFolderSize = (folderPath: string): number => {
+  let totalSize = 0;
+
+  if (fs.existsSync(folderPath)) {
+    const entries = fs.readdirSync(folderPath);
+
+    for (const entry of entries) {
+      const entryPath = path.join(folderPath, entry);
+      const entryStats = fs.statSync(entryPath);
+
+      if (entryStats.isFile()) {
+        totalSize += entryStats.size;
+      } else if (entryStats.isDirectory()) {
+        totalSize += getFolderSize(entryPath);
+      }
+    }
+  }
+
+  return totalSize;
+};
+
+const tmpDir = (action: string, path: string) => {
+  log.info(`[ipcMain] tmpDir-path:${path}-action:${action}`);
+
+  if (action === 'rmdir' || action === 'init') {
+    if (fs.existsSync(path)) {
+      fs.rmdirSync(path, { recursive: true });
+    }
+    fs.mkdirSync(path, { recursive: true });
+  } else if (action === 'mkdir') {
+    fs.mkdirSync(path, { recursive: true });
+  }
+};
+
+ipcMain.on('tmpdir-manage',  (event, action, trails) => {
+  const formatPath = `${cwd()}/${trails}`;
+  tmpDir(action, formatPath);
+  if (action === 'size') event.reply("tmpdir-manage-size", getFolderSize(formatPath));
+});
+
+ipcMain.on('ffmpeg-thumbnail',  (event, url, key) => {
+  const formatPath = `${cwd()}/tmp/zyplayer/thumbnail/${key}.jpg`;
+  const ffmpegCommand = "ffmpeg"; // ffmpeg 命令
+  const inputOptions = ["-i", url]; // 输入选项，替换为实际视频流 URL
+  const outputOptions = [
+    "-y", // 使用 -y 选项强制覆盖输出文件
+    "-frames:v", "1",
+    "-q:v", "20", // 设置输出图片质量为5
+    formatPath
+  ];
+  const command = [ffmpegCommand, ...inputOptions, ...outputOptions].join(" ");
+
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      log.error(`[ipcMain] Error generating thumbnail: ${error}`);
+      event.reply("ffmpeg-thumbnail-status", key, false);
+    } else {
+      const isGenerat = fs.existsSync(formatPath)
+      log.info(`[ipcMain] ffmpeg-thumbnail status:${isGenerat} command:${command}`);
+      event.reply("ffmpeg-thumbnail-status", key, app.isPackaged ? `file://${formatPath}` : `tmp/zyplayer/thumbnail/${key}.jpg`);
+    }
+  });
+});
+
+ipcMain.on('ffmpeg-installed-check',  (event) => {
+  let isInstall = false;
+  // exec 是异步函数
+  exec('ffmpeg -version', (error, stdout) => {
+    if (error) {
+      isInstall = false;
+      log.info(`[ipcMain] Error Ffmpeg Installed Check: ${error}`);
+    } else {
+      isInstall = true;
+      log.info(`[ipcMain] FFmpeg is installed. ${stdout}`);
+    }
+    event.reply("ffmpeg-installed-status", isInstall);
+  });
 });

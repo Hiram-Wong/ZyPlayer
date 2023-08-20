@@ -65,11 +65,12 @@
       </t-form-item>
       <t-form-item label="直播" name="iptv">
         <div class="iptv">
-          <t-space>
+          <t-space align="center">
             <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
             <span class="title" @click="checkIpv6">检查</span>
             <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
-            <!-- <t-radio v-model="formData.thumbnail" allow-uncheck>缩略图</t-radio> -->
+            <t-radio v-model="formData.iptvThumbnail" allow-uncheck>预览图</t-radio>
+            <span class="title" @click="isIptvThumbnailDialog=true">说明</span>
           </t-space>
         </div>
       </t-form-item>
@@ -127,6 +128,7 @@
         <dialog-easy-config-view v-model:visible="isEasyConfigDialog" />
         <dialog-update-view v-model:visible="isUpdateDialog" />
         <dialog-clear-view v-model:visible="isClearDialog" />
+        <dialog-ffmpeg-caption-view v-model:visible="isIptvThumbnailDialog" />
       </t-form-item>
     </t-form>
   </div>
@@ -154,6 +156,7 @@ import DialogDnsView from './components/DialogDns.vue';
 import DialogEasyConfigView from './components/DialogEasyConfig.vue';
 import DialogUaView from './components/DialogUA.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
+import DialogFfmpegCaptionView from './components/DialogFfmpegCaption.vue';
 
 const ipcRenderer = useIpcRenderer();
 
@@ -166,6 +169,7 @@ const isEasyConfigDialog = ref(false);
 const isUpdateDialog = ref(false);
 const isDnsDialog = ref(false);
 const isClearDialog = ref(false);
+const isIptvThumbnailDialog = ref(false);
 const dnsDialogData = ref({ data: '', type: 'dns' });
 const isUaDialog = ref(false);
 const uaDialogData = ref({ data: '', type: 'ua' });
@@ -244,7 +248,7 @@ watch(
 
 // 监听刷新iptv
 watch(
-  () => [formData.value.iptvSkipIpv6, formData.value.iptvStatus, formData.value.defaultIptvEpg],
+  () => [formData.value.iptvSkipIpv6, formData.value.iptvStatus, formData.value.iptvThumbnail, formData.value.defaultIptvEpg],
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
       iptvEmitReload.emit('iptv-reload');
