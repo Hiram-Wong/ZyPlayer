@@ -148,7 +148,7 @@ import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import { setting } from '@/lib/dexie';
-import db from '@/lib/dexie/dexie';
+import db from '@/lib/dexie/orm';
 import { usePlayStore, useSettingStore } from '@/store';
 
 import DialogClearView from './components/DialogClear.vue';
