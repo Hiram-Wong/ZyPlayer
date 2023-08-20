@@ -168,7 +168,7 @@ const addSearchHistory = async (item) => {
     type: 'film'
   };
   const isFind = _.findIndex(searchList.value, doc);
-  if (isFind > -1) {
+  if (isFind === -1) {
     searchList.value.unshift(doc);
     await searchHistory.add(doc);
   }
@@ -210,10 +210,6 @@ const openHotDialog = () => {
     width: 12px;
     height: 32px;
   }
-}
-
-
-.search-result-clear {
 }
 
 .search-result-title {
@@ -261,9 +257,6 @@ const openHotDialog = () => {
     }
     .search-result-num1, .search-result-num2, .search-result-num3 {
       background-image: linear-gradient(233deg,#00d099,#00cc4c);
-    }
-    .search-result-text {
-      // color: var(--td-text-color-primary);
     }
   }
 }
