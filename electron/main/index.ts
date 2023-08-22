@@ -21,9 +21,10 @@ log.info(`[env] ${process.env.PATH}`);
 const { exec } = require("child_process");
 const fs = require("fs");
 
-const { platform, cwd } = process;
+const { platform } = process;
+const appDataPath = app.getPath('userData');
 
-log.info(`[storage] storage location: ${app.getPath('userData')}`);
+log.info(`[storage] storage location: ${appDataPath}`);
 remote.initialize(); // 主进程初始化
 
 // Scheme must be registered before the app is ready
@@ -75,8 +76,6 @@ const showOrHidden = () => {
   }
   isHidden = !isHidden;
 };
-
-// const { NODE_ENV } = process.env;
 
 // 保持window对象的: BrowserWindow | null全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let loadWindow: BrowserWindow | null;
@@ -138,11 +137,11 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     setTimeout(() => {
+      mainWindow.show();
       if (loadWindow && !loadWindow.isDestroyed()) {
         loadWindow.hide();
         loadWindow.destroy();
       }
-      mainWindow.show();
     }, 1000);
   });
 
@@ -204,8 +203,6 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.zyplayer');
 
   // register global shortcuts
-
-  console.log(shortcuts);
   if (shortcuts) {
     globalShortcut.register(shortcuts, () => {
       // Do stuff when Y and either Command/Control is pressed.
@@ -213,7 +210,6 @@ app.whenReady().then(() => {
     });
   }
 
-  console.log(doh);
   if (doh) {
     app.configureHostResolver({
       secureDnsMode: 'secure',
@@ -463,27 +459,37 @@ const getFolderSize = (folderPath: string): number => {
   return totalSize;
 };
 
-const tmpDir = (action: string, path: string) => {
-  log.info(`[ipcMain] tmpDir-path:${path}-action:${action}`);
-
-  if (action === 'rmdir' || action === 'init') {
-    if (fs.existsSync(path)) {
-      fs.rmdirSync(path, { recursive: true });
-    }
-    fs.mkdirSync(path, { recursive: true });
-  } else if (action === 'mkdir') {
-    fs.mkdirSync(path, { recursive: true });
-  }
+const tmpDir = (path: string) => {
+  fs.stat(path, (err, stats) => {
+    if (err) {
+      fs.mkdir(path, { recursive: true }, (err) => {
+        log.info(`[ipcMain] path:${path}-action:mkdir-status:${err? err: 'scuess'}`);
+      });
+    } else if (stats.isDirectory()) {
+      fs.rm(path, { recursive: true }, (err) => {
+        log.info(`[ipcMain] path:${path}-action:rmdir-status:${err? err: 'scuess'}`);
+        if (!err) {
+          fs.mkdir(path, { recursive: true }, (err) => {
+            log.info(`[ipcMain] path:${path}-action:mkdir-status:${err? err: 'scuess'}`);
+          });
+        }
+      });
+    } else {
+      fs.mkdir(path, { recursive: true }, (err) => {
+        log.info(`[ipcMain] path:${path}-action:mkdir-status:${err? err: 'scuess'}`);
+      });
+    };
+  });
 };
 
 ipcMain.on('tmpdir-manage',  (event, action, trails) => {
-  const formatPath = `${cwd()}/${trails}`;
-  tmpDir(action, formatPath);
+  const formatPath = path.join(appDataPath, trails);
+  if (action === 'rmdir' || action === 'mkdir' || action === 'init') tmpDir(formatPath);
   if (action === 'size') event.reply("tmpdir-manage-size", getFolderSize(formatPath));
 });
 
 ipcMain.on('ffmpeg-thumbnail',  (event, url, key) => {
-  const formatPath = `${cwd()}/tmp/zyplayer/thumbnail/${key}.jpg`;
+  const formatPath = path.join(appDataPath, 'thumbnail/', `${key}.jpg`);
   const ffmpegCommand = "ffmpeg"; // ffmpeg 命令
   const inputOptions = ["-i", url]; // 输入选项，替换为实际视频流 URL
   const outputOptions = [
@@ -494,14 +500,14 @@ ipcMain.on('ffmpeg-thumbnail',  (event, url, key) => {
   ];
   const command = [ffmpegCommand, ...inputOptions, ...outputOptions].join(" ");
 
-  exec(command, (error, stdout, stderr) => {
+  exec(command, (error) => {
     if (error) {
       log.error(`[ipcMain] Error generating thumbnail: ${error}`);
       event.reply("ffmpeg-thumbnail-status", key, false);
     } else {
       const isGenerat = fs.existsSync(formatPath)
       log.info(`[ipcMain] ffmpeg-thumbnail status:${isGenerat} command:${command}`);
-      event.reply("ffmpeg-thumbnail-status", key, app.isPackaged ? `file://${formatPath}` : `tmp/zyplayer/thumbnail/${key}.jpg`);
+      event.reply("ffmpeg-thumbnail-status", key, `file://${formatPath}`);
     }
   });
 });

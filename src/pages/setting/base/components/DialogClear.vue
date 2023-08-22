@@ -100,7 +100,7 @@ const getCacheSize = async () => {
 //  获取 thumbnail 文件夹大小
 const getThumbnailSize = () => {
   ipcRenderer.removeAllListeners("tmpdir-manage-size"); // 移除之前的事件监听器
-  ipcRenderer.send('tmpdir-manage', 'size', 'tmp/zyplayer/thumbnail');
+  ipcRenderer.send('tmpdir-manage', 'size', 'thumbnail');
   ipcRenderer.on("tmpdir-manage-size", (_, data) => {
     const getSize = data / 1024 / 1024;
     const formatToMb = getSize.toFixed(2);
@@ -158,7 +158,7 @@ const clearCacheData = async () => {
 
 // 清空 缩略图的函数
 const clearThumbnail = async () => {
-  await ipcRenderer.send('tmpdir-manage', 'rmdir', 'tmp/zyplayer/thumbnail');
+  await ipcRenderer.send('tmpdir-manage', 'rmdir', 'thumbnail');
   iptvEmitReload.emit('iptv-reload');
 }
 

@@ -58,6 +58,6 @@ const initPlayerSetting = async () => {
 };
 
 const initTmpDir = () => {
-  ipcRenderer.send('tmpdir-manage', 'init', 'tmp/zyplayer/thumbnail')
+  ipcRenderer.send('tmpdir-manage', 'init', 'thumbnail')
 }
 </script>

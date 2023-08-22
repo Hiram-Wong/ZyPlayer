@@ -269,8 +269,8 @@ const getChannelList = async () => {
   const restultLength = res.list.length;
   iptvDataList.value.list = _.unionWith(list, res.list, _.isEqual);
 
-  if (iptvStatus) await checkChannelListStatus(pageIndex, pageSize);
-  if (iptvThumbnail) await generateThumbnail(pageIndex, pageSize);
+  if (iptvStatus) checkChannelListStatus(pageIndex, pageSize);
+  if (iptvThumbnail) generateThumbnail(pageIndex, pageSize);
 
   // 判断是否开启检查；判断原数据；判断原和目的
   // 1. 开启检查：为0  1).返回原或0
