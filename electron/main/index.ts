@@ -460,25 +460,36 @@ const getFolderSize = (folderPath: string): number => {
 };
 
 const tmpDir = (path: string) => {
+  const createDirectory = () => {
+    fs.mkdir(path, { recursive: true }, (err) => {
+      if (err) {
+        log.error(`[ipcMain] path:${path}-action:mkdir-status:error`);
+      } else {
+        log.info(`[ipcMain] path:${path}-action:mkdir-status:success`);
+      }
+    });
+  };
+
+  const removeAndCreateDirectory = () => {
+    fs.rm(path, { recursive: true }, (err) => {
+      if (err) {
+        log.error(`[ipcMain] path:${path}-action:rmdir-status:error`);
+      } else {
+        createDirectory();
+      }
+    });
+  };
+
   fs.stat(path, (err, stats) => {
     if (err) {
-      fs.mkdir(path, { recursive: true }, (err) => {
-        log.info(`[ipcMain] path:${path}-action:mkdir-status:${err? err: 'scuess'}`);
-      });
+      createDirectory();
     } else if (stats.isDirectory()) {
-      fs.rm(path, { recursive: true }, (err) => {
-        log.info(`[ipcMain] path:${path}-action:rmdir-status:${err? err: 'scuess'}`);
-        if (!err) {
-          fs.mkdir(path, { recursive: true }, (err) => {
-            log.info(`[ipcMain] path:${path}-action:mkdir-status:${err? err: 'scuess'}`);
-          });
-        }
-      });
+      removeAndCreateDirectory();
+    } else if (stats.isFile()) {
+      createDirectory();
     } else {
-      fs.mkdir(path, { recursive: true }, (err) => {
-        log.info(`[ipcMain] path:${path}-action:mkdir-status:${err? err: 'scuess'}`);
-      });
-    };
+      log.error(`[ipcMain] path:${path}-action:unknown-status:error`);
+    }
   });
 };
 
@@ -496,7 +507,7 @@ ipcMain.on('ffmpeg-thumbnail',  (event, url, key) => {
     "-y", // 使用 -y 选项强制覆盖输出文件
     "-frames:v", "1",
     "-q:v", "20", // 设置输出图片质量为5
-    formatPath
+    `"${formatPath}"`
   ];
   const command = [ffmpegCommand, ...inputOptions, ...outputOptions].join(" ");
 
