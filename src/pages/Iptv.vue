@@ -135,7 +135,7 @@ import { computed, onMounted, ref } from 'vue';
 
 import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
-import { usePlayStore, useSettingStore } from '@/store';
+import store, { usePlayStore, useSettingStore } from '@/store';
 import { ChannelItem } from '@/types/channelList';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -337,17 +337,21 @@ const changeClassEvent = async (item: { name: string }) => {
 
 // 播放
 const playEvent = (item: { name: any }) => {
-  const { epg } = iptvSetting.value;
-  console.log(epg);
-  storePlayer.updateConfig({
-    type: 'iptv',
-    data: {
-      info: item,
-      ext: { epg, skipIpv6: iptvSetting.value.skipIpv6 },
-    },
-  });
-  console.log({ epg, skipIpv6: iptvSetting.value.skipIpv6 });
-  ipcRenderer.send('openPlayWindow', item.name);
+  const playerType = storePlayer.getSetting.broadcasterType
+  if (playerType === 'iina') window.open(`iina://weblink?url=${item.url}`, '_self');
+  else if (playerType === 'potplayer') window.open(`potplayer://${item.url}`, '_self')
+  else {
+    const { epg } = iptvSetting.value;
+    storePlayer.updateConfig({
+      type: 'iptv',
+      data: {
+        info: item,
+        ext: { epg, skipIpv6: iptvSetting.value.skipIpv6 },
+      },
+    });
+    console.log({ epg, skipIpv6: iptvSetting.value.skipIpv6 });
+    ipcRenderer.send('openPlayWindow', item.name);
+  }
 };
 
 // 检查ipv6
@@ -430,12 +434,6 @@ const generateThumbnail = async (pageIndex: number, pageSize: number) => {
     const result = await queue.add(() => {
       return updateThumbnail(item);
     });
-    // console.log(`${i} ${result}`);
-
-    // const index = start + i;
-    // if (index < iptvDataList.value.list.length) {
-    //   iptvDataList.value.list[index].thumbnail = `/tmp/zyplayer/thumbnail/${item.id}.jpg`;
-    // }
   }
 
   ipcRenderer.on("ffmpeg-thumbnail-status", (e, key, url) => {
@@ -690,6 +688,7 @@ const formatMoreTitle = (item, list) => {
               display: block;
               opacity: 1\9\0;
               animation: blockshow .2s ease .2s forwards;
+              cursor: pointer;
               a {
                 display: block;
                 color: var(--td-text-color-secondary);

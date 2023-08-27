@@ -11,6 +11,18 @@
         </ul>
       </div>
       <div class="nav-sub-tab-bottom">
+        <div class="sign-bar">
+          <div class="sign-content">
+            <div class="sign-text">
+              <h2>与drpy更配哦</h2>
+              <p>js0模式</p>
+            </div>
+          </div>
+          <div class="sign-btn">
+            <a href="https://github.com/hjdhnx/dr_py" target="_blank">py版本</a>
+            <a href="https://github.com/flash168/Peach" target="_blank">c#版本</a>
+          </div>
+        </div>
         <div class="membership-wrapper nav-sub-tab-member-info" @click="formDialogPrivacyPolicy=true">
           <PenIcon />
           <span class="member-name">免责声明</span>
@@ -127,6 +139,72 @@ const changeClassEvent = (item) => {
       align-items: center;
       flex-direction: column;
       padding-bottom: 20px;
+      overflow: hidden;
+      .sign-bar {
+        background-image: url(../assets/drpy.png);
+        width: 148px;
+        height: 78px;
+        border-radius: 10px;
+        background-size: contain;
+        position: relative;
+        .sign-content {
+          position: relative;
+          display: flex;
+          flex-direction: row;
+          height: 32px;
+          top: 9px;
+          left: 42px;
+          justify-content: space-between;
+          align-items: center;
+          .sign-text {
+            display: flex;
+            flex-direction: column;
+            height: 32px;
+            justify-content: space-between;
+            h2 {
+              font-size: 14px;
+              font-weight: 600;
+              line-height: 17px;
+              color: #25262b;
+            }
+            p {
+              font-size: 10px;
+              line-height: 12px;
+              color: rgba(37,38,43,.72);
+              max-width: 100%;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+          }
+        }
+        .sign-btn {
+          flex-direction: row;
+          text-align: right;
+          display: flex;
+          align-items: center;
+          backdrop-filter: blur(24px);
+          color: #25262b;
+          position: absolute;
+          width: 136px;
+          left: 5px;
+          top: 48px;
+          align-content: space-around;
+          justify-content: space-around;
+          a {
+            width: 50px;
+            height: 20px;
+            font-size: 10px;
+            border-radius: 11px;
+            border: 2px solid rgba(132, 133, 141, 0.16);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: inherit;
+            text-decoration: none;
+          }
+        }
+      }
       .membership-wrapper {
         display: flex;
         align-items: center;

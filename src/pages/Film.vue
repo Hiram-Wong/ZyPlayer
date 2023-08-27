@@ -737,6 +737,7 @@ const formatMoreTitle = (item, list) => {
               color: var(--td-text-color-primary) !important;
             }
             .menu-item {
+              cursor: pointer;
               font-size: 14px;
               margin-right: 20px;
               float: left;

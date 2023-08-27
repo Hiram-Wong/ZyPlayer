@@ -123,12 +123,6 @@
                 ref="xgpayerRef"
                 class="xgplayer player"
               ></div>
-              <div
-                v-show="set.broadcasterType === 'veplayer'"
-                id="veplayer"
-                ref="vepayerRef"
-                class="veplayer player"
-              ></div>
               <div v-show="set.broadcasterType === 'tcplayer'" ref="tcplayerRef">
                 <video id="tcplayer" preload="auto" playsinline webkit-playsinline class="tcplayer player"></video>
               </div>
@@ -390,7 +384,6 @@
   </div>
 </template>
 <script setup lang="tsx">
-import '@volcengine/veplayer/dist/index.min.css';
 import 'xgplayer-livevideo';
 import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
@@ -398,7 +391,6 @@ import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import '@/style/player/aliplayer-h5-min.css';
 import '@/style/player/tcplayer.min.css';
 
-import VePlayer from '@volcengine/veplayer';
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 import Aliplayer from 'aliyun-aliplayer';
@@ -549,20 +541,6 @@ const config = ref({
   height: 'calc(100vh - 50px)',
 }); // 西瓜播放器参数
 
-const veConfig = ref({
-  ...commonConfig,
-  id: 'veplayer',
-  url: '',
-  type: 'vod',
-  streamType: 'hls',
-  isLive: false,
-  enableH265Degrade: true,
-  closeVideoStopPropagation: true,
-  enableMp4MSE: false,
-  plugins: [],
-  options: {},
-}); // 火山播放器参数
-
 const tcConfig = ref({
   autoplay: true,
   playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
@@ -703,7 +681,6 @@ const season = ref(); // 选集
 const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
-const ve = ref(null); // 火山播放器
 const tc = ref(null); // 腾讯播放器
 const ali = ref(null); // 阿里播放器
 const art = ref(null); // 艺术播放器
@@ -846,25 +823,6 @@ const createPlayer = async (videoType) => {
     }
     xg.value = new Player({ ...config.value });
     console.log(`[player] 加载西瓜${videoType}播放器`);
-  } else if (set.value.broadcasterType === 'veplayer') {
-    switch (videoType) {
-      case 'mp4':
-        veConfig.value.streamType = 'mp4';
-        break;
-      case 'flv':
-        veConfig.value.streamType = 'flv';
-        break;
-      case 'm3u8':
-        veConfig.value.streamType = 'hls';
-        break;
-      default:
-        veConfig.value.streamType = 'hls';
-        break;
-    }
-    veConfig.value.url = config.value.url;
-    if (config.value.startTime) veConfig.value.startTime = config.value.startTime;
-    ve.value = new VePlayer({ ...veConfig.value });
-    console.log(`[player] 加载火山${videoType}播放器`);
   } else if (set.value.broadcasterType === 'tcplayer') {
     if (!tc.value) tc.value = TCPlayer('tcplayer', { ...tcConfig.value });
     if (config.value.startTime) tc.value.currentTime(config.value.startTime);
@@ -978,10 +936,6 @@ const destroyPlayer = () => {
     xg.value.destroy();
     xg.value = null;
   }
-  if (ve.value) {
-    ve.value.destroy();
-    ve.value = null;
-  }
   if (tc.value) {
     tc.value.dispose();
     tc.value = null;
@@ -1019,8 +973,6 @@ const initIptvPlayer = async () => {
       const isLive = await zy.isLiveM3U8(info.value.url);
       config.value.isLive = isLive;
       config.value.presets = isLive ? [LivePreset] : [];
-      veConfig.value.isLive = isLive;
-      if (isLive) veConfig.value.type = 'live';
       aliConfig.value.isLive = isLive;
 
       aliConfig.value.skinLayout[4].children.push({ name: 'liveDisplay', align: 'tl', x: 20, y: 0 });
@@ -1435,14 +1387,6 @@ const timerUpdatePlayProcess = () => {
     });
 
     xg.value.on(Events.ENDED, () => {
-      onEnded();
-    });
-  } else if (set.value.broadcasterType === 'veplayer') {
-    ve.value.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
-      onTimeUpdate(currentTime, duration);
-    });
-
-    ve.value.on(Events.ENDED, () => {
       onEnded();
     });
   } else if (set.value.broadcasterType === 'tcplayer') {

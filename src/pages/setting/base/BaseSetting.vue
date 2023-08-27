@@ -94,7 +94,10 @@
       </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
-          <t-select v-model="formData.broadcasterType" :options="PLAYER_OPTIONS" placeholder="请选择播放器" />
+          <t-space direction="vertical">
+            <t-select v-model="formData.broadcasterType" :options="PLAYER_OPTIONS" placeholder="请选择播放器" />
+            <span>本地播放器仅支持电视，暂不支持影视</span>
+          </t-space>
         </div>
       </t-form-item>
       <t-form-item label="安全" name="security">
@@ -187,11 +190,12 @@ const ANALYZE_OPTIONS = [
 ];
 
 const PLAYER_OPTIONS = [
-  { label: '火山播放器', value: 'veplayer' },
   { label: '西瓜播放器', value: 'xgplayer' },
   { label: '腾讯播放器', value: 'tcplayer' },
   { label: '阿里播放器', value: 'aliplayer' },
   { label: '艺术播放器', value: 'artplayer' },
+  { label: 'iina(mac本地)', value: 'iina' },
+  { label: 'potplayer(win本地)', value: 'potplayer' },
 ];
 
 const shortcutInputRef = ref(null);
