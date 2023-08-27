@@ -1437,11 +1437,6 @@
   resolved "https://registry.npmmirror.com/@vitejs/plugin-vue/-/plugin-vue-4.2.3.tgz#ee0b6dfcc62fe65364e6395bf38fa2ba10bb44b6"
   integrity sha512-R6JDUfiZbJA9cMiguQ7jxALsgiprjBeHL5ikpXfJCH62pPHtI+JdJ5xWj6Ev73yXSlYl86+blXn1kZHQ7uElxw==
 
-"@volcengine/veplayer@^1.5.10":
-  version "1.5.10"
-  resolved "https://registry.npmmirror.com/@volcengine/veplayer/-/veplayer-1.5.10.tgz#e3bd9c9118e83c45927c843e53aafa11c3aec2d7"
-  integrity sha512-m1hpEw+o02IoAfg9der+FAeIT0/0HhdX7fqp82Eq4oDtfCiRHpbofOu1ZJLfZVk5h6HoR8jXr5+bLOx4QjAAag==
-
 "@vue/babel-helper-vue-transform-on@^1.0.2":
   version "1.0.2"
   resolved "https://registry.npmmirror.com/@vue/babel-helper-vue-transform-on/-/babel-helper-vue-transform-on-1.0.2.tgz#9b9c691cd06fc855221a2475c3cc831d774bc7dc"
@@ -7793,10 +7788,10 @@ tdesign-icons-vue-next@^0.2.0, tdesign-icons-vue-next@^0.2.2:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.5.1.tgz#4e2c0e98219a22ee349df45588d249dd28bf9d39"
-  integrity sha512-A51Vzd2RCq11GCtl02H+U6JNQQo5am4xl2gumkVs0gSTY3Im+4z3w++uyLX6Yhv7BfCP+pFlqm2ObeIYGBDaUg==
+tdesign-vue-next@^1.5.2:
+  version "1.5.2"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.5.2.tgz#4d6116791e839297442d6203ffe9b1dcebdb92e1"
+  integrity sha512-zawaZxjoFOFarbLVgNhjaLzKptSooTooCQL5Ocafif1flQ53tkL4GurJ9HX8M5UMfjdz6vmA0qMYF9t0oqxAnA==
   dependencies:
     "@babel/runtime" "^7.22.6"
     "@popperjs/core" "^2.11.8"
