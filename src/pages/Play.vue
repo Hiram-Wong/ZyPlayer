@@ -1643,7 +1643,7 @@ const shareEvent = () => {
   if (type.value === 'film') name = `${info.value.vod_name} ${selectPlayIndex.value}`;
   else name = info.value.name;
 
-  const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
+  const sourceUrl = 'https://web.zyplayer.fun/?url=';
   let params;
   if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name} ${selectPlayIndex.value}`;
   else params = `${config.value.url}&name=${info.value.name}`;
