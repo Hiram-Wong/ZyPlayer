@@ -548,6 +548,7 @@ const dplayerRef = ref(null); // 呆呆播放器dom节点
 const dpConfig = ref({
   container: dplayerRef,
   autoplay: true,
+  screenshot: true,
   video: {
     
   },
