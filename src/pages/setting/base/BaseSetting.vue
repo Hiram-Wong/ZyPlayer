@@ -39,8 +39,8 @@
       <t-form-item label="热榜" name="hotRecommend">
         <div class="hot-recommend">
           <t-radio-group v-model="formData.defaultHot">
-            <t-radio value="kuyun">酷云(旧)</t-radio>
-            <t-radio value="kylive">酷云(新)</t-radio>
+            <!-- <t-radio value="kuyun">酷云(旧)</t-radio> -->
+            <t-radio value="kylive">酷云</t-radio>
             <t-radio value="enlightent">云合数据</t-radio>
           </t-radio-group>
         </div>
@@ -70,7 +70,7 @@
             <span class="title" @click="checkIpv6">检查</span>
             <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
             <t-radio v-model="formData.iptvThumbnail" allow-uncheck>预览图</t-radio>
-            <span class="title" @click="isIptvThumbnailDialog=true">说明</span>
+            <span class="title" @click="isVisible.iptvThumbnail=true">说明</span>
           </t-space>
         </div>
       </t-form-item>
@@ -96,7 +96,6 @@
         <div class="player">
           <t-space direction="vertical">
             <t-select v-model="formData.broadcasterType" :options="PLAYER_OPTIONS" placeholder="请选择播放器" />
-            <span>本地播放器仅支持电视，暂不支持影视</span>
           </t-space>
         </div>
       </t-form-item>
@@ -107,8 +106,8 @@
           <span class="title" @click="uaEvnet">用户代理</span>
         </t-space>
 
-        <dialog-dns-view v-model:visible="isDnsDialog" :data="dnsDialogData" @receive-dns-data="flushDialogData" />
-        <dialog-ua-view v-model:visible="isUaDialog" :data="uaDialogData" @receive-dns-data="flushDialogData" />
+        <dialog-dns-view v-model:visible="isVisible.dns" :data="dnsDialogData" @receive-dns-data="flushDialogData" />
+        <dialog-ua-view v-model:visible="isVisible.ua" :data="uaDialogData" @receive-dns-data="flushDialogData" />
       </t-form-item>
       <t-form-item label="权限" name="data">
         <t-space>
@@ -123,15 +122,13 @@
       <t-form-item label="其他" name="data">
         <t-space>
           <span class="title" @click="resetOriginal">恢复出厂</span>
-          <span class="title" @click="resetCache">清理数据</span>
-          <span class="title" @click="easyConfig">一键配置</span>
-          <span class="title" @click="checkUpdate">检查更新</span>
+          <span class="title" @click="isVisible.data = true">数据管理</span>
+          <span class="title" @click="isVisible.update = true">检查更新</span>
         </t-space>
 
-        <dialog-easy-config-view v-model:visible="isEasyConfigDialog" />
-        <dialog-update-view v-model:visible="isUpdateDialog" />
-        <dialog-clear-view v-model:visible="isClearDialog" />
-        <dialog-ffmpeg-caption-view v-model:visible="isIptvThumbnailDialog" />
+        <dialog-data-view v-model:visible="isVisible.data" />
+        <dialog-update-view v-model:visible="isVisible.update" />
+        <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
       </t-form-item>
     </t-form>
   </div>
@@ -143,7 +140,7 @@ import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { CloseIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
-import { computed, onMounted, ref, watch, watchEffect } from 'vue';
+import { computed, onMounted, ref, watch, watchEffect, reactive } from 'vue';
 import { publicIp } from 'public-ip';
 import net from "net";
 
@@ -154,9 +151,8 @@ import { setting } from '@/lib/dexie';
 import db from '@/lib/dexie/orm';
 import { usePlayStore, useSettingStore } from '@/store';
 
-import DialogClearView from './components/DialogClear.vue';
 import DialogDnsView from './components/DialogDns.vue';
-import DialogEasyConfigView from './components/DialogEasyConfig.vue';
+import DialogDataView from './components/DialogData.vue';
 import DialogUaView from './components/DialogUA.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogFfmpegCaptionView from './components/DialogFfmpegCaption.vue';
@@ -168,13 +164,15 @@ const win = remote.getCurrentWindow();
 
 const { platform } = process;
 
-const isEasyConfigDialog = ref(false);
-const isUpdateDialog = ref(false);
-const isDnsDialog = ref(false);
-const isClearDialog = ref(false);
-const isIptvThumbnailDialog = ref(false);
+const isVisible = reactive({
+  data: false,
+  update: false,
+  dns: false,
+  ua: false,
+  iptvThumbnail: false
+});
+
 const dnsDialogData = ref({ data: '', type: 'dns' });
-const isUaDialog = ref(false);
 const uaDialogData = ref({ data: '', type: 'ua' });
 
 const MODE_OPTIONS = [
@@ -192,7 +190,6 @@ const ANALYZE_OPTIONS = [
 const PLAYER_OPTIONS = [
   { label: '西瓜播放器', value: 'xgplayer' },
   { label: '腾讯播放器', value: 'tcplayer' },
-  { label: '阿里播放器', value: 'aliplayer' },
   { label: '艺术播放器', value: 'artplayer' },
   { label: 'iina(mac本地)', value: 'iina' },
   { label: 'potplayer(win本地)', value: 'potplayer' },
@@ -323,12 +320,6 @@ const resetOriginal = () => {
     onConfirm: handleClear,
     onClose: () => confirmDia.hide(),
   });
-};
-
-// 清理内存
-const resetCache = () => {
-  console.log('clearSessionAndData');
-  isClearDialog.value = true;
 };
 
 // 清除数据库
@@ -518,7 +509,7 @@ const reset = (type: string) => {
     shortcutInputRef.value.blur();
     ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
   } else if (type === 'epg') {
-    formData.value.defaultIptvEpg = 'http://diyp.112114.xyz/';
+    formData.value.defaultIptvEpg = 'https://epg.112114.eu.org/';
   }
 };
 
@@ -537,18 +528,6 @@ const hardwareAccelerationEvnet = () => {
   );
 };
 
-// 更新
-const checkUpdate = () => {
-  console.log('open checkUpdate');
-  isUpdateDialog.value = true;
-};
-
-// 一键配置
-const easyConfig = () => {
-  console.log('open easyConfig');
-  isEasyConfigDialog.value = true;
-};
-
 // dns：打开dialog并设置数据
 const dnsEvnet = () => {
   const { dns } = formData.value;
@@ -557,7 +536,7 @@ const dnsEvnet = () => {
     type: 'dns',
   };
 
-  isDnsDialog.value = true;
+  isVisible.dns = true;
 };
 
 // ua：打开dialog并设置数据
@@ -568,7 +547,7 @@ const uaEvnet = () => {
     type: 'ua',
   };
 
-  isUaDialog.value = true;
+  isVisible.ua = true;
 };
 
 // 分类：刷新dialog数据class
