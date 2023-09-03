@@ -28,6 +28,9 @@ interface Setting {
   doh: string;
   ua: string;
   communitySubscribe: string;
+  webdevUrl: string;
+  webdevUsername: string;
+  webdevPassword: string;
 }
 
 interface Star {

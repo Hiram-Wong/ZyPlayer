@@ -115,6 +115,10 @@ db.version(21).stores({
   searchHistory: '++id, title, type',
 })
 
+db.version(22).stores({
+  setting: 'id, theme, externalPlayer, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, webdevUrl, webdevUsername, webdevPassword',
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(dataSetting);
 })

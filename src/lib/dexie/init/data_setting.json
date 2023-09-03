@@ -37,5 +37,8 @@
   "hardwareAcceleration": true,
   "doh": "",
   "ua": "",
-  "communitySubscribe": ""
+  "communitySubscribe": "",
+  "webdevUrl": "",
+  "webdevUsername": "",
+  "webdevPassword": ""
 }]
