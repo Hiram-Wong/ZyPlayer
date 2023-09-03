@@ -31,10 +31,9 @@
 
 > 播放器说明: 
 - 没有完美的播放器
-- tcplayer不支持h265(hevc),aliplayer(h265 收费),通常表现为只有声音没有画面
-- h264:tcplayer>xgplayer\veplayer>artplayer>aliplayer  h265:xgplayer,veplayer 加密:tcplayer
+- tcplayer不支持h265(hevc),dplayer,通常表现为只有声音没有画面
+- h264:tcplayer>xgplayer>dplayer  h265:xgplayer 加密:dplayer\tcplayer
 - 腾讯一贯风格，tcplayer每次数据都会上报云端(https://datacenter.live.qcloud.com/)
-- aliplayer每次播放卡住会上报云端(https://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/newplayer/track)
 
 > 包说明: 
 - MacOS(dmg)：arm64[Applechip]、x64[Intel]、universal[通用-不区分架构]
@@ -53,8 +52,6 @@
 4.修改packgae.json "electron": "^19.1.9",
 5.安装依赖包  yarn
 6.打包  yarn electron:build:win
-
-注意 veplayer 打包时需将 //unpkg.byted-static.com改成https://unpkg.byted-static.com 否则会加载失败
 ```
 
 <details>
@@ -63,94 +60,137 @@
 > 一键格式
 ```json
 {
-  "sites": { // 站点源
-    "default": 1, // 默认值：需为data中需要设置的id
-    "data": [ // 所有数据
-      {
-        "id": 1, // id 唯一值不可重复
-        "key": "39kan",
-        "name": "39影视", // 名称
-        "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
-        "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
-        "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
-        "playUrl": "", // 配合解析去url地址
-        "group": "影视", // 分组
-        "isActive": true, // 是否启用 true启用 false 禁用
-        "status": true, // 状态 true可用 false 失效
-        "categories": "" // 按顺序展示所配置的分类 不配置则默认展示所有分类
-      }
-    ]
-  },
-  "iptv": { // 直播源
-    "default": 1, // 默认值：需为data中需要设置的id
-    "data": [
-      {
-        "id": 1, // id 唯一值不可重复
-        "name": "APTV", // 名称
-        "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
-        "epg": "", // 电子节目单地址
-        "type": "remote", // remote为远程m3u local本地m3u文件路径
-        "isActive": true // 是否启用 true启用 false 禁用
-      }
-    ]
-  },
-  "analyzes": { // 解析源
-    "default": 2, // 默认值：需为data中需要设置的id
-    "data": [
-      {
-        "id": 2, // id 唯一值不可重复
-        "name": "爱豆", // 名称
-        "url": "https://jx.aidouer.net/?url=", // 解析源地址
-        "isActive": true // 是否启用 true启用 false 禁用
-      }
-    ]
-  }
+  "analyze": [
+    {
+      "id": 1, // id 唯一值不可重复
+      "name": "纯净", // 名称
+      "url": "https://im1907.top/?jx=", // 解析源地址
+      "isActive": true // 是否启用 true启用 false 禁用
+    }
+  ],
+  "iptv": [
+    {
+      "id": 1, // id 唯一值不可重复
+      "name": "APTV", // 名称
+      "url": "https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
+      "type": "remote", // remote为远程m3u local本地m3u文件路径
+      "isActive": true, // 是否启用 true启用 false 禁用
+      "epg": "https://epg.112114.xyz/" // 电子节目单地址
+    }
+  ],
+  "channel": [
+    {
+      "id": 1,
+      "name": "APTV",
+      "url": "https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
+      "type": "remote",
+      "isActive": true,
+      "epg": "https://epg.112114.xyz/"
+    }
+  ],
+  "sites": [
+    {
+      "key": "", // uuid
+      "name": "39影视",  // 名称
+      "api": "https://www.39kan.com/api.php/provide/vod/",  // 站点源地址
+      "playUrl": "", // 配合解析去url地址
+      "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
+      "group": "切片", // 分组
+      "status": false, //  已经弃用该参数
+      "isActive": true, // 是否启用 true启用 false 禁用
+      "type": 1,  // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
+      "id": 1,  // id 唯一值不可重复
+      "categories": "电视,影视" // 按顺序展示所配置的分类 不配置则默认展示所有分类
+    },
+  ],
+  "setting": [
+    {
+      "id": 0,
+      "theme": "auto",
+      "externalPlayer": "",
+      "defaultHot": "kylive",
+      "defaultSearchRecommend": "site",
+      "defaultSearchType": "site",
+      "defaultCheckModel": true,
+      "defaultChangeModel": false,
+      "defaultIptvEpg": "https://epg.112114.eu.org/",
+      "iptvSkipIpv6": true,
+      "iptvThumbnail": true,
+      "restoreWindowPositionAndSize": false,
+      "pauseWhenMinimize": true,
+      "defaultSite": 3,
+      "defaultIptv": 5,
+      "defaultAnalyze": 2,
+      "analyzeFlag": [
+        "youku",
+        "qq",
+        "iqiyi",
+        "qiyi",
+        "letv",
+        "sohu",
+        "tudou",
+        "pptv",
+        "mgtv"
+      ],
+      "analyzeQuickSearchType": "platform",
+      "analyzeSupport": true,
+      "broadcasterType": "iina",
+      "softSolution": false,
+      "skipStartEnd": false,
+      "agreementMask": true,
+      "recordShortcut": "Shift+Command+Z",
+      "selfBoot": false,
+      "hardwareAcceleration": true,
+      "doh": "",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+      "communitySubscribe": "",
+      "iptvStatus": true,
+      "dns": "https://sm2.doh.pub/dns-query"
+    }
+  ],
+  "analyzeHistory": [
+    {
+      "date": "2023-09-03",
+      "analyzeId": 2,
+      "videoUrl": "https://v.qq.com/x/cover/mzc00200v6zk1xm.html",
+      "videoName": "前夜_1080P在线观看平台",
+      "id": 1
+    }
+  ],
+  "history": [
+    {
+      "date": "2023-08-13",
+      "siteKey": "wolongzyw",
+      "siteSource": "wolong",
+      "playEnd": false,
+      "videoId": 66010,
+      "videoImage": "https://pic.wlongimg.com/upload/vod/20230615-1/6666aa42da59bc92acb8932b7e65546e.jpg",
+      "videoName": "杀手古德",
+      "videoIndex": "第01集",
+      "watchTime": 16.315125,
+      "duration": 975.9599999999997,
+      "skipTimeInStart": 30,
+      "skipTimeInEnd": 30,
+      "id": 1
+    },
+  ],
+  "searchHistory": [
+    {
+      "title": "父辈的荣耀",
+      "type": "film",
+      "id": 1
+    }
+  ],
+  "star": [
+    {
+      "siteKey": "wolongzyw",
+      "videoId": 70042,
+      "videoImage": "https://pic.lzzypic.com/upload/vod/20230827-1/bcab69cb4ab4c12433fc12e5b3e10bc5.jpg",
+      "videoName": "父辈的荣耀",
+      "id": 6
+    }
+  ]
 }
-```
-
-> 资源站点接口格式
-```json
-[
-  {
-    "id": 1,
-    "key": "39kan",
-    "name": "39影视",
-    "api": "https://www.39kan.com/api.php/provide/vod/",
-    "type": 1,
-    "search": 1,
-    "playUrl": "",
-    "group": "影视",
-    "isActive": true,
-    "status": true,
-    "categories": ""
-  }
-]
-```
-
-> iptv 站点接口格式
-```json
-[
-  {
-    "id": 1,
-    "name": "APTV",
-    "url": "https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
-    "epg": "",
-    "type": "remote",
-    "isActive": true
-  }
-]
-```
-
-> 解析站点接口格式
-```json
-[
-  {
-    "id":1,
-    "name":"爱豆",
-    "url":"https://jx.aidouer.net/?url=",
-    "isActive": true
-  }
-]
 ```
 
 > 社区分享格式接口格式
