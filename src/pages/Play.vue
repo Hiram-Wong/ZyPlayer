@@ -760,19 +760,30 @@ const createPlayer = async (videoType) => {
 
   if (type.value === 'film') await timerUpdatePlayProcess();
 
+  setSystemMediaInfo();
+};
+
+const setSystemMediaInfo = () => {
   if ("mediaSession" in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: type.value === 'film' ? info.value.vod_name : info.value.name,
-      artist: type.value === 'film' ? selectPlayIndex.value : '直播',
+    let doc = {
+      title: info.value.vod_name,
+      artist: selectPlayIndex.value,
       artwork: [
         {
           src: info.value.vod_pic,
           type: "image/png",
         }
       ],
-    });
+    }
+
+    if (type.value === 'iptv') {
+      doc.title = info.value.name;
+      doc.artist = '直播';
+      delete doc.artwork
+    }
+    navigator.mediaSession.metadata = new MediaMetadata(doc);
   }
-};
+}
 
 // 获取解析地址
 const getAnalysisData = async () => {
