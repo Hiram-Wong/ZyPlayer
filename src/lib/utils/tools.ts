@@ -287,7 +287,7 @@ const zy = {
         vod_remark,
         vod_name,
         vod_blurb: removeHTMLTagsAndSpaces(vod_content),
-        vod_year,
+        vod_year: _.toString(vod_year),
         vod_area,
         vod_content,
         vod_director,
