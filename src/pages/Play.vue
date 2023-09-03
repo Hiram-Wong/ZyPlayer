@@ -127,10 +127,10 @@
                 <video id="tcplayer" preload="auto" playsinline webkit-playsinline class="tcplayer player"></video>
               </div>
               <div
-                v-show="set.broadcasterType === 'aliplayer'"
-                id="aliplayer"
-                ref="aliplayerRef"
-                class="aliplayer player"
+                v-show="set.broadcasterType === 'dplayer'"
+                id="dplayer"
+                ref="dplayerRef"
+                class="dplayer player"
               ></div>
               <div
                 v-show="set.broadcasterType === 'artplayer'"
@@ -388,13 +388,12 @@ import 'xgplayer-livevideo';
 import 'xgplayer/dist/index.min.css';
 import 'v3-infinite-loading/lib/style.css';
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
-import '@/style/player/aliplayer-h5-min.css';
 import '@/style/player/tcplayer.min.css';
 
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
-import Aliplayer from 'aliyun-aliplayer';
 import Artplayer from 'artplayer';
+import DPlayer from 'dplayer';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
 import _ from 'lodash';
@@ -551,87 +550,14 @@ const tcConfig = ref({
     },
   },
 }); // 腾讯云播放器参数
-const aliConfig = ref({
-  id: 'aliplayer',
-  source: '',
-  width: '100%',
-  height: 'calc(100vh - 50px)',
-  autoplay: true,
-  isLive: false,
-  playsinline: true,
-  isVBR: true,
-  useH5Prism: true,
-  keyShortCuts: true,
-  enableSystemMenu: true,
-  skinLayout: [
-    {
-      name: 'bigPlayButton',
-      align: 'blabs',
-      x: '50%',
-      y: '50%',
-    },
-    {
-      name: 'H5Loading',
-      align: 'cc',
-    },
-    {
-      name: 'errorDisplay',
-      align: 'tlabs',
-      x: 0,
-      y: 0,
-    },
-    {
-      name: 'tooltip',
-      align: 'blabs',
-      x: 0,
-      y: 56,
-    },
-    {
-      name: 'controlBar',
-      align: 'blabs',
-      x: 0,
-      y: 0,
-      children: [
-        {
-          name: 'progress',
-          align: 'blabs',
-          x: 0,
-          y: 44,
-        },
-        {
-          name: 'playButton',
-          align: 'tl',
-          x: 15,
-          y: 12,
-        },
-        {
-          name: 'timeDisplay',
-          align: 'tl',
-          x: 10,
-          y: 3,
-        },
-        {
-          name: 'fullScreenButton',
-          align: 'tr',
-          x: 10,
-          y: 12,
-        },
-        {
-          name: 'setting',
-          align: 'tr',
-          x: 16,
-          y: 12,
-        },
-        {
-          name: 'volume',
-          align: 'tr',
-          x: 16,
-          y: 12,
-        },
-      ],
-    },
-  ],
-}); // 阿里云播放器参数
+
+const dpConfig = ref({
+  container: document.getElementById('dplayer'),
+  screenshot: true,
+  video: {
+    url: '',
+  },
+}); // dp播放器参数
 
 const playM3u8 = (video, url, art) => {
   if (Hls.isSupported()) {
@@ -682,11 +608,11 @@ const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
 const tc = ref(null); // 腾讯播放器
-const ali = ref(null); // 阿里播放器
 const art = ref(null); // 艺术播放器
+const dp = ref(null); // dp播放器
 const tcplayerRef = ref(null); // 腾讯云播放器dom节点
 const xgpayerRef = ref(null); // 西瓜播放器dom节点
-const aliplayerRef = ref(null); // 阿里云播放器dom节点
+const dpayerRef = ref(null); // 西瓜播放器dom节点
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
 const isBinge = ref(true); // true未收藏 false收藏
@@ -828,12 +754,6 @@ const createPlayer = async (videoType) => {
     if (config.value.startTime) tc.value.currentTime(config.value.startTime);
     tc.value.src(config.value.url);
     console.log(`[player] 加载腾讯播放器`);
-  } else if (set.value.broadcasterType === 'aliplayer') {
-    aliConfig.value.source = config.value.url;
-    ali.value = new Aliplayer({ ...aliConfig.value }, (player) => {
-      console.log(`[player] 加载阿里播放器`);
-      if (config.value.startTime) player.seek(config.value.startTime);
-    });
   } else if (set.value.broadcasterType === 'artplayer') {
     switch (videoType) {
       case 'mp4':
@@ -853,6 +773,11 @@ const createPlayer = async (videoType) => {
     artConfig.value.url = config.value.url;
     console.log(`[player] 加载艺术播放器`);
     art.value = new Artplayer({ ...artConfig.value });
+  } else if (set.value.broadcasterType === 'dplayer') {
+    // if (config.value.startTime) dpConfig.value.currentTime = dpConfig.value.startTime;
+    dpConfig.value.video.url = config.value.url;
+    console.log(`[player] 加载dp播放器`);
+    dp.value = new DPlayer({ ...dpConfig.value });
   }
 
   if (type.value === 'film') await timerUpdatePlayProcess();
@@ -949,10 +874,6 @@ const destroyPlayer = () => {
     tcplayerRef.value.innerHTML = '';
     tcplayerRef.value.appendChild(newVideoElement);
   }
-  if (ali.value) {
-    ali.value.dispose();
-    ali.value = null;
-  }
   if (art.value) {
     art.value.destroy();
     art.value = null;
@@ -973,9 +894,6 @@ const initIptvPlayer = async () => {
       const isLive = await zy.isLiveM3U8(info.value.url);
       config.value.isLive = isLive;
       config.value.presets = isLive ? [LivePreset] : [];
-      aliConfig.value.isLive = isLive;
-
-      aliConfig.value.skinLayout[4].children.push({ name: 'liveDisplay', align: 'tl', x: 20, y: 0 });
     } catch (err) {
       console.error(err);
     }
@@ -1078,7 +996,7 @@ const initFilmPlayer = async (isFirst) => {
         //   timerUpdatePlayProcess();
         // } else if (ext.value.site.type === 2) {
         console.log('嗅探');
-        MessagePlugin.info('嗅探资源中，如10s没有结果请换源,咻咻咻!');
+        MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
 
         onlineUrl.value = config.value.url;
         isSniff.value = false;
@@ -1354,7 +1272,6 @@ const timerUpdatePlayProcess = () => {
     VIDEO_PROCESS_DOC.duration = duration;
     history.update(dataHistory.value.id, VIDEO_PROCESS_DOC);
 
-    // const watchTime = set.value.skipStartEnd ? currentTime + set.value.skipTimeInEnd : currentTime;
     const watchTime = set.value.skipStartEnd ? currentTime + skipConfig.value.skipTimeInEnd : currentTime;
 
     if (watchTime >= duration) {
@@ -1397,16 +1314,6 @@ const timerUpdatePlayProcess = () => {
     });
 
     tc.value.on('ended', () => {
-      onEnded();
-    });
-  } else if (set.value.broadcasterType === 'aliplayer') {
-    ali.value.on('timeupdate', () => {
-      const duration = ali.value.getDuration();
-      const currentTime = ali.value.getCurrentTime();
-      onTimeUpdate(currentTime, duration);
-    });
-
-    ali.value.on('ended', () => {
       onEnded();
     });
   } else if (set.value.broadcasterType === 'artplayer') {
@@ -1643,7 +1550,7 @@ const shareEvent = () => {
   if (type.value === 'film') name = `${info.value.vod_name} ${selectPlayIndex.value}`;
   else name = info.value.name;
 
-  const sourceUrl = 'https://hunlongyu.gitee.io/zy-player-web/?url=';
+  const sourceUrl = 'https://web.zyplayer.fun/?url=';
   let params;
   if (type.value === 'film') params = `${config.value.url}&name=${info.value.vod_name} ${selectPlayIndex.value}`;
   else params = `${config.value.url}&name=${info.value.name}`;

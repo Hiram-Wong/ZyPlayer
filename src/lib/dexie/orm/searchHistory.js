@@ -7,6 +7,9 @@ export default {
   async find (doc) {
     return await searchHistory.get(doc)
   },
+  async bulkAdd (doc) {
+    return await searchHistory.bulkAdd(doc)
+  },
   async update (id, docs) {
     return await searchHistory.update(id, docs)
   },

@@ -12,10 +12,6 @@
               <remove-icon />
               <span>删除</span>
             </div>
-            <div class="item" @click="exportEvent">
-              <arrow-up-icon />
-              <span>导出</span>
-            </div>
           </div>
         </div>
         <div class="right-operation-container">
@@ -136,43 +132,6 @@ const getIptv = async () => {
 onMounted(() => {
   getIptv();
 });
-
-// 导出接口
-const exportEvent = () => {
-  const arr = [...data.value];
-  const str = JSON.stringify(arr, null, 2);
-  const blob = new Blob([str], { type: 'text/plain;charset=utf-8' });
-  const reader = new FileReader();
-  reader.onload = () => {
-    const result: ArrayBuffer = reader.result as ArrayBuffer;
-    const buffer = Buffer.from(result);
-    remote.dialog
-      .showSaveDialog(remote.getCurrentWindow(), {
-        defaultPath: 'iptv.json',
-        filters: [{ name: 'JSON Files', extensions: ['json'] }],
-      })
-      .then((saveDialogResult) => {
-        if (!saveDialogResult.canceled) {
-          const { filePath } = saveDialogResult;
-          const fs = remote.require('fs');
-          fs.writeFile(filePath, buffer, 'utf-8', (err) => {
-            if (err) {
-              console.error('Failed to save file:', err);
-              MessagePlugin.error('Failed to save file');
-            } else {
-              console.log('File saved successfully');
-              MessagePlugin.success('File saved successfully');
-            }
-          });
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to open save dialog:', err);
-        MessagePlugin.error('Failed to open save dialog');
-      });
-  };
-  reader.readAsArrayBuffer(blob);
-};
 
 const emitReload = useEventBus<string>('iptv-reload');
 

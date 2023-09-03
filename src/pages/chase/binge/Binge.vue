@@ -43,6 +43,7 @@
         <template #complete>人家是有底线的</template>
         <template #error>哎呀，出了点差错</template>
       </infinite-loading>
+      <detail-view v-model:visible="isVisible.detail" :site="siteData" :data="formDetailData"/>
     </div>
   </div>
 </template>
@@ -55,11 +56,12 @@ import { useIpcRenderer } from '@vueuse/electron';
 import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 
 import { sites, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
+import DetailView from '../../film/Detail.vue';
 
 const ipcRenderer = useIpcRenderer();
 
@@ -69,7 +71,15 @@ const pagination = ref({
   pageSize: 32,
   count: 0,
 });
-
+const formDetailData = ref({
+  neme: '',
+  key: '',
+  type: 1,
+}); //  详情组件源传参
+const siteData = ref();
+const isVisible = reactive({
+  detail: false
+});
 const bingeList = ref([]);
 
 const infiniteId = ref(+new Date());
@@ -108,18 +118,32 @@ const load = async ($state) => {
 // 播放
 const playEvent = async (item) => {
   try {
-    const site = await sites.get({ key: item.siteKey });
-    const [detailItem] = await zy.detail(item.siteKey, item.videoId);
-    const config = {
-      type: 'film',
-      data: {
-        info: detailItem,
-        ext: { site: { key: item.siteKey, type: site.type } },
-      },
-    };
+    const { videoName, siteKey, videoId } = item;
+    const site = await sites.get({ key: siteKey });
+    siteData.value = site;
+    if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
+      const [detailItem] = await zy.detail(siteKey, videoId);
+      item = detailItem;
+    }
+    console.log(item);
 
-    store.updateConfig(config);
-    ipcRenderer.send('openPlayWindow', item.videoName);
+    const playerType = store.getSetting.broadcasterType;
+
+    if (playerType === 'iina' || playerType === 'potplayer') {
+      formDetailData.value = item;
+      isVisible.detail = true;
+    } else {
+      const config = {
+        type: 'film',
+        data: {
+          info: item,
+          ext: { site: { key: siteKey, type: site.type } },
+        },
+      };
+
+      store.updateConfig(config);
+      ipcRenderer.send('openPlayWindow', videoName);
+    }
   } catch (err) {
     console.error(err);
     MessagePlugin.warning('请求资源站失败，请检查网络!');

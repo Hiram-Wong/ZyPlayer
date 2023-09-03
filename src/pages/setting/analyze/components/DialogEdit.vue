@@ -2,7 +2,7 @@
   <t-dialog
     v-model:visible="formVisible"
     header="编辑"
-    :width="680"
+    :width="646"
     placement="center"
     :footer="false"
     class="dialog-edit"
@@ -94,5 +94,4 @@ const rules = {
 };
 </script>
 <style lang="less" scoped>
-@import '@/style/variables.less';
 </style>

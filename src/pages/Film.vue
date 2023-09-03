@@ -129,8 +129,8 @@
       </div>
     </div>
 
-    
-    <hot-view v-model:visible="formDialogHot" :site="FilmSiteSetting.basic" />
+    <detail-view v-model:visible="isVisible.detail" :site="FilmSiteSetting.basic" :data="formDetailData"/>
+    <hot-view v-model:visible="isVisible.hot" :site="FilmSiteSetting.basic" />
     <t-back-top
       container=".content-wrapper"
       :visible-height="200"
@@ -151,17 +151,17 @@ import { MoreIcon, RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { onMounted, reactive, ref } from 'vue';
 
-import APP_FILTER_CONFIG from '@/config/appFilter';
 import { setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 import { usePlayStore } from '@/store';
 
 import HotView from './film/Hot.vue';
 import SearchView from './film/Search.vue';
+import DetailView from './film/Detail.vue';
 
 const ipcRenderer = useIpcRenderer();
 
-const store = usePlayStore();
+const storePlayer = usePlayStore();
 const infiniteId = ref(+new Date()); // infinite-loading此属性更改重置组件
 const showToolbar = ref(false); // 是否显示筛选框 true显示 false隐藏
 const searchTxt = ref(''); // 搜索框
@@ -173,7 +173,15 @@ const formSiteData = ref({
   key: '',
   type: 1,
 }); // 详情组件源传参
-const formDialogHot = ref(false); // dialog是否显示热播榜
+const formDetailData = ref({
+  neme: '',
+  key: '',
+  type: 1,
+}); //  详情组件源传参
+const isVisible = reactive({
+  hot: false,
+  detail: false
+})
 const pagination = ref({
   pageIndex: 1,
   pageSize: 36,
@@ -603,15 +611,22 @@ const playEvent = async (item) => {
     item = detailItem;
   }
   console.log(item);
-  store.updateConfig({
-    type: 'film',
-    data: {
-      info: item,
-      ext: { site: formSiteData.value },
-    },
-  });
+  const playerType = storePlayer.getSetting.broadcasterType;
 
-  ipcRenderer.send('openPlayWindow', item.vod_name);
+  if (playerType === 'iina' || playerType === 'potplayer') {
+    formDetailData.value = item;
+    isVisible.detail = true;
+  } else {
+    storePlayer.updateConfig({
+      type: 'film',
+      data: {
+        info: item,
+        ext: { site: formSiteData.value },
+      },
+    });
+
+    ipcRenderer.send('openPlayWindow', item.vod_name);
+  }
 };
 
 // 监听设置默认源变更
