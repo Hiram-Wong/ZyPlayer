@@ -1361,6 +1361,7 @@ const load = async ($state) => {
   console.log('loading...');
   try {
     const resLength = await getChannelList();
+    console.log(`[list] 返回数据长度${resLength}`);
     if (resLength === 0) $state.complete();
     else $state.loaded();
   } catch (err) {
@@ -1376,47 +1377,54 @@ const getChannelCount = () => {
   });
 };
 
+// 检查ipv6
+const checkChannelListIpv6 = async (data) => {
+  const newdata = await Promise.allSettled(
+    data.map(async (item) => {
+      try {
+        const checkStatus = await zy.checkUrlIpv6(item.url);
+        if (checkStatus !== 'IPv6') return item;
+        return false;
+      } catch (err) {
+        console.log(err);
+        return false;
+      }
+    }),
+  );
+
+  const filteredData = newdata
+    .filter((result) => result.status === 'fulfilled' && result.value !== false)
+    .map((result) => {
+      if (result.status === 'fulfilled') return result.value;
+      return null;
+    })
+    .filter((item) => item !== null);
+
+  return filteredData;
+};
+
 // 获取直播列表
 const getChannelList = async () => {
-  const res = await channelList.pagination(pagination.value.pageIndex, pagination.value.pageSize);
+  const { pageIndex, pageSize } = pagination.value;
+  const { skipIpv6 } = data.value.ext;
+  const { list } = iptvDataList.value;
+
+  const res = await channelList.pagination(pageIndex, pageSize);
+
   const sourceLength = res.list.length;
 
-  if (data.value.ext.skipIpv6) {
-    const newdata = await Promise.allSettled(
-      res.list.map(async (item) => {
-        try {
-          const checkStatus = await zy.checkUrlIpv6(item.url);
-          if (checkStatus !== 'IPv6') return item;
-          return false;
-        } catch (err) {
-          console.log(err);
-          return false;
-        }
-      }),
-    );
-
-    res.list = newdata
-      .filter((result) => result.status === 'fulfilled' && result.value !== false)
-      .map((result) => {
-        if (result.status === 'fulfilled') return result.value;
-        return null;
-      })
-      .filter((item) => item !== null);
-  }
-
+  if (skipIpv6) res.list = await checkChannelListIpv6(res.list);
   const restultLength = res.list.length;
-  iptvDataList.value.list = _.unionWith(iptvDataList.value.list, res.list, _.isEqual);
-  let length;
+  iptvDataList.value.list = _.unionWith(list, res.list, _.isEqual);
+  const length = sourceLength;
 
-  if (data.value.ext.skipIpv6) {
-    if (sourceLength) {
-      if (sourceLength === restultLength) length = sourceLength;
-      if (restultLength === 0) {
-        pagination.value.pageIndex++;
-        await getChannelList();
-      }
-    } else length = sourceLength;
+  if (skipIpv6 && sourceLength && sourceLength !== restultLength) {
+    if (res.list.length === 0) {
+      pagination.value.pageIndex++;
+      await getChannelList();
+    }
   }
+
   pagination.value.pageIndex++;
   return length;
 };
