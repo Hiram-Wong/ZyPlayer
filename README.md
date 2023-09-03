@@ -80,12 +80,10 @@
   ],
   "channel": [
     {
-      "id": 1,
-      "name": "APTV",
-      "url": "https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u",
-      "type": "remote",
-      "isActive": true,
-      "epg": "https://epg.112114.xyz/"
+      "name": "CCTV1",
+      "url": "http://hms304nc1972679586.live.aikan.miguvideo.com/wh7f454c46tw3831204341_1349411946/wd_r2/cctv/cctv1hd/2500/01.m3u8?msisdn=19115966146&Channel_ID=0119_04102000-99000_400300000040002&client_ip=182.149.232.3&timestamp=20230115080246&ContentId=265183188&timezone=UTC&mtv_session=01b97ad3f1d61532d8f0d40578ee3f47&HlsSubType=1&HlsProfileId=1&nphaid=0&encrypt=ac6f75650a73ab06efc36233598f26b8",
+      "group": "央视",
+      "id": 5821
     }
   ],
   "sites": [
