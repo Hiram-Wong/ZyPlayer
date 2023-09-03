@@ -1736,13 +1736,6 @@ ajv@^8.0.0, ajv@^8.11.0, ajv@^8.6.3:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-aliyun-aliplayer@^2.16.0:
-  version "2.16.0"
-  resolved "https://registry.npmmirror.com/aliyun-aliplayer/-/aliyun-aliplayer-2.16.0.tgz#25d924398345f52ae8ffb615f792ed4939347345"
-  integrity sha512-Blx2cc/hwiDtPAWRWBDI94MLpftL93+12CAfFdgf7tf9zc9qDULr4CK6tSKQeJRfH0ZwYs18tCCx1/Njg5vVgQ==
-  dependencies:
-    crypto-js "^4.1.1"
-
 ansi-regex@^2.0.0:
   version "2.1.1"
   resolved "https://registry.npmmirror.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
@@ -1891,13 +1884,6 @@ arrify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
   integrity sha512-3CYzex9M9FGQjCGMGyi6/31c8GJbgb0qGyrx5HWxPd0aCwh4cB2YjMb2Xf9UuoogrMrlO9cTqnB5rI5GHZTcUA==
-
-artplayer@^5.0.9:
-  version "5.0.9"
-  resolved "https://registry.npmmirror.com/artplayer/-/artplayer-5.0.9.tgz#bb1a5d3fd9b28aef94b8a0de679332a9520f805b"
-  integrity sha512-IM/DShYdmKFEA9jl08LYbTK2Jfz9s7qIjEH0xWjnxvVArUKZZKcoqwr6i54U0c4grtc/Uvb4wtCd78kvtSVlgw==
-  dependencies:
-    option-validator "^2.0.6"
 
 asn1@~0.2.3:
   version "0.2.6"
@@ -2724,11 +2710,6 @@ crypto-es@^1.2.4:
   version "1.2.7"
   resolved "https://registry.npmmirror.com/crypto-es/-/crypto-es-1.2.7.tgz#754a6d52319a94fb4eb1f119297f17196b360f88"
   integrity sha512-UUqiVJ2gUuZFmbFsKmud3uuLcNP2+Opt+5ysmljycFCyhA0+T16XJmo1ev/t5kMChMqWh7IEvURNCqsg+SjZGQ==
-
-crypto-js@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.npmmirror.com/crypto-js/-/crypto-js-4.1.1.tgz#9e485bcf03521041bd85844786b83fb7619736cf"
-  integrity sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==
 
 css-select@^4.1.3:
   version "4.3.0"
@@ -6406,13 +6387,6 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-option-validator@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.npmmirror.com/option-validator/-/option-validator-2.0.6.tgz#a314dae65e26db5f948ef0ff96fc88f18bb76ed6"
-  integrity sha512-tmZDan2LRIRQyhUGvkff68/O0R8UmF+Btmiiz0SmSw2ng3CfPZB9wJlIjHpe/MKUZqyIZkVIXCrwr1tIN+0Dzg==
-  dependencies:
-    kind-of "^6.0.3"
-
 optionator@^0.9.1:
   version "0.9.1"
   resolved "https://registry.npmmirror.com/optionator/-/optionator-0.9.1.tgz#4f236a6373dae0566a6d43e1326674f50c291499"
@@ -8694,14 +8668,14 @@ wrappy@1:
   resolved "https://registry.npmmirror.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
 
-xgplayer-flv@^3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer-flv/-/xgplayer-flv-3.0.8.tgz#7ebb4d67528d43cc60d09440f1bffd384142437a"
-  integrity sha512-BxeBmTxyLWfMWRLyoaICwPi7Mu16v4Q43zszww39PbUrJ3Kcel2Wc2rje3gqiWsgSVlGf+6n6EGA7McTDRx5dw==
+xgplayer-flv@^3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer-flv/-/xgplayer-flv-3.0.9.tgz#1b3b6f812f94ae30dda465a4a112763aff935408"
+  integrity sha512-Nkgi6JtxMdnEvTtovQrGa4+hLSKLIHisKKgiWsDvTAquPpFxrSiH0Bhr9z7k9MsNd7PNIdLvW4CP9cVnE7IRfA==
   dependencies:
     eventemitter3 "^4.0.7"
-    xgplayer-streaming-shared "3.0.8"
-    xgplayer-transmuxer "3.0.8"
+    xgplayer-streaming-shared "3.0.9"
+    xgplayer-transmuxer "3.0.9"
 
 xgplayer-helper-codec@3.0.0-rc.3-1:
   version "3.0.0-rc.3-1"
@@ -8743,16 +8717,16 @@ xgplayer-helper-utils@3.0.0-rc.3-1:
     eventemitter3 "^4.0.7"
     xgplayer-helper-models "3.0.0-rc.3-1"
 
-xgplayer-hls@^3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer-hls/-/xgplayer-hls-3.0.8.tgz#cc903a7c662104bdc6803640102464095de8bd20"
-  integrity sha512-fYFV/ySVak4iZjRZCpobuYVRMUZLQVLuJegHGAAlTHKNvfoApnWm3QQgCERt1x2CP1nZDF3BWzXPXuGmXTJ5cQ==
+xgplayer-hls@^3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer-hls/-/xgplayer-hls-3.0.9.tgz#c4dc4a954164ed899f624e264ed7cf059da1ad4b"
+  integrity sha512-OF56nOhCrz3+ZDPGUqRWJmxKLT/JnBc1fkvW9o5JEmQmTf584IzPd52XwQwpCKxT+FErqspHLEcmwKZvZk9ZbQ==
   dependencies:
     eventemitter3 "^4.0.7"
-    xgplayer-streaming-shared "3.0.8"
-    xgplayer-transmuxer "3.0.8"
+    xgplayer-streaming-shared "3.0.9"
+    xgplayer-transmuxer "3.0.9"
 
-xgplayer-livevideo@^3.0.0-alpha.139-2:
+xgplayer-livevideo@^3.0.0-next.10:
   version "3.0.0-rc.3-1"
   resolved "https://registry.npmmirror.com/xgplayer-livevideo/-/xgplayer-livevideo-3.0.0-rc.3-1.tgz#32666d23966218a55807bd207d2420ecc1863ed1"
   integrity sha512-dflKZ8XErE6uXMGbmU5/jw1RLvoViEHBAe+RIsJD3z5k3DNWG9tcChxbNM7HZWZ/0R5R3MGJzu5rLUGl2eqCQA==
@@ -8763,60 +8737,60 @@ xgplayer-livevideo@^3.0.0-alpha.139-2:
     xgplayer-helper-transmuxers "3.0.0-rc.3-1"
     xgplayer-helper-utils "3.0.0-rc.3-1"
 
-xgplayer-mp4-loader@3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer-mp4-loader/-/xgplayer-mp4-loader-3.0.8.tgz#86edd6fefe44f39c98e9297d842022fab929f91e"
-  integrity sha512-8i4a+BBy4XifiD7up5mk0zb2J9nvoO5+qU4AVrAwWsdGDOmDznFdq8U0YaQzcs0dMQr/PohAW7/HMOjW9WvcDw==
+xgplayer-mp4-loader@3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer-mp4-loader/-/xgplayer-mp4-loader-3.0.9.tgz#2c6af76a24237ec264e00c662874b6e64a6c7664"
+  integrity sha512-+JAW8YCffg6GB+kDj+3SgsSESrMPkRXNMiOBt/a6k7ahgulyVlKMgvR+hLxAHVptj3qK1CrRfXBzLNDJqL/E6A==
   dependencies:
     eventemitter3 "^4.0.7"
-    xgplayer-streaming-shared "3.0.8"
-    xgplayer-transmuxer "3.0.8"
+    xgplayer-streaming-shared "3.0.9"
+    xgplayer-transmuxer "3.0.9"
 
-xgplayer-mp4@^3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer-mp4/-/xgplayer-mp4-3.0.8.tgz#270f99c7b5efda8e71063459f841350b54c82f27"
-  integrity sha512-AHVonAu7NyilQYDq8HYccuEqIYKzSGVPV/92Eo4EUPFtya3ycyQWObxgR7Llk6Y5ynHUI9zuhM4nFyEjzSwg8w==
+xgplayer-mp4@^3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer-mp4/-/xgplayer-mp4-3.0.9.tgz#4011e00e080d07300e27b71f6d01edca935c88f6"
+  integrity sha512-iCr5//W7IOdLogh/cB1Yh1R6wDVlMGsLZrXkC+tOs866BaStfsUmp/m6w6wUInZzmo9w84cb+EaRMW9Kiv4YZA==
   dependencies:
     concat-typed-array "^1.0.2"
     deepmerge "^2.0.1"
     eventemitter3 "^4.0.7"
-    xgplayer-mp4-loader "3.0.8"
-    xgplayer-streaming-shared "3.0.8"
-    xgplayer-transmuxer "3.0.8"
+    xgplayer-mp4-loader "3.0.9"
+    xgplayer-streaming-shared "3.0.9"
+    xgplayer-transmuxer "3.0.9"
 
-xgplayer-streaming-shared@3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer-streaming-shared/-/xgplayer-streaming-shared-3.0.8.tgz#3106028881e2cb635beebef85d8610e83faa4be1"
-  integrity sha512-6TtICi0QAignqSt5s0tbSFI0GDFgcFmm0mZ9BwcEkclN8PJDLdbS1zlldl9qIsR5Em479PhHkU/QA7NdHm0Jfg==
+xgplayer-streaming-shared@3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer-streaming-shared/-/xgplayer-streaming-shared-3.0.9.tgz#b6eeae13ea3d5d1dff25fc5d284b4ed305c4ddb4"
+  integrity sha512-+TTH7ryj/J/BnkxpepnTb6HMd314gn+IB9k7+ML2ENRclF0+B6LIFdApgP3pA9eHiiVmNC1Yc2hO+1S+j61/Tw==
   dependencies:
     eventemitter3 "^4.0.7"
 
-xgplayer-subtitles@3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer-subtitles/-/xgplayer-subtitles-3.0.8.tgz#988e48cc2793d9e424a15c51ff223ebaf256dd2a"
-  integrity sha512-LjlEPSDQDg063grrWCtNAtdglNgksedh91HB12SXaHUOKshzg1y9CL22cpXnNpKTePlhwvYmYUVRVckV19QpHw==
+xgplayer-subtitles@3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer-subtitles/-/xgplayer-subtitles-3.0.9.tgz#fb36170260f9c0e64c3059c4cdf1f93d15a6f528"
+  integrity sha512-FPD9lQ4BKixm3AKRFWpUAlEpEcHpz1tG2Y+k/CtfzwMEDGKK9fjRlxZ+ZRB2A4f2IXkT+OInbZbrDvgjdproSQ==
   dependencies:
     eventemitter3 "^4.0.7"
 
-xgplayer-transmuxer@3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer-transmuxer/-/xgplayer-transmuxer-3.0.8.tgz#fb62611b455921dd8e3932fc0a475d5c32c4e07f"
-  integrity sha512-2l7jat+7XSBhlDut6mbEUI5sjyPKalrEsmUGkdSIkXuijI2fD8P4qQz+2ROeOdPD2+7lnwVS/HWUsfQBqv4uyA==
+xgplayer-transmuxer@3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer-transmuxer/-/xgplayer-transmuxer-3.0.9.tgz#f830f8d4a21f63f44177e6006711ace0b6846fde"
+  integrity sha512-rFfNNfAOXZijN/OVnUAItZsPqnB5e1D/+f/uzqUv7zwfsSdjP7WCd9k2JGz9h8wTBWVussqYiKJkzNHEkC2RlQ==
   dependencies:
     "@babel/runtime" "^7.15.3"
     concat-typed-array "^1.0.2"
     crypto-es "^1.2.4"
 
-xgplayer@^3.0.8:
-  version "3.0.8"
-  resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.8.tgz#ba374be4bfd069cbc48ae39465032c35b3ab0a40"
-  integrity sha512-6tvIz5u7c9WDLhE5b8ekdAq7jtlhsBGCawVgRsbi+VDU89WYpl4U+pdK9k/9VBFXLsyLgu03QhEK9Kp2OICZww==
+xgplayer@^3.0.9:
+  version "3.0.9"
+  resolved "https://registry.npmmirror.com/xgplayer/-/xgplayer-3.0.9.tgz#d6fdf481995a82f6dca2e5691b95d3d636114778"
+  integrity sha512-0Wz8B6NOQT+vSo+at64hHtR+fCtYwv44kMt5EM4w1O1Ok3KTBpL5Z6e/JTnkSkiC3MNsmbd4ZHayFdlaEGbxyg==
   dependencies:
     danmu.js ">=1.1.6"
     delegate "^3.2.0"
     downloadjs "1.4.7"
     eventemitter3 "^4.0.7"
-    xgplayer-subtitles "3.0.8"
+    xgplayer-subtitles "3.0.9"
 
 xhr@2.4.0:
   version "2.4.0"

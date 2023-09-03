@@ -132,12 +132,6 @@
                 ref="dplayerRef"
                 class="dplayer player"
               ></div>
-              <div
-                v-show="set.broadcasterType === 'artplayer'"
-                id="artplayer"
-                ref="artplayerRef"
-                class="artplayer player"
-              ></div>
             </div>
             <div v-show="onlineUrl && isSniff" class="player-webview">
               <iframe
@@ -392,7 +386,6 @@ import '@/style/player/tcplayer.min.css';
 
 import { useClipboard } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
-import Artplayer from 'artplayer';
 import DPlayer from 'dplayer';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
@@ -402,7 +395,7 @@ import TCPlayer from 'tcplayer.js';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  DesktopIcon,
+  Tv1Icon,
   DownloadIcon,
   HeartIcon,
   HomeIcon,
@@ -551,55 +544,14 @@ const tcConfig = ref({
   },
 }); // 腾讯云播放器参数
 
+const dplayerRef = ref(null); // 呆呆播放器dom节点
 const dpConfig = ref({
-  container: document.getElementById('dplayer'),
-  screenshot: true,
-  video: {
-    url: '',
-  },
-}); // dp播放器参数
-
-const playM3u8 = (video, url, art) => {
-  if (Hls.isSupported()) {
-    if (art.hls) art.hls.destroy();
-    const hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    art.hls = hls;
-    art.on('destroy', () => hls.destroy());
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = url;
-  } else {
-    art.notice.show = 'Unsupported playback format: m3u8';
-  }
-};
-const playFlv = (video, url, art) => {
-  if (flvjs.isSupported()) {
-    if (art.flv) art.flv.destroy();
-    const flv = flvjs.createPlayer({ type: 'flv', url });
-    flv.attachMediaElement(video);
-    flv.load();
-    art.flv = flv;
-    art.on('destroy', () => flv.destroy());
-  } else {
-    art.notice.show = 'Unsupported playback format: flv';
-  }
-};
-const artConfig = ref({
-  container: '.artplayer',
-  url: '',
-  setting: true,
-  type: 'm3u8',
-  currentTime: 0,
-  playbackRate: true,
+  container: dplayerRef,
   autoplay: true,
-  fullscreen: true,
-  pip: true,
-  customType: {
-    m3u8: playM3u8,
-    flv: playFlv,
+  video: {
+    
   },
-}); // art播放器参数
+}); // 呆呆播放器参数
 
 const selectIptvTab = ref('epg');
 const recommend = ref([]); // 推荐
@@ -608,11 +560,9 @@ const selectPlaySource = ref(); // 选择的播放源
 const selectPlayIndex = ref();
 const xg = ref(null); // 西瓜播放器
 const tc = ref(null); // 腾讯播放器
-const art = ref(null); // 艺术播放器
 const dp = ref(null); // dp播放器
 const tcplayerRef = ref(null); // 腾讯云播放器dom节点
 const xgpayerRef = ref(null); // 西瓜播放器dom节点
-const dpayerRef = ref(null); // 西瓜播放器dom节点
 const showEpisode = ref(false); // 是否显示右侧栏
 const epgData = ref(); // epg数据
 const isBinge = ref(true); // true未收藏 false收藏
@@ -675,16 +625,15 @@ const VIDEO_PROCESS_DOC = {
 
 const renderError = () => {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <DesktopIcon size="1.5em" stroke="#fdfdfd" />
+    <div class="renderIcon">
+      <Tv1Icon size="1.5em" stroke-width="2" />
     </div>
   );
 };
-
 const renderLoading = () => {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <LoadingIcon size="1.5em" stroke="#fdfdfd" />
+    <div class="renderIcon">
+      <LoadingIcon size="1.5em" stroke-width="2" />
     </div>
   );
 };
@@ -754,30 +703,47 @@ const createPlayer = async (videoType) => {
     if (config.value.startTime) tc.value.currentTime(config.value.startTime);
     tc.value.src(config.value.url);
     console.log(`[player] 加载腾讯播放器`);
-  } else if (set.value.broadcasterType === 'artplayer') {
+  } else if (set.value.broadcasterType === 'dplayer') {
     switch (videoType) {
       case 'mp4':
-        artConfig.value.type = 'mp4';
+        dpConfig.value.video.url = config.value.url;
         break;
       case 'flv':
-        artConfig.value.type = 'flv';
+        dpConfig.value.video = {
+          url: config.value.url,
+          type: 'customFlv',
+          customType: {
+            customFlv: function (video, player) {
+              const flvPlayer = flvjs.createPlayer({
+                type: 'flv',
+                url: video.src,
+              });
+              flvPlayer.attachMediaElement(video);
+              flvPlayer.load();
+            },
+          },
+        };
         break;
       case 'm3u8':
-        artConfig.value.type = 'm3u8';
+        dpConfig.value.video = {
+          url: config.value.url,
+          type: 'customHls',
+          customType: {
+            customHls: function (video, player) {
+              const hls = new Hls();
+              hls.loadSource(video.src);
+              hls.attachMedia(video);
+            },
+          },
+        }
         break;
       default:
-        artConfig.value.type = 'm3u8';
         break;
     }
-    if (config.value.startTime) artConfig.value.currentTime = config.value.startTime;
-    artConfig.value.url = config.value.url;
-    console.log(`[player] 加载艺术播放器`);
-    art.value = new Artplayer({ ...artConfig.value });
-  } else if (set.value.broadcasterType === 'dplayer') {
-    // if (config.value.startTime) dpConfig.value.currentTime = dpConfig.value.startTime;
-    dpConfig.value.video.url = config.value.url;
-    console.log(`[player] 加载dp播放器`);
-    dp.value = new DPlayer({ ...dpConfig.value });
+    console.log(`[player] 加载呆呆播放器`);
+    console.log(dpConfig.value)
+    dp.value = new DPlayer(dpConfig.value);
+    if (config.value.startTime) dp.value.seek(config.value.startTime);
   }
 
   if (type.value === 'film') await timerUpdatePlayProcess();
@@ -874,9 +840,10 @@ const destroyPlayer = () => {
     tcplayerRef.value.innerHTML = '';
     tcplayerRef.value.appendChild(newVideoElement);
   }
-  if (art.value) {
-    art.value.destroy();
-    art.value = null;
+
+  if (dp.value) {
+    dp.value.destroy();
+    dp.value = null;
   }
 
   if (onlineUrl.value) onlineUrl.value = '';
@@ -894,6 +861,7 @@ const initIptvPlayer = async () => {
       const isLive = await zy.isLiveM3U8(info.value.url);
       config.value.isLive = isLive;
       config.value.presets = isLive ? [LivePreset] : [];
+      dpConfig.value.live = true;
     } catch (err) {
       console.error(err);
     }
@@ -1316,14 +1284,14 @@ const timerUpdatePlayProcess = () => {
     tc.value.on('ended', () => {
       onEnded();
     });
-  } else if (set.value.broadcasterType === 'artplayer') {
-    art.value.on('video:timeupdate', () => {
-      const { duration } = art.value;
-      const { currentTime } = art.value;
+  } else if (set.value.broadcasterType === 'dplayer') {
+    dp.value.on('timeupdate', () => {
+      const duration = dp.value.video.duration;
+      const currentTime = dp.value.video.currentTime;
       onTimeUpdate(currentTime, duration);
     });
 
-    art.value.on('video:ended', () => {
+    dp.value.on('ended', () => {
       onEnded();
     });
   }

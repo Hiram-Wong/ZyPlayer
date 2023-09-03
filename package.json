@@ -30,8 +30,6 @@
     "@vitejs/plugin-vue-jsx": "^3.0.1",
     "@vueuse/core": "10.2.1",
     "@vueuse/electron": "^10.2.1",
-    "aliyun-aliplayer": "^2.16.0",
-    "artplayer": "^5.0.9",
     "axios": "^1.4.0",
     "axios-retry": "^3.6.0",
     "cheerio": "^1.0.0-rc.12",
@@ -78,11 +76,11 @@
     "vue": "^3.3.4",
     "vue-router": "^4.2.4",
     "webdav": "^5.2.3",
-    "xgplayer": "^3.0.8",
-    "xgplayer-flv": "^3.0.8",
-    "xgplayer-hls": "^3.0.8",
-    "xgplayer-livevideo": "^3.0.0-alpha.139-2",
-    "xgplayer-mp4": "^3.0.8"
+    "xgplayer": "^3.0.9",
+    "xgplayer-flv": "^3.0.9",
+    "xgplayer-hls": "^3.0.9",
+    "xgplayer-livevideo": "^3.0.0-next.10",
+    "xgplayer-mp4": "^3.0.9"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.5.1",

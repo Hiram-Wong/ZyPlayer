@@ -190,7 +190,7 @@ const ANALYZE_OPTIONS = [
 const PLAYER_OPTIONS = [
   { label: '西瓜播放器', value: 'xgplayer' },
   { label: '腾讯播放器', value: 'tcplayer' },
-  { label: '艺术播放器', value: 'artplayer' },
+  { label: '呆呆播放器', value: 'dplayer' },
   { label: 'iina(mac本地)', value: 'iina' },
   { label: 'potplayer(win本地)', value: 'potplayer' },
 ];
