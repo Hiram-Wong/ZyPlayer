@@ -122,11 +122,11 @@
       <t-form-item label="其他" name="data">
         <t-space>
           <span class="title" @click="resetOriginal">恢复出厂</span>
-          <span class="title" @click="isVisible.data = true">数据管理</span>
+          <span class="title" @click="dataMange">数据管理</span>
           <span class="title" @click="isVisible.update = true">检查更新</span>
         </t-space>
 
-        <dialog-data-view v-model:visible="isVisible.data" />
+        <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
       </t-form-item>
@@ -174,6 +174,7 @@ const isVisible = reactive({
 
 const dnsDialogData = ref({ data: '', type: 'dns' });
 const uaDialogData = ref({ data: '', type: 'ua' });
+const webdevDialogData = ref({ webdevUrl:'', webdevUsername:'' ,webdevPassword:'' });
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -548,6 +549,17 @@ const uaEvnet = () => {
   };
 
   isVisible.ua = true;
+};
+
+const dataMange = () => {
+  const { webdevUrl, webdevUsername, webdevPassword } = formData.value;
+  console.log(webdevUrl, webdevUsername, webdevPassword)
+  webdevDialogData.value = {
+    webdevUrl,
+    webdevUsername,
+    webdevPassword
+  }
+  isVisible.data = true
 };
 
 // 分类：刷新dialog数据class

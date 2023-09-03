@@ -127,13 +127,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  webdev: {
+    type: Object,
+    default: () => {
+      return {};
+    },
+  }
 });
-
 const formVisible = ref(false);
 const formData = reactive({
-  url: 'https://dav.jianguoyun.com/dav/',
-  username: 'wy-hai@qq.com',
-  password: 'ancmxxuxixng7fjq',
+  url: '',
+  username: '',
+  password: '',
   remoteImpoUrl: '',
   localImpoFile: [],
   clearSeletct: {
@@ -179,6 +184,14 @@ watch(
     };
   },
 );
+watch(
+  () => props.webdev,
+  (val) => {
+    formData.url = val.webdevUrl;
+    formData.username = val.webdevUsername;
+    formData.password = val.webdevPassword;
+  }
+)
 
 // 初始化数据库
 const initDB = async(data) => {
@@ -396,7 +409,7 @@ const clearData = async() => {
   // 清空iptv数据的函数
   const clearIptvData = async () => {
     await iptv.clear();
-    await channel.clear();
+    await channelList.clear();
     await setting.update({
       defaultIptv: null,
     });
@@ -484,9 +497,9 @@ const initWebdav = async() => {
 const saveWebdev = async() => {
   try {
     await setting.update({
-      webdevUserUrl: formData.url,
-      webdevUserName: formData.username,
-      webdevUserPassword: formData.password,
+      webdevUrl: formData.url,
+      webdevUsername: formData.username,
+      webdevPassword: formData.password,
     });
     MessagePlugin.success('保存成功');
   } catch (err) {
