@@ -738,6 +738,17 @@ const createPlayer = async (videoType) => {
         }
         break;
       default:
+        dpConfig.value.video = {
+          url: config.value.url,
+          type: 'customHls',
+          customType: {
+            customHls: function (video, player) {
+              const hls = new Hls();
+              hls.loadSource(video.src);
+              hls.attachMedia(video);
+            },
+          },
+        }
         break;
     }
     console.log(`[player] 加载呆呆播放器`);
