@@ -303,7 +303,7 @@ const jsonFromDB = async(all=false) => {
     if (formData.exportSeletct.iptv || all) {
       const iptv_data = await iptv.all();
       arr["iptv"] = [...iptv_data];
-      const channel_data = await iptv.all();
+      const channel_data = await channelList.all();
       arr["channel"] = [...channel_data];
     }
 
