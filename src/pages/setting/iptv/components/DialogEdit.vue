@@ -1,8 +1,7 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="编辑" :width="646" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="编辑" :width="650" placement="center" :footer="false">
     <template #body>
-      <!-- 表单内容 -->
-      <t-form ref="form" colon :data="formData" :rules="rules" :label-width="100" @submit="onSubmit">
+      <t-form :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
         <t-form-item label="名称" name="name">
           <t-input v-model="formData.name" placeholder="请输入内容" />
         </t-form-item>
@@ -25,6 +24,7 @@
               />
               <t-upload
                 v-if="formData.type === 'local'"
+                class="upload-item"
                 v-model="file"
                 theme="file"
                 accept="audio/mpegurl"
@@ -39,7 +39,7 @@
                 v-model="formData.url"
                 class="input-item input-textarea"
                 :placeholder="'M3u格式示例:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\ngenre格式示例\nChannel,https://channel-url'"
-                :autosize="{ minRows: 7, maxRows: 8 }"
+                :autosize="{ minRows: 7, maxRows: 7 }"
               />
             </t-space>
           </t-space>
@@ -139,18 +139,23 @@ const requestMethod = (file) => {
 };
 </script>
 <style lang="less" scoped>
-@import '@/style/variables.less';
-
 .input-item,
 :deep(.t-upload__dragger) {
-  width: calc(480px - var(--td-size-1));
+  width: calc(518px - var(--td-size-1));
+}
+
+.upload-item {
+  :deep(.t-button--variant-outline) {
+    background-color: var(--td-bg-input) !important;
+    border-color: transparent;
+  }
 }
 
 .input-item-split {
-  width: calc(480px - 130px);
+  width: calc(518px - 130px);
 }
 
 .input-textarea {
-  width: calc(480px - var(--td-size-2)) !important;
+  width: calc(518px - var(--td-size-2)) !important;
 }
 </style>

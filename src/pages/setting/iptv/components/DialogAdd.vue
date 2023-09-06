@@ -1,12 +1,7 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加" :width="646" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加" :width="650" placement="center" :footer="false">
     <template #body>
-      <t-form
-        :data="formData"
-        :rules="rulesSingle"
-        :label-width="60"
-        @submit="onSubmit"
-      >
+      <t-form :data="formData" :rules="rulesSingle" :label-width="60" @submit="onSubmit">
         <t-form-item label="名称" name="name">
           <t-input v-model="formData.name" class="input-item" placeholder="请输入内容" />
         </t-form-item>
@@ -156,7 +151,7 @@ const requestMethod = (file) => {
 <style lang="less" scoped>
 .input-item,
 :deep(.t-upload__dragger) {
-  width: calc(512px - var(--td-size-1));
+  width: calc(518px - var(--td-size-1));
 }
 
 .upload-item {
@@ -167,10 +162,10 @@ const requestMethod = (file) => {
 }
 
 .input-item-split {
-  width: calc(512px - 130px);
+  width: calc(518px - 130px);
 }
 
 .input-textarea {
-  width: calc(512px - var(--td-size-2)) !important;
+  width: calc(518px - var(--td-size-2)) !important;
 }
 </style>

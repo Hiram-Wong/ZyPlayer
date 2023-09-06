@@ -2,14 +2,14 @@
   <t-dialog
     v-model:visible="formVisible"
     header="编辑"
-    :width="646"
+    :width="650"
     placement="center"
     :footer="false"
     class="dialog-edit"
   >
     <template #body>
       <!-- 表单内容 -->
-      <t-form ref="form" colon :data="formData" :rules="rules" :label-width="100" @submit="onSubmit">
+      <t-form ref="form" :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
         <t-form-item label="名称" name="name">
           <t-input v-model="formData.name" placeholder="请输入内容" />
         </t-form-item>

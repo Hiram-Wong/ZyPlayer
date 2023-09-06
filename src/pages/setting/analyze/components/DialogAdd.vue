@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加" :width="646" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" header="添加" :width="650" placement="center" :footer="false">
     <template #body>
       <t-form
         :data="formData"
