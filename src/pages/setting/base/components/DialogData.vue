@@ -7,30 +7,47 @@
           <p class="title">配置文件</p>
           <p class="content">数据保存在数据库中, 为方便迁移可导出为json文件, 导入将覆盖原数据</p>
           <div class="config"> 
-            <t-collapse>
-              <t-collapse-panel value="remoteImport" header="远端导入">
+            <t-collapse expand-mutex>
+              <t-collapse-panel value="easyConfig" header="一键配置">
                 <template #headerRightContent>
                   <t-space size="small">  
-                    <t-button size="small" @click.stop="importFromRemote">导入</t-button>
+                    <t-button size="small" @click.stop="easyConfig">导入</t-button>
                   </t-space>
                 </template>
-                <t-input label="云地址：" v-model="formData.remoteImpoUrl" class="input-item"></t-input>
+                <t-radio-group v-model="formData.easyConfig.type">
+                  <t-radio :value="0">软件接口</t-radio>
+                  <t-radio :value="1">drpy接口</t-radio>
+                  <t-radio :value="2">tvbox接口</t-radio>
+                </t-radio-group>
+                <p v-if="formData.easyConfig.type === 0" class="tip">请严格遵守本软件接口格式</p>
+                <p v-else-if="formData.easyConfig.type === 1" class="tip">目前仅支持sites中type:1的数据,请将js模式设置为0</p>
+                <p v-else-if="formData.easyConfig.type === 2" class="tip">目前仅支持sites中type:0或1且的cms类型的数据</p>
+                <t-input label="地址：" v-model="formData.easyConfig.url" class="input-item"></t-input>
               </t-collapse-panel>
-              <t-collapse-panel value="localImport" header="本地导入">
+              <t-collapse-panel value="remoteImport" header="配置导入">
                 <template #headerRightContent>
                   <t-space size="small">  
-                    <t-button size="small" @click.stop="importFromLocal">导入</t-button>
+                    <t-button size="small" @click.stop="importData">导入</t-button>
                   </t-space>
                 </template>
-                <t-upload
-                  v-model="formData.localImpoFile"
-                  class="input-item"
-                  theme="file"
-                  :max="1"
-                  accept="application/json"
-                  :draggable="true"
-                  :request-method="requestMethod"
-                />
+                <t-radio-group v-model="formData.importData.type">
+                  <t-radio value="remote">远端导入</t-radio>
+                  <t-radio value="local">本地导入</t-radio>
+                </t-radio-group>
+                <div v-if="formData.importData.type === 'remote'">
+                  <t-input label="地址：" v-model="formData.importData.remoteImpoUrl" class="input-item"></t-input>
+                </div>
+                <div v-else>
+                  <t-upload 
+                    v-model="formData.importData.localImpoFile"
+                    class="input-item"
+                    theme="file"
+                    :max="1"
+                    accept="application/json"
+                    :draggable="true"
+                    :request-method="requestMethod"
+                  />
+                </div>
               </t-collapse-panel>
               <t-collapse-panel value="setExport" header="配置导出">
                 <template #headerRightContent>
@@ -139,8 +156,15 @@ const formData = reactive({
   url: '',
   username: '',
   password: '',
-  remoteImpoUrl: '',
-  localImpoFile: [],
+  easyConfig: {
+    type: 0,
+    url: ''
+  },
+  importData: {
+    type: 'remote',
+    remoteImpoUrl: '',
+    localImpoFile: [],
+  },
   clearSeletct: {
     sites: false,
     iptv: false,
@@ -256,17 +280,104 @@ const initDB = async(data) => {
   formVisible.value = false;
 };
 
+// 一键配置
+const easyConfig = async() => {
+  const { url, type } = formData.easyConfig;
+  if (!url) return;
+  const config = await zy.getConfig(url).catch((error) => {
+    MessagePlugin.error(`请求一键配置地址失败：${error}`);
+  });
+  console.log(typeof config);
+  if (typeof config !== 'object') return;
+
+  console.log(config);
+  const data = {};
+  try {
+    // 添加数据
+    const defaultObject = {
+      defaultSite: '',
+      defaultIptv: '',
+      defaultAnalyze: '',
+    };
+
+    if (type === 0) {
+      if (_.has(config, "sites")) {
+        data["sites"] = config.sites.data;
+        defaultObject.defaultSite = config.sites.default;
+      };
+      if (_.has(config, "iptv")) {
+        data["iptv"] = config.iptv.data;
+        defaultObject.defaultIptv = config.iptv.default;
+      };
+      if (_.has(config, "analyze")) {
+        data["analyze"] = config.analyze.data;
+        defaultObject.defaultAnalyze = config.analyzes.default;
+      };
+      setting.update(defaultObject);
+    } else {
+      if (_.has(config, "sites")) {
+        data["sites"] = config.sites
+          .filter((item) => item.type === 0 || item.type === 1) // 先过滤掉不需要的数据
+          .map((item) => ({
+            key: item.key,
+            name: item.name,
+            type: type === 1 ? 2 : 1,
+            api: item.api,
+            group: type === 1 ? 'drpy' : 'tvbox',
+            search: item.searchable,
+            isActive: true,
+            status: true,
+          }));
+      }
+      if (_.has(config, "lives")) {
+        // 提取group为"redirect"的channels
+        const redirectChannels = config.lives.filter(live => live.group === "redirect")[0].channels;
+
+        // 解密URL中的ext并组合成iptv对象
+        const iptv = redirectChannels.map(channel => {
+          const ext = channel.urls[0].split('&ext=')[1];
+          const decodedExt = Buffer.from(ext, 'base64').toString('utf-8');
+          
+          return {
+            name: channel.name,
+            type: "remote",
+            isActive: true,
+            url: decodedExt
+          };
+        });
+        data["iptv"] = iptv;
+      }
+      
+    };
+    console.log(data)
+
+    initDB(data);
+  } catch (error) {
+    MessagePlugin.error(`一键配置失败：${error}`);
+    console.log(error);
+  }
+};
+
+// 配置导入
+const importData = async() => {
+  const { type } = formData.importData;
+  if (type === 'remote') {
+    await importFromRemote(formData.importData.remoteImpoUrl);
+  } else {
+    await importFromLocal(formData.importData.localImpoFile[0].raw);
+  };
+};
+
 // 远端导入
-const importFromRemote = async() => {
-  const config = await zy.getConfig(formData.remoteImpoUrl).catch((error) => {
+const importFromRemote = async(url) => {
+  const config = await zy.getConfig(url).catch((error) => {
     MessagePlugin.error(`请求地址失败：${error}`);
   });
   await initDB(config);
 }
 
 // 本地导入
-const importFromLocal = () => {
-  const file = formData.localImpoFile[0].raw;
+const importFromLocal = (file) => {
   const reader = new FileReader();
   reader.readAsText(file);
   reader.onload = (resultFile) => {
