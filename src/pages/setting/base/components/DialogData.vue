@@ -324,17 +324,17 @@ const easyConfig = async() => {
             type: type === 1 ? 2 : 1,
             api: item.api,
             group: type === 1 ? 'drpy' : 'tvbox',
-            search: item.searchable,
+            search: _.has(item, "searchable") ? item.searchable : 0,
             isActive: true,
             status: true,
           }));
-      }
+      };
       if (_.has(config, "lives")) {
         // 提取group为"redirect"的channels
-        const redirectChannels = config.lives.filter(live => live.group === "redirect")[0].channels;
+        const redirectChannels = config.lives.filter((live) => live.group === "redirect")[0].channels;
 
         // 解密URL中的ext并组合成iptv对象
-        const iptv = redirectChannels.map(channel => {
+        const iptv = redirectChannels.map((channel) => {
           const ext = channel.urls[0].split('&ext=')[1];
           const decodedExt = Buffer.from(ext, 'base64').toString('utf-8');
           
@@ -346,8 +346,15 @@ const easyConfig = async() => {
           };
         });
         data["iptv"] = iptv;
-      }
-      
+      };
+      if (_.has(config, "parses")) {
+        const analyze = config.parses.map((item) => ({
+          name: item.name,
+          url: item.url,
+          isActive: true,
+        }));
+        data["analyze"] = analyze;
+      };
     };
     console.log(data)
 
