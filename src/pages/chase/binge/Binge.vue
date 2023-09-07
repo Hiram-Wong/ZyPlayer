@@ -89,8 +89,8 @@ const getBingeList = async () => {
     const res = await star.pagination(pagination.value.pageIndex, pagination.value.pageSize);
     res.list.map(async (item) => {
       const { siteKey } = item;
-      const { name } = await sites.find({ key: siteKey });
-      item.siteName = name;
+      const res = await sites.find({ key: siteKey });
+      item.siteName = _.has(res, "name") ? res.name : '该源应该被删除了哦';
     });
     bingeList.value = _.unionWith(bingeList.value, res.list, _.isEqual);
     pagination.value.count = res.total;
