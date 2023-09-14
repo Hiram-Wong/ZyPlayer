@@ -475,7 +475,7 @@ const getFilmList = async () => {
 // 加载
 const load = async ($state) => {
   console.log('loading...');
-  if (!sitesListSelect.value || !FilmSiteSetting.value.basic.key) {
+  if (!sitesListSelect.value || !_.has(FilmSiteSetting.value.basic, 'key')) {
     const isNoData = infiniteCompleteTip.value.indexOf('暂无数据');
     if (isNoData > -1) {
       $state.complete();

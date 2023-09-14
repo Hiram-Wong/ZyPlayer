@@ -28,13 +28,7 @@
               </div>
             </div>
           </div>
-          <div
-            v-if="isSupport && quickSearchType !== 'platform'"
-            class="analysis-header-item analysis-header-popup"
-            @click="isShow.searchVisible = true"
-          >
-            <search-icon size="1.3rem" />
-          </div>
+          
           <div v-if="iframeUrl" class="analysis-header-item analysis-header-popup" @click="shareEvent">
             <share-popup v-model:visible="isShow.shareVisible" :data="shareData" />
           </div>
@@ -56,10 +50,19 @@
               <t-input
                 v-model="analysisUrl"
                 class="input-url"
-                placeholder="请输入链接"
+                placeholder="输个链接,让世界充满爱～"
                 size="large"
                 @change="formatUrlEvent"
               />
+              <div class="analysis-bottom-group">
+                <div
+                  v-if="isSupport && quickSearchType !== 'platform'"
+                  class="popover"
+                  @click="isShow.searchVisible = true"
+                >
+                  <app-icon size="1.3rem" class="popover-icon"/>
+                </div>
+              </div>
               <t-button class="analysis-play" size="large" @click="analysisEvent">
                 <p class="analysis-tip">解析</p>
               </t-button>
@@ -87,7 +90,7 @@
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import moment from 'moment';
-import { CloseIcon, HistoryIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
 
@@ -461,8 +464,26 @@ const changeDefaultEvent = async (item: any) => {
             color: var(--td-text-color-primary);
             display: inline-block;
           }
+          .analysis-bottom-group {
+            display: flex;
+            align-items: center;
+            height: 40px;
+            .popover {
+              cursor: pointer;
+              &:hover {
+                .popover-icon {
+                  opacity: 1;
+                  color: var(--td-text-color-primary);
+                }
+              }
+              &-icon {
+                opacity: .6;
+                margin-right: 20px;
+              }
+            }
+          }
           .analysis-play {
-            border-radius: 20px;
+            border-radius: 0 20px 20px;
             width: 5em;
             .analysis-tip {
               color: hsl(0deg 0% 0% / 60%);
@@ -519,5 +540,13 @@ const changeDefaultEvent = async (item: any) => {
 
 :deep(.t-dialog__body--fullscreen--without-footer) {
   padding: 0;
+}
+
+:deep(.t-dialog--default) {
+  padding: 0 !important;
+}
+
+:deep(.t-dialog__body) {
+  padding: 0 !important;
 }
 </style>

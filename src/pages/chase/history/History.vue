@@ -328,6 +328,10 @@ defineExpose({
                 bottom: 0px;
                 display: flex;
                 justify-content: center;
+                span {
+                  font-size: 12px;
+                  font-weight: bolder;
+                }
               }
             }
           }

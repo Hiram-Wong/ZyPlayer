@@ -12,6 +12,7 @@
         <span class="close-icon icon"> <close-icon size="18px" /></span>
       </div>
       <div>
+        <div class="search-modal-header"></div>
         <div class="search-input-container">
           <div class="search-input-wrapper">
             <t-tag v-if="isFilter" class="search-filter-tag">
@@ -182,10 +183,8 @@ const closeDialog = () => {
 </script>
 
 <style lang="less" scoped>
+
 .close-btn {
-  .close-icon {
-    font-size: 18px;
-  }
   &:hover {
     background-color: var(--td-bg-color-component-hover);
   }
@@ -200,9 +199,13 @@ const closeDialog = () => {
   position: absolute;
   top: 24px;
   right: 16px;
-  transition: all 0.3s ease;
+  transition: all .3s ease;
   cursor: pointer;
   z-index: 10;
+}
+
+.search-modal-header {
+  height: 64px;
 }
 
 .search-modal-header {
@@ -273,8 +276,8 @@ const closeDialog = () => {
 }
 
 .search-modal-body {
-  margin-top: 25px;
-  max-height: max(520px - 64px, calc(100vh - 330px));
+  position: relative;
+  max-height: max(456px,100vh - 330px);
   overflow-y: auto;
   .search-filter-list {
     padding: 0 12px 8px;

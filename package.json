@@ -5,7 +5,7 @@
     "email": "admin@catni.cn"
   },
   "private": true,
-  "version": "3.2.8",
+  "version": "3.2.9",
   "license": "MIT",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -60,7 +60,7 @@
     "shelljs": "^0.8.5",
     "tcplayer.js": "^4.8.0",
     "tdesign-icons-vue-next": "^0.2.2",
-    "tdesign-vue-next": "^1.5.3",
+    "tdesign-vue-next": "^1.5.5",
     "unplugin-auto-import": "^0.16.6",
     "unplugin-vue-components": "^0.25.1",
     "url": "^0.11.0",
