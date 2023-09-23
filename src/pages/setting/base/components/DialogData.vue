@@ -311,7 +311,7 @@ const easyConfig = async() => {
       };
       if (_.has(config, "analyze")) {
         data["analyze"] = config.analyze.data;
-        defaultObject.defaultAnalyze = config.analyzes.default;
+        defaultObject.defaultAnalyze = config.analyze.default;
       };
       setting.update(defaultObject);
     } else {
