@@ -94,8 +94,9 @@
       </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
-          <t-space direction="vertical">
+          <t-space  align="center">
             <t-select v-model="formData.broadcasterType" :options="PLAYER_OPTIONS" placeholder="请选择播放器" />
+            <span class="title" @click="isVisible.sniffer=true">嗅探</span>
           </t-space>
         </div>
       </t-form-item>
@@ -129,6 +130,7 @@
         <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
+        <dialog-sniffer-view v-model:visible="isVisible.sniffer" @receive-sniffer-data="flushDialogData"/>
       </t-form-item>
     </t-form>
   </div>
@@ -156,6 +158,7 @@ import DialogDataView from './components/DialogData.vue';
 import DialogUaView from './components/DialogUA.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogFfmpegCaptionView from './components/DialogFfmpegCaption.vue';
+import DialogSnifferView from './components/DialogSniffer.vue';
 
 const ipcRenderer = useIpcRenderer();
 
@@ -169,7 +172,8 @@ const isVisible = reactive({
   update: false,
   dns: false,
   ua: false,
-  iptvThumbnail: false
+  iptvThumbnail: false,
+  sniffer: false
 });
 
 const dnsDialogData = ref({ data: '', type: 'dns' });
@@ -278,6 +282,7 @@ watchEffect(() => {
     storePlayer.updateConfig({
       setting: {
         broadcasterType: formData.value.broadcasterType,
+        snifferType: formData.value.snifferType,
       },
     });
   }

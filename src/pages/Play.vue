@@ -118,16 +118,16 @@
           <div class="player-container">
             <div v-show="!onlineUrl" class="player-media">
               <div
-                v-show="set.broadcasterType === 'xgplayer'"
+                v-show="xg"
                 id="xgplayer"
                 ref="xgpayerRef"
                 class="xgplayer player"
               ></div>
-              <div v-show="set.broadcasterType === 'tcplayer'" ref="tcplayerRef">
+              <div v-show="tc" ref="tcplayerRef">
                 <video id="tcplayer" preload="auto" playsinline webkit-playsinline class="tcplayer player"></video>
               </div>
               <div
-                v-show="set.broadcasterType === 'dplayer'"
+                v-show="dp"
                 id="dplayer"
                 ref="dplayerRef"
                 class="dplayer player"
@@ -930,6 +930,7 @@ const initFilmPlayer = async (isFirst) => {
       config.value.startTime = skipConfig.value.skipTimeInStart;
     }
   }
+
   if (ext.value.site.type === 2) {
     MessagePlugin.info('免嗅资源中, 请等待!');
     console.log('[player] drpy免嗅流程开始');
@@ -979,20 +980,11 @@ const initFilmPlayer = async (isFirst) => {
       // 尝试提取ck/dp播放器中的m3u8
       console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
       try {
-        // if (ext.value.site.type === 0 || ext.value.site.type === 1) {
-        //   console.log('正常cms提取');
-        //   config.value.url = await zy.parserFilmUrl(config.value.url);
-        //   console.info(`最终提取到的地址：${config.value.url}`);
-        //   createPlayer('m3u8');
-        //   timerUpdatePlayProcess();
-        // } else if (ext.value.site.type === 2) {
         console.log('嗅探');
         MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
 
-        onlineUrl.value = config.value.url;
         isSniff.value = false;
         sniffer();
-        // }
       } catch (err) {
         console.error(err);
       }
@@ -1001,12 +993,13 @@ const initFilmPlayer = async (isFirst) => {
 };
 
 // 嗅探
-const sniffer = () => {
+const videoFormats = ['.m3u8', '.mp4', '.flv'];
+
+const sniffer_iframe = () => {
   win.webContents.setAudioMuted(true);
   const iframeWindow = iframeRef.value.contentWindow;
-  const videoFormats = ['.m3u8', '.mp4', '.flv'];
 
-  const totalTime = 10000;
+  const totalTime = 15000;
   const speeder = 250;
   let counter = 1;
   const totalCounter = totalTime / speeder;
@@ -1059,6 +1052,30 @@ const sniffer = () => {
     counter += 1;
   }, speeder);
 };
+
+const sniffer_pie = () => {
+  ipcRenderer.send('sniffer-media', config.value.url);
+  ipcRenderer.on("sniffer-status", (e, res) => {
+    console.log(res)
+    if (res.code == 200) {
+      const formatIndex = videoFormats.findIndex((format) => res.url.toLowerCase().indexOf(format) > -1);
+      if (formatIndex > -1) {
+        config.value.url = res.url
+        const videoFormat = videoFormats[formatIndex];
+        createPlayer(videoFormat.slice(1));
+      }
+    } else {
+      MessagePlugin.warning(`嗅探超时并结束, 请换源`);
+    };
+  });
+}
+
+const sniffer = () => {
+  if (set.value.snifferType === 'iframe') {
+    onlineUrl.value = config.value.url;
+    sniffer_iframe();
+  } else sniffer_pie();
+}
 
 // 初始化播放器
 const initPlayer = async (isFirst = false) => {

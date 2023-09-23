@@ -3,6 +3,8 @@ import remote from '@electron/remote/main';
 import { electronApp } from '@electron-toolkit/utils';
 import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
 import fixPath from 'fix-path';
+import pie from "puppeteer-in-electron";
+import puppeteer from "puppeteer-core";
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
@@ -81,6 +83,7 @@ const showOrHidden = () => {
 let loadWindow: BrowserWindow | null;
 let mainWindow: BrowserWindow | null;
 let playWindow: BrowserWindow | null;
+let snifferWindow: BrowserWindow | null;
 let isHidden = true;
 
 nativeTheme.on('updated', () => {
@@ -110,7 +113,84 @@ const showLoading = () => {
   });
 };
 
-function createWindow(): void {
+pie.initialize(app);
+
+const trySniffer = (url) => {
+  const urlRegex = 'http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*';
+  const promise = new Promise(async (resolve, reject) => {
+    try {
+      let timeout = setTimeout(() => {
+        resolve({ code: 500 });
+        page.close();
+      }, 15000);
+
+      const browser = await pie.connect(app, puppeteer);
+      
+      snifferWindow = new BrowserWindow({
+        show: false,
+      });
+      // window.webContents.openDevTools();
+      const page = await pie.getPage(browser, snifferWindow);
+
+      await page.setRequestInterception(true);
+      page.on('request', (req) => {
+        if (!timeout) {
+          req.abort().catch((err) => console.error(err));
+          return;
+        }
+
+        const reqUrl = req.url();
+        const isExcludedUrl = (reqUrl) => {
+          return (
+            reqUrl.indexOf('url=http') >= 0 ||
+            reqUrl.indexOf('v=http') >= 0 ||
+            reqUrl.indexOf('.css') >= 0 ||
+            reqUrl.indexOf('.html') >= 0
+          );
+        }
+        const isVideoUrl = (reqUrl) => {
+          return reqUrl.match(urlRegex) && !isExcludedUrl(reqUrl);
+        }
+        console.log(reqUrl)
+        if (isVideoUrl(reqUrl)) {
+          console.log(req.headers());
+          console.log(reqUrl);
+
+          const headers = req.headers();
+          const { referer, 'user-agent': userAgent } = headers;
+          const header = {};
+
+          if (referer) header['referer'] = referer;
+          if (userAgent) header['user-agent'] = userAgent;
+
+          resolve({ code: 200, url: reqUrl, header: header });
+          req.abort().catch((err) => console.error(err));
+          clearTimeout(timeout);
+          timeout = null;
+          page.close();
+          return;
+        }
+
+        if (req.isInterceptResolutionHandled()) return;
+
+        if (req.resourceType() === 'image') {
+          req.abort().catch((err) => console.error(err));
+        } else {
+          req.continue().catch((err) => console.error(err));
+        }
+      });
+      
+      await page.setUserAgent(ua? ua :'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1');
+      await page.goto(url).catch((err) => {});
+    } catch (e) {
+      console.error(e);
+      resolve({ code: 500 });
+    }
+  });
+  return promise;
+}
+
+const createWindow = (): void => {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
     width: 1000,
@@ -536,4 +616,9 @@ ipcMain.on('ffmpeg-installed-check',  (event) => {
     }
     event.reply("ffmpeg-installed-status", isInstall);
   });
+});
+
+ipcMain.on('sniffer-media',  async(event, url) => {
+  const res = await trySniffer(url);
+  event.reply("sniffer-status", res);
 });
