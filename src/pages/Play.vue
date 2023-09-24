@@ -379,7 +379,8 @@
 </template>
 <script setup lang="tsx">
 import 'xgplayer-livevideo';
-import 'xgplayer/dist/index.min.css';
+import '@/style/player/veplayer.css';
+
 import 'v3-infinite-loading/lib/style.css';
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import '@/style/player/tcplayer.min.css';
@@ -498,13 +499,6 @@ const commonConfig = {
     volumeMuted: playerVoiceNoIcon,
     pipIcon: playerPipIcon,
     pipIconExit: playerPipIcon,
-  },
-  commonStyle: {
-    playedColor: '#45c58b',
-    sliderBtnStyle: {
-      backgroundColor: '#45c58b',
-    },
-    volumeColor: '#45c58b',
   },
   plugins: [],
 }; // 西瓜、火山公共部分
