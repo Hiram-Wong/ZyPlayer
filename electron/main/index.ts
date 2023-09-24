@@ -1,4 +1,4 @@
-// import { createMenu } from './core/menu';
+import { registerAppMenu } from './core/menu';
 import remote from '@electron/remote/main';
 import { electronApp } from '@electron-toolkit/utils';
 import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
@@ -199,8 +199,6 @@ const createWindow = (): void => {
     minHeight: 640,
     titleBarStyle: 'hiddenInset',
     show: false,
-    frame: false,
-    autoHideMenuBar: true,
     title: 'zyplayer',
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
@@ -214,6 +212,12 @@ const createWindow = (): void => {
   });
 
   remote.enable(mainWindow.webContents); // 启用remote
+
+  // 关闭window时触发下列事件.
+  mainWindow.on('closed', (event) => {
+    event.preventDefault();
+    mainWindow = null;
+  });
 
   mainWindow.on('ready-to-show', () => {
     setTimeout(() => {
@@ -279,6 +283,7 @@ const createWindow = (): void => {
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(() => {
   log.info('[index] App ready');
+
   // 为 Windows 设置应用程序用户模型 ID
   electronApp.setAppUserModelId('com.zyplayer');
 
@@ -306,6 +311,7 @@ app.whenReady().then(() => {
 
   showLoading();
   createWindow();
+  registerAppMenu();
 
   app.on('activate', () => {
     // 通常在 macOS 上，当点击 dock 中的应用程序图标时，如果没有其他

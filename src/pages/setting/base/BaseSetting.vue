@@ -65,25 +65,32 @@
       </t-form-item>
       <t-form-item label="直播" name="iptv">
         <div class="iptv">
-          <t-space align="center">
-            <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
-            <span class="title" @click="checkIpv6">检查</span>
-            <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
-            <t-radio v-model="formData.iptvThumbnail" allow-uncheck>预览图</t-radio>
-            <span class="title" @click="isVisible.iptvThumbnail=true">说明</span>
-          </t-space>
-        </div>
-      </t-form-item>
-      <t-form-item label="节目单" name="epg">
-        <div class="epg">
-          <t-space align="center">
-            <t-input
-              v-model="formData.defaultIptvEpg"
-              label="默认EPG:"
-              placeholder="仅支持DIYP"
-              :style="{ width: '255px' }"
-            />
-            <span class="title" @click="reset('epg')">重置</span>
+          <t-space direction="vertical">
+            <t-space align="center">
+              <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
+              <span class="title" @click="checkIpv6">检查</span>
+              <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
+              <t-radio v-model="formData.iptvThumbnail" allow-uncheck>预览图</t-radio>
+              <span class="title" @click="isVisible.iptvThumbnail=true">说明</span>
+            </t-space>
+            <t-space align="center">
+              <t-input
+                v-model="formData.defaultIptvEpg"
+                label="默认节目:"
+                placeholder="仅支持DIYP"
+                :style="{ width: '255px' }"
+              />
+              <span class="title" @click="reset('epg')">重置</span>
+            </t-space>
+            <!-- <t-space align="center">
+              <t-input
+                v-model="formData.defaultIptvEpg"
+                label="默认台标:"
+                placeholder="仅支持DIYP"
+                :style="{ width: '255px' }"
+              />
+              <span class="title" @click="reset('epg')">重置</span>
+            </t-space> -->
           </t-space>
         </div>
       </t-form-item>

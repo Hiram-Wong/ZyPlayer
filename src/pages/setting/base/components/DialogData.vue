@@ -9,11 +9,6 @@
           <div class="config"> 
             <t-collapse expand-mutex>
               <t-collapse-panel value="easyConfig" header="一键配置">
-                <template #headerRightContent>
-                  <t-space size="small">  
-                    <t-button size="small" @click.stop="easyConfig">导入</t-button>
-                  </t-space>
-                </template>
                 <t-radio-group v-model="formData.easyConfig.type">
                   <t-radio :value="0">软件接口</t-radio>
                   <t-radio :value="1">drpy接口</t-radio>
@@ -23,13 +18,11 @@
                 <p v-else-if="formData.easyConfig.type === 1" class="tip">目前仅支持sites中type:1的数据,请将js模式设置为0</p>
                 <p v-else-if="formData.easyConfig.type === 2" class="tip">目前仅支持sites中type:0或1且的cms类型的数据</p>
                 <t-input label="地址：" v-model="formData.easyConfig.url" class="input-item"></t-input>
+                <t-popconfirm content="原有数据将清除，确认配置吗" placement="bottom" @confirm="easyConfig">
+                  <t-button size="small" block ghost>配置</t-button>
+                </t-popconfirm>
               </t-collapse-panel>
               <t-collapse-panel value="remoteImport" header="配置导入">
-                <template #headerRightContent>
-                  <t-space size="small">  
-                    <t-button size="small" @click.stop="importData">导入</t-button>
-                  </t-space>
-                </template>
                 <t-radio-group v-model="formData.importData.type">
                   <t-radio value="remote">远端导入</t-radio>
                   <t-radio value="local">本地导入</t-radio>
@@ -48,26 +41,20 @@
                     :request-method="requestMethod"
                   />
                 </div>
+                <t-popconfirm content="原有数据将清除，确认导入吗" placement="bottom" @confirm="importData">
+                  <t-button size="small" block ghost>导入</t-button>
+                </t-popconfirm>
               </t-collapse-panel>
               <t-collapse-panel value="setExport" header="配置导出">
-                <template #headerRightContent>
-                  <t-space size="small">  
-                    <t-button size="small" @click.stop="setExport">导出</t-button>
-                  </t-space>
-                </template>
                 <t-radio v-model="formData.exportSeletct.sites" allow-uncheck class="radio-item">影视源</t-radio>
                 <t-radio v-model="formData.exportSeletct.iptv" allow-uncheck class="radio-item">电视源</t-radio>
                 <t-radio v-model="formData.exportSeletct.analyze" allow-uncheck class="radio-item">解析源</t-radio>
                 <t-radio v-model="formData.exportSeletct.history" allow-uncheck class="radio-item">历史</t-radio>
                 <t-radio v-model="formData.exportSeletct.star" allow-uncheck class="radio-item">收藏</t-radio>
                 <t-radio v-model="formData.exportSeletct.setting" allow-uncheck class="radio-item">基础配置</t-radio>
+                <t-button size="small" block ghost @click="setExport">导出</t-button>
               </t-collapse-panel>
               <t-collapse-panel value="clearData" header="清理数据">
-                <template #headerRightContent>
-                  <t-space size="small">  
-                    <t-button size="small" @click.stop="clearData">清理</t-button>
-                  </t-space>
-                </template>
                 <t-radio v-model="formData.clearSeletct.sites" allow-uncheck class="radio-item">影视源</t-radio>
                 <t-radio v-model="formData.clearSeletct.iptv" allow-uncheck class="radio-item">电视源</t-radio>
                 <t-radio v-model="formData.clearSeletct.analyze" allow-uncheck class="radio-item">解析源</t-radio>
@@ -79,6 +66,7 @@
                 <t-radio v-model="formData.clearSeletct.cache" allow-uncheck class="radio-item">缓存
                   <span class="title">「{{ formData.size.cache }}MB」</span>
                 </t-radio>
+                <t-button size="small" block ghost @click="clearData">清理</t-button>
               </t-collapse-panel>
             </t-collapse>
           </div>
@@ -108,8 +96,12 @@
           </div>
           <div class="action">
             <div class="action-item">
-              <t-button theme="default" class="btn-2" @click="rsyncRemote">同步数据到帐号</t-button>
-              <t-button theme="default" class="btn-2" @click="rsyncLocal">云数据覆盖本地</t-button>
+              <t-popconfirm content="云端数据将被覆盖,确认操作吗" placement="bottom"  @confirm="rsyncRemote">
+                <t-button theme="default" class="btn-2">同步数据到帐号</t-button>
+              </t-popconfirm>
+              <t-popconfirm content="本地数据将被清除,确认操作吗" placement="bottom"  @confirm="rsyncLocal">
+                <t-button theme="default" class="btn-2">云数据覆盖本地</t-button>
+              </t-popconfirm>
             </div>
           </div>
         </div>
@@ -217,6 +209,16 @@ watch(
   }
 )
 
+// 数据判断
+const hasTrueValue = (obj) => {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key) && obj[key] === true) {
+      return true;
+    };
+  };
+  return false;
+};
+
 // 初始化数据库
 const initDB = async(data) => {
   if (typeof data !== 'object') return;
@@ -283,7 +285,10 @@ const initDB = async(data) => {
 // 一键配置
 const easyConfig = async() => {
   const { url, type } = formData.easyConfig;
-  if (!url) return;
+  if (!url) {
+    MessagePlugin.warning('请输入一键配置地址');
+    return;
+  };
   const config = await zy.getConfig(url).catch((error) => {
     MessagePlugin.error(`请求一键配置地址失败：${error}`);
   });
@@ -367,11 +372,16 @@ const easyConfig = async() => {
 
 // 配置导入
 const importData = async() => {
-  const { type } = formData.importData;
+  const { type, remoteImpoUrl, localImpoFile } = formData.importData;
+  if (!remoteImpoUrl || !localImpoFile) {
+    MessagePlugin.warning('请选择或者填写数据');
+    return;
+  };
+
   if (type === 'remote') {
-    await importFromRemote(formData.importData.remoteImpoUrl);
+    await importFromRemote(remoteImpoUrl);
   } else {
-    await importFromLocal(formData.importData.localImpoFile[0].raw);
+    await importFromLocal(localImpoFile[0].raw);
   };
 };
 
@@ -459,6 +469,10 @@ const jsonFromDB = async(all=false) => {
 
 // 导出
 const setExport = async() => {
+  if (!hasTrueValue(formData.exportSeletct)) {
+    MessagePlugin.warning('请选择需要导出的类型');
+    return;
+  };
   const arr = await jsonFromDB();
   const str = JSON.stringify(arr, null, 2);
   const blob = new Blob([str], { type: 'text/plain;charset=utf-8' });
@@ -515,6 +529,10 @@ const getThumbnailSize = () => {
 
 // 清理缓存
 const clearData = async() => {
+  if (!hasTrueValue(formData.clearSeletct)) {
+    MessagePlugin.warning('请选择需要清理的类型');
+    return;
+  };
   // 清空sites数据的函数
   const clearSitesData = async () => {
     await sites.clear();
@@ -599,6 +617,10 @@ const clearData = async() => {
 
 // 初始化
 const initWebdav = async() => {
+  if (!formData.url && !formData.username && !formData.password) {
+    MessagePlugin.warning('请补全同步盘配置信息');
+    return;
+  };
   clientWebdev.value = await createClient(
     formData.url,
     {
@@ -629,6 +651,7 @@ const saveWebdev = async() => {
 const checkWebdev = async() => {
   try {
     if (!clientWebdev.value) await initWebdav();
+    if (!formData.url && !formData.username && !formData.password) return;
     await clientWebdev.value.getDirectoryContents("/");
     MessagePlugin.success('连接成功');
   } catch (err) {
@@ -640,6 +663,7 @@ const checkWebdev = async() => {
 const rsyncRemote = async() => {
   try {
     if (!clientWebdev.value) await initWebdav();
+    if (!formData.url && !formData.username && !formData.password) return;
     const str = await jsonFromDB(true);
     const formatToJson = JSON.stringify(str);
     console.log(formatToJson)
@@ -655,6 +679,7 @@ const rsyncRemote = async() => {
 const rsyncLocal = async() => {
   try {
     if (!clientWebdev.value) await initWebdav();
+    if (!formData.url && !formData.username && !formData.password) return;
     const str: string = await clientWebdev.value.getFileContents("/zyplayer/config.json", { format: "text" });
     const formatToJson = JSON.parse(str);
     console.log(formatToJson)
@@ -672,7 +697,7 @@ const rsyncLocal = async() => {
   max-height: 430px;
   .data-item {
     .separator {
-      border: 0.2rem solid var(--td-brand-color);
+      border: 0.1rem solid var(--td-brand-color);
       height: 0.6rem;
       border-radius: var(--td-radius-default);
       display: inline-block;
