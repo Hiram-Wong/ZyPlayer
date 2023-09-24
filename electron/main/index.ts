@@ -410,7 +410,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
     playWindow.show();
   });
   playWindow.on('closed', () => {
-    if (mainWindow.isDestroyed()) {
+    if (!mainWindow || mainWindow.isDestroyed()) {
       createWindow();
     } else {
       mainWindow.show();
@@ -420,7 +420,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
 
 ipcMain.on('showMainWin', () => {
   log.info(`[ipcMain] show main windows`);
-  if (mainWindow.isDestroyed()) {
+  if (!mainWindow || mainWindow.isDestroyed()) {
     createWindow();
   } else {
     mainWindow.show();
