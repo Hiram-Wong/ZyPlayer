@@ -2,7 +2,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from "axios-retry";
 import { XMLParser } from "fast-xml-parser";
 import * as cheerio from "cheerio";
-import { Parser as M3u8Parser } from "m3u8-parser";
 import _ from "lodash";
 import JSON5 from "json5";
 import qs from "qs";
