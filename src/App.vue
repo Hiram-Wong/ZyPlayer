@@ -59,5 +59,5 @@ const initPlayerSetting = async () => {
 
 const initTmpDir = () => {
   ipcRenderer.send('tmpdir-manage', 'init', 'thumbnail')
-}
+};
 </script>
