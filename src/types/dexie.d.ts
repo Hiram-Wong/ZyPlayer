@@ -9,6 +9,7 @@ interface Setting {
   defaultCheckModel: boolean;
   defaultChangeModel: boolean;
   defaultIptvEpg: string;
+  defaultIptvLogo: string;
   iptvSkipIpv6: boolean;
   iptvThumbnail: boolean;
   restoreWindowPositionAndSize: boolean;
@@ -19,6 +20,7 @@ interface Setting {
   analyzeQuickSearchType: string;
   analyzeSupport: boolean;
   broadcasterType: string;
+  snifferType: string;
   softSolution: boolean;
   skipStartEnd: boolean;
   agreementMask: boolean;

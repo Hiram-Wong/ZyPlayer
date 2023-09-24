@@ -119,6 +119,15 @@ db.version(22).stores({
   setting: 'id, theme, externalPlayer, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, webdevUrl, webdevUsername, webdevPassword',
 })
 
+db.version(23).stores({
+  setting: 'id, theme, externalPlayer, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, defaultIptvLogo, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, snifferType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, webdevUrl, webdevUsername, webdevPassword',
+}).upgrade(trans => {
+  trans.setting.toCollection().modify(setting => {
+    setting.snifferType = 'pie';
+    setting.defaultIptvLogo = 'https://epg.112114.eu.org/logo/';
+  })
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(dataSetting);
 })
