@@ -53,6 +53,7 @@ import 'v3-infinite-loading/lib/style.css';
 
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
+
 import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -64,8 +65,8 @@ import { usePlayStore } from '@/store';
 import DetailView from '../../film/Detail.vue';
 
 const ipcRenderer = useIpcRenderer();
-
 const store = usePlayStore();
+
 const pagination = ref({
   pageIndex: 0,
   pageSize: 32,
@@ -85,31 +86,37 @@ const bingeList = ref([]);
 const infiniteId = ref(+new Date());
 
 const getBingeList = async () => {
+  let length = 0;
   try {
-    const res = await star.pagination(pagination.value.pageIndex, pagination.value.pageSize);
+    const { pageIndex, pageSize } = pagination.value;
+    const res = await star.pagination(pageIndex, pageSize);
     res.list.map(async (item) => {
       const { siteKey } = item;
       const res = await sites.find({ key: siteKey });
       item.siteName = _.has(res, "name") ? res.name : '该源应该被删除了哦';
     });
     bingeList.value = _.unionWith(bingeList.value, res.list, _.isEqual);
+
     pagination.value.count = res.total;
     pagination.value.pageIndex++;
-    return _.size(res.list);
+
+    length = _.size(res.list);
+    return length;
   } catch (err) {
     console.error(err);
-    throw err;
-  }
+    length = 0;
+  } finally {
+    console.log(`[binge] load data length: ${length}`);
+    return length;
+  } 
 };
 
 const load = async ($state) => {
-  console.log('loading...');
+  console.log('[binge] loading...');
   try {
     const resLength = await getBingeList();
     if (resLength === 0) $state.complete();
-    else {
-      $state.loaded();
-    }
+    else $state.loaded();
   } catch (error) {
     $state.error();
   }

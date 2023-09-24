@@ -133,7 +133,7 @@ const getHistoryList = async () => {
 };
 
 const load = async ($state) => {
-  console.log('loading...');
+  console.log('[history] loading...');
   try {
     const resLength = await getHistoryList();
     if (resLength === 0) $state.complete();

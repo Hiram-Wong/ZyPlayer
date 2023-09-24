@@ -57,6 +57,7 @@ import 'v3-infinite-loading/lib/style.css';
 
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
+
 import _ from 'lodash';
 import moment from 'moment';
 import { LaptopIcon } from 'tdesign-icons-vue-next';
@@ -70,8 +71,8 @@ import { usePlayStore } from '@/store';
 import DetailView from '../../film/Detail.vue';
 
 const ipcRenderer = useIpcRenderer();
-
 const store = usePlayStore();
+
 const options = ref({
   today: [],
   week: [],
@@ -94,30 +95,39 @@ const isVisible = reactive({
 const infiniteId = ref(+new Date());
 
 const getHistoryList = async () => {
-  const { pageIndex, pageSize } = pagination.value;
-  const res = await history.pagination(pageIndex, pageSize);
+  let length = 0;
+  try {
+    const { pageIndex, pageSize } = pagination.value;
+    const res = await history.pagination(pageIndex, pageSize);
 
-  res.list.forEach(async (item) => {
-    const { date, siteKey } = item;
-    const res = await sites.find({ key: siteKey });
-    item.siteName = _.has(res, "name") ? res.name : '该源应该被删除了哦';
-    console.log(item);
-    const timeDiff = filterDate(date);
-    let timeKey;
-    if (timeDiff === 0) timeKey = 'today';
-    else if (timeDiff < 7) timeKey = 'week';
-    else timeKey = 'ago';
-    options.value[timeKey].push(item);
-  });
+    res.list.forEach(async (item) => {
+      const { date, siteKey } = item;
+      const res = await sites.find({ key: siteKey });
+      item.siteName = _.has(res, "name") ? res.name : '该源应该被删除了哦';
+      const timeDiff = filterDate(date);
+      let timeKey;
+      if (timeDiff === 0) timeKey = 'today';
+      else if (timeDiff < 7) timeKey = 'week';
+      else timeKey = 'ago';
+      options.value[timeKey].push(item);
+    });
 
-  pagination.value.count = res.total;
-  pagination.value.pageIndex++;
+    pagination.value.count = res.total;
+    pagination.value.pageIndex++;
 
-  return _.size(res.list);
+    length = _.size(res.list);
+    return length;
+  } catch (err) {
+    console.error(err);
+    length = 0;
+  } finally {
+    console.log(`[history] load data length: ${length}`);
+    return length;
+  } 
 };
 
 const load = async ($state) => {
-  console.log('loading...');
+  console.log('[history] loading...');
 
   try {
     const resLength = await getHistoryList();
