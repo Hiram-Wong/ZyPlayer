@@ -1,7 +1,5 @@
 import { electronAPI } from '@electron-toolkit/preload';
-import { contextBridge } from 'electron';
-// const { contextBridge } = require('electron');
-// const { electronAPI } = require('@electron-toolkit/preload');
+import { contextBridge, ipcRenderer } from 'electron';
 
 // Custom APIs for renderer
 const api = {};
@@ -17,20 +15,6 @@ if (process.contextIsolated) {
     console.error(error);
   }
 } else {
-  // @ts-ignore (define in dts)
   window.electron = electronAPI;
-  // @ts-ignore (define in dts)
   window.api = api;
 }
-
-// Chrome扩展沙盒
-window.addEventListener('DOMContentLoaded', () => {
-  const replaceText = (selector, text) => {
-    const element = document.getElementById(selector);
-    if (element) element.innerText = text;
-  };
-
-  for (const dependency of ['chrome', 'node', 'electron']) {
-    replaceText(`${dependency}-version`, process.versions[dependency]);
-  }
-});
