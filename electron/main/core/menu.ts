@@ -1,6 +1,6 @@
 import { shell, app, dialog, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
 
-export const registerAppMenu = (win: BrowserWindow) => {
+export const registerAppMenu = () => {
   const menuBar: Array<MenuItemConstructorOptions | MenuItem> = [
     {
       label: 'zyplayer',
@@ -80,7 +80,7 @@ export const registerAppMenu = (win: BrowserWindow) => {
           label: '打开控制台',
           accelerator: process.platform === 'darwin' ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
           click() {
-            const focusedWindow = BrowserWindow.getFocusedWindow();
+            const focusedWindow = BrowserWindow.getFocusedWindow().webContents;
             focusedWindow && focusedWindow.toggleDevTools();
           },
         },
