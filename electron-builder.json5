@@ -3,7 +3,7 @@
  */
 {
   "productName": "zyplayer",
-  "appId": "com.zyplayer.app",
+  "appId": "com.zyplayer",
   "copyright": "Copyright © 2023 zyplayer Team Inc.",
   "asar": true,
   "directories": {
@@ -18,11 +18,10 @@
     "target": [
       {
         "target":"dmg",
+        {
+        "target":"dmg",
         "arch": ["x64", "arm64", "universal"]
-      },
-      {
-        "target": "zip",
-        "arch": ["x64", "arm64", "universal"]
+      }
       }
     ],
     "darkModeSupport": true,
