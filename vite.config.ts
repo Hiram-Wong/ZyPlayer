@@ -10,10 +10,7 @@ import { ConfigEnv, loadEnv, UserConfig } from 'vite';
 import electron from 'vite-plugin-electron';
 import renderer from 'vite-plugin-electron-renderer';
 import viteImagemin from 'vite-plugin-imagemin';
-// 通过触发冷启动时的预构建来解决
-import OptimizationPersist from 'vite-plugin-optimize-persist';
 import fs from 'fs-extra';
-import PkgConfig from 'vite-plugin-package-config';
 import svgLoader from 'vite-svg-loader';
 
 import { dependencies } from './package.json';
@@ -71,8 +68,6 @@ export default ({ mode }: ConfigEnv): UserConfig => {
           },
         },
       }),
-      PkgConfig(),
-      OptimizationPersist(),
       vueJsx(),
       svgLoader(),
       AutoImport({
