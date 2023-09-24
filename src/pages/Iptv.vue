@@ -96,6 +96,7 @@
             </context-menu>
           </div>
           <infinite-loading
+            v-if="isVisible.toolbar"
             :identifier="infiniteId"
             style="text-align: center; margin-bottom: 2em"
             :duration="200"
@@ -131,11 +132,11 @@ import PQueue from 'p-queue';
 import { Tv1Icon, LoadingIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 
 import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
-import store, { usePlayStore, useSettingStore } from '@/store';
+import { usePlayStore, useSettingStore } from '@/store';
 import { ChannelItem } from '@/types/channelList';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -160,6 +161,10 @@ const renderLoading = () => {
     </div>
   );
 };
+
+const isVisible = reactive({
+  toolbar: false, // 筛选
+});
 
 const iptvSetting = ref({
   name: '',
@@ -203,55 +208,60 @@ const channelItem = ref(null);
 const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
 onMounted(() => {
-  getIptvSetting();
+  getSetting();
   getChannelCount();
 });
 
 // 获取配置
-const getIptvSetting = async () => {
-  const [defaultIptv, defaultIptvEpg, iptvSkipIpv6, iptvStatus, iptvThumbnail, iptvAll] = await Promise.all([
-    setting.get('defaultIptv'),
-    setting.get('defaultIptvEpg'),
-    setting.get('iptvSkipIpv6'),
-    setting.get('iptvStatus'),
-    setting.get('iptvThumbnail'),
-    iptv.all(),
-  ]);
-  if (defaultIptv) {
-    iptvListSelect.value = defaultIptv;
-    try {
-      const basic = await iptv.get(defaultIptv);
-      if (basic) {
-        iptvSetting.value.name = basic.name;
-        iptvSetting.value.epg = basic.epg || defaultIptvEpg;
+const getSetting = async () => {
+  try {
+    const [defaultIptv, defaultIptvEpg, iptvSkipIpv6, iptvStatus, iptvThumbnail, iptvAll] = await Promise.all([
+      setting.get('defaultIptv'),
+      setting.get('defaultIptvEpg'),
+      setting.get('iptvSkipIpv6'),
+      setting.get('iptvStatus'),
+      setting.get('iptvThumbnail'),
+      iptv.all(),
+    ]);
+
+    if (defaultIptv) {
+      iptvListSelect.value = defaultIptv;
+      try {
+        const basic = await iptv.get(defaultIptv);
+        if (basic) {
+          iptvSetting.value.name = basic.name;
+          iptvSetting.value.epg = basic.epg || defaultIptvEpg;
+        }
+      } catch {
+        infiniteCompleteTip.value = '查无此id,请前往设置-直播源重新设置默认源!';
       }
-    } catch {
-      infiniteCompleteTip.value = '查无此id,请前往设置-直播源重新设置默认源!';
+    } else {
+      infiniteCompleteTip.value = '暂无数据,请前往设置-直播源设置默认源!';
     }
-  } else {
-    infiniteCompleteTip.value = '暂无数据,请前往设置-直播源设置默认源!';
+
+    iptvSetting.value.skipIpv6 = iptvSkipIpv6;
+    iptvSetting.value.iptvStatus = iptvStatus;
+    iptvSetting.value.iptvThumbnail = iptvThumbnail;
+
+    getClassList();
+
+    iptvList.value = iptvAll.filter((item) => item.isActive);
+
+    isVisible.toolbar = true;
+  } catch (err) {
+    isVisible.toolbar = false;
   }
-
-  iptvSetting.value.skipIpv6 = iptvSkipIpv6;
-  iptvSetting.value.iptvStatus = iptvStatus;
-  iptvSetting.value.iptvThumbnail = iptvThumbnail;
-
-  getIptvClass();
-
-  iptvList.value = iptvAll.filter((item) => item.isActive);
 };
 
 // 获取直播列表个数
-const getChannelCount = () => {
-  channelList.total().then((res) => {
-    pagination.value.count = res;
-  });
+const getChannelCount = async () => {
+  const total = await channelList.total();
+  pagination.value.count = total;
 };
 
 // 获取分类
-const getIptvClass = async () => {
+const getClassList = async () => {
   let res = await channelList.class();
-  if (iptvSetting.value.skipIpv6) res = res.filter((item) => !/ipv6/i.test(item.name));
 
   iptvClassList.value = _.unionWith(iptvClassList.value, res, _.isEqual);
 };
@@ -286,27 +296,16 @@ const getChannelList = async () => {
   }
 
   pagination.value.pageIndex++;
+  console.log(`[iptv] load data length: ${length}`);
   return length;
 };
 
 const load = async ($state: { complete: () => void; loaded: () => void; error: () => void }) => {
-  console.log('loading...');
-
-  if (!iptvSetting.value.name) {
-    const isNoData = infiniteCompleteTip.value.indexOf('暂无数据');
-    if (isNoData > -1) {
-      $state.complete();
-      return;
-    }
-    infiniteId.value++;
-    return;
-  }
-
+  console.log('[iptv] loading...');
   try {
     const resLength = await getChannelList();
-    console.log(`[list] 返回数据长度${resLength}`);
+
     if (resLength === 0) {
-      infiniteCompleteTip.value = '没有更多内容了!';
       $state.complete();
     } else $state.loaded();
   } catch (err) {
@@ -317,7 +316,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
 
 // 搜索
 const searchEvent = async () => {
-  console.log('search');
+  console.log(`[iptv] search keyword: ${searchTxt.value}`);
   iptvDataList.value = { list: [], total: 0 };
   if (!_.size(iptvDataList.value.list)) infiniteId.value++;
   pagination.value.pageIndex = 0;
@@ -456,7 +455,7 @@ const clearQueue = () => {
 
 // 切换源
 const changeDefaultIptvEvent = async (item: any) => {
-  console.log(item);
+  console.log(`[iptv] change source: ${item}`);
 
   infiniteCompleteTip.value = '没有更多内容了!';
   iptvDataList.value = { list: [], total: 0 };
@@ -481,7 +480,7 @@ const changeDefaultIptvEvent = async (item: any) => {
         m3u(fileContent);
       } else txt(fileContent);
       await setting.update({ defaultIptv: item });
-      await Promise.all([getIptvSetting(), getChannelCount(), getIptvClass()]);
+      await Promise.all([getSetting(), getChannelCount(), getClassList()]);
     }
     MessagePlugin.success('设置成功');
   } catch (err) {
@@ -558,7 +557,7 @@ eventBus.on(async () => {
   iptvClassList.value = [{ id: '全部', name: '全部' }];
   iptvClassSelect.value = '全部';
   iptvDataList.value = { list: [], total: 0 };
-  await Promise.all([getIptvSetting(), getChannelCount(), getIptvClass()]);
+  await Promise.all([getSetting(), getChannelCount(), getClassList()]);
   infiniteId.value++;
   pagination.value.pageIndex = 0;
 });
@@ -590,7 +589,7 @@ const copyChannelEvent = () => {
 
 const formatMoreTitle = (item, list) => {
   return _.find(list, {id: item});
-}
+};
 </script>
 
 <style lang="less" scoped>
