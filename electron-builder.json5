@@ -17,7 +17,6 @@
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
     "target": [
       {
-        "target":"dmg",
         {
         "target":"dmg",
         "arch": ["x64", "arm64", "universal"]
