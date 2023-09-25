@@ -17,10 +17,8 @@
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
     "target": [
       {
-        {
         "target":"dmg",
         "arch": ["x64", "arm64", "universal"]
-      }
       }
     ],
     "darkModeSupport": true,
