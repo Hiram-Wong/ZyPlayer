@@ -13,6 +13,7 @@ interface DexieDatabase extends Dexie {
   analyze: Dexie.Table<Analyze, number>;
   analyzeHistory: Dexie.Table<AnalyzeHistory, number>;
   searchHistory: Dexie.Table<SearchHistory, number>;
+  drive: Dexie.Table<Drive, number>;
 }
 
 const db = new Dexie('zy') as DexieDatabase
@@ -120,7 +121,8 @@ db.version(22).stores({
 })
 
 db.version(23).stores({
-  setting: 'id, theme, externalPlayer, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, defaultIptvLogo, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, analyzeFlag, analyzeSupport, broadcasterType, snifferType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, webdevUrl, webdevUsername, webdevPassword',
+  setting: 'id, theme, externalPlayer, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, defaultIptvLogo, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, defaultDrive, analyzeFlag, analyzeSupport, broadcasterType, snifferType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, webdevUrl, webdevUsername, webdevPassword',
+  drive: '++id, name, server, params, startPage, search, headers, isActive'
 }).upgrade(trans => {
   trans.setting.toCollection().modify(setting => {
     setting.snifferType = 'pie';

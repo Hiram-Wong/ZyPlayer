@@ -371,6 +371,38 @@
                 </div>
               </div>
             </div>
+            <div v-if="type == 'drive'" class="drive contents">
+              <div class="play-title-warp">
+                <p class="play-title nowrap">{{ info.name }}</p>
+              </div>
+              <div class="drive-items">
+                <div class="contents-wrap scroll drive-warp">
+                  <div v-for="item in driveDataList" :key="item.id" class="content">
+                    <div class="content-item content-item-start" @click="changeDriveEvent(item)">
+                      <div class="logo-wrap">
+                        <t-image
+                          class="logo"
+                          fit="contain"
+                          :src="item.thumb"
+                          :style="{ width: '64px', height: '32px', maxHeight: '32px', background: 'none' }"
+                          :lazy="true"
+                          :loading="renderLoading"
+                          :error="renderError"
+                        >
+                        </t-image>
+                      </div>
+                      <div class="title-wrap nowrap title-warp-channel">{{ item.name }}</div>
+                      <div class="status-wrap">
+                        <span :class="info.name === item.name ? 'playing' : 'unplay'">
+                          {{ info.name === item.name ? '正在播放' : '未播放' }}
+                        </span>
+                      </div>
+                    </div>
+                    <t-divider dashed style="margin: 5px 0" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -427,6 +459,7 @@ import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 import { analyze, channelList, history, setting, sites, star } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
+import { __jsEvalReturn } from '@/lib/utils/alist_open';
 import { usePlayStore } from '@/store';
 
 import SharePopup from './common/SharePopup.vue';
@@ -581,6 +614,9 @@ const reverseOrder = ref(true); // true 正序 false 倒序
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
 const iptvDataList = ref({});
+const driveDataList = ref({});
+const spider = ref(null);
+
 const skipConfig = ref({
   skipTimeInStart: 30,
   skipTimeInEnd: 30,
@@ -884,7 +920,7 @@ const initIptvPlayer = async () => {
     }
   }
 
-  if (config.value.url.includes('mp4')) {
+  if (config.value.url.includes('mp4') || config.value.url.includes('mkv')) {
     createPlayer('mp4');
   } else if (config.value.url.includes('flv')) {
     createPlayer('flv');
@@ -941,7 +977,7 @@ const initFilmPlayer = async (isFirst) => {
     console.log(`[player] drpy免嗅流程结束`);
   }
 
-  if (config.value.url.includes('mp4')) {
+  if (config.value.url.includes('mp4') || config.value.url.includes('mkv')) {
     createPlayer('mp4');
   } else if (config.value.url.includes('flv')) {
     createPlayer('flv');
@@ -984,6 +1020,29 @@ const initFilmPlayer = async (isFirst) => {
       }
     }
   }
+};
+
+// 初始化网盘
+const initCloudPlayer = async () => {
+  driveDataList.value = ext.value.files;
+  config.value.url = info.value.url;
+  if (config.value.url.includes('mp4') || info.value.name.includes('mp4') || config.value.url.includes('mkv') || info.value.name.includes('mkv')) {
+    createPlayer('mp4');
+  } else if (config.value.url.includes('flv') || info.value.name.includes('flv')) {
+    createPlayer('flv');
+  } else {
+    createPlayer('m3u8');
+  }
+};
+
+const spiderInit = async() => {
+  if (!spider.value) spider.value = __jsEvalReturn();
+  await spider.value.init({
+    skey: 'siteKey',
+    ext: [
+      { ...ext.value.site }
+    ],
+  });
 };
 
 // 嗅探
@@ -1081,6 +1140,8 @@ const initPlayer = async (isFirst = false) => {
     await initIptvPlayer();
   } else if (type.value === 'film') {
     await initFilmPlayer(isFirst);
+  } else if (type.value === 'drive') {
+    await initCloudPlayer();
   }
   document.title = type.value === 'iptv' ? info.value.name : `${info.value.vod_name} ${selectPlayIndex.value}`;
 };
@@ -1208,6 +1269,24 @@ const changeIptvEvent = async (item) => {
     },
   });
   info.value = item;
+  await initPlayer();
+};
+
+// 切换cloud
+const changeDriveEvent = async (item) => {
+  await spiderInit();
+  const res = JSON.parse(await spider.value.file(item.path));
+  store.updateConfig({
+    type: 'drive',
+    data: {
+      info: {
+        name: res.name,
+        url: res.url
+      }
+    },
+  });
+  info.value = res;
+
   await initPlayer();
 };
 
@@ -1955,6 +2034,14 @@ const openMainWinEvent = () => {
             padding-top: 20px;
           }
 
+          .drive {
+            .play-title-warp {
+              .play-title {
+                max-width: 100%;
+              }
+            }
+          }
+
           .play-title-warp {
             height: 26px;
             line-height: 26px;
@@ -2334,64 +2421,70 @@ const openMainWinEvent = () => {
 
 .t-tabs {
   background-color: rgba(0, 0, 0, 0);
-  .contents-wrap,
-  .epg-warp {
-    height: calc(100% - 90px);
-    width: 100%;
-    overflow-y: scroll;
-    display: flex;
-    flex-direction: column;
-    .content {
-      .content-item-start {
-        justify-content: flex-start;
+}
+
+.contents-wrap {
+  height: calc(100% - 90px);
+  width: 100%;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  .content {
+    .content-item-start {
+      justify-content: flex-start;
+    }
+    .content-item-between {
+      justify-content: space-between;
+    }
+    .content-item {
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+      cursor: pointer;
+      .time-warp {
+        width: 40px;
+        color: #f09736;
+        margin-right: 10px;
       }
-      .content-item-between {
-        justify-content: space-between;
-      }
-      .content-item {
-        display: flex;
-        align-items: center;
-        font-weight: 500;
-        cursor: pointer;
-        .time-warp {
-          width: 40px;
+      .status-wrap {
+        width: 60px;
+        text-align: right;
+        .played {
+          color: #2774f6;
+        }
+        .playing {
           color: #f09736;
-          margin-right: 10px;
         }
-        .status-wrap {
-          width: 60px;
-          text-align: right;
-          .played {
-            color: #2774f6;
-          }
-          .playing {
-            color: #f09736;
-          }
-          .unplay {
-            color: #f0f0f1;
-          }
-        }
-        .logo-wrap {
-          max-width: 60px;
-          margin-right: 10px;
-        }
-        .title-wrap {
+        .unplay {
           color: #f0f0f1;
-          font-weight: bold;
         }
-        .title-warp-channel {
-          width: calc(100% - 120px);
-        }
-        .title-warp-epg {
-          width: calc(100% - 110px);
-        }
-        &:hover {
-          background-color: #2f3134;
-          border-radius: var(--td-radius-small);
-        }
+      }
+      .logo-wrap {
+        max-width: 60px;
+        margin-right: 10px;
+      }
+      .title-wrap {
+        color: #f0f0f1;
+        font-weight: bold;
+      }
+      .title-warp-channel {
+        width: calc(100% - 120px);
+      }
+      .title-warp-epg {
+        width: calc(100% - 110px);
+      }
+      &:hover {
+        background-color: #2f3134;
+        border-radius: var(--td-radius-small);
       }
     }
   }
+}
+
+
+.drive-warp {
+  margin-top: 20px;
+  height: calc(100% - 0px);
 }
 
 .scroll {
@@ -2403,7 +2496,8 @@ const openMainWinEvent = () => {
 }
 
 .channel-items,
-.epg-items {
+.epg-items,
+.drive-items {
   position: relative;
   height: calc(100vh - 70px);
 }

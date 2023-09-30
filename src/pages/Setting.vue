@@ -42,7 +42,8 @@
         <base-view class="container-item" v-if="settingSet.select === 'configBase'"/>
         <site-view class="container-item" v-else-if="settingSet.select === 'siteSource'"/>
         <iptv-view class="container-item" v-else-if="settingSet.select === 'iptvSource'"/>
-        <analyze-view class="container-item" v-else/>
+        <analyze-view class="container-item" v-else-if="settingSet.select === 'analyzeSource'"/>
+        <drive-view class="container-item" v-else-if="settingSet.select === 'driveSource'"/>
       </div>
     </div>
     </div>
@@ -59,6 +60,7 @@ import analyzeView from './setting/analyze/AnalyzeSetting.vue';
 import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
+import driveView from './setting/drive/driveSetting.vue';
 import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
 
 const formDialogPrivacyPolicy = ref(false);
@@ -78,6 +80,9 @@ const settingSet = reactive({
     },{
       key: 'analyzeSource',
       value: '解析配置'
+    },{
+      key: 'driveSource',
+      value: '网盘配置'
     }
   ]
 })

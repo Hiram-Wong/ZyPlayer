@@ -224,6 +224,8 @@ const getModeIcon = (mode) => {
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 
+console.log(storeSetting.getStateMode)
+
 const formData = ref({
   theme: storeSetting.getStateMode,
 });

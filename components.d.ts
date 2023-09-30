@@ -12,6 +12,8 @@ declare module 'vue' {
     TAside: typeof import('tdesign-vue-next')['Aside']
     TBackTop: typeof import('tdesign-vue-next')['BackTop']
     TBadge: typeof import('tdesign-vue-next')['Badge']
+    TBreadcrumb: typeof import('tdesign-vue-next')['Breadcrumb']
+    TBreadcrumbItem: typeof import('tdesign-vue-next')['BreadcrumbItem']
     TButton: typeof import('tdesign-vue-next')['Button']
     TCollapse: typeof import('tdesign-vue-next')['Collapse']
     TCollapsePanel: typeof import('tdesign-vue-next')['CollapsePanel']

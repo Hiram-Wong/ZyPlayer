@@ -49,6 +49,7 @@
                 <t-radio v-model="formData.exportSeletct.sites" allow-uncheck class="radio-item">影视源</t-radio>
                 <t-radio v-model="formData.exportSeletct.iptv" allow-uncheck class="radio-item">电视源</t-radio>
                 <t-radio v-model="formData.exportSeletct.analyze" allow-uncheck class="radio-item">解析源</t-radio>
+                <t-radio v-model="formData.exportSeletct.drive" allow-uncheck class="radio-item">网盘源</t-radio>
                 <t-radio v-model="formData.exportSeletct.history" allow-uncheck class="radio-item">历史</t-radio>
                 <t-radio v-model="formData.exportSeletct.star" allow-uncheck class="radio-item">收藏</t-radio>
                 <t-radio v-model="formData.exportSeletct.setting" allow-uncheck class="radio-item">基础配置</t-radio>
@@ -58,6 +59,7 @@
                 <t-radio v-model="formData.clearSeletct.sites" allow-uncheck class="radio-item">影视源</t-radio>
                 <t-radio v-model="formData.clearSeletct.iptv" allow-uncheck class="radio-item">电视源</t-radio>
                 <t-radio v-model="formData.clearSeletct.analyze" allow-uncheck class="radio-item">解析源</t-radio>
+                <t-radio v-model="formData.clearSeletct.drive" allow-uncheck class="radio-item">网盘源</t-radio>
                 <t-radio v-model="formData.clearSeletct.history" allow-uncheck class="radio-item">历史数据「含解析、搜索」</t-radio>
                 <t-radio v-model="formData.clearSeletct.star" allow-uncheck class="radio-item">收藏</t-radio>
                 <t-radio v-model="formData.clearSeletct.thumbnail" allow-uncheck class="radio-item">缩略图
@@ -118,7 +120,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch, reactive } from 'vue';
 import { createClient } from "webdav";
 
-import { analyze, analyzeHistory, channelList, history, iptv, setting, sites, star, searchHistory } from '@/lib/dexie';
+import { analyze, analyzeHistory, channelList, history, iptv, setting, sites, star, searchHistory, drive } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 
 const ipcRenderer = useIpcRenderer();
@@ -130,6 +132,7 @@ const iptvEmitReload = useEventBus('iptv-reload');
 const analyzeEmitReload = useEventBus('analyze-reload');
 const historyEmitReload = useEventBus('history-reload');
 const bingeEmitReload = useEventBus('binge-reload');
+const driveEmitReload = useEventBus('drive-reload');
 
 const props = defineProps({
   visible: {
@@ -161,6 +164,7 @@ const formData = reactive({
     sites: false,
     iptv: false,
     analyze: false,
+    drive: false,
     history: false,
     star: false,
     setting: false,
@@ -175,6 +179,7 @@ const formData = reactive({
     sites: false,
     iptv: false,
     analyze: false,
+    drive: false,
     history: false,
     star: false,
     setting: false,
@@ -211,6 +216,7 @@ watch(
 
 // 数据判断
 const hasTrueValue = (obj) => {
+  console.log(obj)
   for (const key in obj) {
     if (obj.hasOwnProperty(key) && obj[key] === true) {
       return true;
@@ -244,6 +250,11 @@ const initDB = async(data) => {
     if (_.has(data, "analyze")) {
       await analyze.clear();
       analyze.bulkAdd(data["analyze"]);
+    };
+
+    if (_.has(data, "drive")) {
+      await drive.clear();
+      drive.bulkAdd(data["drive"]);
     };
 
     if (_.has(data, "setting")) {
@@ -303,6 +314,7 @@ const easyConfig = async() => {
       defaultSite: '',
       defaultIptv: '',
       defaultAnalyze: '',
+      defaultDrive: ''
     };
 
     if (type === 0) {
@@ -317,6 +329,10 @@ const easyConfig = async() => {
       if (_.has(config, "analyze")) {
         data["analyze"] = config.analyze.data;
         defaultObject.defaultAnalyze = config.analyze.default;
+      };
+      if (_.has(config, "drive")) {
+        data["drive"] = config.drive.data;
+        defaultObject.defaultDrive = config.drive.default;
       };
       setting.update(defaultObject);
     } else {
@@ -359,6 +375,20 @@ const easyConfig = async() => {
           isActive: true,
         }));
         data["analyze"] = analyze;
+      };
+      if (_.has(config, "drives")) {
+        const drives = config.drives
+          .filter((item) => item.type === 'alist' || !item.type) // 先过滤掉不需要的数据
+          .map((item) => ({
+            name: item.name,
+            server: item.server,
+            startPage: item.startPage ? item.startPage : '',
+            search: item.search ? item.search : false,
+            headers: item.headers ? item.headers : null,
+            params: item.params ? item.params : null,
+            isActive: true,
+          }));
+        data["drive"] = drives;
       };
     };
     console.log(data)
@@ -438,6 +468,11 @@ const jsonFromDB = async(all=false) => {
     if (formData.exportSeletct.sites || all) { 
       const sites_data = await sites.all();
       arr["sites"] = [...sites_data];
+    }
+
+    if (formData.exportSeletct.drive || all) { 
+      const drive_data = await drive.all();
+      arr["drive"] = [...drive_data];
     }
     
     if (formData.exportSeletct.setting || all) { 
@@ -561,6 +596,15 @@ const clearData = async() => {
     analyzeEmitReload.emit('analyze-reload');
   };
 
+  // 清空drive数据的函数
+  const clearDriveData = async () => {
+    await drive.clear();
+    await setting.update({
+      defaultDrive: null,
+    });
+    driveEmitReload.emit('drive-reload');
+  };
+
   // 清空history数据的函数
   const clearHistoryData = async () => {
     await history.clear();
@@ -593,6 +637,7 @@ const clearData = async() => {
     sites: clearSitesData,
     iptv: clearIptvData,
     analyze: clearAnalyzeData,
+    drive: clearDriveData,
     history: clearHistoryData,
     binge: clearBingeData,
     cache: clearCacheData,

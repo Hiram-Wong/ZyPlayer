@@ -96,7 +96,7 @@
             </context-menu>
           </div>
           <infinite-loading
-            v-if="isVisible.toolbar"
+            v-if="isVisible.infiniteLoading"
             :identifier="infiniteId"
             style="text-align: center; margin-bottom: 2em"
             :duration="200"
@@ -163,7 +163,7 @@ const renderLoading = () => {
 };
 
 const isVisible = reactive({
-  toolbar: false, // 筛选
+  infiniteLoading: false, // 筛选
 });
 
 const iptvSetting = ref({
@@ -247,9 +247,9 @@ const getSetting = async () => {
 
     iptvList.value = iptvAll.filter((item) => item.isActive);
 
-    isVisible.toolbar = true;
+    isVisible.infiniteLoading = true;
   } catch (err) {
-    isVisible.toolbar = false;
+    isVisible.infiniteLoading = false;
   }
 };
 

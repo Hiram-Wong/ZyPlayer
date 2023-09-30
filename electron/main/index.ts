@@ -310,6 +310,7 @@ app.whenReady().then(() => {
   // });
 
   showLoading();
+  tmpDir('thumbnail');
   createWindow();
   registerAppMenu();
 

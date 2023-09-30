@@ -32,6 +32,21 @@ export default [
     ],
   },
   {
+    path: '/drive',
+    name: 'drive',
+    redirect: '/drive/index',
+    component: Layout,
+    meta: { title: '网盘', icon: 'cloud' },
+    children: [
+      {
+        path: 'index',
+        name: 'DriveIndex',
+        component: () => import('@/pages/Drive.vue'),
+        meta: { title: '网盘', icon: 'cloud' },
+      },
+    ],
+  },
+  {
     path: '/play/',
     name: 'play',
     redirect: '/play/index',

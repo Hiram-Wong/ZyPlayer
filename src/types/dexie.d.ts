@@ -113,3 +113,14 @@ interface SearchHistory {
   title: string;
   type: string;
 }
+
+interface Drive {
+  id?: number;
+  name: string;
+  server: string;
+  params: string;
+  startPage: string;
+  search: boolean;
+  headers: string;
+  isActive: boolean;
+}

@@ -2,6 +2,7 @@ import db from '.'
 const { searchHistory } = db
 export default {
   async add (doc) {
+    console.log(doc)
     return await searchHistory.add(doc)
   },
   async find (doc) {

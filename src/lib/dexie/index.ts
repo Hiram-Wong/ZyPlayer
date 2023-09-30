@@ -7,6 +7,7 @@ import iptv from './orm/iptv';
 import channelList from './orm/channelList';
 import analyze from './orm/analyze';
 import searchHistory from './orm/searchHistory';
+import drive from './orm/drive';
 
 export {
   history,
@@ -17,5 +18,6 @@ export {
   iptv,
   channelList,
   searchHistory,
-  analyze
+  analyze,
+  drive
 };
