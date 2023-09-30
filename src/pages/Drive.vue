@@ -257,7 +257,8 @@ const playEvent = (item, fullPath) => {
       data: {
         info: {
           name: item.name,
-          url: item.url
+          url: item.url,
+          vod_pic: item.thumb
         },
         ext: {
           files: driveContent.value,

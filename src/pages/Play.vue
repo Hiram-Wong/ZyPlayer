@@ -811,6 +811,11 @@ const setSystemMediaInfo = () => {
       doc.artist = '直播';
       delete doc.artwork
     }
+
+    if (type.value === 'drive') {
+      doc.title = info.value.name;
+      doc.artist = 'alist';
+    }
     navigator.mediaSession.metadata = new MediaMetadata(doc);
   }
 }
@@ -1026,7 +1031,7 @@ const initFilmPlayer = async (isFirst) => {
 const initCloudPlayer = async () => {
   driveDataList.value = ext.value.files;
   config.value.url = info.value.url;
-  if (config.value.url.includes('mp4') || info.value.name.includes('mp4') || config.value.url.includes('mkv') || info.value.name.includes('mkv')) {
+  if (info.value.name.includes('mp4') || info.value.name.includes('mkv') || info.value.name.includes('mkv') || info.value.name.includes('avi')) {
     createPlayer('mp4');
   } else if (config.value.url.includes('flv') || info.value.name.includes('flv')) {
     createPlayer('flv');
@@ -1143,7 +1148,10 @@ const initPlayer = async (isFirst = false) => {
   } else if (type.value === 'drive') {
     await initCloudPlayer();
   }
-  document.title = type.value === 'iptv' ? info.value.name : `${info.value.vod_name} ${selectPlayIndex.value}`;
+
+  let title = info.value.name;
+  if (type.value === 'iptv') title = `${info.value.vod_name} ${selectPlayIndex.value}`
+  document.title = title;
 };
 
 // 在追
@@ -1281,7 +1289,8 @@ const changeDriveEvent = async (item) => {
     data: {
       info: {
         name: res.name,
-        url: res.url
+        url: res.url,
+        vod_pic: res.thumb
       }
     },
   });

@@ -369,11 +369,13 @@ const easyConfig = async() => {
         data["iptv"] = iptv;
       };
       if (_.has(config, "parses")) {
-        const analyze = config.parses.map((item) => ({
-          name: item.name,
-          url: item.url,
-          isActive: true,
-        }));
+        const analyze = config.parses
+          .filter((item) => item.url && item.url.startsWith("http")) // 先过滤掉不需要的数据
+          .map((item) => ({
+            name: item.name,
+            url: item.url,
+            isActive: true,
+          }));
         data["analyze"] = analyze;
       };
       if (_.has(config, "drives")) {
@@ -403,7 +405,8 @@ const easyConfig = async() => {
 // 配置导入
 const importData = async() => {
   const { type, remoteImpoUrl, localImpoFile } = formData.importData;
-  if (!remoteImpoUrl || !localImpoFile) {
+  console.log(localImpoFile.length === 0)
+  if ((type === 'remote' && !remoteImpoUrl)  || (type === 'local') && (localImpoFile.length === 0)) {
     MessagePlugin.warning('请选择或者填写数据');
     return;
   };
