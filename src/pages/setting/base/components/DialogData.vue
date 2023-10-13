@@ -432,9 +432,13 @@ const importFromLocal = (file) => {
   reader.readAsText(file);
   reader.onload = (resultFile) => {
     const pointsTxt = resultFile.target.result;
-    const json = JSON.parse(pointsTxt);
-    initDB(json);
-  };
+    try {
+      const json = JSON.parse(String(pointsTxt));
+      initDB(json);
+    } catch (err) {
+      MessagePlugin.error(`导入失败：${err}`);
+    }
+  }
 }
 
 // 文件事件
