@@ -509,48 +509,49 @@ const searchEvent = async () => {
   FilmDataList.value.rawList = [];
   infiniteId.value++;
   pagination.value.pageIndex = 1;
-  searchCurrentSite.value = FilmSiteSetting.value.searchGroup[0];
+  searchCurrentSite.value =  FilmSiteSetting.value.searchGroup ? FilmSiteSetting.value.searchGroup[0]: null;
 };
 
 // 搜索加载数据
 const getSearchList = async () => {
   let length = 0;
-  const site = searchCurrentSite.value;
-  const index = FilmSiteSetting.value.searchGroup.indexOf(searchCurrentSite.value);
-  const searchGroupLength = FilmSiteSetting.value.searchGroup.length;
 
-  if (!site) return 0;
-  if (index + 1 >= searchGroupLength && searchGroupLength !== 1) return 0;
-  if (searchGroupLength !== 1) searchCurrentSite.value = FilmSiteSetting.value.searchGroup[index + 1];
-  else searchCurrentSite.value = null;
+  const currentSite = searchCurrentSite.value;
+  if (!currentSite) return 0; // 没有搜索站点
+
+  const index = FilmSiteSetting.value.searchGroup.indexOf(currentSite);
+  const isLastSite = index + 1 >= FilmSiteSetting.value.searchGroup.length;
+
+  if(index + 1 > FilmSiteSetting.value.searchGroup.length) return 0; // 没有更多站点
+
+  searchCurrentSite.value = isLastSite ? null : FilmSiteSetting.value.searchGroup[index + 1];
 
   try {
-    const resultSearch = await zy.search(site.key, searchTxt.value);
+    const resultSearch = await zy.search(currentSite.key, searchTxt.value);
+
     if (!resultSearch) {
-      return 1;
+      length = 1;
+      return;
     }
 
     let resultDetail = resultSearch;
-    if (FilmSiteSetting.value.basic.type !== 3 && FilmSiteSetting.value.basic.type !== 4) {
+    if (![3, 4].includes(FilmSiteSetting.value.basic.type)) {
       const ids = resultSearch.map((item) => item.vod_id);
-      resultDetail = await zy.detail(site.key, ids.join(','));
+      resultDetail = await zy.detail(currentSite.key, ids.join(','));
     }
 
-    const filmList = resultDetail.map((item) => {
-      return {
-        ...item,
-        siteKey: site.key, // 添加站点标识
-        siteName: site.name, // 添加站点名称
-        siteId: site.id, // 添加站点id
-      };
-    });
+    const filmList = resultDetail.map((item) => ({
+      ...item,
+      siteKey: currentSite.key,
+      siteName: currentSite.name,
+      siteId: currentSite.id,
+    }));
 
-    const newFilms = _.differenceWith(filmList, FilmDataList.value.list, _.isEqual);
+    const newFilms = _.differenceWith(filmList, FilmDataList.value.list, _.isEqual); // 去重
     FilmDataList.value.list.push(...newFilms);
-    length = newFilms.length;
+    length = isLastSite ? 0 : newFilms.length;
   } catch (err) {
-    if (searchGroupLength === 1) length = 0;
-    length = 1;
+    length = FilmSiteSetting.value.searchGroup.length === 1 ? 0 : 1;
     console.error(err);
   } finally {
     console.log(`[film] load data length: ${length}`);
