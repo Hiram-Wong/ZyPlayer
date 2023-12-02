@@ -1,66 +1,72 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="/favicon.ico" />
-    <title>zyplayer</title>
-    <style>
-			@media (prefers-color-scheme: dark) {
-        :root {
-          background: black;
-        }
-			}
-      .desktop-loading {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: transparent;
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zyplayer</title>
+  <style>
+    :root {
+      background: #F7F7F7;
+    }
+    
+    .loading-position {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      margin: -23px 0 0 -23px;
+    }
+
+    .loading {
+      box-sizing: border-box;
+      width: 46px;
+      height: 46px;
+      border: 6px solid #111113;
+      border-radius: 50%;
+      -webkit-animation: loading 1.5s linear infinite;
+      animation: loading 1.5s linear infinite;
+    }
+
+    .green-box {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      left: 40px;
+      top: -5px;
+      position: absolute;
+      background: #88d57e;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        background-color: #111113;
+      }
+      .loading {
+        border: 6px solid #F7F7F7;
+      }
+    }
+
+    @keyframes loading {
+      0% {
+        transform: rotate(0deg);
       }
 
-      .desktop-loading-container {
-        width: 48px;
-        height: 48px;
-        backdrop-filter: blur(24px);
-        display: flex;
-        justify-content: center;
-        align-items: center;
+      50% {
+        transform: rotate(180deg);
       }
 
-      .desktop-loading-img {
-        border-radius: 100%;
-        animation-fill-mode: both;
-        border: 3px solid #88d57e;
-        border-bottom-color: transparent;
-        display: inline-block;
-				width: 36px;
-        height: 36px;
-        animation: rotate360 infinite 1s linear;
+      100% {
+        transform: rotate(360deg);
       }
+    }
+  </style>
+</head>
 
-      @keyframes rotate360 {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root">
-      <div class="desktop-loading">
-        <div class="desktop-loading-container">
-          <div class="desktop-loading-img"></div>
-        </div>
-      </div>
-    </div>
-    <script lang="ts"></script>
-  </body>
+<body>
+  <div class="loading-position loading">
+    <div class="green-box"></div>
+  </div>
+</body>
+
 </html>
