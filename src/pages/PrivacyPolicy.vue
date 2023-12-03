@@ -47,9 +47,6 @@ import { ref, watch } from 'vue';
 
 import { setting } from '@/lib/dexie';
 
-const { getCurrentWindow } = window.require('@electron/remote');
-const win = getCurrentWindow();
-
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -86,7 +83,7 @@ const cancelEvent = () => {
   updateAgreementMask(false);
   MessagePlugin.warning({ content: '5秒后自动退出软件', duration: 5000 });
   setTimeout(() => {
-    win.destroy();
+    window.electron.ipcRenderer.send('quit-app');
   }, 5000);
 };
 </script>

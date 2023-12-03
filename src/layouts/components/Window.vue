@@ -1,6 +1,6 @@
 <template>
   <div v-if="platform !== 'darwin'" class="window">
-    <div class="window-popup window-item" @click="win.minimize()">
+    <div class="window-popup window-item" @click="minimizeEvent">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11"><path d="M11,4.9v1.1H0V4.399h11z"></path></svg>
     </div>
     <div class="window-popup window-item" @click="minMaxEvent">
@@ -18,7 +18,7 @@
         <path d="M10,0H3.5v1.1h6.1c0.2,0,0.3,0.1,0.3,0.3v6.1H11V1C11,0.4,10.6,0,10,0z"></path>
       </svg>
     </div>
-    <div class="window-popup window-item" @click="win.destroy()">
+    <div class="window-popup window-item" @click="closeEvent">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11">
         <path
           d="M6.279 5.5L11 10.221l-.779.779L5.5 6.279.779 11 0 10.221 4.721 5.5 0 .779.779 0 5.5 4.721 10.221 0 11 .779 6.279 5.5z"
@@ -32,16 +32,21 @@ import { ref } from 'vue';
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
+
 const { platform } = process;
 const isMaxed = ref(false);
 
+const minimizeEvent = () => {
+  window.electron.ipcRenderer.send('win:invoke', 'min');
+};
+
 const minMaxEvent = () => {
-  if (isMaxed.value) {
-    remote.getCurrentWindow().unmaximize();
-  } else {
-    remote.getCurrentWindow().maximize();
-  }
+  window.electron.ipcRenderer.send('win:invoke', 'max');
   isMaxed.value = !isMaxed.value;
+};
+
+const closeEvent = () => {
+  window.electron.ipcRenderer.send('win:invoke', 'close');
 };
 
 win.on('maximize', () => {
