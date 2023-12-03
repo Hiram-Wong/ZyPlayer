@@ -7,16 +7,17 @@ export const registerAppMenu = () => {
       submenu: [
         {
           label: '关于',
-          click() {
-            dialog.showMessageBox({
-              title: '关于',
-              message: `关于 v${app.getVersion()}`,
-              detail: '我的世界里不能没有影视',
-              icon: '../../../build/icons/64x64.png',
-            });
-          },
+          role: 'about',
         },
         { type: 'separator' },
+        {
+          label: '重启',
+          click() {
+            // 退出程序
+            app.relaunch();
+            app.quit();
+          },
+        },
         {
           label: '退出',
           accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Alt+F4',
@@ -27,7 +28,6 @@ export const registerAppMenu = () => {
         },
       ],
     },
-    ,
     {
       label: '编辑',
       submenu: [
