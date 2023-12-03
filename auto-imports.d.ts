@@ -6,6 +6,7 @@
 export {}
 declare global {
   const TAB_AND_NEW_LINE: typeof import('tdesign-vue-next')['AB_AND_NEW_LINE']
+  const TCPlayer: typeof import('tdesign-vue-next')['CPlayer']
   const TEA_ID: typeof import('tdesign-vue-next')['EA_ID']
   const TEMPLATE: typeof import('tdesign-vue-next')['EMPLATE']
   const TIAS: typeof import('tdesign-vue-next')['IAS']

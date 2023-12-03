@@ -410,7 +410,6 @@
   </div>
 </template>
 <script setup lang="tsx">
-import 'xgplayer-livevideo';
 import '@/style/player/veplayer.css';
 
 import 'v3-infinite-loading/lib/style.css';
@@ -1116,9 +1115,9 @@ const sniffer_pie = () => {
   ipcRenderer.on("sniffer-status", (e, res) => {
     console.log(res)
     if (res.code == 200) {
-      const formatIndex = videoFormats.findIndex((format) => res.url.toLowerCase().indexOf(format) > -1);
+      const formatIndex = videoFormats.findIndex((format) => res.data.toLowerCase().indexOf(format) > -1);
       if (formatIndex > -1) {
-        config.value.url = res.url
+        config.value.url = res.data
         const videoFormat = videoFormats[formatIndex];
         createPlayer(videoFormat.slice(1));
       }
