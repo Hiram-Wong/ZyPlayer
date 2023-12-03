@@ -1,6 +1,6 @@
 <template>
   <t-drawer v-model:visible="formVisible" header="历史" size="small" class="history-items">
-    <div v-for="item in historyList" :key="item.id" class="" @click.self="historyPlayEvent(item)">
+    <div v-for="item in historyList" :key="item.id" class="" @click="historyPlayEvent(item)">
       <div class="history-item">
         <div class="date">{{ item.date }}</div>
         <t-popup
