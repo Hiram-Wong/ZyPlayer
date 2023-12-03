@@ -1,6 +1,5 @@
-import { registerAppMenu } from './core/menu';
 import remote from '@electron/remote/main';
-import { electronApp } from '@electron-toolkit/utils';
+import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
 import fixPath from 'fix-path';
 import pie from "puppeteer-in-electron";
@@ -8,7 +7,10 @@ import puppeteer from "puppeteer-core";
 import Store from 'electron-store';
 import path from 'path';
 import url from 'url';
+import fs from 'fs-extra';
+import { exec } from 'child_process';
 
+import { registerAppMenu } from './core/menu';
 import initUpdater from './core/auto-update';
 import log from './core/log';
 
@@ -19,9 +21,6 @@ import log from './core/log';
  */
 fixPath();
 log.info(`[env] ${process.env.PATH}`);
-
-const { exec } = require("child_process");
-const fs = require("fs");
 
 const { platform } = process;
 const appDataPath = app.getPath('userData');
@@ -105,9 +104,11 @@ const showLoading = () => {
     autoHideMenuBar: true,
     title: 'zyplayer',
   });
-  loadWindow.loadURL(
-    app.isPackaged ? `file://${path.join(__dirname, '../../dist/load.html')}` : `file://${path.join(__dirname, '../../public/load.html')}`,
-  );
+  if (is.dev) {
+    loadWindow.loadFile(path.join(__dirname, '../../public/load.html'))
+  } else {
+    loadWindow.loadFile(path.join(__dirname, '../../dist/load.html'))
+  }
   loadWindow.on('ready-to-show', () => {
     loadWindow.show();
   });
@@ -115,80 +116,84 @@ const showLoading = () => {
 
 pie.initialize(app);
 
-const trySniffer = (url) => {
-  const urlRegex = 'http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*';
-  const promise = new Promise(async (resolve, reject) => {
-    try {
-      let timeout = setTimeout(() => {
-        resolve({ code: 500 });
+const trySniffer = async (url, callback) => {
+  log.info(`[sniffer] sniffer url: ${url}`);
+
+  let timeout = null;
+
+  const handleResponse = (code, message, data) => {
+    clearTimeout(timeout);
+    timeout = null;
+    log.info(`[sniffer] ${message}: ${data}`);
+    callback({ code: code, message: message, data });
+  };
+
+  try {
+    const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
+    const snifferWindow = new BrowserWindow({ show: false }); // 创建窗口
+    const page = await pie.getPage(browser, snifferWindow); // 获取页面
+
+    if (ua) await page.setUserAgent(ua); // 设置ua
+
+    await page.setRequestInterception(true); // 开启请求拦截
+
+    page.on('request', (req) => {
+      if (!timeout) {
+        handleResponse(201, 'fail', '定时器不存在');
+        req.abort().catch((err) => console.error(err)); // 超时终止请求
+        return;
+      }
+
+      const reqUrl = req.url(); // 请求地址
+
+      const isExcludedUrl = (reqUrl) => {
+        return (
+          reqUrl.indexOf('url=http') >= 0 ||
+          reqUrl.indexOf('v=http') >= 0 ||
+          reqUrl.indexOf('.css') >= 0 ||
+          reqUrl.indexOf('.html') >= 0
+        );
+      } // 排除url
+
+      const urlRegex = new RegExp('http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*');
+      const isVideoUrl = (reqUrl) => {
+        return reqUrl.match(urlRegex) && !isExcludedUrl(reqUrl);
+      } // 视频url
+
+      if (isVideoUrl(reqUrl)) {
+        const headers = req.headers();
+        const { referer, 'user-agent': userAgent } = headers;
+        const header = {};
+
+        if (referer) header['referer'] = referer;
+        if (userAgent) header['user-agent'] = userAgent;
+
         page.close();
-      }, 15000);
+        browser.disconnect();
+        req.abort().catch((err) => console.error(err));
+        handleResponse(200, 'sucess', reqUrl);
+      }
 
-      const browser = await pie.connect(app, puppeteer);
-      
-      snifferWindow = new BrowserWindow({
-        show: false,
-      });
-      // window.webContents.openDevTools();
-      const page = await pie.getPage(browser, snifferWindow);
+      if (req.isInterceptResolutionHandled()) return; // 已处理过的请求不再处理
+      if (req.resourceType() === 'image') {
+        req.abort().catch((err) => console.error(err));
+      } else {
+        req.continue().catch((err) => console.error(err));
+      }
+    });
 
-      await page.setRequestInterception(true);
-      page.on('request', (req) => {
-        if (!timeout) {
-          req.abort().catch((err) => console.error(err));
-          return;
-        }
+    timeout = setTimeout(async () => {
+      await page.close();
+      await browser.disconnect();
+      handleResponse(201, 'fail', '请求超时');
+    }, 15000);
 
-        const reqUrl = req.url();
-        const isExcludedUrl = (reqUrl) => {
-          return (
-            reqUrl.indexOf('url=http') >= 0 ||
-            reqUrl.indexOf('v=http') >= 0 ||
-            reqUrl.indexOf('.css') >= 0 ||
-            reqUrl.indexOf('.html') >= 0
-          );
-        }
-        const isVideoUrl = (reqUrl) => {
-          return reqUrl.match(urlRegex) && !isExcludedUrl(reqUrl);
-        }
-        console.log(reqUrl)
-        if (isVideoUrl(reqUrl)) {
-          console.log(req.headers());
-          console.log(reqUrl);
-
-          const headers = req.headers();
-          const { referer, 'user-agent': userAgent } = headers;
-          const header = {};
-
-          if (referer) header['referer'] = referer;
-          if (userAgent) header['user-agent'] = userAgent;
-
-          resolve({ code: 200, url: reqUrl, header: header });
-          req.abort().catch((err) => console.error(err));
-          clearTimeout(timeout);
-          timeout = null;
-          page.close();
-          return;
-        }
-
-        if (req.isInterceptResolutionHandled()) return;
-
-        if (req.resourceType() === 'image') {
-          req.abort().catch((err) => console.error(err));
-        } else {
-          req.continue().catch((err) => console.error(err));
-        }
-      });
-      
-      await page.setUserAgent(ua? ua :'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1');
-      await page.goto(url).catch((err) => {});
-    } catch (e) {
-      console.error(e);
-      resolve({ code: 500 });
-    }
-  });
-  return promise;
-}
+    await page.goto(url).catch((err) => {});
+  } catch (e) {
+    console.error(e);
+    handleResponse(500, 'fail', e);
+  }
+};
 
 const createWindow = (): void => {
   // 创建浏览器窗口
@@ -241,9 +246,11 @@ const createWindow = (): void => {
     return { action: 'deny' };
   });
 
-  mainWindow.loadURL(
-    app.isPackaged ? `file://${path.join(__dirname, '../../dist/index.html')}` : 'http://localhost:3000',
-  );
+  if (is.dev) {
+    mainWindow.loadURL('http://localhost:3000')
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'))
+  }
 
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders, url } = details;
@@ -284,6 +291,9 @@ const createWindow = (): void => {
 app.whenReady().then(() => {
   log.info('[index] App ready');
 
+  // 注册frameless窗口的ipc
+  optimizer.registerFramelessWindowIpc();
+
   // 为 Windows 设置应用程序用户模型 ID
   electronApp.setAppUserModelId('com.zyplayer');
 
@@ -305,9 +315,9 @@ app.whenReady().then(() => {
   // 开发中默认按F12打开或关闭Dev Tools
   // 并在生产中忽略 Command 或 Control + R。
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  // app.on('browser-window-created', (_, window) => {
-  //   optimizer.watchWindowShortcuts(window);
-  // });
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
 
   showLoading();
   tmpDir('thumbnail');
@@ -376,16 +386,18 @@ ipcMain.on('openPlayWindow', (_, arg) => {
     return { action: 'deny' };
   });
 
-  playWindow.loadURL(
-    app.isPackaged
-      ? url.format({
-          pathname: path.join(__dirname, '../../dist/index.html'),
-          protocol: 'file:',
-          slashes: true,
-          hash: 'play',
-        })
-      : 'http://localhost:3000/#/play',
-  );
+  if (is.dev) {
+    playWindow.loadURL('http://localhost:3000/#/play')
+  } else {
+    playWindow.loadURL(
+      url.format({
+        pathname: path.join(__dirname, '../../dist/index.html'),
+        protocol: 'file:',
+        slashes: true,
+        hash: 'play',
+      })
+    )
+  }
 
   // 修改request headers
   // Sec-Fetch下禁止修改，浏览器自动加上请求头 https://www.cnblogs.com/fulu/p/13879080.html 暂时先用index.html的meta referer policy替代
@@ -454,24 +466,7 @@ ipcMain.on('toggle-playerPip', (_, status) => {
 
 ipcMain.on('toggle-selfBoot', (_, status) => {
   log.info(`[ipcMain] set-selfBoot: ${status}`);
-  if (status) {
-    const exeName = path.basename(process.execPath);
-    app.setLoginItemSettings({
-      openAtLogin: true,
-      openAsHidden: false,
-      path: process.execPath,
-      args: ['--processStart', `"${exeName}"`],
-    });
-  } else if (!app.isPackaged) {
-    app.setLoginItemSettings({
-      openAtLogin: false,
-      path: process.execPath,
-    });
-  } else {
-    app.setLoginItemSettings({
-      openAtLogin: false,
-    });
-  }
+  electronApp.setAutoLaunch(status);
 });
 
 ipcMain.on('update-hardwareAcceleration', (_, status) => {
@@ -546,38 +541,12 @@ const getFolderSize = (folderPath: string): number => {
   return totalSize;
 };
 
-const tmpDir = (path: string) => {
-  const createDirectory = () => {
-    fs.mkdir(path, { recursive: true }, (err) => {
-      if (err) {
-        log.error(`[ipcMain] path:${path}-action:mkdir-status:error`);
-      } else {
-        log.info(`[ipcMain] path:${path}-action:mkdir-status:success`);
-      }
-    });
-  };
-
-  const removeAndCreateDirectory = () => {
-    fs.rm(path, { recursive: true }, (err) => {
-      if (err) {
-        log.error(`[ipcMain] path:${path}-action:rmdir-status:error`);
-      } else {
-        createDirectory();
-      }
-    });
-  };
-
-  fs.stat(path, (err, stats) => {
-    if (err) {
-      createDirectory();
-    } else if (stats.isDirectory()) {
-      removeAndCreateDirectory();
-    } else if (stats.isFile()) {
-      createDirectory();
-    } else {
-      log.error(`[ipcMain] path:${path}-action:unknown-status:error`);
-    }
-  });
+const tmpDir = async(path: string) => {
+  const pathExists = await fs.pathExistsSync(path);
+  if (pathExists) {
+    await fs.removeSync(path); // 删除文件, 不存在不会报错
+  }
+  await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
 };
 
 ipcMain.on('tmpdir-manage',  (event, action, trails) => {
@@ -625,7 +594,20 @@ ipcMain.on('ffmpeg-installed-check',  (event) => {
   });
 });
 
-ipcMain.on('sniffer-media',  async(event, url) => {
-  const res = await trySniffer(url);
-  event.reply("sniffer-status", res);
+ipcMain.on('sniffer-media', (event, url) => {
+  trySniffer(url, (res) => {
+    console.log(res)
+    event.reply("sniffer-status", res);
+  });
+});
+
+// 重启app
+ipcMain.on('relaunch-app', () => {
+  app.relaunch();
+  app.quit();
+});
+
+// 关闭app
+ipcMain.on('quit-app', () => {
+  app.quit();
 });
