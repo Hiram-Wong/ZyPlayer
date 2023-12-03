@@ -103,7 +103,7 @@
         <div class="player">
           <t-space  align="center">
             <t-select v-model="formData.broadcasterType" :options="PLAYER_OPTIONS" placeholder="请选择播放器" />
-            <span class="title" @click="isVisible.sniffer=true">嗅探</span>
+            <span class="title" @click="snifferEvent">嗅探</span>
           </t-space>
         </div>
       </t-form-item>
@@ -137,7 +137,7 @@
         <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
-        <dialog-sniffer-view v-model:visible="isVisible.sniffer" @receive-sniffer-data="flushDialogData"/>
+        <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData" @receive-sniffer-data="flushDialogData"/>
       </t-form-item>
     </t-form>
   </div>
@@ -186,6 +186,7 @@ const isVisible = reactive({
 const dnsDialogData = ref({ data: '', type: 'dns' });
 const uaDialogData = ref({ data: '', type: 'ua' });
 const webdevDialogData = ref({ webdevUrl:'', webdevUsername:'' ,webdevPassword:'' });
+const snifferDialogData = ref({ data: '', type:'snifferType' });
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -565,6 +566,16 @@ const uaEvnet = () => {
   isVisible.ua = true;
 };
 
+const snifferEvent = () => {
+  const { snifferType } = formData.value;
+  snifferDialogData.value = {
+    data: snifferType,
+    type: 'snifferType',
+  };
+
+  isVisible.sniffer = true;
+}
+
 const dataMange = () => {
   const { webdevUrl, webdevUsername, webdevPassword } = formData.value;
   console.log(webdevUrl, webdevUsername, webdevPassword)
@@ -576,7 +587,7 @@ const dataMange = () => {
   isVisible.data = true
 };
 
-// 分类：刷新dialog数据class
+// 分类：刷新dialog 数据class 嗅探snifferType
 const flushDialogData = (item) => {
   const { data, type } = item;
   console.log(data, type);
