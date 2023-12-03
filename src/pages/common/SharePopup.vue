@@ -22,7 +22,7 @@
             <t-divider dashed style="margin: 5px 0" />
           </div>
           <div class="share-container-main-right">
-            <img class="qrcode" :src="qrCodeUrl" alt="二维码" />
+            <qrcode-vue :value="data.url" :size="85" :margin="5" level="H" render-as="svg" class="qrcode" />
           </div>
         </div>
         <div class="bottom-title no-warp">{{ data.name }}</div>
@@ -36,7 +36,7 @@
 </template>
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core';
-import QRCode from 'qrcode';
+import QrcodeVue from 'qrcode.vue';
 import { CameraIcon, ShareIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
@@ -58,17 +58,9 @@ const props = defineProps({
   },
 });
 
-const QR_CODE_OPTIONS = {
-  errorCorrectionLevel: 'H',
-  type: 'image/jpeg',
-  quality: 0.3,
-  margin: 4,
-};
-
 const data = ref(props.data);
 const { isSupported, copy } = useClipboard();
 const formVisible = ref(false);
-const qrCodeUrl = ref('');
 
 const emit = defineEmits(['update:visible']);
 
@@ -82,7 +74,6 @@ watch(
   () => props.visible,
   (val) => {
     formVisible.value = val;
-    if (val) generateQRCode();
   },
 );
 watch(
@@ -91,16 +82,6 @@ watch(
     data.value = val;
   },
 );
-
-// 生成二维码
-const generateQRCode = async () => {
-  try {
-    const url = await QRCode.toDataURL(data.value.url, QR_CODE_OPTIONS);
-    qrCodeUrl.value = url;
-  } catch (err) {
-    console.log(err);
-  }
-};
 
 const copyToClipboard = (content, successMessage, errorMessage) => {
   copy(content);
