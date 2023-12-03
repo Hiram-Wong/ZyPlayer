@@ -5,12 +5,11 @@ import * as cheerio from "cheerio";
 import _ from "lodash";
 import JSON5 from "json5";
 import qs from "qs";
-
-import { sites } from "@/lib/dexie";
-
-const iconv = require("iconv-lite");
+import * as iconv from 'iconv-lite';
 import dns from "dns";
 import net from "net";
+
+import { sites } from "@/lib/dexie";
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 
 let controller = new AbortController();
