@@ -204,6 +204,8 @@ const createWindow = (): void => {
     minHeight: 640,
     titleBarStyle: 'hiddenInset',
     show: false,
+    frame: false,
+    autoHideMenuBar: true,
     title: 'zyplayer',
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
