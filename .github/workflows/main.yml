@@ -1,6 +1,9 @@
 name: Build/release
 
-on: push
+on:
+  push:
+    branches:
+      - dev
 
 jobs:
   release:
@@ -16,10 +19,10 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3.4.1
+      - name: Install Node.js 18
+        uses: actions/setup-node@v2
         with:
-          node-version: 18
+          node-version: 18.12.1
           cache: 'yarn'
 
       - name: Build/release Electron app
@@ -33,20 +36,30 @@ jobs:
           # release the app after building
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
       
-      - uses: actions/upload-artifact@v3
+      - name: Upload Artifact (macOS)
+        uses: actions/upload-artifact@v3
         with:
           name: zyplayer-mac
-          path: dist_electron/*-universal.dmg
+          path: ./release/*-mac-*.dmg
           if-no-files-found: ignore
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload Artifact (Windows)
+        uses: actions/upload-artifact@v3
         with:
           name: zyplayer-win
-          path: dist_electron/*Setup*.exe
+          path: ./release/*-win-*.exe
           if-no-files-found: ignore
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload Artifact (Linux AppImage)
+        uses: actions/upload-artifact@v3
         with:
           name: zyplayer-linux
-          path: dist_electron/*.AppImage
+          path: ./release/*.AppImage
+          if-no-files-found: ignore
+
+      - name: Upload Artifact (Linux deb)
+        uses: actions/upload-artifact@v3
+        with:
+          name: zyplayer-linux
+          path: ./release/*.deb
           if-no-files-found: ignore
