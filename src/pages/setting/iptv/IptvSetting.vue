@@ -272,6 +272,7 @@ const removeAllEvent = () => {
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
+    cursor: pointer;
   }
   .left-operation-container {
     .component-op {

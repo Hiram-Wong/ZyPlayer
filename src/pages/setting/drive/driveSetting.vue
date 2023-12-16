@@ -12,6 +12,10 @@
               <remove-icon />
               <span>删除</span>
             </div>
+            <!-- <div class="item" @click="aliAuthEvent">
+              <user-icon />
+              <span>阿里授权</span>
+            </div> -->
           </div>
         </div>
         <div class="right-operation-container">
@@ -59,12 +63,13 @@
 
     <dialog-add-view v-model:visible="isVisible.addDialog" :data="data" @refresh-table-data="getData" />
     <dialog-edit-view v-model:visible="isVisible.editDialog" :data="rowEditData" />
+    <dialog-ali-auth-view v-model:visible="isVisible.aliAuthDialog" />
   </div>
 </template>
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
-import { AddIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, RemoveIcon, SearchIcon, UserIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
 
@@ -72,12 +77,14 @@ import { drive, setting } from '@/lib/dexie';
 
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
+import DialogAliAuthView from './components/DialogAliAuth.vue';
 import { COLUMNS } from './constants';
 
 // Define item form data & dialog status
 const isVisible = reactive({
   addDialog: false,
   editDialog: false,
+  aliAuthDialog: false,
 });
 const searchValue = ref();
 const rowEditData = ref();
@@ -170,6 +177,10 @@ const removeAllEvent = () => {
   getData();
   MessagePlugin.success('批量删除成功');
 };
+
+const aliAuthEvent = () => {
+  isVisible.aliAuthDialog = true;
+};
 </script>
 
 <style lang="less" scoped>
@@ -180,6 +191,7 @@ const removeAllEvent = () => {
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
+    cursor: pointer;
   }
   .left-operation-container {
     .component-op {

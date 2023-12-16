@@ -244,6 +244,7 @@ const defaultEvent = async (row) => {
   }
   .t-button-link {
     margin-right: var(--td-comp-margin-xxl);
+    cursor: pointer;
   }
   .default-dot {
     display: inline-block;
