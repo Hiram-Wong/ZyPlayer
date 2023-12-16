@@ -42,5 +42,6 @@
   "communitySubscribe": "",
   "webdevUrl": "",
   "webdevUsername": "",
-  "webdevPassword": ""
+  "webdevPassword": "",
+  "windowPosition": false
 }]

@@ -33,6 +33,7 @@ interface Setting {
   webdevUrl: string;
   webdevUsername: string;
   webdevPassword: string;
+  windowPosition: boolean;
 }
 
 interface Star {

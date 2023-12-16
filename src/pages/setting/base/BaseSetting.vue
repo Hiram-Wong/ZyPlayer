@@ -125,6 +125,9 @@
           <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="hardwareAccelerationEvnet">
             硬件加速
           </t-radio>
+          <t-radio v-model="formData.windowPosition" allow-uncheck @change="windowPositionEvnet">
+            窗口位置
+          </t-radio>
         </t-space>
       </t-form-item>
       <t-form-item label="其他" name="data">
@@ -541,6 +544,15 @@ const hardwareAccelerationEvnet = () => {
   ipcRenderer.send('update-hardwareAcceleration', formData.value.hardwareAcceleration);
   MessagePlugin.success(
     formData.value.hardwareAcceleration ? '已开启硬件加速，重启应用生效' : '已关闭硬件加速，重启应用生效',
+  );
+};
+
+// 退出保存主窗口大小及位置
+const windowPositionEvnet = () => {
+  console.log('窗口位置', formData.value.windowPosition);
+  ipcRenderer.send('update-windowPosition', formData.value.windowPosition);
+  MessagePlugin.success(
+    formData.value.windowPosition ? '已开启记录主窗口退出时位置' : '已关闭记录退出主窗口时位置',
   );
 };
 

@@ -61,6 +61,31 @@ if (ua === undefined) {
   store.set('settings.ua', '');
 }
 
+let windowState: any = store.get('settings.window') || {
+  status: false,
+  position: {
+    width: 1000,
+    height: 640,
+  }
+};
+if (windowState === undefined) {
+  store.set('settings.window.status', false);
+  store.set('settings.window.position', {
+    width: 1000,
+    height: 640,
+  });
+}
+
+const windowManage = (win) => {
+  const bounds = win.getBounds();
+  store.set('settings.window.position', {
+    x: bounds.x,
+    y: bounds.y,
+    width: bounds.width,
+    height: bounds.height,
+  });
+}
+
 // 默认数据处理
 if (!hardwareAcceleration) {
   app.disableHardwareAcceleration();
@@ -94,9 +119,11 @@ nativeTheme.on('updated', () => {
 // 加载loading页面窗口
 const showLoading = () => {
   loadWindow = new BrowserWindow({
-    width: 1000,
+    width: windowState.status ? windowState.position.width : 1000,
+    height: windowState.status ? windowState.position.height : 640,
+    x: windowState.status ? windowState.position.x : null,
+    y: windowState.status ? windowState.position.y : null,
     minWidth: 1000,
-    height: 640,
     minHeight: 640,
     titleBarStyle: 'hiddenInset',
     show: false,
@@ -105,10 +132,10 @@ const showLoading = () => {
     title: 'zyplayer',
   });
   if (is.dev) {
-    loadWindow.loadFile(path.join(__dirname, '../../public/load.html'))
+    loadWindow.loadFile(path.join(__dirname, '../../public/load.html'));
   } else {
-    loadWindow.loadFile(path.join(__dirname, '../../dist/load.html'))
-  }
+    loadWindow.loadFile(path.join(__dirname, '../../dist/load.html'));
+  };
   loadWindow.on('ready-to-show', () => {
     loadWindow.show();
   });
@@ -198,9 +225,11 @@ const trySniffer = async (url, callback) => {
 const createWindow = (): void => {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
-    width: 1000,
+    width: windowState.status ? windowState.position.width : 1000,
+    height: windowState.status ? windowState.position.height : 640,
+    x: windowState.status ? windowState.position.x : null,
+    y: windowState.status ? windowState.position.y : null,
     minWidth: 1000,
-    height: 640,
     minHeight: 640,
     titleBarStyle: 'hiddenInset',
     show: false,
@@ -221,8 +250,11 @@ const createWindow = (): void => {
   remote.enable(mainWindow.webContents); // 启用remote
 
   // 关闭window时触发下列事件.
-  mainWindow.on('closed', (event) => {
-    event.preventDefault();
+  mainWindow.on('close', () => {
+    windowManage(mainWindow);
+  });
+
+  mainWindow.on('closed', () => {
     mainWindow = null;
   });
 
@@ -249,10 +281,10 @@ const createWindow = (): void => {
   });
 
   if (is.dev) {
-    mainWindow.loadURL('http://localhost:3000')
+    mainWindow.loadURL('http://localhost:3000');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'))
-  }
+    mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'));
+  };
 
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders, url } = details;
@@ -389,7 +421,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   });
 
   if (is.dev) {
-    playWindow.loadURL('http://localhost:3000/#/play')
+    playWindow.loadURL('http://localhost:3000/#/play');
   } else {
     playWindow.loadURL(
       url.format({
@@ -398,8 +430,8 @@ ipcMain.on('openPlayWindow', (_, arg) => {
         slashes: true,
         hash: 'play',
       })
-    )
-  }
+    );
+  };
 
   // 修改request headers
   // Sec-Fetch下禁止修改，浏览器自动加上请求头 https://www.cnblogs.com/fulu/p/13879080.html 暂时先用index.html的meta referer policy替代
@@ -424,6 +456,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   playWindow.on('ready-to-show', () => {
     playWindow.show();
   });
+
   playWindow.on('closed', () => {
     if (!mainWindow || mainWindow.isDestroyed()) {
       createWindow();
@@ -474,6 +507,11 @@ ipcMain.on('toggle-selfBoot', (_, status) => {
 ipcMain.on('update-hardwareAcceleration', (_, status) => {
   log.info(`[ipcMain] storage-hardwareAcceleration: ${status}`);
   store.set('settings.hardwareAcceleration', status);
+});
+
+ipcMain.on('update-windowPosition', (_, status) => {
+  log.info(`[ipcMain] storage-windowPosition: ${status}`);
+  store.set('settings.window.status', status);
 });
 
 ipcMain.on('set-playerDark', () => {

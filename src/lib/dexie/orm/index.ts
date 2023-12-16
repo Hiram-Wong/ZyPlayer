@@ -130,6 +130,14 @@ db.version(23).stores({
   })
 })
 
+db.version(24).stores({
+  setting: 'id, theme, externalPlayer, defaultHot, defaultSearchRecommend, defaultSearchType, defaultCheckModel, defaultChangeModel, defaultIptvEpg, defaultIptvLogo, iptvSkipIpv6, iptvThumbnail, restoreWindowPositionAndSize, pauseWhenMinimize, defaultSite, defaultIptv, defaultAnalyze, defaultDrive, analyzeFlag, analyzeSupport, broadcasterType, snifferType, softSolution, skipStartEnd, agreementMask, recordShortcut, selfBoot, hardwareAcceleration, doh, webdevUrl, webdevUsername, webdevPassword, windowPosition',
+}).upgrade(trans => {
+  trans.setting.toCollection().modify(setting => {
+    setting.windowPosition = false;
+  })
+})
+
 db.on('populate', () => {
   db.setting.bulkAdd(dataSetting);
 })
