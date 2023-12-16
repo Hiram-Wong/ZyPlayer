@@ -6,7 +6,7 @@
           :data="formData"
           :rules="rulesSingle"
           :label-width="60"
-          @submit="onSubmit($event, 'single')"
+          @submit="onSubmit"
         >
           <t-form-item label="名称" name="name">
             <t-input v-model="formData.name" placeholder="请输入内容" />
@@ -113,20 +113,9 @@ const formData = reactive({
   isActive: true,
   type: 1,
 });
-const onSubmit = ({ result, firstError }, type) => {
-  if (!firstError) {
-    if (type === 'single') {
-      console.log('single');
-      addSite();
-    } else if (type === 'easy') {
-      console.log('easy');
-      urlEvent();
-    }
+const onSubmit = () => {
+    addSite();
     formVisible.value = false;
-  } else {
-    console.log('Errors: ', result);
-    MessagePlugin.warning(firstError);
-  }
 };
 const onClickCloseBtn = () => {
   formVisible.value = false;
@@ -169,40 +158,6 @@ const rulesSingle = {
 const rulesEasy = {
   type: [{ required: true, message: '请选择类型', type: 'error' }],
   url: [{ required: true, message: '请输入配置地址', type: 'error' }],
-};
-
-// url导入
-const urlEvent = async () => {
-  const config = await zy.getConfig(formData.url).catch((error) => {
-    MessagePlugin.error(`请求一键配置地址失败：${error}`);
-  });
-  console.log(config);
-
-  try {
-    // 清空数据
-    await sites.clear();
-
-    const drpyResFilter = config.sites
-      .filter((item) => item.type === 0 || item.type === 1) // 先过滤掉不需要的数据
-      .map((item) => ({
-        key: item.key,
-        name: item.name,
-        type: formData.type === 'drpy' ? 2 : 1,
-        api: item.api,
-        group: formData.type === 'drpy' ? 'drpy' : 'tvbox',
-        search: item.searchable,
-        isActive: true,
-        status: true,
-      }));
-      console.log(drpyResFilter);
-      await sites.bulkAdd(drpyResFilter);
-
-    filmEmitReload.emit('film-reload');
-    MessagePlugin.success('一键配置成功,畅享点点滴滴吧！');
-  } catch (error) {
-    MessagePlugin.error(`一键配置失败：${error}`);
-    console.log(error);
-  }
 };
 
 const addSite = () => {
