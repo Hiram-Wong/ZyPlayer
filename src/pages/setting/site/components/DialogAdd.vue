@@ -175,6 +175,9 @@ const addSite = () => {
     })
     .catch((error) => {
       MessagePlugin.error(`添加失败: ${error}`);
+    })
+    .finally(() => {
+      formData.key = null;
     });
 };
 const checkSiteKey = () => {
