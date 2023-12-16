@@ -20,7 +20,7 @@
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" placeholder="搜索网盘资源" clearable @enter="getData" class="search-bar">
+            <t-input v-model="searchValue" placeholder="搜索网盘资源" clearable @enter="getData" @clear="getData" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -34,7 +34,6 @@
       :data="data"
       :sort="sort"
       height="calc(100vh - 205px)"
-      table-layout="auto"
       :columns="COLUMNS"
       :hover="true"
       :pagination="pagination"
@@ -44,7 +43,7 @@
       @page-change="rehandlePageChange"
     >
       <template #name="{ row }">
-        <t-badge v-if="row.id === defaultDrive" size="small" :offset="[-5, 0]" count="默">{{ row.name }}</t-badge>
+        <t-badge v-if="row.id === defaultDrive" size="small" :offset="[0, 3]" count="默" dot>{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
@@ -53,11 +52,13 @@
         </t-switch>
       </template>
       <template #op="slotProps">
-        <a class="t-button-link" @click="defaultEvent(slotProps.row)">默认</a>
-        <a class="t-button-link" @click="editEvent(slotProps)">编辑</a>
-        <t-popconfirm content="确认删除吗" @confirm="removeEvent(slotProps.row)">
-          <a class="t-button-link">删除</a>
-        </t-popconfirm>
+        <t-space>
+          <t-link theme="primary" @click="defaultEvent(slotProps.row)">默认</t-link> 
+          <t-link theme="primary" @click="editEvent(slotProps)">编辑</t-link>
+          <t-popconfirm content="确认删除吗" @confirm="removeEvent(slotProps.row)">
+            <t-link theme="danger">删除</t-link>
+          </t-popconfirm>
+        </t-space>
       </template>
     </t-table>
 
@@ -66,10 +67,11 @@
     <dialog-ali-auth-view v-model:visible="isVisible.aliAuthDialog" />
   </div>
 </template>
+
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
-import { AddIcon, RemoveIcon, SearchIcon, UserIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
 
@@ -122,6 +124,7 @@ const getData = async () => {
     const res = await drive.pagination(searchValue.value);
     data.value = res.list;
     pagination.total = res.total;
+    pagination.defaultCurrent = 1;
   } catch (e) {
     console.log(e);
   }
@@ -188,10 +191,6 @@ const aliAuthEvent = () => {
   height: calc(100vh - var(--td-comp-size-l));
   .header {
     margin: var(--td-comp-margin-s) 0;
-  }
-  .t-button-link {
-    margin-right: var(--td-comp-margin-xxl);
-    cursor: pointer;
   }
   .left-operation-container {
     .component-op {
