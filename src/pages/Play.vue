@@ -1147,9 +1147,8 @@ const initPlayer = async (isFirst = false) => {
   } else if (type.value === 'drive') {
     await initCloudPlayer();
   }
-
   let title = info.value.name;
-  if (type.value === 'iptv') title = `${info.value.vod_name} ${selectPlayIndex.value}`
+  if (type.value === 'film') title = `${info.value.vod_name} ${selectPlayIndex.value}`
   document.title = title;
 };
 
