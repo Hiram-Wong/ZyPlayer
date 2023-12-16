@@ -558,7 +558,12 @@ ipcMain.on('tmpdir-manage',  (event, action, trails) => {
 });
 
 ipcMain.on('ffmpeg-thumbnail',  (event, url, key) => {
-  const formatPath = path.join(appDataPath, 'thumbnail/', `${key}.jpg`);
+  let formatPath;
+  if (is.dev) {
+    formatPath = path.join(process.cwd(), 'thumbnail/', `${key}.jpg`);
+  } else {
+    formatPath = path.join(appDataPath, 'thumbnail/', `${key}.jpg`);
+  }
   const ffmpegCommand = "ffmpeg"; // ffmpeg 命令
   const inputOptions = ["-i", url]; // 输入选项，替换为实际视频流 URL
   const outputOptions = [
