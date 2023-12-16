@@ -122,6 +122,7 @@
 <script setup lang="tsx">
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 import 'v3-infinite-loading/lib/style.css';
+import loadGif from '@/assets/loading.gif';
 
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useClipboard, useEventBus } from '@vueuse/core';
@@ -129,7 +130,7 @@ import { useIpcRenderer } from '@vueuse/electron';
 
 import _ from 'lodash';
 import PQueue from 'p-queue';
-import { Tv1Icon, LoadingIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
@@ -149,15 +150,15 @@ const storeSetting = useSettingStore();
 
 const renderError = () => {
   return (
-    <div class="renderIcon">
-      <Tv1Icon size="1.5em" stroke-width="2" />
+    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
+      <img src={ loadGif } style="width: 100%; height: 100%; object-fit: cover;"/>
     </div>
   );
 };
 const renderLoading = () => {
   return (
-    <div class="renderIcon">
-      <LoadingIcon size="1.5em" stroke-width="2" />
+    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
+      <img src={ loadGif } style="width: 100%; height: 100%; object-fit: cover;"/>
     </div>
   );
 };
@@ -348,7 +349,6 @@ const playEvent = (item: { name: any }) => {
         ext: { epg, skipIpv6: iptvSetting.value.skipIpv6 },
       },
     });
-    console.log({ epg, skipIpv6: iptvSetting.value.skipIpv6 });
     ipcRenderer.send('openPlayWindow', item.name);
   }
 };
@@ -853,14 +853,5 @@ const formatMoreTitle = (item, list) => {
       }
     }
   }
-}
-
-:deep(.renderIcon) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  color: rgba(255,255,255, 0.72);
 }
 </style>

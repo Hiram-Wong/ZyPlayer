@@ -101,6 +101,8 @@
                     :style="{ width: '100%', height: '200px', background: 'none' }"
                     :lazy="true"
                     fit="cover"
+                    :loading="renderLoading"
+                    :error="renderError"
                   >
                     <template #overlayContent>
                       <div class="op">
@@ -142,8 +144,9 @@
     ></t-back-top>
   </div>
 </template>
-<script setup lang="ts">
+<script setup lang="tsx">
 import 'v3-infinite-loading/lib/style.css';
+import loadGif from '@/assets/loading.gif';
 
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
@@ -162,6 +165,21 @@ import DetailView from './film/Detail.vue';
 
 const ipcRenderer = useIpcRenderer();
 const storePlayer = usePlayStore();
+
+const renderError = () => {
+  return (
+    <div class="renderIcon" style="width: 100%; height: 200px; overflow: hidden;">
+      <img src={ loadGif } style="width: 100%; height: 100%; object-fit: cover;"/>
+    </div>
+  );
+};
+const renderLoading = () => {
+  return (
+    <div class="renderIcon" style="width: 100%; height: 200px; overflow: hidden;">
+      <img src={ loadGif } style="width: 100%; height: 100%; object-fit: cover;"/>
+    </div>
+  );
+};
 
 const infiniteId = ref(+new Date()); // infinite-loading属性重置组件
 const searchTxt = ref(''); // 搜索框
