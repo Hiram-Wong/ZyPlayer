@@ -10,7 +10,14 @@
           </li>
         </ul>
       </div>
-      <div class="nav-sub-tab-bottom"></div>
+      <div class="nav-sub-tab-bottom">
+        <router-link :to="{ path: '/setting', query: { select: 'iptvSource' } }">
+          <div class="membership-wrapper nav-sub-tab-member-info">
+            <ArticleIcon />
+            <span class="member-name">前往配置</span>
+          </div>
+        </router-link>
+      </div>
     </div>
     <div class="content">
       <header class="header">
@@ -78,7 +85,7 @@
                   <t-image
                     class="card-main-item"
                     :src="iptvSetting.iptvThumbnail? item.thumbnail: item.logo"
-                    :style="iptvSetting.iptvThumbnail? { width: '180px', height: '100px', background: 'none' }: { width: '60px', height: '30px', background: 'none' }"
+                    :style="{ width: '180px', height: '100px', background: 'none' }"
                     :lazy="true"
                     :loading="renderLoading"
                     :error="renderError"
@@ -130,7 +137,7 @@ import { useIpcRenderer } from '@vueuse/electron';
 
 import _ from 'lodash';
 import PQueue from 'p-queue';
-import { MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { ArticleIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
@@ -611,8 +618,9 @@ const formatMoreTitle = (item, list) => {
     justify-content: space-between;
     height: 100%;
     z-index: 2;
-    overflow: auto;
     .nav-sub-tab-top {
+      overflow: auto;
+      width: 100%;
       .nav-menu {
         display: flex;
         flex-direction: column;
@@ -644,6 +652,30 @@ const formatMoreTitle = (item, list) => {
       align-items: center;
       flex-direction: column;
       padding-bottom: 20px;
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .membership-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        width: 148px;
+        border: 2px solid rgba(132, 133, 141, 0.16);
+        transition: all .3s ease;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 20px;
+        .member-name {
+          font-size: 12px;
+          margin-left: 4px;
+        }
+      }
+      .nav-sub-tab-member-info {
+        margin-top: 16px;
+      }
     }
   }
 
@@ -802,13 +834,18 @@ const formatMoreTitle = (item, list) => {
               }
               .card-footer {
                 .card-footer-title {
+                  backdrop-filter: saturate(180%) blur(20px);
+                  background-color: rgb(0 0 0 / 60%);
+                  border-radius: 4px;
+                  color: rgba(255, 255, 255, 0.8);
+                  font-size: 10px;
+                  box-shadow: var(--td-shadow-1);
                   z-index: 10;
                   position: absolute;
-                  right: 0;
-                  bottom: 0;
+                  right: 2px;
+                  bottom: 2px;
                   padding: 0 5px;
                   max-width: 90%;
-                  color: #fbfbfb;
                   font-weight: bold;
                   white-space: nowrap;
                   overflow: hidden;

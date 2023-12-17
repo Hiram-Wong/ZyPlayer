@@ -41,10 +41,6 @@
             <span class="member-name">为爱发电</span>
           </div>
         </t-popup>
-        <div class="membership-wrapper nav-sub-tab-member-info" @click="formDialogPrivacyPolicy=true">
-          <AssignmentIcon />
-          <span class="member-name">免责声明</span>
-        </div>
       </div>
     </div>
     <div class="content">
@@ -65,23 +61,22 @@
       </div>
     </div>
     </div>
-   <privacy-policy-view v-model:visible="formDialogPrivacyPolicy" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { onMounted, reactive } from 'vue';
+import { useRoute } from 'vue-router';
 
-import { AssignmentIcon, MoneyIcon } from 'tdesign-icons-vue-next';
+import { MoneyIcon } from 'tdesign-icons-vue-next';
 
 import analyzeView from './setting/analyze/AnalyzeSetting.vue';
 import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
 import driveView from './setting/drive/driveSetting.vue';
-import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
 
-const formDialogPrivacyPolicy = ref(false);
+const route = useRoute();
 
 const settingSet = reactive({
   select: 'configBase',
@@ -108,6 +103,13 @@ const settingSet = reactive({
 const changeClassEvent = (item) => {
   settingSet.select = item
 }
+
+onMounted(() => {
+  const selectValue = route.query.select;
+  if (selectValue) {
+    settingSet.select = selectValue;
+  }
+});
 </script>
 
 <style lang="less" scoped>

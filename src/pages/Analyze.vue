@@ -10,7 +10,14 @@
           </li>
         </ul>
       </div>
-      <div class="nav-sub-tab-bottom"></div>
+      <div class="nav-sub-tab-bottom">
+        <router-link :to="{ path: '/setting', query: { select: 'analyzeSource' } }">
+          <div class="membership-wrapper nav-sub-tab-member-info">
+            <ArticleIcon />
+            <span class="member-name">前往配置</span>
+          </div>
+        </router-link>
+      </div>
     </div>
     <div class="content">
       <header class="header">
@@ -90,7 +97,7 @@
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import moment from 'moment';
-import { CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
+import { ArticleIcon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
 
@@ -309,8 +316,9 @@ const changeDefaultEvent = async (item: any) => {
     justify-content: space-between;
     height: 100%;
     z-index: 2;
-    overflow: auto;
     .nav-sub-tab-top {
+      overflow: auto;
+      width: 100%;
       .nav-menu {
         display: flex;
         flex-direction: column;
@@ -342,6 +350,30 @@ const changeDefaultEvent = async (item: any) => {
       align-items: center;
       flex-direction: column;
       padding-bottom: 20px;
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .membership-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        width: 148px;
+        border: 2px solid rgba(132, 133, 141, 0.16);
+        transition: all .3s ease;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 20px;
+        .member-name {
+          font-size: 12px;
+          margin-left: 4px;
+        }
+      }
+      .nav-sub-tab-member-info {
+        margin-top: 16px;
+      }
     }
   }
   .no-warp {
