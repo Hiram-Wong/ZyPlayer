@@ -20,7 +20,7 @@
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" placeholder="搜索解析资源" clearable @enter="getAnalyze" @clear="getAnalyze" class="search-bar">
+            <t-input v-model="searchValue" placeholder="搜索解析资源" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -69,7 +69,7 @@
         </t-space>
       </template>
     </t-table>
-    <dialog-add-view v-model:visible="formDialogVisibleAddAnalyze" :data="data" @refresh-table-data="getAnalyze" />
+    <dialog-add-view v-model:visible="formDialogVisibleAddAnalyze" :data="data" @refresh-table-data="refreshEvent" />
     <dialog-edit-view v-model:visible="formDialogVisibleEditAnalyze" :data="formData" />
     <dialog-flag-view
       v-model:visible="formDialogVisibleFlagAnalyze"
@@ -110,6 +110,8 @@ const pagination = reactive({
   defaultPageSize: 20,
   total: 0,
   defaultCurrent: 1,
+  pageSize: 20,
+  current: 1,
 });
 const selectedRowKeys = ref([]);
 const rehandleSelectChange = (val) => {
@@ -121,9 +123,14 @@ onMounted(() => {
   getAnalyzeFlag();
 });
 
+const refreshEvent = (page = false) => {
+  getAnalyze();
+  if (page) pagination.current = 1;
+};
+
 const rehandlePageChange = (curr) => {
-  pagination.defaultCurrent = curr.current;
-  pagination.defaultPageSize = curr.pageSize;
+  pagination.current = curr.current;
+  pagination.pageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
@@ -139,7 +146,6 @@ const getAnalyze = async () => {
     const res = await analyze.pagination(searchValue.value);
     data.value = res.list;
     pagination.total = res.total;
-    pagination.defaultCurrent = 1;
   } catch (e) {
     console.log(e);
   }
@@ -157,7 +163,7 @@ const propChangeEvent = (row) => {
 
 // 编辑
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex + pagination.defaultPageSize * (pagination.defaultCurrent - 1)];
+  formData.value = data.value[row.rowIndex + pagination.pageSize * (pagination.current - 1)];
   formDialogVisibleEditAnalyze.value = true;
 };
 
@@ -177,7 +183,7 @@ const removeEvent = (row) => {
   analyze
     .remove(row.id)
     .then(() => {
-      getAnalyze();
+      refreshEvent();
       MessagePlugin.success('删除成功');
     })
     .catch((err) => {
@@ -197,7 +203,7 @@ const removeAllEvent = () => {
       MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
     });
   });
-  getAnalyze();
+  refreshEvent();
   MessagePlugin.success('批量删除成功');
 };
 

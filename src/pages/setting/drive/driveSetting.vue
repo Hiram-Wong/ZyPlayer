@@ -20,7 +20,7 @@
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" placeholder="搜索网盘资源" clearable @enter="getData" @clear="getData" class="search-bar">
+            <t-input v-model="searchValue" placeholder="搜索网盘资源" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -62,7 +62,7 @@
       </template>
     </t-table>
 
-    <dialog-add-view v-model:visible="isVisible.addDialog" :data="data" @refresh-table-data="getData" />
+    <dialog-add-view v-model:visible="isVisible.addDialog" :data="data" @refresh-table-data="refreshEvent" />
     <dialog-edit-view v-model:visible="isVisible.editDialog" :data="rowEditData" />
     <dialog-ali-auth-view v-model:visible="isVisible.aliAuthDialog" />
   </div>
@@ -95,6 +95,8 @@ const pagination = reactive({
   defaultPageSize: 20,
   total: 0,
   defaultCurrent: 1,
+  pageSize: 20,
+  current: 1,
 });
 const selectedRowKeys = ref([]);
 const defaultDrive = ref();
@@ -107,8 +109,8 @@ const rehandleSelectChange = (val) => {
 };
 
 const rehandlePageChange = (curr) => {
-  pagination.defaultCurrent = curr.current;
-  pagination.defaultPageSize = curr.pageSize;
+  pagination.current = curr.current;
+  pagination.pageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
@@ -124,7 +126,6 @@ const getData = async () => {
     const res = await drive.pagination(searchValue.value);
     data.value = res.list;
     pagination.total = res.total;
-    pagination.defaultCurrent = 1;
   } catch (e) {
     console.log(e);
   }
@@ -133,6 +134,11 @@ const getData = async () => {
 onMounted(() => {
   getData();
 });
+
+const refreshEvent = (page = false) => {
+  getData();
+  if (page) pagination.current = 1;
+};
 
 const emitReload = useEventBus<string>('drive-reload');
 
@@ -146,7 +152,7 @@ const defaultEvent = async (row) => {
 
 const editEvent = (row) => {
   rowEditData.value =
-    data.value[row.rowIndex + pagination.defaultPageSize * (pagination.defaultCurrent - 1)];
+    data.value[row.rowIndex + pagination.pageSize * (pagination.current - 1)];
   isVisible.editDialog = true;
 };
 
@@ -158,7 +164,7 @@ const removeEvent = (row) => {
   drive
     .remove(row.id)
     .then(() => {
-      getData();
+      refreshEvent();
       MessagePlugin.success('删除成功');
     })
     .catch((error) => {
@@ -177,7 +183,7 @@ const removeAllEvent = () => {
       MessagePlugin.error(`批量删除源失败, 错误信息:${error}`);
     });
   });
-  getData();
+  refreshEvent();
   MessagePlugin.success('批量删除成功');
 };
 

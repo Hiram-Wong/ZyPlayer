@@ -16,7 +16,7 @@
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" placeholder="搜索频道资源" clearable @enter="getIptv" @clear="getIptv" class="search-bar">
+            <t-input v-model="searchValue" placeholder="搜索频道资源" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -63,7 +63,7 @@
       </template>
     </t-table>
 
-    <dialog-add-view v-model:visible="formDialogVisibleAddIptv" :data="data" @refresh-table-data="getIptv" />
+    <dialog-add-view v-model:visible="formDialogVisibleAddIptv" :data="data" @refresh-table-data="refreshEvent" />
     <dialog-edit-view v-model:visible="formDialogVisibleEditIptv" :data="rowEditData" />
   </div>
 </template>
@@ -97,6 +97,8 @@ const pagination = reactive({
   defaultPageSize: 20,
   total: 0,
   defaultCurrent: 1,
+  pageSize: 20,
+  current: 1,
 });
 const selectedRowKeys = ref([]);
 const defaultIptv = ref();
@@ -109,8 +111,8 @@ const rehandleSelectChange = (val) => {
 };
 
 const rehandlePageChange = (curr) => {
-  pagination.defaultCurrent = curr.current;
-  pagination.defaultPageSize = curr.pageSize;
+  pagination.current = curr.current;
+  pagination.pageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
@@ -126,7 +128,6 @@ const getIptv = async () => {
     const res = await iptv.pagination(searchValue.value);
     data.value = res.list;
     pagination.total = res.total;
-    pagination.defaultCurrent = 1;
   } catch (e) {
     console.log(e);
   }
@@ -135,6 +136,11 @@ const getIptv = async () => {
 onMounted(() => {
   getIptv();
 });
+
+const refreshEvent = (page = false) => {
+  getIptv();
+  if (page) pagination.current = 1;
+};
 
 const emitReload = useEventBus<string>('iptv-reload');
 
@@ -231,7 +237,7 @@ const txt = (text) => {
 
 const editEvent = (row) => {
   rowEditData.value =
-    data.value[row.rowIndex + pagination.defaultPageSize * (pagination.defaultCurrent - 1)];
+    data.value[row.rowIndex + pagination.pageSize * (pagination.current - 1)];
   formDialogVisibleEditIptv.value = true;
 };
 
@@ -243,7 +249,7 @@ const removeEvent = (row) => {
   iptv
     .remove(row.id)
     .then(() => {
-      getIptv();
+      refreshEvent();
       MessagePlugin.success('删除成功');
     })
     .catch((error) => {
@@ -262,7 +268,7 @@ const removeAllEvent = () => {
       MessagePlugin.error(`批量删除源失败, 错误信息:${error}`);
     });
   });
-  getIptv();
+  refreshEvent();
   MessagePlugin.success('批量删除成功');
 };
 </script>

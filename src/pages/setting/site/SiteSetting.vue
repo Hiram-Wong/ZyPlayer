@@ -20,7 +20,7 @@
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" placeholder="搜索站点资源" clearable @enter="refreshEvent" @clear="refreshEvent" class="search-bar">
+            <t-input v-model="searchValue" placeholder="搜索站点资源" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -113,6 +113,8 @@ const pagination = reactive({
   defaultPageSize: 20,
   total: 0,
   defaultCurrent: 1,
+  pageSize: 20,
+  current: 1,
 });
 const tableRef = ref(null);
 const data = ref([]);
@@ -127,9 +129,6 @@ const getSites = async () => {
   defaultSite.value = await setting.get('defaultSite');
   try {
     const res = await sites.pagination(searchValue.value);
-    if (!searchValue.value)  data.value = [];
-    pagination.defaultCurrent = 1;
-    console.log(res);
     data.value = res.list;
     pagination.total = res.total;
   } catch (e) {
@@ -145,12 +144,14 @@ const getGroup = () => {
 };
 
 onMounted(() => {
-  refreshEvent();
-});
-
-const refreshEvent = () => {
   getSites();
   getGroup();
+});
+
+const refreshEvent = (page = false) => {
+  getSites();
+  getGroup();
+  if (page) pagination.current = 1;
 };
 
 // op
@@ -191,8 +192,8 @@ const checkSingleEvent = async (row, all = false) => {
 };
 
 const rehandlePageChange = (curr) => {
-  pagination.defaultCurrent = curr.current;
-  pagination.defaultPageSize = curr.pageSize;
+  pagination.current = curr.current;
+  pagination.pageSize = curr.pageSize;
 };
 
 const rehandleSortChange = (sortVal, options) => {
@@ -202,7 +203,7 @@ const rehandleSortChange = (sortVal, options) => {
 };
 
 const editEvent = (row) => {
-  formData.value = data.value[row.rowIndex + pagination.defaultPageSize * (pagination.defaultCurrent - 1)];
+  formData.value = data.value[row.rowIndex + pagination.pageSize * (pagination.current - 1)];
   formDialogVisibleEditSite.value = true;
 };
 
