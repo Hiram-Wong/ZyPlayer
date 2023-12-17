@@ -190,16 +190,16 @@ const closeDialog = () => {
   }
 }
 .icon-wrapper {
-  height: 28px;
-  width: 28px;
+  height: 24px;
+  width: 24px;
   display: flex;
   border-radius: 5px;
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: 24px;
-  right: 16px;
-  transition: all .3s ease;
+  top: 25px;
+  right: 20px;
+  transition: all 0.3s ease;
   cursor: pointer;
   z-index: 10;
 }

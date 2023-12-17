@@ -1,6 +1,8 @@
 node_modules
 .DS_Store
 
+thumbnail
+
 # build files
 es/
 dist/
