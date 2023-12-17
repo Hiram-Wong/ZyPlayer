@@ -17,6 +17,8 @@
                 :style="{ width: '190px', height: '105px' }"
                 :lazy="true"
                 fit="cover"
+                :loading="renderLoading"
+                :error="renderError"
               >
                 <template #overlayContent>
                   <div class="op">
@@ -48,8 +50,9 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import 'v3-infinite-loading/lib/style.css';
+import loadGif from '@/assets/loading.gif';
 
 import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
@@ -66,6 +69,21 @@ import DetailView from '../../film/Detail.vue';
 
 const ipcRenderer = useIpcRenderer();
 const store = usePlayStore();
+
+const renderError = () => {
+  return (
+    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
+      <img src={ loadGif } style="width: 100%; height: 100%; object-fit: cover;"/>
+    </div>
+  );
+};
+const renderLoading = () => {
+  return (
+    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
+      <img src={ loadGif } style="width: 100%; height: 100%; object-fit: cover;"/>
+    </div>
+  );
+};
 
 const pagination = ref({
   pageIndex: 0,

@@ -83,7 +83,14 @@
                   <t-image
                     class="card-main-item"
                     :src="iptvSetting.iptvThumbnail? item.thumbnail: item.logo"
-                    :style="{ width: '180px', height: '100px', background: 'none' }"
+                    :style="{
+                      width: '180px',
+                      height: '100px',
+                      background: 'none',
+                      padding: iptvSetting.iptvThumbnail
+                        ? 'none'
+                        : '35px 60px'
+                    }"
                     :lazy="true"
                     :loading="renderLoading"
                     :error="renderError"
@@ -133,7 +140,7 @@ import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useClipboard, useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 
-import _ from 'lodash';
+import _, { padEnd } from 'lodash';
 import PQueue from 'p-queue';
 import { ArticleIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
