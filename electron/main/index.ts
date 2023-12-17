@@ -354,7 +354,11 @@ app.whenReady().then(() => {
   });
 
   showLoading();
-  tmpDir('thumbnail');
+  if (is.dev) {
+    tmpDir( path.join(process.cwd(), 'thumbnail'));
+  } else {
+    tmpDir(path.join(appDataPath, 'thumbnail'));
+  }
   createWindow();
   registerAppMenu();
 
@@ -582,15 +586,26 @@ const getFolderSize = (folderPath: string): number => {
 };
 
 const tmpDir = async(path: string) => {
-  const pathExists = await fs.pathExistsSync(path);
-  if (pathExists) {
-    await fs.removeSync(path); // 删除文件, 不存在不会报错
+  try {
+    const pathExists = await fs.pathExistsSync(path);
+    log.info(`[ipcMain] tmpDir: ${path}-exists-${pathExists}`);
+    if (pathExists) {
+      await fs.removeSync(path); // 删除文件, 不存在不会报错
+    }
+    await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
+    log.info(`[ipcMain] tmpDir: ${path}-created-sucess`);
+  } catch (err) {
+    log.error(err)
   }
-  await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
 };
 
 ipcMain.on('tmpdir-manage',  (event, action, trails) => {
-  const formatPath = path.join(appDataPath, trails);
+  let formatPath;
+  if (is.dev) {
+    formatPath = path.join(process.cwd(), trails);
+  } else {
+    formatPath = path.join(appDataPath, trails);
+  }
   if (action === 'rmdir' || action === 'mkdir' || action === 'init') tmpDir(formatPath);
   if (action === 'size') event.reply("tmpdir-manage-size", getFolderSize(formatPath));
 });
