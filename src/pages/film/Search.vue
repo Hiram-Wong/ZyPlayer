@@ -10,7 +10,7 @@
         zIndex: '999',
         background: 'var(--td-bg-color-page)',
         boxShadow: '0 15px 30px rgba(0,0,0,.2)',
-        maxHeight: '500px',
+        maxHeight: '560px',
         overflow: 'auto'
       }"
     >
