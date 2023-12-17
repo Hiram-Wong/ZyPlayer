@@ -10,6 +10,7 @@ const state = {
 export type TState = typeof state;
 
 export const useSettingStore = defineStore('setting', {
+  persist: true, // 数据持久化
   state: () => state,
   getters: {
     getStateMode: (state): 'dark' | 'light' | 'auto' => {
@@ -24,6 +25,9 @@ export const useSettingStore = defineStore('setting', {
         return 'light';
       }
       return state.mode as 'dark' | 'light';
+    },
+    getSysConfigSwitch: (state): 'configBase' | 'siteSource' | 'iptvSource' | 'analyzeSource' | 'driveSource' => {
+      return state.sysConfigSwitch as 'configBase' | 'siteSource' | 'iptvSource' | 'analyzeSource' | 'driveSource';
     },
   },
   actions: {
@@ -49,9 +53,6 @@ export const useSettingStore = defineStore('setting', {
         }
         if (key === 'mode') {
           this.changeMode(payload[key]);
-        }
-        if (key === 'brandTheme') {
-          this.changeBrandTheme(payload[key]);
         }
       }
     },

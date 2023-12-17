@@ -65,8 +65,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive } from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted, computed, reactive, watch } from 'vue';
+import { useSettingStore } from '@/store';
 
 import { MoneyIcon } from 'tdesign-icons-vue-next';
 
@@ -76,7 +76,10 @@ import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
 import driveView from './setting/drive/driveSetting.vue';
 
-const route = useRoute();
+const storeSetting = useSettingStore();
+const sysConfigSwitch = computed(() => {
+  return storeSetting.getSysConfigSwitch;
+});
 
 const settingSet = reactive({
   select: 'configBase',
@@ -100,16 +103,21 @@ const settingSet = reactive({
   ]
 })
 
+if (storeSetting.getSysConfigSwitch) {
+  settingSet.select = storeSetting.getSysConfigSwitch;
+}
+
+watch(() => settingSet.select, (newValue) => {
+  storeSetting.updateConfig({ sysConfigSwitch: newValue });
+})
+
+watch(() => sysConfigSwitch.value, (newValue) => {
+  settingSet.select = newValue;
+})
+
 const changeClassEvent = (item) => {
   settingSet.select = item
 }
-
-onMounted(() => {
-  const selectValue = route.query.select;
-  if (selectValue) {
-    settingSet.select = selectValue;
-  }
-});
 </script>
 
 <style lang="less" scoped>

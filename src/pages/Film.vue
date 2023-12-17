@@ -11,12 +11,10 @@
         </ul>
       </div>
       <div class="nav-sub-tab-bottom">
-        <router-link :to="{ path: '/setting', query: { select: 'siteSource' } }">
-          <div class="membership-wrapper nav-sub-tab-member-info">
-            <ArticleIcon />
-            <span class="member-name">前往配置</span>
-          </div>
-        </router-link>
+        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
+          <ArticleIcon />
+          <span class="member-name">前往配置</span>
+        </div>
       </div>
     </div>
     <div class="content">
@@ -161,10 +159,11 @@ import _ from 'lodash';
 import { ArticleIcon, MoreIcon, RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { setting, sites } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
-import { usePlayStore } from '@/store';
+import { usePlayStore, useSettingStore } from '@/store';
 
 import HotView from './film/Hot.vue';
 import SearchView from './film/Search.vue';
@@ -172,6 +171,8 @@ import DetailView from './film/Detail.vue';
 
 const ipcRenderer = useIpcRenderer();
 const storePlayer = usePlayStore();
+const storeSetting = useSettingStore();
+const router = useRouter();
 
 const renderError = () => {
   return (
@@ -679,6 +680,14 @@ eventBus.on(async () => {
 // 分类更多标题
 const formatMoreTitle = (item, list) => {
   return _.find(list, {type_name: item});
+}
+
+const gotoSetConfig = () =>{
+  router.push({
+    name: 'SettingIndex',
+  })
+  storeSetting.updateConfig({ sysConfigSwitch: 'siteSource' });
+  console.log(storeSetting.getSysConfigSwitch)
 }
 </script>
 

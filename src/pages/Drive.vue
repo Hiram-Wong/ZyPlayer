@@ -10,7 +10,12 @@
           </li>
         </ul>
       </div>
-      <div class="nav-sub-tab-bottom"></div>
+      <div class="nav-sub-tab-bottom">
+        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
+          <ArticleIcon />
+          <span class="member-name">前往配置</span>
+        </div>
+      </div>
     </div>
     <div class="content">
       <header class="header">
@@ -86,17 +91,20 @@ import { useEventBus } from '@vueuse/core';
 import { useIpcRenderer } from '@vueuse/electron';
 
 import _ from 'lodash';
-import { Tv1Icon, LoadingIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { ArticleIcon, Tv1Icon, LoadingIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { drive, setting } from '@/lib/dexie';
 import { __jsEvalReturn } from '@/lib/utils/alist_open';
-import { usePlayStore } from '@/store'
+import { usePlayStore, useSettingStore } from '@/store';
 
 const ipcRenderer = useIpcRenderer();
-
 const storePlayer = usePlayStore();
+const storeSetting = useSettingStore();
+const router = useRouter();
+
 const spider = ref(null);
 const renderError = () => {
   return (
@@ -291,6 +299,15 @@ eventBus.on(async () => {
   infiniteCompleteTip.value = '没有更多内容了!';
   getSetting();
 });
+
+
+
+const gotoSetConfig = () =>{
+  router.push({
+    name: 'SettingIndex',
+  })
+  storeSetting.updateConfig({ sysConfigSwitch: 'driveSource' });
+}
 </script>
 
 <style lang="less" scoped>
@@ -312,8 +329,9 @@ eventBus.on(async () => {
     justify-content: space-between;
     height: 100%;
     z-index: 2;
-    overflow: auto;
     .nav-sub-tab-top {
+      overflow: auto;
+      width: 100%;
       .nav-menu {
         display: flex;
         flex-direction: column;
@@ -345,6 +363,30 @@ eventBus.on(async () => {
       align-items: center;
       flex-direction: column;
       padding-bottom: 20px;
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .membership-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        width: 148px;
+        border: 2px solid rgba(132, 133, 141, 0.16);
+        transition: all .3s ease;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 20px;
+        .member-name {
+          font-size: 12px;
+          margin-left: 4px;
+        }
+      }
+      .nav-sub-tab-member-info {
+        margin-top: 16px;
+      }
     }
   }
 

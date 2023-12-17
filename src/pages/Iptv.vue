@@ -11,12 +11,10 @@
         </ul>
       </div>
       <div class="nav-sub-tab-bottom">
-        <router-link :to="{ path: '/setting', query: { select: 'iptvSource' } }">
-          <div class="membership-wrapper nav-sub-tab-member-info">
-            <ArticleIcon />
-            <span class="member-name">前往配置</span>
-          </div>
-        </router-link>
+        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
+          <ArticleIcon />
+          <span class="member-name">前往配置</span>
+        </div>
       </div>
     </div>
     <div class="content">
@@ -141,6 +139,7 @@ import { ArticleIcon, MoreIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { channelList, iptv, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
@@ -154,6 +153,7 @@ const ipcRenderer = useIpcRenderer();
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
+const router = useRouter();
 
 const renderError = () => {
   return (
@@ -597,6 +597,13 @@ const copyChannelEvent = () => {
 const formatMoreTitle = (item, list) => {
   return _.find(list, {id: item});
 };
+
+const gotoSetConfig = () =>{
+  router.push({
+    name: 'SettingIndex',
+  })
+  storeSetting.updateConfig({ sysConfigSwitch: 'iptvSource' });
+}
 </script>
 
 <style lang="less" scoped>

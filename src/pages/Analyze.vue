@@ -11,12 +11,10 @@
         </ul>
       </div>
       <div class="nav-sub-tab-bottom">
-        <router-link :to="{ path: '/setting', query: { select: 'analyzeSource' } }">
-          <div class="membership-wrapper nav-sub-tab-member-info">
-            <ArticleIcon />
-            <span class="member-name">前往配置</span>
-          </div>
-        </router-link>
+        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
+          <ArticleIcon />
+          <span class="member-name">前往配置</span>
+        </div>
       </div>
     </div>
     <div class="content">
@@ -100,7 +98,9 @@ import moment from 'moment';
 import { ArticleIcon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 
+import { useSettingStore } from '@/store';
 import { analyze, analyzeHistory, setting } from '@/lib/dexie';
 import zy from '@/lib/utils/tools';
 
@@ -109,6 +109,9 @@ import DialogIframemView from './analysis/DialogIframe.vue';
 import DialogPlatformView from './analysis/DialogPlatform.vue';
 import DialogSearchView from './analysis/DialogSearch.vue';
 import SharePopup from './common/SharePopup.vue';
+
+const storeSetting = useSettingStore();
+const router = useRouter();
 
 const isSupport = ref(false);
 const quickSearchType = ref('platform');
@@ -296,6 +299,13 @@ const changeDefaultEvent = async (item: any) => {
   selectAnalysisApi.value = item;
   if(analysisUrl.value) await getVideoInfo(analysisUrl.value, urlTitle.value);
 };
+
+const gotoSetConfig = () =>{
+  router.push({
+    name: 'SettingIndex',
+  })
+  storeSetting.updateConfig({ sysConfigSwitch: 'analyzeSource' });
+}
 </script>
 
 <style lang="less" scoped>
