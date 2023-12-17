@@ -82,15 +82,15 @@
               />
               <span class="title" @click="reset('epg')">重置</span>
             </t-space>
-            <!-- <t-space align="center">
+            <t-space align="center">
               <t-input
-                v-model="formData.defaultIptvEpg"
-                label="默认台标:"
-                placeholder="仅支持DIYP"
+                v-model="formData.defaultIptvLogo"
+                label="全局台标:"
+                placeholder="源台标失效"
                 :style="{ width: '255px' }"
               />
-              <span class="title" @click="reset('epg')">重置</span>
-            </t-space> -->
+              <span class="title" @click="reset('logo')">重置</span>
+            </t-space>
           </t-space>
         </div>
       </t-form-item>
@@ -117,7 +117,7 @@
         <dialog-dns-view v-model:visible="isVisible.dns" :data="dnsDialogData" @receive-dns-data="flushDialogData" />
         <dialog-ua-view v-model:visible="isVisible.ua" :data="uaDialogData" @receive-dns-data="flushDialogData" />
       </t-form-item>
-      <t-form-item label="权限" name="data">
+      <t-form-item label="权限" name="jurisdiction">
         <t-space>
           <t-radio v-if="platform !== 'linux'" v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">
             开机自启
@@ -130,17 +130,19 @@
           </t-radio>
         </t-space>
       </t-form-item>
-      <t-form-item label="其他" name="data">
+      <t-form-item label="其他" name="other">
         <t-space>
           <span class="title" @click="resetOriginal">恢复出厂</span>
           <span class="title" @click="dataMange">数据管理</span>
           <span class="title" @click="isVisible.update = true">检查更新</span>
+          <span class="title" @click="isVisible.privacyPolicy=true">用户协议</span>
         </t-space>
 
         <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
         <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData" @receive-sniffer-data="flushDialogData"/>
+        <dialog-privacy-policy-view v-model:visible="isVisible.privacyPolicy" />
       </t-form-item>
     </t-form>
   </div>
@@ -169,6 +171,7 @@ import DialogUaView from './components/DialogUA.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogFfmpegCaptionView from './components/DialogFfmpegCaption.vue';
 import DialogSnifferView from './components/DialogSniffer.vue';
+import DialogPrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
 
 const ipcRenderer = useIpcRenderer();
 
@@ -183,7 +186,8 @@ const isVisible = reactive({
   dns: false,
   ua: false,
   iptvThumbnail: false,
-  sniffer: false
+  sniffer: false,
+  privacyPolicy: false,
 });
 
 const dnsDialogData = ref({ data: '', type: 'dns' });
@@ -529,6 +533,8 @@ const reset = (type: string) => {
     ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
   } else if (type === 'epg') {
     formData.value.defaultIptvEpg = 'https://epg.112114.eu.org/';
+  } else if (type === 'logo') {
+    formData.value.defaultIptvLogo = 'https://epg.112114.eu.org/logo/';
   }
 };
 

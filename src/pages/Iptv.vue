@@ -82,7 +82,7 @@
                 <div class="card-main">
                   <t-image
                     class="card-main-item"
-                    :src="iptvSetting.iptvThumbnail? item.thumbnail: item.logo"
+                    :src="iptvSetting.iptvThumbnail? item.thumbnail: generateLogo(item)"
                     :style="{
                       width: '180px',
                       height: '100px',
@@ -184,6 +184,7 @@ const isVisible = reactive({
 const iptvSetting = ref({
   name: '',
   epg: '' as string,
+  logo: '' as string,
   skipIpv6: false,
   iptvStatus: false,
   iptvThumbnail: false,
@@ -230,12 +231,13 @@ onMounted(() => {
 // 获取配置
 const getSetting = async () => {
   try {
-    const [defaultIptv, defaultIptvEpg, iptvSkipIpv6, iptvStatus, iptvThumbnail, iptvAll] = await Promise.all([
+    const [defaultIptv, defaultIptvEpg, iptvSkipIpv6, iptvStatus, iptvThumbnail, defaultIptvLogo, iptvAll] = await Promise.all([
       setting.get('defaultIptv'),
       setting.get('defaultIptvEpg'),
       setting.get('iptvSkipIpv6'),
       setting.get('iptvStatus'),
       setting.get('iptvThumbnail'),
+      setting.get('defaultIptvLogo'),
       iptv.all(),
     ]);
 
@@ -246,6 +248,7 @@ const getSetting = async () => {
         if (basic) {
           iptvSetting.value.name = basic.name;
           iptvSetting.value.epg = basic.epg || defaultIptvEpg;
+          iptvSetting.value.logo = defaultIptvLogo;
         }
       } catch {
         infiniteCompleteTip.value = '查无此id,请前往设置-直播源重新设置默认源!';
@@ -610,6 +613,15 @@ const gotoSetConfig = () =>{
     name: 'SettingIndex',
   })
   storeSetting.updateConfig({ sysConfigSwitch: 'iptvSource' });
+}
+
+// 生成台标
+const generateLogo = (item) => {
+  let url = item.logo;
+  if (iptvSetting.value.logo) {
+    url = `${iptvSetting.value.logo}${item.name}.png`;
+  };
+  return url;
 }
 </script>
 
