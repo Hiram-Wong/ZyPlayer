@@ -16,6 +16,7 @@
               <t-radio :value="0">cms[xml]</t-radio>
               <t-radio :value="1">cms[json]</t-radio>
               <t-radio :value="2">drpy[js0]</t-radio>
+              <t-radio :value="6">hipy</t-radio>
               <!-- <t-radio :value="3">drpy[js1]</t-radio> -->
               <t-radio :value="3">app[v3]</t-radio>
               <t-radio :value="4">app[v1]</t-radio>
@@ -23,7 +24,8 @@
             </t-radio-group>
           </t-form-item>
           <t-form-item label="接口" name="api">
-            <t-input v-model="formData.api" placeholder="请输入内容" />
+            <t-input v-if="formData.type !==5" v-model="formData.api" placeholder="请输入内容" />
+            <t-textarea v-else v-model="formData.api" placeholder="请输入内容" />
           </t-form-item>
           <t-form-item label="搜索" name="search">
             <t-radio-group v-model="formData.search">
@@ -32,11 +34,17 @@
               <t-radio :value="2">本站搜索</t-radio>
             </t-radio-group>
           </t-form-item>
+          <!-- <t-form-item label="筛选" name="filter">
+            <t-switch v-model="formData.filter" :label="['开', '关']"/>
+          </t-form-item> -->
           <!-- <t-form-item label="下载" name="download">
             <t-input v-model="formData.download" placeholder="请输入内容" />
           </t-form-item> -->
           <t-form-item label="解析" name="playUrl">
             <t-input v-model="formData.playUrl" placeholder="请输入内容" />
+          </t-form-item>
+          <t-form-item label="扩展" name="ext">
+            <t-input v-model="formData.ext" placeholder="请输入内容" />
           </t-form-item>
           <t-form-item label="分组" name="type">
             <t-select
@@ -153,11 +161,7 @@ const rulesSingle = {
   api: [{ required: true, message: '请输入接口', type: 'error' }],
   type: [{ required: true, message: '请选择类型', type: 'error' }],
   search: [{ required: true, message: '请选择搜索', type: 'error' }],
-};
-
-const rulesEasy = {
-  type: [{ required: true, message: '请选择类型', type: 'error' }],
-  url: [{ required: true, message: '请输入配置地址', type: 'error' }],
+  filter: [{ required: true, message: '请选择筛选', type: 'error' }],
 };
 
 const addSite = () => {

@@ -965,6 +965,18 @@ const initFilmPlayer = async (isFirst) => {
     }
   }
 
+  if (ext.value.site.type === 6) {
+    console.log('[player] hipy获取播放链接开启');
+    const { key } = ext.value.site;
+    try {
+      const hipyPlayUrl = await zy.get_hipy_play_url(key, selectPlaySource.value, config.value.url);
+      config.value.url = hipyPlayUrl;
+    } catch (err) {
+      console.log(err);
+    }
+    console.log(`[player] hipy获取播放链接结束`);
+  }
+
   if (ext.value.site.type === 2) {
     MessagePlugin.info('免嗅资源中, 请等待!');
     console.log('[player] drpy免嗅流程开始');
@@ -1000,6 +1012,7 @@ const initFilmPlayer = async (isFirst) => {
     }
 
     const { hostname } = new URL(config.value.url);
+    console.log(config.value,ext.value)
     if (
       VIP_LIST.some((item) => hostname.includes(item)) ||
       analyzeFlagData.value.some((item) => selectPlaySource.value.includes(item))

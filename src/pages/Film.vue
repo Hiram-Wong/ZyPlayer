@@ -60,10 +60,7 @@
         </div>
         <div class="actions">
           <search-view v-model="searchTxt" :site="FilmSiteSetting.basic" @search="searchEvent" style="position: relative; margin-right: 5px;"/>
-          <div
-            v-if="(FilmSiteSetting.basic.type === 2 && filter.data.length !== 0) || FilmSiteSetting.basic.type !== 2"
-            class="quick_item quick_filter"
-          >
+          <div v-if="filter.data.length !== 0" class="quick_item quick_filter">
             <root-list-icon size="large" @click="isVisible.toolbar = !isVisible.toolbar" />
           </div>
         </div>
@@ -277,15 +274,16 @@ const filterEvent = () => {
 
 // 非cms筛选：基于请求数据
 const filterApiEvent = async () => {
+  const { type } = FilmSiteSetting.value.basic;
   let filterFormat;
-  if (FilmSiteSetting.value.basic.type === 2) {
+  if (type === 2 || type === 6) {
     filterFormat = Object.entries(filter.value.select).reduce((item, [key, value]) => {
       if (value !== '' && value.length !== 0) {
         item[key] = value;
       }
       return item;
     }, {});
-  } else if (FilmSiteSetting.value.basic.type === 3 || FilmSiteSetting.value.basic.type === 4) {
+  } else if (type === 3 || type === 4) {
     filterFormat = Object.entries(filter.value.select)
       .map(([key, value]) => `${key}=${value === '全部' ? '' : value}`)
       .join('&');
@@ -450,7 +448,7 @@ const getClassList = async () => {
       const classItem = classDataFormat[0];
       FilmSiteSetting.value.class.id = classItem.type_id;
       FilmSiteSetting.value.class.name = classItem.type_name;
-      classFilter(filters);
+      if (!_.isEmpty(filters))  classFilter(filters);
 
       isVisible.loadClass = true;
     }
@@ -465,7 +463,7 @@ const changeClassEvent = (item) => {
   console.log(`[film] change class: ${item.type_id}-${item.type_name}`);
   FilmSiteSetting.value.class.id = item.type_id;
   FilmSiteSetting.value.class.name = item.type_name;
-  classFilter(filter.value.data);
+  if (!_.isEmpty(filter.value.data)) classFilter(filter.value.data);
   filterApiEvent();
   searchTxt.value = '';
   infiniteCompleteTip.value = '没有更多内容了!';
@@ -561,7 +559,7 @@ const getSearchList = async () => {
     }
 
     let resultDetail = resultSearch;
-    if (![3, 4].includes(FilmSiteSetting.value.basic.type)) {
+    if (![3, 4, 5].includes(FilmSiteSetting.value.basic.type)) {
       const ids = resultSearch.map((item) => item.vod_id);
       resultDetail = await zy.detail(currentSite.key, ids.join(','));
     }

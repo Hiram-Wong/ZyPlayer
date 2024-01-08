@@ -6,8 +6,12 @@ import _ from "lodash";
 import JSON5 from "json5";
 import qs from "qs";
 import * as iconv from 'iconv-lite';
+import Base64 from 'crypto-js/enc-base64';
+import Utf8 from 'crypto-js/enc-utf8';
 import dns from "dns";
 import net from "net";
+import xpath from 'xpath';
+import { DOMParser } from '@xmldom/xmldom';
 
 import { sites } from "@/lib/dexie";
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
@@ -80,6 +84,36 @@ const buildUrl = (url, paramsStr) => {
   }
 };
 
+const reptileApiFormat = (item, key) => {
+  try {
+    const itemJson = JSON.parse(item);
+    const marryRes = itemJson[key];
+    if (marryRes) {
+      const formatRes = marryRes.replace(/&&&/g, "'");
+      return formatRes;
+    }
+  } catch (error) {
+    console.error('Error occurred while parsing JSON:', error);
+    return '';
+  }
+}
+
+
+const reptileXpathFormat = (item, pat) => {
+  try {
+    const doc = new DOMParser().parseFromString(item);
+    const res = xpath.select(pat, doc);
+    if (res && res.length > 0) {
+      return res.map(item => item.textContent);
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error occurred while parsing or selecting XPath:", error);
+    return [];
+  }
+}
+
 const removeTrailingSlash = (url) => {
   if (url.endsWith('/')) {
     url = url.slice(0, -1);
@@ -115,6 +149,10 @@ const zy = {
         url = buildUrl(site.api, `/nav`);
       } else if (site.type === 4) {
         url = buildUrl(site.api, `/types`);
+      } else if (site.type === 5) {
+        // url = buildUrl(site.api, `&t=1&ac=videolist`);
+      } else if (site.type === 6) {
+        url = buildUrl(site.api, `&extend=${site.ext}&filter=true`);
       }
 
       const res = await axios.get(url, { timeout: 3000 });
@@ -242,6 +280,19 @@ const zy = {
             filters[classItem.type_id]= result
           }
         });
+      } else if (site.type === 6) {
+        page = 1;
+        pagecount = 9999;
+        limit = 20;
+        total = 9999;
+        filters = {};
+
+        classData = jsondata.class;
+        page = jsondata.page;
+        pagecount = jsondata.pagecount;
+        limit = parseInt(jsondata.limit);
+        total = jsondata.total;
+        filters = jsondata?.filters === undefined ? [] : jsondata.filters;
       }
 
       return {
@@ -306,6 +357,15 @@ const zy = {
         url = buildUrl(site.api, `?tid=${t}&page=${pg}`);
         if (Object.keys(f).length !== 0) {
           url = buildUrl(url, `&${f}`);
+        }
+      } else if (site.type === 6) {
+        url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}&extend=${site.ext}`);
+        if (Object.keys(f).length !== 0) {
+          // 将字符串转换为 UTF8 格式的 WordArray
+          const wordArray = Utf8.parse(JSON.stringify(f));
+          // 对 WordArray 进行 Base64 编码
+          const encodedStr = Base64.stringify(wordArray);
+          url = buildUrl(url, `&ext=${encodedStr}`);
         }
       } else {
         url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}`);
@@ -435,11 +495,35 @@ const zy = {
       const site = await sites.find({ key: key });
       let url;
       if ( site.type === 3 ) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
+      else if ( site.type === 5 ) url = `${reptileApiFormat(site.api, 'websearchurl')}${encodeURIComponent(wd)}`;
+      else if ( site.type === 6 ) url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}&extend=${site.ext}`);
       else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
       const { data } = await axios.get(url, { timeout: 3000 });
 
       let json = data;
       if (site.type === 0) json = parser.parse(data);
+
+      if (site.type === 5) {
+        const searchnamePat = reptileApiFormat(site.api, 'searchname');
+        const searchnameRes = reptileXpathFormat(json, searchnamePat);
+        const searchidPat = reptileApiFormat(site.api, 'searchid');
+        const searchidRes = reptileXpathFormat(json, searchidPat);
+        const searchpicPat = reptileApiFormat(site.api, 'searchpic');
+        const searchpicRes = reptileXpathFormat(json, searchpicPat);
+        const searchstarrPat = reptileApiFormat(site.api, 'searchstarr');
+        const searchstarrRes = reptileXpathFormat(json, searchstarrPat);
+
+        let zippedData = _.zip(searchnameRes, searchidRes, searchpicRes, searchstarrRes);
+        let list = zippedData.map(item => {
+          return {
+            vod_name: item[0],
+            vod_id: item[1],
+            vod_pic: item[2],
+            vod_remarks: item[3]
+          };
+        });
+        return list;
+      }
 
       const jsondata = json?.rss ?? json;
       if (!jsondata) return null;
@@ -559,13 +643,38 @@ const zy = {
         url = buildUrl(site.api, `/video_detail?id=${id}`);
       } else if (site.type === 4) {
         url = buildUrl(site.api, `/detail?vod_id=${id}`);
-      } else{
+      } else if (site.type === 5) {
+        url = id.startsWith('http')? id : `${reptileApiFormat(site.api, 'searchUrl')}${id}`;
+      } else if (site.type === 6) {
+        url = buildUrl(site.api, `?ac=detail&ids=${id}&extend=${site.ext}`);
+      } else {
         url = buildUrl(site.api, `?ac=detail&ids=${id}`);
       }
       const { data } = await axios.get(url);
       let json;
       if ( site.type === 0 ) json = parser.parse(data);
       else json = data;
+
+      if (site.type === 5) {
+        const detaillistPat = reptileApiFormat(site.api, 'detaillist');
+        const detaillistRes = reptileXpathFormat(json, detaillistPat);
+        const detailxlPat = reptileApiFormat(site.api, 'detailxl');
+        const detailxlRes = reptileXpathFormat(json, detailxlPat);
+        const detailjsPat = reptileApiFormat(site.api, 'detailjs');
+        const detailjsRes = reptileXpathFormat(json, detailjsPat);
+        const detailjsurlPat = reptileApiFormat(site.api, 'detailjsurl');
+        const detailjsurlRes = reptileXpathFormat(json, detailjsurlPat);
+
+        const vod_from = detailxlRes.join('$$$');
+        let zippedData = _.zip(detaillistRes, detailjsurlRes);
+        console.log(detaillistRes, detailjsurlRes)
+        console.log(vod_from);
+        let list = {
+          vod_from,
+          vod_url: []
+        }
+        return list;
+      }
 
       const jsondata = json?.rss ?? json;
       let videoList = jsondata.data || jsondata.list || [];
@@ -610,6 +719,24 @@ const zy = {
       });
 
       return videoData;
+    } catch (err) {
+      throw err;
+    }
+  },
+  /**
+   * hipy[drpy t4]获取播放详情
+   * @param {*} key 资源网 key
+   * @param {*} id 资源唯一标识符 id
+   * @returns
+   */
+  async get_hipy_play_url(key, flag, play) {
+    try {
+      const site = await sites.find({ key: key });
+      const url = buildUrl(site.api, `?extend=${site.ext}&flag=${flag}&play=${play}`);
+      const { data } = await axios.get(url);
+      let playUrl = data;
+      if (data?.url) playUrl = data.url;
+      return playUrl;
     } catch (err) {
       throw err;
     }
