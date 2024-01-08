@@ -19,8 +19,9 @@
             </div>
           </div>
           <div class="sign-btn">
-            <a href="https://github.com/hjdhnx/dr_py" target="_blank">py版本</a>
-            <a href="https://github.com/flash168/Peach" target="_blank">c#版本</a>
+            <a href="https://github.com/hjdhnx/dr_py" target="_blank">py</a>
+            <a href="https://github.com/flash168/Peach" target="_blank">c</a>
+            <a href="https://github.com/hjdhnx/fastapi_vue" target="_blank">hipy</a>
           </div>
         </div>
         <t-popup placement="right">
@@ -32,7 +33,11 @@
                 <div class="qrcode_bg">
                   <img src="@/assets/pay/qr.png" class="qrcode">
                 </div>
-                <p class="pay_desc">支付宝/微信扫码直接赞助</p>
+                <div class="scan_tips">
+                  <img src="@/assets/pay/ali.webp">
+                  <img src="@/assets/pay/wechat.webp">
+                  <span class="pay_desc">请扫码完成赞助</span>
+                </div>
               </div>
             </div>
           </template>
@@ -225,7 +230,7 @@ const changeClassEvent = (item) => {
           align-content: space-around;
           justify-content: space-around;
           a {
-            width: 50px;
+            width: 30px;
             height: 20px;
             font-size: 10px;
             border-radius: 11px;
@@ -320,13 +325,12 @@ const changeClassEvent = (item) => {
 }
 
 .sponsor_main {
-  padding: 10px 0;
   .qrcode_title {
     text-align: center;
     font-size: 16px;
     font-weight: 700;
     color: #cc9a45;
-    line-height: 20px;
+    line-height: 16px;
   }
   .qrcode-container {
     display: flex;
@@ -348,22 +352,34 @@ const changeClassEvent = (item) => {
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
-      margin-top: 6px;
-      padding: 6px;
-      background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVYAAAFWCAMAAAAFcUWxAAAAM1BMVEUAAADarWParWPZpk3Nm0bOnEnNm0bMmkbNm0fMnEfRm0nZq1/UpVbZq2DSo1HOnUnMmkUrMTs8AAAAEHRSTlMAzGcK3fLGuWFaHHDf0J7VctKVegAAA0JJREFUeNrs1EtKQwEQRNGXqIPED+5/tXoXICEQxYJzBk2P76COzx88Hdz2/EM9WWX9f+7O+n7itpd7s76eue3FCOSPR+DgQWSNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZM1vZb1er++v14MHuXy8XS6XvtP54GHOp+8jq6wTZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbvtqpk5SGAgAKgnFKAor++59WG3EZgpDNg6oj9KJljawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbZI2sG2SNrBtkjawbfrOez+e31/OJB7l+flyv19Nx5MSDHEdklXWBrJF1g6yRdYOskXWDrJF1g6yRdYOskXWDrJF1w1/WG15O3Hc5kuRO1vdn7vv6b9YncsfbkSQm8AAXWX/IuuFW1m+0r0yc66ZNywAAAABJRU5ErkJggg==) 50% no-repeat;
-      background-size: 100% 100%;
+      padding: 2px;
+      border: 1px solid #f3a233;
+      border-radius: 8px;
       text-align: center;
       margin: 0 auto;
       .qrcode {
         width: 100%;
         height: 100%;
+        border-radius: 5px;
       }
     }
-    .pay_desc {
-      margin-top: 12px;
-      font-size: 12px;
-      line-height: 14px;
-      vertical-align: middle;
+    .scan_tips {
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: row;
+      img {
+        background-size: 100%;
+        display: inline-block;
+        height: 16px;
+        margin-right: 2px;
+        width: 16px;
+      }
+      .pay_desc {
+        font-size: 12px;
+        font-weight: 700;
+      }
     }
   }
 }
