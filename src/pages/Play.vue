@@ -2150,6 +2150,9 @@ const openMainWinEvent = () => {
                   padding: 12px 45px 9px 0;
                   color: hsla(0, 0%, 100%, 0.9);
                   font-weight: 400;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                  overflow: hidden;
 
                   .rate {
                     color: var(--td-brand-color);
