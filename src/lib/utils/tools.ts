@@ -2,12 +2,11 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from "axios-retry";
 import { XMLParser } from "fast-xml-parser";
 import * as cheerio from "cheerio";
-import _ from "lodash";
+import _, { get } from "lodash";
 import JSON5 from "json5";
 import qs from "qs";
 import * as iconv from 'iconv-lite';
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
+import { Base64 } from 'js-base64';
 import dns from "dns";
 import net from "net";
 import xpath from 'xpath';
@@ -361,10 +360,7 @@ const zy = {
       } else if (site.type === 6) {
         url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}&extend=${site.ext}`);
         if (Object.keys(f).length !== 0) {
-          // 将字符串转换为 UTF8 格式的 WordArray
-          const wordArray = Utf8.parse(JSON.stringify(f));
-          // 对 WordArray 进行 Base64 编码
-          const encodedStr = Base64.stringify(wordArray);
+          const encodedStr = Base64.encode(JSON.stringify(f));
           url = buildUrl(url, `&ext=${encodedStr}`);
         }
       } else {
@@ -1264,6 +1260,47 @@ const zy = {
       }
     }
   },
+  /**
+   * 判断url媒体播放类型
+   * @param {String} url  请求地址
+   * @return {String}
+   */
+  async getMeadiaType(url: string): Promise<string> {
+    let mediaType: string = 'unknown';
+    try {
+      const res = await axios.head(url);
+      if (res.status === 200) {
+        const contentType = res.headers['content-type'];
+        const supportedFormats: Record<string, string> = {
+          'video/mp4': 'mp4',
+          'video/x-flv': 'flv',
+          'application/vnd.apple.mpegurl': 'm3u8',
+          'application/x-mpegURL': 'm3u8',
+          'application/octet-stream': 'm3u8',
+          'video/avi': 'avi',
+          'video/x-msvideo': 'avi',
+          'video/x-matroska': 'mkv',
+          'video/quicktime': 'mov',
+          'video/x-ms-wmv': 'wmv',
+          'video/3gpp': '3gp',
+        };
+  
+        for (const format in supportedFormats) {
+          if (contentType.includes(format)) {
+            mediaType = supportedFormats[format];
+          }
+        }
+      } else {
+        mediaType = 'error';
+      }
+    } catch (err) {
+      mediaType = 'error';
+      throw err;
+    } finally {
+      console.log(`媒体播放类型：${mediaType}`);
+      return mediaType;
+    }
+  }
 };
 
 export default zy;

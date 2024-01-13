@@ -711,9 +711,18 @@ const seasonReverseOrder = () => {
 
 // 根据不同类型加载不同播放器
 const createPlayer = async (videoType) => {
+  if (!videoType) {
+    const getMeadiaType = await zy.getMeadiaType(config.value.url);
+    if (getMeadiaType !== 'unknown' && getMeadiaType !== 'error' ) {
+      videoType = getMeadiaType;
+    }
+  }
   if (set.value.broadcasterType === 'xgplayer') {
     switch (videoType) {
       case 'mp4':
+        config.value.plugins = [Mp4Plugin];
+        break;
+      case 'mkv':
         config.value.plugins = [Mp4Plugin];
         break;
       case 'flv':
@@ -906,6 +915,19 @@ const destroyPlayer = () => {
   if (onlineUrl.value) onlineUrl.value = '';
 };
 
+// 判断媒体类型
+const checkMediaType = async (url) => {
+  const supportedFormats = ['mp4', 'mkv', 'flv', 'm3u8', 'avi'];
+
+  if (supportedFormats.some(format => url.includes(format)) && url.startsWith('http')) {
+    const fileType = supportedFormats.find(format => url.includes(format));
+    return fileType;
+  } else {
+    const getMeadiaType = await zy.getMeadiaType(config.value.url);
+    return getMeadiaType;
+  };
+};
+
 // 初始化iptv
 const initIptvPlayer = async () => {
   getChannelCount();
@@ -965,21 +987,52 @@ const initFilmPlayer = async (isFirst) => {
     }
   }
 
+  // 解析直链
+  const { playUrl } = ext.value.site;
+  if (playUrl) {
+    const play = await zy.getConfig(`${playUrl}${config.value.url}`);
+    console.log(`解析地址:${play.url}`);
+    if (play.url) {
+      config.value.url = play.url;
+      const fileExtension = play.url.match(/\.([^/?#]+)(?:[?#]|$)/i)[1];
+      createPlayer(fileExtension);
+      return;
+    }
+  }
+
+  // 官解iframe
+  try {
+    const { hostname } = new URL(config.value.url);
+    if (
+        VIP_LIST.some((item) => hostname.includes(item)) ||
+        analyzeFlagData.value.some((item) => selectPlaySource.value.includes(item))
+      ) {
+        onlineUrl.value = analyzeUrl.value + config.value.url;
+        isSniff.value = true;
+        console.log(`[player] return: 官解播放地址:${onlineUrl.value}`);
+        return;
+      }
+  } catch (err) {
+    console.info(`[player] input: 传入地址不是url:${config.value.url}`);
+  }
+
   if (ext.value.site.type === 6) {
-    console.log('[player] hipy获取播放链接开启');
+    // hipy获取服务端播放链接
+    console.log('[player] start: hipy获取服务端播放链接开启');
     const { key } = ext.value.site;
     try {
       const hipyPlayUrl = await zy.get_hipy_play_url(key, selectPlaySource.value, config.value.url);
       config.value.url = hipyPlayUrl;
+      console.log(`[player] return: hipy获取服务端返回链接:${config.value.url}`);
     } catch (err) {
       console.log(err);
+    } finally {
+      console.log(`[player] end: hipy获取服务端播放链接结束`);
     }
-    console.log(`[player] hipy获取播放链接结束`);
-  }
-
-  if (ext.value.site.type === 2) {
+  } else if (ext.value.site.type === 2) {
+    // drpy嗅探
     MessagePlugin.info('免嗅资源中, 请等待!');
-    console.log('[player] drpy免嗅流程开始');
+    console.log('[player] start: drpy免嗅流程开始');
     const { key } = ext.value.site;
     try {
       const drpySniffFree = await zy.getRealUrl(key, config.value.url);
@@ -990,53 +1043,25 @@ const initFilmPlayer = async (isFirst) => {
       console.log(err);
     }
 
-    console.log(`[player] drpy免嗅流程结束`);
+    console.log(`[player] end: drpy免嗅流程结束`);
   }
 
-  if (config.value.url.includes('mp4') || config.value.url.includes('mkv')) {
-    createPlayer('mp4');
-  } else if (config.value.url.includes('flv')) {
-    createPlayer('flv');
-  } else {
-    const { playUrl } = ext.value.site;
-
-    if (playUrl) {
-      const play = await zy.getConfig(`${playUrl}${config.value.url}`);
-      console.log(`解析地址:${play.url}`);
-      if (play.url) {
-        config.value.url = play.url;
-        const fileExtension = play.url.match(/\.([^/?#]+)(?:[?#]|$)/i)[1];
-        createPlayer(fileExtension);
-        return;
-      }
-    }
-
-    const { hostname } = new URL(config.value.url);
-    console.log(config.value,ext.value)
-    if (
-      VIP_LIST.some((item) => hostname.includes(item)) ||
-      analyzeFlagData.value.some((item) => selectPlaySource.value.includes(item))
-    ) {
-      onlineUrl.value = analyzeUrl.value + config.value.url;
-      isSniff.value = true;
-      console.log(onlineUrl.value);
-    } else if (config.value.url.includes('m3u8') && config.value.url.split('http').length - 1 === 1) {
-      console.log(`[player] 直链:${config.value.url}`);
-      createPlayer('m3u8');
-    } else {
-      // 尝试提取ck/dp播放器中的m3u8
-      console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
-      try {
-        console.log('嗅探');
-        MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-
-        isSniff.value = false;
-        sniffer();
-      } catch (err) {
-        console.error(err);
-      }
-    }
+  const mediaType = await checkMediaType(config.value.url);
+  console.log(`[player] mediaType: ${mediaType}`)
+  if (mediaType !== 'unknown' && mediaType !== 'error') {
+    createPlayer(mediaType);
+    return;
   }
+
+  // 兜底办法:嗅探
+  console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
+  try {
+    MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
+    isSniff.value = false;
+    sniffer();
+  } catch (err) {
+    console.error(err);
+  };
 };
 
 // 初始化网盘
@@ -1063,7 +1088,7 @@ const spiderInit = async() => {
 };
 
 // 嗅探
-const videoFormats = ['.m3u8', '.mp4', '.flv'];
+const videoFormats = ['.m3u8', '.mp4', '.flv', 'avi', 'mkv'];
 
 const sniffer_iframe = () => {
   win.webContents.setAudioMuted(true);
@@ -1153,13 +1178,20 @@ const initPlayer = async (isFirst = false) => {
 
   destroyPlayer();
 
-  if (type.value === 'iptv') {
-    await initIptvPlayer();
-  } else if (type.value === 'film') {
-    await initFilmPlayer(isFirst);
-  } else if (type.value === 'drive') {
-    await initCloudPlayer();
+  switch(type.value) {
+    case 'iptv':
+      await initIptvPlayer();
+      break;
+    case 'film':
+      await initFilmPlayer(isFirst);
+      break;
+    case 'drive':
+      await initCloudPlayer();
+      break;
+    default:
+      break;
   }
+
   let title = info.value.name;
   if (type.value === 'film') title = `${info.value.vod_name} ${selectPlayIndex.value}`
   document.title = title;
