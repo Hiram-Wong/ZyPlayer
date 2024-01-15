@@ -287,10 +287,15 @@ const zy = {
         filters = {};
 
         classData = jsondata.class;
-        page = jsondata.page;
-        pagecount = jsondata.pagecount;
-        limit = parseInt(jsondata.limit);
-        total = jsondata.total;
+        if (classData) {
+          const category_url = buildUrl(site.api, `&extend=${site.ext}&ac=videolist&t=${classData[0].type_id}&pg=1`);
+          const category_res = await axios.get(category_url);
+          const category_json = category_res.data;
+          page = category_json.page;
+          pagecount = category_json.pagecount;
+          limit = parseInt(category_json.limit);
+          total = category_json.total;
+        }
         filters = jsondata?.filters === undefined ? [] : jsondata.filters;
       }
 
@@ -1068,7 +1073,7 @@ const zy = {
     }
   },
   // 酷云通用的异步请求函数
-  async  kyHotRequest(url) {
+  async kyHotRequest(url) {
     try {
       const { data } = await axios.get(url);
       // 根据具体的接口返回状态判断是否成功
