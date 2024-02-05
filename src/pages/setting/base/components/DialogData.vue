@@ -10,9 +10,10 @@
             <t-collapse expand-mutex>
               <t-collapse-panel value="easyConfig" header="一键配置">
                 <t-radio-group v-model="formData.easyConfig.type">
-                  <t-radio :value="0">软件接口</t-radio>
-                  <t-radio :value="1">drpy接口</t-radio>
-                  <t-radio :value="2">tvbox接口</t-radio>
+                  <t-radio :value="0">此软件</t-radio>
+                  <t-radio :value="1">drpy</t-radio>
+                  <t-radio :value="2">tvbox</t-radio>
+                  <t-radio :value="3">hipy</t-radio>
                 </t-radio-group>
                 <p v-if="formData.easyConfig.type === 0" class="tip">请严格遵守本软件接口格式</p>
                 <p v-else-if="formData.easyConfig.type === 1" class="tip">目前仅支持sites中type:1的数据,请将js模式设置为0</p>
@@ -337,14 +338,34 @@ const easyConfig = async() => {
       setting.update(defaultObject);
     } else {
       if (_.has(config, "sites")) {
+        const formatType = (type)=>{
+          switch (type) {
+            case 1:
+              return 2;
+            case 2:
+              return 1;
+            case 3:
+              return 6;
+          }
+        }
+        const formatGroup = (group)=>{
+          switch (type) {
+            case 1:
+              return 'drpy';
+            case 2:
+              return 'tvbox';
+            case 3:
+              return 'hipy';
+          }
+        }
         data["sites"] = config.sites
           .filter((item) => item.type === 0 || item.type === 1) // 先过滤掉不需要的数据
           .map((item) => ({
             key: item.key,
             name: item.name,
-            type: type === 1 ? 2 : 1,
+            type: formatType(type),
             api: item.api,
-            group: type === 1 ? 'drpy' : 'tvbox',
+            group: formatGroup(type),
             search: _.has(item, "searchable") ? item.searchable : 0,
             isActive: true,
             status: true,

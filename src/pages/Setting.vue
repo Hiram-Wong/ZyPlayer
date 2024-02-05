@@ -21,7 +21,7 @@
           <div class="sign-btn">
             <a href="https://github.com/hjdhnx/dr_py" target="_blank">py</a>
             <a href="https://github.com/flash168/Peach" target="_blank">c</a>
-            <a href="https://github.com/hjdhnx/fastapi_vue" target="_blank">hipy</a>
+            <a href="https://github.com/hjdhnx/hipy-server" target="_blank">hipy</a>
           </div>
         </div>
         <t-popup placement="right">
