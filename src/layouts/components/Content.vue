@@ -30,12 +30,12 @@ eventBus.on(() => {
 });
 </script>
 <style lang="less" scoped>
-@import '@/style/variables.less';
 .fade-leave-active,
 .fade-enter-active {
   transition: opacity @anim-duration-slow @anim-time-fn-easing;
 }
-.fade-enter,
+
+.fade-enter-from,
 .fade-leave-to {
   opacity: 0;
 }
