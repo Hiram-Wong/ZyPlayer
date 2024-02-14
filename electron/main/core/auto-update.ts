@@ -3,7 +3,6 @@ import { autoUpdater } from 'electron-updater';
 
 import log from './log';
 
-// log.info(autoUpdater.app.baseCachePath);
 // 自动下载更新
 autoUpdater.autoDownload = false;
 // 退出时自动安装更新
@@ -64,8 +63,8 @@ export default (win: BrowserWindow) => {
   });
 
   // 更新出错
-  autoUpdater.on('update-error', (err: any) => {
-    win.webContents.send('update-error', err);
+  autoUpdater.on('error', (err: any) => {
+    win.webContents.send('error', err);
   });
 
   // 监听下载进度
