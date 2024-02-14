@@ -9,6 +9,8 @@ import path from 'path';
 import url from 'url';
 import fs from 'fs-extra';
 import { exec } from 'child_process';
+import { ElectronBlocker } from '@cliqz/adblocker-electron';
+import fetch from 'cross-fetch';
 
 import { registerAppMenu } from './core/menu';
 import initUpdater from './core/auto-update';
@@ -158,6 +160,9 @@ const trySniffer = async (url, callback) => {
   try {
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
     const snifferWindow = new BrowserWindow({ show: false }); // 创建窗口
+    ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+      blocker.enableBlockingInSession(snifferWindow.webContents.session);
+    });
     const page = await pie.getPage(browser, snifferWindow); // 获取页面
 
     if (ua) await page.setUserAgent(ua); // 设置ua
@@ -360,6 +365,9 @@ app.whenReady().then(() => {
     tmpDir(path.join(appDataPath, 'thumbnail'));
   }
   createWindow();
+  ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+    blocker.enableBlockingInSession(mainWindow.webContents.session);
+  });
   registerAppMenu();
 
   app.on('activate', () => {
@@ -459,6 +467,9 @@ ipcMain.on('openPlayWindow', (_, arg) => {
 
   playWindow.on('ready-to-show', () => {
     playWindow.show();
+    ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
+      blocker.enableBlockingInSession(playWindow.webContents.session);
+    });
   });
 
   playWindow.on('closed', () => {
