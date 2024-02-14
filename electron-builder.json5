@@ -3,7 +3,7 @@
  */
 {
   "productName": "zyplayer",
-  "appId": "com.zyplayer",
+  "appId": "com.hiram.zyplayer",
   "copyright": "Copyright © 2023 zyplayer Team Inc.",
   "asar": true,
   "directories": {
@@ -21,8 +21,10 @@
         "arch": ["x64", "arm64", "universal"]
       }
     ],
+    "notarize": false,
     "darkModeSupport": true,
-    "category": "public.app-category.utilities"
+    "category": "public.app-category.video",
+    "entitlementsInherit": "build/entitlements.mac.plist"
   },
   "win": {
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
@@ -35,6 +37,7 @@
   },
   "linux": {
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+    "category": "Audio;Video",
     "target": [
       {
         "target": "AppImage",
@@ -55,5 +58,8 @@
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false
+  },
+  "electronDownload": {
+    "mirror": "https://npmmirror.com/mirrors/electron/"
   }
 }
