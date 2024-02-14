@@ -1,4 +1,4 @@
-import { shell, app, dialog, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
+import { shell, app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
 
 export const registerAppMenu = () => {
   const menuBar: Array<MenuItemConstructorOptions | MenuItem> = [
