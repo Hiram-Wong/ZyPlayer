@@ -1,0 +1,129 @@
+# see config at https://www.electron.build/configuration/configuration
+
+# 应用程序的唯一标识符
+appId: com.hiram.zyplayer
+# 应用程序的产品名称
+productName: zyplayer
+copyright: Copyright © 2023 zyplayer Team Inc.
+# 构建资源所在的目录
+directories:
+  buildResources: build
+# 包含在最终应用程序构建中的文件列表，这里使用通配符 ! 表示排除不需要的文件
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+# 哪些文件将不会被压缩，而是解压到构建目录
+asarUnpack:
+  - resources/**
+# Windows 平台配置
+win:
+  # 可执行文件名
+  executableName: zyplayer
+  # 应用程序的图标文件路径
+  icon: build/icons/logo.ico
+  # 构建类型
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+        - ia32
+# NSIS 安装器配置
+nsis:
+  # 安装程序的生成名称
+  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
+  # 创建的桌面快捷方式名称
+  shortcutName: ${productName}
+  # 卸载时显示的名称
+  uninstallDisplayName: ${productName}
+  # 创建桌面图标
+  createDesktopShortcut: always
+  # 是否允许 UAC 提升权限
+  allowElevation: true
+  # 是否允许用户更改安装目录
+  allowToChangeInstallationDirectory: true
+  # 是否一件安装
+  oneClick: false
+  # 是否显示辅助安装程序的安装模式安装程序页面（选择按机器还是按用户）
+  perMachine: true
+  # 自定义 nsis
+  include: build/installer.nsh
+# macOS 平台配置
+mac:
+  # 可执行文件名
+  executableName: zyplayer
+  # 应用程序的图标文件路径
+  icon: build/icons/logo.icns
+  # 权限继承的文件路径
+  entitlementsInherit: build/entitlements.mac.plist
+  # 扩展信息，如权限描述
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  # 是否启用应用程序的 Notarization（苹果的安全审核）
+  notarize: false
+  darkModeSupport: true
+  category: public.app-category.video
+  # 构建类型
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+        - universal
+# macOS 平台的 DMG 配置
+dmg:
+  # DMG 文件的生成名称
+  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
+# Linux 平台配置
+linux:
+  # 可执行文件名
+  executableName: zyplayer
+  # 应用程序的图标文件路径
+  icon: build/icons/logo.png
+  # 构建类型
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: rpm
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+  # 维护者信息
+  maintainer: hiram.top
+  # 应用程序类别
+  category: Audio;Video
+# AppImage 配置
+appImage:
+  #  AppImage 文件的生成名称
+  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
+# rpm 配置
+rpm:
+  #  rpm 文件的生成名称
+  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
+# deb 配置
+deb:
+  #  deb 文件的生成名称
+  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
+# 是否在构建之前重新编译原生模块
+npmRebuild: false
+# 自动更新的配置
+publish:
+  # 更新提供商
+  provider: github
+  owner: "Hiram-Wong"
+  repo: "ZyPlayer"
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/

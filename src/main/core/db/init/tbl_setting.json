@@ -1,0 +1,114 @@
+[
+  { "key": "version",
+    "value": "3.3.2"
+  },
+  { "key": "theme",
+    "value": "auto"
+  },
+  { "key": "externalPlayer",
+    "value": ""
+  },
+  { "key": "defaultHot",
+    "value": "kylive"
+  },
+  { "key": "defaultSearchRecommend",
+    "value": "site"
+  },
+  { "key": "defaultSearchType",
+    "value": "site"
+  },
+  { "key": "defaultCheckModel",
+    "value": true
+  },
+  { "key": "defaultChangeModel",
+    "value": false
+  },
+  { "key": "defaultIptvEpg",
+    "value": "http://diyp.112114.xyz/"
+  },
+  { "key": "defaultIptvLogo",
+    "value": "https://epg.112114.eu.org/logo/"
+  },
+  { "key": "iptvSkipIpv6",
+    "value": true
+  },
+  { "key": "iptvThumbnail",
+    "value": false
+  },
+  { "key": "iptvStatus",
+    "value": false
+  },
+  { "key": "pauseWhenMinimize",
+    "value": true
+  },
+  { "key": "defaultSite",
+    "value": null
+  },
+  { "key": "defaultIptv",
+    "value": null
+  },
+  { "key": "defaultAnalyze",
+    "value": null
+  },
+  { "key": "analyzeFlag",
+    "value": [
+    "youku",
+    "qq",
+    "iqiyi",
+    "qiyi",
+    "letv",
+    "sohu",
+    "tudou",
+    "pptv",
+    "mgtv"
+  ]},
+  {
+    "key": "defaultDrive",
+    "value": ""
+  },
+  { "key": "broadcasterType",
+    "value": "xgplayer"
+  },
+  { "key": "snifferType",
+    "value": "pie"
+  },
+  { "key": "softSolution",
+    "value": false
+  },
+  { "key": "skipStartEnd",
+    "value": false
+  },
+  { "key": "agreementMask",
+    "value": "false"
+  },
+  { "key": "recordShortcut",
+    "value": ""
+  },
+  { "key": "selfBoot",
+    "value": false
+  },
+  { "key": "hardwareAcceleration",
+    "value": true
+  },
+  { "key": "ua",
+    "value": ""
+  },
+  { "key": "webdevUrl",
+    "value": "https://dav.jianguoyun.com/dav/"
+  },
+  { "key": "webdevUsername",
+    "value": ""
+  },
+  { "key": "webdevPassword",
+    "value": ""
+  },
+  { "key": "windowPosition",
+    "value": {
+      "status": false,
+      "position": {
+        "width": 1000,
+        "height": 640
+      }
+    }
+  }
+]
