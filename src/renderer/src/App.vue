@@ -5,7 +5,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive } from 'vue';
-import moment from 'moment';
 import PLAY_CONFIG from '@/config/play';
 import { setup } from '@/api/setting';
 import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
