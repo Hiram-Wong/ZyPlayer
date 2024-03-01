@@ -8,7 +8,22 @@ import logger from './logger';
 import { setting } from './db/service';
 import puppeteerInElectron from '../utils/pie';
 
-export const ipcListen = () => {
+
+const tmpDir = async(path: string) => {
+  try {
+    const pathExists = await fs.pathExistsSync(path);
+    logger.info(`[ipcMain] tmpDir: ${path}-exists-${pathExists}`);
+    if (pathExists) {
+      await fs.removeSync(path); // 删除文件, 不存在不会报错
+    }
+    await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
+    logger.info(`[ipcMain] tmpDir: ${path}-created-sucess`);
+  } catch (err) {
+    logger.error(err)
+  }
+};
+
+const ipcListen = () => {
   ipcMain.on('uninstallShortcut', () => {
     logger.info(`[ipcMain] globalShortcut unregisterAll`);
     globalShortcut.unregisterAll();
@@ -51,20 +66,6 @@ export const ipcListen = () => {
     }
   
     return totalSize;
-  };
-  
-  const tmpDir = async(path: string) => {
-    try {
-      const pathExists = await fs.pathExistsSync(path);
-      logger.info(`[ipcMain] tmpDir: ${path}-exists-${pathExists}`);
-      if (pathExists) {
-        await fs.removeSync(path); // 删除文件, 不存在不会报错
-      }
-      await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
-      logger.info(`[ipcMain] tmpDir: ${path}-created-sucess`);
-    } catch (err) {
-      logger.error(err)
-    }
   };
   
   ipcMain.on('tmpdir-manage',  (event, action, trails) => {
@@ -140,3 +141,5 @@ export const ipcListen = () => {
     app.quit();
   });
 }
+
+export { ipcListen, tmpDir }

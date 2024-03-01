@@ -11,7 +11,7 @@ import initServer from './core/server';
 import { init as dbInit} from './core/db';
 import { setting } from './core/db/service';
 import createMenu from './core/menu';
-import { ipcListen } from './core/ipc';
+import { ipcListen, tmpDir } from './core/ipc';
 import logger from './core/logger';
 import autoUpdater from './core/update';
 import createTray from './core/tray';
@@ -233,6 +233,11 @@ app.whenReady().then(async() => {
   optimizer.registerFramelessWindowIpc();
 
   showLoading();
+  if (is.dev) {
+    tmpDir(join(process.cwd(), 'thumbnail'));
+  } else {
+    tmpDir(join(app.getPath('userData'), 'thumbnail'));
+  }
   createWindow();
   ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
     blocker.enableBlockingInSession(mainWindow.webContents.session);
