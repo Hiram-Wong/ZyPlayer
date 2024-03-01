@@ -90,7 +90,7 @@ export const ipcListen = () => {
       "-y", // 使用 -y 选项强制覆盖输出文件
       "-frames:v", "1",
       "-q:v", "20", // 设置输出图片质量为5
-      "-user_agent", uaState,
+      "-user_agent", `"${uaState}"`,
       `"${formatPath}"`
     ];
     const command = [ffmpegCommand, ...outputOptions , ...inputOptions].join(" "); // 确保 -user_agent 选项位于输入 URL 之前
