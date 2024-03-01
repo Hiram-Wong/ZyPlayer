@@ -282,8 +282,11 @@ const checkValid = async(site) => {
       resource: data.total
     }
   } catch (err) {
-    console.log(err);
-    return false;
+    console.error(err);
+    return  {
+      status: false,
+      resource: 0
+    }
   }
 }
 

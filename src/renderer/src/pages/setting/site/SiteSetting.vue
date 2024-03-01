@@ -185,6 +185,7 @@ const checkAllSite = async () => {
 const checkSingleEvent = async (row, all = false) => {
   const { status, resource } = await checkValid(row); // 检测状态
   row.isActive = status; // 检测是否开启变更状态
+  updateSiteItem(row.id, { isActive: row.isActive });
   row.resource = resource;
   if (!all) {
     emitReload.emit('film-reload');
