@@ -56,6 +56,11 @@
 6.打包  yarn electron:build:win[mac/linux]
 ```
 
+> star history: 
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date)](https://star-history.com/#Hiram-Wong/ZyPlayer&Date)
+
+
 <details>
 <summary>展开查看接口说明</summary>
 
@@ -90,15 +95,15 @@
   ],
   "sites": [
     {
-      "name": "39影视",  // 名称
+      "id": "51793af6-c923-5504-85db-0ef686624dec", // 唯一值不可重复, 建议 uuid
+      "name": "39影视", // 名称
       "api": "https://www.39kan.com/api.php/provide/vod/",  // 站点源地址
       "playUrl": "", // 配合解析去url地址
       "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
       "group": "切片", // 分组
-      "status": false, //  已经弃用该参数
       "isActive": true, // 是否启用 true启用 false 禁用
-      "type": 1,  // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
-      "id": 1,  // id 唯一值不可重复, 建议 uuid
+      "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
+      "ext": "", // 扩展参数
       "categories": "电视,影视" // 按顺序展示所配置的分类 不配置则默认展示所有分类
     },
   ],
@@ -106,7 +111,6 @@
     {
       "version": 0, // 当前版本
       "theme": "auto",
-      "externalPlayer": "",
       "defaultHot": "kylive",
       "defaultSearchRecommend": "site",
       "defaultSearchType": "site",
