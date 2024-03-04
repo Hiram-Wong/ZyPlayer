@@ -5,9 +5,6 @@
   { "key": "theme",
     "value": "auto"
   },
-  { "key": "externalPlayer",
-    "value": ""
-  },
   { "key": "defaultHot",
     "value": "kylive"
   },
@@ -37,9 +34,6 @@
   },
   { "key": "iptvStatus",
     "value": false
-  },
-  { "key": "pauseWhenMinimize",
-    "value": true
   },
   { "key": "defaultSite",
     "value": null

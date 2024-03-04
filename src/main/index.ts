@@ -16,7 +16,6 @@ import logger from './core/logger';
 import autoUpdater from './core/update';
 import createTray from './core/tray';
 
-
 import loadHtml from '../../resources/html/load.html?asset'
 
 /**
@@ -44,6 +43,8 @@ initServer(); // 后端服务
 if (!setting.find({ key: "hardwareAcceleration" }).value) {
   app.disableHardwareAcceleration();
 };
+
+let shortcutsState: any = setting.find({ key: "recordShortcut" }).value;
 
 let uaState: any = setting.find({ key: "ua" }).value;
 
@@ -264,6 +265,12 @@ app.whenReady().then(async() => {
   createMenu();
   // 快捷键
   // createGlobalShortcut(mainWindow);
+  if (shortcutsState) {
+    globalShortcut.register(shortcutsState, () => {
+      // Do stuff when Y and either Command/Control is pressed.
+      showOrHidden();
+    });
+  }
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
