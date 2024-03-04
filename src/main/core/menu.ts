@@ -1,7 +1,12 @@
+import { platform } from '@electron-toolkit/utils';
 import { shell, app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
 import logger from './logger';
 
 const createMenu = () => {
+  if (!platform.isMacOS) {
+    Menu.setApplicationMenu(null);
+    return;
+  }
   const menuBar: Array<MenuItemConstructorOptions | MenuItem> = [
     {
       label: 'zyplayer',
@@ -21,7 +26,7 @@ const createMenu = () => {
         },
         {
           label: '退出',
-          accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Alt+F4',
+          accelerator: platform.isMacOS ? 'Cmd+Q' : 'Alt+F4',
           click() {
             logger.info('[menu] quit app');
             app.quit();
@@ -46,7 +51,7 @@ const createMenu = () => {
       submenu: [
         {
           label: '刷新',
-          accelerator: process.platform === 'darwin' ? 'Cmd+R' : 'Ctrl+R',
+          accelerator: platform.isMacOS ? 'Cmd+R' : 'Ctrl+R',
           click() {
             logger.info('[menu] refresh view');
             const focusedWindow = BrowserWindow.getFocusedWindow();
@@ -80,7 +85,7 @@ const createMenu = () => {
       submenu: [
         {
           label: '打开控制台',
-          accelerator: process.platform === 'darwin' ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
+          accelerator: platform.isMacOS ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
           click() {
             logger.info('[menu] open devlop tool');
             const focusedWindow = BrowserWindow.getFocusedWindow();
