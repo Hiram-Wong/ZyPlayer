@@ -1,5 +1,5 @@
 import { platform } from '@electron-toolkit/utils';
-import { Tray, Menu, app, nativeImage } from "electron";
+import { Tray, Menu, app, nativeImage, nativeTheme } from "electron";
 import { join } from "path";
 import logger from './logger';
 
@@ -8,16 +8,17 @@ import logger from './logger';
  * @param {BrowserWindow} win - 程序窗口
  */
 const createSystemTray = (win) => {
+  // 设置顶部APP图标的操作和图标
+  const lightIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_light.png');
+  const darkIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_dark.png');
+  const colorIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'logo.png');
+
   // 系统托盘
-  const mainTray = new Tray(
-    nativeImage.createFromPath(
-      join(app.getAppPath(), 'resources',
-        platform.isWindows
-          ? "img/icons/logo.png"
-          : "img/icons/tray_dark.png",
-      )
-    ).resize({ width: 16, height: 16 })
-  );
+  const icon = nativeImage.createFromPath(platform.isWindows ? colorIcon : darkIcon);
+  const trayIcon = icon.resize({ width: 16, height: 16 });
+  if (platform.isMacOS) trayIcon.setTemplateImage(true);
+  const mainTray = new Tray(trayIcon);
+
   // 应用内菜单
   Menu.setApplicationMenu(createTrayMenu(win));
   mainTray.setToolTip('zyplayer');
