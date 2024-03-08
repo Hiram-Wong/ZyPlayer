@@ -1,6 +1,6 @@
 <template>
-  <div class="titlebar">
-    <div class="left no-drag">
+  <div class="titlebar" @mousedown="handleMouseDown">
+    <div class="left no-drag" >
       <history-control />
       <search-bar class="search"/>
     </div>
@@ -25,6 +25,11 @@ import Sponsor from './Sponsor.vue';
 
 const { platform } = window.electron.process;
 
+const handleMouseDown = (event) => {
+  if (event.detail === 2) {
+    window.electron.ipcRenderer.send('win:invoke', 'max');
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -46,9 +51,6 @@ const { platform } = window.electron.process;
   }
   .center {
     margin-left: 20px;
-    // .search {
-
-    // }
   }
   .right {
     display: flex;

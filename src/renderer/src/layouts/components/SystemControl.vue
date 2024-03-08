@@ -40,7 +40,7 @@ const win = remote.getCurrentWindow();
 const isMaxed = ref(false);
 
 const handleWindow = (action: string): void => {
-  window.electron.ipcRenderer.send('win:invoke', action)
+  window.electron.ipcRenderer.send('win:invoke', action);
   if (action === 'max') isMaxed.value = !isMaxed.value;
 }
 
