@@ -1,15 +1,15 @@
 import Datastore from "lowdb";
 import FileSync from "lowdb/adapters/FileSync";
 import _ from "lodash";
-import path from "path";
+import { join } from "path";
 import LodashId from "lodash-id";
 import { app } from "electron";
 
 import { tblSetting } from "./init";
 import logger from "../logger";
 
-const STORE_PATH = app.getPath("userData");
-const adapter = new FileSync(path.join(STORE_PATH, "database.json"));   // 初始化lowdb读写的json文件名以及存储路径
+const STORE_PATH = join(app.getPath("userData"), "database.json");
+const adapter = new FileSync(STORE_PATH);   // 初始化lowdb读写的json文件名以及存储路径
 const db = Datastore(adapter); // lowdb接管该文件
 
 const init = () => {

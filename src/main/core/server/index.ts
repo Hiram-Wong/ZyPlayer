@@ -1,13 +1,30 @@
+import { app } from "electron";
 import fastify from 'fastify';
+import fastifyLogger from "fastify-logger";
+import { join } from "path";
 import logger from '../logger';
 import { analyze, iptv, setting, drive, site, history, star, db } from './routes';
 
 
-logger.info('[server] fastify module initialized')
+logger.info('[server] fastify module initialized');
+
+let logOpt = {
+  console: true, // 是否开启console.log 。。。
+  file: join(app.getPath("userData"), 'logs/fastify.log'), // 文件路径  
+  maxBufferLength: 4096, // 日志写入缓存队列最大长度
+  flushInterval: 1000, // flush间隔
+  logrotator: { // 分割配置
+    byHour: true,
+    byDay: false,    
+    hourDelimiter: '_'
+  }
+}
+const { opt } = fastifyLogger(logOpt);
+opt.stream = null;
 
 const initServer = async () => {
   const server = fastify({
-    logger: true,
+    logger: opt,
     ignoreTrailingSlash: true,
     bodyLimit: 1024 * 1024 * 3 // 限制请求体大小为 3MB
   });

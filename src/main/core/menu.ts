@@ -1,5 +1,6 @@
 import { platform } from '@electron-toolkit/utils';
 import { shell, app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
+import { join } from "path";
 import logger from './logger';
 
 const createMenu = () => {
@@ -109,6 +110,16 @@ const createMenu = () => {
             logger.info('[menu] visit official github, url is https://github.com/Hiram-Wong/ZyPlayer');
             const url = 'https://github.com/Hiram-Wong/ZyPlayer';
             shell.openExternal(url);
+          },
+        },
+        {
+          label: '打开日志',
+          accelerator: process.platform === 'darwin' ? 'Cmd+Shift+T' : 'Ctrl+Shift+T',
+          click() {
+            const fileName = '/logs/';
+            const url = join(app.getPath("userData"), fileName);
+            logger.info(`[menu] visit local log, path is ${url}`);
+            shell.openPath(url);
           },
         },
       ],
