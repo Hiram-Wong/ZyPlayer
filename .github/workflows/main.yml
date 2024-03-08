@@ -22,7 +22,7 @@ jobs:
       - name: Install Node.js 18
         uses: actions/setup-node@v2
         with:
-          node-version: 18.12.1
+          node-version: 18.18.0
           cache: 'yarn'
 
       - name: Build/release Electron app
