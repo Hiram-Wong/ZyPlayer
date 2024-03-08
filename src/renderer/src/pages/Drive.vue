@@ -1,13 +1,6 @@
 <template>
   <div class="drive-container">
-    <common-nav title="网盘" :list="driveConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent">
-      <template #customize>
-        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
-          <ArticleIcon />
-          <span class="member-name">前往配置</span>
-        </div>
-      </template>
-    </common-nav>
+    <common-nav title="网盘" :list="driveConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">
         <div class="page-title">
@@ -84,17 +77,14 @@ import _ from 'lodash';
 import { ArticleIcon, Tv1Icon, LoadingIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { fetchDriveActive } from '@/api/drive';
 
 import { __jsEvalReturn } from '@/utils/alist_open';
-import { usePlayStore, useSettingStore } from '@/store';
+import { usePlayStore } from '@/store';
 import CommonNav from '../components/common-nav/index.vue';
 
 const storePlayer = usePlayStore();
-const storeSetting = useSettingStore();
-const router = useRouter();
 
 const spider = ref(null);
 const renderError = () => {
@@ -292,17 +282,7 @@ eventBus.on(async () => {
   infiniteCompleteTip.value = '没有更多内容了!';
   getSetting();
 });
-
-
-
-const gotoSetConfig = () =>{
-  router.push({
-    name: 'SettingIndex',
-  })
-  storeSetting.updateConfig({ sysConfigSwitch: 'driveSource' });
-}
 </script>
-
 
 <style lang="less" scoped>
 .drive-container {

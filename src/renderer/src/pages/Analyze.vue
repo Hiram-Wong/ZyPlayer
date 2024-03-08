@@ -1,13 +1,6 @@
 <template>
   <div class="analyze view-container">
-    <CommonNav title="解析" :list="analyzeConfig.data" :active="active.nav" @change-key="changeDefaultEvent">
-      <template #customize>
-        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
-          <ArticleIcon />
-          <span class="member-name">前往配置</span>
-        </div>
-      </template>
-    </CommonNav>
+    <common-nav title="解析" :list="analyzeConfig.data" :active="active.nav" @change-key="changeDefaultEvent" />
     <div class="content">
       <div class="container">
         <div class="analyze-player">
@@ -86,9 +79,6 @@ import moment from 'moment';
 import { ArticleIcon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
-
-import { useSettingStore } from '@/store';
 
 import { getUrlTitle } from '@/utils/analyze';
 import { fetchAnalyzeActive } from '@/api/analyze';
@@ -99,9 +89,6 @@ import DialogIframemView from './analyze/DialogIframe.vue';
 import DialogSearchView from './analyze/DialogSearch.vue';
 import SharePopup from '../components/share-popup/index.vue';
 import CommonNav from '../components/common-nav/index.vue';
-
-const storeSetting = useSettingStore();
-const router = useRouter();
 
 const urlTitle = ref(''); // 播放地址的标题
 const analysisUrl = ref(null); // 输入需要解析地址
@@ -273,13 +260,6 @@ const changeDefaultEvent = async (id) => {
   active.value.nav = id;
   if(analysisUrl.value) await getVideoInfo(analysisUrl.value, urlTitle.value);
 };
-
-const gotoSetConfig = () =>{
-  router.push({
-    name: 'SettingIndex',
-  })
-  storeSetting.updateConfig({ sysConfigSwitch: 'analyzeSource' });
-}
 </script>
 
 <style lang="less" scoped>
@@ -444,11 +424,11 @@ const gotoSetConfig = () =>{
           height: 40px;
           padding: 0;
           border-radius: 20px;
-          background-color: var(--td-bg-input);
+          background-color: var(--td-bg-content-input);
           display: flex;
           :deep(.t-input) {
             border-radius: 20px;
-            background-color: var(--td-bg-input);
+            background-color: var(--td-bg-content-input);
             border: none;
             outline: none;
           }

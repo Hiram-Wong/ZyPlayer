@@ -6,11 +6,26 @@
 
 <script setup lang="ts">
 import { SettingIcon } from 'tdesign-icons-vue-next';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
-const router = useRouter()
+import { useSettingStore } from '@/store';
+
+const router = useRouter();
+const route = useRoute();
+const storeSetting = useSettingStore();
 
 const gotoSetting = () => {
-	router.push({ name: 'SettingIndex' });
+  const view_name = route.name;
+  const Match = {
+    FilmIndex: 'siteSource',
+    IptvIndex: 'iptvSource',
+    DriveIndex: 'driveSource',
+    AnalyzeIndex: 'analyzeSource',
+  }
+  const defaultConfigSwitch = 'configBase'; // 设置一个默认值，用于处理不在 Match 中的 view_name
+  const sysConfigSwitch = Match[view_name] || defaultConfigSwitch;
+  storeSetting.updateConfig({ sysConfigSwitch });
+  console.log(storeSetting.getSysConfigSwitch);
+  router.push({ name: 'SettingIndex' });
 }
 </script>

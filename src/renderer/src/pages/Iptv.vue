@@ -1,13 +1,6 @@
 <template>
   <div class="iptv view-container">
-    <CommonNav title="电视" :list="iptvConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent">
-      <template #customize>
-        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
-          <ArticleIcon />
-          <span class="member-name">前往配置</span>
-        </div>
-      </template>
-    </CommonNav>
+    <common-nav title="电视" :list="iptvConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">
         <div class="header-nav">
@@ -91,7 +84,6 @@ import { ArticleIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { checkUrlIpv6 } from '@/utils/tool';
 import { usePlayStore, useSettingStore } from '@/store';
@@ -104,7 +96,6 @@ import TagNav from '../components/tag-nav/index.vue';
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
-const router = useRouter();
 
 const renderError = () => {
   return (
@@ -455,13 +446,6 @@ const copyChannelEvent = () => {
   if (isSupported) copy(channelItem.value.url);
   isVisible.contentMenu = false;
 };
-
-const gotoSetConfig = () =>{
-  router.push({
-    name: 'SettingIndex',
-  })
-  storeSetting.updateConfig({ sysConfigSwitch: 'iptvSource' });
-}
 
 // 生成台标
 const generateLogo = (item) => {

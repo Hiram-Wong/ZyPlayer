@@ -1,7 +1,23 @@
 <template>
   <div class="setting-container">
-    <CommonNav title="设置" :list="settingSet.list" :active="settingSet.select" @change-key="changeClassEvent">
-    </CommonNav>
+    <common-nav title="设置" :list="settingSet.list" :active="settingSet.select" @change-key="changeClassEvent">
+      <template #customize>
+        <div class="sign-bar">
+          <div class="sign-logo">
+              <img src="@/assets/hipy.png" alt="logo">
+            </div>
+          <div class="sign-content">
+            <div class="sign-text">
+              <h2>与Hipy更配哦</h2>
+              <p>新起点, 新开始</p>
+            </div>
+          </div>
+          <div class="sign-btn">
+            <a href="https://github.com/hjdhnx/hipy-server" target="_blank">查看</a>
+          </div>
+        </div>
+      </template>
+    </common-nav>
     <div class="content">
       <div class="container">
         <base-view class="container-item" v-if="settingSet.select === 'configBase'"/>
@@ -77,6 +93,84 @@ const changeClassEvent = (item) => {
   flex-direction: row;
   overflow: hidden;
   flex: 1 1;
+
+  .sign-bar {
+    background-image: url(../assets/nav-bg.png);
+    width: 148px;
+    height: 78px;
+    border-radius: 10px;
+    background-size: contain;
+    position: relative;
+    .sign-logo {
+      width: 32px;
+      height: 32px;
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      img{
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+      }
+    }
+    .sign-content {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      height: 32px;
+      top: 9px;
+      left: 42px;
+      justify-content: space-between;
+      align-items: center;
+      .sign-text {
+        display: flex;
+        flex-direction: column;
+        height: 32px;
+        justify-content: space-between;
+        h2 {
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 17px;
+          color: #25262b;
+        }
+        p {
+          font-size: 10px;
+          line-height: 12px;
+          color: rgba(37,38,43,.72);
+          max-width: 100%;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+    .sign-btn {
+      flex-direction: row;
+      text-align: right;
+      display: flex;
+      align-items: center;
+      color: #25262b;
+      position: absolute;
+      width: 136px;
+      left: 5px;
+      top: 48px;
+      align-content: space-around;
+      justify-content: space-around;
+      a {
+        width: 100%;
+        height: 20px;
+        font-size: 10px;
+        border-radius: 11px;
+        background-color: rgba(132, 133, 141, 0.16);
+        border: 2px solid rgba(132, 133, 141, 0.16);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: inherit;
+        text-decoration: none;
+      }
+    }
+  }
 
   .membership-wrapper {
     display: flex;
