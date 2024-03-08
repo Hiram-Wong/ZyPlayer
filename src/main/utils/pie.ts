@@ -1,5 +1,3 @@
-import { ElectronBlocker } from '@cliqz/adblocker-electron';
-import fetch from 'cross-fetch';
 import { app, BrowserWindow } from 'electron';
 import puppeteer from "puppeteer-core";
 import pie from "puppeteer-in-electron";
@@ -55,9 +53,6 @@ const puppeteerInElectron = async (url: string, ua: string | null = null): Promi
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
     snifferWindow = new BrowserWindow({ show: false }); // 创建无界面窗口
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
-    ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-      blocker.enableBlockingInSession(snifferWindow.webContents.session);
-    }); // 屏蔽广告
     const page = await pie.getPage(browser, snifferWindow); // 获取页面
 
     if (ua) await page.setUserAgent(ua); // 设置ua

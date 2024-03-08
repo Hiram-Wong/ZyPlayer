@@ -1,4 +1,3 @@
-import { ElectronBlocker } from '@cliqz/adblocker-electron';
 import remote from '@electron/remote/main';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 
@@ -240,9 +239,6 @@ app.whenReady().then(async() => {
     tmpDir(join(app.getPath('userData'), 'thumbnail'));
   }
   createWindow();
-  ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-    blocker.enableBlockingInSession(mainWindow.webContents.session);
-  });
   // 监听进入全屏事件
   mainWindow.on('enter-full-screen', () => {
     logger.info(`[main] mainwindow has entered full-screen mode ; send to vue app`);
@@ -369,9 +365,6 @@ ipcMain.on('openPlayWindow', (_, arg) => {
 
   playWindow.on('ready-to-show', () => {
     playWindow.show();
-    ElectronBlocker.fromPrebuiltAdsAndTracking(fetch).then((blocker) => {
-      blocker.enableBlockingInSession(playWindow.webContents.session);
-    });
   });
 
   playWindow.on('closed', () => {
