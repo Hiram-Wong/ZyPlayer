@@ -45,7 +45,7 @@ const gotoRefresh = () => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: var(--td-bg-input);
+  background: var(--td-bg-content-input);
   height: 100%;
   width: 100px;
   border-radius: 50px;
@@ -55,6 +55,9 @@ const gotoRefresh = () => {
     text-align: center;
     display: flex;
     align-items: center;
+    &:hover {
+      color: var(--td-primary-color);
+    }
   }
 }
 </style>

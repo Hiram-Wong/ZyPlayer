@@ -102,7 +102,7 @@ const onSubmit = async (snifferType) => {
 					margin-right: 9px;
 				}
         .sku-wrapper {
-          background-color: var(--td-bg-input);
+          background-color: var(--td-bg-content-input);
           border-radius: 10px;
           padding: 20px 12px 12px;
           color: rgba(var(--td-text-color-primary), 0.72);

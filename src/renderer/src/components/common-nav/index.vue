@@ -83,6 +83,7 @@ const handleItemClick = (key: string | number) => {
       .nav-sub-tab-top {
         overflow: auto;
         width: 100%;
+        padding-left: var(--td-comp-paddingTB-s);
         .nav-menu {
           display: flex;
           flex-direction: column;
@@ -91,7 +92,7 @@ const handleItemClick = (key: string | number) => {
           font-size: 14px;
           line-height: 1.5;
           .nav-menu-item {
-            width: 140px;
+            width: 148px;
             height: 40px;
             padding-left: var(--td-comp-paddingTB-s);
             line-height: 14px;
@@ -106,11 +107,11 @@ const handleItemClick = (key: string | number) => {
               margin-top: var(--td-comp-margin-xs);
             }
             &:hover {
-              background-color: rgba(132, 133, 141, 0.108);
+              background-color: var(--td-bg-content-hover);
             }
           }
           .is-active {
-            background-color: rgba(132, 133, 141, 0.16);
+            background-color: var(--td-bg-content-active);
           }
         }
       }
@@ -119,7 +120,7 @@ const handleItemClick = (key: string | number) => {
         display: flex;
         align-items: center;
         flex-direction: column;
-        padding-bottom: var(--td-comp-paddingTB-xs);
+        padding-top: var(--td-comp-paddingTB-xs);
       }
     }
   }

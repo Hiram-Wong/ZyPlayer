@@ -79,7 +79,7 @@ const openPlatform = (item) => {
     margin-right: 8px;
     padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-s) var(--td-comp-paddingTB-m);
     border-radius: var(--td-radius-medium);
-    background-color: var(--td-bg-input);
+    background-color: var(--td-bg-content-input);
     &:hover {
       background-color: var(--td-bg-color-component-hover);
     }

@@ -272,24 +272,26 @@ const defaultEvent = async (row) => {
   .left-operation-container {
     .component-op {
       display: flex;
-      height: 32px;
+      height: var(--td-comp-size-m);
       padding: 0 var(--td-comp-paddingLR-xs);
-      background-color: var(--td-bg-input);
+      background-color: var(--td-bg-content-input);
       border-radius: var(--td-radius-default);
       align-items: center;
+      border-radius: var(--td-radius-medium);
       .item {
-        border-radius: var(--td-radius-default);
-        transition: all 0.2s ease 0s;
+        color: var(--td-text-color-placeholder);
+        border-radius: var(--td-radius-medium);
         display: flex;
         align-items: center;
         padding: 2px 4px;
         height: 22px;
         cursor: pointer;
         text-decoration: none;
-      }
-      .item:hover {
-        color: var(--td-text-color-primary);
-        background-color: var(--td-bg-color-component-hover);
+        &:hover {
+          transition: all 0.2s ease 0s;
+          color: var(--td-text-color-primary);
+          background-color: var(--td-bg-color-container-hover);
+        }
       }
     }
   }

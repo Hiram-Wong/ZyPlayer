@@ -256,8 +256,8 @@ hotReloadeventBus.on(() => {
 
 <style lang="less" scoped>
 :global(.t-popup__content) {
-  background: var(--td-bg-aside);
-  box-shadow: none;
+  box-shadow: var(--td-shadow-1);
+  background-color: var(--td-bg-color-container);
 }
 
 .no-warp {
@@ -351,12 +351,12 @@ hotReloadeventBus.on(() => {
 
 :deep(.t-input-adornment__prepend) {
   border-radius: 50px 0 0 50px;
-  background: var(--td-bg-input);
+  background: var(--td-bg-content-input);
   height: 32px;
 }
 :deep(.t-input-adornment__append) {
   height: 32px;
-  background: var(--td-bg-input);
+  background: var(--td-bg-content-input);
   border-radius: 0 50px 50px 0;
   text-align: center;
   display: flex;
@@ -376,7 +376,7 @@ hotReloadeventBus.on(() => {
   :deep(.t-input) {
     height: 32px;
     border-style: none;
-    background: var(--td-bg-input);
+    background: var(--td-bg-content-input);
     box-shadow: none;
     &.t-is-focused .t-input__prefix > .t-icon {
       color: var(--td-text-color-placeholder);

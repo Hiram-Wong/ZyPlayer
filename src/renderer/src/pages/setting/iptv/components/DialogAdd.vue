@@ -130,7 +130,7 @@ const requestMethod = (file) => {
 
 .upload-item {
   :deep(.t-button--variant-outline) {
-    background-color: var(--td-bg-input) !important;
+    background-color: var(--td-bg-content-input) !important;
     border-color: transparent;
   }
 }
