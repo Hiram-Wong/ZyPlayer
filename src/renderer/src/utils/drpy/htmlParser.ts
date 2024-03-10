@@ -1,15 +1,11 @@
 import * as cheerio from 'cheerio';
-import * as jsonpath from 'jsonpath-plus';
-import * as url from 'url';
+import jsonpath from 'jsonpath';
+import url from 'url';
 
 const PARSE_CACHE = true;  // 解析缓存
 const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|^body$|^#';  // 不自动加eq下标索引
 const URLJOIN_ATTR = '(url|src|href|-original|-src|-play|-url|style)$';  // 需要自动urljoin的属性
 const SPECIAL_URL = '^(ftp|magnet|thunder|ws):';  // 过滤特殊链接,不走urlJoin
-
-interface JqueryStatic<T> {
-  (selector: string, context?: T): Cheerio;
-}
 
 class Jsoup {
   MY_URL: string = '';
@@ -43,18 +39,18 @@ class Jsoup {
    */
   parseHikerToJq(parse: string, first = false): string {
     if (this.contains(parse, '&&')) {
-      parse = parse.split('&&');  // 带&&的重新拼接
+      const parses = parse.split('&&');  // 带&&的重新拼接
       let new_parses: string[] = [];  //  构造新的解析表达式列表
-      for (let i = 0; i < parse.length; i++) {
-        const ps = parse[i].split(' ')[-1];  // 如果分割&&后带空格就取最后一个元素
+      for (let i = 0; i < parses.length; i++) {
+        const ps = parses[i].split(' ')[-1];  // 如果分割&&后带空格就取最后一个元素
         if (!this.test(NOADD_INDEX, ps)) {
-          if (!first && i === parse.length - 1) {  // 不传first且遇到最后一个,不用补eq(0)
-            new_parses.push(parse[i]);
+          if (!first && i === parses.length - 1) {  // 不传first且遇到最后一个,不用补eq(0)
+            new_parses.push(parses[i]);
           } else {
-            new_parses.push(`${parse[i]}:eq(0)`);
+            new_parses.push(`${parses[i]}:eq(0)`);
           }
         } else {
-          new_parses.push(parse[i]);
+          new_parses.push(parses[i]);
         }
       }
       parse = new_parses.join(' ');
@@ -106,7 +102,7 @@ class Jsoup {
    * @param ret: 当前返回值
    * @returns {Cheerio}
    */
-  parseOneRule($: JqueryStatic<Cheerio>, nparse: string, ret?: Cheerio): Cheerio {
+  parseOneRule($, nparse: string, ret) {
     const { rule, index, excludes } = this.getParseInfo(nparse);
 
     if (!ret) {
@@ -239,7 +235,7 @@ class Jsoup {
     return this.pdfh(html, parse, baseUrl);
   }
 
-  pq(html: string): CheerioStatic {
+  pq(html: string) {
     return cheerio.load(html);
   }
 

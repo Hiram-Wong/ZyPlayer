@@ -85,36 +85,36 @@ const baseRequest = (url: string, requestObject: BaseRequestObject, jsType: numb
 }
 
 const fetch = (_url, _object) => {
-  return base_request(_url, _object, 0);
+  return baseRequest(_url, _object, 0);
 }
 
 const req = (_url, _object) => {
-  return base_request(_url, _object, 1);
+  return baseRequest(_url, _object, 1);
 }
 
-const 重定向 = (_url: str) => {
-  if(_url.startswith('http')) return `redirect://${_url}`
+const redirect = (_url: string) => {
+  if(_url.startsWith('http')) return `redirect://${_url}`
   else return `${_url}`
 }
 
-const toast = (_url: str) => {
+const toast = (_url: string) => {
   return `toast://${_url}`
 }
 
-const image = (_text: str) => {
+const image = (_text: string) => {
   return `image://${_text}`
 }
 
-const initContext = (ctx, url, prefix_code, env, getParams, getCryptoJS) => {
+const initContext = (ctx, url, prefixCode, env, getParams, getCryptoJS) => {
   ctx.callableMap.set('getParams', getParams);
   ctx.callableMap.set('log', console.log);
   ctx.callableMap.set('print', console.log);
   ctx.callableMap.set('fetch', fetch);
-  ctx.callableMap.set('urljoin', urljoin);
+  ctx.callableMap.set('urljoin', urlJoin);
   ctx.eval(`const console = { log };`);
   ctx.callableMap.set('getCryptoJS', getCryptoJS);
 
-  const jsp = new Jsoup(url);
+  const jsp = new jsoup(url);
   ctx.callableMap.set('pdfh', jsp.pdfh);
   ctx.callableMap.set('pdfa', jsp.pdfa);
   ctx.callableMap.set('pd', jsp.pd);
@@ -150,47 +150,78 @@ const initContext = (ctx, url, prefix_code, env, getParams, getCryptoJS) => {
 }
 
 const initGlobalThis = (ctx) => {
-  globalThis = ctx.eval("globalThis;")
-  _url = 'https://www.baidu.com'
+  let globalThis = ctx.eval("globalThis;")
+  const _url = 'https://www.baidu.com'
   globalThis.fetch_params = {'headers': {'Referer': _url}, 'timeout': 10, 'encoding': 'utf-8'}
-  globalThis.log = print
-  globalThis.print = print
-  globalThis.req = req
+  globalThis.log = print;
+  globalThis.print = print;
+  globalThis.req = req;
 
-  const pdfh = (html, parse: str, base_url: str = '') => {
-    jsp = jsoup(base_url);
+  const pdfh = (html, parse: string, base_url: string = '') => {
+    const jsp = new jsoup(base_url);
     return jsp.pdfh(html, parse, base_url);
   }
 
-  const pd = (html, parse: str, base_url: str = '') => {
-    jsp = jsoup(base_url)
+  const pd = (html, parse: string, base_url: string = '') => {
+    const jsp = new jsoup(base_url);
     return jsp.pd(html, parse);
   }
 
-  const pdfa = (html, parse: str) => {
-    jsp = jsoup();
+  const pdfa = (html, parse: string) => {
+    const jsp = new jsoup();
     return jsp.pdfa(html, parse);
   }
 
   const local_get = (_id, key, value='') => {
     console.log('local_get:', _id, key, value)
-    return localStorage.getItem(_id, key, value);
+    return localStorage.getItem(key);
   }
 
   const local_set = (_id, key, value) => {
-    return localStorage.setItem(_id, key, value);
+    return localStorage.setItem(key, value);
   }
 
   const local_delete = (_id, key) => {
-    return localStorage.removeItem(_id, key);
+    return localStorage.removeItem(key);
   }
 
   globalThis.pdfh = pdfh;
   globalThis.pdfa = pdfa;
   globalThis.pd = pd;
-  globalThis.joinUrl = urljoin;
+  globalThis.joinUrl = urlJoin;
   globalThis.local = {
     'get': local_get, 'set': local_set, 'delete': local_delete
   };
   return globalThis;
 }
+
+
+const pdfh = (html, parse: string, base_url: string = '') => {
+  const jsp = new jsoup(base_url);
+  return jsp.pdfh(html, parse, base_url);
+}
+
+const pd = (html, parse: string, base_url: string = '') => {
+  const jsp = new jsoup(base_url);
+  return jsp.pd(html, parse);
+}
+
+const pdfa = (html, parse: string) => {
+  const jsp = new jsoup();
+  return jsp.pdfa(html, parse);
+}
+
+const local_get = (_id, key, value='') => {
+  console.log('local_get:', _id, key, value)
+  return localStorage.getItem(key);
+}
+
+const local_set = (_id, key, value) => {
+  return localStorage.setItem(key, value);
+}
+
+const local_delete = (_id, key) => {
+  return localStorage.removeItem(key);
+}
+
+export { pdfh, pdfa, pd, local_get, local_set, local_delete , req }
