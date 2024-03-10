@@ -14,8 +14,8 @@ let logOpt = {
   maxBufferLength: 4096, // 日志写入缓存队列最大长度
   flushInterval: 1000, // flush间隔
   logrotator: { // 分割配置
-    byHour: true,
-    byDay: false,    
+    byHour: false,
+    byDay: true,    
     hourDelimiter: '_'
   }
 }
