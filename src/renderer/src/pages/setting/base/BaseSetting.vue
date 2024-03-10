@@ -56,6 +56,17 @@
         </div>
         <div class="hot-recommend"></div>
       </t-form-item>
+      <!-- <t-form-item label="弹幕库" name="danmu">
+        <t-space align="center">
+          <t-input
+            v-model="formData.defaultDanMuKu"
+            label="链接:"
+            placeholder="请输入弹幕库地址"
+            :style="{ width: '255px' }"
+          />
+          <span class="title" @click="reset('danmuku')">重置</span>
+        </t-space>
+      </t-form-item> -->
       <t-form-item label="直播" name="iptv">
         <div class="iptv">
           <t-space direction="vertical">
@@ -90,7 +101,12 @@
       <t-form-item label="播放器" name="player">
         <div class="player">
           <t-space  align="center">
-            <t-select v-model="formData.broadcasterType" :options="PLAYER_OPTIONS" placeholder="请选择播放器" />
+            <t-select
+              v-model="formData.broadcasterType"
+              :options="PLAYER_OPTIONS"
+              placeholder="请选择播放器" 
+              :style="{ width: '255px' }"
+            />
             <span class="title" @click="snifferEvent">嗅探</span>
           </t-space>
         </div>
@@ -548,6 +564,8 @@ const reset = (type: string) => {
     formData.value.defaultIptvEpg = 'https://epg.112114.eu.org/';
   } else if (type === 'logo') {
     formData.value.defaultIptvLogo = 'https://epg.112114.eu.org/logo/';
+  } else if(type === 'danmuku') {
+    formData.value.defaultDanMuKu = 'https://dm.bbj.icu/dm?ac=dm';
   }
 };
 
