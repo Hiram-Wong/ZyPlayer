@@ -68,7 +68,8 @@ import InfiniteLoading from 'v3-infinite-loading';
 import { ref, reactive } from 'vue';
 
 import { delHistory, fetchHistoryList } from '@/api/history';
-import { fetchFilmDetail, fetchSiteList } from '@/api/site';
+import { fetchSiteList } from '@/api/site';
+import { fetchDetail } from '@/utils/cms';
 import { usePlayStore } from '@/store';
 import DetailView from '../../film/Detail.vue';
 
@@ -172,7 +173,7 @@ const playEvent = async (item) => {
     const site = siteConfig.value.data.find(({ id }) => id === item.relateId);
     siteData.value = site;
     if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
-      const [detailItem] = await fetchFilmDetail(relateId, videoId);
+      const [detailItem] = await fetchDetail(site, videoId);
       item = detailItem;
     }
     console.log(item);

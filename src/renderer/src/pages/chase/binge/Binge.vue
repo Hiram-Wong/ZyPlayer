@@ -163,7 +163,7 @@ const playEvent = async (item) => {
     const site = siteConfig.value.data.find(({ id }) => id === item.relateId);
     siteData.value = site;
     if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
-      const [detailItem] = await fetchFilmDetail(relateId, videoId);
+      const [detailItem] = await fetchDetail(site, videoId);
       item = detailItem;
     }
     console.log(item);
