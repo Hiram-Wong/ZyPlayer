@@ -26,7 +26,7 @@
                 v-if="formData.type === 'local'"
                 class="upload-item"
                 theme="file"
-                accept="audio/mpegurl"
+                accept="audio/mpegurl;text/plain"
                 auto-upload
                 :max="1"
                 :allow-upload-duplicate-file="true"

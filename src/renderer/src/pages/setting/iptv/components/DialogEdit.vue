@@ -27,7 +27,7 @@
                 class="upload-item"
                 v-model="file"
                 theme="file"
-                accept="audio/mpegurl"
+                accept="audio/mpegurl;text/plain"
                 auto-upload
                 :max="1"
                 :allow-upload-duplicate-file="true"
