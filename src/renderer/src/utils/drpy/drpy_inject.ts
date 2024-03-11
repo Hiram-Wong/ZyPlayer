@@ -1,6 +1,7 @@
 import jsoup from './htmlParser';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import urlJoin from 'url-join';
+import localCahe from './cache';
 
 interface BaseRequestObject {
   method?: string;
@@ -212,16 +213,25 @@ const pdfa = (html, parse: string) => {
 }
 
 const local_get = (_id, key, value='') => {
-  console.log('local_get:', _id, key, value)
-  return localStorage.getItem(key);
+  console.log('local_get:', _id, key, value);
+  return localCahe.get(_id, key, value);
+  // return localStorage.getItem(`${_id}$${key}`);
 }
 
 const local_set = (_id, key, value) => {
-  return localStorage.setItem(key, value);
+  return localCahe.set(_id, key, value);
+  // return localStorage.setItem(`${_id}$${key}`, value);
 }
 
 const local_delete = (_id, key) => {
-  return localStorage.removeItem(key);
+  return localCahe.delete(_id, key);
+  // return localStorage.removeItem(`${_id}$${key}`);
 }
 
-export { pdfh, pdfa, pd, local_get, local_set, local_delete , req }
+const local = {
+  'get': local_get,
+  'set': local_set,
+  'delete': local_delete
+}
+
+export { pdfh, pdfa, pd, local , req }

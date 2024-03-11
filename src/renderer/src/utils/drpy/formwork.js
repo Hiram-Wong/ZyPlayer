@@ -12,8 +12,9 @@ if (typeof Object.assign != 'function') {
     return target;
   };
 }
-function getMubans() {
-  var mubanDict = { // 模板字典
+
+const getMubans = () => {
+  const mubanDict = { // 模板字典
     mxpro: {
       title: '',
       host: '',
@@ -299,6 +300,8 @@ function getMubans() {
   };
   return JSON.parse(JSON.stringify(mubanDict));
 }
-var mubanDict = getMubans();
-var muban = getMubans();
+
+const mubanDict = getMubans();
+const muban = getMubans();
+
 export { muban, getMubans };
