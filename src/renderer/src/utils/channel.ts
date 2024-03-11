@@ -1,6 +1,6 @@
 import axios from 'axios';
 import _ from 'lodash';
-import fs from 'fs-extra';
+import fs from 'fs';
 import getUuid from 'uuid-by-string';
 
 let controller = new AbortController();
