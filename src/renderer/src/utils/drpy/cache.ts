@@ -2,7 +2,7 @@ class LocalCache {
   private cacheName: string;
   private db: IDBDatabase | null;
 
-  constructor(cacheName = 'local_cache') {
+  constructor(cacheName = 'drpy') {
     this.cacheName = cacheName;
     this.db = null;
     this.initDatabase().then(() => {
@@ -55,7 +55,7 @@ class LocalCache {
       request.onerror = () => {
         reject(new Error('Failed to get value from cache.'));
       };
-      
+
       request.onsuccess = () => {
         const value = request.result ? request.result : defaultValue;
         resolve(value);
