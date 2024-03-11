@@ -129,6 +129,15 @@ const ipcListen = () => {
     const res = await puppeteerInElectron(url, ua);
     return res;
   });
+
+  ipcMain.handle('read-file', async (_, path) => {
+    const fileContent = await fs.readFileSync(path, 'utf8').toString();
+    // logger.info(fileContent)
+    const res = fileContent ? fileContent : '';
+    logger.info(res)
+
+    return res;
+  });
   
   // 重启app
   ipcMain.on('relaunch-app', () => {

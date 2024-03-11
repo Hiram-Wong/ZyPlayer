@@ -53,7 +53,9 @@ const parseChannel = async(type: 'local'|'remote'|'url', path: string) => {
   try {
     let fileContent;
     if (type === 'local') {
-      fileContent = await fs.promises.readFile(path, 'utf8');
+      await window.electron.ipcRenderer.invoke('read-file', path).then(res => {
+        fileContent = res;
+      });
     } else if (type === 'remote') {
       const response = await axios.get(path);
       fileContent = response.data;
