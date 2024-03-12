@@ -1,87 +1,60 @@
 import jsoup from './htmlParser';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import urlJoin from 'url-join';
+import superagent from 'superagent';
 import indexDbCahe from './cache';
 
-interface BaseRequestObject {
+interface RequestOptions {
   method?: string;
   timeout?: number;
   body?: string;
-  data?: Record<string, any>;
-  headers?: Record<string, string>;
+  data?: { [key: string]: string };
+  headers?: { [key: string]: string };
   withHeaders?: boolean;
 }
 
-interface BaseRequestResult {
-  content: string;
-  body: string;
-  headers: Record<string, string>;
-}
 
-const baseRequest = (url: string, requestObject: BaseRequestObject, jsType: number = 0): string | BaseRequestResult => {
-  let object: BaseRequestObject = requestObject;
-  if (!(object instanceof Object) && jsType === 0) {
-    object = JSON.parse(object);
-  } else if (jsType === 1) {
-    object = { ...object };
+const baseRequest = (url: string, options: RequestOptions, jsType: number = 0): Promise<string | any> => {
+  const { method = 'get', timeout = 5000, body = '', data = {}, headers = {}, withHeaders = false } = options;
+    
+  let request: superagent.SuperAgentRequest;
+  switch (method.toLowerCase()) {
+    case 'get':
+      request = superagent.get(url).query(data);
+      break;
+    case 'post':
+      request = superagent.post(url).send(data);
+      break;
+    case 'put':
+      request = superagent.put(url).send(data);
+      break;
+    case 'delete':
+      request = superagent.delete(url).send(data);
+      break;
+    case 'head':
+      request = superagent.head(url).send(data);
+      break;
+    default:
+      throw new Error(`Unsupported method: ${method}`);
   }
 
-  const method: string = (object.method || 'get').toLowerCase();
-  const timeout: number = object.timeout || 5;
-  const body: string = object.body || '';
-  let data: Record<string, any> = object.data || {};
-  if (body && !data) {
-    data = {};
-    for (const p of body.split('&')) {
-      const [k, v] = p.split('=');
-      data[k] = v;
+  request.timeout(timeout);
+
+  Object.entries(headers).forEach(([key, value]) => {
+    request.set(key, value);
+  });
+
+  return request.then((response: superagent.Response) => {
+    const { text, headers } = response;
+    if (withHeaders && jsType === 0) {
+      return { body: text, headers };
+    } else if (!withHeaders && jsType === 0) {
+      return text;
+    } else if (jsType === 1) {
+      return { content: text, headers };
+    } else {
+      return { content: '', body: '', headers: {} };
     }
-  }
-  let headers: Record<string, string> = object.headers || {};
-
-  // 修复pythonmonkey没有自动把 JSObjectProxy 转为 TypeScript 的对象导致的后续错误
-  data = { ...data };
-  headers = { ...headers };
-
-  const withHeaders: boolean = Boolean(object.withHeaders || false);
-
-  const config: AxiosRequestConfig = {
-    method,
-    url,
-    params: method === 'get' ? data : undefined,
-    data: method !== 'get' ? data : undefined,
-    headers,
-    timeout,
-    validateStatus: () => true, // 避免抛出错误状态的异常
-    responseType: 'text', // 以文本形式接收响应
-  };
-
-  return new Promise<string | BaseRequestResult>((resolve) => {
-    axios(config)
-      .then((response: AxiosResponse) => {
-        const emptyResult: BaseRequestResult = { content: '', body: '', headers: {} };
-        if (withHeaders && jsType === 0) {
-          const result: BaseRequestResult = {
-            body: response.data,
-            headers: response.headers,
-          };
-          resolve(JSON.stringify(result));
-        } else if (!withHeaders && jsType === 0) {
-          resolve(response.data);
-        } else if (jsType === 1) {
-          const result: BaseRequestResult = {
-            content: response.data,
-            headers: response.headers,
-          };
-          resolve(result);
-        } else {
-          resolve(emptyResult);
-        }
-      })
-      .catch(() => {
-        const emptyResult: BaseRequestResult = { content: '', body: '', headers: {} };
-        resolve(emptyResult);
-      });
+  }).catch((error: superagent.ResponseError) => {
+    throw new Error(error.message);
   });
 }
 
@@ -90,6 +63,7 @@ const fetch = (_url, _object) => {
 }
 
 const req = (_url, _object) => {
+  console.log('req', _url, _object);
   return baseRequest(_url, _object, 1);
 }
 
@@ -197,17 +171,52 @@ const initGlobalThis = (ctx) => {
 }
 
 
-const pdfh = (html, parse: string, base_url: string = '') => {
+const joinUrl = (base: string, url: string) => {
+  base = base || '';
+  url = url || '';
+  base = base.trim().replace(/\/+$/, '');
+  url = url.trim().replace(/\/+$/, '');
+  console.log('joinUrl:', base, url)
+
+  let u;
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    u = new URL(url);
+  } else if (url.startsWith('://')) {
+    u = new URL(base + url);
+  } else if (url.startsWith('//')) {
+    u = new URL(base.startsWith('http:') ? 'http:' + url : 'https:' + url);
+  } else {
+    u = new URL(base + '/' + url);
+  }
+
+  if (!u.pathname && new URL(base).pathname) {
+    u.pathname = new URL(base).pathname;
+  }
+
+  if (!u.search && new URL(base).search) {
+    u.search = new URL(base).search;
+  }
+
+  return u.toString();
+}
+
+const pdfh = (html: string, parse: string, base_url: string = '') => {
   const jsp = new jsoup(base_url);
   return jsp.pdfh(html, parse, base_url);
 }
 
-const pd = (html, parse: string, base_url: string = '') => {
+const pd = (html: string, parse: string, base_url: string = '') => {
   const jsp = new jsoup(base_url);
   return jsp.pd(html, parse);
 }
 
-const pdfa = (html, parse: string) => {
+const pdfa = (html: string, parse: string) => {
+  const jsp = new jsoup();
+  return jsp.pdfa(html, parse);
+}
+
+const pdfl = (html: string, rule: string, list_text: string, urlKey: string) => {
   const jsp = new jsoup();
   return jsp.pdfa(html, parse);
 }
@@ -231,4 +240,4 @@ const local = {
   'delete': local_delete
 }
 
-export { pdfh, pdfa, pd, local , req }
+export { pdfh, pdfa, pd, local , req, joinUrl }

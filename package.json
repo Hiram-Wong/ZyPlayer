@@ -86,6 +86,7 @@
     "public-ip": "^6.0.1",
     "qrcode.vue": "^3.4.1",
     "qs": "^6.12.0",
+    "superagent": "^8.1.2",
     "tdesign-icons-vue-next": "^0.2.2",
     "tdesign-vue-next": "^1.9.0",
     "typescript": "^5.4.2",

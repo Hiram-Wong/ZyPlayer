@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import jsonpath from 'jsonpath';
-import url from 'url';
+import urlJoin from 'url-join';
 
 const PARSE_CACHE = true;  // 解析缓存
 const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|^body$|^#';  // 不自动加eq下标索引
@@ -22,8 +22,8 @@ class Jsoup {
 
   // 测试
   test(text: string, string: string): boolean {
-    const searchObj = new RegExp(text, 'mgi').exec(string);
-    return searchObj !== null;
+    const searchObj = new RegExp(text, 'mi').exec(string);
+    return searchObj ? true : false;
   }
 
   // 包含
@@ -37,14 +37,15 @@ class Jsoup {
    * @param first: 是否第一个
    * @returns {string}
    */
-  parseHikerToJq(parse: string, first = false): string {
+  parseHikerToJq(parse: string, first: boolean = false): string {
     if (this.contains(parse, '&&')) {
       const parses = parse.split('&&');  // 带&&的重新拼接
       let new_parses: string[] = [];  //  构造新的解析表达式列表
       for (let i = 0; i < parses.length; i++) {
-        const ps = parses[i].split(' ')[-1];  // 如果分割&&后带空格就取最后一个元素
+        const ps_list = parses[i].split(' ');
+        const ps = ps_list[ps_list.length - 1];  // 如果分割&&后带空格就取最后一个元素
         if (!this.test(NOADD_INDEX, ps)) {
-          if (!first && i === parses.length - 1) {  // 不传first且遇到最后一个,不用补eq(0)
+          if (!first && i >= parses.length - 1) {  // 不传first且遇到最后一个,不用补eq(0)
             new_parses.push(parses[i]);
           } else {
             new_parses.push(`${parses[i]}:eq(0)`);
@@ -55,7 +56,8 @@ class Jsoup {
       }
       parse = new_parses.join(' ');
     } else {
-      const ps = parse.split(' ')[-1];  // 如果带空格就取最后一个元素
+      const ps_list = parse.split(' ');
+      const ps = ps_list[ps_list.length - 1];  // 如果带空格就取最后一个元素
       if (!this.test(NOADD_INDEX, ps) && first) {
         parse = `${parse}:eq(0)`;
       }
@@ -69,57 +71,57 @@ class Jsoup {
    * @param nparse
    * @returns {rule: string, index: number, excludes: string[]}
    */
-  getParseInfo(nparse: string): { rule: string, index: number, excludes: string[] } {
+  getParseInfo(nparse: string): { nparse_rule: string, nparse_index: number, excludes: string[] } {
     let excludes: string[] = [];  // 定义排除列表默认值为空
-    let nparseIndex = 0;  // 定义位置索引默认值为0
-    let nparseRule = nparse;  // 定义规则默认值为本身
+    let nparse_index: number = 0;  // 定义位置索引默认值为0
+    let nparse_rule: string = nparse;  // 定义规则默认值为本身
 
     if (this.contains(nparse, ':eq')) {
-      nparseRule = nparse.split(':eq')[0];
-      let nparsePos = nparse.split(':eq')[1];
-      if (this.contains(nparseRule, '--')) {
-        excludes = nparseRule.split('--').slice(1);
-        nparseRule = nparseRule.split('--')[0];
-      } else if (this.contains(nparsePos, '--')) {
-        excludes = nparsePos.split('--').slice(1);
-        nparsePos = nparsePos.split('--')[0]
+      nparse_rule = nparse.split(':eq')[0];
+      let nparse_pos = nparse.split(':eq')[1];
+      if (this.contains(nparse_rule, '--')) {
+        excludes = nparse_rule.split('--').slice(1);
+        nparse_rule = nparse_rule.split('--')[0];
+      } else if (this.contains(nparse_pos, '--')) {
+        excludes = nparse_pos.split('--').slice(1);
+        nparse_pos = nparse_pos.split('--')[0]
       }
       try {
-        nparseIndex = parseInt(nparsePos.split('(')[1].split(')')[0]);
+        nparse_index = parseInt(nparse_pos.split('(')[1].split(')')[0]);
       } catch {}
     } else if (this.contains(nparse, '--')) {
-      nparseRule = nparse.split('--')[0];
+      nparse_rule = nparse.split('--')[0];
       excludes = nparse.split('--').slice(1);
     }
 
-    return { rule: nparseRule, index: nparseIndex, excludes };
+    return { nparse_rule, nparse_index, excludes };
   }
 
   /**
    * 解析空格分割后的原生表达式中的一条记录,正确处理eq的索引,返回处理后的ret
-   * @param $: cheerio
+   * @param doc: cheerio.load() load后的dom对象
    * @param nparse: 解析表达式
    * @param ret: 当前返回值
    * @returns {Cheerio}
    */
-  parseOneRule($, nparse: string, ret) {
-    const { rule, index, excludes } = this.getParseInfo(nparse);
+  parseOneRule(doc, nparse: string, ret) {
+    const { nparse_rule, nparse_index, excludes } = this.getParseInfo(nparse);
 
     if (!ret) {
-      ret = $(rule);
+      ret = doc(nparse_rule);
     } else {
-      ret = ret.find(rule);
+      ret = ret(nparse_rule);
     }
 
     if (this.contains(nparse, ':eq')) {
-      ret = ret.eq(index);
+      ret = ret.eq(nparse_index);
     }
 
-    if (excludes && ret.length > 0) {
+    if (excludes && ret) {
       ret = ret.clone(); // 克隆一个，避免直接remove影响原始DOM
-      excludes.forEach(exclude => {
-        ret.find(exclude).remove();
-      });
+      for (let exclude of excludes) {
+        ret(exclude).remove();
+      }
     }
 
     return ret;
@@ -133,28 +135,56 @@ class Jsoup {
    * @returns {Cheerio}
    */
   pdfa(html: string, parse: string): string[] {
-    if (!html || !parse) {
-      return [];
-    }
+    if (!html || !parse) return [];
     parse = this.parseHikerToJq(parse);
-    const $ = cheerio.load(html);
-    const ret: string[] = [];
+    console.log(`pdfa:${parse}`);
+    
+    const doc = cheerio.load(html);
+    if (PARSE_CACHE) {
+      if (this.pdfa_html !== html) {
+        this.pdfa_html = html;
+        this.pdfa_doc = doc;
+      }
+    }
 
     const parses = parse.split(' ');
-    let currentRet = $('body');
+    let ret: cheerio | null = null;
     for (const nparse of parses) {
-      currentRet = this.parseOneRule($, nparse, currentRet);
-      if (currentRet.length === 0) {
+      ret = this.parseOneRule(doc, nparse, ret);
+      if (!ret) {  // 可能循环取值后ret 对应eq取完无值了，pdfa直接返回空列表
         return [];
       }
     }
 
-    currentRet.each((_, el) => {
-      ret.push($(el).html());
-    });
-
-    return ret;
+    const res: string[] = ret.toArray().map((item: any) => doc(item).html());
+    return res;
   }
+
+  // pdfl(html: string, parse: string, list_text: string, list_url: string, add_url: string): string[] {
+  //   if (!html || !parse) return [];
+
+  //   parse = this.parseHikerToJq(parse, false);
+  //   const doc = cheerio.load(html);
+  //   const ret: string[] = [];
+    
+  //   const parses = parse.split(' ');
+  //   let currentRet = $('body');
+  //   for (const nparse of parses) {
+  //     currentRet = this.parseOneRule(doc, nparse, currentRet);
+  //     if (currentRet.length === 0) {
+  //       return [];
+  //     }
+  //   }
+  
+  //   const new_vod_list = [];
+  
+  //   for (let i = 0; i < ret.length; i++) {
+  //     const it = currentRet.prop('outerHTML');
+  //     new_vod_list.push(this.parseDomForUrl(it, list_text, "").trim() + '$' + this.parseDomForUrl(it, list_url, add_url));
+  //   }
+  
+  //   return new_vod_list;
+  // }
   
   /**
    * 解析空格分割后的原生表达式,返回处理后的ret
@@ -164,74 +194,74 @@ class Jsoup {
    * @returns {Cheerio}
    */
   pdfh(html: string, parse: string, baseUrl: string = ''): string {
-    if (!html || !parse) {
-      return '';
+    if (!html || !parse) return '';
+
+    const doc = cheerio.load(html);
+    if (PARSE_CACHE) {
+      if (this.pdfa_html !== html) {
+        this.pdfa_html = html;
+        this.pdfa_doc = doc;
+      }
     }
-    if (PARSE_CACHE && this.pdfh_html !== html) {
-      this.pdfh_html = html;
-      const $ = cheerio.load(html);
-      this.pdfh_doc = $;
-    } else {
-      const $ = cheerio.load(html);
+
+    if (parse == 'body&&Text' || parse == 'Text') {
+      return doc.text();
+    } else if (parse == 'body&&Html' || parse == 'Html') {
+      return doc.html();
     }
 
     let option: string | undefined;
     if (this.contains(parse, '&&')) {
-      [parse, option] = parse.split('&&');
-      parse = this.parseHikerToJq(parse, true);
+      const parts: string[] = parse.split('&&');
+      option = parts[parts.length - 1];
+      parse = parts.slice(0, -1).join('&&');
     }
+    parse = this.parseHikerToJq(parse, true);
+    const parses: string[] = parse.split(' ');
 
-    const parses = parse.split(' ');
-    let currentRet = $('body');
+    let ret: string | Cheerio | null = null;
     for (const nparse of parses) {
-      currentRet = this.parseOneRule($, nparse, currentRet);
-      if (currentRet.length === 0) {
-        return '';
-      }
+      ret = this.parseOneRule(doc, nparse, ret);
+      if (!ret) return '';
     }
 
-    let ret: string;
     if (option) {
       switch (option.toLowerCase()) {
-        case 'text':
-          ret = currentRet.text();
+        case 'Text':
+          ret = ret.text();
           break;
-        case 'html':
-          ret = currentRet.html();
+        case 'Html':
+          ret = ret.html();
           break;
         default:
-          ret = currentRet.attr(option) || '';
+          ret = ret.attr(option) || '';
           if (this.contains(option.toLowerCase(), 'style') && this.contains(ret, 'url(')) {
             try {
-              ret = ret.match(/url\((.*?)\)/)?.[1];
+              ret = ret.match(/url\((.*?)\)/)![1];
               // 2023/07/28新增 style取内部链接自动去除首尾单双引号
-              ret = ret?.replace(/^['"]|['"]$/g, '');
-            } catch {
-              // 忽略错误
-            }
+              ret = ret.replace(/^['"]|['"]$/g, '');
+            } catch {}
           }
           if (ret && baseUrl) {
             const needAdd = this.test(URLJOIN_ATTR, option) && !this.test(SPECIAL_URL, ret);
             if (needAdd) {
-              if (ret.startsWith('http')) {
+              if (ret.includes('http')) {
                 ret = ret.slice(ret.indexOf('http'));
               } else {
-                ret = url.resolve(baseUrl, ret);
+                ret = new URL(ret, baseUrl).toString();
               }
             }
           }
       }
     } else {
-      ret = currentRet.prop('outerHTML');
+      ret = ret.toString();
     }
 
     return ret;
   }
 
   pd(html: string, parse: string, baseUrl: string = ''): string {
-    if (!baseUrl) {
-      baseUrl = this.MY_URL;
-    }
+    if (!baseUrl) baseUrl = this.MY_URL;
     return this.pdfh(html, parse, baseUrl);
   }
 
@@ -240,9 +270,7 @@ class Jsoup {
   }
 
   pjfh(html: any, parse: string, addUrl = false): string {
-    if (!html || !parse) {
-      return '';
-    }
+    if (!html || !parse) return '';
 
     try {
       html = typeof html === 'string' ? JSON.parse(html) : html;
@@ -259,13 +287,13 @@ class Jsoup {
     const paths = parse.split('||');
     for (const path of paths) {
       const queryResult = jsonpath.query(html, path);
-      ret = queryResult.length > 0 ? queryResult[0] : '';
+      if (Array.isArray(queryResult)) ret = queryResult[0] ? `${queryResult[0]}` : '';
+      else ret = queryResult ? `${queryResult}` : '';
+      
       if (addUrl && ret) {
-        ret = url.resolve(this.MY_URL, ret);
+        ret = urlJoin(this.MY_URL, ret);
       }
-      if (ret) {
-        break;
-      }
+      if (ret)  break;
     }
 
     return ret;
@@ -276,9 +304,7 @@ class Jsoup {
   }
 
   pjfa(html: any, parse: string): any[] {
-    if (!html || !parse) {
-      return [];
-    }
+    if (!html || !parse) return [];
 
     try {
       html = typeof html === 'string' ? JSON.parse(html) : html;
@@ -286,14 +312,11 @@ class Jsoup {
       return [];
     }
 
-    if (!parse.startsWith('$.')) {
-      parse = '$.' + parse;
-    }
+    if (!parse.startsWith('$.')) parse = '$.' + parse;
 
     const result = jsonpath.query(html, parse);
     if (Array.isArray(result) && Array.isArray(result[0]) && result.length === 1) {
-      // 自动解包
-      return result[0];
+      return result[0];  // 自动解包
     }
 
     return result || [];
