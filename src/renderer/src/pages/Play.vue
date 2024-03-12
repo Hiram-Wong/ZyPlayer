@@ -501,7 +501,6 @@ const commonConfig = {
   cssFullscreen: false,
   enableContextmenu: true,
   topBarAutoHide: false,
-  closeVideoDblclick: true,
   lastPlayTimeHideDelay: 5,
   startTime: 0,
   playbackRate: {
