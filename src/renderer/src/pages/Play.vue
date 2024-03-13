@@ -271,7 +271,7 @@
                     <t-tabs v-model="selectPlaySource" class="film-tabs">
                       <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key">
                         <template #label> {{ key }} </template>
-                        <div>
+                        <div class="tag-container">
                           <t-space break-line size="small" align="center">
                             <t-tag
                               v-for="item in value"
@@ -300,7 +300,7 @@
                           <t-image
                             class="card-main-item"
                             :src="content.vod_pic"
-                            :style="{ width: '126px', height: '70px', 'border-radius': '10px' }"
+                            :style="{ width: '126px', height: '70px', 'border-radius': '5px' }"
                             :lazy="true"
                             fit="cover"
                           >
@@ -309,14 +309,9 @@
                                 class="nowrap"
                                 :style="{
                                   position: 'absolute',
-                                  right: '2px',
+                                  right: '6px',
                                   bottom: '2px',
-                                  borderRadius: '10px',
-                                  backgroundColor: '#25252a',
-                                  padding: '0 5px',
-                                  textAlign: 'right',
                                   maxWidth: '90%',
-                                  fontSize: '10px',
                                 }"
                               >
                                 {{ content.vod_remarks }}
@@ -2241,14 +2236,13 @@ const openMainWinEvent = () => {
                       overflow: hidden;
                       display: flex;
                       flex-direction: column;
-                      justify-content: center;
+                      justify-content: flex-start;
 
                       .title {
                         font-size: 14px;
                         line-height: 20px;
                         max-height: 40px;
                         overflow: hidden;
-                        -o-text-overflow: ellipsis;
                         text-overflow: ellipsis;
                         word-break: break-all;
                         display: -webkit-box;
@@ -2260,6 +2254,9 @@ const openMainWinEvent = () => {
                       .subtitle {
                         color: #797979;
                         font-size: 10px;
+                        white-space: wrap;
+                        max-height: 40px;
+                        line-height: 14px;
                       }
                     }
                   }
@@ -2340,7 +2337,7 @@ const openMainWinEvent = () => {
 
                 h4 {
                   margin-top: 10px;
-                  font-size: 15px;
+                  font-size: 24px;
                   font-weight: 500;
                   color: #fff;
                   height: 33px;
@@ -2360,13 +2357,14 @@ const openMainWinEvent = () => {
                 .intro-title {
                   font-size: 15px;
                   line-height: 21px;
-                  font-weight: 800;
+                  font-weight: 400;
+                  color: hsla(0, 0%, 100%, .5);
                 }
 
                 .intro-desc {
                   margin-top: 7px;
                   line-height: 24px;
-                  color: hsla(0, 0%, 100%, 0.5);
+                  color: hsla(0, 0%, 100%, .9);
                   font-size: 15px;
                   font-weight: 400;
                 }
