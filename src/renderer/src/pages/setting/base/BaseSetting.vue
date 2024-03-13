@@ -110,9 +110,8 @@
               />
               <span class="title" @click="snifferEvent">嗅探</span>
             </t-space>
-            <t-space align="center">
+            <t-space align="center" v-if="formData.broadcasterType === 'custom'">
               <t-input
-                v-if="formData.broadcasterType === 'custom'"
                 v-model="formData.externalPlayer"
                 label="系统命令:"
                 placeholder="请输入系统命令"
