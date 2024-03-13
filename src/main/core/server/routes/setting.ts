@@ -54,12 +54,14 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const theme = await setting.find({ key: "theme"}).value;
       const skipStartEnd = await setting.find({ key: "skipStartEnd"}).value;
       const broadcasterType = await setting.find({ key: "broadcasterType"}).value;
+      const externalPlayer = await setting.find({ key: "externalPlayer"}).value;
       
       const res = {
         agreementMask,
         theme,
         skipStartEnd,
-        broadcasterType
+        broadcasterType,
+        externalPlayer
       };
       reply.code(200).send(res);
     } catch (err) {

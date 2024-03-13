@@ -100,14 +100,26 @@
       </t-form-item>
       <t-form-item label="播放器" name="player">
         <div class="player">
-          <t-space  align="center">
-            <t-select
-              v-model="formData.broadcasterType"
-              :options="PLAYER_OPTIONS"
-              placeholder="请选择播放器" 
-              :style="{ width: '255px' }"
-            />
-            <span class="title" @click="snifferEvent">嗅探</span>
+          <t-space direction="vertical">
+            <t-space align="center">
+              <t-select
+                v-model="formData.broadcasterType"
+                :options="PLAYER_OPTIONS"
+                placeholder="请选择播放器" 
+                :style="{ width: '255px' }"
+              />
+              <span class="title" @click="snifferEvent">嗅探</span>
+            </t-space>
+            <t-space align="center">
+              <t-input
+                v-if="formData.broadcasterType === 'custom'"
+                v-model="formData.externalPlayer"
+                label="系统命令:"
+                placeholder="请输入系统命令"
+                :style="{ width: '255px' }"
+              />
+              <span class="title" @click="isVisible.customPlayer = true">说明</span>
+            </t-space>
           </t-space>
         </div>
       </t-form-item>
@@ -140,6 +152,7 @@
           <span class="title" @click="isVisible.privacyPolicy=true">用户协议</span>
         </t-space>
 
+        <dialog-custom-player v-model:visible="isVisible.customPlayer" />
         <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
@@ -169,6 +182,7 @@ import DialogDataView from './components/DialogData.vue';
 import DialogUaView from './components/DialogUA.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogFfmpegCaptionView from './components/DialogFfmpegCaption.vue';
+import DialogCustomPlayer from './components/DialogCustomPlayer.vue';
 import DialogSnifferView from './components/DialogSniffer.vue';
 import DialogPrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
 
@@ -184,6 +198,7 @@ const isVisible = reactive({
   ua: false,
   iptvThumbnail: false,
   sniffer: false,
+  customPlayer: false,
   privacyPolicy: false,
 });
 
@@ -200,9 +215,13 @@ const MODE_OPTIONS = [
 const PLAYER_OPTIONS = [
   { label: '西瓜播放器', value: 'xgplayer' },
   { label: '呆呆播放器', value: 'dplayer' },
-  { label: 'iina(mac本地)', value: 'iina' },
-  { label: 'potplayer(win本地)', value: 'potplayer' },
-  { label: 'vlc(系统通用)', value: 'vlc' },
+  // { label: '腾讯播放器', value: 'tcplayer' },
+  // { label: '阿里播放器', value: 'aliplayer' },
+  // { label: '艺术播放器', value: 'artplayer' },
+  // { label: 'iina(mac本地)', value: 'iina' },
+  // { label: 'potplayer(win本地)', value: 'potplayer' },
+  // { label: 'vlc(系统通用)', value: 'vlc' },
+  { label: '自定义(调用系统)', value: 'custom' },
 ];
 
 const shortcutInputRef = ref(null);
@@ -228,6 +247,7 @@ const theme = computed(() => {
 const formData = ref({
   version: '3.3.2',
   theme: 'auto',
+  externalPlayer: '',
   defaultHot: 'kylive',
   defaultSearchRecommend: 'site',
   defaultSearchType: 'site',
@@ -325,6 +345,7 @@ watch(formData,
     storePlayer.updateConfig({
       setting: {
         broadcasterType: formData.value.broadcasterType,
+        externalPlayer: formData.value.externalPlayer,
         snifferType: formData.value.snifferType,
       },
     });
@@ -613,6 +634,8 @@ const snifferEvent = () => {
 
   isVisible.sniffer = true;
 }
+
+const commonCustomPlayer = () => {}
 
 const dataMange = () => {
   const { webdevUrl, webdevUsername, webdevPassword } = formData.value;

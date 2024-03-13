@@ -170,7 +170,7 @@ const playEvent = async (item) => {
 
     const playerType = store.getSetting.broadcasterType;
 
-    if (playerType === 'iina' || playerType === 'potplayer' || playerType === 'vlc' ) {
+    if (playerType === 'custom' ) {
       formDetailData.value = item;
       isVisible.detail = true;
     } else {

@@ -335,12 +335,13 @@ const gotoPlay = async (e) => {
 };
 
 const callSysPlayer = (url) => {
-  console.log(url)
-  const playerType = set.value.broadcasterType;
-  if (playerType === 'iina') window.open(`iina://weblink?url=${url}`, '_self');
-  else if (playerType === 'potplayer') window.open(`potplayer://${url}`, '_self');
-  else if (playerType === 'vlc') window.open(`vlc://${url}`, '_self');
-
+  console.log(url);
+  // const playerType = set.value.broadcasterType;
+  const externalPlayer = set.value.externalPlayer;
+  window.electron.ipcRenderer.send('call-player', externalPlayer, url);
+  // if (playerType === 'iina') window.open(`iina://weblink?url=${url}`, '_self');
+  // else if (playerType === 'potplayer') window.open(`potplayer://${url}`, '_self');
+  // else if (playerType === 'vlc') window.open(`vlc://${url}`, '_self');
   getHistoryData(true);
 }
 

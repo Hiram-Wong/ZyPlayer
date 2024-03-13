@@ -271,11 +271,11 @@ const changeClassEvent = async (id) => {
 
 // 播放
 const playEvent = (item: { name: any }) => {
-  const playerType = storePlayer.getSetting.broadcasterType
-  if (playerType === 'iina') window.open(`iina://weblink?url=${item.url}`, '_self');
-  else if (playerType === 'potplayer') window.open(`potplayer://${item.url}`, '_self')
-  else if (playerType === 'vlc') window.open(`vlc://${item.url}`, '_self');
-  else {
+  const playerType = storePlayer.getSetting.broadcasterType;
+  const externalPlayer = storePlayer.getSetting.externalPlayer;
+  if (playerType === 'custom' ) {
+    window.electron.ipcRenderer.send('call-player', externalPlayer, item.url);
+  } else {
     const { epg, skipIpv6 } = iptvConfig.value.ext;
     storePlayer.updateConfig({
       type: 'iptv',

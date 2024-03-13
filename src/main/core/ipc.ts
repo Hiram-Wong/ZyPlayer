@@ -38,6 +38,13 @@ const ipcListen = () => {
     logger.info(`[ipcMain] open-proxy-setting`);
     if (platform.isWindows) shell.openPath('ms-settings:network-proxy');
     if (platform.isMacOS) shell.openExternal('x-apple.systempreferences:com.apple.preference.network?Proxies');
+    if (platform.isLinux) shell.openPath('gnome-control-center network');
+  });
+
+  ipcMain.on('call-player', (_, path, url) => {
+    const command = `${path} ${url}`;
+    exec(command);
+    logger.info(`[ipcMain] call-player: command:${command}`);
   });
   
   ipcMain.on('reboot-app', () => {
@@ -45,7 +52,6 @@ const ipcListen = () => {
     app.relaunch();
     app.exit();
   });
-  
   
   const getFolderSize = (folderPath: string): number => {
     let totalSize = 0;
@@ -132,7 +138,6 @@ const ipcListen = () => {
 
   ipcMain.handle('read-file', async (_, path) => {
     const fileContent = await fs.readFileSync(path, 'utf8').toString();
-    // logger.info(fileContent)
     const res = fileContent ? fileContent : '';
     logger.info(res)
 

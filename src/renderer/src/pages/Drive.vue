@@ -237,10 +237,10 @@ const searchEvent = async () => {
 const playEvent = (item, fullPath) => {
   const playerType = storePlayer.getSetting.broadcasterType;
   const shareUrl = `${driveConfig.value.default.server}/d/${fullPath}${item.sign ? `?sign=${item.sign}`: ''}`
-  if (playerType === 'iina') window.open(`iina://weblink?url=${shareUrl}`, '_self');
-  else if (playerType === 'potplayer') window.open(`potplayer://${shareUrl}`, '_self');
-  else if (playerType === 'vlc') window.open(`vlc://${shareUrl}`, '_self');
-  else {
+  const externalPlayer = storePlayer.getSetting.externalPlayer;
+  if (playerType === 'custom' ) {
+    window.electron.ipcRenderer.send('call-player', externalPlayer, shareUrl);
+  } else {
     storePlayer.updateConfig({
       type: 'drive',
       data: {

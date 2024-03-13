@@ -63,6 +63,10 @@
   { "key": "broadcasterType",
     "value": "xgplayer"
   },
+  {
+    "key": "externalPlayer",
+    "value": ""
+  },
   { "key": "snifferType",
     "value": "pie"
   },
