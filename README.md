@@ -64,12 +64,12 @@
 <details>
 <summary>展开查看接口说明</summary>
 
-> 一键格式
+> 配置导入格式(备份数据建议此格式)
 ```json
 {
   "analyze": [
     {
-      "id": 1, // id 唯一值不可重复, 建议 uuid
+      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // id唯一值不可重复,不能数字,建议 uuid
       "name": "纯净", // 名称
       "url": "https://im1907.top/?jx=", // 解析源地址
       "isActive": true // 是否启用 true启用 false 禁用
@@ -77,7 +77,7 @@
   ],
   "iptv": [
     {
-      "id": 1, // id 唯一值不可重复, 建议 uuid
+      "id": "993841fe-5e91-5e5d-35d6-5be81822960b", // id唯一值不可重复,不能数字,建议 uuid
       "name": "APTV", // 名称
       "url": "https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
       "type": "remote", // remote为远程m3u local本地m3u文件路径
@@ -87,15 +87,15 @@
   ],
   "channel": [
     {
-      "name": "CCTV1",
-      "url": "http://hms304nc1972679586.live.aikan.miguvideo.com/wh7f454c46tw3831204341_1349411946/wd_r2/cctv/cctv1hd/2500/01.m3u8?msisdn=19115966146&Channel_ID=0119_04102000-99000_400300000040002&client_ip=182.149.232.3&timestamp=20230115080246&ContentId=265183188&timezone=UTC&mtv_session=01b97ad3f1d61532d8f0d40578ee3f47&HlsSubType=1&HlsProfileId=1&nphaid=0&encrypt=ac6f75650a73ab06efc36233598f26b8",
-      "group": "央视",
-      "id": 5821 // id 唯一值不可重复, 建议 uuid
+      "id": "0ede1ecd-de69-1042-15d9-4e5e9e3bb897", // id唯一值不可重复,不能数字,建议 uuid
+      "name": "CCTV6", // 名称
+      "url": "http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221226393/index.m3u8", // 播放地址
+      "group": "央视"  // 分组
     }
   ],
   "sites": [
     {
-      "id": "51793af6-c923-5504-85db-0ef686624dec", // 唯一值不可重复, 建议 uuid
+      "id": "51793af6-c923-5504-85db-0ef686624dec", // id唯一值不可重复,不能数字,建议 uuid
       "name": "39影视", // 名称
       "api": "https://www.39kan.com/api.php/provide/vod/",  // 站点源地址
       "playUrl": "", // 配合解析去url地址
@@ -107,22 +107,37 @@
       "categories": "电视,影视" // 按顺序展示所配置的分类 不配置则默认展示所有分类
     },
   ],
+  "drive": [
+    {
+      "id": "3293dc45-cf14-9c66-3028-5b7765b240b7", // id唯一值不可重复,不能数字,建议 uuid
+      "name": "🙋丫仙女",  // 名称
+      "server": "http://alist.xiaoya.pro/",  // 网盘地址
+      "startPage": "",  // 开始页路径
+      "search": false,  // 是否支持搜索 true启用 false 禁用
+      "headers": null,  // 请求头
+      "params": null,  // 参数
+      "isActive": true // 是否启用 true启用 false 禁用
+    }
+  ],
   "setting": [
     {
-      "version": 0, // 当前版本
-      "theme": "auto",
-      "defaultHot": "kylive",
-      "defaultSearchRecommend": "site",
-      "defaultSearchType": "site",
-      "defaultCheckModel": true,
-      "defaultChangeModel": false,
-      "defaultIptvEpg": "https://epg.112114.eu.org/",
-      "defaultIptvLogo": "https://epg.112114.eu.org/logo/",
-      "iptvSkipIpv6": true,
-      "iptvThumbnail": true,
-      "defaultSite": 3,
-      "defaultIptv": 5,
-      "defaultAnalyze": 2,
+      "version": "3.3.2", // 当前版本 3.3.2版本启用参该数
+      "theme": "auto",  // 主题 auto:跟随系统 light:亮色 dark:暗色
+      "externalPlayer": "", // 播放器为custom,调用此处系统命令
+      "defaultHot": "kylive",  // 热搜 kylive:酷云数据 enlightent:云合数据
+      "defaultSearchRecommend": "site", // 搜索推荐 site:站点 quark:夸克 baidu:百度 douban:豆瓣  弃用
+      "defaultSearchType": "site", // 全局搜索模式 site:本站 group:组内 all:全部
+      "defaultCheckModel": true,  // 弃用 忘了干嘛的
+      "defaultChangeModel": false,  // 弃用 忘了干嘛的
+      "defaultIptvEpg": "https://epg.112114.eu.org/", // iptv epg
+      "defaultIptvLogo": "https://epg.112114.eu.org/logo/", // iptv logo
+      "iptvSkipIpv6": true, // iptv是否跳过ipv6节目
+      "iptvThumbnail": true, // iptv是否显示缩略图
+      "iptvStatus": true, // iptv是否检测延迟
+      "defaultSite": "51793af6-c923-5504-85db-0ef686624dec", // site 默认源标识
+      "defaultIptv": "993841fe-5e91-5e5d-35d6-5be81822960b", // iptv 默认源标识
+      "defaultAnalyze": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // analyze 默认源标识
+      "defaultDrive": "3293dc45-cf14-9c66-3028-5b7765b240b7", // drive 默认源标识
       "analyzeFlag": [
         "youku",
         "qq",
@@ -133,28 +148,91 @@
         "tudou",
         "pptv",
         "mgtv"
-      ],
-      "broadcasterType": "iina",
-      "softSolution": false,
-      "skipStartEnd": false,
-      "agreementMask": true,
-      "recordShortcut": "Shift+Command+Z",
-      "selfBoot": false,
-      "hardwareAcceleration": true,
-      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
-      "iptvStatus": true,
-      "webdevUrl": "https://dav.jianguoyun.com/dav/",
-      "webdevUsername": "",
-      "webdevPassword": "",
+      ],  // 解析标识
+      "broadcasterType": "xgplayer", // 播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合externalPlayer
+      "softSolution": false, // 是否使用软解 预留
+      "communitySubscribe": "", // 社区地址 预留
+      "skipStartEnd": false, // 是否跳过首尾空白
+      "agreementMask": true, // 是否同意协议
+      "recordShortcut": "Shift+Command+Z", // 录制快捷键
+      "snifferType" : "pie",  // 嗅探模式 pie iframe
+      "selfBoot": false,  // 是否开机自启动
+      "hardwareAcceleration": true,  // 是否启用硬件加速
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",  // UA
+      "webdevUrl": "https://dav.jianguoyun.com/dav/",  // webdev同步盘地址  用于备份
+      "webdevUsername": "",  // webdev用户名  用于备份
+      "webdevPassword": "",  // webdev密码  用于备份
       "windowPosition": {
-        "status": false,
+        "status": false,  // 是否记录窗口位置
         "position": {
-            "width": 1000,
-            "height": 640
-        }
+          "width": 1000,
+          "height": 640
+        }  // 窗口位置
       }
     }
   ],
+}
+```
+
+> 一键配置格式(初次使用建议此格式, 仅支持导入源数据和设置默认源标识)
+```json
+{
+  "analyze": {
+    "default": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 默认标识 对应需设置为默认的id
+    "data": [
+      {
+        "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // id唯一值不可重复,不能数字,建议 uuid
+        "name": "纯净", // 名称
+        "url": "https://im1907.top/?jx=", // 解析源地址
+        "isActive": true // 是否启用 true启用 false 禁用
+      }
+    ]
+  },
+  "iptv": {
+    "default": "993841fe-5e91-5e5d-35d6-5be81822960b", // 默认标识 对应需设置为默认的id
+    "data": [
+      {
+        "id": "993841fe-5e91-5e5d-35d6-5be81822960b", // id唯一值不可重复,不能数字,建议 uuid
+        "name": "APTV", // 名称
+        "url": "https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
+        "type": "remote", // remote为远程m3u local本地m3u文件路径
+        "isActive": true, // 是否启用 true启用 false 禁用
+        "epg": "https://epg.112114.xyz/" // 电子节目单地址
+      }
+    ]
+  },
+  "sites":  {
+    "default": "51793af6-c923-5504-85db-0ef686624dec", // 默认标识 对应需设置为默认的id
+    "data": [
+      {
+        "id": "51793af6-c923-5504-85db-0ef686624dec", // id唯一值不可重复,不能数字,建议 uuid
+        "name": "39影视", // 名称
+        "api": "https://www.39kan.com/api.php/provide/vod/",  // 站点源地址
+        "playUrl": "", // 配合解析去url地址
+        "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
+        "group": "切片", // 分组
+        "isActive": true, // 是否启用 true启用 false 禁用
+        "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
+        "ext": "", // 扩展参数
+        "categories": "电视,影视" // 按顺序展示所配置的分类 不配置则默认展示所有分类
+      }
+    ]
+  },
+  "drive":  {
+    "default": "3293dc45-cf14-9c66-3028-5b7765b240b7", // 默认标识 对应需设置为默认的id
+    "data": [
+      {
+        "id": "3293dc45-cf14-9c66-3028-5b7765b240b7", // id唯一值不可重复,不能数字,建议 uuid
+        "name": "🙋丫仙女",  // 名称
+        "server": "http://alist.xiaoya.pro/",  // 网盘地址
+        "startPage": "",  // 开始页路径
+        "search": false,  // 是否支持搜索 true启用 false 禁用
+        "headers": null,  // 请求头
+        "params": null,  // 参数
+        "isActive": true // 是否启用 true启用 false 禁用
+      }
+    ]
+  }
 }
 ```
 </details>
