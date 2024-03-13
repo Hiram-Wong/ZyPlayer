@@ -26,7 +26,7 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, skipStartEnd, broadcasterType } = await setup();
+  const { agreementMask, theme, skipStartEnd, broadcasterType, externalPlayer } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
   isVisible.dialogPrivacyPolicy = !agreementMask;
@@ -36,6 +36,7 @@ const initConfig = async () => {
   };
   init.broadcasterType = broadcasterType;
   init.skipStartEnd = skipStartEnd;
+  init.externalPlayer = externalPlayer;
   storePlayer.updateConfig({ setting: init });
 }
 
