@@ -1,6 +1,7 @@
-import jsoup from './htmlParser';
-import superagent from 'superagent';
+import syncRequest from 'sync-request';
 import indexDbCahe from './cache';
+import jsoup from './htmlParser';
+
 
 interface RequestOptions {
   method?: string;
@@ -11,51 +12,64 @@ interface RequestOptions {
   withHeaders?: boolean;
 }
 
+interface Response {
+  content: string;
+  body: string;
+  headers: { [key: string]: string };
+}
 
-const baseRequest = (url: string, options: RequestOptions, jsType: number = 0): Promise<string | any> => {
-  const { method = 'get', timeout = 5000, body = '', data = {}, headers = {}, withHeaders = false } = options;
-    
-  let request: superagent.SuperAgentRequest;
-  switch (method.toLowerCase()) {
-    case 'get':
-      request = superagent.get(url).query(data);
-      break;
-    case 'post':
-      request = superagent.post(url).send(data);
-      break;
-    case 'put':
-      request = superagent.put(url).send(data);
-      break;
-    case 'delete':
-      request = superagent.delete(url).send(data);
-      break;
-    case 'head':
-      request = superagent.head(url).send(data);
-      break;
-    default:
-      throw new Error(`Unsupported method: ${method}`);
+function baseRequest(_url: string, _object: RequestOptions, _js_type: number = 0): Response {
+  let response: syncRequest.Response | null = null;
+
+  const method = (_object.method || 'get').toLowerCase();
+  const timeout = _object.timeout || 5000; // default timeout 5 seconds
+  const body = _object.body || '';
+  let data = _object.data || {};
+  if (body && !data) {
+    data = {};
+    body.split('&').forEach((param) => {
+      const [key, value] = param.split('=');
+      data[key] = value;
+    });
+  }
+  const headers = _object.headers || {};
+
+  let r: syncRequest.Request;
+
+  if (method === 'get') {
+    r = syncRequest(method, _url, {
+      headers,
+      qs: data,
+      timeout,
+    });
+  } else {
+    const requestOptions: any = {
+      headers,
+      timeout,
+    };
+    if (method === 'post' || method === 'put' || method === 'delete' || method === 'head') {
+      requestOptions.body = data;
+    }
+    r = syncRequest(method, _url, requestOptions);
   }
 
-  request.timeout(timeout);
+  const emptyResult: Response = { content: '', body: '', headers: {} };
 
-  Object.entries(headers).forEach(([key, value]) => {
-    request.set(key, value);
-  });
+  if (_js_type === 0) {
+    const result: Response = {
+      content: r.getBody('utf8'),
+      body: r.getBody('utf8'),
+      headers: r.headers,
+    };
 
-  return request.then((response: superagent.Response) => {
-    const { text, headers } = response;
-    if (withHeaders && jsType === 0) {
-      return { body: text, headers };
-    } else if (!withHeaders && jsType === 0) {
-      return text;
-    } else if (jsType === 1) {
-      return { content: text, headers };
+    if (_object.withHeaders) {
+      return result;
     } else {
-      return { content: '', body: '', headers: {} };
+      return { content: result.content, body: result.body, headers: {} };
     }
-  }).catch((error: superagent.ResponseError) => {
-    throw new Error(error.message);
-  });
+  } else {
+    return { content: r.getBody('utf8'), body: r.getBody('utf8'), headers: r.headers };
+  }
 }
 
 const fetch = (_url, _object) => {

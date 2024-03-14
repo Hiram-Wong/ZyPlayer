@@ -107,19 +107,17 @@ class Jsoup {
   parseOneRule(doc, nparse: string, ret) {
     const { nparse_rule, nparse_index, excludes } = this.getParseInfo(nparse);
 
-    if (!ret) {
-      ret = doc(nparse_rule);
-    } else {
-      ret = ret(nparse_rule);
-    }
+    if (!ret) ret = doc(nparse_rule);
+    else ret = ret.find(nparse_rule);
 
-    if (this.contains(nparse, ':eq')) {
-      ret = ret.eq(nparse_index);
-    }
+    if (this.contains(nparse, ':eq')) ret = ret.eq(nparse_index);
 
-    if (excludes && ret) {
+    if (excludes.length > 0 && ret) {
       ret = ret.clone(); // 克隆一个，避免直接remove影响原始DOM
+      // ret = ret.toArray().map(element => doc(element));
+      
       for (let exclude of excludes) {
+        console.log(exclude)
         ret(exclude).remove();
       }
     }
@@ -224,9 +222,8 @@ class Jsoup {
       ret = this.parseOneRule(doc, nparse, ret);
       if (!ret) return '';
     }
-
     if (option) {
-      switch (option.toLowerCase()) {
+      switch (option) {
         case 'Text':
           ret = ret.text();
           break;

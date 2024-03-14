@@ -917,7 +917,7 @@ const getHome = (url) => {
  * @param ocr_flag 标识此flag是用于请求ocr识别的,自动过滤content-type指定编码
  * @returns {string|string|DocumentFragment|*}
  */
-const request = (url, obj, ocr_flag = false) => {
+const request = (url: string, obj: any = undefined, ocr_flag = false) => {
   if (typeof obj === 'undefined' || !obj) {
     if (!fetch_params || !fetch_params.headers) {
       const headers = {
@@ -956,9 +956,7 @@ const request = (url, obj, ocr_flag = false) => {
     obj.data = obj.body;
     delete obj.body;
   }
-  if (!url) {
-    return obj.withHeaders ? '{}' : '';
-  }
+  if (!url) return obj.withHeaders ? '{}' : '';
   if (obj.toBase64) { // 返回base64,用于请求图片
     obj.buffer = 2;
     delete obj.toBase64;
@@ -2053,18 +2051,7 @@ const isVideoParse = (isVideoObj) => {
 const init = (ext) => {
   console.log('init');
   try {
-    // make shared jsContext happy muban不能import,不然会造成换源继承后变量被篡改
-    // if (typeof (globalThis.mubanJs) === 'undefined') {
-    //     let mubanJs = request('https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/js/模板.js', { 'User-Agent': MOBILE_UA });
-    //     mubanJs = mubanJs.replace('export default', '(function() {return muban;}()) // export default');
-    //     // console.log(mubanJs);
-    //     globalThis.mubanJs = mubanJs;
-    // }
-    // let muban = eval(globalThis.mubanJs);
-
     let muban = getMubans();
-    // print(typeof (muban));
-    // print(muban);
     if (typeof ext == 'object'){
       rule = ext;
     } else if (typeof ext == 'string') {
@@ -2171,7 +2158,7 @@ const init = (ext) => {
     // console.log(rule.headers);
     rule_fetch_params  = {'headers': rule["headers"] || false, 'timeout': rule["timeout"], 'encoding': rule["encoding"]};
     oheaders = rule["headers"]||{};
-    // RKEY = typeof(key)!=='undefined' && key ? key:'drpy_' + (rule["title"] || rule["host"]);
+    RKEY = typeof key !=='undefined' && key ? key : 'drpy_' + (rule["title"] || rule["host"]);
     pre(); // 预处理
     init_test();
   } catch (e) {
@@ -2235,7 +2222,7 @@ const category = (tid, pg, filter, extend) => {
     extend: extend
   };
 
-  // console.log(JSON.stringify(extend));
+  console.log("category");
   return categoryParse(cateObj);
 };
 
@@ -2291,6 +2278,7 @@ const play = (flag, id, flags) => {
     flag,
     flags
   }
+  console.log('play');
   return playParse(playObj);
 }
 
