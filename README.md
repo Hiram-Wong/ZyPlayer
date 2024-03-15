@@ -53,7 +53,7 @@
 3.进入项目  cd ZyPlayer/
 4.修改packgae.json "electron": "^19.1.9",
 5.安装依赖包  yarn
-6.打包  yarn electron:build:win[mac/linux]
+6.打包  yarn build:win[mac/linux]
 ```
 
 > star history: 
