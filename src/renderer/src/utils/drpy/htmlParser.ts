@@ -13,7 +13,7 @@ class Jsoup {
   pdfa_html = '';
 
   pdfh_doc = null;
-  pdfa_doc = null;
+  pdfa_doc: cheerio.Root | null = null;
 
   // 构造函数
   constructor(MY_URL: string = '') {
@@ -146,7 +146,7 @@ class Jsoup {
     }
 
     const parses = parse.split(' ');
-    let ret: cheerio | null = null;
+    let ret: cheerio.Cheerio | null = null;
     for (const nparse of parses) {
       ret = this.parseOneRule(doc, nparse, ret);
       if (!ret) {  // 可能循环取值后ret 对应eq取完无值了，pdfa直接返回空列表
@@ -154,7 +154,10 @@ class Jsoup {
       }
     }
 
-    const res: string[] = ret.toArray().map((item: any) => doc(item).html());
+    const res: string[] = (ret?.toArray() ?? []).map((item: any) => {
+      const res_html = doc(item).html();
+      return res_html ? res_html : ""; // 空值检查，将 null 值转换为空字符串
+    });
     return res;
   }
 
@@ -194,7 +197,7 @@ class Jsoup {
   pdfh(html: string, parse: string, baseUrl: string = ''): string {
     if (!html || !parse) return '';
 
-    const doc = cheerio.load(html);
+    const doc: cheerio.Root = cheerio.load(html);
     if (PARSE_CACHE) {
       if (this.pdfa_html !== html) {
         this.pdfa_html = html;
@@ -203,6 +206,7 @@ class Jsoup {
     }
 
     if (parse == 'body&&Text' || parse == 'Text') {
+      //@ts-ignore
       return doc.text();
     } else if (parse == 'body&&Html' || parse == 'Html') {
       return doc.html();
@@ -217,7 +221,7 @@ class Jsoup {
     parse = this.parseHikerToJq(parse, true);
     const parses: string[] = parse.split(' ');
 
-    let ret: string | Cheerio | null = null;
+    let ret: string | cheerio.Cheerio | null = null;
     for (const nparse of parses) {
       ret = this.parseOneRule(doc, nparse, ret);
       if (!ret) return '';
@@ -225,13 +229,13 @@ class Jsoup {
     if (option) {
       switch (option) {
         case 'Text':
-          ret = ret.text();
+          ret = (ret as cheerio.Cheerio)?.text() || '';
           break;
         case 'Html':
-          ret = ret.html();
+          ret = (ret as cheerio.Cheerio)?.html() || '';
           break;
         default:
-          ret = ret.attr(option) || '';
+          ret = (ret as cheerio.Cheerio)?.attr(option) || '';
           if (this.contains(option.toLowerCase(), 'style') && this.contains(ret, 'url(')) {
             try {
               ret = ret.match(/url\((.*?)\)/)![1];
@@ -251,7 +255,7 @@ class Jsoup {
           }
       }
     } else {
-      ret = ret.toString();
+      ret = ret!.toString();
     }
 
     return ret;
