@@ -148,7 +148,7 @@
           <span class="title" @click="resetOriginal">恢复出厂</span>
           <span class="title" @click="dataMange">数据管理</span>
           <span class="title" @click="isVisible.update = true">检查更新</span>
-          <span class="title" @click="isVisible.privacyPolicy=true">用户协议</span>
+          <span class="title" @click="isVisible.disclaimer=true">用户协议</span>
         </t-space>
 
         <dialog-custom-player v-model:visible="isVisible.customPlayer" />
@@ -156,7 +156,7 @@
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
         <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData" @receive-sniffer-data="flushDialogData"/>
-        <dialog-privacy-policy-view v-model:visible="isVisible.privacyPolicy" />
+        <dialog-disclaimer-view v-model:visible="isVisible.disclaimer" />
       </t-form-item>
     </t-form>
   </div>
@@ -183,7 +183,7 @@ import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogFfmpegCaptionView from './components/DialogFfmpegCaption.vue';
 import DialogCustomPlayer from './components/DialogCustomPlayer.vue';
 import DialogSnifferView from './components/DialogSniffer.vue';
-import DialogPrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
+import DialogDisclaimerView from '@/pages/Disclaimer.vue';
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
@@ -198,7 +198,7 @@ const isVisible = reactive({
   iptvThumbnail: false,
   sniffer: false,
   customPlayer: false,
-  privacyPolicy: false,
+  disclaimer: false,
 });
 
 const uaDialogData = ref({ data: '', type: 'ua' });

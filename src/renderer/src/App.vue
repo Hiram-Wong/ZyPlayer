@@ -1,20 +1,20 @@
 <template>
   <router-view></router-view>
-  <privacy-policy-view v-model:visible="isVisible.dialogPrivacyPolicy" />
+  <disclaimer-view v-model:visible="isVisible.dialogDisclaimer" />
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive } from 'vue';
 import PLAY_CONFIG from '@/config/play';
 import { setup } from '@/api/setting';
-import PrivacyPolicyView from '@/pages/PrivacyPolicy.vue';
+import DisclaimerView from '@/pages/Disclaimer.vue';
 import { usePlayStore, useSettingStore } from '@/store';
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 
 const isVisible = reactive({
-  dialogPrivacyPolicy: false
+  dialogDisclaimer: false
 })
 
 const theme = computed(() => {
@@ -29,7 +29,7 @@ const initConfig = async () => {
   const { agreementMask, theme, skipStartEnd, broadcasterType, externalPlayer } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
-  isVisible.dialogPrivacyPolicy = !agreementMask;
+  isVisible.dialogDisclaimer = !agreementMask;
 
   const init = {
     ...PLAY_CONFIG.setting,
