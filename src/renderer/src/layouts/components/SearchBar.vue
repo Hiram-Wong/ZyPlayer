@@ -251,7 +251,7 @@ const searchEvent = async (item) => {
   isVisible.popup = false;
 };
 
-const popupVisibleEvent = (value, context) => {
+const popupVisibleEvent = (_, context) => {
   if (context.trigger === 'document') {
     isVisible.popup = false;
   }
