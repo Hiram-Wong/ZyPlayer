@@ -18,10 +18,10 @@
         </t-select>
       </template>
       <template #append>
-        <search-icon size="large" />
+        <search-icon size="large"/>
       </template>
-      <t-popup trigger="click" placement="bottom-right">
-        <t-input placeholder="搜索全网资源" class="search-input" @focus="focusEvent" v-model="searchValue" @enter="searchEvent"/>
+      <t-popup placement="bottom-right" :visible="isVisible.popup" :on-visible-change="popupVisibleEvent">
+        <t-input placeholder="搜索全网资源" class="search-input" :on-focus="focusEvent" v-model="searchValue" :on-enter="searchEvent"/>
         <template #content>
           <div class="search-content">
             <div class="history" v-show="searchList.length > 0">
@@ -98,6 +98,7 @@ const channelSearchEmitReload = useEventBus<string>('channel-search');
 
 const isVisible = reactive({
   load: true,
+  popup: false
 });
 
 const active = reactive({
@@ -123,6 +124,7 @@ const hotConfig = reactive({
 const focusEvent = async () => {
   getSearchHistory();
   getSetConfig();
+  isVisible.popup = true;
 };
 
 // 获取搜索历史
@@ -245,7 +247,15 @@ const searchEvent = async (item) => {
     })
     channelSearchEmitReload.emit(searchValue.value);
   };
+
+  isVisible.popup = false;
 };
+
+const popupVisibleEvent = (value, context) => {
+  if (context.trigger === 'document') {
+    isVisible.popup = false;
+  }
+}
 
 // 监听设置变更
 hotReloadeventBus.on(() => {
