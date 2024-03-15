@@ -161,7 +161,7 @@ const createWindow = (): void => {
 
   mainWindow.on('ready-to-show', () => {
     setTimeout(() => {
-      mainWindow.show();
+      mainWindow!.show();
       if (loadWindow && !loadWindow.isDestroyed()) {
         loadWindow.hide();
         loadWindow.destroy();
@@ -170,7 +170,7 @@ const createWindow = (): void => {
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    mainWindow.webContents.send('blockUrl', details.url);
+    mainWindow!.webContents.send('blockUrl', details.url);
     const allowUrlList = ['github.com'];
     const urlIsAllowed = allowUrlList.some((url) => details.url.includes(url));
 
@@ -202,10 +202,10 @@ const createWindow = (): void => {
   });
 
   // X-Frame-Options
-  mainWindow.webContents.session.webRequest.onHeadersReceived({ urls: ['*://*/*'] }, (details, callback) => {
-    if (details.responseHeaders['X-Frame-Options']) {
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    if (details.responseHeaders?.['X-Frame-Options']) {
       delete details.responseHeaders['X-Frame-Options'];
-    } else if (details.responseHeaders['x-frame-options']) {
+    } else if (details.responseHeaders?.['x-frame-options']) {
       delete details.responseHeaders['x-frame-options'];
     }
 
@@ -214,7 +214,7 @@ const createWindow = (): void => {
 
   mainWindow.webContents.on('did-attach-webview', (_, wc) => {
     wc.setWindowOpenHandler((details) => {
-      mainWindow.webContents.send('blockUrl', details.url);
+      mainWindow!.webContents.send('blockUrl', details.url);
       console.log(details.url);
       return { action: 'deny' };
     });
@@ -239,24 +239,25 @@ app.whenReady().then(async() => {
     tmpDir(join(app.getPath('userData'), 'thumbnail'));
   }
   createWindow();
+  // createWorker();
   // 监听进入全屏事件
-  mainWindow.on('enter-full-screen', () => {
+  mainWindow!.on('enter-full-screen', () => {
     logger.info(`[main] mainwindow has entered full-screen mode ; send to vue app`);
-    mainWindow.webContents.send('screen', true);
+    mainWindow!.webContents.send('screen', true);
   });
 
   // 监听退出全屏事件
-  mainWindow.on('leave-full-screen', () => {
+  mainWindow!.on('leave-full-screen', () => {
     logger.info(`[main] mainwindow has leaved full-screen mode ; send to vue app`);
-    mainWindow.webContents.send('screen', false);
+    mainWindow!.webContents.send('screen', false);
   });
 
   // 检测更新
-  autoUpdater(mainWindow);
+  autoUpdater(mainWindow!);
   // 引入主 Ipc
   ipcListen();
   // 系统托盘 必须 tray 先加载 否则加载不出 menu
-  createTray(mainWindow);
+  createTray(mainWindow!);
   // 菜单
   createMenu();
   // 快捷键
@@ -364,7 +365,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   });
 
   playWindow.on('ready-to-show', () => {
-    playWindow.show();
+    playWindow!.show();
   });
 
   playWindow.on('closed', () => {
