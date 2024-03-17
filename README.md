@@ -51,9 +51,10 @@
 1.安装 node.js version18 以上
 2.克隆项目  git clone https://github.com/Hiram-Wong/ZyPlayer.git
 3.进入项目  cd ZyPlayer/
-4.修改packgae.json "electron": "^19.1.9",
+4.修改packgae.json[仅win8.1、7] "electron": "^19.1.9",
 5.安装依赖包  yarn
-6.打包  yarn build:win[mac/linux]
+6.全局安装electron-vite框架 yarn add electron-vite -D
+7.打包  yarn build:win[mac/linux]
 ```
 
 > star history: 
