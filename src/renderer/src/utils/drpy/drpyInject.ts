@@ -1,13 +1,11 @@
 import syncRequest from 'sync-request';
-// import syncFetch from 'sync-fetch';
-// import $ from 'jquery';
-// import superagent from 'superagent';
-import indexDbCahe from './cache';
+import cache from './cache';
 import jsoup from './htmlParser';
 
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
 
 interface RequestOptions {
-  method?: string;
+  method?: HttpMethod;
   timeout?: number;
   body?: string;
   data?: { [key: string]: string };
@@ -16,18 +14,18 @@ interface RequestOptions {
 }
 
 interface Response {
-  content: string;
-  body: string;
-  headers: { [key: string]: string };
+  content?: string;
+  body?: string;
+  headers?: { [key: string]: string };
 }
 
-function baseRequest(_url: string, _object: RequestOptions, _js_type: number = 0): Response {
-  let response: syncRequest.Response | null = null;
+const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0): Response => {
+  const method: HttpMethod = (_object.method || 'GET').toUpperCase() as HttpMethod;
+  const timeout: number = _object.timeout || 5000;
+  const withHeaders: boolean = _object.withHeaders || false;
+  const body: string = _object.body || '';
+  let data: { [key: string]: string } = _object.data || {};
 
-  const method = (_object.method || 'get').toLowerCase();
-  const timeout = _object.timeout || 5000; // default timeout 5 seconds
-  const body = _object.body || '';
-  let data = _object.data || {};
   if (body && !data) {
     data = {};
     body.split('&').forEach((param) => {
@@ -37,9 +35,9 @@ function baseRequest(_url: string, _object: RequestOptions, _js_type: number = 0
   }
   const headers = _object.headers || {};
 
-  let r: syncRequest.Request;
+  let r: any;
 
-  if (method === 'get') {
+  if (method === 'GET') {
     r = syncRequest(method, _url, {
       headers,
       qs: data,
@@ -48,35 +46,28 @@ function baseRequest(_url: string, _object: RequestOptions, _js_type: number = 0
   } else {
     const requestOptions: any = {
       headers,
-      timeout,
+      body: data,
+      timeout
     };
-    if (method === 'post' || method === 'put' || method === 'delete' || method === 'head') {
-      requestOptions.body = data;
-    }
     r = syncRequest(method, _url, requestOptions);
   }
 
   const emptyResult: Response = { content: '', body: '', headers: {} };
 
   if (_js_type === 0) {
-    const result: Response = {
-      content: r.getBody('utf8'),
-      body: r.getBody('utf8'),
-      headers: r.headers,
-    };
-
-    if (_object.withHeaders) {
-      return result;
+    if (withHeaders) {
+      return { body: r.getBody('utf8'), headers: r.headers } || emptyResult;
     } else {
-      return { content: result.content, body: result.body, headers: {} };
+      return r.getBody('utf8') || '';
     }
+  } else if (_js_type === 1) {
+    return { content: r.getBody('utf8'), headers: r.headers } || emptyResult;
   } else {
-    return { content: r.getBody('utf8'), body: r.getBody('utf8'), headers: r.headers };
+    return emptyResult;
   }
 }
 
 const req = (_url, _object) => {
-  console.log('req', _url, _object);
   return baseRequest(_url, _object, 1);
 }
 
@@ -131,16 +122,15 @@ const pdfa = (html: string, parse: string) => {
 // }
 
 const local_get = (_id, key, value='') => {
-  console.log('local_get:', _id, key, value);
-  return indexDbCahe.get(_id, key, value);
+  return cache.get(_id, key, value);
 }
 
 const local_set = (_id, key, value) => {
-  return indexDbCahe.set(_id, key, value);
+  return cache.set(_id, key, value);
 }
 
 const local_delete = (_id, key) => {
-  return indexDbCahe.delete(_id, key);
+  return cache.delete(_id, key);
 }
 
 const local = {
