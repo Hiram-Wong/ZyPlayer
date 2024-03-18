@@ -245,7 +245,7 @@
 | :-------------------------------------------------------------: | :-----------------------------------------------------------------: |
 | ![影视](https://s2.loli.net/2024/02/29/XvoZTeLMDAz87N5.png) | ![影视搜索](https://s2.loli.net/2024/02/29/kb5Hs9hfuBeVaY1.png) |
 |                           影视(播放)                           |                             影视 (介绍)                             |
-| ![影视播放](https://s2.loli.net/2023/05/07/fgmbdXQvPE73WCY.png) |   ![影视详情](https://s2.loli.net/2023/05/07/LrJY4EVK5WhZ3XR.png)   |
+| ![影视播放](https://s2.loli.net/2023/05/07/fgmbdXQvPE73WCY.png) |   ![影视详情](https://s2.loli.net/2024/03/18/hIYEDRKmOrQq4ya.png)   |
 |                          网盘                           |                             直播(首页)                              |
 | ![网盘](https://s2.loli.net/2024/02/29/CpNc4wisOgKQbSM.png) |   ![直播首页](https://s2.loli.net/2024/02/29/hpCKzaD7ryWAqY9.png)   |
 |                           直播(播放)                            |                                解析                                 |
