@@ -3,7 +3,7 @@ import cheerio from "./cheerio.min";
 import joinUrl from 'url-join';
 import { getMubans } from './template';
 import gbkTool from './gbk';
-import { pdfh, pdfa, pd, local, req } from './drpy_inject';
+import { pdfh, pdfa, pd, local, req } from './drpyInject';
 
 const init_test = () => {
   console.log("init_test_start");
@@ -424,11 +424,6 @@ const decodeStr = (input, encoding) => {
 
   return input;
 };
-
-const getCryptoJS = () => {
-  // return request('https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/crypto-hiker.js');
-  return 'console.log("CryptoJS已装载");'
-}
 
 // 封装的RSA加解密类
 // const RSA = {
@@ -964,12 +959,11 @@ const request = (url: string, obj: any = undefined, ocr_flag = false) => {
   console.log(JSON.stringify(obj.headers));
   console.log(`request:${url}|method:${obj.method || 'GET'}|body:${obj.body || ''}`);
   const res = req(url, obj);
-  console.log(res)
   const html = res["content"] || '';
   if (obj.withHeaders) {
     const htmlWithHeaders = res["headers"];
     htmlWithHeaders.body = html;
-    return JSON.stringify(htmlWithHeaders);
+    return htmlWithHeaders;
   } else {
     return html;
   }
@@ -1134,7 +1128,7 @@ const homeParse = (homeObj) => {
     resp["filters"] = homeObj.filter;
   }
   // console.log(JSON.stringify(resp));
-  return JSON.stringify(resp);
+  return resp;
 }
 
 /**
@@ -1288,9 +1282,7 @@ const homeVodParse = (homeVodObj) => {
     console.log(d.slice(0, 2));
   }
 
-  return JSON.stringify({
-    list: d
-  });
+  return { list: d };
 };
 
 /**
@@ -1438,13 +1430,13 @@ const categoryParse = (cateObj) => {
     limit: 1
   };
 
-  let vod = d.length < 1 ? JSON.stringify(nodata) : JSON.stringify({
+  let vod = d.length < 1 ? nodata : {
     'page': parseInt(cateObj.pg),
     'pagecount': pagecount || 999,
     'limit': 20,
     'total': 999,
     'list': d,
-  });
+  };
 
   return vod;
 }
@@ -1458,173 +1450,171 @@ function searchParse(searchObj) {
     fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
     let d = [];
     if(!searchObj.searchUrl){
-        return '{}'
+      return '{}'
     }
     let p = searchObj.搜索==='*'&&rule.一级 ? rule.一级 : searchObj.搜索;
     if(!p||typeof(p)!=='string'){
-        return '{}'
+      return '{}'
     }
     p = p.trim();
     let pp = rule.一级.split(';');
     let url = searchObj.searchUrl.replaceAll('**', searchObj.wd);
     if(searchObj.pg === 1 && url.includes('[')&&url.includes(']')&&!url.includes('#')){
-        url = url.split('[')[1].split(']')[0];
+      url = url.split('[')[1].split(']')[0];
     }else if(searchObj.pg > 1 && url.includes('[')&&url.includes(']')&&!url.includes('#')){
-        url = url.split('[')[0];
+      url = url.split('[')[0];
     }
 
     if(/fypage/.test(url)){
-        if(url.includes('(')&&url.includes(')')){
-            let url_rep = url.match(/.*?\((.*)\)/)[1];
-            // console.log(url_rep);
-            let cnt_page = url_rep.replaceAll('fypage', searchObj.pg);
-            // console.log(cnt_page);
-            let cnt_pg = eval(cnt_page);
-            // console.log(cnt_pg);
-            url = url.replaceAll(url_rep,cnt_pg).replaceAll('(','').replaceAll(')','');
-        }else{
-            url = url.replaceAll('fypage',searchObj.pg);
-        }
+      if(url.includes('(')&&url.includes(')')){
+        let url_rep = url.match(/.*?\((.*)\)/)[1];
+        // console.log(url_rep);
+        let cnt_page = url_rep.replaceAll('fypage', searchObj.pg);
+        // console.log(cnt_page);
+        let cnt_pg = eval(cnt_page);
+        // console.log(cnt_pg);
+        url = url.replaceAll(url_rep,cnt_pg).replaceAll('(','').replaceAll(')','');
+      }else{
+        url = url.replaceAll('fypage',searchObj.pg);
+      }
     }
 
     MY_URL = url;
     console.log(MY_URL);
     // log(searchObj.搜索);
     // setItem('MY_URL',MY_URL);
-    if(p.startsWith('js:')){
-        const TYPE = 'search';
-        const MY_PAGE = searchObj.pg;
-        const KEY = searchObj.wd;
-        var input = MY_URL;
-        var detailUrl = rule.detailUrl||'';
-        eval(p.trim().replace('js:',''));
-        d = VODS;
-    }else{
-        p = p.split(';');
-        if (p.length < 5) {
-            return '{}'
+    if (p.startsWith('js:')) {
+      const TYPE = 'search';
+      const MY_PAGE = searchObj.pg;
+      const KEY = searchObj.wd;
+      var input = MY_URL;
+      var detailUrl = rule.detailUrl||'';
+      eval(p.trim().replace('js:',''));
+      d = VODS;
+    } else {
+      p = p.split(';');
+      if (p.length < 5) {
+          return '{}'
+      }
+      let p0 = getPP(p,0,pp,0);
+      let _ps = parseTags.getParse(p0);
+      _pdfa = _ps.pdfa;
+      _pdfh = _ps.pdfh;
+      _pd = _ps.pd;
+      let is_json = p0.startsWith('json:');
+      p0 = p0.replace(/^(jsp:|json:|jq:)/,'');
+      // print('1381 p0:'+p0);
+      try {
+        let req_method = MY_URL.split(';').length>1?MY_URL.split(';')[1].toLowerCase():'get';
+        let html;
+        if (req_method==='post') {
+          let rurls = MY_URL.split(';')[0].split('#')
+          let rurl = rurls[0]
+          let params = rurls.length > 1 ?rurls[1]:'';
+          console.log(`post=》rurl:${rurl},params:${params}`);
+          // let new_dict = {};
+          // let new_tmp = params.split('&');
+          // new_tmp.forEach(i=>{
+          //     new_dict[i.split('=')[0]] = i.split('=')[1];
+          // });
+          // html = post(rurl,{body:new_dict});
+          let _fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
+          let postData = {body:params};
+          Object.assign(_fetch_params,postData);
+          html = post(rurl,_fetch_params);
+        } else if(req_method==='postjson') {
+          let rurls = MY_URL.split(';')[0].split('#')
+          let rurl = rurls[0]
+          let params = rurls.length > 1 ?rurls[1]:'';
+          console.log(`postjson-》rurl:${rurl},params:${params}`);
+          try {
+            params = JSON.parse(params);
+          } catch (e) {
+            params = '{}'
+          }
+          let _fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
+          let postData = {body:params};
+          Object.assign(_fetch_params,postData);
+          html = post(rurl,_fetch_params);
+        }else{
+          html = getHtml(MY_URL);
         }
-        let p0 = getPP(p,0,pp,0);
-        let _ps = parseTags.getParse(p0);
-        _pdfa = _ps.pdfa;
-        _pdfh = _ps.pdfh;
-        _pd = _ps.pd;
-        let is_json = p0.startsWith('json:');
-        p0 = p0.replace(/^(jsp:|json:|jq:)/,'');
-        // print('1381 p0:'+p0);
-        try {
-            let req_method = MY_URL.split(';').length>1?MY_URL.split(';')[1].toLowerCase():'get';
-            let html;
-            if(req_method==='post'){
-                let rurls = MY_URL.split(';')[0].split('#')
-                let rurl = rurls[0]
-                let params = rurls.length > 1 ?rurls[1]:'';
-                print(`post=》rurl:${rurl},params:${params}`);
-                // let new_dict = {};
-                // let new_tmp = params.split('&');
-                // new_tmp.forEach(i=>{
-                //     new_dict[i.split('=')[0]] = i.split('=')[1];
-                // });
-                // html = post(rurl,{body:new_dict});
-                let _fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
-                let postData = {body:params};
-                Object.assign(_fetch_params,postData);
-                html = post(rurl,_fetch_params);
-            }else if(req_method==='postjson'){
-                let rurls = MY_URL.split(';')[0].split('#')
-                let rurl = rurls[0]
-                let params = rurls.length > 1 ?rurls[1]:'';
-                print(`postjson-》rurl:${rurl},params:${params}`);
-                try{
-                    params = JSON.parse(params);
-                }catch (e) {
-                    params = '{}'
-                }
-                let _fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
-                let postData = {body:params};
-                Object.assign(_fetch_params,postData);
-                html = post(rurl,_fetch_params);
-            }else{
-                html = getHtml(MY_URL);
-            }
-            if (html) {
-                if(/系统安全验证|输入验证码/.test(html)){
-                    let cookie = verifyCode(MY_URL);
-                    if(cookie){
-                        console.log(`本次成功过验证,cookie:${cookie}`);
-                        setItem(RULE_CK,cookie);
-                    }else{
-                        console.log(`本次自动过搜索验证失败,cookie:${cookie}`);
-                    }
-                    // obj.headers['Cookie'] = cookie;
-                    html = getHtml(MY_URL);
-                }
-                if(!html.includes(searchObj.wd)){
-                    console.log('搜索结果源码未包含关键字,疑似搜索失败,正为您打印结果源码');
-                    console.log(html);
-                }
-                if(is_json){
-                    // console.log(html);
-                    html = dealJson(html);
-                    // console.log(JSON.stringify(html));
-                }
-                // console.log(html);
-                let list = _pdfa(html, p0);
-                // print(list.length);
-                // print(list);
-                let p1 = getPP(p, 1, pp, 1);
-                let p2 = getPP(p, 2, pp, 2);
-                let p3 = getPP(p, 3, pp, 3);
-                let p4 = getPP(p, 4, pp, 4);
-                let p5 = getPP(p,5,pp,5);
-                list.forEach(it => {
-                    let links = p4.split('+').map(_p4=>{
-                        return !rule.detailUrl?_pd(it, _p4,MY_URL):_pdfh(it, _p4)
-                    });
-                    let link = links.join('$');
-                    let content;
-                    if(p.length > 5 && p[5]){
-                        content = _pdfh(it, p5);
-                    }else{
-                        content = '';
-                    }
-                    let vod_id = link;
-                    let vod_name = _pdfh(it, p1).replace(/\n|\t/g,'').trim();
-                    let vod_pic = _pd(it, p2,MY_URL);
-                    if(rule.二级==='*'){
-                        vod_id = vod_id+'@@'+vod_name+'@@'+vod_pic;
-                    }
-                    let ob = {
-                        'vod_id': vod_id,
-                        'vod_name': vod_name,
-                        'vod_pic': vod_pic,
-                        'vod_remarks': _pdfh(it, p3).replace(/\n|\t/g,'').trim(),
-                        'vod_content': content.replace(/\n|\t/g,'').trim(),
-                    };
-                    d.push(ob);
-                });
-
-            }
-        } catch (e) {
-            print('搜索发生错误:'+e.message);
-            return '{}'
+        if (html) {
+          if(/系统安全验证|输入验证码/.test(html)){
+              let cookie = verifyCode(MY_URL);
+              if(cookie){
+                  console.log(`本次成功过验证,cookie:${cookie}`);
+                  setItem(RULE_CK,cookie);
+              }else{
+                  console.log(`本次自动过搜索验证失败,cookie:${cookie}`);
+              }
+              // obj.headers['Cookie'] = cookie;
+              html = getHtml(MY_URL);
+          }
+          if(!html.includes(searchObj.wd)){
+              console.log('搜索结果源码未包含关键字,疑似搜索失败,正为您打印结果源码');
+              console.log(html);
+          }
+          if(is_json){
+              // console.log(html);
+              html = dealJson(html);
+              // console.log(JSON.stringify(html));
+          }
+          // console.log(html);
+          let list = _pdfa(html, p0);
+          // print(list.length);
+          // print(list);
+          let p1 = getPP(p, 1, pp, 1);
+          let p2 = getPP(p, 2, pp, 2);
+          let p3 = getPP(p, 3, pp, 3);
+          let p4 = getPP(p, 4, pp, 4);
+          let p5 = getPP(p,5,pp,5);
+          list.forEach(it => {
+              let links = p4.split('+').map(_p4=>{
+                  return !rule.detailUrl?_pd(it, _p4,MY_URL):_pdfh(it, _p4)
+              });
+              let link = links.join('$');
+              let content;
+              if(p.length > 5 && p[5]){
+                  content = _pdfh(it, p5);
+              }else{
+                  content = '';
+              }
+              let vod_id = link;
+              let vod_name = _pdfh(it, p1).replace(/\n|\t/g,'').trim();
+              let vod_pic = _pd(it, p2,MY_URL);
+              if(rule.二级==='*'){
+                  vod_id = vod_id+'@@'+vod_name+'@@'+vod_pic;
+              }
+              let ob = {
+                  'vod_id': vod_id,
+                  'vod_name': vod_name,
+                  'vod_pic': vod_pic,
+                  'vod_remarks': _pdfh(it, p3).replace(/\n|\t/g,'').trim(),
+                  'vod_content': content.replace(/\n|\t/g,'').trim(),
+              };
+              d.push(ob);
+          });
         }
+      } catch (e) {
+        console.log('搜索发生错误:', e);
+        return '{}'
+      }
     }
-    if(rule.图片来源){
-        d.forEach(it=>{
-            if(it.vod_pic&&it.vod_pic.startsWith('http')){
-                it.vod_pic = it.vod_pic + rule.图片来源;
-            }
-        });
+    if(rule["图片来源"]){
+      d.forEach(it=>{
+        if(it.vod_pic&&it.vod_pic.startsWith('http')){
+          it.vod_pic = it.vod_pic + rule.图片来源;
+        }
+      });
     }
-    // print(d);
-    return JSON.stringify({
-        'page': parseInt(searchObj.pg),
-        'pagecount': 10,
-        'limit': 20,
-        'total': 100,
-        'list': d,
-    });
+    return {
+      'page': parseInt(searchObj.pg),
+      'pagecount': 10,
+      'limit': 20,
+      'total': 100,
+      'list': d,
+    };
 }
 
 /**
@@ -1855,9 +1845,10 @@ const detailParse = (detailObj) => {
   let t2 = (new Date()).getTime();
   console.log(`加载二级界面${MY_URL}耗时:${t2-t1}毫秒`);
   vod = vodDeal(vod);
-  return JSON.stringify({
+
+  return {
     list: [vod]
-  })
+  };
 }
 
 /**
@@ -1994,7 +1985,7 @@ const playParse = (playObj) => {
   }
 
   console.log(JSON.stringify(lazy_play));
-  return JSON.stringify(lazy_play);
+  return lazy_play;
 }
 
 /**
@@ -2184,7 +2175,7 @@ const home = () => {
     cate_exclude: rule["cate_exclude"],
   };
 
-  console.log("");
+  console.log("home");
   return homeParse(homeObj);
 };
 
