@@ -457,7 +457,7 @@ import { fetchChannelList } from '@/api/iptv';
 
 import { getConfig, getMeadiaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
 import { __jsEvalReturn } from '@/utils/alist_open';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchDetail, fetchSearch,fetchDoubanRecommend } from '@/utils/cms';
+import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchDetail, fetchSearch, t3RuleInit, fetchDoubanRecommend } from '@/utils/cms';
 import { fetchChannelEpg } from '@/utils/channel';
 import { usePlayStore } from '@/store';
 
@@ -707,6 +707,7 @@ const seasonReverseOrder = () => {
 
 // 根据不同类型加载不同播放器
 const createPlayer = async (videoType) => {
+  console.log(videoType)
   if (!videoType) {
     const meadiaType = await getMeadiaType(config.value.url);
     if (meadiaType !== 'unknown' && meadiaType !== 'error' ) {
@@ -1015,6 +1016,22 @@ const initFilmPlayer = async (isFirst) => {
     } finally {
       console.log(`[player] end: hipy获取服务端播放链接结束`);
     }
+  } else if (ext.value.site.type === 7) {
+    // t3获取服务端播放链接
+    console.log('[player] start: t3获取服务端播放链接开启');
+    try {
+      const content =  await getConfig(ext.value.site.ext);
+      const status = await t3RuleInit(content);
+      if (status === 'sucess') {
+        const t3PlayUrl = await fetchT3PlayUrl(selectPlaySource.value, config.value.url , []);
+        config.value.url = t3PlayUrl.url;
+      }
+      console.log(`[player] return: t3获取服务端返回链接:${config.value.url}`);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      console.log(`[player] end: t3获取服务端播放链接结束`);
+    }
   } else if (ext.value.site.type === 2) {
     // drpy嗅探
     MessagePlugin.info('免嗅资源中, 请等待!');
@@ -1143,7 +1160,7 @@ const sniffer_pie = () => {
         config.value.url = res.data.url;
         const videoFormat = videoFormats[formatIndex];
         createPlayer(videoFormat.slice(1));
-      }
+      } createPlayer('m3u8');
     } else {
       MessagePlugin.warning(`嗅探超时并结束, 请换源`);
     };

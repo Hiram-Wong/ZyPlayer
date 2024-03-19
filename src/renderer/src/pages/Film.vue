@@ -104,7 +104,8 @@ import { onMounted, reactive, ref } from 'vue';
 
 import { usePlayStore } from '@/store';
 import { fetchSiteActive } from '@/api/site';
-import { fetchClassify, fetchList, fetchSearch, fetchDetail } from '@/utils/cms';
+import { fetchClassify, fetchList, fetchSearch, fetchDetail, t3RuleInit } from '@/utils/cms';
+import { getConfig } from '@/utils/tool';
 
 import DetailView from './film/Detail.vue';
 import CommonNav from '../components/common-nav/index.vue';
@@ -143,7 +144,8 @@ const isVisible = reactive({
   detail: false,
   loadClass: false,
   infiniteLoading: false,
-  gridList: false
+  gridList: false,
+  t3Work: false
 });
 const pagination = ref({
   pageIndex: 1,
@@ -169,7 +171,8 @@ const siteConfig = ref({
   default: {
     id: '',
     type: 0,
-    categories: ''
+    categories: '',
+    ext: ''
   },
   search: '',
   data: [],
@@ -228,7 +231,7 @@ const filterEvent = () => {
 const filterApiEvent = async () => {
   const { type } = siteConfig.value.default;
   let filterFormat;
-  if (type === 2 || type === 6) {
+  if (type === 2 || type === 6 || type === 7) {
     filterFormat = Object.entries(active.value.filter).reduce((item, [key, value]) => {
       if (value !== '' && value.length !== 0) {
         item[key] = value;
@@ -424,11 +427,11 @@ const getFilmList = async () => {
   const t = active.value.class;
   const { format } = filter.value;
 
-  console.log(`[film] load parameter: ${defaultSite.type === 2 ? JSON.stringify({ ...format }) : JSON.stringify(format)}`);
+  console.log(`[film] load parameter: ${defaultSite.type === 2 || defaultSite.type === 7 ? JSON.stringify({ ...format }) : JSON.stringify(format)}`);
 
   let length = 0;
   try {
-    const res = await fetchList(defaultSite, pg, t, defaultSite.type === 2 ? { ...format } : format);
+    const res = await fetchList(defaultSite, pg, t, defaultSite.type === 2 || defaultSite.type === 7 ? { ...format } : format);
     const newFilms = _.differenceWith(res, filmData.value.list, _.isEqual);
     filmData.value.list = [...filmData.value.list, ...newFilms];
     filmData.value.rawList = [... filmData.value.rawList, ...res];
@@ -445,6 +448,11 @@ const getFilmList = async () => {
   } 
 };
 
+const getContent = async(url: string) => {
+  const res = await getConfig(url);
+  return res;
+}
+
 // 加载
 const load = async ($state: { complete: () => void; loaded: () => void; error: () => void }) => {
   console.log('[film] loading...');
@@ -456,6 +464,14 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
     }
 
     const defaultSite = siteConfig.value.default;
+    console.log(isVisible.t3Work)
+    if (defaultSite.type === 7 && !isVisible.t3Work) {
+      const content = await getContent(defaultSite.ext);
+      const status = await t3RuleInit(content);
+      console.log(status)
+      if (status === 'sucess') isVisible.t3Work = true;
+      else $state.error();
+    }
     if (!isVisible.loadClass) await getClassList(defaultSite); // 加载分类
 
     const loadFunction = searchTxt.value ? getSearchList : getFilmList;
@@ -537,8 +553,10 @@ const getSearchList = async () => {
 
 // 切换站点
 const changeSitesEvent = async (key: string) => {
+  console.log(1111)
   isVisible.loadClass = false;
   isVisible.infiniteLoading = true;
+  isVisible.t3Work = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';
   const res = _.find(siteConfig.value.data, { id: key });
@@ -601,6 +619,7 @@ filmSearcheventBus.on((kw: string)=>{
 
 filmReloadeventBus.on(async () => {
   isVisible.loadClass = false;
+  isVisible.t3Work = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';
   await getSetting();
