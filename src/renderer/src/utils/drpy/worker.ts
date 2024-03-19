@@ -39,11 +39,7 @@ const drpyWork = (parms) => {
   return res;
 };
 
-self.addEventListener(
-  'message',
-  (e) => {
-    const res = drpyWork(e.data);
-    self.postMessage(res);
-  },
-  false,
-);
+self.onmessage = (e) => {
+  const res = drpyWork(e.data);
+  self.postMessage(res);
+};
