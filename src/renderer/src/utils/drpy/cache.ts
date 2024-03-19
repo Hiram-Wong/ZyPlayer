@@ -1,14 +1,22 @@
 class LocalCache {
   private cacheName: string;
   private db: IDBDatabase | null;
+  private isInitialized: boolean;
 
   constructor(cacheName = 'drpy') {
     this.cacheName = cacheName;
     this.db = null;
-    this.initDatabase().then(() => {
-      // Database is initialized, proceed with cache operations
-      this.cacheExample();
-    });
+    this.isInitialized = false; // 标志表示缓存是否已初始化
+
+    this.initDatabase()
+      .then(() => {
+        this.isInitialized = true; // 将标志设置为已初始化
+        this.cacheExample();
+        console.log('Cache initialized.');
+      })
+      .catch((error) => {
+        console.error('Cache initialization failed:', error);
+      });
   }
 
   private async initDatabase() {
@@ -34,19 +42,23 @@ class LocalCache {
     });
   }
 
-  private getObjectStore(mode: IDBTransactionMode = 'readwrite') {
-    if (!this.db) {
-      throw new Error('Database is not initialized.');
+  private async initialize() {
+    if (!this.isInitialized) {
+      await this.initDatabase(); // 确保缓存已初始化
+      this.isInitialized = true; // 将标志设置为已初始化
     }
+  }
+
+  private getObjectStore(mode: IDBTransactionMode = 'readwrite') {
+    if (!this.db) throw new Error('Database is not initialized.');
 
     const transaction = this.db.transaction('cache', mode);
     return transaction.objectStore('cache');
   }
 
   public async get(id: string, key: string, defaultValue: any = null) {
-    if (!this.db) {
-      throw new Error('Database is not initialized.');
-    }
+    await this.initialize();
+    if (!this.db) throw new Error('Database is not initialized.');
 
     return new Promise<any>((resolve, reject) => {
       const store = this.getObjectStore('readonly');
@@ -64,9 +76,8 @@ class LocalCache {
   }
 
   public async set(id: string, key: string, value: any) {
-    if (!this.db) {
-      throw new Error('Database is not initialized.');
-    }
+    await this.initialize();
+    if (!this.db) throw new Error('Database is not initialized.');
   
     return new Promise<void>((resolve, reject) => {
       const store = this.getObjectStore();
@@ -83,9 +94,8 @@ class LocalCache {
   }
 
   public async delete(id: string, key: string) {
-    if (!this.db) {
-      throw new Error('Database is not initialized.');
-    }
+    await this.initialize();
+    if (!this.db) throw new Error('Database is not initialized.');
 
     return new Promise<void>((resolve, reject) => {
       const store = this.getObjectStore();
