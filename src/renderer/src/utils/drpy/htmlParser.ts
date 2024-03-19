@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import jsonpath from 'jsonpath';
-import urlJoin from 'url-join';
+import urlJoin from 'url';
 
 const PARSE_CACHE = true;  // 解析缓存
 const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|^body$|^#';  // 不自动加eq下标索引
@@ -117,8 +117,7 @@ class Jsoup {
       // ret = ret.toArray().map(element => doc(element));
       
       for (let exclude of excludes) {
-        console.log(exclude)
-        ret(exclude).remove();
+        ret.find(exclude).remove();
       }
     }
 
@@ -292,7 +291,7 @@ class Jsoup {
       else ret = queryResult ? `${queryResult}` : '';
       
       if (addUrl && ret) {
-        ret = urlJoin(this.MY_URL, ret);
+        ret = urlJoin.resolve(this.MY_URL, ret);
       }
       if (ret)  break;
     }
