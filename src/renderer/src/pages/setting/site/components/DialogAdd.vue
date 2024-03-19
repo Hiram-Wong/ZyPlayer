@@ -16,8 +16,8 @@
               <t-radio :value="0">cms[xml]</t-radio>
               <t-radio :value="1">cms[json]</t-radio>
               <t-radio :value="2">drpy[js0]</t-radio>
-              <t-radio :value="6">hipy</t-radio>
-              <!-- <t-radio :value="3">drpy[js1]</t-radio> -->
+              <t-radio :value="6">hipy[t4]</t-radio>
+              <t-radio :value="7">js[t3]</t-radio>
               <t-radio :value="3">app[v3]</t-radio>
               <t-radio :value="4">app[v1]</t-radio>
               <!-- <t-radio :value="5">爬虫</t-radio> -->
