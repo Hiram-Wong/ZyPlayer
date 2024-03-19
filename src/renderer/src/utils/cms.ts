@@ -6,6 +6,7 @@ import Base64 from 'crypto-js/enc-base64';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 
+import t3Work from './drpy';
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 
 
@@ -88,6 +89,10 @@ const removeHTMLTagsAndSpaces = (str) => {
   return trimmedString;
 };
 
+const t3RuleInit = async(rule: string) => {
+  const res = await t3Work({type:'init', data: rule});
+  return res.data;
+}
 
 /**
  * 获取资源分类 和 所有资源的总数, 分页等信息
@@ -96,7 +101,8 @@ const removeHTMLTagsAndSpaces = (str) => {
  */
 const fetchClassify = async(site) => {
   try {
-    let url;
+    let url, classData, page, pagecount, limit, total, filters;
+    
     if (site.type === 1 || site.type === 0) {
       url = buildUrl(site.api, `?ac=class`);
     } else if (site.type === 2) {
@@ -109,6 +115,17 @@ const fetchClassify = async(site) => {
       // url = buildUrl(site.api, `&t=1&ac=videolist`);
     } else if (site.type === 6) {
       url = buildUrl(site.api, `&extend=${site.ext}&filter=true`);
+    } else if (site.type === 7) {
+      const content = await t3Work({type:'home'});
+      const res = {
+        page: 1,
+        pagecount: 9999,
+        limit: 20,
+        total: 9999,
+        filters: content.data.filters ? content.data.filters : {},
+        classData: content.data.class
+      }
+      return res;
     }
 
     const res = await axios.get(url, { timeout: 3000 });
@@ -118,7 +135,6 @@ const fetchClassify = async(site) => {
     else json = res.data;
 
     const jsondata = json.rss || json;
-    let classData, page, pagecount, limit, total, filters;
 
     const cmsFilterData = [
       {
@@ -346,6 +362,9 @@ const fetchList = async(site, pg = 1, t, f = {}) => {
         const encodedStr = Base64.stringify(Base64.parse(JSON.stringify(f)));
         url = buildUrl(url, `&ext=${encodedStr}`);
       }
+    } else if (site.type === 7) {
+      const res = await t3Work({type:'category', data: { tid:t, pg, filter: _.size(f) ? true:  false, extend: _.size(f) ? f : {} }});
+      return res.data.list;
     } else {
       url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}`);
       if (Object.keys(f).length !== 0 && site.type === 2) {
@@ -472,6 +491,10 @@ const convertSearchList =(searchItem) =>{
 const fetchSearch = async(site, wd) => {
   // xml坑: 单条结果是dict 多条结果list
   try {
+    if (site.type === 7) {
+      const res = await t3Work({type:'search', data: { wd, quick: false, pg: 1 }});
+      return res.data;
+    }
     let url;
     if ( site.type === 3 ) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
     else if ( site.type === 5 ) url = `${reptileApiFormat(site.api, 'websearchurl')}${encodeURIComponent(wd)}`;
@@ -626,6 +649,9 @@ const fetchDetail = async(site, id) => {
       url = id.startsWith('http')? id : `${reptileApiFormat(site.api, 'searchUrl')}${id}`;
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=detail&ids=${id}&extend=${site.ext}`);
+    } else if (site.type === 7) {
+      const res = await t3Work({type:'detail', data: `${id}`});
+      return res.data.list;
     } else {
       url = buildUrl(site.api, `?ac=detail&ids=${id}`);
     }
@@ -717,6 +743,23 @@ const fetchHipyPlayUrl = async(site, flag, play) => {
     let playUrl = data;
     if (data?.url) playUrl = data.url;
     return playUrl;
+  } catch (err) {
+    throw err;
+  }
+}
+
+/**
+ * drpy[drpy t3]获取播放详情
+ * @param {*} flag 资源配置
+ * @param {*} id 播放源
+ * @param {*} flags 播放地址
+ * @returns
+ */
+const fetchT3PlayUrl = async (flag: string, id: string, flags:string[] = []) => {
+  try {
+    const res = await t3Work({type:'play', data: { flag, id, flags }});
+    console.log(res)
+    return res.data;
   } catch (err) {
     throw err;
   }
@@ -876,6 +919,7 @@ const fetchDoubanRecommend = async(id, name, year) => {
 }
 
 export {
+  t3RuleInit,
   checkValid,
   fetchClassify,
   fetchList,
@@ -883,6 +927,7 @@ export {
   fetchDetail,
   fetchSearch,
   fetchSearchFirstDetail,
+  fetchT3PlayUrl,
   fetchDrpyPlayUrl,
   fetchHipyPlayUrl,
   extractPlayerUrl,
