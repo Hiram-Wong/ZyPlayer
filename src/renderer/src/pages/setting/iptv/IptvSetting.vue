@@ -72,7 +72,7 @@ import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { AddIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, watch } from 'vue';
 
 import { fetchIptvPage, updateIptvItem, delIptvItem, addChannel, clearChannel } from '@/api/iptv';
 import { setDefault } from '@/api/setting';
@@ -105,6 +105,19 @@ const iptvTableConfig = ref({
   select: [],
   default: ''
 })
+
+const emitReload = useEventBus<string>('iptv-reload');
+
+watch(
+  () => iptvTableConfig.value.data,
+  (_, oldValue) => {
+    if (oldValue.length > 0) {
+      emitReload.emit('iptv-reload');
+    }
+  }, {
+    deep: true
+  }
+);
 
 const rehandleSelectChange = (val) => {
   iptvTableConfig.value.select = val;
@@ -183,8 +196,6 @@ const removeAllEvent = () => {
     MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
   }
 };
-
-const emitReload = useEventBus<string>('iptv-reload');
 
 const defaultEvent = async (row) => {
   const { id, url, type } = row;

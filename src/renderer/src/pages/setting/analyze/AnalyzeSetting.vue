@@ -82,7 +82,7 @@
 import { useEventBus } from '@vueuse/core';
 import { AddIcon, DiscountIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, watch } from 'vue';
 import _ from 'lodash';
 
 import { fetchAnalyzePage, updateAnalyzeItem, delAnalyzeItem } from '@/api/analyze';
@@ -120,6 +120,19 @@ const analyzeTableConfig = ref({
   group: [],
   flag: []
 })
+
+const emitReload = useEventBus<string>('analyze-reload');
+
+watch(
+  () => analyzeTableConfig.value.data,
+  (_, oldValue) => {
+    if (oldValue.length > 0) {
+      emitReload.emit('analyze-reload');
+    }
+  }, {
+    deep: true
+  }
+);
 
 const rehandleSelectChange = (val) => {
   analyzeTableConfig.value.select = val;
@@ -205,8 +218,6 @@ const removeAllEvent = () => {
     MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
   }
 };
-
-const emitReload = useEventBus<string>('analyze-reload');
 
 // 设置默认接口
 const defaultEvent = async (row) => {

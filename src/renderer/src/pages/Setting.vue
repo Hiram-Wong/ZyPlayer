@@ -38,7 +38,7 @@ import analyzeView from './setting/analyze/AnalyzeSetting.vue';
 import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
-import driveView from './setting/drive/driveSetting.vue';
+import driveView from './setting/drive/DriveSetting.vue';
 import CommonNav from '../components/common-nav/index.vue';
 
 const storeSetting = useSettingStore();

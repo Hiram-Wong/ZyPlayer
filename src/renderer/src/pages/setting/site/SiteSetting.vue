@@ -89,7 +89,7 @@ import { useEventBus } from '@vueuse/core';
 import { AddIcon, RefreshIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import PQueue from 'p-queue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, watch } from 'vue';
 import _ from 'lodash';
 
 import { fetchSitePage, updateSiteItem, delSiteItem } from '@/api/site';
@@ -131,6 +131,19 @@ const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 const rehandleSelectChange = (val) => {
   siteTableConfig.value.select = val;
 };
+
+const emitReload = useEventBus<string>('film-reload');
+
+watch(
+  () => siteTableConfig.value.data,
+  (_, oldValue) => {
+    if (oldValue.length > 0) {
+      emitReload.emit('film-reload');
+    }
+  }, {
+    deep: true
+  }
+);
 
 // Business Processing
 const getData = async () => {
@@ -240,8 +253,6 @@ const removeAllEvent = () => {
     MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
   }
 };
-
-const emitReload = useEventBus<string>('film-reload');
 
 const defaultEvent = async (row) => {
   try {

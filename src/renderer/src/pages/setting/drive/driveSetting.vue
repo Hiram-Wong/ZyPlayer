@@ -72,7 +72,7 @@ import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { AddIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, watch } from 'vue';
 
 import { fetchDrivePage, updateDriveItem, delDriveItem } from '@/api/drive';
 import { setDefault } from '@/api/setting';
@@ -106,6 +106,19 @@ const driveTableConfig = ref({
   select: [],
   default: ''
 })
+
+const emitReload = useEventBus<string>('drive-reload');
+
+watch(
+  () => driveTableConfig.value.data,
+  (_, oldValue) => {
+    if (oldValue.length > 0) {
+      emitReload.emit('drive-reload');
+    }
+  }, {
+    deep: true
+  }
+);
 
 const rehandleSelectChange = (val) => {
   driveTableConfig.value.select = val;
@@ -148,8 +161,6 @@ const refreshEvent = (page = false) => {
   getData();
   if (page) pagination.current = 1;
 };
-
-const emitReload = useEventBus<string>('drive-reload');
 
 const defaultEvent = async (row) => {
   try {
