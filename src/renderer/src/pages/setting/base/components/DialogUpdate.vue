@@ -8,7 +8,7 @@
     :close-on-overlay-click="false"
   >
     <template #body>
-      <t-loading v-if="load" size="small" indicator :loading="load" text="请等待，检查更新中..." />
+      <t-loading v-if="load" size="small" indicator :loading="load" text="请等待，检查更新中..." style="min-height: 30px;"/>
       <div v-else class="wrapper">
         <div class="body">
           <div v-if="updateInfo.new">
