@@ -551,9 +551,8 @@ const getSearchList = async () => {
 
 // 切换站点
 const changeSitesEvent = async (key: string) => {
-  console.log(1111)
-  isVisible.loadClass = false;
   isVisible.infiniteLoading = true;
+  isVisible.loadClass = false;
   isVisible.t3Work = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';
@@ -575,7 +574,6 @@ const changeSitesEvent = async (key: string) => {
   };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
-  getClassList(siteConfig.value.default);
   siteConfig.value.searchGroup = await searchGroup(siteConfig.value.search);
 };
 
