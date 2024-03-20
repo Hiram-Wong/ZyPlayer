@@ -139,7 +139,7 @@ import { usePlayStore } from '@/store';
 import { detailStar, addStar, delStar } from '@/api/star';
 import { updateHistory, detailHistory, addHistory } from '@/api/history';
 import { fetchAnalyzeDefault } from '@/api/analyze';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl } from '@/utils/cms';
+import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl } from '@/utils/cms';
 import { getConfig, getMeadiaType } from '@/utils/tool';
 
 const remote = window.require('@electron/remote');
@@ -301,6 +301,18 @@ const gotoPlay = async (e) => {
     } finally {
       console.log(`[player] end: hipy获取服务端播放链接结束`);
     }
+  } else if (formData.value.type === 7) {
+    // t3获取服务端播放链接
+    console.log('[player] start: t3获取服务端播放链接开启');
+    try {
+      const t3PlayUrl = await fetchT3PlayUrl(selectPlaySource.value, url , []);
+      snifferUrl.value = t3PlayUrl.url;
+      console.log(`[player] return: t3获取服务端返回链接:${url}`);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      console.log(`[player] end: t3获取服务端播放链接结束`);
+    }
   } else if (formData.value.type === 2) {
     // drpy嗅探
     MessagePlugin.info('免嗅资源中, 请等待!');
@@ -335,13 +347,8 @@ const gotoPlay = async (e) => {
 };
 
 const callSysPlayer = (url) => {
-  console.log(url);
-  // const playerType = set.value.broadcasterType;
   const externalPlayer = set.value.externalPlayer;
   window.electron.ipcRenderer.send('call-player', externalPlayer, url);
-  // if (playerType === 'iina') window.open(`iina://weblink?url=${url}`, '_self');
-  // else if (playerType === 'potplayer') window.open(`potplayer://${url}`, '_self');
-  // else if (playerType === 'vlc') window.open(`vlc://${url}`, '_self');
   getHistoryData(true);
 }
 
@@ -487,11 +494,16 @@ const filterContent = (item) => {
 };
 
 const sniffer_pie = () => {
-  window.electron.ipcRenderer.invoke('sniffer-media', snifferUrl.value).then(res => {
-    console.log(res)
+  window.electron.ipcRenderer.invoke('sniffer-media', snifferUrl.value).then(async res => {
+    console.log(res);
     if (res.code == 200) {
       const formatIndex = videoFormats.findIndex((format) => res.data.url.toLowerCase().indexOf(format) > -1);
       if (formatIndex > -1) {
+        snifferUrl.value = res.data.url;
+        callSysPlayer(snifferUrl.value);
+      } else {
+        const mediaType = await checkMediaType(res.data.url);
+        console.log(`[player] mediaType: ${mediaType}`)
         snifferUrl.value = res.data.url;
         callSysPlayer(snifferUrl.value);
       }
