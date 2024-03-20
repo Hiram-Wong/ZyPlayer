@@ -3,7 +3,7 @@ import fastify from 'fastify';
 import fastifyLogger from "fastify-logger";
 import { join } from "path";
 import logger from '../logger';
-import { analyze, iptv, setting, drive, site, history, star, db } from './routes';
+import { analyze, iptv, setting, drive, site, history, star, db, proxy } from './routes';
 
 
 logger.info('[server] fastify module initialized');
@@ -41,8 +41,9 @@ const initServer = async () => {
     server.register(history);
     server.register(star);
     server.register(db);
+    server.register(proxy);
 
-    await server.listen({ port: 8345, host: '0.0.0.0' });
+    await server.listen({ port: 9978, host: '0.0.0.0' });
   } catch (err) {
     server.log.error(err);
     process.exit(1);
