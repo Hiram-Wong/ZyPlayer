@@ -53,7 +53,7 @@
                   >
                     <template #overlayContent>
                       <div class="op">
-                        <span v-if="item.siteName"> {{ item.siteName }}</span>
+                        <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
                       </div>
                     </template>
                   </t-image>
@@ -534,9 +534,7 @@ const getSearchList = async () => {
 
     const filmList = resultDetail.map((item) => ({
       ...item,
-      siteKey: currentSite.key,
-      siteName: currentSite.name,
-      siteId: currentSite.id,
+      relateSite: currentSite
     }));
 
     const newFilms = _.differenceWith(filmList, filmData.value.list, _.isEqual); // 去重
@@ -583,10 +581,11 @@ const changeSitesEvent = async (key: string) => {
 
 // 播放
 const playEvent = async (item) => {
-  const defaultSite = siteConfig.value.default;
+  let site = siteConfig.value.default;
+  if (_.has(item, 'relateSite')) site = item.relateSite;
 
   if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
-    const [detailItem] = await fetchDetail(defaultSite, item.vod_id);
+    const [detailItem] = await fetchDetail(site, item.vod_id);
     item = detailItem;
   }
 
@@ -600,7 +599,7 @@ const playEvent = async (item) => {
       type: 'film',
       data: {
         info: item,
-        ext: { site: defaultSite },
+        ext: { site: site },
       },
     });
 
