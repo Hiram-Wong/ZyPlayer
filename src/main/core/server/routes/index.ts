@@ -6,5 +6,6 @@ import drive from './drive';
 import setting from './setting';
 import iptv from './iptv';
 import db from './db';
+import proxy from './proxy';
 
-export { analyze, site, star, history, drive, setting, iptv, db };
+export { analyze, site, star, history, drive, setting, iptv, db,proxy };
