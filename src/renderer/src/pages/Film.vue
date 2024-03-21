@@ -464,7 +464,6 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
     }
 
     const defaultSite = siteConfig.value.default;
-    console.log(isVisible.t3Work)
     if (defaultSite.type === 7 && !isVisible.t3Work) {
       const content = await getContent(defaultSite.ext);
       const status = await t3RuleInit(content);
