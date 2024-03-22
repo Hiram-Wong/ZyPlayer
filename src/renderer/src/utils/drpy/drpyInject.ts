@@ -1,4 +1,4 @@
-import syncRequest from 'sync-request';
+import syncFetch from 'sync-fetch';
 import cache from './cache';
 import jsoup from './htmlParser';
 
@@ -11,6 +11,7 @@ interface RequestOptions {
   data?: { [key: string]: string };
   headers?: { [key: string]: string };
   withHeaders?: boolean;
+  buffer?: number;
 }
 
 interface Response {
@@ -21,9 +22,10 @@ interface Response {
 
 const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0): Response => {
   const method: HttpMethod = (_object.method || 'GET').toUpperCase() as HttpMethod;
-  const timeout: number = _object.timeout || 5000;
+  // const timeout: number = _object.timeout || 5000;
   const withHeaders: boolean = _object.withHeaders || false;
   const body: string = _object.body || '';
+  const bufferType: number = _object.buffer || 0;
   let data: { [key: string]: string } = _object.data || {};
 
   if (body && !data) {
@@ -38,30 +40,36 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   let r: any;
 
   if (method === 'GET') {
-    r = syncRequest(method, _url, {
+    r = syncFetch(_url, {
       headers,
-      qs: data,
-      timeout,
+      parms: data,
+      credentials: 'include'
     });
   } else {
+    headers["Content-Type"] = "application/json"
     const requestOptions: any = {
+      method,
       headers,
-      body: data,
-      timeout
+      body: JSON.stringify(data),
+      credentials: 'include'
     };
-    r = syncRequest(method, _url, requestOptions);
+    console.log(requestOptions)
+    r = syncFetch(_url, requestOptions);
   }
-
   const emptyResult: Response = { content: '', body: '', headers: {} };
 
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: r.getBody('utf8'), headers: r.headers } || emptyResult;
+      return { body: r.text(), headers: r.headers } || emptyResult;
     } else {
-      return r.getBody('utf8') || '';
+      return r.text() || '';
     }
   } else if (_js_type === 1) {
-    return { content: r.getBody('utf8'), headers: r.headers } || emptyResult;
+    let content
+    if (bufferType === 2) {
+      content = Buffer.from(r.arrayBuffer(), 'binary').toString('base64');
+    } else content = r.text();
+    return { content, headers: r.headers } || emptyResult;
   } else {
     return emptyResult;
   }

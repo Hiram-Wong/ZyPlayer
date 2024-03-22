@@ -425,42 +425,42 @@ const decodeStr = (input, encoding) => {
 };
 
 // 封装的RSA加解密类
-// const RSA = {
-//   encode: (data, key, option) => {
-//     // console.log('encode');
-//     if (typeof rsaEncrypt === 'function') {
-//       if (!option || typeof option !== 'object') {
-//         return rsaEncrypt(data, key);
-//       }else{
-//         return rsaEncrypt(data, key, option);
-//       }
-//     }
-//     return false;
-//   },
-//   decode: (data, key, option) => {
-//     // console.log('decode');
-//     if (typeof rsaDecrypt === 'function') {
-//       if (!option || typeof option !== 'object') {
-//         return rsaDecrypt(data, key);
-//       }else{
-//         return rsaDecrypt(data, key, option);
-//       }
-//     }
-//     return false;
-//   }
-// };
+const RSA = {
+  encode: (data, key, option) => {
+    // console.log('encode');
+    if (typeof rsaEncrypt === 'function') {
+      if (!option || typeof option !== 'object') {
+        return rsaEncrypt(data, key);
+      }else{
+        return rsaEncrypt(data, key, option);
+      }
+    }
+    return false;
+  },
+  decode: (data, key, option) => {
+    // console.log('decode');
+    if (typeof rsaDecrypt === 'function') {
+      if (!option || typeof option !== 'object') {
+        return rsaDecrypt(data, key);
+      }else{
+        return rsaDecrypt(data, key, option);
+      }
+    }
+    return false;
+  }
+};
 
 /**
  * 获取壳子返回的代理地址
  * @returns {string|*}
  */
-// const getProxyUrl = () => {
-//   if (typeof getProxy === 'function') {//判断壳子里有getProxy函数就执行取返回结果。否则取默认的本地
-//     return getProxy(true);
-//   } else {
-//     return 'http://127.0.0.1:9978/proxy?do=js';
-//   }
-// };
+const getProxyUrl = () => {
+  if (typeof getProxy === 'function') {//判断壳子里有getProxy函数就执行取返回结果。否则取默认的本地
+    return getProxy(true);
+  } else {
+    return 'http://127.0.0.1:9978/proxy?do=js';
+  }
+};
 
 /**
  * 强制正序算法
@@ -775,7 +775,8 @@ var OcrApi = {
  */
 const verifyCode = (url) => {
   let cnt = 0;
-  let host = getHome(url);
+  // let host = getHome(url);
+  let host = url;
   let cookie = '';
 
   while (cnt < OCR_RETRY) {
@@ -783,7 +784,9 @@ const verifyCode = (url) => {
       let yzm_url = `${host}/index.php/verify/index.html`;
       console.log(`验证码链接: ${yzm_url}`);
       let hhtml = request(yzm_url, { withHeaders: true, toBase64: true }, true);
-      let json = JSON.parse(hhtml);
+      console.log(hhtml)
+      let json = JSON.parse(JSON.stringify(hhtml));
+      console.log(json)
 
       if (!cookie) {
         let setCk = Object.keys(json).find((it) => it.toLowerCase() === 'set-cookie');
@@ -791,6 +794,7 @@ const verifyCode = (url) => {
       }
 
       let img = json.body;
+      console.log(img)
       let code = OcrApi.classification(img);
       console.log(`第${cnt + 1}次验证码识别结果: ${code}`);
       let submit_url = `${host}/index.php/ajax/verify_check?type=search&verify=${code}`;
@@ -955,14 +959,14 @@ const request = (url: string, obj: any = undefined, ocr_flag = false) => {
     obj.buffer = 2;
     delete obj.toBase64;
   }
-  console.log(JSON.stringify(obj.headers));
   console.log(`request:${url}|method:${obj.method || 'GET'}|body:${obj.body || ''}`);
   const res = req(url, obj);
   const html = res["content"] || '';
   if (obj.withHeaders) {
-    const htmlWithHeaders = res["headers"];
-    htmlWithHeaders.body = html;
-    return htmlWithHeaders;
+    return {
+      headers: res["headers"],
+      body: html
+    }
   } else {
     return html;
   }
@@ -1645,6 +1649,9 @@ const detailParse = (detailObj) => {
     const TYPE = 'detail';
     var input = MY_URL;
     var play_url = '';
+    console.log(p)
+    console.log(input)
+    console.log(rule["proxy_rule"])
     eval(p.trim().replace('js:',''));
     vod = VOD;
     console.log(JSON.stringify(vod));
@@ -2344,5 +2351,6 @@ export {
   search,
   proxy,
   sniffer,
-  isVideo
+  isVideo,
+  verifyCode
 }
