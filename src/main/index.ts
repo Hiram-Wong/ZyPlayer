@@ -1,7 +1,7 @@
 import remote from '@electron/remote/main';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 
-import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, session, shell } from 'electron';
 import fixPath from 'fix-path';
 import { join } from 'path';
 import url from 'url';
@@ -44,9 +44,7 @@ if (!setting.find({ key: "hardwareAcceleration" }).value) {
 };
 
 let shortcutsState: any = setting.find({ key: "recordShortcut" }).value;
-
 let uaState: any = setting.find({ key: "ua" }).value;
-
 let windowState: any = setting.find({ key: "windowPosition" }).value || {
   status: false,
   position: {
@@ -54,6 +52,7 @@ let windowState: any = setting.find({ key: "windowPosition" }).value || {
     height: 640,
   }
 };
+let reqIdMethod = {}; // 请求id与header列表
 
 const windowManage = (win) => {
   const bounds = win.getBounds();
@@ -81,6 +80,20 @@ const showOrHidden = () => {
   }
   isHidden = !isHidden;
 };
+
+// 解析自定义url
+const parseCustomUrl = (url) => {
+  const parts = url.split('@');
+  const redirectURL = parts[0];
+  const headers = {};
+
+  for (let i = 1; i < parts.length; i++) {
+    const [key, value] = parts[i].split('=');
+    headers[key] = value;
+  }
+
+  return { redirectURL, headers };
+}
 
 // 主题更新事件
 nativeTheme.on('updated', () => {
@@ -189,17 +202,58 @@ const createWindow = (): void => {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-  mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
-    const { requestHeaders, url } = details;
-    const requestUrl = new URL(url);
+  // mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+  //   let { requestHeaders, url } = details;
 
-    requestHeaders.Origin = requestUrl.origin;
-    if (uaState) requestHeaders['User-Agent'] = uaState;
-    if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
-      requestHeaders.Referer = requestUrl.origin;
-    }
-    callback({ requestHeaders });
-  });
+  //   const parseCustomUrl = (url) => {
+  //     const parts = url.split('@');
+  //     const filePath = parts[0];
+  //     const headers = {};
+  
+  //     for (let i = 1; i < parts.length; i++) {
+  //       const [key, value] = parts[i].split('=');
+  //       headers[key] = value;
+  //     }
+  
+  //     return { filePath, headers };
+  //   }
+
+  //   const { headers } = parseCustomUrl(url);
+
+  //   const requestUrl = new URL(url);
+  //   // 添加 Origin 头部
+  //   requestHeaders.Origin = requestUrl.origin;
+
+  //   // 处理自定义 User-Agent 头部
+  //   if (requestHeaders['custom-ua']) {
+  //     requestHeaders['User-Agent'] = requestHeaders['custom-ua'];
+  //     delete requestHeaders['custom-ua'];
+  //   } else if (headers['User-Agent']) {
+  //     requestHeaders['User-Agent'] = headers['User-Agent'];
+  //   } else if (uaState) {
+  //     requestHeaders['User-Agent'] = uaState;
+  //   }
+
+  //   // 处理自定义 Cookie 头部
+  //   if (requestHeaders['custom-cookie']) {
+  //     requestHeaders['Cookie'] = requestHeaders['custom-cookie'];
+  //     delete requestHeaders['custom-cookie'];
+  //   } else if (headers['Cookie']) {
+  //     requestHeaders['Cookie'] = headers['Cookie'];
+  //   } 
+
+  //   // 处理自定义 Referer 头部
+  //   if (requestHeaders['custom-referer']) {
+  //     requestHeaders['Referer'] = requestHeaders['custom-referer'];
+  //     delete requestHeaders['custom-referer'];
+  //   } else if (headers['Referer']) {
+  //     requestHeaders['Referer'] = headers['Referer'];
+  //   } else if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
+  //     requestHeaders.Referer = requestUrl.origin;
+  //   }
+  //   // console.log(requestHeaders, details)
+  //   callback({ requestHeaders });
+  // });
 
   // X-Frame-Options
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
@@ -225,6 +279,48 @@ const createWindow = (): void => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async() => {
+  // 获取默认的 session
+  const defaultSession = session.defaultSession;
+
+  // 监听 `will-navigate` 事件，该事件在导航到新的页面之前触发
+  defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
+    let { url, id } = details;
+
+    // http://bfdsr.hutu777.com/upload/video/2024/03/20/c6b8e67e75131466cfcbb18ed75b8c6b.JPG@Referer=www.jianpianapp.com@User-Agent=jianpian-version353
+    const { redirectURL, headers } = parseCustomUrl(url);
+    if (!url.includes('//localhost') && ['Referer', 'Cookie', 'User-Agent'].some(str => url.includes(str))) {
+      reqIdMethod[`${id}`] = headers;
+
+      callback({
+        cancel: false,
+        redirectURL: redirectURL
+      });
+    } else callback({});
+  });
+
+  defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    let { requestHeaders, url, id } = details;
+    const requestUrl = new URL(url);
+
+    if (!url.includes('//localhost')) {
+      const headers = reqIdMethod[`${id}`];
+
+      // 添加 Origin 头部
+      requestHeaders.Origin = requestUrl.origin;
+      // 处理自定义 User-Agent 头部
+      requestHeaders['User-Agent'] = requestHeaders['custom-ua'] || headers?.['User-Agent'] || uaState;
+      delete requestHeaders['custom-ua'];
+      // 处理自定义 Cookie 头部
+      requestHeaders['Cookie'] = requestHeaders['custom-cookie'] || headers?.['Cookie'];
+      delete requestHeaders['custom-cookie'];
+      // 处理自定义 Referer 头部
+      requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'] || requestUrl.origin;
+    }
+
+    callback({ requestHeaders });
+    delete reqIdMethod[`${id}`];
+  });
+
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.zyplayer');
 
@@ -239,7 +335,6 @@ app.whenReady().then(async() => {
     tmpDir(join(app.getPath('userData'), 'thumbnail'));
   }
   createWindow();
-  // createWorker();
   // 监听进入全屏事件
   mainWindow!.on('enter-full-screen', () => {
     logger.info(`[main] mainwindow has entered full-screen mode ; send to vue app`);
