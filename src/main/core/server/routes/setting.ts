@@ -55,13 +55,21 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const skipStartEnd = await setting.find({ key: "skipStartEnd"}).value;
       const broadcasterType = await setting.find({ key: "broadcasterType"}).value;
       const externalPlayer = await setting.find({ key: "externalPlayer"}).value;
+      const webdevUrl = await setting.find({ key: "webdevUrl"}).value;
+      const webdevUsername = await setting.find({ key: "webdevUsername"}).value;
+      const webdevPassword = await setting.find({ key: "webdevPassword"}).value;
       
       const res = {
         agreementMask,
         theme,
         skipStartEnd,
         broadcasterType,
-        externalPlayer
+        externalPlayer,
+        webdev: {
+          url: webdevUrl,
+          username: webdevUsername,
+          password: webdevPassword
+        }
       };
       reply.code(200).send(res);
     } catch (err) {

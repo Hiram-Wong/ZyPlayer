@@ -26,9 +26,10 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, skipStartEnd, broadcasterType, externalPlayer } = await setup();
+  const { agreementMask, theme, skipStartEnd, broadcasterType, externalPlayer, webdev } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
+  storeSetting.updateConfig({ webdev: webdev });
   isVisible.dialogDisclaimer = !agreementMask;
 
   const init = {
