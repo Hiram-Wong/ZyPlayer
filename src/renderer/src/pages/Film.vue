@@ -104,7 +104,7 @@ import { onMounted, reactive, ref } from 'vue';
 
 import { usePlayStore } from '@/store';
 import { fetchSiteActive } from '@/api/site';
-import { fetchClassify, fetchList, fetchSearch, fetchDetail, t3RuleInit } from '@/utils/cms';
+import { fetchClassify, fetchList, fetchSearch, fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
 import { getConfig } from '@/utils/tool';
 
 import DetailView from './film/Detail.vue';
@@ -145,7 +145,8 @@ const isVisible = reactive({
   loadClass: false,
   infiniteLoading: false,
   gridList: false,
-  t3Work: false
+  t3Work: false,
+  catvod: false
 });
 const pagination = ref({
   pageIndex: 1,
@@ -467,8 +468,11 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
     if (defaultSite.type === 7 && !isVisible.t3Work) {
       const content = await getContent(defaultSite.ext);
       const status = await t3RuleInit(content);
-      console.log(status)
       if (status === 'sucess') isVisible.t3Work = true;
+      else $state.error();
+    } else if (defaultSite.type === 8 && !isVisible.catvodWork) {
+      const content = await catvodRuleInit(defaultSite.api, defaultSite.ext ? JSON.parse(defaultSite.ext) : {});
+      if (content === {}) isVisible.catvod = true;
       else $state.error();
     }
     if (!isVisible.loadClass) await getClassList(defaultSite); // 加载分类
@@ -553,6 +557,7 @@ const changeSitesEvent = async (key: string) => {
   isVisible.infiniteLoading = true;
   isVisible.loadClass = false;
   isVisible.t3Work = false;
+  isVisible.catvod = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';
   const res = _.find(siteConfig.value.data, { id: key });
@@ -616,6 +621,7 @@ filmSearcheventBus.on((kw: string)=>{
 filmReloadeventBus.on(async () => {
   isVisible.loadClass = false;
   isVisible.t3Work = false;
+  isVisible.catvod = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';
   await getSetting();

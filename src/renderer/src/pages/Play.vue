@@ -457,7 +457,7 @@ import { fetchChannelList } from '@/api/iptv';
 
 import { getConfig, getMeadiaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
 import { __jsEvalReturn } from '@/utils/alist_open';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchDetail, fetchSearch, t3RuleInit, fetchDoubanRecommend } from '@/utils/cms';
+import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchDetail, fetchSearch, t3RuleInit, fetchCatvodPlayUrl, fetchDoubanRecommend } from '@/utils/cms';
 import { fetchChannelEpg } from '@/utils/channel';
 import { usePlayStore } from '@/store';
 
@@ -1031,6 +1031,19 @@ const initFilmPlayer = async (isFirst) => {
       console.log(err);
     } finally {
       console.log(`[player] end: t3获取服务端播放链接结束`);
+    }
+  } else if (ext.value.site.type === 8) {
+    // catbox获取服务端播放链接
+    console.log('[player] start: catbox获取服务端播放链接开启');
+    const { site } = ext.value;
+    try {
+      const catboxPlayUrl = await fetchCatvodPlayUrl(site, selectPlaySource.value, config.value.url);
+      config.value.url = catboxPlayUrl.url;
+      console.log(`[player] return: catbox获取服务端返回链接:${config.value.url}`);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      console.log(`[player] end: catbox获取服务端播放链接结束`);
     }
   } else if (ext.value.site.type === 2) {
     // drpy嗅探
