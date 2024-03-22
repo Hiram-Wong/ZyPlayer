@@ -139,7 +139,7 @@ import { usePlayStore } from '@/store';
 import { detailStar, addStar, delStar } from '@/api/star';
 import { updateHistory, detailHistory, addHistory } from '@/api/history';
 import { fetchAnalyzeDefault } from '@/api/analyze';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl } from '@/utils/cms';
+import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchCatvodPlayUrl } from '@/utils/cms';
 import { getConfig, getMeadiaType } from '@/utils/tool';
 
 const remote = window.require('@electron/remote');
@@ -254,6 +254,63 @@ const getAnalyzeFlag = async() => {
   }
 };
 
+// Helper functions
+
+const fetchHipyPlayUrlHelper = async () => {
+  console.log('[player] start: hipy获取服务端播放链接开启');
+  try {
+    const hipyPlayUrl = await fetchHipyPlayUrl(formData.value, selectPlaySource.value, url);
+    snifferUrl.value = hipyPlayUrl;
+    console.log(`[player] return: hipy获取服务端返回链接:${url}`);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    console.log(`[player] end: hipy获取服务端播放链接结束`);
+  }
+};
+
+const fetchT3PlayUrlHelper = async () => {
+  console.log('[player] start: t3获取服务端播放链接开启');
+  try {
+    const t3PlayUrl = await fetchT3PlayUrl(selectPlaySource.value, url, []);
+    snifferUrl.value = t3PlayUrl.url;
+    console.log(`[player] return: t3获取服务端返回链接:${url}`);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    console.log(`[player] end: t3获取服务端播放链接结束`);
+  }
+};
+
+const fetchCatboxPlayUrlHelper = async () => {
+  console.log('[player] start: catbox获取服务端播放链接开启');
+  const { site } = ext.value;
+  try {
+    const catboxPlayUrl = await fetchCatvodPlayUrl(site, selectPlaySource.value, config.value.url);
+    config.value.url = catboxPlayUrl.url;
+    console.log(`[player] return: catbox获取服务端返回链接:${config.value.url}`);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    console.log(`[player] end: catbox获取服务端播放链接结束`);
+  }
+};
+
+const fetchDrpyPlayUrlHelper = async () => {
+  MessagePlugin.info('免嗅资源中, 请等待!');
+  console.log('[player] start: drpy免嗅流程开始');
+  try {
+    const drpySniffFree = await fetchDrpyPlayUrl(formData.value, url);
+    if (drpySniffFree.redirect) {
+      snifferUrl.value = drpySniffFree.url;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+  console.log(`[player] end: drpy免嗅流程结束`);
+};
+
+
 // 调用本地播放器 + 历史
 const gotoPlay = async (e) => {
   const [index, url] = e.split('$');
@@ -261,72 +318,47 @@ const gotoPlay = async (e) => {
 
   snifferUrl.value = url;
 
-  // 解析直链
-  const { playUrl } = formData.value;
-  if (playUrl) {
-    const play = await getConfig(`${playUrl}${url}`);
-    console.log(`解析地址:${play.url}`);
-    if (play.url) {
-      snifferUrl.value = play.url;
-      callSysPlayer(snifferUrl.value);
-      return;
-    }
-  }
-
-  // 官解iframe
   try {
-    const { hostname } = new URL(url);
-    if (
-        VIP_LIST.some((item) => hostname.includes(item)) ||
-        analyzeConfig.value.flag.some((item) => selectPlaySource.value.includes(item))
-      ) {
-        snifferUrl.value = analyzeConfig.value.default.url + url;
-        sniffer(snifferUrl.value);
-        console.log(`[player] return: 官解播放地址:${snifferUrl.value}`);
+    // 解析直链
+    const { playUrl } = formData.value;
+    if (playUrl) {
+      const play = await getConfig(`${playUrl}${url}`);
+      console.log(`解析地址:${play.url}`);
+      if (play.url) {
+        snifferUrl.value = play.url;
+        callSysPlayer(snifferUrl.value);
         return;
       }
+    }
+
+    const { hostname } = new URL(url);
+
+    if (
+      VIP_LIST.some((item) => hostname.includes(item)) ||
+      analyzeConfig.value.flag.some((item) => selectPlaySource.value.includes(item))
+    ) {
+      // 官解iframe
+      snifferUrl.value = analyzeConfig.value.default.url + url;
+      sniffer(snifferUrl.value);
+      console.log(`[player] return: 官解播放地址:${snifferUrl.value}`);
+      return;
+    }
   } catch (err) {
     console.info(`[player] input: 传入地址不是url:${url}`);
   }
 
   if (formData.value.type === 6) {
     // hipy获取服务端播放链接
-    console.log('[player] start: hipy获取服务端播放链接开启');
-    try {
-      const hipyPlayUrl = await fetchHipyPlayUrl(formData.value, selectPlaySource.value, url);
-      snifferUrl.value = hipyPlayUrl;
-      console.log(`[player] return: hipy获取服务端返回链接:${url}`);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      console.log(`[player] end: hipy获取服务端播放链接结束`);
-    }
+    await fetchHipyPlayUrlHelper();
   } else if (formData.value.type === 7) {
     // t3获取服务端播放链接
-    console.log('[player] start: t3获取服务端播放链接开启');
-    try {
-      const t3PlayUrl = await fetchT3PlayUrl(selectPlaySource.value, url , []);
-      snifferUrl.value = t3PlayUrl.url;
-      console.log(`[player] return: t3获取服务端返回链接:${url}`);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      console.log(`[player] end: t3获取服务端播放链接结束`);
-    }
+    await fetchT3PlayUrlHelper();
+  } else if (ext.value.site.type === 8) {
+    // catbox获取服务端播放链接
+    await fetchCatboxPlayUrlHelper();
   } else if (formData.value.type === 2) {
     // drpy嗅探
-    MessagePlugin.info('免嗅资源中, 请等待!');
-    console.log('[player] start: drpy免嗅流程开始');
-    try {
-      const drpySniffFree = await fetchDrpyPlayUrl(formData.value, url);
-      if (drpySniffFree.redirect) {
-        snifferUrl.value = drpySniffFree.url;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-
-    console.log(`[player] end: drpy免嗅流程结束`);
+    await fetchDrpyPlayUrlHelper();
   }
 
   const mediaType = await checkMediaType(snifferUrl.value);
