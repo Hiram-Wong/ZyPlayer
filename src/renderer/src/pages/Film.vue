@@ -472,7 +472,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       else $state.error();
     } else if (defaultSite.type === 8 && !isVisible.catvodWork) {
       const content = await catvodRuleInit(defaultSite.api, defaultSite.ext ? JSON.parse(defaultSite.ext) : {});
-      if (content === {}) isVisible.catvod = true;
+      if (typeof content === 'object') isVisible.catvod = true;
       else $state.error();
     }
     if (!isVisible.loadClass) await getClassList(defaultSite); // 加载分类
