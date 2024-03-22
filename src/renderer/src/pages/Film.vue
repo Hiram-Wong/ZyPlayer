@@ -480,7 +480,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
     const loadFunction = searchTxt.value ? getSearchList : getFilmList;
     const resLength = await loadFunction(); // 动态加载数据
 
-    if (resLength === 0) {
+    if (resLength === 0 || filmData.value.list[0].vod_name === '无数据,防无限请求') {
       $state.complete();
     } else {
       if (defaultSite.type === 0 || defaultSite.type === 1) {
