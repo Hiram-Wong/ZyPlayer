@@ -775,8 +775,7 @@ var OcrApi = {
  */
 const verifyCode = (url) => {
   let cnt = 0;
-  // let host = getHome(url);
-  let host = url;
+  let host = getHome(url);
   let cookie = '';
 
   while (cnt < OCR_RETRY) {
@@ -1051,7 +1050,7 @@ const getHtml = (url) => {
       obj["headers"]['Cookie'] = cookie;
       console.log('历史有大写过期的cookie,更新过验证后的cookie');
     } else if(!obj["headers"]) {
-      obj["headers"] = {Cookie:cookie};
+      obj["headers"] = { Cookie: cookie };
       console.log('历史无headers,更新过验证后的含cookie的headers');
     }
   }
