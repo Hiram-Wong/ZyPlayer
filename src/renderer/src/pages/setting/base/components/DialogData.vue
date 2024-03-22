@@ -257,6 +257,7 @@ const easyConfig = async() => {
       switch (soureceType) {
         case 0: return 0; // 0cms[xml]
         case 1: return 1; // 1cms[json]
+        case 3: return 7; // 1cms[json]
         case 4: return 6; // hipy
       }
     } // hipy
@@ -297,7 +298,7 @@ const easyConfig = async() => {
     } else {
       if (_.has(config, "sites")) {
         data["tbl_site"] = config.sites
-          .filter((item) => item.type === 0 || item.type === 1 || item.type === 4) // 先过滤掉不需要的数据
+          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.endsWith('.js') && item.ext.endsWith('.js'))) // 先过滤掉不需要的数据
           .map((item) => ({
             id: getUuid(item.name, 5),
             name: item.name,
@@ -306,6 +307,7 @@ const easyConfig = async() => {
             group: formatGroup(type),
             search: _.has(item, "searchable") ? item.searchable : 0,
             categories: _.has(item, "categories") ? (_.isArray(item.categories) ? _.join(item.categories, ',') : item.categories) : null, // 转字符串
+            ext: _.has(item, "ext") ? item.ext : '',
             isActive: true,
             status: true,
           }));
