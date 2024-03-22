@@ -2,6 +2,8 @@ import axios from "axios";
 import _ from "lodash";
 import qs from "qs";
 
+axios.defaults.withCredentials = true; //让ajax携带cookie
+
 const doubanHot = async(type, tag, limit = 20, start = 0) => {
   const doubanHotLink = `https://movie.douban.com/j/search_subjects?type=${type}&tag=${encodeURI(
     tag

@@ -2,6 +2,8 @@ import axios from 'axios';
 import JSON5 from "json5";
 import ip from 'ip';
 
+axios.defaults.withCredentials = true; //让ajax携带cookie
+
 const getConfig = async (url, header = {}) => {
   try {
     let res;

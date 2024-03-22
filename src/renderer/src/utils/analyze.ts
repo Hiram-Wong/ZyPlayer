@@ -1,6 +1,8 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
+axios.defaults.withCredentials = true; //让ajax携带cookie
+
 const getUrlTitle = async(url:string): Promise<string> => {
   try {
     const res = await axios.get(url, { responseType: "arraybuffer" });

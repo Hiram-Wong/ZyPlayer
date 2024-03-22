@@ -2,6 +2,8 @@ import axios from 'axios';
 import _ from 'lodash';
 import getUuid from 'uuid-by-string';
 
+axios.defaults.withCredentials = true; //让ajax携带cookie
+
 let controller = new AbortController();
 
 const m3u = (text: string) => {

@@ -10,6 +10,8 @@ import t3Work from './drpy';
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 
 
+axios.defaults.withCredentials = true; //让ajax携带cookie
+
 // 初始化对象xml转json https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/docs/v4/1.GettingStarted.md
 const xmlOptions = {
   // XML 转 JSON 配置
@@ -94,6 +96,16 @@ const t3RuleInit = async(rule: string) => {
   return res.data;
 }
 
+const catvodRuleInit = async(api, rule: string) => {
+  const url = buildUrl(api, `/init`);
+  const res = await axios({
+    method: 'post',
+    url,
+    data: rule
+  });
+  return res.data;
+}
+
 /**
  * 获取资源分类 和 所有资源的总数, 分页等信息
  * @param {*} site 资源配置
@@ -126,9 +138,13 @@ const fetchClassify = async(site) => {
         classData: content.data.class
       }
       return res;
+    } else if (site.type === 8) {
+      url = buildUrl(site.api, `/home`);
     }
 
-    const res = await axios.get(url, { timeout: 3000 });
+    let res;
+    if (site.type !== 8) res = await axios.get(url, { timeout: 3000 });
+    else res = await axios.post(url, { timeout: 3000 });
 
     let json;
     if (site.type === 0) json = parser.parse(res.data);
@@ -270,6 +286,24 @@ const fetchClassify = async(site) => {
         total = category_json.total;
       }
       filters = jsondata?.filters === undefined ? [] : jsondata.filters;
+    } else if (site.type === 8) {
+      page = 1;
+      pagecount = 9999;
+      limit = 20;
+      total = 9999;
+      filters = {};
+
+      classData = jsondata.class;
+      // if (classData) {
+      //   const category_url = buildUrl(site.api, `&extend=${site.ext}&ac=videolist&t=${classData[0].type_id}&pg=1`);
+      //   const category_res = await axios.get(category_url);
+      //   const category_json = category_res.data;
+      //   page = category_json.page;
+      //   pagecount = category_json.pagecount;
+      //   limit = parseInt(category_json.limit);
+      //   total = category_json.total;
+      // }
+      filters = jsondata?.filters === undefined ? [] : jsondata.filters;
     }
 
     return {
@@ -345,7 +379,7 @@ const convertVideoList = (videoItems) => {
 }
 const fetchList = async(site, pg = 1, t, f = {}) => {
   try {
-    let url;
+    let url, postData;
     if (site.type === 3) {
       url = buildUrl(site.api, `video?tid=${t}&pg=${pg}`);
       if (Object.keys(f).length !== 0) {
@@ -365,16 +399,27 @@ const fetchList = async(site, pg = 1, t, f = {}) => {
     } else if (site.type === 7) {
       const res = await t3Work({type:'category', data: { tid:t, pg, filter: _.size(f) ? true:  false, extend: _.size(f) ? f : {} }});
       return res.data.list;
-    } else {
+    } else if (site.type === 8) {
+      url = buildUrl(site.api, `/category`);
+      postData = {
+        id: t,
+        page: pg,
+        filters: f
+      }
+    }  else {
       url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}`);
       if (Object.keys(f).length !== 0 && site.type === 2) {
         url = buildUrl(url, `&f=${JSON.stringify(f)}`);
       }
     }
 
-    const { data } = await axios.get(url);
-    let json = data;
-    if (site.type === 0) json = parser.parse(data);
+    let res;
+    if (site.type !== 8) res = await axios.get(url);
+    else res = await axios.post(url, postData);
+
+    let json;
+    if (site.type === 0) json = parser.parse(res.data);
+    else json = res.data;
 
     const jsondata = json.rss || json;
     let videoList = jsondata.list || jsondata.data || [];
@@ -495,15 +540,25 @@ const fetchSearch = async(site, wd) => {
       const res = await t3Work({type:'search', data: { wd, quick: false, pg: 1 }});
       return res.data;
     }
-    let url;
+    let url, postData;
     if ( site.type === 3 ) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
     else if ( site.type === 5 ) url = `${reptileApiFormat(site.api, 'websearchurl')}${encodeURIComponent(wd)}`;
     else if ( site.type === 6 ) url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}&extend=${site.ext}`);
+    else if ( site.type === 8 ) {
+      url = buildUrl(site.api, `/search`);
+      postData = {
+        wd,
+        pg: 1
+      }
+    }
     else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
-    const { data } = await axios.get(url, { timeout: 3000 });
 
-    let json = data;
-    if (site.type === 0) json = parser.parse(data);
+    let res;
+    if ( site.type !== 8 ) res = await axios.get(url, { timeout: 3000 });
+    else res = await axios.post(url, postData, { timeout: 3000 });
+
+    let json = res.data;
+    if (site.type === 0) json = parser.parse(res.data);
 
     if (site.type === 5) {
       const searchnamePat = reptileApiFormat(site.api, 'searchname');
@@ -640,7 +695,7 @@ const convertDetailList = (detailItems) => {
 }
 const fetchDetail = async(site, id) => {
   try {
-    let url;
+    let url, postData;
     if (site.type === 3) {
       url = buildUrl(site.api, `/video_detail?id=${id}`);
     } else if (site.type === 4) {
@@ -652,13 +707,22 @@ const fetchDetail = async(site, id) => {
     } else if (site.type === 7) {
       const res = await t3Work({type:'detail', data: `${id}`});
       return res.data.list;
+    } else if (site.type === 8) {
+      url = buildUrl(site.api, `/detail`);
+      postData = {
+        id
+      }
     } else {
       url = buildUrl(site.api, `?ac=detail&ids=${id}`);
     }
-    const { data } = await axios.get(url);
+
+    let res;
+    if (site.type !== 8) res = await axios.get(url);
+    else res = await axios.post(url, postData);
+
     let json;
-    if ( site.type === 0 ) json = parser.parse(data);
-    else json = data;
+    if ( site.type === 0 ) json = parser.parse(res.data);
+    else json = res.data;
 
     if (site.type === 5) {
       const detaillistPat = reptileApiFormat(site.api, 'detaillist');
@@ -758,6 +822,23 @@ const fetchHipyPlayUrl = async(site, flag, play) => {
 const fetchT3PlayUrl = async (flag: string, id: string, flags:string[] = []) => {
   try {
     const res = await t3Work({type:'play', data: { flag, id, flags }});
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+/**
+ * catvod[nodejs]获取播放详情
+ * @param {*} flag 资源配置
+ * @param {*} id 播放源
+ * @param {*} flags 播放地址
+ * @returns
+ */
+const fetchCatvodPlayUrl = async (site, flag: string, id: string) => {
+  try {
+    const url = buildUrl(site.api, `/play`);
+    const res = await axios.post(url, {flag, id});
     console.log(res)
     return res.data;
   } catch (err) {
@@ -920,6 +1001,7 @@ const fetchDoubanRecommend = async(id, name, year) => {
 
 export {
   t3RuleInit,
+  catvodRuleInit,
   checkValid,
   fetchClassify,
   fetchList,
@@ -928,6 +1010,7 @@ export {
   fetchSearch,
   fetchSearchFirstDetail,
   fetchT3PlayUrl,
+  fetchCatvodPlayUrl,
   fetchDrpyPlayUrl,
   fetchHipyPlayUrl,
   extractPlayerUrl,
