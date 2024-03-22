@@ -1,10 +1,11 @@
 import { app } from "electron";
 import fastify from 'fastify';
 import fastifyLogger from "fastify-logger";
+import { JsonDB, Config } from 'node-json-db';
 import { join } from "path";
 import logger from '../logger';
-import { analyze, iptv, setting, drive, site, history, star, db, proxy } from './routes';
-
+import { analyze, iptv, setting, drive, site, history, star, db, proxy, catbox } from './routes';
+import initConfig from './routes/catbox/config';
 
 logger.info('[server] fastify module initialized');
 
@@ -24,14 +25,25 @@ opt.stream = null;
 
 const initServer = async () => {
   const server = fastify({
-    logger: opt,
-    ignoreTrailingSlash: true,
-    bodyLimit: 1024 * 1024 * 3 // 限制请求体大小为 3MB
+    logger: opt, // 是否开启日志
+    forceCloseConnections: true, // 是否强制关闭连接
+    ignoreTrailingSlash: true, // 是否忽略斜杠
+    maxParamLength: 10240, // 参数长度限制
+    bodyLimit: 1024 * 1024 * 3, // 限制请求体大小为 3MB
   });
 
   try {
+    server.addHook('onError', async (_request, _reply, error) => {
+      logger.error(error);
+      if (!error.statusCode) error.statusCode = 500;
+      return error;
+    });
+
+    server.decorate('config', initConfig);
+    server.decorate('db', new JsonDB(new Config(join(app.getPath("userData"), "cache.json"), true, true, '/')));
+
     server.get('/', async (_, reply) => {
-      reply.code(200).send('zyplayer server is running!')
+      reply.code(200).send({status: 'run'})
     })
     server.register(analyze);
     server.register(iptv);
@@ -42,6 +54,7 @@ const initServer = async () => {
     server.register(star);
     server.register(db);
     server.register(proxy);
+    server.register(catbox);
 
     await server.listen({ port: 9978, host: '0.0.0.0' });
   } catch (err) {
