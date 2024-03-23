@@ -847,12 +847,7 @@ const setItem = (k, v) => {
  * @returns {*}
  */
 const getItem = (k, v) => {
-  local.get(RKEY, k)
-  .then(result => {
-    console.log(result)
-    if (!result) return v
-    return result; // 可选，根据需要返回结果
-  })
+  return local.get(RKEY, k, v);
 }
 
 /**

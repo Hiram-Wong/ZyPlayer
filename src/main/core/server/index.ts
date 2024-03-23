@@ -4,7 +4,7 @@ import fastifyLogger from "fastify-logger";
 import { JsonDB, Config } from 'node-json-db';
 import { join } from "path";
 import logger from '../logger';
-import { analyze, iptv, setting, drive, site, history, star, db, proxy, catbox } from './routes';
+import { analyze, iptv, setting, drive, site, history, star, db, proxy, catbox, cache } from './routes';
 import initConfig from './routes/catbox/config';
 
 logger.info('[server] fastify module initialized');
@@ -55,6 +55,7 @@ const initServer = async () => {
     server.register(db);
     server.register(proxy);
     server.register(catbox);
+    server.register(cache);
 
     await server.listen({ port: 9978, host: '0.0.0.0' });
   } catch (err) {

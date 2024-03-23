@@ -8,5 +8,6 @@ import iptv from './iptv';
 import db from './db';
 import proxy from './proxy';
 import catbox from './catbox';
+import cache from './cache';
 
-export { analyze, site, star, history, drive, setting, iptv, db, proxy, catbox };
+export { analyze, site, star, history, drive, setting, iptv, db, proxy, catbox, cache };

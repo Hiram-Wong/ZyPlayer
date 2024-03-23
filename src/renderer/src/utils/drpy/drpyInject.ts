@@ -1,5 +1,4 @@
 import syncFetch from 'sync-fetch';
-import cache from './cache';
 import jsoup from './htmlParser';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
@@ -158,16 +157,33 @@ const pdfl = (html: string, parse: string, list_text: string, list_url: string, 
   return jsp.pdfl(html, parse, list_text, list_url, url_key);
 }
 
-const local_get = (_id, key, value='') => {
-  return cache.get(_id, key, value);
+const CACHE_URL = String(import.meta.env.DEV ? '/api' : import.meta.env.VITE_APP_API_URL) + '/v1/cache';
+
+const local_get = (_id: string, key: string, value: string = '') => {
+  const url = `${CACHE_URL}/${_id}${key}`;
+  const res: any = req(url, {});
+  return JSON.parse(res.content).data || value;
 }
 
 const local_set = (_id, key, value) => {
-  return cache.set(_id, key, value);
+  const headers = {
+    method: 'POST',
+    data: {
+      key: `${_id}${key}`,
+      value
+    }
+  };
+  const res: any = req(CACHE_URL, headers);
+  return JSON.parse(res.content).data;
 }
 
 const local_delete = (_id, key) => {
-  return cache.delete(_id, key);
+  const url = `${CACHE_URL}/${_id}${key}`;
+  const headers = {
+    method: 'DELETE'
+  };
+  const res: any = req(url, headers);
+  return JSON.parse(res.content).data;
 }
 
 const local = {
