@@ -6,7 +6,7 @@ import Base64 from 'crypto-js/enc-base64';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 
-import t3Work from './drpy';
+import { doWork as t3Work, terminateWork as t3WorkTerminate } from './drpy';
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 
 
@@ -94,6 +94,12 @@ const removeHTMLTagsAndSpaces = (str) => {
 const t3RuleInit = async(rule: string) => {
   const res = await t3Work({type:'init', data: rule});
   return res.data;
+}
+
+const t3RuleTerminate = async() => {
+  const res = await t3WorkTerminate();
+  if (res.code === 200) return 'sucess'
+  else return 'fail';
 }
 
 const catvodRuleInit = async(api, rule: string) => {
@@ -1001,6 +1007,7 @@ const fetchDoubanRecommend = async(id, name, year) => {
 
 export {
   t3RuleInit,
+  t3RuleTerminate,
   catvodRuleInit,
   checkValid,
   fetchClassify,

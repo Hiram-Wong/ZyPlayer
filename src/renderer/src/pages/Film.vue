@@ -104,7 +104,7 @@ import { onMounted, reactive, ref } from 'vue';
 
 import { usePlayStore } from '@/store';
 import { fetchSiteActive } from '@/api/site';
-import { fetchClassify, fetchList, fetchSearch, fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
+import { fetchClassify, fetchList, fetchSearch, fetchDetail, t3RuleInit, t3RuleTerminate, catvodRuleInit } from '@/utils/cms';
 import { getConfig } from '@/utils/tool';
 
 import DetailView from './film/Detail.vue';
@@ -557,6 +557,7 @@ const changeSitesEvent = async (key: string) => {
   isVisible.infiniteLoading = true;
   isVisible.loadClass = false;
   isVisible.t3Work = false;
+  if (siteConfig.value.default.type === 8) await t3RuleTerminate();
   isVisible.catvod = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';
@@ -621,6 +622,7 @@ filmSearcheventBus.on((kw: string)=>{
 filmReloadeventBus.on(async () => {
   isVisible.loadClass = false;
   isVisible.t3Work = false;
+  if (siteConfig.value.default.type === 8) await t3RuleTerminate();
   isVisible.catvod = false;
   infiniteCompleteTip.value = '没有更多内容了!';
   searchTxt.value = '';

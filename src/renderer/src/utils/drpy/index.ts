@@ -18,4 +18,21 @@ const doWork = (data) => {
   });
 }
 
-export default doWork;
+const terminateWork = () => {
+  return new Promise((resolve, reject) => {
+    if (typeof worker !== 'undefined' && worker !== null) {
+      worker.terminate();
+      resolve({
+        msg: 'Worker terminated successfully.',
+        code: 200
+      });
+    } else {
+      reject({
+        msg: new Error('Worker is not defined or already terminated.'),
+        code: 200
+      });
+    }
+  });
+};
+
+export { doWork, terminateWork };
