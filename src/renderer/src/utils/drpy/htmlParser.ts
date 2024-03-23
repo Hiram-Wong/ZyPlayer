@@ -134,7 +134,6 @@ class Jsoup {
   pdfa(html: string, parse: string): string[] {
     if (!html || !parse) return [];
     parse = this.parseHikerToJq(parse);
-    console.log(`pdfa:${parse}`);
     
     const doc = cheerio.load(html);
     if (PARSE_CACHE) {
@@ -148,9 +147,7 @@ class Jsoup {
     let ret: cheerio.Cheerio | null = null;
     for (const nparse of parses) {
       ret = this.parseOneRule(doc, nparse, ret);
-      if (!ret) {  // 可能循环取值后ret 对应eq取完无值了，pdfa直接返回空列表
-        return [];
-      }
+      if (!ret) return [];
     }
 
     const res: string[] = (ret?.toArray() ?? []).map((item: any) => {
@@ -160,31 +157,25 @@ class Jsoup {
     return res;
   }
 
-  // pdfl(html: string, parse: string, list_text: string, list_url: string, add_url: string): string[] {
-  //   if (!html || !parse) return [];
+  pdfl(html: string, parse: string ,list_text: string, list_url: string, url_key: string): string[] {
+    if (!html || !parse) return [];
+    parse = this.parseHikerToJq(parse, false);
+    const new_vod_list: any = [];
 
-  //   parse = this.parseHikerToJq(parse, false);
-  //   const doc = cheerio.load(html);
-  //   const ret: string[] = [];
+    const doc = cheerio.load(html);
+    const parses: string[] = parse.split(' ');
+    let ret: cheerio.Cheerio | null = null;
+    for (const pars of parses) {
+      ret = this.parseOneRule(doc, pars, ret);
+      if (!ret) return [];
+    }
     
-  //   const parses = parse.split(' ');
-  //   let currentRet = $('body');
-  //   for (const nparse of parses) {
-  //     currentRet = this.parseOneRule(doc, nparse, currentRet);
-  //     if (currentRet.length === 0) {
-  //       return [];
-  //     }
-  //   }
+    ret!.each((_, element) => {
+      new_vod_list.push(doc(element).html());
+    });
   
-  //   const new_vod_list = [];
-  
-  //   for (let i = 0; i < ret.length; i++) {
-  //     const it = currentRet.prop('outerHTML');
-  //     new_vod_list.push(this.parseDomForUrl(it, list_text, "").trim() + '$' + this.parseDomForUrl(it, list_url, add_url));
-  //   }
-  
-  //   return new_vod_list;
-  // }
+    return new_vod_list;
+  }
   
   /**
    * 解析空格分割后的原生表达式,返回处理后的ret

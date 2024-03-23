@@ -35,7 +35,21 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       data[key] = value;
     });
   }
+
   const headers = _object.headers || {};
+
+  const customHeaders = {
+    'Cookie': 'custom-cookie',
+    'User-Agent': 'custom-ua',
+    'Referer': 'custom-referer',
+  };
+  
+  for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
+    if (headers.hasOwnProperty(originalHeader)) {
+      headers[customHeader] = headers[originalHeader];
+      delete headers[originalHeader];
+    }
+  }
 
   let r: any;
 
@@ -53,23 +67,38 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       body: JSON.stringify(data),
       credentials: 'include'
     };
-    console.log(requestOptions)
     r = syncFetch(_url, requestOptions);
   }
   const emptyResult: Response = { content: '', body: '', headers: {} };
 
+  const formatHeaders: { [key: string]: string } = {};
+
+  // 遍历 Headers 对象
+  for (const [key, value] of r.headers.entries()) {
+    if (key.toLowerCase() === 'custom-set-cookie') {
+      formatHeaders['set-cookie'] = value;
+    } else {
+      formatHeaders[key] = value;
+    }
+  }
+
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: r.text(), headers: r.headers } || emptyResult;
+      return { body: r.text(), headers: formatHeaders } || emptyResult;
     } else {
       return r.text() || '';
     }
   } else if (_js_type === 1) {
-    let content
+    let content;
     if (bufferType === 2) {
-      content = Buffer.from(r.arrayBuffer(), 'binary').toString('base64');
+      // content = Buffer.from(r.arrayBuffer(), 'binary').toString('base64');
+      const uint8Array = new Uint8Array(r.arrayBuffer()); // 将 ArrayBuffer 转换为一个 Uint8Array
+      const buffer = Buffer.from(uint8Array); // 使用 Buffer.from 将 Uint8Array 转换为 Buffer
+      const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
+      content = base64String;
+      console.log(base64String);
     } else content = r.text();
-    return { content, headers: r.headers } || emptyResult;
+    return { content, headers: formatHeaders } || emptyResult;
   } else {
     return emptyResult;
   }
@@ -124,10 +153,10 @@ const pdfa = (html: string, parse: string) => {
   return jsp.pdfa(html, parse);
 }
 
-// const pdfl = (html: string, rule: string, list_text: string, urlKey: string) => {
-//   const jsp = new jsoup();
-//   return jsp.pdfa(html, parse);
-// }
+const pdfl = (html: string, parse: string, list_text: string, list_url: string, url_key: string) => {
+  const jsp = new jsoup();
+  return jsp.pdfl(html, parse, list_text, list_url, url_key);
+}
 
 const local_get = (_id, key, value='') => {
   return cache.get(_id, key, value);
@@ -147,4 +176,4 @@ const local = {
   'delete': local_delete
 }
 
-export { pdfh, pdfa, pd, local , req, joinUrl }
+export { pdfh, pdfa, pdfl, pd, local , req, joinUrl }
