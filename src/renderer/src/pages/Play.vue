@@ -950,7 +950,9 @@ const initFilmPlayer = async (isFirst) => {
     await getHistoryData();
     await getAnalysisData();
 
-    if (!ext.value.site.search === 0) getDoubanRecommend();
+    if (ext.value.site.type !== 7) {
+      if (ext.value.site.search !== 0) getDoubanRecommend();
+    }
     getBinge();
 
     const item = season.value[selectPlaySource.value].find(
@@ -1369,22 +1371,19 @@ const getDoubanRecommend = async () => {
         if (item && ids.length < 10) {
           ids.push(item[0]);
         }
-      } catch (err) {
-        // Handle the error if necessary
-      }
+      } catch (err) {}
     });
 
     await Promise.all(searchPromises);
-
-    if ( ids.length > 0 ) {
+    if (ids.length > 0) {
       const idsFirst = ids[0]
-      if ( !('vod_pic' in idsFirst) ) { 
+      if (!('vod_pic' in idsFirst)) { 
         flag = false;
         vodIds = ids.map((movie) => movie.vod_id).join(',');
       }
     }
 
-    if ( flag ) recommend.value = ids;
+    if (flag) recommend.value = ids;
     else recommend.value = await fetchDetail(site, vodIds);
   } catch (err) {
     console.log(err);
