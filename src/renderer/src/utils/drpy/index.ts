@@ -1,6 +1,6 @@
 import Worker from '@/utils/drpy/worker?worker';   
 
-const worker = new Worker();
+let worker = new Worker();
 
 const doWork = (data) => {
   return new Promise((resolve, reject) => {
@@ -22,6 +22,7 @@ const terminateWork = () => {
   return new Promise((resolve, reject) => {
     if (typeof worker !== 'undefined' && worker !== null) {
       worker.terminate();
+      worker = new Worker(); // 重新创建
       resolve({
         msg: 'Worker terminated successfully.',
         code: 200
