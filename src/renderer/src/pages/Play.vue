@@ -950,7 +950,7 @@ const initFilmPlayer = async (isFirst) => {
     await getHistoryData();
     await getAnalysisData();
 
-    getDoubanRecommend();
+    if (!ext.value.site.search === 0) getDoubanRecommend();
     getBinge();
 
     const item = season.value[selectPlaySource.value].find(
