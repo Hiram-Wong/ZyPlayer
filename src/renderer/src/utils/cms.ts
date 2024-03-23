@@ -544,7 +544,7 @@ const fetchSearch = async(site, wd) => {
   try {
     if (site.type === 7) {
       const res = await t3Work({type:'search', data: { wd, quick: false, pg: 1 }});
-      return res.data;
+      return res.data?.list;
     }
     let url, postData;
     if ( site.type === 3 ) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
