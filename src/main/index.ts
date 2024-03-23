@@ -27,6 +27,7 @@ logger.info(`[env] path:${process.env.PATH}`);
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'; // 关闭安全警告
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors'); // 允许跨域
+app.commandLine.appendSwitch('disable-features', 'BlockInsecurePrivateNetworkRequests'); // 允许不安全的专用网络请求
 app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书相关错误
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 支持hevc
 app.commandLine.appendSwitch('disable-site-isolation-trials'); // iframe 跨域
@@ -157,7 +158,7 @@ const createWindow = (): void => {
       contextIsolation: false,
       webviewTag: true, // 启用webview
       webSecurity: false, // 禁用同源策略
-      allowRunningInsecureContent: false, // 允许 https 页面运行来自http url的JavaScript, CSS 或 plugins
+      allowRunningInsecureContent: true, // 允许 https 页面运行来自http url的JavaScript, CSS 或 plugins
     },
   })
 
@@ -194,77 +195,12 @@ const createWindow = (): void => {
     return { action: 'deny' };
   });
 
-  // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
-
-  // mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
-  //   let { requestHeaders, url } = details;
-
-  //   const parseCustomUrl = (url) => {
-  //     const parts = url.split('@');
-  //     const filePath = parts[0];
-  //     const headers = {};
-  
-  //     for (let i = 1; i < parts.length; i++) {
-  //       const [key, value] = parts[i].split('=');
-  //       headers[key] = value;
-  //     }
-  
-  //     return { filePath, headers };
-  //   }
-
-  //   const { headers } = parseCustomUrl(url);
-
-  //   const requestUrl = new URL(url);
-  //   // 添加 Origin 头部
-  //   requestHeaders.Origin = requestUrl.origin;
-
-  //   // 处理自定义 User-Agent 头部
-  //   if (requestHeaders['custom-ua']) {
-  //     requestHeaders['User-Agent'] = requestHeaders['custom-ua'];
-  //     delete requestHeaders['custom-ua'];
-  //   } else if (headers['User-Agent']) {
-  //     requestHeaders['User-Agent'] = headers['User-Agent'];
-  //   } else if (uaState) {
-  //     requestHeaders['User-Agent'] = uaState;
-  //   }
-
-  //   // 处理自定义 Cookie 头部
-  //   if (requestHeaders['custom-cookie']) {
-  //     requestHeaders['Cookie'] = requestHeaders['custom-cookie'];
-  //     delete requestHeaders['custom-cookie'];
-  //   } else if (headers['Cookie']) {
-  //     requestHeaders['Cookie'] = headers['Cookie'];
-  //   } 
-
-  //   // 处理自定义 Referer 头部
-  //   if (requestHeaders['custom-referer']) {
-  //     requestHeaders['Referer'] = requestHeaders['custom-referer'];
-  //     delete requestHeaders['custom-referer'];
-  //   } else if (headers['Referer']) {
-  //     requestHeaders['Referer'] = headers['Referer'];
-  //   } else if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
-  //     requestHeaders.Referer = requestUrl.origin;
-  //   }
-  //   // console.log(requestHeaders, details)
-  //   callback({ requestHeaders });
-  // });
-
-  // X-Frame-Options
-  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    if (details.responseHeaders?.['X-Frame-Options']) {
-      delete details.responseHeaders['X-Frame-Options'];
-    } else if (details.responseHeaders?.['x-frame-options']) {
-      delete details.responseHeaders['x-frame-options'];
-    }
-
-    callback({ cancel: false, responseHeaders: details.responseHeaders });
-  });
 
   mainWindow.webContents.on('did-attach-webview', (_, wc) => {
     wc.setWindowOpenHandler((details) => {
@@ -364,6 +300,26 @@ app.whenReady().then(async() => {
     });
   }
 
+  defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const headersToRemove = ['X-Frame-Options', 'x-frame-options'];
+    const cookieHeader = details.responseHeaders?.['Set-Cookie'] || details.responseHeaders?.['set-cookie'];
+  
+    for (const header of headersToRemove) {
+      if (details.responseHeaders?.[header]) {
+        delete details.responseHeaders[header];
+      }
+    }
+  
+    if (cookieHeader) {
+      const updatedCookieHeader = cookieHeader.map((cookie) => `${cookie}; SameSite=None; Secure`);
+      delete details.responseHeaders!['Set-Cookie'];
+      details.responseHeaders!['custom-set-cookie'] = cookieHeader;
+      details.responseHeaders!['set-cookie'] = updatedCookieHeader;
+    }
+  
+    callback({ cancel: false, responseHeaders: details.responseHeaders });
+  });
+
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -418,7 +374,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
       nodeIntegration: true,
       contextIsolation: false,
       webSecurity: false, // 允许跨域
-      allowRunningInsecureContent: false,
+      allowRunningInsecureContent: true
     },
   });
 
@@ -439,20 +395,6 @@ ipcMain.on('openPlayWindow', (_, arg) => {
       })
     )
   }
-
-  // 修改request headers
-  // Sec-Fetch下禁止修改，浏览器自动加上请求头 https://www.cnblogs.com/fulu/p/13879080.html 暂时先用index.html的meta referer policy替代
-  playWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
-    const { requestHeaders, url } = details;
-    const requestUrl = new URL(url);
-
-    requestHeaders.Origin = requestUrl.origin;
-    if (uaState) requestHeaders['User-Agent'] = uaState;
-    if (!url.includes('//localhost') && requestHeaders.Referer && requestHeaders.Referer.includes('//localhost')) {
-      requestHeaders.Referer = requestUrl.origin;
-    }
-    callback({ requestHeaders });
-  });
 
   // 禁止下载
   playWindow.webContents.session.on('will-download', (event) => {
