@@ -64,7 +64,7 @@ const reptileApiFormat = (item, key) => {
 const reptileXpathFormat = (item, pat) => {
   try {
     const doc = new DOMParser().parseFromString(item);
-    const res = xpath.select(pat, doc);
+    const res: any = xpath.select(pat, doc);
     if (res && res.length > 0) {
       return res.map(item => item.textContent);
     } else {
@@ -92,12 +92,12 @@ const removeHTMLTagsAndSpaces = (str) => {
 };
 
 const t3RuleInit = async(rule: string) => {
-  const res = await t3Work({type:'init', data: rule});
+  const res: any = await t3Work({type:'init', data: rule});
   return res.data;
 }
 
 const t3RuleTerminate = async() => {
-  const res = await t3WorkTerminate();
+  const res: any = await t3WorkTerminate();
   if (res.code === 200) return 'sucess'
   else return 'fail';
 }
@@ -134,7 +134,7 @@ const fetchClassify = async(site) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `&extend=${site.ext}&filter=true`);
     } else if (site.type === 7) {
-      const content = await t3Work({type:'home'});
+      const content: any = await t3Work({type:'home'});
       const res = {
         page: 1,
         pagecount: 9999,
@@ -262,13 +262,14 @@ const fetchClassify = async(site) => {
 
       classData.forEach(classItem => {
         if (classItem.type_extend) {
-          const result = [];
+          const result: any = [];
           for (const key in classItem.type_extend) {
             const value = classItem.type_extend[key];
             if (!_.isEmpty(value) && !['star','state','version','director'].includes(key)) {
               const valueList = value.split(',').map((item) => item.trim());
               const options = valueList.map((value) => ({ n: value === "全部" ? "全部" : value, v: value }));
-              result.push({ key, name: _.find(CLASS_FILTER_CONFIG, { key }).desc, value: [{ n: "全部", v: "" }, ...options] });
+              const name = (_.find(CLASS_FILTER_CONFIG, { key }) || {}).desc;
+              result.push({ key, name, value: [{ n: "全部", v: "" }, ...options] });
             }
           }
           filters[classItem.type_id]= result
@@ -403,7 +404,7 @@ const fetchList = async(site, pg = 1, t, f = {}) => {
         url = buildUrl(url, `&ext=${encodedStr}`);
       }
     } else if (site.type === 7) {
-      const res = await t3Work({type:'category', data: { tid:t, pg, filter: _.size(f) ? true:  false, extend: _.size(f) ? f : {} }});
+      const res: any = await t3Work({type:'category', data: { tid:t, pg, filter: _.size(f) ? true:  false, extend: _.size(f) ? f : {} }});
       return res.data.list;
     } else if (site.type === 8) {
       url = buildUrl(site.api, `/category`);
@@ -490,7 +491,7 @@ const fetchHot = async(site, h) => {
       videoList = data.list.flatMap(typeObj => typeObj.vlist);
     }
 
-    let hotList = [];
+    let hotList: any = [];
     if (site.type === 3 || site.type === 2) {
       hotList = videoList;
     } else {
@@ -543,7 +544,7 @@ const fetchSearch = async(site, wd) => {
   // xml坑: 单条结果是dict 多条结果list
   try {
     if (site.type === 7) {
-      const res = await t3Work({type:'search', data: { wd, quick: false, pg: 1 }});
+      const res: any = await t3Work({type:'search', data: { wd, quick: false, pg: 1 }});
       return res.data?.list;
     }
     let url, postData;
@@ -711,7 +712,7 @@ const fetchDetail = async(site, id) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=detail&ids=${id}&extend=${site.ext}`);
     } else if (site.type === 7) {
-      const res = await t3Work({type:'detail', data: `${id}`});
+      const res: any = await t3Work({type:'detail', data: `${id}`});
       return res.data.list;
     } else if (site.type === 8) {
       url = buildUrl(site.api, `/detail`);
@@ -827,7 +828,7 @@ const fetchHipyPlayUrl = async(site, flag, play) => {
  */
 const fetchT3PlayUrl = async (flag: string, id: string, flags:string[] = []) => {
   try {
-    const res = await t3Work({type:'play', data: { flag, id, flags }});
+    const res: any = await t3Work({type:'play', data: { flag, id, flags }});
     return res.data;
   } catch (err) {
     throw err;
@@ -915,20 +916,20 @@ const extractPlayerUrl = async(url) => {
  * @param {*} year 视频年份
  * @returns 豆瓣页面链接，如果没有搜到该视频，返回搜索页面链接
  */
-const fetchDoubanLink = async(id, name, year) => {
+const fetchDoubanLink = async (id: string, name: string, year: string) => {
   const nameToSearch = encodeURI(name.trim());
   const doubanSearchLink =
     id && parseInt(id) !== 0
       ? `https://movie.douban.com/subject/${id}`
       : `https://www.douban.com/search?cat=1002&q=${nameToSearch}`;
   try {
-    const res = await axios.get(doubanSearchLink);
-    const $ = cheerio.load(res.data);
-    let link = "";
-    $("div.result").each(function () {
-      const linkInDouban = $(this).find("div>div>h3>a").first();
+    const { data } = await axios.get(doubanSearchLink);
+    const $ = cheerio.load(data);
+    let link: any = "";
+    $("div.result").each((_, element) => {
+      const linkInDouban = $(element).find("div>div>h3>a").first();
       const nameInDouban = linkInDouban.text().replace(/\s/g, "");
-      const subjectCast = $(this).find("span.subject-cast").text();
+      const subjectCast = $(element).find("span.subject-cast").text();
       if (
         nameToSearch === encodeURI(nameInDouban) &&
         subjectCast &&
