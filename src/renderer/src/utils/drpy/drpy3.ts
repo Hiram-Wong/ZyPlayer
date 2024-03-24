@@ -52,23 +52,15 @@ const VERSION = `${vercode} 3.9.49beta36 202400308`;
  * 7.eval(getCryptoJS());还没有实现 (可以空实现了,以后遇到能忽略)
  * done: jsp:{pdfa,pdfh,pd},json:{pdfa,pdfh,pd},jq:{pdfa,pdfh,pd}
  * 8.req函数不支持传递字符串的data参数 {'content-type':'text/plain'} 类型数据，因此无法直接调用alist的ocr接口
- *  * 电脑看日志调试
- adb tcpip 5555
- adb connect 192.168.10.192
- adb devices -l
- adb logcat -c
- adb logcat | grep -i QuickJS
- adb logcat -c -b events
- adb logcat -c -b main -b events -b radio -b system
- adb logcat > 2.log DRPY:E | grep -i QuickJS
- * **/
+ * /
 
-/*** 以下是内置变量和解析方法 **/
+/** 以下是内置变量和解析方法 **/
 var MOBILE_UA = 'Mozilla/5.0 (Linux; Android 11; M2007J3SC Build/RKQ1.200826.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045714 Mobile Safari/537.36';
 const PC_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36';
 const UA = 'Mozilla/5.0';
 const UC_UA = 'Mozilla/5.0 (Linux; U; Android 9; zh-CN; MI 9 Build/PKQ1.181121.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 UCBrowser/12.5.5.1035 Mobile Safari/537.36';
 const IOS_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1';
+// console.log(UA,UC_UA,IOS_UA);
 const RULE_CK = 'cookie'; // 源cookie的key值
 // const KEY = typeof(key)!=='undefined'&&key?key:'drpy_' + (rule.title || rule.host); // 源的唯一标识
 const CATE_EXCLUDE = '首页|留言|APP|下载|资讯|新闻|动态';
@@ -327,53 +319,53 @@ const rc = (js) =>{
 
 // 千万不要用for in 推荐 forEach (for in 会打乱顺序)
 //猫函数
-// const maoss = (jxurl, ref, key) => {
-//   fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
-//   eval(getCryptoJS());
-//   try {
-//     var getVideoInfo = function (text) {
-//       return CryptoJS.AES.decrypt(text, key, {iv: iv, padding: CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8);
-//     };
-//     var token_key = key == undefined ? 'dvyYRQlnPRCMdQSe' : key;
-//     if (ref) {
-//       var html = request(jxurl, {
-//         headers: {
-//           'Referer': ref
-//         }
-//       });
-//     } else {
-//       var html = request(jxurl);
-//     }
-//       // print(html);
-//     if (html.indexOf('&btwaf=') != -1) {
-//       html = request(jxurl + '&btwaf' + html.match(/&btwaf(.*?)"/)[1], {
-//         headers: {
-//           'Referer': ref
-//         }
-//       })
-//     }
-//     var token_iv = html.split('_token = "')[1].split('"')[0];
-//     var key = CryptoJS.enc.Utf8.parse(token_key);
-//     var iv = CryptoJS.enc.Utf8.parse(token_iv);
-//     // log("iv:"+iv);
-//     //  log(html);
-//     // print(key);
-//     // print(iv);
-//     eval(html.match(/var config = {[\s\S]*?}/)[0] + '');
-//     // config.url = config.url.replace(/,/g,'');
-//     // print(config.url);
-//     if (!config.url.startsWith('http')) {
-//       //config.url = decodeURIComponent(AES(config.url, key, iv));
-//       config.url = CryptoJS.AES.decrypt(config.url, key, {
-//         iv: iv,
-//         padding: CryptoJS.pad.Pkcs7
-//       }).toString(CryptoJS.enc.Utf8)
-//     }
-//     return config.url;
-//   } catch (e) {
-//     return '';
-//   }
-// }
+const maoss = (jxurl, ref, key) => {
+  fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
+  eval(getCryptoJS());
+  try {
+    var getVideoInfo = function (text) {
+      return CryptoJS.AES.decrypt(text, key, {iv: iv, padding: CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8);
+    };
+    var token_key = key == undefined ? 'dvyYRQlnPRCMdQSe' : key;
+    if (ref) {
+      var html = request(jxurl, {
+        headers: {
+          'Referer': ref
+        }
+      });
+    } else {
+      var html = request(jxurl);
+    }
+      // print(html);
+    if (html.indexOf('&btwaf=') != -1) {
+      html = request(jxurl + '&btwaf' + html.match(/&btwaf(.*?)"/)[1], {
+        headers: {
+          'Referer': ref
+        }
+      })
+    }
+    var token_iv = html.split('_token = "')[1].split('"')[0];
+    var key = CryptoJS.enc.Utf8.parse(token_key);
+    var iv = CryptoJS.enc.Utf8.parse(token_iv);
+    // log("iv:"+iv);
+    //  log(html);
+    // print(key);
+    // print(iv);
+    eval(html.match(/var config = {[\s\S]*?}/)[0] + '');
+    // config.url = config.url.replace(/,/g,'');
+    // print(config.url);
+    if (!config.url.startsWith('http')) {
+      //config.url = decodeURIComponent(AES(config.url, key, iv));
+      config.url = CryptoJS.AES.decrypt(config.url, key, {
+        iv: iv,
+        padding: CryptoJS.pad.Pkcs7
+      }).toString(CryptoJS.enc.Utf8)
+    }
+    return config.url;
+  } catch (e) {
+    return '';
+  }
+}
 
 const urlencode = (str) => {
   str = `${str}`;
@@ -2040,13 +2032,13 @@ const init = (ext) => {
     rule["host"] = rstrip(rule["host"] || '', '/');
     HOST = rule["host"];
     if (rule["hostJs"]) {
-      console.log(`检测到hostJs,准备执行...`);
+      console.log(`[t3][publish]检测到hostJs,准备执行...`);
       try {
         eval(rule["hostJs"]);
         rule["host"] = rstrip(HOST, '/');
-        console.log(rule["host"])
+        console.log(`[t3][publish]最新域名为${rule["host"]}`)
       } catch (e) {
-        console.log(`执行${rule["hostJs"]}获取host发生错误:${e}`);
+        console.log(`[t3][publish]执行${rule["hostJs"]}获取host发生错误:${e}`);
       }
     }
     rule["url"] = rule["url"] || '';
@@ -2104,13 +2096,13 @@ const init = (ext) => {
                 v = fetch(v);
                 rule["headers"][k] = v;
               } catch (e) {
-                console.log(`从${v}获取cookie发生错误:${e}`);
+                console.log(`[t3][init]从${v}获取cookie发生错误:${e}`);
               }
             }
           }
         }
       } catch (e) {
-        console.log(`处理headers发生错误:${e}`);
+        console.log(`[t3][init]处理headers发生错误:${e}`);
       }
     }
 
@@ -2121,7 +2113,7 @@ const init = (ext) => {
     pre();
     init_test();
   } catch (e) {
-    console.info('init_test发生错误:', e);
+    console.info('[t3][init]init_test发生错误:', e);
   }
 }
 
@@ -2339,6 +2331,5 @@ export {
   search,
   proxy,
   sniffer,
-  isVideo,
-  verifyCode
+  isVideo
 }
