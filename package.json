@@ -101,7 +101,6 @@
     "stylelint-order": "~6.0.4",
     "tdesign-icons-vue-next": "^0.2.2",
     "tdesign-vue-next": "^1.9.0",
-    "terser": "^5.29.2",
     "typescript": "^5.4.2",
     "unplugin-auto-import": "^0.17.5",
     "unplugin-vue-components": "^0.26.0",

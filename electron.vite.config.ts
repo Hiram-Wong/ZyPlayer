@@ -43,21 +43,10 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         }
       },
       build: {
-        assetsInclude: ['./src/renderer/src/utils/drpy/drpy3.ts'],
-        minify: 'terser',
         emptyOutDir: true, // 打包时先清空上一次构建生成的目录
         reportCompressedSize: false, // 关闭文件计算
-        sourcemap: true, // 关闭生成map文件 可以达到缩小打包体积
-        terserOptions: {
-          // 禁用代码优化
-          compress: false,
-          mangle: false,
-          format: {
-            comments: false,
-          },
-        },
+        sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
         rollupOptions: {
-          treeshake: false, // 关闭代码分割[重要], 否则eval执行时缺少全局变量和方法
           output: {
             entryFileNames: `assets/entry/[name][hash].js`, // 引入文件名的名称
             chunkFileNames: `assets/chunk/[name][hash].js`, // 包的入口文件名称
@@ -108,7 +97,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         splitVendorChunkPlugin()
       ],
       server: {
-        strictPort: true,
+        strictPort: true, // 端口冲突自动分配端口
         proxy: {
           [VITE_API_URL_PREFIX]: {
             target: VITE_API_URL,  // 后台接口域名
