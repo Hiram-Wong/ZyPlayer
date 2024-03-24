@@ -321,22 +321,26 @@ const rc = (js) =>{
 //猫函数
 const maoss = (jxurl, ref, key) => {
   fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
+  var html;
+  // @ts-ignore
   eval(getCryptoJS());
   try {
     var getVideoInfo = function (text) {
       return CryptoJS.AES.decrypt(text, key, {iv: iv, padding: CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8);
     };
+    let temp:any = { getVideoInfo }; // 防止tree-shake
+    temp.stringify({}); // 防止tree-shake
     var token_key = key == undefined ? 'dvyYRQlnPRCMdQSe' : key;
     if (ref) {
-      var html = request(jxurl, {
+      html = request(jxurl, {
         headers: {
           'Referer': ref
         }
       });
     } else {
-      var html = request(jxurl);
+      html = request(jxurl);
     }
-      // print(html);
+
     if (html.indexOf('&btwaf=') != -1) {
       html = request(jxurl + '&btwaf' + html.match(/&btwaf(.*?)"/)[1], {
         headers: {
@@ -347,20 +351,18 @@ const maoss = (jxurl, ref, key) => {
     var token_iv = html.split('_token = "')[1].split('"')[0];
     var key = CryptoJS.enc.Utf8.parse(token_key);
     var iv = CryptoJS.enc.Utf8.parse(token_iv);
-    // log("iv:"+iv);
-    //  log(html);
-    // print(key);
-    // print(iv);
+
     eval(html.match(/var config = {[\s\S]*?}/)[0] + '');
-    // config.url = config.url.replace(/,/g,'');
-    // print(config.url);
+
+    // @ts-ignore
     if (!config.url.startsWith('http')) {
-      //config.url = decodeURIComponent(AES(config.url, key, iv));
+      // @ts-ignore
       config.url = CryptoJS.AES.decrypt(config.url, key, {
         iv: iv,
         padding: CryptoJS.pad.Pkcs7
       }).toString(CryptoJS.enc.Utf8)
     }
+    // @ts-ignore
     return config.url;
   } catch (e) {
     return '';
@@ -829,7 +831,7 @@ const verifyCode = (url) => {
  */
 const setItem = (k, v) => {
   local.set(RKEY, k, v);
-  console.log(`规则${RKEY}设置${k} => ${v}`)
+  console.log(`[t3][cache][set]${RKEY}${k}:${v}`);
 }
 
 /**
@@ -839,7 +841,9 @@ const setItem = (k, v) => {
  * @returns {*}
  */
 const getItem = (k, v) => {
-  return local.get(RKEY, k, v);
+  const res = local.get(RKEY, k, v);
+  console.log(`[t3][cache][get]${res}`)
+  return res;
 }
 
 /**
@@ -1169,6 +1173,7 @@ const homeVodParse = (homeVodObj) => {
   if (p.startsWith('js:')) {
     const TYPE = 'home';
     var input = MY_URL;
+    [TYPE, input].map(item =>{item.length}); // 防止tree-shake
     HOST = rule["host"];
     eval(p.replace('js:', ''));
     d = VODS;
@@ -1357,6 +1362,7 @@ const categoryParse = (cateObj) => {
     var input = MY_URL;
     const MY_PAGE = cateObj.pg;
     var desc = '';
+    [MY_FL, TYPE, input, MY_PAGE, desc].map(item =>{item.length}); // 防止tree-shake
     eval(p.trim().replace('js:', ''));
     d = VODS;
   } else {
@@ -1478,6 +1484,7 @@ const searchParse = (searchObj) => {
     const KEY = searchObj.wd;
     var input = MY_URL;
     var detailUrl = rule["detailUrl"] || '';
+    [TYPE, MY_PAGE, KEY, input, detailUrl].map(item =>{item.length}); // 防止tree-shake
     eval(p.trim().replace('js:',''));
     d = VODS;
   } else {
@@ -1623,6 +1630,7 @@ const detailParse = (detailObj) => {
   let url = detailObj.url;
   let detailUrl = detailObj.detailUrl;
   let fyclass = detailObj.fyclass;
+  [fyclass].map(item =>{item.length}); // 防止tree-shake
   let tab_exclude = detailObj.tab_exclude;
   let html = detailObj.html || '';
   MY_URL = url;
@@ -1645,6 +1653,7 @@ const detailParse = (detailObj) => {
     const TYPE = 'detail';
     var input = MY_URL;
     var play_url = '';
+    [TYPE, input, play_url].map(item =>{item.length}); // 防止tree-shake
     eval(p.trim().replace('js:',''));
     vod = VOD;
   } else if(p && typeof p === 'object') {
@@ -1774,6 +1783,7 @@ const detailParse = (detailObj) => {
             let p1 = p.lists.replaceAll('#idv', tab_name).replaceAll('#id', i);
             tab_ext = tab_ext.replaceAll('#idv', tab_name).replaceAll('#id', i);
             let tabName = tab_ext ? _pdfh(html, tab_ext) : tab_name;
+            [tabName].map(item =>{item.length}); // 防止tree-shake
             let new_vod_list: any = [];
             let tt1 = Date.now();
             // @ts-ignore
@@ -2305,7 +2315,7 @@ const isVideo = (url: string) => {
   if (is_video?.startsWith('js:')) {
     is_video = is_video.replace('js:', '');
     t = 1;
-  }
+  };
 
   const isVideoObj = {
     url: url,
@@ -2317,8 +2327,24 @@ const isVideo = (url: string) => {
 
   if (result) {
     console.log(`成功执行辅助嗅探规则并检测到视频地址:\n${rule["isVideo"]}`);
-  }
-  return result
+  };
+  return result;
+};
+
+// [重要]防止树摇
+const keepUnUse = {
+  useful: (): void => {
+    const _ = {
+      UA, UC_UA, IOS_UA, // UA
+      log, oheaders, // global parms
+      NOADD_INDEX, URLJOIN_ATTR, SELECT_REGEX, SELECT_REGEX_A, // REGEX
+      urlDeal, setResult2, setHomeResult, rc, maoss, getProxyUrl, urljoin2, stringify, jsp, jq, buildUrl, $require, proxy, sniffer, isVideo,
+      base64Encode, md5, decodeStr, RSA, // encryption and decryption
+      clearItem, // cache
+    };
+    let temp = _;
+    temp.stringify({});
+  },
 };
 
 export {
@@ -2329,7 +2355,5 @@ export {
   detail,
   play,
   search,
-  proxy,
-  sniffer,
-  isVideo
-}
+  keepUnUse
+};
