@@ -1,8 +1,11 @@
 import uniq from 'lodash/uniq';
 import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vue-router';
 
-// 自动导入modules文件夹下所有ts文件
-const modules = import.meta.glob<{ install: (ctx: any) => void }>('./modules/**/*.ts', { eager: true });
+// 导入homepage相关固定路由
+const homepageModules = import.meta.glob('./modules/**/homepage.ts', { eager: true });
+
+// 导入modules非homepage相关固定路由
+const fixedModules = import.meta.glob('./modules/**/!(homepage).ts', { eager: true });
 
 // 其他固定路由
 const defaultRouterList: Array<any> = [
@@ -19,9 +22,10 @@ const defaultRouterList: Array<any> = [
 ];
 
 // 存放固定路由
-export const asyncRouterList: Array<RouteRecordRaw> = mapModuleRouterList(modules);
+export const homepageRouterList: Array<RouteRecordRaw> = mapModuleRouterList(homepageModules);
+export const fixedRouterList: Array<RouteRecordRaw> = mapModuleRouterList(fixedModules);
 
-export const allRoutes = [...defaultRouterList, ...asyncRouterList];
+export const allRoutes = [...homepageRouterList, ...fixedRouterList, ...defaultRouterList];
 
 // 固定路由模块转换为路由
 // 关于单层路由，meta 中设置 { single: true } 即可为单层路由，{ hidden: true } 即可在侧边栏隐藏该路由
@@ -37,9 +41,9 @@ export function mapModuleRouterList(modules: Record<string, unknown>): Array<Rou
 }
 
 export const getRoutesExpanded = () => {
-  const expandedRoutes = [];
+  const expandedRoutes: Array<string> = [];
 
-  allRoutes.forEach((item) => {
+  fixedRouterList.forEach((item) => {
     if (item.meta && item.meta.expanded) {
       expandedRoutes.push(item.path);
     }
@@ -57,6 +61,7 @@ export const getRoutesExpanded = () => {
 
 export const getActive = (maxLevel = 3): string => {
   const route = useRoute();
+  console.log(route)
   if (!route.path) {
     return '';
   }

@@ -25,7 +25,7 @@ import type { PropType } from 'vue';
 import { computed, ref } from 'vue';
 
 import { prefix } from '@/config/global';
-import { getActive } from '@/router';
+import { useRoute, useRouter } from 'vue-router';
 import type { MenuRoute } from '@/types/interface';
 
 type ListItemType = MenuRoute & { icon?: string };
@@ -41,12 +41,24 @@ const props = defineProps({
   },
 });
 
-const macFull = ref(false);
+const route = useRoute();
 const { platform } = window.electron.process;
+const macFull = ref(false);
 
 window.electron.ipcRenderer.on('screen', (_, args) => {
   macFull.value = args;
 })
+
+const getActive = (maxLevel = 3): string => {
+  if (!route.path) {
+    return '';
+  }
+  return route.path
+    .split('/')
+    .filter((_item: string, index: number) => index <= maxLevel && index > 0)
+    .map((item: string) => `/${item}`)
+    .join('');
+};
 
 const active = computed(() => getActive());
 

@@ -47,7 +47,7 @@ export default [
     ],
   },
   {
-    path: '/play/',
+    path: '/play',
     name: 'play',
     redirect: '/play/index',
     meta: { title: '播放', icon: 'play-circle-stroke', hidden: true },
