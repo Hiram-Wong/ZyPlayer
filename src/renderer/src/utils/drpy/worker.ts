@@ -1,4 +1,19 @@
-import { init, home, homeVod, category, detail, play, search, proxy, sniffer, isVideo } from './drpy3';
+/*!
+ * @module worker
+ * @brief web-worker 专属线程处理
+ * @version  0.0.1
+ * @author HiramWong <admin@catni.cn>
+ * @date 2023-03-24T18:21:29+08:00
+ */
+
+import { init, home, homeVod, category, detail, play, search, keepUnUse } from './drpy3';
+
+const initUtils = () => {
+  console.log(`[worker][prevent tree-shake] init t3 not use module`);
+  keepUnUse.useful();
+}
+
+if (!import.meta.env.DEV) initUtils(); // 防止tree-shake
 
 const drpyWork = (parms) => {
   const { type, data } = parms;

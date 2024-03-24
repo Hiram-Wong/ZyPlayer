@@ -1,3 +1,25 @@
+/*!
+ * @module drpy3
+ * @brief T3数据处理核心库
+ * @version 3.1.0
+ * 
+ * @original-author hjdhnx
+ * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
+ * 
+ * @modified-by HiramWong <admin@catni.cn>
+ * @modification-date 2023-03-24T18:21:29+08:00
+ * @modification-description 使用TypeScript适配, 适用于JavaScript项目, 并采取措施防止 Tree-Shaking 删除关键代码
+ * 
+ * **防止 Tree-Shake 说明**:
+ * - 为了确保 `drpy3.ts` 中的函数和变量不被 Tree Shaking, 已采取以下措施：
+ *   - 作用域参数举例：`[a, b, c].forEach(item => item.length)` —— 显式遍历数组元素防止数组相关操作被优化掉。
+ *   - 作用域函数举例：`let temp = _; temp.stringify({});` —— 对于 `_` 符合的对象，确保其方法被调用，防止被误删。
+ *   - 全局函数与参数举例：`keepUnUse.useful._` —— 对于 `_` 符合的对象，确保其方法被调用，防止被误删。
+ * 
+ * --- 
+ */
+
+
 import CryptoJS from 'crypto-js';
 import cheerio from "./cheerio.min";
 import joinUrl from 'url';

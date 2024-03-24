@@ -1,3 +1,16 @@
+/*!
+ * @module htmlParser
+ * @brief T3解析html处理库
+ * @version 3.1.0
+ * 
+ * @original-author hjdhnx
+ * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/base/htmlParser.py | Source on GitHub}
+ * 
+ * @modified-by HiramWong <admin@catni.cn>
+ * @modification-date 2023-03-24T18:21:29+08:00
+ * @modification-description Python转TypeScript, 适用于JavaScript项目
+ */
+
 import * as cheerio from 'cheerio';
 import jsonpath from 'jsonpath';
 import urlJoin from 'url';

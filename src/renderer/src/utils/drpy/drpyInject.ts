@@ -1,3 +1,16 @@
+/*!
+ * @module drpyInject
+ * @brief T3网络请求、缓存模块处理库
+ * @version 3.1.0
+ * 
+ * @original-author hjdhnx
+ * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/utils/quickjs_ctx.py | Source on GitHub}
+ * 
+ * @modified-by HiramWong <admin@catni.cn>
+ * @modification-date 2023-03-24T18:21:29+08:00
+ * @modification-description Python转TypeScript, 适用于JavaScript项目
+ */
+
 import syncFetch from 'sync-fetch';
 import jsoup from './htmlParser';
 
@@ -157,7 +170,7 @@ const pdfl = (html: string, parse: string, list_text: string, list_url: string, 
   return jsp.pdfl(html, parse, list_text, list_url, url_key);
 }
 
-const CACHE_URL = String(import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_APP_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`) + '/v1/cache';
+const CACHE_URL = String(import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`) + '/v1/cache';
 
 const local_get = (_id: string, key: string, value: string = '') => {
   const url = `${CACHE_URL}/${_id}${key}`;
