@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const baseURL = String(import.meta.env.DEV ? '/api' : import.meta.env.VITE_APP_API_URL)
+const baseURL = String(import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_APP_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`)
 
 const service: AxiosInstance = axios.create({
   baseURL,

@@ -157,7 +157,7 @@ const pdfl = (html: string, parse: string, list_text: string, list_url: string, 
   return jsp.pdfl(html, parse, list_text, list_url, url_key);
 }
 
-const CACHE_URL = String(import.meta.env.DEV ? '/api' : import.meta.env.VITE_APP_API_URL) + '/v1/cache';
+const CACHE_URL = String(import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_APP_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`) + '/v1/cache';
 
 const local_get = (_id: string, key: string, value: string = '') => {
   const url = `${CACHE_URL}/${_id}${key}`;
