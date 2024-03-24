@@ -19,6 +19,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         history: () => history.clear(),
         star: () => star.clear(),
         setting: () => setting.clear(),
+        // @ts-ignore
+        cache: () => req.server.db.delete('/'),
         all: () => db.clear()
       };
 
@@ -78,7 +80,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   });
   fastify.post(`/${API_VERSION}/db/init`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
-      const data = req.body;
+      const data: any = req.body;
       const tables = ['tbl_site', 'tbl_iptv', 'tbl_channel', 'tbl_analyze', 'tbl_drive', 'tbl_history', 'tbl_star', 'tbl_setting'];
 
       const tableSetters = {

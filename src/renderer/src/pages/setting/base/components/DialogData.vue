@@ -574,7 +574,7 @@ const clearData = async() => {
   
   try {
     const activeList = _.keys(_.pickBy(active.clear, _.identity));
-    let activeToRemove = ["cache", "thumbnail"];
+    let activeToRemove = ["thumbnail"];
     const formatActive = _.difference(activeList, activeToRemove);
     await clearDb(formatActive);
 
