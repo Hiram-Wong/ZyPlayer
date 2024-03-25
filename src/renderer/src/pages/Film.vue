@@ -32,44 +32,46 @@
             </div>
           </div>
         </div>
-        <div class="content-wrapper">
-          <div class="container-flow-wrap">
-            <div v-for="item in filmData.list" :key="item.id" class="card-wrap">
-              <div class="card" @click="playEvent(item)">
-                <div v-if="item.vod_remarks || item.vod_remark" class="card-header">
-                  <span class="card-header-tag card-header-tag-orange">
-                    <span class="card-header-tag-tagtext">{{ item.vod_remarks || item.vod_remark }}</span>
-                  </span>
+        <div class="content-wrapper" id="back-top">
+          <t-row :gutter="[16, 16]">
+            <t-col
+              :md="3" :lg="3" :xl="2" :xxl="1"
+              v-for="item in filmData.list"
+              :key="item.id"
+              class="card"
+              @click="playEvent(item)"
+            >
+              <div class="card-main">
+                <div v-if="item.vod_remarks || item.vod_remark" class="card-tag card-tag-orange">
+                  <span class="card-tag-text text-hide">{{ item.vod_remarks || item.vod_remark }}</span>
                 </div>
-                <div class="card-main">
-                  <t-image
-                    class="card-main-item"
-                    :src="item.vod_pic"
-                    :style="{ width: '100%', height: '200px', background: 'none' }"
-                    :lazy="true"
-                    fit="cover"
-                    :loading="renderLoading"
-                    :error="renderError"
-                  >
-                    <template #overlayContent>
-                      <div class="op">
-                        <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
-                      </div>
-                    </template>
-                  </t-image>
-                </div>
-                <div class="card-footer">
-                  <p class="card-footer-title">{{ item.vod_name }}</p>
-                  <p class="card-footer-desc">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
-                </div>
+                <t-image
+                  class="card-main-item"
+                  :src="item.vod_pic"
+                  :style="{ height: '100%', background: 'none', overflow: 'hidden' }"
+                  :lazy="true"
+                  fit="cover"
+                  :loading="renderLoading"
+                  :error="renderError"
+                >
+                  <template #overlayContent>
+                    <div class="op">
+                      <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
+                    </div>
+                  </template>
+                </t-image>
               </div>
-            </div>
-          </div>
+              <div class="card-footer">
+                <p class="card-footer-title text-hide">{{ item.vod_name }}</p>
+                <p class="card-footer-desc text-hide">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
+              </div>
+            </t-col>
+          </t-row>
           <infinite-loading
             v-if="isVisible.infiniteLoading"
             :identifier="infiniteId"
             :distance="200"
-            style="text-align: center; margin-bottom: 2.5em"
+            style="text-align: center"
             @infinite="load"
           >
             <template #complete>{{ infiniteCompleteTip }}</template>
@@ -81,13 +83,11 @@
 
     <detail-view v-model:visible="isVisible.detail" :site="siteConfig.default" :data="formDetailData"/>
     <t-back-top
-      container=".content-wrapper"
-      :visible-height="200"
+      container="#back-top"
       size="small"
       :offset="['1.4rem', '0.5rem']"
       :duration="2000"
-      :firstload="false"
-    ></t-back-top>
+    />
   </div>
 </template>
 
@@ -115,15 +115,15 @@ const storePlayer = usePlayStore();
 
 const renderError = () => {
   return (
-    <div class="renderIcon" style="width: 100%; height: 200px; overflow: hidden;">
-      <img src={ lazyImg } style="width: 100%; height: 100%; object-fit: cover;"/>
+    <div class="renderIcon" style="height: '100%'">
+      <img src={ lazyImg } style="height: 100%; object-fit: cover;"/>
     </div>
   );
 };
 const renderLoading = () => {
   return (
-    <div class="renderIcon" style="width: 100%; height: 200px; overflow: hidden;">
-      <img src={ lazyImg } style="width: 100%; height: 100%; object-fit: cover;"/>
+    <div class="renderIcon" style="height: '100%'">
+      <img src={ lazyImg } style="height: 100%; object-fit: cover;"/>
     </div>
   );
 };
@@ -772,109 +772,88 @@ filmReloadeventBus.on(async () => {
       }
       .content-wrapper {
         overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
         height: 100%;
-        display: flex;
-        flex-direction: column;
         position: relative;
-        flex-grow: 1;
-        .container-flow-wrap {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, 153px);
-          grid-column-gap: 15px;
-          grid-row-gap: 15px;
-          justify-content: center;
+        .card {
+          box-sizing: border-box;
           width: inherit;
-          .card {
-            box-sizing: border-box;
-            width: 153px;
-            height: 250px;
+          position: relative;
+          cursor: pointer;
+          .text-hide {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+          }
+          .card-main {
             position: relative;
-            cursor: pointer;
-            .card-header {
-              position: absolute;
-              color: #fff;
-              font-size: 12px;
+            width: 100%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 7px;
+            padding-top: 139.9%;
+            .card-tag-orange {
+              background: #ffdd9a;
+              color: #4e2d03;
+            }
+            .card-tag {
               z-index: 15;
-              height: 18px;
-              line-height: 18px;
+              position: absolute;
               left: 0;
               top: 0;
-              &-tag {
+              border-radius: 6px 0 6px 0;
+              padding: 1px 6px;
+              max-width: 60%;
+              .card-tag-text {
+                font-size: 12px;
                 height: 18px;
                 line-height: 18px;
-                padding: 1px 6px;
-                border-radius: 6px 0 6px 0;
-                background: #03c8d4;
-                display: block;
-                &-tagtext {
-                  display: inline-block;
-                  font-size: 12px;
-                  overflow: hidden;
-                  white-space: nowrap;
-                  text-overflow: ellipsis;
-                  max-width: 100px;
-                }
-              }
-              &-tag-orange {
-                background: #ffdd9a;
-                color: #4e2d03;
               }
             }
-            .card-main {
+            .card-main-item {
+              position: absolute;
+              top: 0;
+              left: 0;
+              display: block;
               width: 100%;
-              overflow: hidden;
-              border-radius: 7px;
-              .card-main-item {
-                border-radius: 7px;
-                .op {
-                  background-color: rgba(22, 22, 23, 0.8);
-                  border-radius: 0 0 7px 7px;
-                  width: 100%;
-                  color: rgba(255, 255, 255, 0.8);
-                  position: absolute;
-                  bottom: 0px;
-                  display: flex;
-                  justify-content: center;
-                }
-              }
-            }
-            .card-main:hover {
-              .card-main-item {
-                :deep(img) {
-                  transition: all 0.25s ease-in-out;
-                  transform: scale(1.05);
-                }
-              }
-            }
-            .card-footer {
-              max-height: 44px;
-              padding-top: 10px;
-              overflow: hidden;
-              height: auto;
-              .card-footer-title {
-                height: auto;
-                line-height: 15px;
-                font-size: 14px;
-                font-weight: 700;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-              }
-              .card-footer-desc {
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-                height: auto;
+              height: 100%;
+              .op {
+                background-color: rgba(22, 22, 23, 0.8);
+                border-radius: 0 0 7px 7px;
                 width: 100%;
-                line-height: 26px;
-                font-size: 13px;
-                color: #999;
-                font-weight: normal;
+                color: rgba(255, 255, 255, 0.8);
+                position: absolute;
+                bottom: 0;
+                display: flex;
+                justify-content: center;
               }
             }
           }
-          .card:hover {
+          .card-main:hover {
+            .card-main-item {
+              :deep(img) {
+                transition: all 0.25s ease-in-out;
+                transform: scale(1.05);
+              }
+            }
+          }
+          .card-footer {
+            position: relative;
+            padding-top: var(--td-comp-paddingTB-s);
+            .card-footer-title {
+              font-weight: 700;
+              line-height: var(--td-line-height-title-medium);
+              height: 22px;
+            }
+            .card-footer-desc {
+              font-size: 13px;
+              line-height: var(--td-line-height-body-large);
+              color: var(--td-text-color-placeholder);
+            }
+          }
+          &:hover {
             .card-footer-title {
               color: var(--td-brand-color);
             }

@@ -1,5 +1,5 @@
 <template>
-  <div class="chase-container">
+  <div class="chase view-container">
     <header class="header">
       <div class="page-title">
         <p class="title">过刻</p>
@@ -21,21 +21,19 @@
         </div>
       </div>
     </header>
-    <div class="container">
-      <div class="content-wrapper">
+    <div class="layout-container" id="back-top">
+      <div class="layout-content-wrapper">
         <history-view ref="historyRef" class="container-item" v-if="chaseTag === 'history'"/>
         <binge-view ref="bingeRef" class="container-item" v-else/>
       </div>
     </div>
     
-    <div class="chase-container-dialog"></div>
     <t-back-top
-      container=".container-item"
-      :visible-height="200"
+      container="#back-top"
       size="small"
       :offset="['1.4rem', '0.5rem']"
       :duration="2000"
-    ></t-back-top>
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -56,7 +54,7 @@ const checkUpdaterEvent = () => {
 </script>
 
 <style lang="less" scoped>
-.chase-container {
+.view-container {
   width: 100%;
   height: 100%;
   .header {
@@ -104,7 +102,7 @@ const checkUpdaterEvent = () => {
     }
   }
 
-  .container {
+  .layout-container {
     height: calc(100% - 45px);
     display: flex;
     flex-direction: column;
@@ -112,7 +110,7 @@ const checkUpdaterEvent = () => {
     position: relative;
     overflow-y: auto;
     width: 100%;
-    .content-wrapper {
+    .layout-content-wrapper {
       width: 100%;
       height: 100%;
       padding: 0 40px;

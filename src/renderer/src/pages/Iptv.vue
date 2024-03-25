@@ -8,48 +8,51 @@
         </div>
       </header>
       <div class="container">
-        <div class="content-wrapper">
-          <div class="container-flow-wrap">
-            <div v-for="item in channelData.list" :key="item.id" class="card-wrap">
-              <div class="card" @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
-                <div v-show="iptvConfig.ext.status" class="card-header">
-                  <div class="status">
-                    <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
-                    <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : '超时' }}</span>
-                  </div>
+        <div class="content-wrapper" id="back-top">
+          <t-row :gutter="[16, 16]">
+            <t-col
+              :md="3" :lg="3" :xl="2" :xxl="1"
+              v-for="item in channelData.list"
+              :key="item.id"
+              class="card"
+              @click="playEvent(item)"
+              @contextmenu="conButtonClick(item, $event)"
+            >
+              <div class="card-main">
+                <div v-show="iptvConfig.ext.status" class="card-tag">
+                  <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
+                  <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : '超时' }}</span>
                 </div>
-                <div class="card-main">
-                  <t-image
-                    class="card-main-item"
-                    :src="iptvConfig.ext.thumbnail? item.thumbnail: generateLogo(item)"
-                    :style="{
-                      width: '180px',
-                      height: '100px',
-                      background: 'none',
-                      padding: iptvConfig.ext.thumbnail
-                        ? 'none'
-                        : '35px 60px'
+                <t-image
+                  class="card-main-item"
+                  :src="iptvConfig.ext.thumbnail? item.thumbnail: generateLogo(item)"
+                  :style="{
+                    width: '100%',
+                    background: 'none',
+                    overflow: 'hidden',
+                    padding: iptvConfig.ext.thumbnail
+                      ? 'none'
+                      : '35px 30px'
                     }"
-                    :lazy="true"
-                    :loading="renderLoading"
-                    :error="renderError"
-                  >
-                  </t-image>
-                </div>
-                <div class="card-footer">
-                  <span class="card-footer-title">{{ item.name }}</span>
-                </div>
+                  :lazy="true"
+                  :loading="renderLoading"
+                  :error="renderError"
+                />
               </div>
-            </div>
+              <div class="card-footer">
+                <span class="card-footer-title text-hide">{{ item.name }}</span>
+              </div>
+            </t-col>
+
             <context-menu :show="isVisible.contentMenu" :options="optionsComponent" @close="isVisible.contentMenu = false">
               <context-menu-item label="拷贝频道链接" @click="copyChannelEvent" />
               <context-menu-item label="删除频道" @click="delChannelEvent" />
             </context-menu>
-          </div>
+          </t-row>
           <infinite-loading
             v-if="isVisible.infiniteLoading"
             :identifier="infiniteId"
-            style="text-align: center; margin-bottom: 2em"
+            style="text-align: center"
             :duration="200"
             @infinite="load"
           >
@@ -60,13 +63,11 @@
       </div>
     </div>
     <t-back-top
-      container=".container"
-      :visible-height="200"
+      container="#back-top"
       size="small"
       :offset="['1.4rem', '0.5rem']"
       :duration="2000"
-      :firstload="false"
-    ></t-back-top>
+    />
   </div>
 </template>
 
@@ -80,7 +81,6 @@ import { useClipboard, useEventBus } from '@vueuse/core';
 
 import _ from 'lodash';
 import PQueue from 'p-queue';
-import { ArticleIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
@@ -99,15 +99,15 @@ const storeSetting = useSettingStore();
 
 const renderError = () => {
   return (
-    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
-      <img src={ lazyImg } style="width: 100%; height: 100%; object-fit: cover;"/>
+    <div class="renderIcon" style="width: 100%;">
+      <img src={ lazyImg } style="width: 100%;object-fit: cover;"/>
     </div>
   );
 };
 const renderLoading = () => {
   return (
-    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
-      <img src={ lazyImg } style="width: 100%; height: 100%; object-fit: cover;"/>
+    <div class="renderIcon" style="width: 100%;">
+      <img src={ lazyImg } style="width: 100%; object-fit: cover;"/>
     </div>
   );
 };
@@ -511,106 +511,80 @@ const generateLogo = (item) => {
       width: 100%;
       .content-wrapper {
         overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
         height: 100%;
-        display: flex;
-        flex-direction: column;
         position: relative;
-        flex-grow: 1;
-        .container-flow-wrap {
-          display: grid;
-          padding: 10px 0;
-          grid-template-columns: repeat(auto-fill, 190px);
-          grid-column-gap: 45px;
-          grid-row-gap: 10px;
-          justify-content: center;
+        .card {
+          box-sizing: border-box;
           width: inherit;
-          .card-wrap {
-            flex-direction: column;
+          position: relative;
+          cursor: pointer;
+          border-radius: var(--td-radius-medium);
+          .text-hide {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+          }
+          .card-main {
             position: relative;
-            .card {
-              box-sizing: border-box;
-              width: 190px;
-              height: 110px;
-              position: relative;
+            width: 100%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 7px;
+            padding-top: 62%;
+            box-shadow: var(--td-shadow-1);
+            border: 5px solid #211f20;
+            background-color: #373536;
+            .card-tag {
+              z-index: 15;
+              display: flex;
+              align-content: center;
+              flex-direction: row;
+              align-items: center;
+              justify-content: center;
+              width: 40px;
+              height: 15px;
+              background-color: rgb(0 0 0 / 60%);
+              border-radius: 5px;
               box-shadow: var(--td-shadow-1);
-              border-radius: var(--td-radius-medium);
-              border: 5px solid #211f20;
-              background-color: #373536;
-              cursor: pointer;
-              .card-header {
-                .status {
-                  z-index: 10;
-                  display: flex;
-                  align-content: center;
-                  flex-direction: row;
-                  align-items: center;
-                  justify-content: center;
-                  width: 40px;
-                  height: 15px;
-                  background-color: rgb(0 0 0 / 60%);
-                  border-radius: 5px;
-                  box-shadow: var(--td-shadow-1);
-                  position: absolute;
-                  top: 5px;
-                  right: 5px;
-                  .status-item {
-                    font-size: 10px;
-                  }
-                  .error {
-                    color: var(--td-error-color);
-                  }
-                  .sucess {
-                    color: var(--td-success-color);
-                  }
-                }
-                
-                .card-header-title {
-                  background-color: rgba(0, 0, 0, 0.5);
-                  border-radius: 5px;
-                  padding: 0 5px;
-                  position: absolute;
-                  top: 5px;
-                  left: 5px;
-                  color: #fbfbfb;
-                  font-size: 10px;
-                }
+              position: absolute;
+              top: 5px;
+              right: 5px;
+              .status-item {
+                font-size: 10px;
               }
-              .card-main {
-                width: 100%;
-                height: 100%;
-                .card-main-item {
-                  left: 50%;
-                  top: 50%;
-                  transform: translate(-50%, -50%);
-                  border-radius: 5px;
-                }
+              .error {
+                color: var(--td-error-color);
               }
-              .card-footer {
-                .card-footer-title {
-                  background-color: rgb(0 0 0 / 60%);
-                  border-radius: 4px;
-                  color: rgba(255, 255, 255, 0.8);
-                  font-size: 10px;
-                  box-shadow: var(--td-shadow-1);
-                  z-index: 10;
-                  position: absolute;
-                  right: 2px;
-                  bottom: 2px;
-                  padding: 0 5px;
-                  max-width: 90%;
-                  font-weight: bold;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: clip;
-                }
+              .sucess {
+                color: var(--td-success-color);
               }
             }
-            .card:hover {
-              .card-footer-title {
-                color: var(--td-brand-color);
-              }
+            .card-main-item {
+              position: absolute;
+              top: 0;
+              left: 0;
+              display: block;
+              width: 100%;
+              height: 100%;
+              border-radius: 5px;
             }
+          }
+          .card-footer {
+            position: relative;
+            padding-top: var(--td-comp-paddingTB-s);
+            .card-footer-title {
+              font-weight: 700;
+              line-height: var(--td-line-height-title-medium);
+              height: 22px;
+            }
+          }
+        }
+        .card:hover {
+          .card-footer-title {
+            color: var(--td-brand-color);
           }
         }
       }

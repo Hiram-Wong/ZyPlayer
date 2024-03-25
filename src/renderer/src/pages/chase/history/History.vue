@@ -1,56 +1,66 @@
 <template>
-  <div class="history-container">
-    <div v-for="(item, name, index) in options" :key="index" class="history-container-item">
-      <div v-if="item.length !== 0" class="history-container-item-header">
-        <span v-if="name === 'today'" class="title">今天</span>
-        <span v-if="name === 'week'" class="title">七天内</span>
-        <span v-if="name === 'ago'" class="title">更早</span>
-      </div>
-      <div class="history-container-item-main">
-        <div v-for="detail in item" :key="detail.id" class="history-container-item-main-content">
-          <div class="card" @click="playEvent(detail)">
-            <div class="card-header"></div>
-            <div class="card-main">
-              <div class="card-close" @click.stop="removeEvent(detail)"></div>
-              <t-image
-                class="card-main-item"
-                :src="detail.videoImage"
-                :style="{ width: '190px', height: '105px', borderRadius: '4px', background: 'none' }"
-                :lazy="true"
-                fit="cover"
-                :loading="renderLoading"
-                :error="renderError"
-              >
-                <template #overlayContent>
-                  <div class="op">
-                    <span v-if="detail.siteName"> {{ detail.siteName }}</span>
-                  </div>
-                </template>
-              </t-image>
+  <div class="history view-container">
+    <div class="content">
+      <div class="container">
+        <div class="content-wrapper">
+          <div v-for="(item, name, index) in options" :key="index" class="container-item">
+            <div v-if="item.length !== 0" class="time">
+              <span v-if="name === 'today'" class="title">今天</span>
+              <span v-if="name === 'week'" class="title">七天内</span>
+              <span v-if="name === 'ago'" class="title">更早</span>
             </div>
-            <div class="card-footer">
-              <span class="history-item-title card-footer-item nowrap">
-                {{ detail.videoName }} {{ detail.videoIndex }}
-              </span>
-              <p class="history-item-time card-footer-item nowrap">
-                <laptop-icon />
-                <span v-if="detail.playEnd">已看完</span>
-                <span v-else>观看到{{ formatProgress(detail.watchTime, detail.duration) }}</span>
-              </p>
+            <div class="main">
+              <t-row :gutter="[16, 16]">
+                <t-col
+                  :md="3" :lg="3" :xl="2" :xxl="1"
+                  v-for="detail in item"
+                  :key="detail.id"
+                  class="card"
+                  @click="playEvent(detail)"
+                >
+                <div class="card-main">
+                  <div class="card-close" @click.stop="removeEvent(detail)"></div>
+                  <t-image
+                    class="card-main-item"
+                    :src="detail.videoImage"
+                    :style="{ width: '100%', background: 'none', overflow: 'hidden' }"
+                    :lazy="true"
+                    fit="cover"
+                    :loading="renderLoading"
+                    :error="renderError"
+                  >
+                    <template #overlayContent>
+                      <div class="op">
+                        <span v-if="detail.siteName"> {{ detail.siteName }}</span>
+                      </div>
+                    </template>
+                  </t-image>
+                  </div>
+                  <div class="card-footer">
+                    <p class="card-footer-title text-hide">{{ detail.videoName }} {{ detail.videoIndex }}</p>
+                    <p class="card-footer-desc text-hide">
+                      <laptop-icon size="1.3em" class="icon" />
+                      <span v-if="detail.playEnd">已看完</span>
+                      <span v-else>观看到{{ formatProgress(detail.watchTime, detail.duration) }}</span>
+                    </p>
+                  </div>
+                </t-col>
+              </t-row>
             </div>
           </div>
+
+          <infinite-loading
+            :identifier="infiniteId"
+            style="text-align: center"
+            :duration="200"
+            @infinite="load"
+          >
+            <template #complete>人家是有底线的</template>
+            <template #error>哎呀，出了点差错</template>
+          </infinite-loading>
         </div>
       </div>
     </div>
-    <infinite-loading
-      :identifier="infiniteId"
-      style="text-align: center; margin-bottom: 2em"
-      :duration="200"
-      @infinite="load"
-    >
-      <template #complete>人家是有底线的</template>
-      <template #error>哎呀，出了点差错</template>
-    </infinite-loading>
     <detail-view v-model:visible="isVisible.detail" :site="siteData" :data="formDetailData"/>
   </div>
 </template>
@@ -76,15 +86,15 @@ import DetailView from '../../film/Detail.vue';
 const store = usePlayStore();
 const renderError = () => {
   return (
-    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
-      <img src={ lazyImg } style="width: 100%; height: 100%; object-fit: cover;"/>
+    <div class="renderIcon" style="width: 100%;">
+      <img src={ lazyImg } style="width: 100%; object-fit: cover;"/>
     </div>
   );
 };
 const renderLoading = () => {
   return (
-    <div class="renderIcon" style="width: 100%; height: 100px; overflow: hidden;">
-      <img src={ lazyImg } style="width: 100%; height: 100%; object-fit: cover;"/>
+    <div class="renderIcon" style="width: 100%;">
+      <img src={ lazyImg } style="width: 100%; object-fit: cover;"/>
     </div>
   );
 };
@@ -243,159 +253,133 @@ eventBus.on(() => {
 </script>
 
 <style lang="less" scoped>
-.history-container {
+.view-container {
   height: 100%;
-  .history-container-item {
-    &-header {
-      position: relative;
-      height: 40px;
-      line-height: 40px;
-      font-size: 20px;
-      font-weight: 700;
-      text-align: left;
-      .title {
+  .content {
+    .container {
+      .content-wrapper {
+        width: 100%;
+        height: 100%;
         position: relative;
-        display: inline-block;
-        padding-right: 18px;
-        vertical-align: middle;
-        z-index: 10;
-      }
-    }
-    &-main {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 190px);
-      grid-column-gap: 20px;
-      grid-row-gap: 10px;
-      justify-content: center;
-      width: inherit;
-      &-content {
-        flex-direction: column;
-        display: inline-block;
-        width: 190px;
-        margin: 10px 15px 10px 0;
-        position: relative;
-        &:hover {
-          .card-main-item {
-            :deep(img) {
-              transition: all 0.25s ease-in-out;
-              transform: scale(1.05);
+        .container-item {
+          .time {
+            position: relative;
+            height: 40px;
+            line-height: 40px;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: left;
+            .title {
+              position: relative;
+              display: inline-block;
+              padding-right: 18px;
+              vertical-align: middle;
+              z-index: 10;
             }
           }
-        }
-        .card {
-          box-sizing: border-box;
-          width: 190px;
-          height: 160px;
-          position: relative;
-          display: inline-block;
-          vertical-align: top;
-          &-header {
-            position: absolute;
-            color: #fff;
-            font-size: 12px;
-            z-index: 15;
-            height: 18px;
-            line-height: 18px;
-            right: 0;
-            top: 0;
-            &-tag {
-              height: 18px;
-              line-height: 18px;
-              padding: 1px 6px;
-              border-radius: 0 7px 0 7px;
-              background: #03c8d4;
-              display: block;
-              &-tagtext {
-                display: inline-block;
-                font-size: 12px;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                max-width: 100px;
-              }
-            }
-            &-tag-orange {
-              background: #ffdd9a;
-              color: #4e2d03;
-            }
-          }
-          &-close {
-            display: none;
-            position: absolute;
-            right: -9px;
-            top: -9px;
-            height: 22px;
-            width: 22px;
-            background: url(../../../assets/close.png) 0 0 no-repeat;
-            z-index: 1000;
-            cursor: pointer;
-            background-size: 100%;
-          }
-          &-main {
-            margin-bottom: 13px;
-            overflow: hidden;
-            border-radius: 5px;
-            &:hover .card-close {
-              display: block !important;
-            }
-            &-item {
-              .op {
-                background-color: rgba(22, 22, 23, 0.8);
-                border-radius: 0 0 4px 4px;
-                width: 100%;
-                color: rgba(255, 255, 255, 0.8);
+          .main {
+            .card {
+              box-sizing: border-box;
+              width: inherit;
+              position: relative;
+              cursor: pointer;
+              border-radius: var(--td-radius-medium);
+              .card-close {
+                display: none;
                 position: absolute;
-                bottom: 0px;
-                display: flex;
-                justify-content: center;
-                span {
-                  font-size: 12px;
-                  font-weight: bolder;
+                right: -9px;
+                top: -9px;
+                height: 22px;
+                width: 22px;
+                background: url(../../../assets/close.png) 0 0 no-repeat;
+                z-index: 1000;
+                cursor: pointer;
+                background-size: 100%;
+              }
+              .text-hide {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                display: block;
+              }
+              .card-main {
+                position: relative;
+                width: 100%;
+                height: 0;
+                border-radius: 7px;
+                padding-top: 62%;
+                &:hover {
+                  .card-main-item {
+                    overflow: hidden;
+                    :deep(img) {
+                      transition: all 0.25s ease-in-out;
+                      transform: scale(1.05);
+                    }
+                  }
+                }
+                &:hover .card-close {
+                  display: block !important;
+                }
+                .card-tag-orange {
+                  background: #ffdd9a;
+                  color: #4e2d03;
+                }
+                .card-tag {
+                  z-index: 15;
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  border-radius: 6px 0 6px 0;
+                  padding: 1px 6px;
+                  max-width: 60%;
+                  .card-tag-text {
+                    font-size: 12px;
+                    height: 18px;
+                    line-height: 18px;
+                  }
+                }
+                .card-main-item {
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  display: block;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 5px;
+                  .op {
+                    background-color: rgba(22, 22, 23, 0.8);
+                    border-radius: 0 0 7px 7px;
+                    width: 100%;
+                    color: rgba(255, 255, 255, 0.8);
+                    position: absolute;
+                    bottom: 0;
+                    display: flex;
+                    justify-content: center;
+                  }
+                }
+              }
+              .card-footer {
+                position: relative;
+                padding-top: var(--td-comp-paddingTB-s);
+                .card-footer-title {
+                  font-weight: 700;
+                  line-height: var(--td-line-height-title-medium);
+                  height: 22px;
+                }
+                .card-footer-desc {
+                  font-size: 13px;
+                  line-height: var(--td-line-height-body-large);
+                  color: var(--td-text-color-placeholder);
+                  .icon {
+                    margin-right: var(--td-comp-margin-xs);
+                  }
                 }
               }
             }
           }
-          &-footer {
-            max-width: 190px;
-            .history-item-title {
-              font-weight: 700;
-              line-height: 20px;
-              width: 100%;
-              height: 21px;
-              margin-bottom: 4px;
-            }
-            .history-item-time {
-              height: 16px;
-              position: relative;
-              color: var(--td-gray-color-7);
-              font-size: 12px;
-              display: block;
-              line-height: 16px;
-              span {
-                padding-left: 5px;
-              }
-            }
-            .nowrap {
-              display: -webkit-box;
-              -webkit-line-clamp: 1;
-              -webkit-box-orient: vertical;
-              overflow: hidden;
-              height: auto;
-              width: 100%;
-            }
-          }
         }
       }
     }
-  }
-}
-:deep(.t-affix) {
-  background-color: #fbfbfb;
-  padding-bottom: 10px;
-}
-:root[theme-mode='dark'] {
-  :deep(.t-affix) {
-    background-color: #000 !important;
   }
 }
 </style>
