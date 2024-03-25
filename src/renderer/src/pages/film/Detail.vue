@@ -28,13 +28,13 @@
               </div>
             </div>
             <div class="binge">
-              <div v-if="isVisible.binge" class="video-subscribe-text" @click="bingeEvnet">
+              <div v-if="isVisible.binge" class="video-subscribe-text" @click="bingeEvent">
                 <t-space :size="8">
                   <heart-icon size="1.2em" class="icon" />
                   <span class="tip">追</span>
                 </t-space>
               </div>
-              <div v-else class="video-subscribe-text" @click="bingeEvnet">
+              <div v-else class="video-subscribe-text" @click="bingeEvent">
                 <span class="tip">在追</span>
               </div>
             </div>
@@ -103,7 +103,7 @@
             </t-tabs>
           </div>
         </div>
-        <div v-show="onlineUrl" class="player-webview">
+        <div v-show="onlineUrl" class="player-webview" style="overflow: hidden; height: 0; width: 0;">
           <iframe
             ref="iframeRef"
             :src="onlineUrl"
@@ -124,7 +124,6 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash';
 import {
   HeartIcon,
   OrderAscendingIcon,
@@ -183,7 +182,7 @@ const onlineUrl = ref();
 const analyzeConfig = ref({
   default: {
     url: ''
-  }, // 
+  },
   flag: [] //标识
 })
 
@@ -238,22 +237,22 @@ watch(
   },
 );
 
-const getAnalyzeFlag = async() => {
+const getAnalyzeFlag = async (): Promise<void> => {
   try {
     const res = await fetchAnalyzeDefault();
-    if (_.has(res, 'default')) analyzeConfig.value.default = res.default;
-    if (_.has(res, 'flag')) analyzeConfig.value.flag = res.flag;
+    if (res.hasOwnProperty('default')) analyzeConfig.value.default = res.default;
+    if (res.hasOwnProperty('flag')) analyzeConfig.value.flag = res.flag;
 
-    console.log(`[analyze] jx:${res.default.url}; flag:${[...res.flag]}`);
+    console.log(`[detail][analyze]-[jx]:${res.default.url}; flag:${[...res.flag]}`);
   } catch (error) {
     console.error(error);
   }
 };
 
 // Helper functions
-const fetchHipyPlayUrlHelper = async (site, flag: string, url: string) => {
+const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<string> => {
   console.log('[detail][hipy][start]获取服务端播放链接开启');
-  let data = '';
+  let data: string = '';
   try {
     const res = await fetchHipyPlayUrl(site, flag, url);
     data = res;
@@ -266,9 +265,9 @@ const fetchHipyPlayUrlHelper = async (site, flag: string, url: string) => {
   }
 };
 
-const fetchT3PlayUrlHelper = async (flag: string, id: string, flags:string[] = []) => {
+const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<string> => {
   console.log('[detail][t3][start]获取服务端播放链接开启');
-  let data = '';
+  let data: string = '';
   try {
     const res = await fetchT3PlayUrl(flag, id, flags);
     data = res.url;
@@ -281,9 +280,9 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags:string[] = [
   }
 };
 
-const fetchCatboxPlayUrlHelper = async (site, flag: string, id: string) => {
+const fetchCatboxPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
   console.log('[detail][catvod][start]获取服务端播放链接开启');
-  let data = '';
+  let data: string = '';
   try {
     const res = await fetchCatvodPlayUrl(site, flag, id);
     data = res.url;
@@ -296,9 +295,9 @@ const fetchCatboxPlayUrlHelper = async (site, flag: string, id: string) => {
   }
 };
 
-const fetchDrpyPlayUrlHelper = async (site, url: string) => {
+const fetchDrpyPlayUrlHelper = async (site: { [key: string]: any }, url: string): Promise<string> => {
   console.log('[detail][drpy][start]免嗅流程开启');
-  let data = '';
+  let data: string = '';
   try {
     const res = await fetchDrpyPlayUrl(site, url);
     if (res.redirect) {
@@ -313,9 +312,9 @@ const fetchDrpyPlayUrlHelper = async (site, url: string) => {
   }
 };
 
-const fetchJsonPlayUrlHelper = async (playUrl, url: string) => {
+const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<string> => {
   console.log('[detail][json][start]json解析流程开启');
-  let data = '';
+  let data: string = '';
   try {
     const res = await getConfig(`${playUrl}${url}`);
     if (res.url) {
@@ -330,9 +329,9 @@ const fetchJsonPlayUrlHelper = async (playUrl, url: string) => {
   }
 };
 
-const fetchJxPlayUrlHelper = async (type: string, url: string) => {
+const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> => {
   console.log('[detail][jx][start]官解流程开启');
-  let data = '';
+  let data: string = '';
   try {
     const res = await sniffer(type, url);
     data = res;
@@ -371,7 +370,7 @@ const gotoPlay = async (e) => {
       }
       if (snifferUrl) {
         playerUrl = await fetchJxPlayUrlHelper(snifferType, snifferUrl);
-        callSysPlayer(playerUrl);
+        if (playerUrl) callSysPlayer(playerUrl);
         return;
       }
     }
@@ -417,14 +416,14 @@ const gotoPlay = async (e) => {
   };
 };
 
-const callSysPlayer = (url) => {
-  const externalPlayer = set.value.externalPlayer;
+const callSysPlayer = (url: string): void => {
+  const externalPlayer: string = set.value.externalPlayer;
   window.electron.ipcRenderer.send('call-player', externalPlayer, url);
   getHistoryData(true);
-}
+};
 
 // 在追
-const bingeEvnet = async () => {
+const bingeEvent = async (): Promise<void> => {
   try {
     const { id } = formData.value;
     const db = await detailStar({ relateId: id, videoId: info.value.vod_id });
@@ -438,22 +437,20 @@ const bingeEvnet = async () => {
         videoType: info.value.type_name,
         videoRemarks: info.value.vod_remarks,
       };
-      if (!db) {
-        await addStar(doc);
-      }
+      if (!db) await addStar(doc);
     } else {
-      await delStar(db.id);
+      if (db) await delStar(db.id);
     }
 
     isVisible.binge = !isVisible.binge;
-  } catch (error) {
-    console.error(error);
-    MessagePlugin.error(`操作失败:${error}`);
+  } catch (err) {
+    console.error(`[detail][binge][error]${err}`);
+    MessagePlugin.error(`操作失败:${err}`);
   }
 };
 
 // 获取是否收藏
-const getBinge = async () => {
+const getBinge = async (): Promise<void> => {
   const { id } = formData.value;
   const { vod_id } = info.value;
   const res = await detailStar({ relateId: id, videoId: vod_id });
@@ -461,32 +458,21 @@ const getBinge = async () => {
 };
 
 // 选择倒序
-const reverseOrderEvent = () => {
+const reverseOrderEvent = (): void => {
   reverseOrder.value = !reverseOrder.value;
-  seasonReverseOrder();
-};
-
-// 选集排序
-const seasonReverseOrder = () => {
   if (reverseOrder.value) {
-    console.log('正序');
+    console.log('[detail][season]正序');
     season.value = JSON.parse(JSON.stringify(info.value.fullList));
   } else {
-    console.log('倒序');
+    console.log('[detail][season]倒序');
     for (const key in season.value) {
       season.value[key].reverse();
     }
   }
 };
 
-// 格式化剧集名称
-const formatName = (e) => {
-  const [first] = e.split('$');
-  return first.includes('http') ? '正片' : first;
-};
-
 // 获取历史
-const getHistoryData = async (type = false) => {
+const getHistoryData = async (type = false): Promise<void> => {
   try {
     const { id } = formData.value;
     const res = await detailHistory({ relateId: id, videoId: info.value.vod_id });
@@ -522,12 +508,12 @@ const getHistoryData = async (type = false) => {
       dataHistory.value = add_res;
     }
   } catch (error) {
-    console.error(error);
+    console.error(`[detail][history][error]${err}`);
   }
 };
 
 // 获取播放源及剧集
-const getDetailInfo = async () => {
+const getDetailInfo = async (): Promise<void> => {
   const videoList = info.value;
 
   // 播放源
@@ -551,22 +537,30 @@ const getDetailInfo = async () => {
   if (!selectPlayIndex.value) selectPlayIndex.value = playEpisodes[0][0].split('$')[0];
 
   // 合并播放源和剧集
-  const fullList = Object.fromEntries(playSource.map((key, index) => [key, playEpisodes[index]]));
+  const fullList: Record<string, string[][]> = Object.fromEntries(
+    playSource.map((key, index) => [key, playEpisodes[index]])
+  );
 
   videoList.fullList = fullList;
   info.value = videoList;
   season.value = fullList;
 };
 
-
-// 替换style
-const filterContent = (item) => {
-  return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
+// 格式化剧集名称
+const formatName = (e: string): string => {
+  const [first] = e.split('$');
+  return first.includes('http') ? '正片' : first;
 };
 
-const snifferPie = async(url: string) => {
+// 替换style
+const filterContent = (item: string | undefined | null): string => {
+  if (!item) return '';
+  return item.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
+};
+
+const snifferPie = async (url: string): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
-  let data = '';
+  let data: string = '';
 
   try {
     const res = await window.electron.ipcRenderer.invoke('sniffer-media', url);
@@ -585,73 +579,81 @@ const snifferPie = async(url: string) => {
   }
 };
 
-const snifferIframe = (url: string) => {
+const snifferIframe = async (url: string, totalTime: number = 15000, speeder: number = 250) => {
   win.webContents.setAudioMuted(true); // 静音
   onlineUrl.value = url;
   const iframeWindow = iframeRef.value.contentWindow;
 
-  const totalTime = 15000;  // 嗅探总时间
-  const speeder = 250; // 每次嗅探间隔
   const totalCounter = totalTime / speeder; // 计算总次数
 
   let counter = 1;
   let snifferTimer;
   let data = '';
-  clearInterval(snifferTimer);
 
-  snifferTimer = setInterval(() => {
-    console.log(`[detail][sniffer][iframe][start]iframe嗅第${counter}次探流程开始`);
+  const checkResourceName = (resourceName: string) => {
+    const formatIndex = videoFormats.findIndex((format) => resourceName.toLowerCase().includes(format));
+    return formatIndex > -1;
+  };
 
-    if (counter >= totalCounter) {
-      clearInterval(snifferTimer);
-      MessagePlugin.warning(`嗅探超时并结束, 共计嗅探:${counter}次, 请换源`);
-      console.log(`[detail][sniffer][iframe][end]iframe嗅探超时并结束, 共计嗅探:${counter}次`);
-      return;
-    }
+  const stopSniffer = () => {
+    clearInterval(snifferTimer);
+    onlineUrl.value = '';
+    win.webContents.setAudioMuted(false);
+  };
 
-    try {
-      const resources = iframeWindow.performance.getEntriesByType('resource'); // 获取所有资源
+  await new Promise((resolve) => {
+    snifferTimer = setInterval(async () => {
+      console.log(`[detail][sniffer][iframe][start]iframe嗅第${counter}次探流程开始`);
 
-      for (const resource of resources) {
-        const resourceName = resource.name;
-        const sniffUrl = resourceName;
-        const formatIndex = videoFormats.findIndex((format) => sniffUrl.toLowerCase().indexOf(format) > -1);
-        if (formatIndex > -1) {
-          data = resourceName;
-          console.log(`[detail][sniffer][iframe][return]iframe嗅探流程返回链接:${data}`);
+      try {
+        const resources = iframeWindow.performance.getEntriesByType('resource'); // 获取所有资源
 
-          onlineUrl.value = '';
-          win.webContents.setAudioMuted(false);
+        for (const resource of resources) {
+          const resourceName = resource.name;
+          if (checkResourceName(resourceName)) {
+            data = resourceName;
+            console.log(`[detail][sniffer][iframe][return]iframe嗅探流程返回链接:${data}`);
 
-          clearInterval(snifferTimer);
-          break;
+            stopSniffer();
+            resolve();
+            return;
+          }
         }
+      } catch (err) {
+        MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
+        console.log(`[detail][sniffer][iframe][error]iframe第${counter}次嗅探发生错误:${err}`);
       }
-    } catch (err) {
-      MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
-      console.log(`[detail][sniffer][iframe][error]iframe第${counter}次嗅探发生错误:${err}`);
-    }
-    counter += 1;
-  }, speeder);
+
+      if (counter >= totalCounter) {
+        MessagePlugin.warning(`嗅探超时并结束, 共计嗅探:${counter}次, 请换源`);
+        console.log(`[detail][sniffer][iframe][end]iframe嗅探超时结束`);
+        stopSniffer();
+        resolve();
+      }
+
+      counter += 1;
+    }, speeder);
+  });
+
+
   console.log(`[detail][sniffer][iframe][end]iframe嗅探流程结束`);
   return data;
 };
 
-const sniffer = async(type, url) => {
-  let data: any = '';
+// 嗅探
+const sniffer = async (type: 'iframe' | 'pie', url: string): Promise<string> => {
+  let data: string = '';
   if (type === 'iframe') {
-    const res = await snifferIframe(url);
-    data = res;
+    data = await snifferIframe(url);
   } else {
-    const res = await snifferPie(url);
-    data = res;
+    data = await snifferPie(url);
   }
   return data;
 };
 
 // 判断媒体类型
-const checkMediaType = async (url) => {
-  const supportedFormats = ['mp4', 'mkv', 'flv', 'm3u8', 'avi'];
+const checkMediaType = async (url: string): Promise<string | null> => {
+  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi'];
 
   if (url.startsWith('http')) {
     const fileType = supportedFormats.find(format => url.includes(format));
@@ -665,7 +667,6 @@ const checkMediaType = async (url) => {
     return null; // 如果 URL 不以 http 开头，返回 null
   }
 };
-
 </script>
 
 <style lang="less" scoped>
