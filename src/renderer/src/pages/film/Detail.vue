@@ -1,7 +1,7 @@
 <template>
-  <t-dialog v-model:visible="formVisible" width="796px" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" width="70%" placement="center" :footer="false">
     <template #body>
-      <div class="detail-container">
+      <div class="detail view-container">
         <div class="plist-body">
           <div class="detail-title clearfix">
             <div class="detail-info">
@@ -18,13 +18,13 @@
                 </div>
               </div>
               <div class="desc">
-                <t-space size="small" class="tag-items">
+                <div class="tag-items">
                   <t-tag v-show="info.vod_type" shape="round" class="tag-item">{{ info.vod_type }}</t-tag>
                   <t-tag v-show="info.vod_area" shape="round" class="tag-item">{{ info.vod_area }}</t-tag>
                   <t-tag v-show="info.vod_lang" shape="round" class="tag-item">{{ info.vod_lang }}</t-tag>
                   <t-tag v-show="info.vod_year" shape="round" class="tag-item">{{ info.vod_year }}</t-tag>
                   <t-tag v-show="info.vod_note" shape="round" class="tag-item">{{ info.vod_note }}</t-tag>
-                </t-space>
+                </div>
               </div>
             </div>
             <div class="binge">
@@ -171,7 +171,6 @@ const set = computed(() => {
 const formVisible = ref(false);
 const info = ref(props.data);
 const formData = ref(props.site);
-const recommendationsList = ref([]);
 const reverseOrder = ref(true); // true 正序 false 倒序
 const season = ref(); // 选集
 const selectPlaySource = ref(); // 选择的播放源
@@ -180,8 +179,6 @@ const dataHistory = ref({}); // 历史
 
 const iframeRef = ref(); // iframe dom节点
 const onlineUrl = ref();
-const snifferTimer = ref();
-const snifferUrl = ref();
 
 const analyzeConfig = ref({
   default: {
@@ -214,7 +211,6 @@ watch(
   () => formVisible.value,
   (val) => {
     emit('update:visible', val);
-    recommendationsList.value = [];
     onlineUrl.value = '';
 
     if (val) getBinge();
@@ -255,59 +251,98 @@ const getAnalyzeFlag = async() => {
 };
 
 // Helper functions
-
-const fetchHipyPlayUrlHelper = async () => {
-  console.log('[player] start: hipy获取服务端播放链接开启');
+const fetchHipyPlayUrlHelper = async (site, flag: string, url: string) => {
+  console.log('[detail][hipy][start]获取服务端播放链接开启');
+  let data = '';
   try {
-    const hipyPlayUrl = await fetchHipyPlayUrl(formData.value, selectPlaySource.value, url);
-    snifferUrl.value = hipyPlayUrl;
-    console.log(`[player] return: hipy获取服务端返回链接:${url}`);
+    const res = await fetchHipyPlayUrl(site, flag, url);
+    data = res;
+    console.log(`[detail][hipy][return]${data}`);
   } catch (err) {
-    console.log(err);
+    console.log(`[detail][hipy][error]${err}`);
   } finally {
-    console.log(`[player] end: hipy获取服务端播放链接结束`);
+    console.log(`[detail][hipy][end]获取服务端播放链接结束`);
+    return data;
   }
 };
 
-const fetchT3PlayUrlHelper = async () => {
-  console.log('[player] start: t3获取服务端播放链接开启');
+const fetchT3PlayUrlHelper = async (flag: string, id: string, flags:string[] = []) => {
+  console.log('[detail][t3][start]获取服务端播放链接开启');
+  let data = '';
   try {
-    const t3PlayUrl = await fetchT3PlayUrl(selectPlaySource.value, url, []);
-    snifferUrl.value = t3PlayUrl.url;
-    console.log(`[player] return: t3获取服务端返回链接:${url}`);
+    const res = await fetchT3PlayUrl(flag, id, flags);
+    data = res.url;
+    console.log(`[detail][t3][return]${data}`);
   } catch (err) {
-    console.log(err);
+    console.log(`[detail][t3][error]${err}`);
   } finally {
-    console.log(`[player] end: t3获取服务端播放链接结束`);
+    console.log(`[detail][t3][end]获取服务端播放链接结束`);
+    return data;
   }
 };
 
-const fetchCatboxPlayUrlHelper = async () => {
-  console.log('[player] start: catbox获取服务端播放链接开启');
-  const { site } = ext.value;
+const fetchCatboxPlayUrlHelper = async (site, flag: string, id: string) => {
+  console.log('[detail][catvod][start]获取服务端播放链接开启');
+  let data = '';
   try {
-    const catboxPlayUrl = await fetchCatvodPlayUrl(site, selectPlaySource.value, config.value.url);
-    config.value.url = catboxPlayUrl.url;
-    console.log(`[player] return: catbox获取服务端返回链接:${config.value.url}`);
+    const res = await fetchCatvodPlayUrl(site, flag, id);
+    data = res.url;
+    console.log(`[detail][catvod][return]${data}`);
   } catch (err) {
-    console.log(err);
+    console.log(`[detail][catvod][error]${err}`);
   } finally {
-    console.log(`[player] end: catbox获取服务端播放链接结束`);
+    console.log(`[detail][catvod][end]获取服务端播放链接结束`);
+    return data;
   }
 };
 
-const fetchDrpyPlayUrlHelper = async () => {
-  MessagePlugin.info('免嗅资源中, 请等待!');
-  console.log('[player] start: drpy免嗅流程开始');
+const fetchDrpyPlayUrlHelper = async (site, url: string) => {
+  console.log('[detail][drpy][start]免嗅流程开启');
+  let data = '';
   try {
-    const drpySniffFree = await fetchDrpyPlayUrl(formData.value, url);
-    if (drpySniffFree.redirect) {
-      snifferUrl.value = drpySniffFree.url;
+    const res = await fetchDrpyPlayUrl(site, url);
+    if (res.redirect) {
+      data = res.url;
+      console.log(`[detail][drpy][return]${data}`);
     }
   } catch (err) {
-    console.log(err);
+    console.log(`[detail][drpy][error]:${err}`);
+  } finally {
+    console.log(`[detail][drpy][end]免嗅流程结束`);
+    return data;
   }
-  console.log(`[player] end: drpy免嗅流程结束`);
+};
+
+const fetchJsonPlayUrlHelper = async (playUrl, url: string) => {
+  console.log('[detail][json][start]json解析流程开启');
+  let data = '';
+  try {
+    const res = await getConfig(`${playUrl}${url}`);
+    if (res.url) {
+      data = res.url;
+      console.log(`[detail][json][return]${data}`);
+    }
+  } catch (err) {
+    console.log(`[detail][json][error]${err}`);
+  } finally {
+    console.log(`[detail][json][end]json解析流程结束`);
+    return data;
+  }
+};
+
+const fetchJxPlayUrlHelper = async (type: string, url: string) => {
+  console.log('[detail][jx][start]官解流程开启');
+  let data = '';
+  try {
+    const res = await sniffer(type, url);
+    data = res;
+    console.log(`[detail][jx][return]${data}`);
+  } catch (err) {
+    console.log(`[detail][jx][error]${err}`);
+  } finally {
+    console.log(`[detail][jx][end]官解流程结束`);
+    return data;
+  }
 };
 
 
@@ -315,64 +350,68 @@ const fetchDrpyPlayUrlHelper = async () => {
 const gotoPlay = async (e) => {
   const [index, url] = e.split('$');
   selectPlayIndex.value = index;
+  const { playUrl, type } = formData.value;
+  const { snifferType } = set.value;
 
-  snifferUrl.value = url;
+  let playerUrl = url;
 
-  try {
-    // 解析直链
-    const { playUrl } = formData.value;
-    if (playUrl) {
-      const play = await getConfig(`${playUrl}${url}`);
-      console.log(`解析地址:${play.url}`);
-      if (play.url) {
-        snifferUrl.value = play.url;
-        callSysPlayer(snifferUrl.value);
+  if (playUrl) {
+    playerUrl = await fetchJsonPlayUrlHelper(playUrl, url);
+  } else {
+    if (url.startsWith('http')) {
+      const { hostname } = new URL(url);
+      let snifferUrl;
+      if (url.includes('url=')) snifferUrl = url; // 判断有播放器的
+      if (
+        VIP_LIST.some((item) => hostname.includes(item)) ||
+        analyzeConfig.value.flag.some((item) => selectPlaySource.value.includes(item))
+      ) {
+        // 官解iframe
+        snifferUrl = analyzeConfig.value.default.url + url;
+      }
+      if (snifferUrl) {
+        playerUrl = await fetchJxPlayUrlHelper(snifferType, snifferUrl);
+        callSysPlayer(playerUrl);
         return;
       }
     }
+    switch (type) {
+      case 2:
+        // drpy免嗅
+        playerUrl = await fetchDrpyPlayUrlHelper(formData.value, url);
+        break;
+      case 6:
+        // hipy获取服务端播放链接
+        playerUrl = await fetchHipyPlayUrlHelper(formData.value, selectPlaySource.value, url);
+        break;
+      case 7:
+        // t3获取服务端播放链接
+        playerUrl = await fetchT3PlayUrlHelper(selectPlaySource.value, url, []);
+        break;
+      case 8:
+        // catbox获取服务端播放链接
+        playerUrl = await fetchCatboxPlayUrlHelper(formData.value, selectPlaySource.value, url);
+        break;
+    }
+  }
 
-    const { hostname } = new URL(url);
+  if (!playerUrl) playerUrl = url;
 
-    if (
-      VIP_LIST.some((item) => hostname.includes(item)) ||
-      analyzeConfig.value.flag.some((item) => selectPlaySource.value.includes(item))
-    ) {
-      // 官解iframe
-      snifferUrl.value = analyzeConfig.value.default.url + url;
-      sniffer(snifferUrl.value);
-      console.log(`[player] return: 官解播放地址:${snifferUrl.value}`);
+  if (playerUrl) {
+    const mediaType = await checkMediaType(playerUrl);
+    console.log(`[detail][mediaType]${mediaType}`)
+    if (mediaType !== 'unknown' && mediaType !== 'error') {
+      callSysPlayer(playerUrl);
       return;
     }
-  } catch (err) {
-    console.info(`[player] input: 传入地址不是url:${url}`);
-  }
-
-  if (formData.value.type === 6) {
-    // hipy获取服务端播放链接
-    await fetchHipyPlayUrlHelper();
-  } else if (formData.value.type === 7) {
-    // t3获取服务端播放链接
-    await fetchT3PlayUrlHelper();
-  } else if (ext.value.site.type === 8) {
-    // catbox获取服务端播放链接
-    await fetchCatboxPlayUrlHelper();
-  } else if (formData.value.type === 2) {
-    // drpy嗅探
-    await fetchDrpyPlayUrlHelper();
-  }
-
-  const mediaType = await checkMediaType(snifferUrl.value);
-  console.log(`[player] mediaType: ${mediaType}`)
-  if (mediaType !== 'unknown' && mediaType !== 'error') {
-    callSysPlayer(snifferUrl.value);
-    return;
   }
 
   // 兜底办法:嗅探
-  console.log(`尝试提取播放链接,type:${formData.value.type}`);
+  console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    sniffer(url);
+    playerUrl = await sniffer(snifferType, url);
+    callSysPlayer(playerUrl);
   } catch (err) {
     console.error(err);
   };
@@ -525,88 +564,89 @@ const filterContent = (item) => {
   return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
 };
 
-const sniffer_pie = () => {
-  window.electron.ipcRenderer.invoke('sniffer-media', snifferUrl.value).then(async res => {
-    console.log(res);
-    if (res.code == 200) {
-      const formatIndex = videoFormats.findIndex((format) => res.data.url.toLowerCase().indexOf(format) > -1);
-      if (formatIndex > -1) {
-        snifferUrl.value = res.data.url;
-        callSysPlayer(snifferUrl.value);
-      } else {
-        const mediaType = await checkMediaType(res.data.url);
-        console.log(`[player] mediaType: ${mediaType}`)
-        snifferUrl.value = res.data.url;
-        callSysPlayer(snifferUrl.value);
-      }
-    } else {
-      MessagePlugin.warning(`嗅探超时并结束, 请换源`);
-    };
-  });
+const snifferPie = async(url: string) => {
+  console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
+  let data = '';
+
+  try {
+    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url);
+
+    if (res.code === 200) {
+      data = res.data.url;
+      console.log(`[detail][sniffer][pie][return]: pie嗅探流程返回链接:${data}`);
+    } else if (res.code === 500) {
+      console.log(`[detail][sniffer][pie][error]: pie嗅探流程错误:${res}`);
+    }
+  } catch (err) {
+    console.log(`[detail][sniffer][pie][error]: pie嗅探流程错误:${err}`);
+  } finally {
+    console.log(`[detail][sniffer][pie][end]: pie嗅探流程结束`);
+    return data;
+  }
 };
 
-const sniffer_iframe = () => {
-  win.webContents.setAudioMuted(true);
+const snifferIframe = (url: string) => {
+  win.webContents.setAudioMuted(true); // 静音
+  onlineUrl.value = url;
   const iframeWindow = iframeRef.value.contentWindow;
 
-  const totalTime = 15000;
-  const speeder = 250;
-  let counter = 1;
-  const totalCounter = totalTime / speeder;
-  clearInterval(snifferTimer.value);
+  const totalTime = 15000;  // 嗅探总时间
+  const speeder = 250; // 每次嗅探间隔
+  const totalCounter = totalTime / speeder; // 计算总次数
 
-  snifferTimer.value = setInterval(() => {
-    console.log(`第${counter}次嗅探开始`);
+  let counter = 1;
+  let snifferTimer;
+  let data = '';
+  clearInterval(snifferTimer);
+
+  snifferTimer = setInterval(() => {
+    console.log(`[detail][sniffer][iframe][start]iframe嗅第${counter}次探流程开始`);
 
     if (counter >= totalCounter) {
-      clearInterval(snifferTimer.value);
+      clearInterval(snifferTimer);
       MessagePlugin.warning(`嗅探超时并结束, 共计嗅探:${counter}次, 请换源`);
-      console.log(`嗅探超时并结束，共计嗅探:${counter}次`);
+      console.log(`[detail][sniffer][iframe][end]iframe嗅探超时并结束, 共计嗅探:${counter}次`);
       return;
     }
 
     try {
-      const resources = iframeWindow.performance.getEntriesByType('resource');
+      const resources = iframeWindow.performance.getEntriesByType('resource'); // 获取所有资源
 
       for (const resource of resources) {
         const resourceName = resource.name;
         const sniffUrl = resourceName;
         const formatIndex = videoFormats.findIndex((format) => sniffUrl.toLowerCase().indexOf(format) > -1);
         if (formatIndex > -1) {
-          const videoFormat = videoFormats[formatIndex];
-          console.log(`嗅探到${videoFormat}文件:${resourceName},共计嗅探:${counter}次`);
-          const regex = new RegExp(`https?:\\/\\/.*(https?:\\/\\/(?:[^\\s"]+\\/)+[^\\s"]+\\${videoFormat})`);
-          const match = sniffUrl.match(regex);
-
-          if (match && match.length > 1) {
-            console.log(`最终嗅探地址：${match[1]}`);
-            snifferUrl.value = match[1];
-          } else {
-            console.log(`最终嗅探地址：${resourceName}`);
-            snifferUrl.value = resourceName;
-          }
+          data = resourceName;
+          console.log(`[detail][sniffer][iframe][return]iframe嗅探流程返回链接:${data}`);
 
           onlineUrl.value = '';
-          callSysPlayer(snifferUrl.value);
           win.webContents.setAudioMuted(false);
 
-          clearInterval(snifferTimer.value);
+          clearInterval(snifferTimer);
           break;
         }
       }
     } catch (err) {
       MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
-      console.log(`第${counter}次嗅探发生错误:${err}`);
+      console.log(`[detail][sniffer][iframe][error]iframe第${counter}次嗅探发生错误:${err}`);
     }
     counter += 1;
   }, speeder);
+  console.log(`[detail][sniffer][iframe][end]iframe嗅探流程结束`);
+  return data;
 };
 
-const sniffer = (url) => {
-  if (set.value.snifferType === 'iframe') {
-    onlineUrl.value = url;
-    sniffer_iframe();
-  } else sniffer_pie();
+const sniffer = async(type, url) => {
+  let data: any = '';
+  if (type === 'iframe') {
+    const res = await snifferIframe(url);
+    data = res;
+  } else {
+    const res = await snifferPie(url);
+    data = res;
+  }
+  return data;
 };
 
 // 判断媒体类型
@@ -629,14 +669,14 @@ const checkMediaType = async (url) => {
 </script>
 
 <style lang="less" scoped>
-.detail-container {
+.view-container {
   height: calc(100% - 48px);
   .plist-body {
     .detail-title {
       position: relative;
       display: flex;
       justify-content: space-between;
-      box-shadow: 0 26px 40px -30px rgba(0,36,100,0.3);
+      align-items: center;
       .detail-info {
         .title {
           display: flex;
@@ -664,6 +704,15 @@ const checkMediaType = async (url) => {
         }
         .desc {
           margin-top: 10px;
+          .tag-items {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: stretch;
+            .tag-item {
+              margin-right: var(--td-comp-margin-xs);
+            }
+          }
         }
       }
       .binge {
@@ -732,6 +781,13 @@ const checkMediaType = async (url) => {
       }
       .box-anthology-reverse-order {
         cursor: pointer;
+      }
+    }
+    .box-anthology-items {
+      .film-tabs {
+        .tag {
+          cursor: pointer;
+        }
       }
     }
   }
