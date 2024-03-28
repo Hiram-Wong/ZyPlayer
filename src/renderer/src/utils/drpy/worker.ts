@@ -20,12 +20,7 @@ const drpyWork = (parms) => {
   let res = { type, data };
   switch (type) {
     case 'init':
-      try {
-        init(data);
-        res.data = 'sucess';
-      } catch(_){
-        res.data = 'error';
-      }
+      res.data = init(data);
       break;
     case 'home':
       res.data = home();

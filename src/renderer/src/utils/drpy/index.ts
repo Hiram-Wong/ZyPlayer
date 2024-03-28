@@ -30,7 +30,7 @@ const terminateWork = () => {
     } else {
       reject({
         msg: new Error('Worker is not defined or already terminated.'),
-        code: 200
+        code: 500
       });
     }
   });

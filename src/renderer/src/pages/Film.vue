@@ -105,7 +105,6 @@ import { onMounted, reactive, ref } from 'vue';
 import { usePlayStore } from '@/store';
 import { fetchSiteActive } from '@/api/site';
 import { fetchClassify, fetchList, fetchSearch, fetchDetail, t3RuleInit, t3RuleTerminate, catvodRuleInit } from '@/utils/cms';
-import { getConfig } from '@/utils/tool';
 
 import DetailView from './film/Detail.vue';
 import CommonNav from '../components/common-nav/index.vue';
@@ -449,11 +448,6 @@ const getFilmList = async () => {
   } 
 };
 
-const getContent = async(url: string) => {
-  const res = await getConfig(url);
-  return res;
-}
-
 // 加载
 const load = async ($state: { complete: () => void; loaded: () => void; error: () => void }) => {
   console.log('[film] loading...');
@@ -466,9 +460,8 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
 
     const defaultSite = siteConfig.value.default;
     if (defaultSite.type === 7 && !isVisible.t3Work) {
-      const content = await getContent(defaultSite.ext);
-      const status = await t3RuleInit(content);
-      if (status === 'sucess') isVisible.t3Work = true;
+      const res = await t3RuleInit(defaultSite);
+      if (res.code === 200) isVisible.t3Work = true;
       else $state.error();
     } else if (defaultSite.type === 8 && !isVisible.catvodWork) {
       const content = await catvodRuleInit(defaultSite.api, defaultSite.ext ? JSON.parse(defaultSite.ext) : {});

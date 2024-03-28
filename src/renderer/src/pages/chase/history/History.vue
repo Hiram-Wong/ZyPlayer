@@ -80,7 +80,6 @@ import { ref, reactive } from 'vue';
 import { delHistory, fetchHistoryList } from '@/api/history';
 import { fetchSiteList } from '@/api/site';
 import { fetchDetail, t3RuleInit } from '@/utils/cms';
-import { getConfig } from '@/utils/tool';
 import { usePlayStore } from '@/store';
 import DetailView from '../../film/Detail.vue';
 
@@ -177,11 +176,6 @@ const load = async ($state) => {
   }
 };
 
-const getContent = async(url: string) => {
-  const res = await getConfig(url);
-  return res;
-}
-
 // 播放
 const playEvent = async (item) => {
   try {
@@ -189,8 +183,7 @@ const playEvent = async (item) => {
     const site = siteConfig.value.data.find(({ id }) => id === item.relateId);
     siteData.value = site;
     if (site.type === 7) {
-      const content = await getContent(site.ext);
-      const status = await t3RuleInit(content);
+      const res = await t3RuleInit(site);
     }
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const [detailItem] = await fetchDetail(site, videoId);

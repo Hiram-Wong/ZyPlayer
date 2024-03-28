@@ -835,7 +835,7 @@ const getAnalysisData = async () => {
     if (_.has(res, 'default')) analyzeConfig.value.default = res.default;
     if (_.has(res, 'flag')) analyzeConfig.value.flag = res.flag;
 
-    console.log(`[analyze] jx:${res.default.url}; flag:${[...res.flag]}`);
+    // console.log(`[analyze] jx:${res.default.url}; flag:${[...res.flag]}`);
   } catch (error) {
     console.error(error);
   }
@@ -1022,9 +1022,8 @@ const initFilmPlayer = async (isFirst) => {
     // t3获取服务端播放链接
     console.log('[player] start: t3获取服务端播放链接开启');
     try {
-      const content =  await getConfig(ext.value.site.ext);
-      const status = await t3RuleInit(content);
-      if (status === 'sucess') {
+      const res =  await t3RuleInit(ext.value.site);
+      if (res.code === 200) {
         const t3PlayUrl = await fetchT3PlayUrl(selectPlaySource.value, config.value.url , []);
         config.value.url = t3PlayUrl.url;
       }
@@ -1435,16 +1434,6 @@ const timerUpdatePlayProcess = () => {
     });
 
     xg.value.on(Events.ENDED, () => {
-      onEnded();
-    });
-  } else if (set.value.broadcasterType === 'tcplayer') {
-    tc.value.on('timeupdate', () => {
-      const duration = tc.value.duration();
-      const currentTime = tc.value.currentTime();
-      onTimeUpdate(currentTime, duration);
-    });
-
-    tc.value.on('ended', () => {
       onEnded();
     });
   } else if (set.value.broadcasterType === 'dplayer') {

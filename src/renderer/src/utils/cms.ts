@@ -91,9 +91,27 @@ const removeHTMLTagsAndSpaces = (str) => {
   return trimmedString;
 };
 
-const t3RuleInit = async(rule: string) => {
-  const res: any = await t3Work({type:'init', data: rule});
-  return res.data;
+const t3RuleInit = async(site) => {
+  let data = {
+    code: 500,
+    msg: 'site parameter not have ext or ext is empty',
+  };
+
+  if (_.has(site, 'ext')) {
+    try {
+      const res = await axios.get(site.ext);
+      const rule = res.data;
+      await t3Work({type:'init', data: rule});
+      data = {
+        code: 200,
+        msg: 'sucess'
+      }
+    } catch (err) {
+      data.msg = err as string;
+    }
+  }
+  
+  return data;
 }
 
 const t3RuleTerminate = async() => {
@@ -846,7 +864,6 @@ const fetchCatvodPlayUrl = async (site, flag: string, id: string) => {
   try {
     const url = buildUrl(site.api, `/play`);
     const res = await axios.post(url, {flag, id});
-    console.log(res)
     return res.data;
   } catch (err) {
     throw err;
