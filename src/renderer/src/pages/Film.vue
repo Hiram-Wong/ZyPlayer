@@ -464,7 +464,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       if (res.code === 200) isVisible.t3Work = true;
       else $state.error();
     } else if (defaultSite.type === 8 && !isVisible.catvodWork) {
-      const content = await catvodRuleInit(defaultSite.api, defaultSite.ext ? JSON.parse(defaultSite.ext) : {});
+      const content = await catvodRuleInit(defaultSite);
       if (typeof content === 'object') isVisible.catvod = true;
       else $state.error();
     }

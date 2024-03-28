@@ -120,12 +120,12 @@ const t3RuleTerminate = async() => {
   else return 'fail';
 }
 
-const catvodRuleInit = async(api, rule: string) => {
-  const url = buildUrl(api, `/init`);
+const catvodRuleInit = async(site) => {
+  const url = buildUrl(site.api, `/init`);
   const res = await axios({
     method: 'post',
     url,
-    data: rule
+    data: site.ext ? JSON.parse(site.ext) : {}
   });
   return res.data;
 }

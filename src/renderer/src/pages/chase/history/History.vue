@@ -79,7 +79,7 @@ import { ref, reactive } from 'vue';
 
 import { delHistory, fetchHistoryList } from '@/api/history';
 import { fetchSiteList } from '@/api/site';
-import { fetchDetail, t3RuleInit } from '@/utils/cms';
+import { fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
 import { usePlayStore } from '@/store';
 import DetailView from '../../film/Detail.vue';
 
@@ -184,7 +184,7 @@ const playEvent = async (item) => {
     siteData.value = site;
     if (site.type === 7) {
       const res = await t3RuleInit(site);
-    }
+    } else if(site.type === 8) await catvodRuleInit(site);
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const [detailItem] = await fetchDetail(site, videoId);
       item = detailItem;
