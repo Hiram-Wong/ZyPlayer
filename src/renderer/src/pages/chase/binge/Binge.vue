@@ -68,7 +68,7 @@ import { ref, reactive } from 'vue';
 
 import { fetchStarList, delStar } from '@/api/star';
 import { fetchFilmDetail, fetchSiteList } from '@/api/site';
-import { fetchDetail, t3RuleInit } from '@/utils/cms';
+import { catvodRuleInit, fetchDetail, t3RuleInit } from '@/utils/cms';
 import { usePlayStore } from '@/store';
 import DetailView from '../../film/Detail.vue';
 
@@ -169,7 +169,6 @@ const playEvent = async (item) => {
     siteData.value = site;
     if (site.type === 7) {
       const res = await t3RuleInit(site);
-      if (res.data === 500) ;
     }
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const [detailItem] = await fetchDetail(site, videoId);
@@ -218,10 +217,11 @@ const updateVideoRemarks = (item, res) => {
 
 const checkUpdaterEvent = async () => {
   const fetchAndUpdateVideoRemarks = async (item) => {
-    console.log(item)
     if (item.siteName === '该源应该被删除了哦') return;
     const { site, videoId } = item;
     try {
+      if (site.type === 7) await t3RuleInit(site);
+      else if(site.type === 8) await catvodRuleInit(site);
       const [res] = await fetchDetail(site, videoId);
       if (res.vod_remarks) {
         updateVideoRemarks(item, res);
