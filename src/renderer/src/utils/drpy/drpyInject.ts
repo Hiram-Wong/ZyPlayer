@@ -1,13 +1,13 @@
 /*!
  * @module drpyInject
  * @brief T3网络请求、缓存模块处理库
- * @version 3.1.0
+ * @version 3.1.1
  * 
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/utils/quickjs_ctx.py | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-03-24T18:21:29+08:00
+ * @modification-date 2023-03-29T23:02:29+08:00
  * @modification-description Python转TypeScript, 适用于JavaScript项目
  */
 
@@ -38,17 +38,20 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   const withHeaders: boolean = _object.withHeaders || false;
   const body: string = _object.body || '';
   const bufferType: number = _object.buffer || 0;
-  let data: { [key: string]: string } = _object.data || {};
+  let data: any = _object.data || {};
+  const headers = _object.headers || {};
+  const emptyResult: Response = { content: '', body: '', headers: {} };
 
-  if (body && !data) {
-    data = {};
+  if (body && Object.keys(data).length == 0) {
     body.split('&').forEach((param) => {
       const [key, value] = param.split('=');
       data[key] = value;
     });
   }
 
-  const headers = _object.headers || {};
+  if (headers['Content-Type']?.includes('application/x-www-form-urlencoded')) {
+    data = new URLSearchParams(data).toString();
+  }
 
   const customHeaders = {
     'Cookie': 'custom-cookie',
@@ -72,20 +75,16 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       credentials: 'include'
     });
   } else {
-    headers["Content-Type"] = "application/json"
     const requestOptions: any = {
       method,
       headers,
-      body: JSON.stringify(data),
+      body: typeof data === 'string' ? data : JSON.stringify(data),
       credentials: 'include'
     };
     r = syncFetch(_url, requestOptions);
   }
-  const emptyResult: Response = { content: '', body: '', headers: {} };
 
   const formatHeaders: { [key: string]: string } = {};
-
-  // 遍历 Headers 对象
   for (const [key, value] of r.headers.entries()) {
     if (key.toLowerCase() === 'custom-set-cookie') {
       formatHeaders['set-cookie'] = value;
@@ -103,12 +102,10 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   } else if (_js_type === 1) {
     let content;
     if (bufferType === 2) {
-      // content = Buffer.from(r.arrayBuffer(), 'binary').toString('base64');
       const uint8Array = new Uint8Array(r.arrayBuffer()); // 将 ArrayBuffer 转换为一个 Uint8Array
       const buffer = Buffer.from(uint8Array); // 使用 Buffer.from 将 Uint8Array 转换为 Buffer
       const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
       content = base64String;
-      console.log(base64String);
     } else content = r.text();
     return { content, headers: formatHeaders } || emptyResult;
   } else {
@@ -181,6 +178,9 @@ const local_get = (_id: string, key: string, value: string = '') => {
 const local_set = (_id, key, value) => {
   const headers = {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
     data: {
       key: `${_id}${key}`,
       value

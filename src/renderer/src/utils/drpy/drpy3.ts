@@ -1,13 +1,13 @@
 /*!
  * @module drpy3
  * @brief T3数据处理核心库
- * @version 3.1.0
+ * @version 3.1.1
  * 
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-03-24T18:21:29+08:00
+ * @modification-date 2023-03-29T23:02:29+08:00
  * @modification-description 使用TypeScript适配, 适用于JavaScript项目, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
@@ -87,7 +87,7 @@ const RULE_CK = 'cookie'; // 源cookie的key值
 // const KEY = typeof(key)!=='undefined'&&key?key:'drpy_' + (rule.title || rule.host); // 源的唯一标识
 const CATE_EXCLUDE = '首页|留言|APP|下载|资讯|新闻|动态';
 const TAB_EXCLUDE = '猜你|喜欢|下载|剧情|热播';
-const OCR_RETRY = 3;//ocr验证重试次数
+const OCR_RETRY = 3; // ocr验证重试次数
 // const OCR_API = 'http://dm.mudery.com:10000';//ocr在线识别接口
 // const OCR_API = 'http://192.168.3.239:5705/parse/ocr';//ocr在线识别接口
 // const OCR_API = 'http://cms.nokia.press/parse/ocr';//ocr在线识别接口
@@ -816,8 +816,8 @@ const verifyCode = (url) => {
       let json = JSON.parse(JSON.stringify(hhtml));
 
       if (!cookie) {
-        let setCk = Object.keys(json.headers).find((it) => it.toLowerCase() === 'set-cookie');
-        cookie = setCk ? json.headers[setCk].split(';')[0] : '';
+        let setCk = Object.keys(json).find(it => it.toLowerCase() === 'set-cookie');
+        cookie = setCk ? json[setCk].split(';')[0] : '';
       }
 
       let img = json.body;
@@ -929,7 +929,7 @@ const $require = (url) => {
  * @param ocr_flag 标识此flag是用于请求ocr识别的,自动过滤content-type指定编码
  * @returns {string|string|DocumentFragment|*}
  */
-const request = (url: string, obj: any = undefined, ocr_flag = false) => {
+const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) => {
   if (typeof obj === 'undefined' || !obj) {
     if (!fetch_params || !fetch_params.headers) {
       const headers = {
@@ -977,10 +977,9 @@ const request = (url: string, obj: any = undefined, ocr_flag = false) => {
   const res = req(url, obj);
   const html = res["content"] || '';
   if (obj.withHeaders) {
-    return {
-      headers: res["headers"],
-      body: html
-    }
+    let htmlWithHeaders = res.headers;
+    htmlWithHeaders!.body = html;
+    return JSON.stringify(htmlWithHeaders);
   } else {
     return html;
   }
