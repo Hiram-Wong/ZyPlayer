@@ -1,4 +1,5 @@
 name: 反馈 Bug
+description: 通过 github 模板进行 Bug 反馈。
 title: "[组件名称] 描述问题的标题"
 body:
   - type: markdown
