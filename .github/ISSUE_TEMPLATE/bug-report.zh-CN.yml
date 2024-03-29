@@ -1,3 +1,4 @@
+name: 反馈 Bug
 title: "[组件名称] 描述问题的标题"
 body:
   - type: markdown
