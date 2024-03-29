@@ -21,23 +21,8 @@ const init = () => {
       db.get("tbl_setting").insert({ key: item.key, value: item.value }).write();
     });
   }
-  if (!db.read().has("tbl_site").value()) {
-    db.set("tbl_site", []).write();
-  }
-  if (!db.read().has("tbl_iptv").value()) {
-    db.set("tbl_iptv", []).write();
-  }
-  if (!db.read().has("tbl_channel").value()) {
-    db.set("tbl_channel", []).write();
-  }
-  if (!db.read().has("tbl_star").value()) {
-    db.set("tbl_star", []).write();
-  }
   if (!db.read().has("tbl_history").value()) {
     db.set("tbl_history", []).write();
-  }
-  if (!db.read().has("tbl_drive").value()) {
-    db.set("tbl_drive", []).write();
   }
   if (!db.read().has("tbl_analyze").value()) {
     db.set("tbl_analyze", []).write();

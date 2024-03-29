@@ -1,14 +1,14 @@
 <template>
-  <div class="titlebar" @mousedown="handleMouseDown">
-    <div class="left no-drag" >
-      <history-control />
+  <div class="titlebar" @mousedown="handleMouseDown" :style="[platform === 'darwin' ? 'margin-left: 80px' : '']">
+    <div class="left no-drag">
+      <!-- <img src="@/assets/icon.png" alt="logo" class="logo"/> -->
+    </div>
+    <div class="center no-drag">
       <search-bar class="search"/>
     </div>
     <div class="right no-drag">
       <div class="system-functions">
-        <sponsor class="system-function"/>
         <system-skin class="system-function"/>
-        <system-config class="system-function"/>
       </div>
       <system-control v-if="platform !== 'darwin'"/>
     </div>
@@ -16,12 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import HistoryControl from './HistoryControl.vue';
 import SearchBar from './SearchBar.vue';
-import SystemConfig from './SystemConfig.vue';
 import SystemControl from './SystemControl.vue';
 import SystemSkin from './SystemSkin.vue';
-import Sponsor from './Sponsor.vue';
 
 const { platform } = window.electron.process;
 
@@ -45,9 +42,6 @@ const handleMouseDown = (event) => {
   .left {
     height: 100%;
     display: flex;
-    .search {
-      margin-left: 20px;
-    }
   }
   .center {
     margin-left: 20px;

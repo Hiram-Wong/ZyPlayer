@@ -4,6 +4,10 @@
       <t-row justify="space-between">
         <div class="left-operation-container">
           <div class="component-op">
+            <div class="item" @click="gotoAnalyze">
+              <rollback-icon />
+              <span>返回</span>
+            </div>
             <div class="item" @click="isVisible.dialogAdd = true">
               <add-icon />
               <span>添加</span>
@@ -11,10 +15,6 @@
             <div class="item" @click="removeAllEvent">
               <remove-icon />
               <span>删除</span>
-            </div>
-            <div class="item" @click="isVisible.dialogFlag = true">
-              <discount-icon />
-              <span>标识</span>
             </div>
           </div>
         </div>
@@ -45,12 +45,6 @@
         <t-badge v-if="row.id === analyzeTableConfig.default" size="small" :offset="[0, 3]" count="默" dot>{{ row.name }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
-      <!-- <template #type="{ row }">
-        <span v-if="row.type === 0">普通</span>
-        <span v-if="row.type === 1">json</span>
-        <span v-if="row.type === 2">多json</span>
-        <span v-if="row.type === 3">聚合</span>
-      </template> -->
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" @change="switchStatus(row)">
           <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
@@ -71,33 +65,30 @@
     </t-table>
     <dialog-add-view v-model:visible="isVisible.dialogAdd" @refresh-table-data="refreshEvent" />
     <dialog-edit-view v-model:visible="isVisible.dialogEdit" :data="formData" />
-    <dialog-flag-view
-      v-model:visible="isVisible.dialogFlag"
-      :data="analyzeTableConfig.flag"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
-import { AddIcon, DiscountIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
-import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive, watch } from 'vue';
 import _ from 'lodash';
+import { useEventBus } from '@vueuse/core';
+import { onMounted, ref, reactive, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { AddIcon, DiscountIcon, RemoveIcon, RollbackIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
 
 import { fetchAnalyzePage, updateAnalyzeItem, delAnalyzeItem } from '@/api/analyze';
 import { setDefault } from '@/api/setting';
 
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
-import DialogFlagView from './components/DialogFlag.vue';
 import { COLUMNS } from './constants';
+
+const router = useRouter();
 
 // Define item form data & dialog status
 const isVisible = reactive({
   dialogAdd : false,
-  dialogEdit : false,
-  dialogFlag : false,
+  dialogEdit : false
 })
 
 const formData = ref();
@@ -229,6 +220,12 @@ const defaultEvent = async (row) => {
   } catch (err) {
     MessagePlugin.error(`设置默认源失败, 错误信息:${err}`);
   }
+};
+
+const gotoAnalyze = () => {
+  router.push({
+    name: 'AnalyzeIndex',
+  })
 };
 </script>
 

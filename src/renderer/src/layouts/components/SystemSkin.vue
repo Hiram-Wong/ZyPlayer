@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { BrowseGalleryIcon, ModeDarkIcon, ModeLightIcon } from 'tdesign-icons-vue-next';
+import { Contrast1Icon, ModeDarkIcon, ModeLightIcon } from 'tdesign-icons-vue-next';
 import { computed } from 'vue';
 
 import { useSettingStore } from '@/store';
@@ -32,7 +32,7 @@ const storeSetting = useSettingStore();
 const themeIcons = {
   light: ModeLightIcon,
   dark: ModeDarkIcon,
-  auto: BrowseGalleryIcon
+  auto: Contrast1Icon
 };
 
 const themeNames = {

@@ -5,12 +5,10 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive } from 'vue';
-import PLAY_CONFIG from '@/config/play';
 import { setup } from '@/api/setting';
 import DisclaimerView from '@/pages/Disclaimer.vue';
-import { usePlayStore, useSettingStore } from '@/store';
+import { useSettingStore } from '@/store';
 
-const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 
 const isVisible = reactive({
@@ -26,19 +24,10 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, skipStartEnd, broadcasterType, externalPlayer, webdev } = await setup();
+  const { agreementMask, theme } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
-  storeSetting.updateConfig({ webdev: webdev });
   isVisible.dialogDisclaimer = !agreementMask;
-
-  const init = {
-    ...PLAY_CONFIG.setting,
-  };
-  init.broadcasterType = broadcasterType;
-  init.skipStartEnd = skipStartEnd;
-  init.externalPlayer = externalPlayer;
-  storePlayer.updateConfig({ setting: init });
 }
 
 window.electron.ipcRenderer.on('system-theme-updated', (_, activeTheme) => {

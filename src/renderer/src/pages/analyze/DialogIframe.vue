@@ -5,7 +5,7 @@
     width="100%"
     :header="platformData.name"
     :footer="false"
-    @close="closeEvent"
+    :closeBtn="false"
   >
     <div v-if="platformData.url" class="platform-container">
       <webview ref="webviewRef" :src="platformData.url" class="platform-play-box" disablewebsecurity allowpopups />
@@ -31,6 +31,11 @@
               <refresh-icon size="20px" class="icon" />
             </div>
           </div>
+          <div class="btn-list close" @click="closeEvent">
+            <div class="btn">
+              <close-circle-icon size="20px" class="icon" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -38,7 +43,7 @@
 </template>
 <script setup lang="ts">
 import _ from 'lodash';
-import { PlayCircleStrokeIcon, RefreshIcon, RollbackIcon, RollfrontIcon } from 'tdesign-icons-vue-next';
+import { CloseCircleIcon, PlayCircleStrokeIcon, RefreshIcon, RollbackIcon, RollfrontIcon } from 'tdesign-icons-vue-next';
 import { onMounted, ref, watch } from 'vue';
 
 const props = defineProps({

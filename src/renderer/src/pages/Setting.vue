@@ -1,30 +1,8 @@
 <template>
   <div class="setting-container">
-    <common-nav title="设置" :list="settingSet.list" :active="settingSet.select" @change-key="changeClassEvent">
-      <template #customize>
-        <div class="sign-bar">
-          <div class="sign-logo">
-              <img src="@/assets/hipy.png" alt="logo">
-            </div>
-          <div class="sign-content">
-            <div class="sign-text">
-              <h2>与Hipy更配哦</h2>
-              <p>新起点, 新开始</p>
-            </div>
-          </div>
-          <div class="sign-btn">
-            <a href="https://github.com/hjdhnx/hipy-server" target="_blank">查看</a>
-          </div>
-        </div>
-      </template>
-    </common-nav>
     <div class="content">
       <div class="container">
-        <base-view class="container-item" v-if="settingSet.select === 'configBase'"/>
-        <site-view class="container-item" v-else-if="settingSet.select === 'siteSource'"/>
-        <iptv-view class="container-item" v-else-if="settingSet.select === 'iptvSource'"/>
-        <analyze-view class="container-item" v-else-if="settingSet.select === 'analyzeSource'"/>
-        <drive-view class="container-item" v-else-if="settingSet.select === 'driveSource'"/>
+        <analyze-view class="container-item" />
       </div>
     </div>
   </div>
@@ -35,11 +13,6 @@ import { computed, reactive, watch } from 'vue';
 import { useSettingStore } from '@/store';
 
 import analyzeView from './setting/analyze/AnalyzeSetting.vue';
-import baseView from './setting/base/BaseSetting.vue';
-import iptvView from './setting/iptv/IptvSetting.vue';
-import siteView from './setting/site/SiteSetting.vue';
-import driveView from './setting/drive/DriveSetting.vue';
-import CommonNav from '../components/common-nav/index.vue';
 
 const storeSetting = useSettingStore();
 const sysConfigSwitch = computed(() => {

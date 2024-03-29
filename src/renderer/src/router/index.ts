@@ -11,7 +11,7 @@ const fixedModules = import.meta.glob('./modules/**/!(homepage).ts', { eager: tr
 const defaultRouterList: Array<any> = [
   {
     path: '/',
-    redirect: '/film/index',
+    redirect: '/analyze/index',
     component: () => import('@/layouts/blank.vue'),
   },
   {
@@ -61,7 +61,7 @@ export const getRoutesExpanded = () => {
 
 export const getActive = (maxLevel = 3): string => {
   const route = useRoute();
-  console.log(route)
+
   if (!route.path) {
     return '';
   }

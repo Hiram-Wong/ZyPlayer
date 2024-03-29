@@ -1,6 +1,18 @@
 <template>
   <div class="analyze view-container">
-    <common-nav title="解析" :list="analyzeConfig.data" :active="active.nav" @change-key="changeDefaultEvent" />
+    <common-nav
+      title="解析"
+      :list="analyzeConfig.data"
+      :active="active.nav"
+      @change-key="changeDefaultEvent"
+    >
+      <template #customize>
+        <div class="membership-wrapper nav-sub-tab-member-info" @click="gotoSetConfig">
+          <ArticleIcon />
+          <span class="member-name">点我管理配置</span>
+        </div>
+      </template>
+    </common-nav>
     <div class="content">
       <div class="container">
         <div class="analyze-player">
@@ -8,7 +20,6 @@
           <div class="head-info-section" :style="[ iframeUrl ? 'background-color: rgba(37, 37, 37, 0.78)' : '']">
             <div class="left">
               <div class="info">
-                <!-- <div class="avatar mg-right"></div> -->
                 <div class="title mg-right">{{ urlTitle ? urlTitle : '暂无播放' }}</div>
                 <t-button shape="round" size="small" class="open mg-right" v-if="iframeUrl" @click="openCurrentUrl">原始</t-button>
                 <div class="share mg-right" v-if="iframeUrl" @click="shareEvent">
@@ -41,24 +52,8 @@
           ></iframe>
           <!-- <webview class="webview" v-if="iframeUrl" :src="iframeUrl" disablewebsecurity allowfullscreen/> -->
         </div>
-        <div class="analyze-setting">
-          <div class="analyze-setting-group">
-            <t-input
-              v-model="analysisUrl"
-              class="input-url"
-              placeholder="输个链接,让世界充满爱～"
-              size="large"
-              @change="formatUrlEvent"
-            />
-            <div class="analyze-bottom-group">
-              <div class="popover" @click="isVisible.search = true">
-                <app-icon size="1.3rem" class="popover-icon"/>
-              </div>
-            </div>
-            <t-button class="analyze-play" size="large" @click="analysisEvent">
-              <p class="analyze-tip">解析</p>
-            </t-button>
-          </div>
+        <div class="">
+          <platform-view class="dialog-platform-view" @open-platform="openPlatform" />
         </div>
       </div>
     </div>
@@ -79,6 +74,7 @@ import moment from 'moment';
 import { ArticleIcon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { getUrlTitle } from '@/utils/analyze';
 import { fetchAnalyzeActive } from '@/api/analyze';
@@ -88,7 +84,10 @@ import DialogHistoryView from './analyze/DialogHistory.vue';
 import DialogIframemView from './analyze/DialogIframe.vue';
 import DialogSearchView from './analyze/DialogSearch.vue';
 import SharePopup from '../components/share-popup/index.vue';
+import PlatformView from './analyze/DialogPlatform.vue';
 import CommonNav from '../components/common-nav/index.vue';
+
+const router = useRouter();
 
 const urlTitle = ref(''); // 播放地址的标题
 const analysisUrl = ref(null); // 输入需要解析地址
@@ -201,6 +200,7 @@ const analysisEvent = async () => {
 const platformPlay = async (url, title) => {
   const formatUrl = formatUrlMethod(url);
   analysisUrl.value = formatUrl;
+  inputBus.emit(formatUrl);
   await getVideoInfo(formatUrl, title);
 };
 
@@ -209,6 +209,7 @@ const historyPlayEvent = async (item) => {
   active.value.nav = item.relateId;
   const formatUrl = formatUrlMethod(item.videoUrl);
   analysisUrl.value = formatUrl;
+  inputBus.emit(formatUrl);
   await getVideoInfo(formatUrl, item.videoName);
   isVisible.history = false;
 };
@@ -237,8 +238,17 @@ const clearWebview = () => {
 }
 
 // 监听设置默认源变更
-const eventBus = useEventBus('analyze-reload');
-eventBus.on(async () => {
+const reloadBus = useEventBus<string>('analyze-reload');
+const searchBus = useEventBus<string>('analyze-search');
+const inputBus = useEventBus<string>('search-input');
+
+
+searchBus.on((url: string)=>{
+  analysisUrl.value = url;
+  analysisEvent();
+});
+
+reloadBus.on(() => {
   getSetting();
 });
 
@@ -260,6 +270,12 @@ const changeDefaultEvent = async (id) => {
   active.value.nav = id;
   if(analysisUrl.value) await getVideoInfo(analysisUrl.value, urlTitle.value);
 };
+
+const gotoSetConfig = () =>{
+  router.push({
+    name: 'SettingIndex',
+  })
+}
 </script>
 
 <style lang="less" scoped>
@@ -287,9 +303,6 @@ const changeDefaultEvent = async (id) => {
       margin-left: 4px;
     }
   }
-  .nav-sub-tab-member-info {
-    margin-top: 16px;
-  }
 
   .no-warp {
     text-overflow: ellipsis;
@@ -311,7 +324,6 @@ const changeDefaultEvent = async (id) => {
       .analyze-player {
         flex: 1 1;
         border-radius: var(--td-radius-extraLarge);
-        border: 5px solid var(--td-bg-color-secondarycontainer);
         height: 100%;
         width: 100%;
         position: relative;
@@ -538,6 +550,23 @@ const changeDefaultEvent = async (id) => {
         flex-direction: column;
       }
     }
+  }
+}
+
+:deep(.t-dialog--default) {
+  padding: 0;
+  border: none;
+  background-color: var(--td-bg-color-page);
+  box-shadow: var(--td-shadow-3);
+  .t-dialog__header {
+    padding: 0 var(--td-comp-margin-xs);
+    .t-dialog__header-content {
+      text-align: center;
+      display: inline-block;
+    }
+  }
+  .t-dialog__body {
+    padding: 0;
   }
 }
 </style>
