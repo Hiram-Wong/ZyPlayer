@@ -33,7 +33,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, ref, watch } from 'vue';
 import { MdPreview } from 'md-editor-v3';
 
-import md from '@/assets/md/privacy-policy.md?raw'
+import md from '@/assets/md/privacy-policy.md?raw';
 import { useSettingStore } from '@/store';
 import { setDefault } from '@/api/setting';
 
@@ -48,6 +48,7 @@ const theme = computed(() => {
   return storeSetting.displayMode;
 });
 const formVisible = ref(false);
+const text = ref(md);
 const emit = defineEmits(['update:visible']);
 watch(
   () => formVisible.value,
@@ -78,8 +79,6 @@ const cancelEvent = () => {
     window.electron.ipcRenderer.send('quit-app');
   }, 5000);
 };
-
-const text = ref(md);
 </script>
 
 <style lang="less" scoped>
