@@ -27,6 +27,16 @@
               </div>
             </div>
           </div>
+          <div class="sniffer_items_list">
+            <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data === 'sniffer' }" @click="onSubmit('sniffer')">
+              <div class="content">
+                <div class="corner_sign">hipy-sniffer嗅探器</div>
+                <div class="sku-name">独立部署性能好</div>
+                <div class="main-ability">又快又好</div>
+                <div class="secondary-ability">支持未加载页面</div>
+              </div>
+            </div>
+          </div>
 				</div>
 			</div>
 		</div>
@@ -93,6 +103,7 @@ const onSubmit = async (snifferType) => {
 		.sniffer_items_container {
 			.sniffer_items_list {
 				display: flex;
+        padding-bottom: 15px;
 				.list_num_2 {
 					width: 247px;
 					cursor: default;

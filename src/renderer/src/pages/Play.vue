@@ -462,6 +462,7 @@ import { fetchChannelEpg } from '@/utils/channel';
 import { usePlayStore } from '@/store';
 
 import SharePopup from '../components/share-popup/index.vue';
+import axios from "axios/index";
 
 const remote = window.require('@electron/remote');
 const { BrowserWindow } = require('@electron/remote');
@@ -559,7 +560,7 @@ const dpConfig = ref({
   autoplay: true,
   screenshot: true,
   video: {
-    
+
   },
 }); // 呆呆播放器参数
 
@@ -632,7 +633,7 @@ const VIDEO_PROCESS_DOC = {
 const analyzeConfig = ref({
   default: {
     url: ''
-  }, // 
+  }, //
   flag: [] //标识
 })
 
@@ -1181,8 +1182,29 @@ const sniffer_pie = () => {
   });
 };
 
+const sniffer_url = async () => {
+  let _url = set.value.defaultSnifferUrl;
+  if(_url.endsWith('/')){
+    _url = _url.substr(0, _url.length - 1);
+  }
+  let url = _url + '/sniffer?url='+config.value.url;
+  let resp = await axios.get(url);
+  if (resp.code == 200) {
+    const formatIndex = videoFormats.findIndex((format) => resp.url.toLowerCase().indexOf(format) > -1);
+    if (formatIndex > -1) {
+      config.value.url = resp.url;
+      const videoFormat = videoFormats[formatIndex];
+      createPlayer(videoFormat.slice(1));
+    } createPlayer('m3u8');
+  } else {
+    MessagePlugin.warning(resp.msg);
+  };
+}
+
 const sniffer = () => {
-  if (set.value.snifferType === 'iframe') {
+  if(set.value.snifferType === 'sniffer'){
+    sniffer_url();
+  } else if (set.value.snifferType === 'iframe') {
     onlineUrl.value = config.value.url;
     sniffer_iframe();
   } else sniffer_pie();
@@ -1376,7 +1398,7 @@ const getDoubanRecommend = async () => {
     await Promise.all(searchPromises);
     if (ids.length > 0) {
       const idsFirst = ids[0]
-      if (!('vod_pic' in idsFirst)) { 
+      if (!('vod_pic' in idsFirst)) {
         flag = false;
         vodIds = ids.map((movie) => movie.vod_id).join(',');
       }
@@ -1624,7 +1646,7 @@ const copyDownloadUrl = () => {
     const downloadUrl = downloadTarget.value.join('\n');
     const successMessage = '复制成功，快到下载器里下载吧!';
     const errorMessage = '复制失败，当前环境不支持一键复制!';
-    
+
     checkDownloadUrl(firstUrl);
     copyToClipboard(downloadUrl, successMessage, errorMessage);
     isVisible.download = false;

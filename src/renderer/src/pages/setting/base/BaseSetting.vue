@@ -105,7 +105,7 @@
               <t-select
                 v-model="formData.broadcasterType"
                 :options="PLAYER_OPTIONS"
-                placeholder="请选择播放器" 
+                placeholder="请选择播放器"
                 :style="{ width: '255px' }"
               />
               <span class="title" @click="snifferEvent">嗅探</span>
@@ -121,6 +121,16 @@
             </t-space>
           </t-space>
         </div>
+      </t-form-item>
+      <t-form-item label="嗅探器" name="sniffer">
+        <t-space align="center">
+        <t-input
+          v-model="formData.defaultSnifferUrl"
+          placeholder="仅支持hipy-sniffer"
+          :style="{ width: '255px' }"
+        />
+        <span class="title" @click="reset('sniffer')">重置</span>
+        </t-space>
       </t-form-item>
       <t-form-item label="安全" name="security">
         <t-space>
@@ -247,6 +257,7 @@ const formData = ref({
   version: '3.3.2',
   theme: 'auto',
   externalPlayer: '',
+  defaultSnifferUrl: 'http://127.0.0.1:5708',
   defaultHot: 'kylive',
   defaultSearchRecommend: 'site',
   defaultSearchType: 'site',
@@ -586,6 +597,8 @@ const reset = (type: string) => {
     formData.value.defaultIptvLogo = 'https://epg.112114.eu.org/logo/';
   } else if(type === 'danmuku') {
     formData.value.defaultDanMuKu = 'https://dm.bbj.icu/dm?ac=dm';
+  } else if(type == 'sniffer'){
+    formData.value.defaultSnifferUrl = 'http://127.0.0.1:5708'
   }
 };
 
@@ -661,7 +674,7 @@ const checkIpv6 = async () => {
 
     const ipv4Regex: RegExp = /^((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(?::(?:[0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$/
     const ipv6Regex: RegExp = /(^(?:(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}:[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){5}:([0-9A-Fa-f]{1,4}:)?[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){4}:([0-9A-Fa-f]{1,4}:){0,2}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){3}:([0-9A-Fa-f]{1,4}:){0,3}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){2}:([0-9A-Fa-f]{1,4}:){0,4}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(([0-9A-Fa-f]{1,4}:){0,5}:((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(::([0-9A-Fa-f]{1,4}:){0,5}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|([0-9A-Fa-f]{1,4}::([0-9A-Fa-f]{1,4}:){0,5}[0-9A-Fa-f]{1,4})|(::([0-9A-Fa-f]{1,4}:){0,6}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){1,7}:))$)|(^\[(?:(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}:[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){5}:([0-9A-Fa-f]{1,4}:)?[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){4}:([0-9A-Fa-f]{1,4}:){0,2}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){3}:([0-9A-Fa-f]{1,4}:){0,3}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){2}:([0-9A-Fa-f]{1,4}:){0,4}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(([0-9A-Fa-f]{1,4}:){0,5}:((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(::([0-9A-Fa-f]{1,4}:){0,5}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|([0-9A-Fa-f]{1,4}::([0-9A-Fa-f]{1,4}:){0,5}[0-9A-Fa-f]{1,4})|(::([0-9A-Fa-f]{1,4}:){0,6}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){1,7}:))\](?::(?:[0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$)/i
-    
+
     if (ip.match(ipv4Regex)) formData.value.iptvSkipIpv6 = true;
     if (ip.match(ipv6Regex)) formData.value.iptvSkipIpv6 = false;
     MessagePlugin.success(`网络地址:${ip}`);
