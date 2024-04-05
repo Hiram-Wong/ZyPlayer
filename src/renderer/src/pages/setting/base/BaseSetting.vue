@@ -154,7 +154,7 @@
         <dialog-custom-player v-model:visible="isVisible.customPlayer" />
         <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
         <dialog-update-view v-model:visible="isVisible.update" />
-        <dialog-ffmpeg-caption-view v-model:visible="isVisible.iptvThumbnail" />
+        <dialog-thumbnail-view v-model:visible="isVisible.iptvThumbnail" />
         <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData" @receive-sniffer-data="flushDialogData"/>
         <dialog-disclaimer-view v-model:visible="isVisible.disclaimer" />
       </t-form-item>
@@ -180,7 +180,7 @@ import { usePlayStore, useSettingStore } from '@/store';
 import DialogDataView from './components/DialogData.vue';
 import DialogUaView from './components/DialogUA.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
-import DialogFfmpegCaptionView from './components/DialogFfmpegCaption.vue';
+import DialogThumbnailView from './components/DialogThumbnail.vue';
 import DialogCustomPlayer from './components/DialogCustomPlayer.vue';
 import DialogSnifferView from './components/DialogSniffer.vue';
 import DialogDisclaimerView from '@/pages/Disclaimer.vue';

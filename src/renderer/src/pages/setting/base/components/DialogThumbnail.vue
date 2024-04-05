@@ -1,5 +1,5 @@
 <template>
-	<div class="ffmpeg-caption-dialog-container dialog-container-padding">
+	<div class="thumbnail-dialog-container dialog-container-padding">
 		<t-dialog v-model:visible="formVisible"
       :close-btn="false"
       :header="false"
@@ -10,7 +10,7 @@
       width="480px"
 		>
 			<template #body>
-				<div class="ffmpeg-caption">
+				<div class="thumbnail">
           <div class="header">缩略图使用说明</div>
           <div class="main-content">
             <MdPreview 
@@ -89,7 +89,7 @@ const confirmEvent = () => {
 </script>
 
 <style lang="less" scoped>
-.ffmpeg-caption-dialog-container {
+.thumbnail-dialog-container {
   :deep(.t-dialog) {
     .t-dialog__footer {
       display: flex;
@@ -105,7 +105,7 @@ const confirmEvent = () => {
       }
     }
   }
-  .ffmpeg-caption {
+  .thumbnail {
     opacity: 1;
     .header {
       margin-top: 45px;
