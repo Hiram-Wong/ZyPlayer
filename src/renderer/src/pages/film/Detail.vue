@@ -135,14 +135,12 @@ import moment from 'moment';
 
 import { usePlayStore } from '@/store';
 
-import { detailStar, addStar, delStar } from '@/api/star';
-import { updateHistory, detailHistory, addHistory } from '@/api/history';
 import { fetchAnalyzeDefault } from '@/api/analyze';
+import { updateHistory, detailHistory, addHistory } from '@/api/history';
+import { detailStar, addStar, delStar } from '@/api/star';
 import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchCatvodPlayUrl } from '@/utils/cms';
+import sniffer from '@/utils/sniffer';
 import { getConfig, getMeadiaType } from '@/utils/tool';
-
-const remote = window.require('@electron/remote');
-const win = remote.getCurrentWindow();
 
 const props = defineProps({
   visible: {
@@ -191,7 +189,6 @@ const isVisible = reactive({
 })
 
 // 嗅探
-const videoFormats = ['.m3u8', '.mp4', '.flv', 'avi', 'mkv'];
 const VIP_LIST = [
   'iqiyi.com',
   'iq.com',
@@ -329,7 +326,7 @@ const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<str
   }
 };
 
-const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> => {
+const fetchJxPlayUrlHelper = async (type: 'iframe' | 'pie' | 'custom', url: string): Promise<string> => {
   console.log('[detail][jx][start]官解流程开启');
   let data: string = '';
   try {
@@ -343,7 +340,6 @@ const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> 
     return data;
   }
 };
-
 
 // 调用本地播放器 + 历史
 const gotoPlay = async (e) => {
@@ -369,7 +365,7 @@ const gotoPlay = async (e) => {
         snifferUrl = analyzeConfig.value.default.url + url;
       }
       if (snifferUrl) {
-        playerUrl = await fetchJxPlayUrlHelper(snifferType, snifferUrl);
+        playerUrl = await fetchJxPlayUrlHelper(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${snifferUrl}` : snifferUrl);
         if (playerUrl) callSysPlayer(playerUrl);
         return;
       }
@@ -409,7 +405,7 @@ const gotoPlay = async (e) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    playerUrl = await sniffer(snifferType, url);
+    playerUrl = await sniffer(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${url}` : url);
     callSysPlayer(playerUrl);
   } catch (err) {
     console.error(err);
@@ -507,7 +503,7 @@ const getHistoryData = async (type = false): Promise<void> => {
       const add_res = await addHistory(doc);
       dataHistory.value = add_res;
     }
-  } catch (error) {
+  } catch (err) {
     console.error(`[detail][history][error]${err}`);
   }
 };
@@ -556,99 +552,6 @@ const formatName = (e: string): string => {
 const filterContent = (item: string | undefined | null): string => {
   if (!item) return '';
   return item.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
-};
-
-const snifferPie = async (url: string): Promise<string> => {
-  console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
-  let data: string = '';
-
-  try {
-    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url);
-
-    if (res.code === 200) {
-      data = res.data.url;
-      console.log(`[detail][sniffer][pie][return]: pie嗅探流程返回链接:${data}`);
-    } else if (res.code === 500) {
-      console.log(`[detail][sniffer][pie][error]: pie嗅探流程错误:${res}`);
-    }
-  } catch (err) {
-    console.log(`[detail][sniffer][pie][error]: pie嗅探流程错误:${err}`);
-  } finally {
-    console.log(`[detail][sniffer][pie][end]: pie嗅探流程结束`);
-    return data;
-  }
-};
-
-const snifferIframe = async (url: string, totalTime: number = 15000, speeder: number = 250) => {
-  win.webContents.setAudioMuted(true); // 静音
-  onlineUrl.value = url;
-  const iframeWindow = iframeRef.value.contentWindow;
-
-  const totalCounter = totalTime / speeder; // 计算总次数
-
-  let counter = 1;
-  let snifferTimer;
-  let data = '';
-
-  const checkResourceName = (resourceName: string) => {
-    const formatIndex = videoFormats.findIndex((format) => resourceName.toLowerCase().includes(format));
-    return formatIndex > -1;
-  };
-
-  const stopSniffer = () => {
-    clearInterval(snifferTimer);
-    onlineUrl.value = '';
-    win.webContents.setAudioMuted(false);
-  };
-
-  await new Promise((resolve) => {
-    snifferTimer = setInterval(async () => {
-      console.log(`[detail][sniffer][iframe][start]iframe嗅第${counter}次探流程开始`);
-
-      try {
-        const resources = iframeWindow.performance.getEntriesByType('resource'); // 获取所有资源
-
-        for (const resource of resources) {
-          const resourceName = resource.name;
-          if (checkResourceName(resourceName)) {
-            data = resourceName;
-            console.log(`[detail][sniffer][iframe][return]iframe嗅探流程返回链接:${data}`);
-
-            stopSniffer();
-            resolve();
-            return;
-          }
-        }
-      } catch (err) {
-        MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
-        console.log(`[detail][sniffer][iframe][error]iframe第${counter}次嗅探发生错误:${err}`);
-      }
-
-      if (counter >= totalCounter) {
-        MessagePlugin.warning(`嗅探超时并结束, 共计嗅探:${counter}次, 请换源`);
-        console.log(`[detail][sniffer][iframe][end]iframe嗅探超时结束`);
-        stopSniffer();
-        resolve();
-      }
-
-      counter += 1;
-    }, speeder);
-  });
-
-
-  console.log(`[detail][sniffer][iframe][end]iframe嗅探流程结束`);
-  return data;
-};
-
-// 嗅探
-const sniffer = async (type: 'iframe' | 'pie', url: string): Promise<string> => {
-  let data: string = '';
-  if (type === 'iframe') {
-    data = await snifferIframe(url);
-  } else {
-    data = await snifferPie(url);
-  }
-  return data;
 };
 
 // 判断媒体类型
