@@ -74,7 +74,7 @@
               <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
               <span class="title" @click="checkIpv6">检查</span>
               <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
-              <t-radio v-model="formData.iptvThumbnail" allow-uncheck>预览图</t-radio>
+              <t-radio v-model="formData.iptvThumbnail" allow-uncheck>缩略图</t-radio>
               <span class="title" @click="isVisible.iptvThumbnail=true">说明</span>
             </t-space>
             <t-space align="center">
@@ -203,7 +203,7 @@ const isVisible = reactive({
 
 const uaDialogData = ref({ data: '', type: 'ua' });
 const webdevDialogData = ref({ webdevUrl:'', webdevUsername:'' ,webdevPassword:'' });
-const snifferDialogData = ref({ data: '', type:'snifferType' });
+const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferType' });
 
 const MODE_OPTIONS = [
   { type: 'light', text: '浅色' },
@@ -627,14 +627,15 @@ const uaEvnet = () => {
 const snifferEvent = () => {
   const { snifferType } = formData.value;
   snifferDialogData.value = {
-    data: snifferType,
+    data: {
+      type: snifferType.type,
+      url: snifferType.url,
+    },
     type: 'snifferType',
   };
 
   isVisible.sniffer = true;
 }
-
-const commonCustomPlayer = () => {}
 
 const dataMange = () => {
   const { webdevUrl, webdevUsername, webdevPassword } = formData.value;

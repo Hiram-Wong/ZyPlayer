@@ -4,13 +4,13 @@
       header="嗅探方案"
 			:footer="false"
       placement="center"
-      width="428px"
+      width="608px"
 		>
 		<div class="sniffer_detail_container">
 			<div class="sniffer_benefits">
 				<div class="sniffer_items_container">
 					<div class="sniffer_items_list">
-            <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data === 'pie' }" @click="onSubmit('pie')">
+            <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data.type == 'pie' }" @click="onSubmit('pie')">
               <div class="content">
                 <div class="corner_sign">PuppeteerInElectron</div>
                 <div class="sku-name">拦截和修改请求</div>
@@ -18,12 +18,31 @@
                 <div class="secondary-ability">支持未加载页面</div>
               </div>
             </div>
-            <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data === 'iframe' }" @click="onSubmit('iframe')">
+            <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data.type == 'iframe' }" @click="onSubmit('iframe')">
               <div class="content">
                 <div class="corner_sign">浏览器原生接口</div>
                 <div class="sku-name">资源占用低</div>
                 <div class="main-ability">兼容性好</div>
                 <div class="secondary-ability">仅限已加载页面</div>
+              </div>
+            </div>
+            <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data.type == 'custom' }" @click="onSubmit('custom')">
+              <div class="content">
+                <div class="corner_sign">第三方接口</div>
+                <div class="sku-name">不受本机性能影响</div>
+                <div class="main-ability">更专业</div>
+                <div class="secondary-ability" style="height: 17px;">
+                  <t-input
+                    v-model="formData.data.url"
+                    placeholder="请输入接口地址"
+                    :style="{ height: '100%', width: '143px' }"
+                    @blur="onSubmit('custom')"
+                  >
+                    <template #prefix-icon>
+                      <link-icon />
+                    </template>
+                  </t-input>
+                </div>
               </div>
             </div>
           </div>
@@ -36,6 +55,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { LinkIcon } from 'tdesign-icons-vue-next';
 
 const props = defineProps({
 	visible: {
@@ -77,13 +97,16 @@ watch(
   },
 );
 
-const onSubmit = async (snifferType) => {
+const onSubmit = (snifferType: 'pie' | 'iframe' | 'custom') => {
+  formData.value.data.type = snifferType;
+
   emit('receiveSnifferData', {
-    data: snifferType,
+    data: {
+      type: snifferType,
+      url: formData.value.data.url
+    },
 		type: 'snifferType'
   });
-
-  formVisible.value = false;
 };
 </script>
 
@@ -91,15 +114,17 @@ const onSubmit = async (snifferType) => {
 .sniffer_detail_container {
 	.sniffer_benefits {
 		.sniffer_items_container {
+      display: flex;
+      flex-direction: column;
 			.sniffer_items_list {
 				display: flex;
+        justify-content: space-between;
 				.list_num_2 {
 					width: 247px;
 					cursor: default;
 					border-radius: 14px;
 					position: relative;
 					background: #f7f7f7;
-					margin-right: 9px;
 				}
         .sku-wrapper {
           background-color: var(--td-bg-content-input);
@@ -107,7 +132,7 @@ const onSubmit = async (snifferType) => {
           padding: 20px 12px 12px;
           color: rgba(var(--td-text-color-primary), 0.72);
           cursor: pointer;
-          width: 180px;
+          width: 171px;
           min-height: 112px;
           position: relative;
           border: 2px solid rgba(0,0,0,0);
@@ -185,10 +210,22 @@ const onSubmit = async (snifferType) => {
             .secondary-ability {
               font-size: 14px;
               line-height: 17px;
+              :deep(.t-input) {
+                height: 17px;
+                background-color: transparent !important;
+              }
             }
           }
         }
 			}
+      .bundle {
+        background: var(--td-bg-content-input);
+        border-radius: 10px;
+        font-size: 12px;
+        margin-top: 6px;
+        padding: 12px 8px;
+        position: relative;
+      }
 		}
 	}
 }

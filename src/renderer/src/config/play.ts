@@ -3,7 +3,10 @@ export default {
   setting: {
     broadcasterType: 'xgplayer',
     externalPlayer: '',
-    snifferType: 'pie',
+    snifferType: {
+      type: 'pie' as 'pie' | 'iframe' | 'custom',
+      url: ''
+    },
     skipStartEnd: true,
   },
   data: {
