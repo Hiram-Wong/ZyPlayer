@@ -140,7 +140,7 @@ import { updateHistory, detailHistory, addHistory } from '@/api/history';
 import { detailStar, addStar, delStar } from '@/api/star';
 import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchCatvodPlayUrl } from '@/utils/cms';
 import sniffer from '@/utils/sniffer';
-import { getConfig, getMeadiaType } from '@/utils/tool';
+import { getConfig, checkMediaType } from '@/utils/tool';
 
 const props = defineProps({
   visible: {
@@ -356,7 +356,7 @@ const gotoPlay = async (e) => {
     if (url.startsWith('http')) {
       const { hostname } = new URL(url);
       let snifferUrl;
-      if (url.includes('url=')) snifferUrl = url; // 判断有播放器的
+      if (url.includes('uri=')) snifferUrl = url; // 判断有播放器的
       if (
         VIP_LIST.some((item) => hostname.includes(item)) ||
         analyzeConfig.value.flag.some((item) => selectPlaySource.value.includes(item))
@@ -552,23 +552,6 @@ const formatName = (e: string): string => {
 const filterContent = (item: string | undefined | null): string => {
   if (!item) return '';
   return item.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
-};
-
-// 判断媒体类型
-const checkMediaType = async (url: string): Promise<string | null> => {
-  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi'];
-
-  if (url.startsWith('http')) {
-    const fileType = supportedFormats.find(format => url.includes(format));
-    if (fileType) {
-      return fileType;
-    } else {
-      const getMediaType = await getMeadiaType(url);
-      return getMediaType;
-    }
-  } else {
-    return null; // 如果 URL 不以 http 开头，返回 null
-  }
 };
 </script>
 

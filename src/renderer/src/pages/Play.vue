@@ -320,7 +320,7 @@
                           </t-image>
                         </div>
                         <div class="anthology-title-wrap">
-                          <div class="title">{{ content.vod_name }}</div>
+                          <div class="title nowrap">{{ content.vod_name }}</div>
                           <div class="subtitle nowrap">
                             {{ content.vod_blurb ? content.vod_blurb.trim() : content.vod_blurb }}
                           </div>
@@ -455,10 +455,11 @@ import { updateHistory, detailHistory, addHistory } from '@/api/history';
 import { detailStar, addStar, delStar } from '@/api/star';
 import { fetchChannelList } from '@/api/iptv';
 
-import { getConfig, getMeadiaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
+import { getConfig, checkMediaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
 import { __jsEvalReturn } from '@/utils/alist_open';
 import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchDetail, fetchSearch, t3RuleInit, fetchCatvodPlayUrl, fetchDoubanRecommend } from '@/utils/cms';
 import { fetchChannelEpg } from '@/utils/channel';
+import sniffer from '@/utils/sniffer';
 import { usePlayStore } from '@/store';
 
 import SharePopup from '../components/share-popup/index.vue';
@@ -706,15 +707,15 @@ const seasonReverseOrder = () => {
 };
 
 // 根据不同类型加载不同播放器
-const createPlayer = async (videoType) => {
-  console.log(videoType)
+const createPlayer = async (url, videoType='') => {
+  const { broadcasterType } = set.value;
   if (!videoType) {
-    const meadiaType = await getMeadiaType(config.value.url);
+    const meadiaType = await checkMediaType(url);
     if (meadiaType !== 'unknown' && meadiaType !== 'error' ) {
       videoType = meadiaType;
     }
   }
-  if (set.value.broadcasterType === 'xgplayer') {
+  if (broadcasterType === 'xgplayer') {
     switch (videoType) {
       case 'mp4':
         config.value.plugins = [Mp4Plugin];
@@ -732,16 +733,17 @@ const createPlayer = async (videoType) => {
         config.value.plugins = [HlsPlugin];
         break;
     }
+    config.value.url = url;
     xg.value = new Player({ ...config.value });
     console.log(`[player] 加载西瓜${videoType}播放器`);
-  } else if (set.value.broadcasterType === 'dplayer') {
+  } else if (broadcasterType === 'dplayer') {
     switch (videoType) {
       case 'mp4':
-        dpConfig.value.video.url = config.value.url;
+        dpConfig.value.video.url = url;
         break;
       case 'flv':
         dpConfig.value.video = {
-          url: config.value.url,
+          url: url,
           type: 'customFlv',
           customType: {
             customFlv: function (video, player) {
@@ -757,7 +759,7 @@ const createPlayer = async (videoType) => {
         break;
       case 'm3u8':
         dpConfig.value.video = {
-          url: config.value.url,
+          url: url,
           type: 'customHls',
           customType: {
             customHls: function (video, player) {
@@ -770,7 +772,7 @@ const createPlayer = async (videoType) => {
         break;
       default:
         dpConfig.value.video = {
-          url: config.value.url,
+          url: url,
           type: 'customHls',
           customType: {
             customHls: function (video, player) {
@@ -900,23 +902,6 @@ const destroyPlayer = () => {
   if (onlineUrl.value) onlineUrl.value = '';
 };
 
-// 判断媒体类型
-const checkMediaType = async (url) => {
-  const supportedFormats = ['mp4', 'mkv', 'flv', 'm3u8', 'avi'];
-
-  if (url.startsWith('http')) {
-    const fileType = supportedFormats.find(format => url.includes(format));
-    if (fileType) {
-      return fileType;
-    } else {
-      const getMediaType = await getMeadiaType(url);
-      return getMediaType;
-    }
-  } else {
-    return null; // 如果 URL 不以 http 开头，返回 null
-  }
-};
-
 // 初始化iptv
 const initIptvPlayer = async () => {
   if (data.value.ext.epg) getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
@@ -942,16 +927,112 @@ const initIptvPlayer = async () => {
   }
 };
 
+// Helper functions
+const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<string> => {
+  console.log('[detail][hipy][start]获取服务端播放链接开启');
+  let data: string = '';
+  try {
+    const res = await fetchHipyPlayUrl(site, flag, url);
+    data = res;
+    console.log(`[detail][hipy][return]${data}`);
+  } catch (err) {
+    console.log(`[detail][hipy][error]${err}`);
+  } finally {
+    console.log(`[detail][hipy][end]获取服务端播放链接结束`);
+    return data;
+  }
+};
+
+const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<string> => {
+  console.log('[detail][t3][start]获取服务端播放链接开启');
+  let data: string = '';
+  try {
+    const res = await fetchT3PlayUrl(flag, id, flags);
+    data = res.url;
+    console.log(`[detail][t3][return]${data}`);
+  } catch (err) {
+    console.log(`[detail][t3][error]${err}`);
+  } finally {
+    console.log(`[detail][t3][end]获取服务端播放链接结束`);
+    return data;
+  }
+};
+
+const fetchCatboxPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
+  console.log('[detail][catvod][start]获取服务端播放链接开启');
+  let data: string = '';
+  try {
+    const res = await fetchCatvodPlayUrl(site, flag, id);
+    data = res.url;
+    console.log(`[detail][catvod][return]${data}`);
+  } catch (err) {
+    console.log(`[detail][catvod][error]${err}`);
+  } finally {
+    console.log(`[detail][catvod][end]获取服务端播放链接结束`);
+    return data;
+  }
+};
+
+const fetchDrpyPlayUrlHelper = async (site: { [key: string]: any }, url: string): Promise<string> => {
+  console.log('[detail][drpy][start]免嗅流程开启');
+  let data: string = '';
+  try {
+    const res = await fetchDrpyPlayUrl(site, url);
+    if (res.redirect) {
+      data = res.url;
+      console.log(`[detail][drpy][return]${data}`);
+    }
+  } catch (err) {
+    console.log(`[detail][drpy][error]:${err}`);
+  } finally {
+    console.log(`[detail][drpy][end]免嗅流程结束`);
+    return data;
+  }
+};
+
+const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<string> => {
+  console.log('[detail][json][start]json解析流程开启');
+  let data: string = '';
+  try {
+    const res = await getConfig(`${playUrl}${url}`);
+    if (res.url) {
+      data = res.url;
+      console.log(`[detail][json][return]${data}`);
+    }
+  } catch (err) {
+    console.log(`[detail][json][error]${err}`);
+  } finally {
+    console.log(`[detail][json][end]json解析流程结束`);
+    return data;
+  }
+};
+
+const fetchJxPlayUrlHelper = async (type: 'iframe' | 'pie' | 'custom', url: string): Promise<string> => {
+  console.log('[detail][jx][start]官解流程开启');
+  let data: string = '';
+  try {
+    const res = await sniffer(type, url);
+    data = res;
+    console.log(`[detail][jx][return]${data}`);
+  } catch (err) {
+    console.log(`[detail][jx][error]${err}`);
+  } finally {
+    console.log(`[detail][jx][end]官解流程结束`);
+    return data;
+  }
+};
+
 // 初始化film
 const initFilmPlayer = async (isFirst) => {
+  const { site } = ext.value;
   await getDetailInfo();
 
   if (!isFirst) {
     await getHistoryData();
     await getAnalysisData();
 
-    if (ext.value.site.type !== 7) {
-      if (ext.value.site.search !== 0) getDoubanRecommend();
+    if (site.type !== 7) {
+      if (site.search !== 0) getDoubanRecommend();
     }
     getBinge();
 
@@ -977,105 +1058,65 @@ const initFilmPlayer = async (isFirst) => {
   }
 
   // 解析直链
-  const { playUrl } = ext.value.site;
-  if (playUrl) {
-    const play = await getConfig(`${playUrl}${config.value.url}`);
-    console.log(`解析地址:${play.url}`);
-    if (play.url) {
-      config.value.url = play.url;
-      const fileExtension = play.url.match(/\.([^/?#]+)(?:[?#]|$)/i)[1];
-      createPlayer(fileExtension);
+  let playerUrl = config.value.url;
+  const { snifferType } = set.value;
+  if (site.playUrl) {
+    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, config.value.url);
+  } else {
+    if (config.value.url.startsWith('http')) {
+      const { hostname } = new URL(config.value.url);
+      let snifferUrl;
+      if (config.value.url.includes('uri=')) snifferUrl = config.value.url; // 判断有播放器的
+      if (
+        VIP_LIST.some((item) => hostname.includes(item)) ||
+        analyzeConfig.value.flag.some((item) => selectPlaySource.value.includes(item))
+      ) {
+        // 官解iframe
+        snifferUrl = analyzeConfig.value.default.url + config.value.url;
+      }
+      if (snifferUrl) {
+        playerUrl = await fetchJxPlayUrlHelper(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${snifferUrl}` : snifferUrl);
+        if (playerUrl) createPlayer(playerUrl);
+        return;
+      }
+    }
+    switch (site.type) {
+      case 2:
+        // drpy免嗅
+        playerUrl = await fetchDrpyPlayUrlHelper(site, config.value.url);
+        break;
+      case 6:
+        // hipy获取服务端播放链接
+        playerUrl = await fetchHipyPlayUrlHelper(site, selectPlaySource.value, config.value.url);
+        break;
+      case 7:
+        // t3获取服务端播放链接
+        playerUrl = await fetchT3PlayUrlHelper(selectPlaySource.value, config.value.url, []);
+        break;
+      case 8:
+        // catbox获取服务端播放链接
+        playerUrl = await fetchCatboxPlayUrlHelper(site, selectPlaySource.value, config.value.url);
+        break;
+    }
+  }
+
+  if (!playerUrl) playerUrl = config.value.url;
+
+  if (playerUrl) {
+    const mediaType = await checkMediaType(playerUrl);
+    console.log(`[detail][mediaType]${mediaType}`)
+    if (mediaType !== 'unknown' && mediaType !== 'error') {
+      createPlayer(playerUrl, mediaType);
       return;
     }
   }
 
-  // 官解iframe
-  try {
-    const { hostname } = new URL(config.value.url);
-    if (
-        VIP_LIST.some((item) => hostname.includes(item)) ||
-        analyzeConfig.value.flag.some((item) => selectPlaySource.value.includes(item))
-      ) {
-        onlineUrl.value = analyzeConfig.value.default.url + config.value.url;
-        isSniff.value = true;
-        console.log(`[player] return: 官解播放地址:${onlineUrl.value}`);
-        return;
-      }
-  } catch (err) {
-    console.info(`[player] input: 传入地址不是url:${config.value.url}`);
-  }
-
-  if (ext.value.site.type === 6) {
-    // hipy获取服务端播放链接
-    console.log('[player] start: hipy获取服务端播放链接开启');
-    const { site } = ext.value;
-    try {
-      const hipyPlayUrl = await fetchHipyPlayUrl(site, selectPlaySource.value, config.value.url);
-      config.value.url = hipyPlayUrl;
-      console.log(`[player] return: hipy获取服务端返回链接:${config.value.url}`);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      console.log(`[player] end: hipy获取服务端播放链接结束`);
-    }
-  } else if (ext.value.site.type === 7) {
-    // t3获取服务端播放链接
-    console.log('[player] start: t3获取服务端播放链接开启');
-    try {
-      const res =  await t3RuleInit(ext.value.site);
-      if (res.code === 200) {
-        const t3PlayUrl = await fetchT3PlayUrl(selectPlaySource.value, config.value.url , []);
-        config.value.url = t3PlayUrl.url;
-      }
-      console.log(`[player] return: t3获取服务端返回链接:${config.value.url}`);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      console.log(`[player] end: t3获取服务端播放链接结束`);
-    }
-  } else if (ext.value.site.type === 8) {
-    // catbox获取服务端播放链接
-    console.log('[player] start: catbox获取服务端播放链接开启');
-    const { site } = ext.value;
-    try {
-      const catboxPlayUrl = await fetchCatvodPlayUrl(site, selectPlaySource.value, config.value.url);
-      config.value.url = catboxPlayUrl.url;
-      console.log(`[player] return: catbox获取服务端返回链接:${config.value.url}`);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      console.log(`[player] end: catbox获取服务端播放链接结束`);
-    }
-  } else if (ext.value.site.type === 2) {
-    // drpy嗅探
-    MessagePlugin.info('免嗅资源中, 请等待!');
-    console.log('[player] start: drpy免嗅流程开始');
-    const { site } = ext.value;
-    try {
-      const drpySniffFree = await fetchDrpyPlayUrl(site, config.value.url);
-      if (drpySniffFree.redirect) {
-        config.value.url = drpySniffFree.url;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-
-    console.log(`[player] end: drpy免嗅流程结束`);
-  }
-
-  const mediaType = await checkMediaType(config.value.url);
-  console.log(`[player] mediaType: ${mediaType}`)
-  if (mediaType !== 'unknown' && mediaType !== 'error') {
-    createPlayer(mediaType);
-    return;
-  }
-
   // 兜底办法:嗅探
-  console.log(`尝试提取播放链接,type:${ext.value.site.type}`);
+  console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    isSniff.value = false;
-    sniffer();
+    playerUrl = await sniffer(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${config.value.url}` : config.value.url);
+    createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
   };
@@ -1102,90 +1143,6 @@ const spiderInit = async() => {
       { ...ext.value.site }
     ],
   });
-};
-
-// 嗅探
-const videoFormats = ['.m3u8', '.mp4', '.flv', 'avi', 'mkv'];
-
-const sniffer_iframe = () => {
-  win.webContents.setAudioMuted(true);
-  const iframeWindow = iframeRef.value.contentWindow;
-
-  const totalTime = 15000;
-  const speeder = 250;
-  let counter = 1;
-  const totalCounter = totalTime / speeder;
-  clearInterval(snifferTimer.value);
-
-  snifferTimer.value = setInterval(() => {
-    console.log(`第${counter}次嗅探开始`);
-
-    if (counter >= totalCounter) {
-      clearInterval(snifferTimer.value);
-      MessagePlugin.warning(`嗅探超时并结束, 共计嗅探:${counter}次, 请换源`);
-      console.log(`嗅探超时并结束，共计嗅探:${counter}次`);
-      return;
-    }
-
-    try {
-      const resources = iframeWindow.performance.getEntriesByType('resource');
-
-      for (const resource of resources) {
-        const resourceName = resource.name;
-        const sniffUrl = resourceName;
-        const formatIndex = videoFormats.findIndex((format) => sniffUrl.toLowerCase().indexOf(format) > -1);
-        if (formatIndex > -1) {
-          const videoFormat = videoFormats[formatIndex];
-          console.log(`嗅探到${videoFormat}文件:${resourceName},共计嗅探:${counter}次`);
-          const regex = new RegExp(`https?:\\/\\/.*(https?:\\/\\/(?:[^\\s"]+\\/)+[^\\s"]+\\${videoFormat})`);
-          const match = sniffUrl.match(regex);
-          console.log(match);
-
-          if (match && match.length > 1) {
-            console.log(`最终嗅探地址：${match[1]}`);
-            config.value.url = match[1];
-          } else {
-            console.log(`最终嗅探地址：${resourceName}`);
-            config.value.url = resourceName;
-          }
-
-          onlineUrl.value = '';
-          createPlayer(videoFormat.slice(1));
-          win.webContents.setAudioMuted(false);
-
-          clearInterval(snifferTimer.value);
-          break;
-        }
-      }
-    } catch (err) {
-      MessagePlugin.error(`温馨提示：嗅探发生错误:${err}`);
-      console.log(`第${counter}次嗅探发生错误:${err}`);
-    }
-    counter += 1;
-  }, speeder);
-};
-
-const sniffer_pie = () => {
-  window.electron.ipcRenderer.invoke('sniffer-media', config.value.url).then(res => {
-    console.log(res)
-    if (res.code == 200) {
-      const formatIndex = videoFormats.findIndex((format) => res.data.url.toLowerCase().indexOf(format) > -1);
-      if (formatIndex > -1) {
-        config.value.url = res.data.url;
-        const videoFormat = videoFormats[formatIndex];
-        createPlayer(videoFormat.slice(1));
-      } createPlayer('m3u8');
-    } else {
-      MessagePlugin.warning(`嗅探超时并结束, 请换源`);
-    };
-  });
-};
-
-const sniffer = () => {
-  if (set.value.snifferType === 'iframe') {
-    onlineUrl.value = config.value.url;
-    sniffer_iframe();
-  } else sniffer_pie();
 };
 
 // 初始化播放器
