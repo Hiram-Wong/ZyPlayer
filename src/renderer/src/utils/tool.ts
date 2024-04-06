@@ -23,6 +23,23 @@ const getConfig = async (url, header = {}) => {
   }
 }
 
+// 判断媒体类型
+const checkMediaType = async (url: string): Promise<string | null> => {
+  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi'];
+
+  if (url.startsWith('http')) {
+    const fileType = supportedFormats.find(format => url.includes(format));
+    if (fileType) {
+      return fileType;
+    } else {
+      const getMediaType = await getMeadiaType(url);
+      return getMediaType;
+    }
+  } else {
+    return null; // 如果 URL 不以 http 开头，返回 null
+  }
+};
+
 const getMeadiaType = async(url: string): Promise<string> => {
   let mediaType: string = 'unknown';
   try {
@@ -90,4 +107,4 @@ const checkLiveM3U8 = async(url: string): Promise<boolean> =>{
   }
 }
 
-export { getConfig, getMeadiaType, checkUrlIpv6, checkLiveM3U8 }
+export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8 }
