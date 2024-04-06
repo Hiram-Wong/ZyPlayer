@@ -4,7 +4,16 @@ import axios from 'axios';
 const { getCurrentWindow } = require('@electron/remote');
 const win = getCurrentWindow();
 
-const videoFormats = ['.m3u8', '.mp4', '.flv', 'avi', 'mkv'];
+// const videoFormats = ['.m3u8', '.mp4', '.flv', 'avi', 'mkv'];
+const urlRegex: RegExp = new RegExp('http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*');
+const isExcludedUrl = (reqUrl) => {
+  return (
+    reqUrl.indexOf('url=http') >= 0 ||
+    reqUrl.indexOf('v=http') >= 0 ||
+    reqUrl.indexOf('.css') >= 0 ||
+    reqUrl.indexOf('.html') >= 0
+  );
+}
 
 const snifferPie = async (url: string): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
@@ -32,6 +41,9 @@ const createIframe = (iframeId: string, url: string): Promise<{ iframeRef: HTMLI
     const iframeRef = document.createElement("iframe");
     iframeRef.style.height = '0';
     iframeRef.style.width = '0';
+    iframeRef.style.position = 'fixed';
+    iframeRef.style.top = '-10px';
+    iframeRef.style.left = '-10px';
     iframeRef.id = iframeId;
     iframeRef.setAttribute("frameborder", "0");
     iframeRef.src = url;
@@ -68,8 +80,9 @@ const snifferIframe = async (url: string, totalTime: number = 15000, speeder: nu
   let data = '';
 
   const checkResourceName = (resourceName: string) => {
-    const formatIndex = videoFormats.findIndex((format) => resourceName.toLowerCase().includes(format));
-    return formatIndex > -1;
+    return resourceName.match(urlRegex) && !isExcludedUrl(resourceName);
+    // const formatIndex = videoFormats.findIndex((format) => resourceName.toLowerCase().includes(format));
+    // return formatIndex > -1;
   };
 
   const stopSniffer = () => {
