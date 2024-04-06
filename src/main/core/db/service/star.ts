@@ -45,7 +45,7 @@ export default {
   pagination(pageIndex = 0, pageSize = 10) {
     let data = [];
     let total = 0;
-    const jumpCount = pageIndex > 0 ? pageIndex*pageSize : 0
+    const jumpCount = pageIndex * pageSize;
     const items = db.get(TABLE_NAME).value();
     data  = _.slice(items, jumpCount, jumpCount + pageSize);
     total = _.size(items);

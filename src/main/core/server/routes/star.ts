@@ -45,7 +45,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(`/${API_VERSION}/star/page`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
       const { page, limit } = req.query;
-      const res = await star.pagination(page, limit);
+      const res = await star.pagination(parseInt(page), parseInt(limit));
       reply.code(200).send(res);
     } catch (err) {
       reply.code(500).send(err)

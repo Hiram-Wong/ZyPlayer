@@ -137,7 +137,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(`/${API_VERSION}/channel/page`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
       const { page, limit, key, group } = req.query;
-      const data_page = await channel.pagination(page, limit, key, group);
+      const data_page = await channel.pagination(parseInt(page), parseInt(limit), key, group);
       const data_class = await channel.class();
       const res = {
         data: data_page["list"],

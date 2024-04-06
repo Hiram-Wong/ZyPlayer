@@ -62,7 +62,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(`/${API_VERSION}/history/page`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
       const { page, limit, action } = req.query;
-      const res = await history.pagination(page, limit, action);
+      const res = await history.pagination(parseInt(page), parseInt(limit), action);
       reply.code(200).send(res);
     } catch (err) {
       reply.code(500).send(err)

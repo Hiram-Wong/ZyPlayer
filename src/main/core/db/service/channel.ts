@@ -45,10 +45,11 @@ export default {
   pagination(pageIndex = 0, pageSize = 10, kw = '', group = '全部') {
     let list = [];
     let total = 0;
-    const jumpCount = pageIndex > 0 ? pageIndex*pageSize : 0
+    const jumpCount = pageIndex * pageSize;
     if (group == '全部') {
       const items = db.get(TABLE_NAME).filter((x) => {
-        return x.name.toLowerCase().indexOf(kw) > -1}).value();
+        return x.name.toLowerCase().includes(kw.toLowerCase());
+      }).value();
       list  = _.slice(items, jumpCount, jumpCount + pageSize);
       total = _.size(items);
     } else {

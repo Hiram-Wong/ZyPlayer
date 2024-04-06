@@ -39,7 +39,7 @@ export default {
   pagination(pageIndex = 0, pageSize = 10, type = 'all') {
     let data = [];
     let total = 0;
-    const jumpCount = pageIndex > 0 ? pageIndex*pageSize : 0;
+    const jumpCount = pageIndex * pageSize;
 
     let items;
     if (type === 'all') {
