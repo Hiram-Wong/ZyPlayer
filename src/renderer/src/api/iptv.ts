@@ -49,7 +49,7 @@ export function addChannel(doc) {
   })
 }
 
-export function fetchChannelList(page, limit, key, group) {
+export function fetchChannelList(page, limit, key=null, group=null) {
   return request({
     url: '/v1/channel/page',
     method: 'get',
