@@ -121,7 +121,7 @@ import { useEventBus } from '@vueuse/core';
 import Base64 from 'crypto-js/enc-base64';
 import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
-import getUuid from 'uuid-by-string';
+import { nanoid } from 'nanoid';
 import { ref, watch, reactive } from 'vue';
 import { createClient } from "webdav";
 
@@ -300,7 +300,7 @@ const easyConfig = async() => {
         data["tbl_site"] = config.sites
           .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.endsWith('.js') && item.ext.endsWith('.js'))) // 先过滤掉不需要的数据
           .map((item) => ({
-            id: getUuid(item.name, 5),
+            id: nanoid(),
             name: item.name,
             type: formatType(type, item.type),
             api: item.api,
@@ -327,7 +327,7 @@ const easyConfig = async() => {
           }
 
           return {
-            id: getUuid(channel.name, 5),
+            id: nanoid(),
             name: channel.name,
             type: 'remote',
             isActive: true,
@@ -339,7 +339,7 @@ const easyConfig = async() => {
       if (_.has(config, 'parses')) {
         const analyze = _.filter(config.parses, item => _.startsWith(item.url, 'http'))
           .map(item => ({
-            id: getUuid(item.name, 5),
+            id: nanoid(),
             name: item.name,
             url: item.url,
             isActive: true,
@@ -349,7 +349,7 @@ const easyConfig = async() => {
       if (_.has(config, 'drives')) {
         const drives = _.filter(config.drives, item => item.type === 'alist' || !item.type)
           .map(item => ({
-            id: getUuid(item.name, 5),
+            id: nanoid(),
             name: item.name,
             server: item.server,
             startPage: item.startPage || '',
@@ -451,7 +451,7 @@ const commonDelImportData = (data) => {
               data[dataType][i].id = `${dataArray[i].id}`;
             }
           } else {
-            data[dataType][i].id = getUuid(`${dataItem.name}`, 5); // getuuid必须是字符串
+            data[dataType][i].id = nanoid();
           }
         }
       }

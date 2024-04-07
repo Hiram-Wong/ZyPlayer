@@ -1,5 +1,5 @@
-import getUuid from 'uuid-by-string';
 import axios from 'axios';
+import { nanoid } from 'nanoid';
 
 const { getCurrentWindow } = require('@electron/remote');
 const win = getCurrentWindow();
@@ -70,7 +70,7 @@ const removeIframe = (iframeId: string): void => {
 
 const snifferIframe = async (url: string, totalTime: number = 15000, speeder: number = 250): Promise<string> => {
   win.webContents.setAudioMuted(true); // 静音
-  const iframeId = getUuid('sniffer', 5)
+  const iframeId = nanoid();
   const iframeWindow = await createIframe(iframeId, url);
 
   const totalCounter = totalTime / speeder; // 计算总次数

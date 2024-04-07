@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { nanoid } from 'nanoid';
 import _ from 'lodash';
-import getUuid from 'uuid-by-string';
 
 axios.defaults.withCredentials = true; //让ajax携带cookie
 
@@ -81,7 +81,7 @@ const parseChannel = async(type: 'local'|'remote'|'url', path: string) => {
             channelContent[i].id = `${channelContent[i].id.id}`;
           }
         } else {
-          channelContent[i].id = getUuid(`${dataItem.name}`, 5); // getuuid必须是字符串
+          channelContent[i].id = nanoid();
         }
       }
 
