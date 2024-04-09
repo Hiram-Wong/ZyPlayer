@@ -585,7 +585,6 @@ const onlineUrl = ref(); // 解析接口+需解析的地址
 const isSniff = ref(true); // 嗅探标识
 const iframeRef = ref(); // iframe dom节点
 const currentUrl = ref(); // 当前未解析前的url
-const snifferTimer = ref();
 const reverseOrder = ref(true); // true 正序 false 倒序
 
 const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
@@ -1116,7 +1115,7 @@ const initFilmPlayer = async (isFirst) => {
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
     playerUrl = await sniffer(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${config.value.url}` : config.value.url);
-    createPlayer(playerUrl);
+    if (playerUrl) createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
   };

@@ -406,7 +406,7 @@ const gotoPlay = async (e) => {
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
     playerUrl = await sniffer(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${url}` : url);
-    callSysPlayer(playerUrl);
+    if (playerUrl) callSysPlayer(playerUrl);
   } catch (err) {
     console.error(err);
   };
