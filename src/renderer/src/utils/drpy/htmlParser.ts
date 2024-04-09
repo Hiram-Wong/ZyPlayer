@@ -7,7 +7,7 @@
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/base/htmlParser.py | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-03-24T18:21:29+08:00
+ * @modification-date 2023-04-09T18:31:59+08:00
  * @modification-description Python转TypeScript, 适用于JavaScript项目
  */
 
@@ -164,7 +164,8 @@ class Jsoup {
     }
 
     const res: string[] = (ret?.toArray() ?? []).map((item: any) => {
-      const res_html = doc(item).html();
+      const res_html = `${doc(item)}`; // outerHTML()
+      // const res_html = doc(item).html(); // innerHTML()
       return res_html ? res_html : ""; // 空值检查，将 null 值转换为空字符串
     });
     return res;
@@ -184,7 +185,8 @@ class Jsoup {
     }
     
     ret!.each((_, element) => {
-      new_vod_list.push(doc(element).html());
+      new_vod_list.push(`${doc(element)}`); // outerHTML()
+      // new_vod_list.push(doc(element).html()); // innerHTML()
     });
   
     return new_vod_list;
@@ -258,7 +260,7 @@ class Jsoup {
           }
       }
     } else {
-      ret = ret!.toString();
+      ret = `${ret}`;
     }
 
     return ret;

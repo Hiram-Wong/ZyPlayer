@@ -7,7 +7,7 @@
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-03-29T23:02:29+08:00
+ * @modification-date 2023-04-09T18:37:11+08:00
  * @modification-description 使用TypeScript适配, 适用于JavaScript项目, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
@@ -25,7 +25,7 @@ import cheerio from "./cheerio.min";
 import joinUrl from 'url';
 import { getMubans } from './template';
 import gbkTool from './gbk';
-import { pdfh, pdfa, pd, local, req } from './drpyInject';
+import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req } from './drpyInject';
 
 const init_test = () => {
   const test_data = {
@@ -93,7 +93,7 @@ const OCR_RETRY = 3; // ocr验证重试次数
 // const OCR_API = 'http://cms.nokia.press/parse/ocr';//ocr在线识别接口
 // const OCR_API = 'http://cms.nokia.press:5707/parse/ocr';//ocr在线识别接口
 const OCR_API = 'http://drpy.nokia.press:8028/ocr/drpy/text';//ocr在线识别接口
-if(typeof(MY_URL)==='undefined'){
+if (typeof MY_URL === 'undefined') {
   var MY_URL; // 全局注入变量,pd函数需要
 }
 var HOST;
@@ -108,6 +108,9 @@ var oheaders;
 var _pdfh;
 var _pdfa;
 var _pd;
+var pdfh = pdfh;
+var pdfa = pdfa;
+var pd = pd;
 // const DOM_CHECK_ATTR = ['url', 'src', 'href', 'data-original', 'data-src'];
 const DOM_CHECK_ATTR = /(url|src|href|-original|-src|-play|-url|style)$/;
 // 过滤特殊链接,不走urlJoin
@@ -555,9 +558,9 @@ var urljoin2 = urljoin;
 
 // 内置 pdfh,pdfa,pd
 const defaultParser = {
-  pdfh: pdfh,
-  pdfa: pdfa,
-  pd: pd,
+  pdfh: pdfhModule,
+  pdfa: pdfaModule,
+  pd: pdModule
 };
 
 /**
@@ -2357,6 +2360,7 @@ const keepUnUse = {
   useful: (): void => {
     const _ = {
       UA, UC_UA, IOS_UA, // UA
+      pdfa, pdfh, pd, // html parser
       log, oheaders, // global parms
       NOADD_INDEX, URLJOIN_ATTR, SELECT_REGEX, SELECT_REGEX_A, // REGEX
       urlDeal, setResult2, setHomeResult, rc, maoss, getProxyUrl, urljoin2, stringify, jsp, jq, buildUrl, $require, proxy, sniffer, isVideo,
