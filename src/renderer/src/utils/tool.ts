@@ -107,4 +107,13 @@ const checkLiveM3U8 = async(url: string): Promise<boolean> =>{
   }
 }
 
-export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8 }
+const copyToClipboardApi = async (text: string): Promise<boolean> => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (_) {
+    return false;
+  }
+};
+
+export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8, copyToClipboardApi }
