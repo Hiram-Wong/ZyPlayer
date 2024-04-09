@@ -77,7 +77,7 @@ import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
-import { useClipboard, useEventBus } from '@vueuse/core';
+import { useEventBus } from '@vueuse/core';
 
 import _ from 'lodash';
 import PQueue from 'p-queue';
@@ -85,7 +85,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
 
-import { checkUrlIpv6 } from '@/utils/tool';
+import { checkUrlIpv6, copyToClipboardApi } from '@/utils/tool';
 import { usePlayStore, useSettingStore } from '@/store';
 import { fetchIptvActive, clearChannel, addChannel, fetchChannelList, delChannelItem } from '@/api/iptv';
 import { setDefault } from '@/api/setting';
@@ -441,9 +441,19 @@ const delChannelEvent = () => {
 };
 
 // 拷贝
-const copyChannelEvent = () => {
-  const { isSupported, copy } = useClipboard();
-  if (isSupported) copy(channelItem.value.url);
+const copyToClipboard = async(content, successMessage, errorMessage) => {
+  const res = await copyToClipboardApi(content);
+  if (res) {
+    MessagePlugin.info(successMessage);
+  } else {
+    MessagePlugin.warning(errorMessage);
+  }
+};
+const copyChannelEvent = async() => {
+  const successMessage = '复制成功，快分享给好友吧!';
+  const errorMessage = '当前环境不支持一键复制，请手动复制链接!';
+  await copyToClipboard(channelItem.value.url, successMessage, errorMessage);
+
   isVisible.contentMenu = false;
 };
 

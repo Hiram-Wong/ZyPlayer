@@ -48,6 +48,7 @@ const isVideoUrl = (reqUrl) => {
 
 const puppeteerInElectron = async (url: string, ua: string | null = null): Promise<PieResponse> => {
   logger.info(`[sniffer] sniffer url: ${url}`);
+  logger.info(`[sniffer] sniffer ua: ${ua}`);
 
   try {
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer

@@ -133,29 +133,12 @@
                 class="dplayer player"
               ></div>
             </div>
-            <div v-show="onlineUrl && isSniff" class="player-webview">
-              <iframe
-                ref="iframeRef"
-                :key="onlinekey"
-                class="player"
-                :src="onlineUrl"
-                allowtransparency="true"
-                frameborder="0"
-                scrolling="no"
-                allowfullscreen="true"
-                webkit-playsinline
-                playsinline
-                sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
-              ></iframe>
-            </div>
           </div>
         </div>
 
-        <div class="player-wide-btn" @click="showEpisode = !showEpisode">
-          <div class="player-wide-btn-box">
-            <chevron-left-icon v-if="showEpisode" class="player-wide-btn-icon" />
-            <chevron-right-icon v-else class="player-wide-btn-icon" />
-          </div>
+        <div class="btn-box dock-show" @click="showEpisode = !showEpisode">
+          <chevron-left-icon v-if="showEpisode" class="btn-icon" />
+          <chevron-right-icon v-else class="btn-icon" />
         </div>
       </div>
 
@@ -179,7 +162,7 @@
                               <span v-if="filterEpgStatus(item.start, item.end) === '已播放'" class="played">{{
                                 filterEpgStatus(item.start, item.end)
                               }}</span>
-                              <span v-if="filterEpgStatus(item.start, item.end) === '正在直播'" class="playing">{{
+                              <span v-if="filterEpgStatus(item.start, item.end) === '直播中'" class="playing">{{
                                 filterEpgStatus(item.start, item.end)
                               }}</span>
                               <span v-if="filterEpgStatus(item.start, item.end) === '未播放'" class="unplay">{{
@@ -211,8 +194,8 @@
                             </div>
                             <div class="title-wrap nowrap title-warp-channel">{{ item.name }}</div>
                             <div class="status-wrap">
-                              <span :class="item.url === config.url ? 'playing' : 'unplay'">
-                                {{ item.url === config.url ? '正在播放' : '未播放' }}
+                              <span :class="item.id === info.id ? 'playing' : 'unplay'">
+                                {{ item.id === info.id ? '播放中' : '未播放' }}
                               </span>
                             </div>
                           </div>
@@ -373,27 +356,29 @@
               <div class="drive-items">
                 <div class="contents-wrap scroll drive-warp">
                   <div v-for="item in driveDataList" :key="item.id" class="content">
-                    <div class="content-item content-item-start" @click="changeDriveEvent(item)">
-                      <div class="logo-wrap">
-                        <t-image
-                          class="logo"
-                          fit="contain"
-                          :src="item.thumb"
-                          :style="{ width: '64px', height: '32px', maxHeight: '32px', background: 'none' }"
-                          :lazy="true"
-                          :loading="renderLoading"
-                          :error="renderError"
-                        >
-                        </t-image>
+                    <template v-if="item.type === 10">
+                      <div class="content-item content-item-start" @click="changeDriveEvent(item)">
+                        <div class="logo-wrap">
+                          <t-image
+                            class="logo"
+                            fit="contain"
+                            :src="item.thumb"
+                            :style="{ width: '64px', height: '32px', maxHeight: '32px', background: 'none' }"
+                            :lazy="true"
+                            :loading="renderLoading"
+                            :error="renderError"
+                          >
+                          </t-image>
+                        </div>
+                        <div class="title-wrap nowrap title-warp-channel">{{ item.name }}</div>
+                        <div class="status-wrap">
+                          <span :class="info.name === item.name ? 'playing' : 'unplay'">
+                            {{ info.name === item.name ? '正在播放' : '未播放' }}
+                          </span>
+                        </div>
                       </div>
-                      <div class="title-wrap nowrap title-warp-channel">{{ item.name }}</div>
-                      <div class="status-wrap">
-                        <span :class="info.name === item.name ? 'playing' : 'unplay'">
-                          {{ info.name === item.name ? '正在播放' : '未播放' }}
-                        </span>
-                      </div>
-                    </div>
-                    <t-divider dashed style="margin: 5px 0" />
+                      <t-divider dashed style="margin: 5px 0" />
+                    </template>
                   </div>
                 </div>
               </div>
@@ -406,7 +391,6 @@
 </template>
 <script setup lang="tsx">
 import '@/style/player/veplayer.css';
-
 import 'v3-infinite-loading/lib/style.css';
 
 import { useClipboard } from '@vueuse/core';
@@ -438,14 +422,6 @@ import FlvPlugin from 'xgplayer-flv';
 import HlsPlugin from 'xgplayer-hls';
 import Mp4Plugin from 'xgplayer-mp4';
 
-import playerPauseIcon from '@/assets/player/pause.svg?raw';
-import playerPipIcon from '@/assets/player/pip.svg?raw';
-import playerPlayIcon from '@/assets/player/play.svg?raw';
-import playerPlayNextIcon from '@/assets/player/play-next.svg?raw';
-import playerVoiceIcon from '@/assets/player/voice.svg?raw';
-import playerVoiceNoIcon from '@/assets/player/voice-no.svg?raw';
-import playerZoomIcon from '@/assets/player/zoom.svg?raw';
-import playerZoomExitIcon from '@/assets/player/zoom-s.svg?raw';
 import windowView from '@/layouts/components/Window.vue';
 
 import { setDefault } from '@/api/setting';
@@ -457,7 +433,7 @@ import { fetchChannelList } from '@/api/iptv';
 
 import { getConfig, checkMediaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
 import { __jsEvalReturn } from '@/utils/alist_open';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchDetail, fetchSearch, t3RuleInit, fetchCatvodPlayUrl, fetchDoubanRecommend } from '@/utils/cms';
+import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchDetail, fetchSearch, t3RuleInit, catvodRuleInit, fetchCatvodPlayUrl, fetchDoubanRecommend } from '@/utils/cms';
 import { fetchChannelEpg } from '@/utils/channel';
 import sniffer from '@/utils/sniffer';
 import { usePlayStore } from '@/store';
@@ -515,18 +491,6 @@ const commonConfig = {
     ],
     index: 7,
   },
-  icons: {
-    play: playerPlayIcon,
-    pause: playerPauseIcon,
-    playNext: playerPlayNextIcon,
-    fullscreen: playerZoomIcon,
-    exitFullscreen: playerZoomExitIcon,
-    volumeSmall: playerVoiceIcon,
-    volumeLarge: playerVoiceIcon,
-    volumeMuted: playerVoiceNoIcon,
-    pipIcon: playerPipIcon,
-    pipIconExit: playerPipIcon,
-  },
   plugins: [],
 }; // 西瓜、火山公共部分
 
@@ -578,16 +542,11 @@ const showEpisode = ref(false); // 是否显示右侧栏
 const isSettingVisible = ref(false);
 
 const dataHistory = ref({}); // 历史
-// const iswideBtn = ref(false); // 视频划过显示按钮
 const isProfile = ref(false); // 简介
 
 const onlineUrl = ref(); // 解析接口+需解析的地址
-const isSniff = ref(true); // 嗅探标识
-const iframeRef = ref(); // iframe dom节点
 const currentUrl = ref(); // 当前未解析前的url
 const reverseOrder = ref(true); // true 正序 false 倒序
-
-const onlinekey = new Date().getTime(); // 解决iframe不刷新问题
 
 const driveDataList = ref({});
 const spider = ref(null);
@@ -665,19 +624,6 @@ const renderLoading = () => {
     </div>
   );
 };
-
-// 添加画中画事件
-watch(
-  () => xg.value,
-  (val) => {
-    if (val?.hasStart) {
-      val.on(Events.PIP_CHANGE, (isPip) => {
-        console.log('isPip', isPip);
-        window.electron.ipcRenderer.send('toggle-playerPip', isPip);
-      });
-    }
-  },
-);
 
 // 更新跳过数据
 watch(
@@ -917,13 +863,7 @@ const initIptvPlayer = async () => {
     }
   }
 
-  if (config.value.url.includes('mp4') || config.value.url.includes('mkv')) {
-    createPlayer('mp4');
-  } else if (config.value.url.includes('flv')) {
-    createPlayer('flv');
-  } else {
-    createPlayer('m3u8');
-  }
+  createPlayer(config.value.url);
 };
 
 // Helper functions
@@ -957,7 +897,7 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   }
 };
 
-const fetchCatboxPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
+const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
   console.log('[detail][catvod][start]获取服务端播放链接开启');
   let data: string = '';
   try {
@@ -1008,6 +948,7 @@ const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<str
 
 const fetchJxPlayUrlHelper = async (type: 'iframe' | 'pie' | 'custom', url: string): Promise<string> => {
   console.log('[detail][jx][start]官解流程开启');
+  MessagePlugin.info('官解流程开启,请稍等');
   let data: string = '';
   try {
     const res = await sniffer(type, url);
@@ -1017,6 +958,7 @@ const fetchJxPlayUrlHelper = async (type: 'iframe' | 'pie' | 'custom', url: stri
     console.log(`[detail][jx][error]${err}`);
   } finally {
     console.log(`[detail][jx][end]官解流程结束`);
+    MessagePlugin.info('官解流程结束,如未加载播放器则嗅探失败,请换源');
     return data;
   }
 };
@@ -1090,11 +1032,13 @@ const initFilmPlayer = async (isFirst) => {
         break;
       case 7:
         // t3获取服务端播放链接
+        await t3RuleInit(site);
         playerUrl = await fetchT3PlayUrlHelper(selectPlaySource.value, config.value.url, []);
         break;
       case 8:
-        // catbox获取服务端播放链接
-        playerUrl = await fetchCatboxPlayUrlHelper(site, selectPlaySource.value, config.value.url);
+        // catvox获取服务端播放链接
+        await catvodRuleInit(site);
+        playerUrl = await fetchCatvodPlayUrlHelper(site, selectPlaySource.value, config.value.url);
         break;
     }
   }
@@ -1115,7 +1059,7 @@ const initFilmPlayer = async (isFirst) => {
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
     playerUrl = await sniffer(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${config.value.url}` : config.value.url);
-    if (playerUrl) createPlayer(playerUrl);
+    createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
   };
@@ -1125,13 +1069,7 @@ const initFilmPlayer = async (isFirst) => {
 const initCloudPlayer = async () => {
   driveDataList.value = ext.value.files;
   config.value.url = info.value.url;
-  if (info.value.name.includes('mp4') || info.value.name.includes('mkv') || info.value.name.includes('mkv') || info.value.name.includes('avi')) {
-    createPlayer('mp4');
-  } else if (config.value.url.includes('flv') || info.value.name.includes('flv')) {
-    createPlayer('flv');
-  } else {
-    createPlayer('m3u8');
-  }
+  createPlayer(config.value.url);
 };
 
 const spiderInit = async() => {
@@ -1438,7 +1376,7 @@ const filterEpgStatus = (start, end) => {
   const startTimestamp = moment(`${nowTimestamp.format('YYYY-MM-DD')} ${start}`);
   const endTimestamp = moment(`${nowTimestamp.format('YYYY-MM-DD')} ${end}`);
 
-  if (nowTimestamp.isBetween(startTimestamp, endTimestamp)) return '正在直播';
+  if (nowTimestamp.isBetween(startTimestamp, endTimestamp)) return '直播中';
   if (nowTimestamp.isBefore(startTimestamp)) return '未播放';
   if (nowTimestamp.isAfter(endTimestamp)) return '已播放';
 };
@@ -1960,31 +1898,33 @@ const openMainWinEvent = () => {
           }
         }
       }
-
-      .player-wide-btn {
+      .container-player:hover ~ .dock-show {
+        display: flex;
+      }
+      .dock-show {
+        display: none;
+        transition: 0.15s ease-out;
+        background: rgba(0, 0, 0, .4);
+        border-radius: 8px 0 0 8px;
+        width: 32px;
+        height: 84px;
         position: absolute;
         top: 50%;
         right: 0;
         transform: translateY(-50%);
-
-        .player-wide-btn-box {
-          cursor: pointer;
-          z-index: 120;
-          border-radius: 5px 0 0 5px;
-          background: rgba(0, 0, 0, 0.5);
-          width: 20px;
-          height: 120px;
-          overflow: hidden;
-          &:hover {
-            background-color: #18191c;
-          }
-          .player-wide-btn-icon {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            fill: #333;
-            left: 3px;
-          }
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 95;
+        cursor: pointer;
+        &:hover {
+          display: flex;
+          background: rgba(0, 0, 0, .5);
+        }
+        .btn-icon {
+          width: 24px;
+          height: 24px;
+          color: #fbfbfb;
         }
       }
     }

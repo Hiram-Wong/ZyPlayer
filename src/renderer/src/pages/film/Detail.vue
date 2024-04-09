@@ -277,7 +277,7 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   }
 };
 
-const fetchCatboxPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
+const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
   console.log('[detail][catvod][start]获取服务端播放链接开启');
   let data: string = '';
   try {
@@ -384,8 +384,8 @@ const gotoPlay = async (e) => {
         playerUrl = await fetchT3PlayUrlHelper(selectPlaySource.value, url, []);
         break;
       case 8:
-        // catbox获取服务端播放链接
-        playerUrl = await fetchCatboxPlayUrlHelper(formData.value, selectPlaySource.value, url);
+        // catvod获取服务端播放链接
+        playerUrl = await fetchCatvodPlayUrlHelper(formData.value, selectPlaySource.value, url);
         break;
     }
   }
