@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import fetch from 'cross-fetch';
+import fetch from 'node-fetch';
 
 import { findBestLCS } from './similarity';
 
