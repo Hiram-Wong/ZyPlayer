@@ -92,7 +92,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive, watch } from 'vue';
 import _ from 'lodash';
 
-import { fetchSitePage, updateSiteItem, delSiteItem } from '@/api/site';
+import { fetchSitePage, fetchSiteGroup, updateSiteItem, delSiteItem } from '@/api/site';
 import { setDefault } from '@/api/setting';
 import { checkValid } from '@/utils/cms';
 
@@ -154,7 +154,6 @@ const getData = async () => {
     }
     if (_.has(res, 'data') && res["data"]) {
       siteTableConfig.value.data = res.data;
-      siteTableConfig.value.group = _.uniqBy(res.data, 'group').map(item => ({ label: item.group, value: item.group }));
     }
     if (_.has(res, 'total') && res["total"]) {
       pagination.total = res.total;
@@ -164,12 +163,25 @@ const getData = async () => {
   }
 };
 
+const getGroup = async () => {
+  try {
+    const res = await fetchSiteGroup();
+    if (_.has(res, 'data') && res["data"]) {
+      siteTableConfig.value.group = res.data;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 onMounted(() => {
   getData();
+  getGroup();
 });
 
 const refreshEvent = (page = false) => {
   getData();
+  getGroup();
   if (page) pagination.current = 1;
 };
 

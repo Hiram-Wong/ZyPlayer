@@ -101,7 +101,6 @@ const props = defineProps({
 const siteGroup = ref(props.group);
 
 const formVisible = ref(false);
-// key, name, api, download, playUrl, isActive, group;
 const formData = reactive({
   name: '',
   api: '',
@@ -110,6 +109,8 @@ const formData = reactive({
   search: 2,
   isActive: true,
   type: 1,
+  ext: '',
+  categories: ''
 });
 const onSubmit = async() => {
   try {

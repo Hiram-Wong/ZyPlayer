@@ -33,7 +33,7 @@ export default {
   remove (id: string) {
     return db.get(TABLE_NAME).removeById(id).write();
   },
-  search(kw) {
+  search(kw: string) {
     let list = db.get(TABLE_NAME).value();
     if (kw) list = list.filter(item => item.name.includes(kw))
     const total = list.length
@@ -42,7 +42,7 @@ export default {
       total: total
     }
   },
-  pagination(kw) {
+  pagination(kw: string) {
     let data = _.castArray(db.get(TABLE_NAME).value());
     if (kw) {
       data = db.get(TABLE_NAME).filter(item => item.name.includes(kw)).value();
@@ -53,16 +53,16 @@ export default {
       total: total
     }
   },
-  group(){
-    const groupListLabel = []
-    const groupListValue = []
-    for (const i of  db.get(TABLE_NAME).value()) {
-      if (groupListLabel.indexOf(i.group) < 0) {
-        groupListLabel.push(i.group)
-        groupListValue.push(i.group)
-      }
-    }
-    const res = groupListLabel.map((label, i) => ({ label, value: groupListValue[i] }))
-    return res
-  },
+  group() {
+    const groups = db.get(TABLE_NAME)
+      .map('group')
+      .uniq()
+      .value();
+    const data = groups.map(group => ({ label: group, value: group }));
+    const total = data.length;
+    return {
+      data: data,
+      total: total
+    };
+  }
 }

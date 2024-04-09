@@ -20,6 +20,15 @@ export function fetchSiteActive() {
   })
 }
 
+// 获取site活跃列表
+export function fetchSiteGroup() {
+  return request({
+    url: '/v1/site/group',
+    method: 'get',
+    params: {}
+  })
+}
+
 // 获取分类列表
 export function fetchFilmClass(id: string) {
   return request({
