@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyPluginAsync } from 'fastify';
 
-import { kunyu77, kkys, push, ffm3u8, alist, _13bqg, copymanga } from './spider';
+import { kunyu77, kkys, push, ffm3u8 } from './spider';
 import logger from '../../../logger';
 
 const API_VERSION = 'api/v1';
 const spiderPrefix = "/spider";
-const spiders = [kunyu77, kkys, push, ffm3u8, alist, _13bqg, copymanga];
+const spiders = [kunyu77, kkys, push, ffm3u8];
 
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   // register all spider router
