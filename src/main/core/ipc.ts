@@ -42,7 +42,7 @@ const ipcListen = () => {
   });
 
   ipcMain.on('call-player', (_, path, url) => {
-    const command = `${path} ${url}`;
+    const command = `${path} '${url}'`;
     exec(command);
     logger.info(`[ipcMain] call-player: command:${command}`);
   });
