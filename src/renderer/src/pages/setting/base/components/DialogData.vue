@@ -56,7 +56,9 @@
                 <t-radio v-model="active.export.history" allow-uncheck class="radio-item">历史</t-radio>
                 <t-radio v-model="active.export.star" allow-uncheck class="radio-item">收藏</t-radio>
                 <t-radio v-model="active.export.setting" allow-uncheck class="radio-item">基础配置</t-radio>
-                <t-button size="small" block ghost @click="exportData">导出</t-button>
+                <t-popconfirm content="选中数据将被导出,确认操作吗" placement="bottom" @confirm="exportData">
+                  <t-button size="small" block ghost>导出</t-button>
+                </t-popconfirm>
               </t-collapse-panel>
               <t-collapse-panel value="clearData" header="清理数据">
                 <t-radio v-model="active.clear.site" allow-uncheck class="radio-item">影视源</t-radio>
@@ -72,7 +74,9 @@
                 <t-radio v-model="active.clear.cache" allow-uncheck class="radio-item">缓存
                   <span class="title">「{{ formData.size.cache }}MB」</span>
                 </t-radio>
-                <t-button size="small" block ghost @click="clearData">清理</t-button>
+                <t-popconfirm content="选中数据将被删除,确认操作吗" placement="bottom"  @confirm="clearData">
+                  <t-button size="small" block ghost>清理</t-button>
+                </t-popconfirm>
               </t-collapse-panel>
             </t-collapse>
           </div>
