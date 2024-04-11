@@ -164,11 +164,11 @@ const load = async ($state) => {
 // 播放
 const playEvent = async (item) => {
   try {
-    const { videoName, relateId, videoId } = item;
+    const { videoName, videoId } = item;
     const site = siteConfig.value.data.find(({ id }) => id === item.relateId);
     siteData.value = site;
     if (site.type === 7) {
-      const res = await t3RuleInit(site);
+      await t3RuleInit(site);
     } else if(site.type === 8) await catvodRuleInit(site);
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const [detailItem] = await fetchDetail(site, videoId);
@@ -186,8 +186,8 @@ const playEvent = async (item) => {
         type: 'film',
         data: {
           info: item,
-          ext: { site: { key: relateId, type: site.type } },
-        },
+          ext: { site: site }
+        }
       };
 
       store.updateConfig(config);
