@@ -15,7 +15,7 @@
               <div class="header-info">
                 推荐<span class="header-info-browser">夸克APP</span>-搜索框中的相机-扫码
               </div>
-              <div class="header-copyright no-warp">
+              <div class="header-copyright text-hide">
                 <span>{{ data.provider }}</span>
                 <span>提供支持,严禁传播资源</span>
               </div>
@@ -25,7 +25,7 @@
               <qrcode-vue :value="data.url" :size="85" :margin="5" level="H" render-as="svg" class="qrcode" />
             </div>
           </div>
-          <div class="bottom-title no-warp">{{ data.name }}</div>
+          <div class="bottom-title text-hide">{{ data.name }}</div>
           <div class="bottom-copy">
             <input v-model="data.url" class="input-url" readonly />
             <button class="btn-copy" @click="copyShareUrl">复制地址</button>
@@ -35,11 +35,12 @@
     </t-popup>
   </template>
   <script setup lang="ts">
-  import { useClipboard } from '@vueuse/core';
   import QrcodeVue from 'qrcode.vue';
   import { Share1Icon } from 'tdesign-icons-vue-next';
   import { MessagePlugin } from 'tdesign-vue-next';
   import { ref, watch } from 'vue';
+
+  import { copyToClipboardApi } from '@/utils/tool';
   
   const props = defineProps({
     visible: {
@@ -59,7 +60,6 @@
   });
   
   const data = ref(props.data);
-  const { isSupported, copy } = useClipboard();
   const formVisible = ref(false);
   
   const emit = defineEmits(['update:visible']);
@@ -82,10 +82,10 @@
       data.value = val;
     },
   );
-  
-  const copyToClipboard = (content, successMessage, errorMessage) => {
-    copy(content);
-    if (isSupported) {
+
+  const copyToClipboard = async(content, successMessage, errorMessage) => {
+    const res = await copyToClipboardApi(content);
+    if (res) {
       MessagePlugin.info(successMessage);
     } else {
       MessagePlugin.warning(errorMessage);
@@ -99,10 +99,10 @@
   };
   
   // 复制分享地址
-  const copyShareUrl = () => {
+  const copyShareUrl = async() => {
     const successMessage = '复制成功，快分享给好友吧!';
     const errorMessage = '当前环境不支持一键复制，请手动复制链接!';
-    copyToClipboard(data.value.url, successMessage, errorMessage);
+    await copyToClipboard(data.value.url, successMessage, errorMessage);
   
     formVisible.value = false;
   };
@@ -112,12 +112,11 @@
   .share-container {
     width: 340px;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: var(--td-radius-large);
     position: relative;
-    background-color: #2a2a31;
     cursor: default;
   
-    .no-warp {
+    .text-hide {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
@@ -131,13 +130,11 @@
       &-left {
         width: 210px;
         .header-name {
-          color: hsla(0, 0%, 100%, 0.87);
           font-size: 15px;
           line-height: 40px;
         }
   
         .header-info {
-          color: hsla(0, 0%, 100%, 0.6);
           font-size: 12px;
           line-height: 20px;
   
@@ -147,7 +144,6 @@
         }
   
         .header-copyright {
-          color: hsla(0, 0%, 100%, 0.6);
           font-size: 12px;
           line-height: 20px;
         }
@@ -160,27 +156,28 @@
           width: 85px;
           height: 85px;
           border-radius: var(--td-radius-large);
+          background: rgba(0, 0, 0, 0.3);
+          border: 2px solid var(--td-border-level-2-color);
         }
       }
     }
   
     .bottom-title {
-      margin-top: 5px;
+      margin-top: var(--td-comp-margin-s);
       line-height: 20px;
-      font-weight: 500;
-      color: hsla(0, 0%, 100%, 0.87);
+      font-weight: 600;
     }
+
     .bottom-copy {
-      margin-top: 5px;
+      margin-top: var(--td-comp-margin-s);
       display: inline-block;
       position: relative;
       width: 100%;
       text-align: right;
       vertical-align: middle;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid hsla(0, 0%, 100%, 0.3);
+      background: var(--td-bg-content-input);
       height: 43px;
-      border-radius: 21px;
+      border-radius: var(--td-radius-round);
   
       .input-url {
         width: 100%;
@@ -188,9 +185,8 @@
         background-color: initial;
         border: none;
         outline: none;
-        caret-color: #e7e7e7;
         font-size: 14px;
-        color: #fff;
+        color: var(--td-text-color-primary);
         letter-spacing: 0;
         padding: 9px 80px 9px 10px;
         position: absolute;
@@ -204,9 +200,8 @@
         line-height: 30px;
         border-radius: 15px;
         font-weight: 500;
-        background-color: #fff;
-        color: #222;
-        font-size: 12px;
+        background-color: var(--td-context-primary);
+        color: var(--td-bg-popup);
         top: 5px;
         border: none;
         vertical-align: top;
