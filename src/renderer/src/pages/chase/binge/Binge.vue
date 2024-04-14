@@ -27,14 +27,14 @@
                 >
                   <template #overlayContent>
                     <div class="op">
-                      <span v-if="item.siteName"> {{ item.siteName }}</span>
+                      <span>{{ item.siteName ? item.siteName : $t('pages.chase.sourceDeleted') }}</span>
                     </div>
                   </template>
                 </t-image>
               </div>
               <div class="card-footer">
                 <p class="card-footer-title text-hide">{{ item.videoName }}</p>
-                <p class="card-footer-desc text-hide">{{ item.videoRemarks ? item.videoRemarks.trim() : '暂无说明' }}</p>
+                <p class="card-footer-desc text-hide">{{ item.videoRemarks ? item.videoRemarks.trim() : '' }}</p>
               </div>
             </t-col>
           </t-row>
@@ -44,8 +44,8 @@
             :duration="200"
             @infinite="load"
           >
-            <template #complete>人家是有底线的</template>
-            <template #error>哎呀，出了点差错</template>
+            <template #complete>{{ $t('pages.chase.infiniteLoading.complete') }}</template>
+            <template #error>{{ $t('pages.chase.infiniteLoading.error') }}</template>
           </infinite-loading>
         </div>
       </div>
@@ -66,10 +66,11 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref, reactive } from 'vue';
 
+import { usePlayStore } from '@/store';
+
 import { fetchStarList, delStar } from '@/api/star';
 import { fetchFilmDetail, fetchSiteList } from '@/api/site';
 import { catvodRuleInit, fetchDetail, t3RuleInit } from '@/utils/cms';
-import { usePlayStore } from '@/store';
 import DetailView from '../../film/Detail.vue';
 
 const store = usePlayStore();
@@ -131,7 +132,7 @@ const getBingeList = async () => {
     for (const item of star_res.data) {
       const findItem = siteConfig.value.data.find(({ id }) => id === item.relateId);
       if (findItem) item.site = { ...findItem };
-      item.siteName = findItem ? findItem.name : '该源应该被删除了哦';
+      item.siteName = findItem ? findItem.name : "";
     }
 
     bingeConfig.value.data = _.unionWith(bingeConfig.value.data, star_res.data, _.isEqual);
@@ -195,7 +196,7 @@ const playEvent = async (item) => {
     }
   } catch (err) {
     console.error(err);
-    MessagePlugin.warning('请求资源站失败，请检查网络!');
+    MessagePlugin.warning(t('pages.chase.reqError'));
   }
 };
 
@@ -217,7 +218,7 @@ const updateVideoRemarks = (item, res) => {
 
 const checkUpdaterEvent = async () => {
   const fetchAndUpdateVideoRemarks = async (item) => {
-    if (item.siteName === '该源应该被删除了哦') return;
+    if (!item.siteName) return;
     const { site, videoId } = item;
     try {
       if (site.type === 7) await t3RuleInit(site);

@@ -2,7 +2,7 @@
   <div class="platform-container">
     <div class="support-title">
       <span class="support-separator"></span>
-      <p class="support-tip">支持平台</p>
+      <p class="support-tip">{{ $t('pages.platform.support') }}</p>
     </div>
     <div class="support-platform">
       <div v-for="(item, index) in VIDEOSITES" :key="index" class="logo-item" @click="openPlatform(item)">

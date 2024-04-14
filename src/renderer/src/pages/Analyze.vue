@@ -1,6 +1,6 @@
 <template>
   <div class="analyze view-container">
-    <common-nav title="解析" :list="analyzeConfig.data" :active="active.nav" @change-key="changeDefaultEvent" />
+    <common-nav :title="$t('pages.analyze.name')" :list="analyzeConfig.data" :active="active.nav" @change-key="changeDefaultEvent" />
     <div class="content">
       <div class="container">
         <div class="analyze-player">
@@ -9,10 +9,14 @@
             <div class="left">
               <div class="info">
                 <!-- <div class="avatar mg-right"></div> -->
-                <div class="title mg-right">{{ urlTitle ? urlTitle : '暂无播放' }}</div>
-                <t-button shape="round" size="small" class="open mg-right" v-if="iframeUrl" @click="openCurrentUrl">原始</t-button>
+                <div class="title mg-right">{{ urlTitle ? urlTitle : $t('pages.analyze.noPlay') }}</div>
+                <t-button shape="round" size="small" class="open mg-right" v-if="iframeUrl" @click="openCurrentUrl">{{ $t('pages.analyze.source') }}</t-button>
                 <div class="share mg-right" v-if="iframeUrl" @click="shareEvent">
-                  <share-popup v-model:visible="isVisible.share" :data="shareData" />
+                  <share-popup v-model:visible="isVisible.share" :data="shareData">
+                    <template #customize>
+                      <share-1-icon class="icon" />
+                    </template>
+                  </share-popup>
                 </div>
               </div>
             </div>
@@ -46,7 +50,7 @@
             <t-input
               v-model="analysisUrl"
               class="input-url"
-              placeholder="输个链接,让世界充满爱～"
+              :placeholder="$t('pages.analyze.inputUrl')"
               size="large"
               @change="formatUrlEvent"
             />
@@ -56,7 +60,7 @@
               </div>
             </div>
             <t-button class="analyze-play" size="large" @click="analysisEvent">
-              <p class="analyze-tip">解析</p>
+              <p class="analyze-tip">{{ $t('pages.analyze.play') }}</p>
             </t-button>
           </div>
         </div>
@@ -76,9 +80,11 @@
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import moment from 'moment';
-import { ArticleIcon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
+import { Share1Icon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive } from 'vue';
+
+import { t } from '@/locales';
 
 import { getUrlTitle } from '@/utils/analyze';
 import { fetchAnalyzeActive } from '@/api/analyze';
@@ -153,18 +159,18 @@ const formatUrlMethod = (url) => {
 // 解析函数公共方法
 const getVideoInfo = async (url, title) => {
   if (!active.value.nav || !analysisUrl.value) {
-    MessagePlugin.error('请选择解析接口或输入需要解析的地址');
+    MessagePlugin.error(t('pages.analyze.message.empty'));
     return;
   }
 
   const api = _.find(analyzeConfig.value.data, { id: active.value.nav });
   if (!api) {
-    MessagePlugin.error('无效的解析接口');
+    MessagePlugin.error(t('pages.analyze.message.invalidApi'));
     return;
   }
 
   urlTitle.value = title;
-  MessagePlugin.info('正在加载当前视频，如遇解析失败请切换线路!');
+  MessagePlugin.info(t('pages.analyze.message.info'));
 
   const res = await detailHistory({ relateId: active.value.nav, videoUrl: url });
   

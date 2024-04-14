@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="标识" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.flag')" placement="center" :footer="false">
     <template #body>
       <div class="class-dialog-container dialog-container-padding">
         <!-- 表单内容 -->
@@ -7,15 +7,15 @@
           <t-textarea
             v-model="flagData"
             class="textarea"
-            placeholder="请输入过滤关键词,逗号分隔"
+            :placeholder="$t('pages.setting.dialog.splitTip')"
             autofocus
             :autosize="{ minRows: 3, maxRows: 5 }"
           />
-          <p class="tip bottom-tip">分隔符请使用英文状态下","</p>
+          <p class="tip bottom-tip">{{ $t('pages.setting.dialog.splitTip') }}</p>
           <div class="optios">
-            <t-form-item style="float: right; margin: ">
-              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-              <t-button theme="primary" type="submit">确定</t-button>
+            <t-form-item style="float: right;">
+              <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+              <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
             </t-form-item>
           </div>
         </t-form>

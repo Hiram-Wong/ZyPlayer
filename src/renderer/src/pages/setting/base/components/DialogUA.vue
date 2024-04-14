@@ -1,9 +1,9 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="User-Agent" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.ua.title')" placement="center" :footer="false">
     <template #body>
       <div class="ua-dialog-container dialog-container-padding">
         <div class="header">
-          <p class="tip">模拟用户代理</p>
+          <p class="tip">{{ $t('pages.setting.ua.topTip') }}</p>
         </div>
 
         <!-- 表单内容 -->
@@ -11,7 +11,7 @@
           <t-textarea
             v-model="formData.data"
             class="dns-input"
-            placeholder="请输入User-Agent"
+            :placeholder="$t('pages.setting.placeholder.general')"
             autofocus
             :autosize="{ minRows: 2, maxRows: 4 }"
             @change="changeUatextarea"
@@ -19,11 +19,11 @@
           <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeUaSelect">
             <t-radio-button v-for="item in UA_LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
           </t-radio-group>
-          <p class="tip bottom-tip">推荐使用Chrome,为空使用系统默认</p>
+          <p class="tip bottom-tip">{{ $t('pages.setting.ua.bottomTip') }}</p>
           <div class="optios">
             <t-form-item style="float: right">
-              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-              <t-button theme="primary" type="submit">确定</t-button>
+              <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+              <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
             </t-form-item>
           </div>
         </t-form>

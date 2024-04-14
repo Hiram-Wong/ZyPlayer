@@ -1,22 +1,22 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="编辑" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.edit')" :width="650" placement="center" :footer="false">
     <template #body>
       <t-form :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
-        <t-form-item label="名称" name="name">
-          <t-input v-model="formData.name" class="input-item" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.drive.name')" name="name">
+          <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item label="地址" name="server">
+        <t-form-item :label="$t('pages.setting.drive.server')" name="server">
           <t-input
             v-model="formData.server"
             class="input-item"
-            placeholder="请输入内容"
+            :placeholder="$t('pages.setting.placeholder.general')"
           />
         </t-form-item>
-        <t-form-item label="起始" name="startPage">
+        <t-form-item :label="$t('pages.setting.drive.startPage')" name="startPage">
           <t-input
             v-model="formData.startPage"
             class="input-item"
-            placeholder="请输入起始页路径, 如/home/"
+            :placeholder="$t('pages.setting.placeholder.startPage')"
           />
         </t-form-item>
         <!-- <t-form-item label="搜索" name="search">
@@ -30,18 +30,18 @@
             :autosize="{ minRows: 3, maxRows: 3 }"
           />
         </t-form-item> -->
-        <t-form-item label="加密" name="params">
+        <t-form-item :label="$t('pages.setting.drive.params')" name="params">
           <t-textarea
             v-model="formData.params"
             class="input-item input-textarea"
-            :placeholder='`{\n\t"路径": { "password": "密码" }\n}`'
+            :placeholder="$t('pages.setting.placeholder.params')"
             :autosize="{ minRows: 3, maxRows: 3 }"
           />
         </t-form-item>
         <div class="optios">
           <t-form-item style="float: right">
-            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-            <t-button theme="primary" type="submit">确定</t-button>
+            <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+            <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
           </t-form-item>
         </div>
       </t-form>

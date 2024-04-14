@@ -2,18 +2,18 @@
   <div class="chase view-container">
     <header class="header">
       <div class="page-title">
-        <p class="title">过刻</p>
+        <p class="title">{{ $t('pages.chase.name') }}</p>
         <div class="container">
           <t-radio-group v-model="chaseTag" variant="default-filled" size="small">
-          <t-radio-button value="history">看过</t-radio-button>
-          <t-radio-button value="binge">收藏</t-radio-button>
+          <t-radio-button value="history">{{ $t('pages.chase.history') }}</t-radio-button>
+          <t-radio-button value="binge">{{ $t('pages.chase.like') }}</t-radio-button>
         </t-radio-group>
         </div>
       </div>
       <div class="actions">
         <div v-if="chaseTag === 'binge'" class="check-update chase-container-op-item">
           <t-button theme="default" size="small" @click="checkUpdaterEvent">
-            <span>更新</span>
+            <span>{{ $t('pages.chase.update') }}</span>
             <template #icon>
               <time-icon />
             </template>

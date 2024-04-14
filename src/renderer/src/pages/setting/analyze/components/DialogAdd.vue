@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center" :footer="false">
     <template #body>
       <t-form
         :data="formData"
@@ -7,16 +7,16 @@
         :label-width="60"
         @submit="onSubmit"
       >
-        <t-form-item label="名称" name="name">
-          <t-input v-model="formData.name" class="input-item" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.analyze.name')" name="name">
+          <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item label="接口" name="url">
-          <t-input v-model="formData.url" class="input-item" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.analyze.api')" name="url">
+          <t-input v-model="formData.url" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
         <div class="optios">
           <t-form-item style="float: right">
-            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-            <t-button theme="primary" type="submit">确定</t-button>
+            <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+            <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
           </t-form-item>
         </div>
       </t-form>

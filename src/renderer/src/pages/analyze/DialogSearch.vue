@@ -24,12 +24,12 @@
                 v-model="searchText"
                 type="text"
                 class="input"
-                placeholder="搜索影视"
+                :placeholder="$t('pages.analyze.search.input')"
                 @keyup.enter="searchEvent"
                 @keyup.delete="deleteEvent"
               />
             </div>
-            <span v-if="isFilter || searchText" class="clear" @click="clearSearchEvent">清空</span>
+            <span v-if="isFilter || searchText" class="clear" @click="clearSearchEvent">{{ $t('pages.analyze.search.clear') }}</span>
           </div>
         </div>
         <div class="search-modal-body">
@@ -41,7 +41,7 @@
               @click="selectFilterSearchEvent(item.name)"
             >
               <div class="icon" v-html="item.img"></div>
-              <span class="text">{{ item.name }}</span>
+              <span class="text">{{ $t(`pages.analyze.search.${item.name}`) }}</span>
             </li>
           </ul>
           <div v-if="searchText" class="search-footer">
@@ -49,9 +49,9 @@
               <search-icon class="icon" />
               <div class="content">
                 <p class="text">
-                  查看
+                  {{ $t('pages.analyze.search.watch') }}
                   <span class="keywords">{{ searchText }}</span>
-                  的所有内容
+                  {{ $t('pages.analyze.search.content') }}
                 </p>
               </div>
               <span class="shortcut">Enter</span>
@@ -61,9 +61,9 @@
         <div class="search-hint">
           <p class="content">
             <info-circle-icon class="search-filter-icon" />
-            输入@快速指定搜索源，例如
-            <t-tag class="search-filter-tag">爱奇艺@</t-tag>
-            <t-tag class="search-filter-tag">腾讯视频@</t-tag>
+            {{ $t('pages.analyze.search.tip') }}
+            <t-tag class="search-filter-tag">{{ $t('pages.analyze.search.iqiyi') }}@</t-tag>
+            <t-tag class="search-filter-tag">{{ $t('pages.analyze.search.tencent') }}@</t-tag>
           </p>
         </div>
       </div>

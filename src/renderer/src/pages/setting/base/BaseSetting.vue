@@ -1,7 +1,7 @@
 <template>
   <div class="setting-base-container">
     <t-form ref="form" label-width="110px" :data="formData" label-align="left">
-      <t-form-item label="外观" name="theme">
+      <t-form-item :label="$t('pages.setting.base.theme')" name="theme">
         <t-radio-group v-model="formData.theme">
           <div v-for="(item, index) in MODE_OPTIONS" :key="index" class="setting-layout-drawer">
             <div>
@@ -13,7 +13,7 @@
           </div>
         </t-radio-group>
       </t-form-item>
-      <t-form-item label="老板键" name="shortcutKey">
+      <t-form-item :label="$t('pages.setting.base.bossKey')" name="shortcutKey">
         <t-space align="center">
           <t-input
             ref="shortcutInputRef"
@@ -33,24 +33,24 @@
               </div>
             </template>
           </t-input>
-          <span class="title" @click="reset('shortcut')">重置</span>
+          <span class="title" @click="reset('shortcut')">{{ $t('pages.setting.base.reset') }}</span>
         </t-space>
       </t-form-item>
-      <t-form-item label="热榜" name="hotRecommend">
+      <t-form-item :label="$t('pages.setting.base.hotRecommend')" name="hotRecommend">
         <div class="hot-recommend">
           <t-radio-group v-model="formData.defaultHot">
-            <t-radio value="kylive">酷云数据</t-radio>
-            <t-radio value="enlightent">云合数据</t-radio>
+            <t-radio value="kylive">{{ $t('pages.setting.base.kylive') }}</t-radio>
+            <t-radio value="enlightent">{{ $t('pages.setting.base.enlightent') }}</t-radio>
           </t-radio-group>
         </div>
       </t-form-item>
-      <t-form-item label="搜索" name="search">
+      <t-form-item :label="$t('pages.setting.base.search')" name="search">
         <div class="search">
           <t-space direction="vertical">
             <t-radio-group v-model="formData.defaultSearchType">
-              <t-radio value="site">本站搜索</t-radio>
-              <t-radio value="group">组内搜索</t-radio>
-              <t-radio value="all">全站搜索</t-radio>
+              <t-radio value="site">{{ $t('pages.setting.base.site') }}</t-radio>
+              <t-radio value="group">{{ $t('pages.setting.base.group') }}</t-radio>
+              <t-radio value="all">{{ $t('pages.setting.base.all') }}</t-radio>
             </t-radio-group>
           </t-space>
         </div>
@@ -67,88 +67,88 @@
           <span class="title" @click="reset('danmuku')">重置</span>
         </t-space>
       </t-form-item> -->
-      <t-form-item label="直播" name="iptv">
+      <t-form-item :label="$t('pages.setting.base.iptv')" name="iptv">
         <div class="iptv">
           <t-space direction="vertical">
             <t-space align="center">
-              <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>跳过ipv6</t-radio>
-              <span class="title" @click="checkIpv6">检查</span>
-              <t-radio v-model="formData.iptvStatus" allow-uncheck>延迟</t-radio>
-              <t-radio v-model="formData.iptvThumbnail" allow-uncheck>缩略图</t-radio>
-              <span class="title" @click="isVisible.iptvThumbnail=true">说明</span>
+              <t-radio v-model="formData.iptvSkipIpv6" allow-uncheck>{{ $t('pages.setting.base.skipIpv6') }}</t-radio>
+              <span class="title" @click="checkIpv6">{{ $t('pages.setting.base.check') }}</span>
+              <t-radio v-model="formData.iptvStatus" allow-uncheck>{{ $t('pages.setting.base.delay') }}</t-radio>
+              <t-radio v-model="formData.iptvThumbnail" allow-uncheck>{{ $t('pages.setting.base.thumbnail') }}</t-radio>
+              <span class="title" @click="isVisible.iptvThumbnail=true">{{ $t('pages.setting.base.info') }}</span>
             </t-space>
             <t-space align="center">
               <t-input
                 v-model="formData.defaultIptvEpg"
-                label="默认节目:"
-                placeholder="仅支持DIYP"
+                :label="$t('pages.setting.base.defaultEpg')"
+                :placeholder="$t('pages.setting.placeholder.epgTip')"
                 :style="{ width: '255px' }"
               />
-              <span class="title" @click="reset('epg')">重置</span>
+              <span class="title" @click="reset('epg')">{{ $t('pages.setting.base.reset') }}</span>
             </t-space>
             <t-space align="center">
               <t-input
                 v-model="formData.defaultIptvLogo"
-                label="全局台标:"
-                placeholder="源台标失效"
+                :label="$t('pages.setting.base.globalLogo')"
+                :placeholder="$t('pages.setting.placeholder.logoTip')"
                 :style="{ width: '255px' }"
               />
-              <span class="title" @click="reset('logo')">重置</span>
+              <span class="title" @click="reset('logo')">{{ $t('pages.setting.base.reset') }}</span>
             </t-space>
           </t-space>
         </div>
       </t-form-item>
-      <t-form-item label="播放器" name="player">
+      <t-form-item :label="$t('pages.setting.base.player')" name="player">
         <div class="player">
           <t-space direction="vertical">
             <t-space align="center">
               <t-select
                 v-model="formData.broadcasterType"
                 :options="PLAYER_OPTIONS"
-                placeholder="请选择播放器" 
+                :placeholder="$t('pages.setting.placeholder.general')"
                 :style="{ width: '255px' }"
               />
-              <span class="title" @click="snifferEvent">嗅探</span>
+              <span class="title" @click="snifferEvent">{{ $t('pages.setting.base.sniffer') }}</span>
             </t-space>
             <t-space align="center" v-if="formData.broadcasterType === 'custom'">
               <t-input
                 v-model="formData.externalPlayer"
-                label="系统命令:"
-                placeholder="请输入系统命令"
+                :label="$t('pages.setting.base.command')"
+                :placeholder="$t('pages.setting.placeholder.general')"
                 :style="{ width: '255px' }"
               />
-              <span class="title" @click="isVisible.customPlayer = true">说明</span>
+              <span class="title" @click="isVisible.customPlayer = true">{{ $t('pages.setting.base.info') }}</span>
             </t-space>
           </t-space>
         </div>
       </t-form-item>
-      <t-form-item label="安全" name="security">
+      <t-form-item :label="$t('pages.setting.base.security')" name="security">
         <t-space>
-          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">网络代理</span>
-          <span class="title" @click="uaEvnet">用户代理</span>
+          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">{{ $t('pages.setting.base.proxy') }}</span>
+          <span class="title" @click="uaEvnet">{{ $t('pages.setting.base.ua') }}</span>
         </t-space>
 
         <dialog-ua-view v-model:visible="isVisible.ua" :data="uaDialogData" @receive-dns-data="flushDialogData" />
       </t-form-item>
-      <t-form-item label="权限" name="jurisdiction">
+      <t-form-item :label="$t('pages.setting.base.jurisdiction')" name="jurisdiction">
         <t-space>
           <t-radio v-if="platform !== 'linux'" v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">
-            开机自启
+            {{ $t('pages.setting.base.selefBoot') }}
           </t-radio>
           <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="hardwareAccelerationEvnet">
-            硬件加速
+            {{ $t('pages.setting.base.hardwareAcceleration') }}
           </t-radio>
           <t-radio v-model="formData.windowPosition.status" allow-uncheck @change="windowPositionEvnet">
-            窗口位置
+            {{ $t('pages.setting.base.windowPosition') }}
           </t-radio>
         </t-space>
       </t-form-item>
-      <t-form-item label="其他" name="other">
+      <t-form-item :label="$t('pages.setting.base.other')" name="other">
         <t-space>
-          <span class="title" @click="resetOriginal">恢复出厂</span>
-          <span class="title" @click="dataMange">数据管理</span>
-          <span class="title" @click="isVisible.update = true">检查更新</span>
-          <span class="title" @click="isVisible.disclaimer=true">用户协议</span>
+          <span class="title" @click="resetOriginal">{{ $t('pages.setting.base.restoreFactory') }}</span>
+          <span class="title" @click="dataMange">{{ $t('pages.setting.base.dataMange') }}</span>
+          <span class="title" @click="isVisible.update = true">{{ $t('pages.setting.base.checkUpdate') }}</span>
+          <span class="title" @click="isVisible.disclaimer=true">{{ $t('pages.setting.base.disclaimer') }}</span>
         </t-space>
 
         <dialog-custom-player v-model:visible="isVisible.customPlayer" />
@@ -176,6 +176,7 @@ import SettingLightIcon from '@/assets/assets-setting-light.svg';
 
 import { fetchSettingList, updateSetting, clearDb } from '@/api/setting';
 import { usePlayStore, useSettingStore } from '@/store';
+import { t } from '@/locales';
 
 import DialogDataView from './components/DialogData.vue';
 import DialogUaView from './components/DialogUA.vue';
@@ -206,25 +207,25 @@ const webdevDialogData = ref({ webdevUrl:'', webdevUsername:'' ,webdevPassword:'
 const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferType' });
 
 const MODE_OPTIONS = [
-  { type: 'light', text: '浅色' },
-  { type: 'dark', text: '深色' },
-  { type: 'auto', text: '跟随系统' },
+  { type: 'light', text: t('pages.setting.base.light') },
+  { type: 'dark', text: t('pages.setting.base.dark') },
+  { type: 'auto', text: t('pages.setting.base.auto') },
 ];
 
 const PLAYER_OPTIONS = [
-  { label: '西瓜播放器', value: 'xgplayer' },
-  { label: '呆呆播放器', value: 'dplayer' },
+  { label: t('pages.setting.base.xgplayer'), value: 'xgplayer' },
+  { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
   // { label: '腾讯播放器', value: 'tcplayer' },
   // { label: '阿里播放器', value: 'aliplayer' },
   // { label: '艺术播放器', value: 'artplayer' },
   // { label: 'iina(mac本地)', value: 'iina' },
   // { label: 'potplayer(win本地)', value: 'potplayer' },
   // { label: 'vlc(系统通用)', value: 'vlc' },
-  { label: '自定义(调用系统)', value: 'custom' },
+  { label: t('pages.setting.base.custom'), value: 'custom' },
 ];
 
 const shortcutInputRef = ref(null);
-const placeholderShortcut = ref('点击设置快捷键');
+const placeholderShortcut = ref(t('pages.setting.placeholder.shortcutKeyTip'));
 const statusShortcut = ref('default');
 const tipShortcut = ref('');
 
@@ -376,17 +377,17 @@ const resetOriginal = () => {
     clearCache();
 
     confirmDia.hide();
-    MessagePlugin.success('重置成功, 即将重启应用!');
+    MessagePlugin.success(t('pages.setting.message.reboot'));
     setTimeout(() => {
       window.electron.ipcRenderer.send('reboot-app');
     }, 1000);
   };
 
   const confirmDia = DialogPlugin({
-    body: '确定恢复出厂吗？出厂后恢复初始状态。',
-    header: '恢复出厂',
+    body: t('pages.setting.dialog.restoreFactoryBody'),
+    header: t('pages.setting.dialog.restoreFactoryHeader'),
     width: '320px',
-    confirmBtn: '确认恢复',
+    confirmBtn: t('pages.setting.dialog.confirm'),
     placement: 'center',
     closeBtn: '',
     onConfirm: handleClear,
@@ -435,7 +436,7 @@ const focusShortcut = () => {
   // 复制快捷键
   formData.value.recordedSourceShortcut = formData.value.recordShortcut;
   formData.value.recordShortcut = '';
-  placeholderShortcut.value = '请按下快捷键组合';
+  placeholderShortcut.value = t('pages.setting.placeholder.shortcutKeyEnterTip');
 };
 
 // 设置组合键更换失去焦点placeholder
@@ -443,7 +444,7 @@ const blurShortcut = () => {
   // 还原快捷键
   if (formData.value.recordedSourceShortcut && !formData.value.recordShortcut)
     formData.value.recordShortcut = formData.value.recordedSourceShortcut;
-  placeholderShortcut.value = '设置快捷键';
+  placeholderShortcut.value = t('pages.setting.placeholder.shortcutKeyTip');
 };
 
 // 获取组合按键
@@ -560,7 +561,7 @@ const isLegalShortcut = (item) => {
     shortcutInputRef.value.blur();
     window.electron.ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
   } else {
-    tipShortcut.value = '当前组合键不合规';
+    tipShortcut.value = t('pages.setting.placeholder.shortcutKeyNonCompliance');
     statusShortcut.value = 'error';
   }
 };
@@ -600,7 +601,7 @@ const hardwareAccelerationEvnet = () => {
   console.log('开机自启', formData.value.hardwareAcceleration);
   window.electron.ipcRenderer.send('update-hardwareAcceleration', formData.value.hardwareAcceleration);
   MessagePlugin.success(
-    formData.value.hardwareAcceleration ? '已开启硬件加速，重启应用生效' : '已关闭硬件加速，重启应用生效',
+    formData.value.hardwareAcceleration ? t('pages.setting.message.hardwareAccelerationOn') : t('pages.setting.message.hardwareAccelerationOff'),
   );
 };
 
@@ -609,7 +610,7 @@ const windowPositionEvnet = () => {
   console.log('窗口位置', formData.value.windowPosition);
   window.electron.ipcRenderer.send('update-windowPosition', formData.value.windowPosition.status);
   MessagePlugin.success(
-    formData.value.windowPosition.status ? '已开启记录主窗口退出时位置' : '已关闭记录退出主窗口时位置',
+    formData.value.windowPosition.status ? t('pages.setting.message.windowPositionOn') : t('pages.setting.message.windowPositionOff'),
   );
 };
 
@@ -665,9 +666,9 @@ const checkIpv6 = async () => {
     
     if (ip.match(ipv4Regex)) formData.value.iptvSkipIpv6 = true;
     if (ip.match(ipv6Regex)) formData.value.iptvSkipIpv6 = false;
-    MessagePlugin.success(`网络地址:${ip}`);
+    MessagePlugin.success(`${t('pages.setting.message.networkAddress')}: ${ip}`);
   } catch(err) {
-    MessagePlugin.error(`网络状态检测失败:${err}`);
+    MessagePlugin.error(`${t('pages.setting.message.networkCheckError')}: ${err}`);
     console.log(err);
   };
 };

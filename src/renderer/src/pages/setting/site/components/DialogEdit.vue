@@ -1,12 +1,12 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="编辑" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.edit')" :width="650" placement="center" :footer="false">
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
-        <t-form-item label="名称" name="name">
-          <t-input v-model="formData.name" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.site.name')" name="name">
+          <t-input v-model="formData.name" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item label="类型" name="type">
+        <t-form-item :label="$t('pages.setting.site.type')" name="type">
           <t-radio-group v-model="formData.type">
             <t-radio :value="0">cms[xml]</t-radio>
             <t-radio :value="1">cms[json]</t-radio>
@@ -19,35 +19,35 @@
             <!-- <t-radio :value="5">爬虫</t-radio> -->
           </t-radio-group>
         </t-form-item>
-        <t-form-item label="接口" name="api">
-          <t-input v-if="formData.type !==5" v-model="formData.api" placeholder="请输入内容" />
-          <t-textarea v-else v-model="formData.api" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.site.api')" name="api">
+          <t-input v-if="formData.type !==5" v-model="formData.api" :placeholder="$t('pages.setting.placeholder.general')" />
+          <t-textarea v-else v-model="formData.api" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item label="搜索" name="search">
+        <t-form-item :label="$t('pages.setting.site.search')" name="search">
           <t-radio-group v-model="formData.search">
-            <t-radio :value="0">关闭</t-radio>
-            <t-radio :value="1">聚合搜索</t-radio>
-            <t-radio :value="2">本站搜索</t-radio>
+            <t-radio :value="0">{{ $t('pages.setting.table.site.close') }}</t-radio>
+            <t-radio :value="1">{{ $t('pages.setting.table.site.together') }}</t-radio>
+            <t-radio :value="2">{{ $t('pages.setting.table.site.local') }}</t-radio>
           </t-radio-group>
         </t-form-item>
         <!-- <t-form-item label="筛选" name="filter">
           <t-switch v-model="formData.filter" :label="['开', '关']"/>
         </t-form-item> -->
         <!-- <t-form-item label="下载" name="download">
-          <t-input v-model="formData.download" placeholder="请输入内容" />
+          <t-input v-model="formData.download" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item> -->
-        <t-form-item label="解析" name="playUrl">
-          <t-input v-model="formData.playUrl" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.site.playUrl')" name="playUrl">
+          <t-input v-model="formData.playUrl" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item label="扩展" name="ext">
-          <t-input v-model="formData.ext" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.site.ext')" name="ext">
+          <t-input v-model="formData.ext" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item label="分组" name="group">
+        <t-form-item :label="$t('pages.setting.site.group')" name="group">
           <t-select
             v-model="formData.group"
             creatable
             filterable
-            placeholder="请选择分组"
+            :placeholder="$t('pages.setting.placeholder.groupTip')"
             class="input-item"
             @create="createOptions"
           >
@@ -60,14 +60,14 @@
             />
           </t-select>
         </t-form-item>
-        <t-form-item label="类别" name="categories">
-          <t-input v-model="formData.categories" placeholder="请输入内容,逗号分隔" />
+        <t-form-item :label="$t('pages.setting.site.category')" name="category">
+          <t-input v-model="formData.categories" :placeholder="$t('pages.setting.placeholder.categoryTip')" />
         </t-form-item>
 
         <div class="optios">
           <t-form-item style="float: right">
-            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-            <t-button theme="primary" type="submit">确定</t-button>
+            <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+            <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
           </t-form-item>
         </div>
       </t-form>

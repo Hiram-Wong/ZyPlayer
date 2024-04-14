@@ -1,6 +1,6 @@
 <template>
   <div class="iptv view-container">
-    <common-nav title="电视" :list="iptvConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
+    <common-nav :title="$t('pages.iptv.name')" :list="iptvConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">
         <div class="header-nav">
@@ -21,7 +21,7 @@
               <div class="card-main">
                 <div v-show="iptvConfig.ext.status" class="card-tag">
                   <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
-                  <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : '超时' }}</span>
+                  <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : $t('pages.iptv.delay') }}</span>
                 </div>
                 <t-image
                   class="card-main-item"
@@ -45,8 +45,8 @@
             </t-col>
 
             <context-menu :show="isVisible.contentMenu" :options="optionsComponent" @close="isVisible.contentMenu = false">
-              <context-menu-item label="拷贝频道链接" @click="copyChannelEvent" />
-              <context-menu-item label="删除频道" @click="delChannelEvent" />
+              <context-menu-item :label="$t('pages.iptv.contextMenu.copyChannel')" @click="copyChannelEvent" />
+              <context-menu-item :label="$t('pages.iptv.contextMenu.delChannel')" @click="delChannelEvent" />
             </context-menu>
           </t-row>
           <infinite-loading
@@ -56,8 +56,8 @@
             :duration="200"
             @infinite="load"
           >
-            <template #complete>{{ infiniteCompleteTip }}</template>
-            <template #error>哎呀，出了点差错</template>
+            <template #complete>{{ $t(`pages.iptv.infiniteLoading.${infiniteCompleteTip}`) }}</template>
+            <template #error>{{ $t('pages.iptv.infiniteLoading.error') }}</template>
           </infinite-loading>
         </div>
       </div>
@@ -78,15 +78,16 @@ import lazyImg from '@/assets/lazy.png';
 
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
 import { useEventBus } from '@vueuse/core';
-
 import _ from 'lodash';
 import PQueue from 'p-queue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
 
-import { checkUrlIpv6, copyToClipboardApi } from '@/utils/tool';
 import { usePlayStore, useSettingStore } from '@/store';
+import { t } from '@/locales';
+
+import { checkUrlIpv6, copyToClipboardApi } from '@/utils/tool';
 import { fetchIptvActive, clearChannel, addChannel, fetchChannelList, delChannelItem } from '@/api/iptv';
 import { setDefault } from '@/api/setting';
 import { parseChannel, checkChannel, stopCheckChannel } from '@/utils/channel';
@@ -118,7 +119,7 @@ const isVisible = reactive({
 });
 const searchTxt = ref('');
 const infiniteId = ref(+new Date());
-const infiniteCompleteTip = ref('没有更多内容了');
+const infiniteCompleteTip = ref('noMore');
 const pagination = ref({
   pageIndex: 0,
   pageSize: 32,
@@ -236,7 +237,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
     const resLength = await getChannel();
 
     if (_.isEmpty(active.value.nav) && _.isEmpty(channelData.value.list) ) {
-      infiniteCompleteTip.value = '暂无数据,请前往设置-直播源设置默认源!';
+      infiniteCompleteTip.value = 'noData';
       $state.complete();
       // return;
     }
@@ -261,7 +262,7 @@ const searchEvent = async () => {
 // 切换分类
 const changeClassEvent = async (id) => {
   clearQueue();
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value = 'noMore';
   active.value.class = id;
 
   channelData.value = { list: [], total: 0 };
@@ -382,7 +383,7 @@ const clearQueue = () => {
 const changeDefaultIptvEvent = async (id: string) => {
   try {
     isVisible.infiniteLoading = true;
-    infiniteCompleteTip.value = '没有更多内容了!';
+    infiniteCompleteTip.value = 'noMore';
     channelData.value = { list: [], total: 0 };
     classConfig.value.data = [{ type_id: '全部', type_name: '全部' }];
     active.value.class = '全部';
@@ -394,11 +395,11 @@ const changeDefaultIptvEvent = async (id: string) => {
     await addChannel(docs);
     await setDefault('defaultIptv', id);
 
-    MessagePlugin.success('设置成功');
+    MessagePlugin.success(t('pages.iptv.message.setSucess'));
     infiniteId.value++;
     pagination.value.pageIndex = 0;
   } catch (err) {
-    MessagePlugin.error(`设置失败, 错误信息:${err}`);
+    MessagePlugin.error(`${t('pages.iptv.message.setFail')}:${err}`);
   }
 };
 
@@ -412,7 +413,7 @@ channelSearcheventBus.on((kw: string)=>{
 });
 
 iptvReloadeventBus.on(async () => {
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value = 'noMore';
   searchTxt.value = '';
   classConfig.value.data = [{ type_id: '全部', type_name: '全部' }];
   active.value.class = '全部';
@@ -450,8 +451,8 @@ const copyToClipboard = async(content, successMessage, errorMessage) => {
   }
 };
 const copyChannelEvent = async() => {
-  const successMessage = '复制成功，快分享给好友吧!';
-  const errorMessage = '当前环境不支持一键复制，请手动复制链接!';
+  const successMessage = t('pages.iptv.message.copySucess');
+  const errorMessage = t('pages.iptv.message.copyFail');
   await copyToClipboard(channelItem.value.url, successMessage, errorMessage);
 
   isVisible.contentMenu = false;

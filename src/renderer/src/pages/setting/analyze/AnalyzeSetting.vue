@@ -6,21 +6,21 @@
           <div class="component-op">
             <div class="item" @click="isVisible.dialogAdd = true">
               <add-icon />
-              <span>添加</span>
+              <span>{{ $t('pages.setting.header.add') }}</span>
             </div>
             <div class="item" @click="removeAllEvent">
               <remove-icon />
-              <span>删除</span>
+              <span>{{ $t('pages.setting.header.delete') }}</span>
             </div>
             <div class="item" @click="isVisible.dialogFlag = true">
               <discount-icon />
-              <span>标识</span>
+              <span>{{ $t('pages.setting.header.flag') }}</span>
             </div>
           </div>
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" placeholder="搜索解析资源" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
+            <t-input v-model="searchValue" :placeholder="$t('pages.setting.header.search')" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -52,19 +52,17 @@
         <span v-if="row.type === 3">聚合</span>
       </template> -->
       <template #isActive="{ row }">
-        <t-switch v-model="row.isActive" @change="switchStatus(row)">
-          <template #label="tip">{{ tip.value ? '开' : '关' }}</template>
-        </t-switch>
+        <t-switch v-model="row.isActive" @change="switchStatus(row)" />
       </template>
       <template #ext="{ row }">
         <span v-for="item in row.ext" :key="item.id">{{ item }},</span>
       </template>
       <template #op="slotProps">
         <t-space>
-          <t-link theme="primary" @click="defaultEvent(slotProps.row)">默认</t-link> 
-          <t-link theme="primary" @click="editEvent(slotProps)">编辑</t-link>
-          <t-popconfirm content="确认删除吗" @confirm="removeEvent(slotProps.row)">
-            <t-link theme="danger">删除</t-link>
+          <t-link theme="primary" @click="defaultEvent(slotProps.row)">{{ $t('pages.setting.table.default') }}</t-link> 
+          <t-link theme="primary" @click="editEvent(slotProps)">{{ $t('pages.setting.table.edit') }}</t-link>
+          <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="removeEvent(slotProps.row)">
+            <t-link theme="danger">{{ $t('pages.setting.table.delete') }}</t-link>
           </t-popconfirm>
         </t-space>
       </template>

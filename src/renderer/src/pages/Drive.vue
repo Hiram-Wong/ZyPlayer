@@ -1,6 +1,6 @@
 <template>
   <div class="drive-container">
-    <common-nav title="网盘" :list="driveConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
+    <common-nav :title="$t('pages.drive.name')" :list="driveConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">
         <div class="page-title">
@@ -72,16 +72,17 @@
 import 'v3-infinite-loading/lib/style.css';
 
 import { useEventBus } from '@vueuse/core';
-
 import _ from 'lodash';
-import { ArticleIcon, Tv1Icon, LoadingIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { Tv1Icon, LoadingIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref } from 'vue';
+
+import { t } from '@/locales';
+import { usePlayStore } from '@/store';
 
 import { fetchDriveActive } from '@/api/drive';
-
 import { __jsEvalReturn } from '@/utils/alist_open';
-import { usePlayStore } from '@/store';
+
 import CommonNav from '../components/common-nav/index.vue';
 
 const storePlayer = usePlayStore();
@@ -101,10 +102,6 @@ const renderLoading = () => {
     </div>
   );
 };
-
-const isVisible = reactive({
-  infiniteLoading: false, // 筛选
-});
 
 const driveConfig = ref({
   data: [],
@@ -126,9 +123,9 @@ const driveList = ref([]);
 const driveContent = ref([]);
 const breadcrumb = ref([]);
 
-const searchTxt = ref('');
+// const searchTxt = ref('');
 
-const infiniteCompleteTip = ref('没有更多内容了');
+const infiniteCompleteTip = ref(`${t('pages.drive.infiniteLoading.noData')}`);
 
 onMounted(() => {
   getSetting();
@@ -143,7 +140,7 @@ const getSetting = async() => {
       active.value.nav = data["default"]["id"];
       driveConfig.value.default.startPage = driveConfig.value.default.startPage ?  driveConfig.value.default.startPage : '/';
     } else {
-      infiniteCompleteTip.value = '暂无数据,请前往设置-网盘源设置默认源!';
+      infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noData');
     }
     if (_.has(data, 'data') && !_.isEmpty(data["data"])) {
       driveConfig.value.data = data["data"];
@@ -221,17 +218,17 @@ const getCloudFile = async (item) => {
       playEvent(res, path);
     };
   } catch(err){
-    console.log(err)
-    MessagePlugin.error(`请求出错`)
+    console.log(err);
+    MessagePlugin.error(t('pages.drive.message.reqError'));
   }
 };
 
 // 搜索
-const searchEvent = async () => {
-  console.log(`[drive] search keyword: ${searchTxt.value}`);
-  const res = JSON.parse(await spider.value.search(searchTxt.value));
-  console.log(res)
-};
+// const searchEvent = async () => {
+//   console.log(`[drive] search keyword: ${searchTxt.value}`);
+//   const res = JSON.parse(await spider.value.search(searchTxt.value));
+//   console.log(res)
+// };
 
 // 播放
 const playEvent = (item, fullPath) => {
@@ -268,7 +265,7 @@ const changeDefaultIptvEvent = async (id) => {
   spider.value.destroy();
   driveContent.value = [];
   breadcrumb.value = [];
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value =  t('pages.drive.infiniteLoading.noMore');
   active.value.nav = id;
   driveConfig.value.default = item;
   driveConfig.value.default.startPage = item.startPage ?  item.startPage : '/';
@@ -279,7 +276,7 @@ const changeDefaultIptvEvent = async (id) => {
 const eventBus = useEventBus('drive-reload');
 eventBus.on(async () => {
   spider.value.destroy();
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value =  t('pages.drive.infiniteLoading.noMore');
   getSetting();
 });
 </script>

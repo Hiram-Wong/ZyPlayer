@@ -2,7 +2,7 @@
   <t-drawer
     v-model:visible="formVisible"
     show-in-attached-element
-    header="历史"
+    :header="$t('pages.analyze.history.title')"
     size="small"
     class="history-items"
     >
@@ -29,13 +29,13 @@
       <t-divider dashed style="margin: 5px 0" />
     </div>
     <template #footer>
-      <t-button @click="histroyClearEvent">清空</t-button>
-      <t-button variant="outline" @click="formVisible = false"> 取消 </t-button>
+      <t-button @click="histroyClearEvent">{{ $t('pages.analyze.history.clear') }}</t-button>
+      <t-button variant="outline" @click="formVisible = false">{{ $t('pages.analyze.history.cancel') }}</t-button>
     </template>
 
     <infinite-loading :identifier="infiniteId" style="text-align: center" :distance="200" @infinite="load">
-      <template #complete>人家是有底线的</template>
-      <template #error>哎呀，出了点差错</template>
+      <template #complete>{{ $t('pages.analyze.infiniteLoading.complete') }}</template>
+      <template #error>{{ $t('pages.analyze.infiniteLoading.error') }}</template>
     </infinite-loading>
   </t-drawer>
 </template>
@@ -46,9 +46,11 @@ import 'v3-infinite-loading/lib/style.css';
 import _ from 'lodash';
 import moment from 'moment';
 import { DeleteIcon } from 'tdesign-icons-vue-next';
-import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
+import { DialogPlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref, watch } from 'vue';
+
+import { t } from '@/locales';
 
 import { fetchHistoryList, delHistory, clearHistoryAnalyzeList } from '@/api/history';
 
@@ -108,17 +110,17 @@ const histroyClearEvent = () => {
   const handleClear = () => {
     clearHistoryAnalyzeList();
     historyList.value = [];
-    MessagePlugin.success('删除成功');
     confirmDia.hide();
   };
 
   const confirmDia = DialogPlugin({
-    body: '确定删除所有记录吗？删除后不支持找回。',
-    header: '删除记录',
+    body: t('pages.analyze.dialog.body'),
+    header: t('pages.analyze.dialog.header'),
     width: '340px',
-    confirmBtn: '确认删除',
     placement: 'center',
     closeBtn: '',
+    confirmBtn: t('pages.analyze.dialog.confirm'),
+    cancelBtn: t('pages.analyze.dialog.cancel'),
     onConfirm: handleClear,
     onClose: () => confirmDia.hide(),
   });

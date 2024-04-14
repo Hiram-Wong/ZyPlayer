@@ -17,7 +17,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     width: 100,
     colKey: 'resource',
   },
-  { title: '搜索', align: 'left', colKey: 'search', width: 80 },
+  { title: '搜索', align: 'left', colKey: 'search', width: 90 },
   {
     title: '分组',
     align: 'left',

@@ -1,6 +1,6 @@
 <template>
   <div class="setting-container">
-    <common-nav title="设置" :list="settingSet.list" :active="settingSet.select" @change-key="changeClassEvent">
+    <common-nav :title="$t('pages.setting.name')" :list="settingSet.list" :active="settingSet.select" @change-key="changeClassEvent">
       <template #customize>
         <div class="sign-bar">
           <div class="sign-logo">
@@ -8,12 +8,12 @@
             </div>
           <div class="sign-content">
             <div class="sign-text">
-              <h2>与Hipy更配哦</h2>
-              <p>新起点, 新开始</p>
+              <h2>{{ $t('pages.setting.ad.title') }}</h2>
+              <p>{{ $t('pages.setting.ad.desc') }}</p>
             </div>
           </div>
           <div class="sign-btn">
-            <a href="https://github.com/hjdhnx/hipy-server" target="_blank">查看</a>
+            <a href="https://github.com/hjdhnx/hipy-server" target="_blank">{{ $t('pages.setting.ad.open') }}</a>
           </div>
         </div>
       </template>
@@ -32,6 +32,8 @@
 
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue';
+
+import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 
 import analyzeView from './setting/analyze/AnalyzeSetting.vue';
@@ -51,19 +53,19 @@ const settingSet = reactive({
   list: [
     {
       id: 'configBase',
-      name: '基础配置'
+      name: t('pages.setting.nav.configBase')
     },{
       id: 'siteSource',
-      name: '影视配置'
+      name: t('pages.setting.nav.siteSource')
     },{
       id: 'iptvSource',
-      name: '电视配置'
+      name: t('pages.setting.nav.iptvSource')
     },{
       id: 'analyzeSource',
-      name: '解析配置'
+      name: t('pages.setting.nav.analyzeSource')
     },{
       id: 'driveSource',
-      name: '网盘配置'
+      name: t('pages.setting.nav.driveSource')
     }
   ]
 })

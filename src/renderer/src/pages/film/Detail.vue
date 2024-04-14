@@ -10,7 +10,7 @@
                 <div v-show="info.vod_douban_score" class="rate">
                   · {{
                     info.vod_douban_score === '0.0' && info.vod_score === '0.0'
-                      ? '暂无评分'
+                      ? '0.0'
                       : info.vod_douban_score === '0.0'
                       ? info.vod_score
                       : info.vod_douban_score
@@ -28,14 +28,12 @@
               </div>
             </div>
             <div class="binge">
-              <div v-if="isVisible.binge" class="video-subscribe-text" @click="bingeEvent">
-                <t-space :size="8">
-                  <heart-icon size="1.2em" class="icon" />
-                  <span class="tip">追</span>
-                </t-space>
-              </div>
-              <div v-else class="video-subscribe-text" @click="bingeEvent">
-                <span class="tip">在追</span>
+              <div class="video-subscribe-text" @click="bingeEvent">
+                <span>
+                  <heart-icon class="icon" v-if="isVisible.binge"/>
+                  <heart-filled-icon class="icon" v-else/>
+                </span>
+                <span class="tip">{{ $t('pages.player.film.like') }}</span>
               </div>
             </div>
           </div>
@@ -52,15 +50,15 @@
             <div class="content-wrap">
               <div class="introduce-items">
                 <div v-show="info.vod_director" class="director introduce-item">
-                  <span class="title">导演：</span>
+                  <span class="title">{{ $t('pages.player.film.director') }}: </span>
                   <div class="info">{{ info.vod_director }}</div>
                 </div>
                 <div v-show="info.vod_actor" class="actor introduce-item">
-                  <span class="title">主演：</span>
+                  <span class="title">{{ $t('pages.player.film.actor') }}: </span>
                   <div class="info">{{ info.vod_actor }}</div>
                 </div>
                 <div v-show="info.vod_content" class="des introduce-item">
-                  <span class="title">摘要：</span>
+                  <span class="title">{{ $t('pages.player.film.desc') }}: </span>
                   <div class="info">
                     <span v-html="filterContent(info.vod_content)" />
                   </div>
@@ -71,7 +69,7 @@
         </div>
         <div class="plist-listbox">
           <div class="box-anthology-header">
-            <h4 class="box-anthology-title">选集</h4>
+            <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
             <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
               <order-descending-icon v-if="reverseOrder" size="1.3em" />
               <order-ascending-icon v-else size="1.3em" />
@@ -126,6 +124,7 @@
 <script setup lang="ts">
 import {
   HeartIcon,
+  HeartFilledIcon,
   OrderAscendingIcon,
   OrderDescendingIcon,
 } from 'tdesign-icons-vue-next';
@@ -613,6 +612,12 @@ const filterContent = (item: string | undefined | null): string => {
         width: 84px;
         height: 42px;
         z-index: 14;
+        .tip {
+          vertical-align: top;
+          line-height: 25px;
+          text-align: center;
+          margin-left: 4px;
+        }
       }
     }
     .intro-wrap {

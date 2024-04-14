@@ -8,7 +8,7 @@
         <div class="skin-items">
           <div v-for="(icon, name) in themeIcons" :key="name" class="skin-item" @click="setTheme(name)">
             <component :is="icon" size="large" />
-            <div class="skin-title">{{ themeNames[name] }}</div>
+            <div class="skin-title">{{ $t(`pages.skin.${name}`) }}</div>
           </div>
         </div>
       </template>
@@ -33,12 +33,6 @@ const themeIcons = {
   light: ModeLightIcon,
   dark: ModeDarkIcon,
   auto: BrowseGalleryIcon
-};
-
-const themeNames = {
-  light: '浅色',
-  dark: '深色',
-  auto: '自动'
 };
 
 const currentIcon = computed(() => themeIcons[theme.value]);

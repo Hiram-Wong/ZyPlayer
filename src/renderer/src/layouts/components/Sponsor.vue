@@ -3,7 +3,7 @@
     <t-popup placement="bottom">
       <template #content>
         <div class="sponsor_main">
-          <div class="qrcode_title">请作者喝杯咖啡吧</div>
+          <div class="qrcode_title">{{ $t('pages.sponsor.title') }}</div>
           <div class="qrcode-container">
             <div class="qrcode-arrow"></div>
             <div class="qrcode_bg">
@@ -12,7 +12,7 @@
             <div class="scan_tips">
               <img src="@/assets/pay/ali.webp">
               <img src="@/assets/pay/wechat.webp">
-              <span class="pay_desc">扫码完成赞助</span>
+              <span class="pay_desc">{{ $t('pages.sponsor.desc') }}</span>
             </div>
           </div>
         </div>

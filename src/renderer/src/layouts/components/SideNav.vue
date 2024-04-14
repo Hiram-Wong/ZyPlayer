@@ -7,13 +7,13 @@
           <template #icon>
             <component :is="menuIcon(item)"></component>
           </template>
-          {{ item.title }}
+          {{ renderMenuTitle(item.title) }}
         </t-menu-item>
         <t-menu-item v-else :name="item.path" :value="getPath(item)" :to="item.path">
           <template #icon>
             <component :is="menuIcon(item)"></component>
           </template>
-          {{ item.title }}
+          {{ renderMenuTitle(item.title) }}
         </t-menu-item>
       </template>
     </t-menu>
@@ -23,9 +23,10 @@
 <script setup lang="tsx">
 import type { PropType } from 'vue';
 import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { prefix } from '@/config/global';
-import { useRoute, useRouter } from 'vue-router';
+import { useLocale } from '@/locales/useLocale';
 import type { MenuRoute } from '@/types/interface';
 
 type ListItemType = MenuRoute & { icon?: string };
@@ -43,6 +44,7 @@ const props = defineProps({
 
 const route = useRoute();
 const { platform } = window.electron.process;
+const { locale } = useLocale();
 const macFull = ref(false);
 
 window.electron.ipcRenderer.on('screen', (_, args) => {
@@ -71,6 +73,11 @@ const menuIcon = (item: ListItemType) => {
   if (typeof item.icon === 'string') return <t-icon name={item.icon} style="" stroke-width="2.5"/>;
   const RenderIcon = item.icon;
   return RenderIcon;
+};
+
+const renderMenuTitle = (title: string | Record<string, string>) => {
+  if (typeof title === 'string') return title;
+  return title[locale.value];
 };
 
 const getMenuList = (list: MenuRoute[], basePath?: string): ListItemType[] => {

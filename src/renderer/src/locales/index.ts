@@ -10,7 +10,7 @@ const langModuleMap = new Map<string, Object>();
 
 export const langCode: Array<string> = [];
 
-export const localeConfigKey = 'tdesign-starter-locale';
+export const localeConfigKey = 'zy-starter-locale';
 
 // 获取浏览器默认语言环境
 const languages = usePreferredLanguages();
@@ -18,14 +18,12 @@ const languages = usePreferredLanguages();
 // 生成语言模块列表
 const generateLangModuleMap = () => {
   const fullPaths = Object.keys(langModules);
-  console.log(langModules, 'langModules');
   fullPaths.forEach((fullPath) => {
     const k = fullPath.replace('./lang', '');
     const startIndex = 1;
     const lastIndex = k.lastIndexOf('/');
     const code = k.substring(startIndex, lastIndex);
     langCode.push(code);
-    console.log(langCode, 'langCode');
     langModuleMap.set(code, langModules[fullPath]);
   });
 };

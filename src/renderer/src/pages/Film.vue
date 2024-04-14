@@ -1,6 +1,6 @@
 <template>
   <div class="film view-container">
-    <common-nav title="影视" :list="siteConfig.data" :active="active.nav" @change-key="changeSitesEvent" />
+    <common-nav :title="$t('pages.film.name')" :list="siteConfig.data" :active="active.nav" @change-key="changeSitesEvent" />
     <div class="content">
       <header class="header">
         <div class="header-nav">
@@ -63,7 +63,7 @@
               </div>
               <div class="card-footer">
                 <p class="card-footer-title text-hide">{{ item.vod_name }}</p>
-                <p class="card-footer-desc text-hide">{{ item.vod_blurb ? item.vod_blurb.trim() : '暂无剧情简介' }}</p>
+                <p class="card-footer-desc text-hide">{{ item.vod_blurb ? item.vod_blurb.trim() : $t('pages.film.noDesc') }}</p>
               </div>
             </t-col>
           </t-row>
@@ -75,7 +75,7 @@
             @infinite="load"
           >
             <template #complete>{{ infiniteCompleteTip }}</template>
-            <template #error>哎呀，出了点差错</template>
+            <template #error>{{ $t('pages.film.infiniteLoading.complete') }}</template>
           </infinite-loading>
         </div>
       </div>
@@ -102,7 +102,9 @@ import { RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { onMounted, reactive, ref } from 'vue';
 
+import { t } from '@/locales';
 import { usePlayStore } from '@/store';
+
 import { fetchSiteActive } from '@/api/site';
 import { fetchClassify, fetchList, fetchSearch, fetchDetail, t3RuleInit, t3RuleTerminate, catvodRuleInit } from '@/utils/cms';
 
@@ -165,7 +167,7 @@ const filter = ref({
   },
 });
 
-const infiniteCompleteTip = ref('没有更多内容了!');
+const infiniteCompleteTip = ref(`${t('pages.film.infiniteLoading.noMore')}`);
 
 const siteConfig = ref({
   default: {
@@ -290,7 +292,7 @@ const getSetting = async () => {
       siteConfig.value.default = data["default"];
       active.value.nav = data["default"]["id"];
     } else {
-      infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
+      infiniteCompleteTip.value = t('pages.film.infiniteLoading.noData');
     }
     if (_.has(data, 'data') && !_.isEmpty(data["data"])) {
       siteConfig.value.data = data["data"];
@@ -394,7 +396,7 @@ const getClassList = async (site) => {
     classConfig.value.data = classDataFormat;
 
     if (_.isEmpty(classDataFormat)) {
-      infiniteCompleteTip.value = '设置分类异常, 请前往设置检查源分类后尝试手动刷新!';
+      infiniteCompleteTip.value = t('pages.film.infiniteLoading.categoryError');
       isVisible.loadClass = false;
     } else {
       const classItem = classDataFormat[0];
@@ -404,7 +406,7 @@ const getClassList = async (site) => {
     }
   } catch (err) {
     console.log(err);
-    infiniteCompleteTip.value = '网络请求失败, 请尝试手动刷新!';
+    infiniteCompleteTip.value = t('pages.film.infiniteLoading.netwotkError');
   }
 };
 
@@ -414,7 +416,7 @@ const changeClassEvent = (key) => {
   if (!_.isEmpty(filter.value.data)) classFilter(filter.value.data);
   filterApiEvent();
   searchTxt.value = '';
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
   filmData.value = { list: [], rawList: [] };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
@@ -439,7 +441,7 @@ const getFilmList = async () => {
     if (defaultSite.type === 0 || defaultSite.type === 1) filterEvent();
     length = newFilms.length;
   } catch (err) {
-    infiniteCompleteTip.value = '网络请求失败, 请尝试手动刷新!';
+    infiniteCompleteTip.value = t('pages.film.infiniteLoading.netwotkError');
     console.error(err);
     length = 0;
   } finally {
@@ -453,7 +455,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
   console.log('[film] loading...');
   try {
     if (_.isEmpty(active.value.nav)) {
-      infiniteCompleteTip.value = '暂无数据,请前往设置-影视源设置默认源!';
+      infiniteCompleteTip.value = t('pages.film.infiniteLoading.noData');
       $state.complete();
       return;
     }
@@ -491,7 +493,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
 // 搜索
 const searchEvent = async () => {
   console.log(`[film] search keyword:${searchTxt.value}`);
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
   filmData.value.list = [];
   filmData.value.rawList = [];
   infiniteId.value++;
@@ -552,7 +554,7 @@ const changeSitesEvent = async (key: string) => {
   isVisible.t3Work = false;
   if (siteConfig.value.default.type === 8) await t3RuleTerminate();
   isVisible.catvod = false;
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
   searchTxt.value = '';
   const res = _.find(siteConfig.value.data, { id: key });
   active.value.nav = key;
@@ -617,7 +619,7 @@ filmReloadeventBus.on(async () => {
   isVisible.t3Work = false;
   if (siteConfig.value.default.type === 8) await t3RuleTerminate();
   isVisible.catvod = false;
-  infiniteCompleteTip.value = '没有更多内容了!';
+  infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
   searchTxt.value = '';
   await getSetting();
   classConfig.value.data = [{ type_id: 0, type_name: '最新' }];

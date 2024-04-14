@@ -5,9 +5,9 @@
         <div class="content-wrapper">
           <div v-for="(item, name, index) in options" :key="index" class="container-item">
             <div v-if="item.length !== 0" class="time">
-              <span v-if="name === 'today'" class="title">今天</span>
-              <span v-if="name === 'week'" class="title">七天内</span>
-              <span v-if="name === 'ago'" class="title">更早</span>
+              <span v-if="name === 'today'" class="title">{{ $t('pages.chase.date.today') }}</span>
+              <span v-if="name === 'week'" class="title">{{ $t('pages.chase.date.week') }}</span>
+              <span v-if="name === 'ago'" class="title">{{ $t('pages.chase.date.ago') }}</span>
             </div>
             <div class="main">
               <t-row :gutter="[16, 16]">
@@ -31,7 +31,7 @@
                   >
                     <template #overlayContent>
                       <div class="op">
-                        <span v-if="detail.siteName"> {{ detail.siteName }}</span>
+                        <span>{{ detail.siteName ? detail.siteName : $t('pages.chase.sourceDeleted') }}</span>
                       </div>
                     </template>
                   </t-image>
@@ -40,8 +40,8 @@
                     <p class="card-footer-title text-hide">{{ detail.videoName }} {{ detail.videoIndex }}</p>
                     <p class="card-footer-desc text-hide">
                       <laptop-icon size="1.3em" class="icon" />
-                      <span v-if="detail.playEnd">已看完</span>
-                      <span v-else>观看到{{ formatProgress(detail.watchTime, detail.duration) }}</span>
+                      <span v-if="detail.playEnd">{{ $t('pages.chase.progress.watched') }}</span>
+                      <span v-else>{{ $t('pages.chase.progress.watching') }} {{ formatProgress(detail.watchTime, detail.duration) }}</span>
                     </p>
                   </div>
                 </t-col>
@@ -55,8 +55,8 @@
             :duration="200"
             @infinite="load"
           >
-            <template #complete>人家是有底线的</template>
-            <template #error>哎呀，出了点差错</template>
+            <template #complete>{{ $t('pages.chase.infiniteLoading.complete') }}</template>
+            <template #error>{{ $t('pages.chase.infiniteLoading.error') }}</template>
           </infinite-loading>
         </div>
       </div>
@@ -77,10 +77,12 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref, reactive } from 'vue';
 
+import { usePlayStore } from '@/store';
+
 import { delHistory, fetchHistoryList } from '@/api/history';
 import { fetchSiteList } from '@/api/site';
 import { fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
-import { usePlayStore } from '@/store';
+
 import DetailView from '../../film/Detail.vue';
 
 const store = usePlayStore();
@@ -140,7 +142,7 @@ const getHistoryList = async () => {
     for (const item of history_res.data) {
       const findItem = siteConfig.value.data.find(({ id }) => id === item.relateId);
       if (findItem) item.site = { ...findItem };
-      item.siteName = findItem ? findItem.name : '该源应该被删除了哦';
+      item.siteName = findItem ? findItem.name : "";
       const timeDiff = filterDate(item.date);
       let timeKey;
       if (timeDiff === 0) timeKey = 'today';
@@ -210,7 +212,7 @@ const playEvent = async (item) => {
     }
   } catch (err) {
     console.error(err);
-    MessagePlugin.warning('请求资源站失败，请检查网络!');
+    MessagePlugin.warning(t('pages.chase.reqError'));
   }
 };
 

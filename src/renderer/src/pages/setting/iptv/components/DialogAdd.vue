@@ -1,17 +1,17 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="添加" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center" :footer="false">
     <template #body>
       <t-form :data="formData" :rules="rulesSingle" :label-width="60" @submit="onSubmit">
-        <t-form-item label="名称" name="name">
-          <t-input v-model="formData.name" class="input-item" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.iptv.name')" name="name">
+          <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item label="配置" name="url">
+        <t-form-item :label="$t('pages.setting.iptv.config')" name="url">
           <t-space direction="vertical">
             <t-space>
               <t-radio-group v-model="formData.type">
-                <t-radio value="remote">远程链接</t-radio>
-                <t-radio value="local">本地文件</t-radio>
-                <t-radio value="batches">批量频道</t-radio>
+                <t-radio value="remote">{{ $t('pages.setting.table.iptv.remote') }}</t-radio>
+                <t-radio value="local">{{ $t('pages.setting.table.iptv.local') }}</t-radio>
+                <t-radio value="batches">{{ $t('pages.setting.table.iptv.manual') }}</t-radio>
               </t-radio-group>
             </t-space>
             <t-space>
@@ -20,7 +20,7 @@
                 v-model="formData.url"
                 class="input-item"
                 :class="formData.type === 'local' ? 'input-item-split' : ''"
-                placeholder="请输入内容"
+                :placeholder="$t('pages.setting.placeholder.general')"
               />
               <t-upload
                 v-if="formData.type === 'local'"
@@ -32,24 +32,31 @@
                 :allow-upload-duplicate-file="true"
                 :show-upload-progress="false"
                 :request-method="requestMethod"
-              />
+              >
+                <t-button theme="primary" style="width: 110px;">
+                  <template #icon>
+                    <cloud-upload-icon />
+                  </template>
+                  {{ $t('pages.setting.iptv.upload') }}
+                </t-button>
+              </t-upload>
               <t-textarea
                 v-if="formData.type === 'batches'"
                 v-model="formData.url"
                 class="input-item input-textarea"
-                :placeholder="'M3u格式示例:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\ngenre格式示例\nChannel,https://channel-url'"
+                :placeholder="$t('pages.setting.placeholder.manualTip')"
                 :autosize="{ minRows: 7, maxRows: 7 }"
               />
             </t-space>
           </t-space>
         </t-form-item>
-        <t-form-item label="节目单" name="epg">
-          <t-input v-model="formData.epg" class="input-item" placeholder="请输入内容" />
+        <t-form-item :label="$t('pages.setting.iptv.epg')" name="epg">
+          <t-input v-model="formData.epg" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
         <div class="optios">
           <t-form-item style="float: right">
-            <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-            <t-button theme="primary" type="submit">确定</t-button>
+            <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+            <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
           </t-form-item>
         </div>
       </t-form>
@@ -59,6 +66,7 @@
 
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
+import { CloudUploadIcon } from 'tdesign-icons-vue-next';
 import { ref, reactive, watch } from 'vue';
 
 import { addIptvItem } from '@/api/iptv';
