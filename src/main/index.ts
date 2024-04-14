@@ -222,6 +222,18 @@ app.whenReady().then(async() => {
   defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
     let { url, id } = details;
 
+    const filters = [
+      'devtools-detector.min.js',
+      'devtools-detector.js'
+    ];
+
+    for (const filter of filters) {
+      if (url.includes(filter)) {
+        callback({ cancel: true });
+        return;
+      }
+    }
+
     // http://bfdsr.hutu777.com/upload/video/2024/03/20/c6b8e67e75131466cfcbb18ed75b8c6b.JPG@Referer=www.jianpianapp.com@User-Agent=jianpian-version353
     const { redirectURL, headers } = parseCustomUrl(url);
     if (!url.includes('//localhost') && ['Referer', 'Cookie', 'User-Agent'].some(str => url.includes(str))) {
@@ -354,19 +366,18 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   logger.info(process.env['ELECTRON_RENDERER_URL'])
   if (playWindow) playWindow.destroy();
   playWindow = new BrowserWindow({
-    width: 890,
-    minWidth: 890,
+    width: 875,
+    minWidth: 875,
     height: 550,
     minHeight: 550,
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
     autoHideMenuBar: true,
-    backgroundColor: '#18191c',
     title: arg,
     trafficLightPosition: {
-      x: 10,
-      y: 15,
+      x: 12,
+      y: 20,
     },
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
