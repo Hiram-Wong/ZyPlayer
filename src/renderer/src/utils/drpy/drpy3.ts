@@ -7,7 +7,7 @@
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-09T18:37:11+08:00
+ * @modification-date 2023-04-14T21:52:24+08:00
  * @modification-description 使用TypeScript适配, 适用于JavaScript项目, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
@@ -62,7 +62,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.49beta36 202400308`;
+const VERSION = `${vercode} 3.9.49beta38 202400414`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -1307,6 +1307,15 @@ const homeVodParse = (homeVodObj) => {
   let t2 = Date.now();
   console.log(`[t3]加载首页推荐耗时:${t2 - t1}毫秒`);
 
+  if (rule["图片替换"] && rule["图片替换"].includes('=>')) {
+    const [replace_from, replace_to] = rule["图片替换"].split('=>');
+    d.forEach(it => {
+      if (it["vod_pic"] && it["vod_pic"].startsWith('http')) {
+        it["vod_pic"] = it["vod_pic"].replace(replace_from, replace_to);
+      }
+    });
+  }
+  
   if (rule["图片来源"]) {
     // @ts-ignore
     d.filter(it => it["vod_pic"] && it["vod_pic"].startsWith('http'))
@@ -1428,6 +1437,15 @@ const categoryParse = (cateObj) => {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  if (rule["图片替换"] && rule["图片替换"].includes('=>')) {
+    const [replace_from, replace_to] = rule["图片替换"].split('=>');
+    d.forEach(it => {
+      if (it["vod_pic"] && it["vod_pic"].startsWith('http')) {
+        it["vod_pic"] = it["vod_pic"].replace(replace_from, replace_to);
+      }
+    });
   }
 
   if (rule["图片来源"]) {
@@ -1600,6 +1618,15 @@ const searchParse = (searchObj) => {
       console.log('[t3][search]错误:', e);
       return '{}'
     }
+  }
+
+  if (rule["图片替换"] && rule["图片替换"].includes('=>')) {
+    const [replace_from, replace_to] = rule["图片替换"].split('=>');
+    d.forEach(it => {
+      if (it["vod_pic"] && it["vod_pic"].startsWith('http')) {
+        it["vod_pic"] = it["vod_pic"].replace(replace_from, replace_to);
+      }
+    });
   }
 
   if (rule["图片来源"]) {
@@ -1836,10 +1863,14 @@ const detailParse = (detailObj) => {
     }
     vod["vod_play_url"] = vod_play_url;
   }
-  if(rule["图片来源"] && vod.vod_pic && vod.vod_pic.startsWith('http')){
+  if (rule["图片替换"] && rule["图片替换"].includes('=>')) {
+    const [replace_from, replace_to] = rule["图片替换"].split('=>');
+    vod.vod_pic = vod.vod_pic.replace(replace_from,replace_to);
+  }
+  if (rule["图片来源"] && vod.vod_pic && vod.vod_pic.startsWith('http')) {
     vod.vod_pic = vod.vod_pic + rule["图片来源"];
   }
-  if(!vod.vod_id||(vod_id.includes('$') && vod.vod_id!==vod_id)){
+  if (!vod.vod_id||(vod_id.includes('$') && vod.vod_id!==vod_id)) {
     vod.vod_id = vod_id;
   }
   let t2 = Date.now();
@@ -1936,17 +1967,20 @@ const tellIsJx = (url: string) => {
 const playParse = (playObj) => {
   fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
   MY_URL = playObj.url;
+  var MY_FLAG = playObj.flag;
   if (!/http/.test(MY_URL)) {
     try {
       MY_URL = base64Decode(MY_URL);
     } catch (e) {}
   }
   MY_URL = decodeURIComponent(MY_URL);
-  var input = MY_URL;  //注入给免嗅js
+  var input = MY_URL;  // 注入给免嗅js
+  var flag = MY_FLAG;  // 注入播放线路名称给免嗅js
 
   const common_play = {
     parse: 1,
     url: input,
+    flag:flag,
     jx: tellIsJx(input)
   };
 
@@ -2102,6 +2136,7 @@ const init = (ext) => {
     rule["encoding"] = rule["编码"] || rule["encoding"] || 'utf-8';
     rule["search_encoding"] = rule["搜索编码"] || rule["search_encoding"] || '';
     rule["图片来源"] = rule["图片来源"] || '';
+    rule["图片替换"] = rule["图片替换"] || '';
     rule["play_json"] = rule.hasOwnProperty('play_json') ? rule["play_json"] : [];
     rule["pagecount"] = rule.hasOwnProperty('pagecount') ? rule["pagecount"]: {};
     rule["proxy_rule"] = rule.hasOwnProperty('proxy_rule') ? rule["proxy_rule"] : '';
