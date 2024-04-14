@@ -7,6 +7,7 @@
     <div class="right no-drag">
       <div class="system-functions">
         <sponsor class="system-function"/>
+        <language class="system-function"/>
         <system-skin class="system-function"/>
         <system-config class="system-function"/>
       </div>
@@ -22,6 +23,7 @@ import SystemConfig from './SystemConfig.vue';
 import SystemControl from './SystemControl.vue';
 import SystemSkin from './SystemSkin.vue';
 import Sponsor from './Sponsor.vue';
+import Language from './Language.vue';
 
 const { platform } = window.electron.process;
 

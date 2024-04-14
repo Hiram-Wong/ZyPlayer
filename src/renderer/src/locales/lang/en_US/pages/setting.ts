@@ -158,7 +158,7 @@ export default {
       tvboxTip: 'Currently only cms-type data of type: 0 or 1 is supported in sites',
       address: 'url',
       confirm: 'Confirm',
-      confirmTip: 'Original data will be cleared, confirm config',
+      confirmTip: 'Original data will be cleared',
     },
     configImport: {
       title: 'ConfigImport',
@@ -167,7 +167,7 @@ export default {
       address: 'url',
       dropTip: 'Due to compatibility problems, the old data import will discard historical and collection data',
       import: 'Import',
-      importTip: 'Original data will be cleared, confirm import'
+      importTip: 'Original data will be cleared'
     },
     configExport: {
       title: 'ConfigExport',
