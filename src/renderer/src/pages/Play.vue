@@ -1886,10 +1886,10 @@ const openMainWinEvent = () => {
               padding-top: 10px;
               .mainVideo-num {
                 position: relative;
-                width: 44px;
+                width: 41px;
                 font-size: 18px;
-                height: 44px;
-                line-height: 44px;
+                height: 41px;
+                line-height: 41px;
                 border-radius: 8px;
                 text-align: center;
                 cursor: pointer;
