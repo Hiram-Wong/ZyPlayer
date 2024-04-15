@@ -1,5 +1,5 @@
 export default {
-  name: 'Moments',
+  name: 'Moment',
   like: 'Liked',
   history: 'History',
   update: 'UpDate',
