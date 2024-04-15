@@ -1,18 +1,23 @@
 <template>
   <div class="system-skin">
-    <t-popup placement="bottom">
-      <template v-if="currentIcon">
-        <component :is="currentIcon" size="1.3em" />
-      </template>
-      <template #content>
-        <div class="skin-items">
-          <div v-for="(icon, name) in themeIcons" :key="name" class="skin-item" @click="setTheme(name)">
+    <t-dropdown trigger="click">
+      <t-button theme="default" shape="square" variant="text">
+        <component :is="currentIcon" />
+      </t-button>
+      <t-dropdown-menu>
+        <t-dropdown-item
+          v-for="(icon, name) in themeIcons"
+          :key="name"
+          :value="name"
+          @click="setTheme(name)"
+        >
+          <div class="skin-item">
             <component :is="icon" size="large" />
-            <div class="skin-title">{{ $t(`pages.skin.${name}`) }}</div>
+            <span class="skin-title">{{ $t(`pages.skin.${name}`) }}</span>
           </div>
-        </div>
-      </template>
-    </t-popup>
+        </t-dropdown-item>
+      </t-dropdown-menu>
+    </t-dropdown>
   </div>
 </template>
 
@@ -44,13 +49,12 @@ const setTheme = (theme: 'light' | 'dark' | 'auto') => {
 </script>
 
 <style lang="less" scoped>
-.skin-items {
+.skin-item {
   display: flex;
-  .skin-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 5px;
+  flex-direction: row;
+  align-items: center;
+  .skin-title {
+    margin-left: 5px;
   }
 }
 </style>

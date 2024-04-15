@@ -1,26 +1,28 @@
 <template>
   <div class="sponsor">
-    <t-popup placement="bottom">
-      <template #content>
-        <div class="sponsor_main">
-          <div class="qrcode_title">{{ $t('pages.sponsor.title') }}</div>
-          <div class="qrcode-container">
-            <div class="qrcode-arrow"></div>
-            <div class="qrcode_bg">
-              <img src="@/assets/pay/qr.png" class="qrcode">
-            </div>
-            <div class="scan_tips">
-              <img src="@/assets/pay/ali.webp">
-              <img src="@/assets/pay/wechat.webp">
-              <span class="pay_desc">{{ $t('pages.sponsor.desc') }}</span>
+    <t-dropdown trigger="click" placement="bottom" :min-column-width="150">
+      <t-button theme="default" shape="square" variant="text">
+        <gift-icon />
+      </t-button>
+      <t-dropdown-menu>
+        <t-dropdown-item>
+          <div class="sponsor_main">
+            <div class="qrcode_title">{{ $t('pages.sponsor.title') }}</div>
+            <div class="qrcode-container">
+              <div class="qrcode-arrow"></div>
+              <div class="qrcode_bg">
+                <img src="@/assets/pay/qr.png" class="qrcode">
+              </div>
+              <div class="scan_tips">
+                <img src="@/assets/pay/ali.webp">
+                <img src="@/assets/pay/wechat.webp">
+                <span class="pay_desc">{{ $t('pages.sponsor.desc') }}</span>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-      <div class="icon">
-        <gift-icon size="1.3em"/>
-      </div>
-    </t-popup>
+        </t-dropdown-item>
+      </t-dropdown-menu>
+    </t-dropdown>
   </div>
 </template>
 

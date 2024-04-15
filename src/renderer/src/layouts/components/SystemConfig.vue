@@ -1,6 +1,8 @@
 <template>
 	<div class="system-config" @click="gotoSetting">
-		<setting-icon size="1.3em"/>
+    <t-button theme="default" shape="square" variant="text">
+      <setting-icon />
+    </t-button>
 	</div>
 </template>
 
