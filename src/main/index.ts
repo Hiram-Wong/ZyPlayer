@@ -14,6 +14,7 @@ import { ipcListen, tmpDir } from './core/ipc';
 import logger from './core/logger';
 import autoUpdater from './core/update';
 import createTray from './core/tray';
+import protocolResgin from './core/protocolResgin';
 
 import loadHtml from '../../resources/html/load.html?asset'
 
@@ -305,6 +306,8 @@ app.whenReady().then(async() => {
   createMenu();
   // 快捷键
   // createGlobalShortcut(mainWindow);
+  // 协议注册
+  protocolResgin();
   if (shortcutsState) {
     globalShortcut.register(shortcutsState, () => {
       // Do stuff when Y and either Command/Control is pressed.
