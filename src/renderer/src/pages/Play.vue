@@ -53,7 +53,7 @@
             </div>
           </div>
         </div>
-        <system-control v-if="platform === 'darwin'"/>
+        <system-control v-if="platform !== 'darwin'"/>
       </div>
     </div>
     <div class="container-main">
