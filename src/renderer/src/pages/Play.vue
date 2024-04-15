@@ -1641,6 +1641,7 @@ const openMainWinEvent = () => {
     display: flex;
     justify-content: space-between;
     .player {
+      flex: 1 1;
       width: 100%;
       position: relative;
       .container-player {
@@ -1694,6 +1695,7 @@ const openMainWinEvent = () => {
 
     .aside {
       transition: 0.15s ease-out;
+      width: 300px;
       height: 100%;
       position: relative;
       background: var(--td-bg-color-container);
@@ -1701,7 +1703,6 @@ const openMainWinEvent = () => {
       padding: 10px 10px 0;
       box-sizing: border-box;
       .content {
-        width: 300px;
         height: 100%;
         .title-warp {
           height: 26px;
