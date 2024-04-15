@@ -1,7 +1,7 @@
 <template>
 	<div class="sniffer-dialog-container dialog-container-padding">
 		<t-dialog v-model:visible="formVisible"
-      header="嗅探方案"
+      :header="$t('pages.setting.sniffer.title')"
 			:footer="false"
       placement="center"
       width="608px"
@@ -12,29 +12,29 @@
 					<div class="sniffer_items_list">
             <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data.type == 'pie' }" @click="onSubmit('pie')">
               <div class="content">
-                <div class="corner_sign">PuppeteerInElectron</div>
-                <div class="sku-name">拦截和修改请求</div>
-                <div class="main-ability">嗅探能力强</div>
-                <div class="secondary-ability">支持未加载页面</div>
+                <div class="corner_sign">{{ $t('pages.setting.sniffer.pie.sign') }}</div>
+                <div class="sku-name">{{ $t('pages.setting.sniffer.pie.name') }}</div>
+                <div class="main-ability">{{ $t('pages.setting.sniffer.pie.mainAbility') }}</div>
+                <div class="secondary-ability">{{ $t('pages.setting.sniffer.pie.secondaryAbility') }}</div>
               </div>
             </div>
             <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data.type == 'iframe' }" @click="onSubmit('iframe')">
               <div class="content">
-                <div class="corner_sign">浏览器原生接口</div>
-                <div class="sku-name">资源占用低</div>
-                <div class="main-ability">兼容性好</div>
-                <div class="secondary-ability">仅限已加载页面</div>
+                <div class="corner_sign">{{ $t('pages.setting.sniffer.iframe.sign') }}</div>
+                <div class="sku-name">{{ $t('pages.setting.sniffer.iframe.name') }}</div>
+                <div class="main-ability">{{ $t('pages.setting.sniffer.iframe.mainAbility') }}</div>
+                <div class="secondary-ability">{{ $t('pages.setting.sniffer.iframe.secondaryAbility') }}</div>
               </div>
             </div>
             <div class="sku-wrapper list_num_2" :class="{ 'selected': formData.data.type == 'custom' }" @click="onSubmit('custom')">
               <div class="content">
-                <div class="corner_sign">第三方接口</div>
-                <div class="sku-name">不受本机性能影响</div>
-                <div class="main-ability">更专业</div>
+                <div class="corner_sign">{{ $t('pages.setting.sniffer.other.sign') }}</div>
+                <div class="sku-name">{{ $t('pages.setting.sniffer.other.name') }}</div>
+                <div class="main-ability">{{ $t('pages.setting.sniffer.other.mainAbility') }}</div>
                 <div class="secondary-ability" style="height: 17px;">
                   <t-input
                     v-model="formData.data.url"
-                    placeholder="请输入接口地址"
+                    :placeholder="$t('pages.setting.placeholder.general')"
                     :style="{ height: '100%', width: '143px' }"
                     @blur="onSubmit('custom')"
                   >

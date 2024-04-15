@@ -6,19 +6,19 @@
       :close-on-esc-keydown="false"
       :header="false"
       :close-on-overlay-click="false"
-      confirm-btn="同意并继续"
-      cancel-btn="不同意"
+      :confirm-btn="$t('pages.md.privacyPolicy.confirm')"
+      :cancel-btn="$t('pages.md.privacyPolicy.cancel')"
       :on-confirm="confirmEvent"
       :on-close="cancelEvent"
       placement="center"
       width="480px"
     >
       <div class="privacy-policy">
-        <div class="header">用户协议与免责声明</div>
+        <div class="header">{{ $t('pages.md.privacyPolicy.title') }}</div>
         <div class="main-content">
           <MdPreview 
             editorId="privacy-policy"
-            :modelValue="text"
+            :modelValue="$t('pages.md.privacyPolicy.content')"
             previewTheme="vuepress"
             :theme="theme"
           />
@@ -33,7 +33,6 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, ref, watch } from 'vue';
 import { MdPreview } from 'md-editor-v3';
 
-import md from '@/assets/md/privacy-policy.md?raw';
 import { useSettingStore } from '@/store';
 import { setDefault } from '@/api/setting';
 
@@ -48,7 +47,6 @@ const theme = computed(() => {
   return storeSetting.displayMode;
 });
 const formVisible = ref(false);
-const text = ref(md);
 const emit = defineEmits(['update:visible']);
 watch(
   () => formVisible.value,

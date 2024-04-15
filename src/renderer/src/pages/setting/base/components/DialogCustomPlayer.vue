@@ -3,7 +3,7 @@
 		<t-dialog v-model:visible="formVisible"
       :close-btn="false"
       :header="false"
-      confirm-btn="知道了"
+      :confirm-btn="$t('pages.md.customPlayer.confirm')"
       :cancel-btn=null
       :on-confirm="confirmEvent"
       placement="center"
@@ -11,11 +11,11 @@
 		>
 			<template #body>
 				<div class="custtom-player">
-          <div class="header">自定义播放器说明</div>
+          <div class="header">{{ $t('pages.md.customPlayer.title') }}</div>
           <div class="main-content">
             <MdPreview 
               editorId="privacy-policy"
-              :modelValue="text"
+              :modelValue="$t('pages.md.customPlayer.content')"
               previewTheme="vuepress"
               :theme="theme"
             />
@@ -32,7 +32,6 @@ import { computed, ref, watch } from 'vue';
 import { MdPreview } from 'md-editor-v3';
 
 import { useSettingStore } from '@/store';
-import md from '@/assets/md/custom-player.md?raw';
 
 const props = defineProps({
 	visible: {
@@ -42,7 +41,6 @@ const props = defineProps({
 });
 
 const formVisible = ref(false);
-const text = ref(md);
 const storeSetting = useSettingStore();
 const theme = computed(() => {
   return storeSetting.displayMode;

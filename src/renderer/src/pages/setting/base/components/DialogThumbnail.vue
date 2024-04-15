@@ -3,19 +3,19 @@
 		<t-dialog v-model:visible="formVisible"
       :close-btn="false"
       :header="false"
-      confirm-btn="安装检测"
-      cancel-btn="知道了"
+      :confirm-btn="$t('pages.md.thumbanilFfmpeg.confirm')"
+      :cancel-btn="$t('pages.md.thumbanilFfmpeg.cancel')"
       :on-confirm="confirmEvent"
       placement="center"
       width="480px"
 		>
 			<template #body>
 				<div class="thumbnail">
-          <div class="header">缩略图使用说明</div>
+          <div class="header">{{ $t('pages.md.thumbanilFfmpeg.title') }}</div>
           <div class="main-content">
             <MdPreview 
               editorId="privacy-policy"
-              :modelValue="text"
+              :modelValue="$t('pages.md.thumbanilFfmpeg.content')"
               previewTheme="vuepress"
               :theme="theme"
             />
@@ -32,8 +32,8 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import 'md-editor-v3/lib/style.css';
 import { MdPreview } from 'md-editor-v3';
 
+import { t } from '@/locales';
 import { useSettingStore } from '@/store';
-import md from '@/assets/md/thumbnail-ffmpeg.md?raw';
 
 const props = defineProps({
 	visible: {
@@ -53,7 +53,6 @@ const props = defineProps({
 
 const formVisible = ref(false);
 const formData = ref(props.data);
-const text = ref(md);
 const storeSetting = useSettingStore();
 const theme = computed(() => {
   return storeSetting.displayMode;
@@ -82,8 +81,8 @@ watch(
 
 const confirmEvent = () => {
   window.electron.ipcRenderer.invoke('ffmpeg-installed-check').then(status => {
-    if (status) MessagePlugin.success(`检测到ffmpeg模块已安装`);
-		else MessagePlugin.error(`未检测到ffmpeg模块`);
+    if (status) MessagePlugin.success(t('pages.setting.thumbanilFfmpeg.haveFfmpeg'));
+		else MessagePlugin.error(t('pages.setting.thumbanilFfmpeg.noFfmpeg'));
   });
 };
 </script>

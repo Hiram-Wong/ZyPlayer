@@ -214,5 +214,30 @@ export default {
       syncToCloudTip: '云端数据将被覆盖,确认操作吗',
       syncToLocal: '云数据覆盖本地',
       syncToLocalTip: '本地数据将被清除,确认操作吗'
+    },
+    thumbanilFfmpeg: {
+      haveFfmpeg: '检测到ffmpeg模块已安装',
+      noFfmpeg: '未检测到ffmpeg模块'
+    },
+    sniffer: {
+      title: '嗅探方案',
+      pie: {
+        sign: 'PuppeteerInElectron',
+        name: '拦截和修改请求',
+        mainAbility: '嗅探能力强',
+        secondaryAbility: '支持未加载页面'
+      },
+      iframe: {
+        sign: '浏览器原生接口',
+        name: '资源占用低',
+        mainAbility: '兼容性好',
+        secondaryAbility: '仅限已加载页面'
+      },
+      other: {
+        sign: '第三方接口',
+        name: '不受本机性能影响',
+        mainAbility: '更专业更好',
+        secondaryAbility: ''
+      }
     }
   }

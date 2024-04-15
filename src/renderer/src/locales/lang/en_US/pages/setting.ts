@@ -214,5 +214,30 @@ export default {
     syncToCloudTip: 'Cloud data will be overwritten',
     syncToLocal: 'SyncToLocal',
     syncToLocalTip: 'Local data will be cleared'
+  },
+  thumbanilFfmpeg: {
+    haveFfmpeg: 'FFmpeg module installed detected',
+    noFfmpeg: 'No FFmpeg module was detected'
+  },
+  sniffer: {
+    title: 'Sniffing Scheme',
+    pie: {
+      sign: 'PuppeteerInElectron',
+      name: 'Intercept&Modify req',
+      mainAbility: 'Sniff ability',
+      secondaryAbility: 'Support unload page'
+    },
+    iframe: {
+      sign: 'Browser native interface',
+      name: 'Low resource',
+      mainAbility: 'Compliant',
+      secondaryAbility: 'Loaded page only'
+    },
+    other: {
+      sign: 'Third-party interface',
+      name: 'Good performance',
+      mainAbility: 'Expert',
+      secondaryAbility: ''
+    }
   }
 }

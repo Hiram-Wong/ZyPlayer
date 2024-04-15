@@ -8,6 +8,7 @@ import skin from './skin';
 import setting from './setting';
 import sponsor from './sponsor';
 import search from './search';
+import md from './md';
 
 export default {
   player,
@@ -19,5 +20,6 @@ export default {
   skin,
   setting,
   sponsor,
-  search
+  search,
+  md
 };
