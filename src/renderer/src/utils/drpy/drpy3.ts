@@ -1164,7 +1164,7 @@ const homeParse = (homeObj) => {
                     'type_name': name.trim()
                   });
                 } catch (e) {
-                  console.log(`分类列表定位第${idex}个元素正常报错:${e.message}`);
+                  console.log(`分类列表定位第${idex}个元素正常报错:${e}`);
                 }
               });
             }
