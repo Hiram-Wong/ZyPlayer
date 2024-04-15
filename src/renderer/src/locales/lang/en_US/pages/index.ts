@@ -9,6 +9,7 @@ import setting from './setting';
 import sponsor from './sponsor';
 import search from './search';
 import md from './md';
+import justlook from './justlook';
 
 export default {
   player,
@@ -21,5 +22,6 @@ export default {
   setting,
   sponsor,
   search,
-  md
+  md,
+  justlook
 };
