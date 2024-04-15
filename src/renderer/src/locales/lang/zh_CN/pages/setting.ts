@@ -55,14 +55,14 @@ export default {
       search: '搜索资源'
     },
     site: {
-      name: 'name',
-      type: 'type',
-      url: 'url',
-      search: 'search',
-      api: 'api',
-      icon: 'icon',
-      show: 'show',
-      default: 'default'
+      name: '名称',
+      type: '类型',
+      api: '接口',
+      search: '搜索',
+      playUrl: '解析',
+      ext: '扩展',
+      group: '分组',
+      category: '类别'
     },
     iptv: {
       name: '名称',
