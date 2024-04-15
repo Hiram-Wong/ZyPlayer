@@ -332,7 +332,6 @@ defineExpose({
               border-radius: 5px;
               .op {
                 background-color: rgba(22, 22, 23, 0.8);
-                border-radius: 0 0 7px 7px;
                 width: 100%;
                 color: rgba(255, 255, 255, 0.8);
                 position: absolute;
