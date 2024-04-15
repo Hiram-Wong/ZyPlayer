@@ -1642,9 +1642,10 @@ const openMainWinEvent = () => {
     justify-content: space-between;
     .player {
       flex: 1 1;
-      width: 100%;
       position: relative;
       .container-player {
+        width: 100%;
+        height: 100%;
         .player-panel {
           position: relative;
           width: 100%;
