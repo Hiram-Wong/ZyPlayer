@@ -95,6 +95,7 @@ export default {
       site: '本站搜索',
       group: '聚合搜索',
       all: '组内搜索',
+      viewCasual: '随性看',
       iptv: '电视',
       globalLogo: '全局台标',
       defaultEpg: '默认节目',

@@ -95,6 +95,7 @@ export default {
     site: 'Site',
     group: 'Group',
     all: 'All',
+    viewCasual: 'ViewCasual',
     iptv: 'IPTV',
     globalLogo: 'GlobalLogo',
     defaultEpg: 'DefaultEpg',

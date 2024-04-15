@@ -26,14 +26,17 @@
 
 <script lang="ts" setup>
 import '@/style/player/veplayer.css';
-import { ref, reactive } from 'vue';
+
 import { DvdIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { ref, reactive, onMounted } from 'vue';
 import Player from 'xgplayer';
+
+import { fetchSettingDetail } from '@/api/setting';
 
 const isVisible = reactive({
   drawer: false
 });
-const api = ref('http://api.yujn.cn/api/zzxjj.php');
+const api = ref();
 const player = ref();
 const config = ref({
   id: 'player',
@@ -49,6 +52,15 @@ const config = ref({
   width: '100%'
 })
 
+const getData = async() => {
+  const res = await fetchSettingDetail('defaultViewCasual');
+  api.value = res.value;
+}
+
+onMounted(() => {
+  getData();
+})
+
 const change = () => {
   player.value.src = api.value;
 }
@@ -59,28 +71,30 @@ const close = () => {
 }
 
 const play = () => {
-  isVisible.drawer = true;
-  config.value.url = api.value;
-  player.value = new Player(config.value);
+  if (!isVisible.drawer) {
+    isVisible.drawer = true;
+    config.value.url = api.value;
+    player.value = new Player(config.value);
+  } else {
+    close();
+    isVisible.drawer = false;
+  }
 }
 </script>
 
 <style lang="less" scoped>
-.view-container {
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   height: 100%;
-  .content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  #player{
     height: 100%;
-    #player{
-      height: 100%;
-      border-radius: var(--td-radius-large);
-    }
-    .btn {
-      margin-top: var(--td-comp-margin-xs);
-      width: 100%;
-    }
+    border-radius: var(--td-radius-large);
+  }
+  .btn {
+    margin-top: var(--td-comp-margin-xs);
+    width: 100%;
   }
 }
 </style>
