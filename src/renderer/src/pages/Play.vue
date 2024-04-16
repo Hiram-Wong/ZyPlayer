@@ -1793,8 +1793,9 @@ const openMainWinEvent = () => {
           .title-album {
             font-size: 100%;
             .title-text {
+              width: 80%;
+              display: inline-block;
               font-weight: 500;
-              display: inline;
               line-height: 16px;
               font-size: 16px;
               color: var(--td-text-color-primary);
