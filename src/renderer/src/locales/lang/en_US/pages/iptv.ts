@@ -5,7 +5,7 @@ export default {
     complete: 'load complete',
     error: 'load error',
     noMore: 'nothing more',
-    noData: 'no data, please go to settings-live source settings default source'
+    noData: 'no data, please go Setting-IptvSetting set default source'
   },
   contextMenu: {
     copyChannel: 'Copy Channel',

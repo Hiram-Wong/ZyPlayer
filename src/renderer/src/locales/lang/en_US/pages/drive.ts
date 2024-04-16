@@ -5,6 +5,6 @@ export default {
   },
   infiniteLoading: {
     noMore: 'nothing more',
-    noData: 'no data, please go to settings-drive source settings default source'
+    noData: 'no data, please go Setting-DriveSetting set default source'
   }
 }
