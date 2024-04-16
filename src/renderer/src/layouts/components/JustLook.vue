@@ -1,6 +1,6 @@
 <template>
   <div class="just-look view-container">
-    <t-button theme="default" shape="square" variant="text" @click="play">
+    <t-button theme="default" shape="square" variant="text" @click="toggleDrawerAndHandlePlayer">
       <dvd-icon />
     </t-button>
     <t-drawer
@@ -27,12 +27,14 @@
 <script lang="ts" setup>
 import '@/style/player/veplayer.css';
 
+import { MessagePlugin } from 'tdesign-vue-next';
 import { DvdIcon, RefreshIcon } from 'tdesign-icons-vue-next';
 import { ref, reactive } from 'vue';
 import Player from 'xgplayer';
 
 import { fetchSettingDetail } from '@/api/setting';
 import { prefix } from '@/config/global';
+import { t } from '@/locales';
 
 const isVisible = reactive({
   drawer: false
@@ -53,13 +55,34 @@ const config = ref({
   width: '100%'
 })
 
-const getData = async() => {
+const fetchDataAndSetPlayerConfig = async () => {
   const res = await fetchSettingDetail('defaultViewCasual');
+
+  if (!res.value) {
+    MessagePlugin.info(t('pages.justlook.message.noData'));
+    return;
+  }
+
   api.value = res.value;
+  config.value.url = res.value;
 }
 
-const change = () => {
-  player.value.src = api.value;
+const initializePlayer = () => {
+  player.value = new Player(config.value);
+}
+
+const toggleDrawerAndHandlePlayer = async () => {
+  if (!isVisible.drawer) {
+    await fetchDataAndSetPlayerConfig();
+    isVisible.drawer = true;
+
+    if (api.value) {
+      initializePlayer();
+    }
+  } else {
+    close();
+    isVisible.drawer = false;
+  }
 }
 
 const close = () => {
@@ -67,18 +90,11 @@ const close = () => {
     player.value.destroy();
     player.value = null;
   }
-  isVisible.drawer = false;
 }
 
-const play = async() => {
-  if (!isVisible.drawer) {
-    await getData();
-    isVisible.drawer = true;
-    config.value.url = api.value;
-    player.value = new Player(config.value);
-  } else {
-    close();
-    isVisible.drawer = false;
+const change = () => {
+  if (player.value) {
+    player.value.src = api.value;
   }
 }
 </script>
