@@ -5,16 +5,16 @@
     </t-button>
     <t-drawer
       v-model:visible="isVisible.drawer"
-      show-in-attached-element
       size-draggable
+      show-in-attached-element
       :footer=null
-      attach=".zy-component"
+      :attach="`.${prefix}-content`"
       @confirm="change"
       @close="close"
       size="320px"
     >
       <div class="content">
-        <div id="player"></div>
+        <div id="mse"></div>
         <t-button shape="round" theme="default" variant="dashed" class="btn" @click="change">
           <template #icon><refresh-icon /></template>
           <span>{{ $t('pages.justlook.confirm') }}</span>
@@ -28,10 +28,11 @@
 import '@/style/player/veplayer.css';
 
 import { DvdIcon, RefreshIcon } from 'tdesign-icons-vue-next';
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive } from 'vue';
 import Player from 'xgplayer';
 
 import { fetchSettingDetail } from '@/api/setting';
+import { prefix } from '@/config/global';
 
 const isVisible = reactive({
   drawer: false
@@ -39,7 +40,7 @@ const isVisible = reactive({
 const api = ref();
 const player = ref();
 const config = ref({
-  id: 'player',
+  id: 'mse',
   url: '',
   autoplay: true,
   rotate: {
@@ -57,21 +58,21 @@ const getData = async() => {
   api.value = res.value;
 }
 
-onMounted(() => {
-  getData();
-})
-
 const change = () => {
   player.value.src = api.value;
 }
 
 const close = () => {
-  player.value.destroy();
-  player.value = null;
+  if (player.value) {
+    player.value.destroy();
+    player.value = null;
+  }
+  isVisible.drawer = false;
 }
 
-const play = () => {
+const play = async() => {
   if (!isVisible.drawer) {
+    await getData();
     isVisible.drawer = true;
     config.value.url = api.value;
     player.value = new Player(config.value);
