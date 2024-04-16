@@ -1,6 +1,6 @@
 <template>
   <div class="sponsor">
-    <t-dropdown trigger="click" placement="bottom" :min-column-width="150">
+    <t-dropdown trigger="click" placement="bottom" :min-column-width="180">
       <t-button theme="default" shape="square" variant="text">
         <gift-icon />
       </t-button>
