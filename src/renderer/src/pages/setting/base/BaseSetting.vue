@@ -219,23 +219,27 @@ const uaDialogData = ref({ data: '', type: 'ua' });
 const webdevDialogData = ref({ webdevUrl:'', webdevUsername:'' ,webdevPassword:'' });
 const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferType' });
 
-const MODE_OPTIONS = [
-  { type: 'light', text: t('pages.setting.base.light') },
-  { type: 'dark', text: t('pages.setting.base.dark') },
-  { type: 'auto', text: t('pages.setting.base.auto') },
-];
+const MODE_OPTIONS = computed(() => {
+  return [
+    { type: 'light', text: t('pages.setting.base.light') },
+    { type: 'dark', text: t('pages.setting.base.dark') },
+    { type: 'auto', text: t('pages.setting.base.auto') }
+  ]
+});
 
-const PLAYER_OPTIONS = [
-  { label: t('pages.setting.base.xgplayer'), value: 'xgplayer' },
-  { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
-  // { label: '腾讯播放器', value: 'tcplayer' },
-  // { label: '阿里播放器', value: 'aliplayer' },
-  // { label: '艺术播放器', value: 'artplayer' },
-  // { label: 'iina(mac本地)', value: 'iina' },
-  // { label: 'potplayer(win本地)', value: 'potplayer' },
-  // { label: 'vlc(系统通用)', value: 'vlc' },
-  { label: t('pages.setting.base.custom'), value: 'custom' },
-];
+const PLAYER_OPTIONS = computed(() => {
+  return [
+    { label: t('pages.setting.base.xgplayer'), value: 'xgplayer' },
+    { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
+    // { label: '腾讯播放器', value: 'tcplayer' },
+    // { label: '阿里播放器', value: 'aliplayer' },
+    // { label: '艺术播放器', value: 'artplayer' },
+    // { label: 'iina(mac本地)', value: 'iina' },
+    // { label: 'potplayer(win本地)', value: 'potplayer' },
+    // { label: 'vlc(系统通用)', value: 'vlc' },
+    { label: t('pages.setting.base.custom'), value: 'custom' }
+  ]
+});
 
 const shortcutInputRef = ref(null);
 const placeholderShortcut = ref(t('pages.setting.placeholder.shortcutKeyTip'));

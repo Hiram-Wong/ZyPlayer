@@ -48,9 +48,8 @@ const sysConfigSwitch = computed(() => {
   return storeSetting.getSysConfigSwitch;
 });
 
-const settingSet = reactive({
-  select: 'configBase',
-  list: [
+const settingNav = computed(() => {
+  return [
     {
       id: 'configBase',
       name: t('pages.setting.nav.configBase')
@@ -60,31 +59,30 @@ const settingSet = reactive({
     },{
       id: 'iptvSource',
       name: t('pages.setting.nav.iptvSource')
-    },{
-      id: 'analyzeSource',
-      name: t('pages.setting.nav.analyzeSource')
-    },{
-      id: 'driveSource',
-      name: t('pages.setting.nav.driveSource')
     }
   ]
-})
+});
+
+const settingSet = reactive({
+  select: 'configBase',
+  list: settingNav
+});
 
 if (storeSetting.getSysConfigSwitch) {
   settingSet.select = storeSetting.getSysConfigSwitch;
-}
+};
 
 watch(() => settingSet.select, (newValue) => {
   storeSetting.updateConfig({ sysConfigSwitch: newValue });
-})
+});
 
 watch(() => sysConfigSwitch.value, (newValue) => {
   settingSet.select = newValue;
-})
+});
 
 const changeClassEvent = (item) => {
-  settingSet.select = item
-}
+  settingSet.select = item;
+};
 </script>
 
 <style lang="less" scoped>
