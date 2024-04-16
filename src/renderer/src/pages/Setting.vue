@@ -59,6 +59,12 @@ const settingNav = computed(() => {
     },{
       id: 'iptvSource',
       name: t('pages.setting.nav.iptvSource')
+    },{
+      id: 'analyzeSource',
+      name: t('pages.setting.nav.analyzeSource')
+    },{
+      id: 'driveSource',
+      name: t('pages.setting.nav.driveSource')
     }
   ]
 });
