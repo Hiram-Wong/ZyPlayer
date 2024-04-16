@@ -9,13 +9,15 @@
   >
     <template #body>
       <div class="icon-wrapper close-btn" @click="closeDialog">
-        <span class="close-icon icon"> <close-icon size="18px" /></span>
+        <span class="close-icon icon">
+          <close-icon size="18px" />
+        </span>
       </div>
       <div>
         <div class="search-modal-header"></div>
         <div class="search-input-container">
           <div class="search-input-wrapper">
-            <t-tag v-if="isFilter" class="search-filter-tag">
+            <t-tag v-if="isVisible.filter" class="search-filter-tag">
               {{ searchTag }}
             </t-tag>
             <div class="input-wrapper">
@@ -29,19 +31,19 @@
                 @keyup.delete="deleteEvent"
               />
             </div>
-            <span v-if="isFilter || searchText" class="clear" @click="clearSearchEvent">{{ $t('pages.analyze.search.clear') }}</span>
+            <span v-if="isVisible.filter || searchText" class="clear" @click="clearSearchEvent">{{ $t('pages.analyze.search.clear') }}</span>
           </div>
         </div>
         <div class="search-modal-body">
-          <ul v-if="!isFilter" class="search-filter-list">
+          <ul v-if="!isVisible.filter" class="search-filter-list">
             <li
               v-for="(item, index) in VIDEOSITES"
               :key="index"
               class="search-filter-list-item"
-              @click="selectFilterSearchEvent(item.name)"
+              @click="selectFilterSearchEvent(item)"
             >
               <div class="icon" v-html="item.img"></div>
-              <span class="text">{{ $t(`pages.analyze.search.${item.name}`) }}</span>
+              <span class="text">{{ $t(`pages.analyze.search.${item.id}`) }}</span>
             </li>
           </ul>
           <div v-if="searchText" class="search-footer">
@@ -61,9 +63,9 @@
         <div class="search-hint">
           <p class="content">
             <info-circle-icon class="search-filter-icon" />
-            {{ $t('pages.analyze.search.tip') }}
-            <t-tag class="search-filter-tag">{{ $t('pages.analyze.search.iqiyi') }}@</t-tag>
-            <t-tag class="search-filter-tag">{{ $t('pages.analyze.search.tencent') }}@</t-tag>
+            {{ $t('pages.analyze.search.tip', ['@']) }}
+            <t-tag shape="round" class="search-tag">{{ $t('pages.analyze.search.iqiyi') }}@</t-tag>
+            <t-tag shape="round" class="search-tag">{{ $t('pages.analyze.search.tencent') }}@</t-tag>
           </p>
         </div>
       </div>
@@ -77,6 +79,7 @@ import { CloseIcon, InfoCircleIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { nextTick, reactive, ref, watch } from 'vue';
 
 import PLATFORM_CONFIG from '@/config/platform';
+import { t } from '@/locales';
 
 const props = defineProps({
   visible: {
@@ -85,16 +88,16 @@ const props = defineProps({
   },
 });
 
-const formVisible = ref(false); // 控制dialog
-
 const emit = defineEmits(['update:visible', 'open-platform']);
-const isFilter = ref(false);
+
+const isVisible = reactive({
+  filter: false
+})
+const formVisible = ref(false); // 控制dialog
 const searchText = ref('');
 const searchTag = ref('');
 const searchInputRef = ref(null);
-const VIDEOSITES = reactive({
-  ...PLATFORM_CONFIG.site,
-}); // 视频网站列表
+const VIDEOSITES = { ...PLATFORM_CONFIG.site }; // 视频网站列表
 
 watch(
   () => formVisible.value,
@@ -119,12 +122,13 @@ watch(
   () => searchText.value,
   (val) => {
     if (val.includes('@')) {
-      const patchItem = val.split('@')[0];
-      const item = _.find(VIDEOSITES, { name: patchItem });
+      const patchFlag = val.split('@')[0];
+      const patchValue = val.split('@')[1];
+      const item = _.find(VIDEOSITES, { name: patchFlag }) || _.find(VIDEOSITES, { id: patchFlag });
       if (item) {
-        isFilter.value = true;
-        searchTag.value = val;
-        searchText.value = '';
+        isVisible.filter = true;
+        searchTag.value = `${patchFlag}@`;
+        searchText.value = patchValue || '';
       }
     }
   },
@@ -137,7 +141,7 @@ const deleteEvent = () => {
 
 // 清空搜索选项
 const clearSearchEvent = () => {
-  isFilter.value = false;
+  isVisible.filter = false;
   searchText.value = '';
   searchTag.value = '';
 };
@@ -153,9 +157,9 @@ const focusSearchInput = () => {
 
 // 手动选择搜索源
 const selectFilterSearchEvent = (item) => {
-  isFilter.value = true;
+  isVisible.filter = true;
   searchText.value = '';
-  searchTag.value = `${item}@`;
+  searchTag.value = `${t(`pages.analyze.search.${item.id}`)}@`;
   focusSearchInput();
 };
 
@@ -164,18 +168,18 @@ const searchEvent = () => {
   let searchDomain = 'https://so.360kan.com/?kw=';
   if (searchTag.value) {
     const searchTagSplite = searchTag.value.split('@')[0];
-    const item = _.find(VIDEOSITES, { name: searchTagSplite });
+    const item = _.find(VIDEOSITES, { name: searchTagSplite }) || _.find(VIDEOSITES, { id: searchTagSplite });
     searchDomain = { ...item }.search;
   }
   const searchUrl = `${searchDomain}${searchText.value}`;
-  console.log(searchUrl);
+  console.log(`[analyze][search]${searchUrl}`);
   emit('open-platform', { name: searchText.value, url: searchUrl });
   formVisible.value = false;
 };
 
 // 关闭 dialog
 const closeDialog = () => {
-  isFilter.value = false;
+  isVisible.filter = false;
   searchText.value = '';
   searchTag.value = '';
   formVisible.value = false;
@@ -183,7 +187,6 @@ const closeDialog = () => {
 </script>
 
 <style lang="less" scoped>
-
 .close-btn {
   &:hover {
     background-color: var(--td-bg-color-component-hover);
@@ -205,11 +208,7 @@ const closeDialog = () => {
 }
 
 .search-modal-header {
-  height: 64px;
-}
-
-.search-modal-header {
-  height: 64px;
+  height: 48px;
   border-radius: 10px 10px 0 0;
 }
 
@@ -228,6 +227,9 @@ const closeDialog = () => {
     position: relative;
     width: 100%;
     height: 28px;
+    .search-filter-tag {
+      margin-right: 8px;
+    }
     .input-wrapper {
       position: relative;
       flex-grow: 1;
@@ -308,7 +310,7 @@ const closeDialog = () => {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 8px 12px 8px 12px;
+    padding: 0 12px 8px 12px;
     flex-shrink: 0;
     border-top: 1px solid var(--divider_tertiary);
     border-radius: 0 0 10px 10px;
@@ -358,9 +360,8 @@ const closeDialog = () => {
   height: 40px;
   align-items: center;
   justify-content: space-between;
-  // background-color: var(--td-bg-color-container);
   background-color: var(--td-bg-color-page);
-  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(28, 28, 32, 0.06), 0 16px 48px rgba(28, 28, 32, 0.2);
+  box-shadow: var(--td-shadow-1);
   border-radius: 10px;
   padding-left: 24px;
   padding-right: 16px;
@@ -370,11 +371,11 @@ const closeDialog = () => {
     display: flex;
     align-items: center;
     .search-filter-icon {
-      margin-right: 12px;
-      font-size: 20px;
+      margin-right: 8px;
+      font-size: 16px;
       line-height: 0;
     }
-    .search-filter-tag {
+    .search-tag {
       margin-left: 8px;
     }
   }

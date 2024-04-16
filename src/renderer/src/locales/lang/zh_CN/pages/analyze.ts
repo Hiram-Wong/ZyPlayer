@@ -18,7 +18,7 @@ export default {
   search: {
     input: '输入关键词搜索',
     clear: '清空',
-    tip: '输入@快速指定搜索源，例如',
+    tip: '输入 {0} 快速指定搜索源, 例如',
     watch: '查看',
     content: '的所有内容',
     iqiyi: '爱奇艺',
