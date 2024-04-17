@@ -232,11 +232,10 @@ const getCloudFile = async (item) => {
 
 // 播放
 const playEvent = (item, fullPath) => {
-  const playerType = storePlayer.getSetting.broadcasterType;
+  const playerMode = storePlayer.getSetting.playerMode;
   const shareUrl = `${driveConfig.value.default.server}/d/${fullPath}${item.sign ? `?sign=${item.sign}`: ''}`
-  const externalPlayer = storePlayer.getSetting.externalPlayer;
-  if (playerType === 'custom' ) {
-    window.electron.ipcRenderer.send('call-player', externalPlayer, shareUrl);
+  if (playerMode.type === 'custom' ) {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, shareUrl);
   } else {
     storePlayer.updateConfig({
       type: 'drive',

@@ -98,15 +98,15 @@
                   <t-space size="small">
                     <!-- <div>
                       <span>{{ $t('pages.setting.data.webdev.sync') }}</span>
-                      <t-switch />
+                      <t-switch v-model="formData.webdev.sync" />
                     </div> -->
                     <t-button size="small" @click.stop="saveWebdev">{{ $t('pages.setting.data.webdev.save') }}</t-button>
                     <t-button theme="default" size="small" @click.stop="checkWebdev">{{ $t('pages.setting.data.webdev.check') }}</t-button>
                   </t-space>
                 </template>
-                <t-input :label="$t('pages.setting.data.webdev.url')" v-model="formData.url" class="input-item"></t-input>
-                <t-input :label="$t('pages.setting.data.webdev.username')" v-model="formData.username" class="input-item"></t-input>
-                <t-input :label="$t('pages.setting.data.webdev.password')" v-model="formData.password" type="password" class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.data.webdev.url')" v-model="formData.webdev.data.url" class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.data.webdev.username')" v-model="formData.webdev.data.username" class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.data.webdev.password')" v-model="formData.webdev.data.password" type="password" class="input-item"></t-input>
               </t-collapse-panel>
             </t-collapse>
           </div>
@@ -164,9 +164,13 @@ const props = defineProps({
 });
 const formVisible = ref(false);
 const formData = reactive({
-  url: '',
-  username: '',
-  password: '',
+  webdev: {
+    sync: false, data: {
+      url: '',
+      username: '',
+      password: ''
+    }
+  },
   easyConfig: {
     type: 0,
     url: ''
@@ -241,9 +245,7 @@ watch(
 watch(
   () => props.webdev,
   (val) => {
-    formData.url = val.webdevUrl;
-    formData.username = val.webdevUsername;
-    formData.password = val.webdevPassword;
+    formData.webdev = val.webdev;
   }
 )
 
@@ -398,34 +400,39 @@ const importData = async() => {
 // 公共导入方法
 const commonDelImportData = (data) => {
   try {
+    // 旧数据 新数据 映射
     const tblSettingDefaults = [
-      { key: 'windowPosition', value: { status: false, position: { width: 1000, height: 640 } } },
-      { key: 'version', value: process.env.npm_package_version },
-      { key: 'webdev', value: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", user: "", password: "" } } },
-      { key: 'snifferMode', value: { type: 'pie', url: '' } },
-      { key: 'playerMode', value: { type: 'xgplayer', external: '' } },
+      { oldKey: ['version'], key: 'version', value: process.env.npm_package_version }, // 3.3.2
+      { oldKey: ['windowPosition'], key: 'windowPosition', value: { status: false, position: { width: 1000, height: 640 } } }, // 3.3.2
+      { oldKey: ['webdevUrl', 'webdevUsername', 'webdevPassword'], key: 'webdev', value: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } } }, // 3.3.4
+      { oldKey: ['snifferType'], key: 'snifferMode', value: { type: 'pie', url: '' } }, // 3.3.4
+      { oldKey: ['broadcasterType', 'externalPlayer'], key: 'playerMode', value: { type: 'xgplayer', external: '' } }, // 3.3.4
+      { oldKey: ['defaultViewCasual'], key: 'defaultViewCasual', value: 'http://api.yujn.cn/api/zzxjj.php' }, // 3.3.4
+      { oldKey: ['lang'], key: 'lang', value: 'zh_CN' }, // 3.3.4
     ];
+
+    const formatSettingData = (tblSetting) => {
+      tblSettingDefaults.forEach((defaultItem) => {
+        const index = _.findIndex(tblSetting, { key: defaultItem.oldKey[0] });
+        if (index > -1) {
+          tblSetting.push({ key: defaultItem.key, value: defaultItem.value });
+        };
+        defaultItem.oldKey.forEach(element => {
+          const index = _.findIndex(tblSetting, { key: element });
+          if (index > -1) delete tblSetting[index];
+        });
+      });
+    };
 
     // 先处理旧数据
     ['sites', 'iptv', 'analyze', 'drive', 'setting', 'channel'].forEach(key => {
       if (_.has(data, key)) {
         const tblKey = key === 'sites' ? 'site' : key;
         if (key === 'setting') {
-          data["tbl_setting"] = data['setting'][0] ? Object.entries(data['setting'][0]).map(([key, value]) => ({ key, value })) : [];
-          const tblSetting = data.setting[0] ? Object.entries(data.setting[0]).map(([k, v]) => ({ key: k, value: v })) : [];
-
-          // 更新或添加默认设置项
-          tblSettingDefaults.forEach((defaultItem) => {
-            const index = _.findIndex(tblSetting, { key: defaultItem.key });
-            if (index > -1) {
-              tblSetting[index] = defaultItem;
-              delete tblSetting[index];
-            } else {
-              tblSetting.push(defaultItem);
-              delete tblSetting[index];
-            }
-          });
-
+          const tblSetting = data.setting[0]
+            ? Object.entries(data.setting[0]).map(([k, v]) => ({ key: k, value: v }))
+            : [];
+          
           data[`tbl_${tblKey}`] = tblSetting;
         } else {
           data[`tbl_${tblKey}`] = data[key].data || data[key];
@@ -458,9 +465,11 @@ const commonDelImportData = (data) => {
       if (!newDataTypes.includes(key)) {
         delete data[key];
       }
-    }
+    };
 
-    console.log(data)
+    formatSettingData(data);
+
+    console.log(data);
     return data;
   } catch (err) {
     throw err;
@@ -475,7 +484,7 @@ const importFromRemote = async (url) => {
 
     await initDb(config);
     MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (error) {
+  } catch (err) {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
 };
@@ -485,7 +494,7 @@ const importFromLocal = (file) => {
   const reader = new FileReader();
   reader.readAsText(file);
   reader.onload = async(resultFile) => {
-    const pointsTxt = resultFile.target.result;
+    const pointsTxt = resultFile.target!.result;
     try {
       let json = JSON.parse(String(pointsTxt));
       json = await commonDelImportData(json);
@@ -621,13 +630,13 @@ const clearData = async() => {
 
 // 初始化
 const initWebdav = async() => {
-  if (!formData.url && !formData.username && !formData.password) return;
+  if (!formData.webdev.data.url && !formData.webdev.data.username && !formData.webdev.data.password) return;
   
   clientWebdev.value = await createClient(
-    formData.url,
+    formData.webdev.data.url,
     {
-      username: formData.username,
-      password: formData.password
+      username: formData.webdev.data.username,
+      password: formData.webdev.data.password
     }
   );
   if (await clientWebdev.value.exists("/zyplayer") === false) {
@@ -639,9 +648,7 @@ const initWebdav = async() => {
 const saveWebdev = async() => {
   try {
     await updateSetting({
-      webdevUrl: formData.url,
-      webdevUsername: formData.username,
-      webdevPassword: formData.password,
+      webdev: formData.webdev
     })
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
@@ -653,7 +660,6 @@ const saveWebdev = async() => {
 const checkWebdev = async() => {
   try {
     if (!clientWebdev.value) await initWebdav();
-    if (!formData.url && !formData.username && !formData.password) return;
     await clientWebdev.value.getDirectoryContents("/");
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
@@ -665,7 +671,6 @@ const checkWebdev = async() => {
 const rsyncRemote = async() => {
   try {
     if (!clientWebdev.value) await initWebdav();
-    if (!formData.url && !formData.username && !formData.password) return;
     const str = await exportDb(["all"]);
     const formatToJson = JSON.stringify(str);
     await clientWebdev.value.putFileContents("/zyplayer/config.json", formatToJson, { overwrite: false });
@@ -680,7 +685,6 @@ const rsyncRemote = async() => {
 const rsyncLocal = async() => {
   try {
     if (!clientWebdev.value) await initWebdav();
-    if (!formData.url && !formData.username && !formData.password) return;
     const str: string = await clientWebdev.value.getFileContents("/zyplayer/config.json", { format: "text" });
     const formatToJson = JSON.parse(str);
     await initDb(formatToJson);

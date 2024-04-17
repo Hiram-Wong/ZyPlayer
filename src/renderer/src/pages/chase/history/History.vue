@@ -193,9 +193,9 @@ const playEvent = async (item) => {
     }
     console.log(item);
 
-    const playerType = store.getSetting.broadcasterType;
+    const playerMode = store.getSetting.playerMode;
 
-    if (playerType === 'custom') {
+    if (playerMode.type === 'custom') {
       formDetailData.value = item;
       isVisible.detail = true;
     } else {

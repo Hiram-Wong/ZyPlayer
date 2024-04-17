@@ -35,7 +35,7 @@ const update3_3_3_to3_3_4 = () => {
       sync: false,
       data: {
         url: db.get(TABLE_NAME).find({ key: "webdevUrl" }).value()?.value || "https://dav.jianguoyun.com/dav/",
-        user: db.get(TABLE_NAME).find({ key: "webdevUsername" }).value()?.value || "",
+        username: db.get(TABLE_NAME).find({ key: "webdevUsername" }).value()?.value || "",
         password: db.get(TABLE_NAME).find({ key: "webdevPassword" }).value()?.value || ""
       }
     }

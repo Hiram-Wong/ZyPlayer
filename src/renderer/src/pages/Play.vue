@@ -398,7 +398,6 @@ import Mp4Plugin from 'xgplayer-mp4';
 
 import SystemControl from '@/layouts/components/SystemControl.vue';
 import DialogDownloadView from './play/componets/DialogDownload.vue';
-import { t } from '@/locales';
 import { setDefault } from '@/api/setting';
 import { fetchAnalyzeDefault } from '@/api/analyze';
 import { fetchFilmDetail } from '@/api/site';
@@ -630,14 +629,14 @@ const seasonReverseOrder = () => {
 
 // 根据不同类型加载不同播放器
 const createPlayer = async (url, videoType='') => {
-  const { broadcasterType } = set.value;
+  const { playerMode } = set.value;
   if (!videoType) {
     const meadiaType = await checkMediaType(url);
     if (meadiaType !== 'unknown' && meadiaType !== 'error' ) {
       videoType = meadiaType;
     }
   }
-  if (broadcasterType === 'xgplayer') {
+  if (playerMode.type === 'xgplayer') {
     switch (videoType) {
       case 'mp4':
         config.value.plugins = [Mp4Plugin];
@@ -658,7 +657,7 @@ const createPlayer = async (url, videoType='') => {
     config.value.url = url;
     xg.value = new Player({ ...config.value });
     console.log(`[player] 加载西瓜${videoType}播放器`);
-  } else if (broadcasterType === 'dplayer') {
+  } else if (playerMode.type === 'dplayer') {
     switch (videoType) {
       case 'mp4':
         dpConfig.value.video.url = url;
@@ -829,7 +828,7 @@ const initIptvPlayer = async () => {
   if (data.value.ext.epg) getEpgList(ext.value.epg, info.value.name, moment().format('YYYY-MM-DD'));
   config.value.url = info.value.url;
 
-  if (set.value.broadcasterType !== 'tcplayer') {
+  if (set.value.playerMode.type !== 'tcplayer') {
     try {
       const isLive = await checkLiveM3U8(info.value.url);
       config.value.isLive = isLive;
@@ -923,7 +922,7 @@ const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<str
   }
 };
 
-const fetchJxPlayUrlHelper = async (type: 'iframe' | 'pie' | 'custom', url: string): Promise<string> => {
+const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> => {
   console.log('[detail][jx][start]官解流程开启');
   MessagePlugin.info('官解流程开启,请稍等');
   let data: string = '';
@@ -977,7 +976,7 @@ const initFilmPlayer = async (isFirst) => {
 
   // 解析直链
   let playerUrl = config.value.url;
-  const { snifferType } = set.value;
+  const { snifferMode } = set.value;
   if (site.playUrl) {
     playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, config.value.url);
   } else {
@@ -993,7 +992,7 @@ const initFilmPlayer = async (isFirst) => {
         snifferUrl = analyzeConfig.value.default.url + config.value.url;
       }
       if (snifferUrl) {
-        playerUrl = await fetchJxPlayUrlHelper(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${snifferUrl}` : snifferUrl);
+        playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${snifferUrl}` : snifferUrl);
         if (playerUrl) createPlayer(playerUrl);
         return;
       }
@@ -1035,7 +1034,7 @@ const initFilmPlayer = async (isFirst) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    playerUrl = await sniffer(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${config.value.url}` : config.value.url);
+    playerUrl = await sniffer(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${config.value.url}` : config.value.url);
     createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
@@ -1276,7 +1275,7 @@ const timerUpdatePlayProcess = () => {
     const watchTime = set.value.skipStartEnd ? currentTime + skipConfig.value.skipTimeInEnd : currentTime;
 
     if (watchTime >= duration) {
-      if (set.value.broadcasterType === 'xgplayer') {
+      if (set.value.playerMode.type === 'xgplayer') {
         const pipInstance = xg.value.plugins.pip;
         if (pipInstance.isPip) {
           xg.value.pause();
@@ -1299,7 +1298,7 @@ const timerUpdatePlayProcess = () => {
     autoPlayNext();
   };
 
-  if (set.value.broadcasterType === 'xgplayer') {
+  if (set.value.playerMode.type === 'xgplayer') {
     xg.value.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
       onTimeUpdate(currentTime, duration);
     });
@@ -1307,7 +1306,7 @@ const timerUpdatePlayProcess = () => {
     xg.value.on(Events.ENDED, () => {
       onEnded();
     });
-  } else if (set.value.broadcasterType === 'dplayer') {
+  } else if (set.value.playerMode.type === 'dplayer') {
     dp.value.on('timeupdate', () => {
       const duration = dp.value.video.duration;
       const currentTime = dp.value.video.currentTime;

@@ -325,7 +325,7 @@ const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<str
   }
 };
 
-const fetchJxPlayUrlHelper = async (type: 'iframe' | 'pie' | 'custom', url: string): Promise<string> => {
+const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> => {
   console.log('[detail][jx][start]官解流程开启');
   let data: string = '';
   try {
@@ -345,7 +345,7 @@ const gotoPlay = async (e) => {
   const [index, url] = e.split('$');
   selectPlayIndex.value = index;
   const { playUrl, type } = formData.value;
-  const { snifferType } = set.value;
+  const { snifferMode } = set.value;
 
   let playerUrl = url;
 
@@ -364,7 +364,7 @@ const gotoPlay = async (e) => {
         snifferUrl = analyzeConfig.value.default.url + url;
       }
       if (snifferUrl) {
-        playerUrl = await fetchJxPlayUrlHelper(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${snifferUrl}` : snifferUrl);
+        playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${snifferUrl}` : snifferUrl);
         if (playerUrl) callSysPlayer(playerUrl);
         return;
       }
@@ -404,7 +404,7 @@ const gotoPlay = async (e) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    playerUrl = await sniffer(snifferType.type, snifferType.type === 'custom' ? `${snifferType.url}${url}` : url);
+    playerUrl = await sniffer(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${url}` : url);
     if (playerUrl) callSysPlayer(playerUrl);
   } catch (err) {
     console.error(err);
@@ -412,8 +412,8 @@ const gotoPlay = async (e) => {
 };
 
 const callSysPlayer = (url: string): void => {
-  const externalPlayer: string = set.value.externalPlayer;
-  window.electron.ipcRenderer.send('call-player', externalPlayer, url);
+  const playerMode = set.value.playerMode;
+  window.electron.ipcRenderer.send('call-player', playerMode.external, url);
   getHistoryData(true);
 };
 

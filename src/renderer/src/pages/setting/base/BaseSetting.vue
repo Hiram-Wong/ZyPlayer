@@ -116,16 +116,16 @@
           <t-space direction="vertical">
             <t-space align="center">
               <t-select
-                v-model="formData.broadcasterType"
+                v-model="formData.playerMode.type"
                 :options="PLAYER_OPTIONS"
                 :placeholder="$t('pages.setting.placeholder.general')"
                 :style="{ width: '255px' }"
               />
               <span class="title" @click="snifferEvent">{{ $t('pages.setting.base.sniffer') }}</span>
             </t-space>
-            <t-space align="center" v-if="formData.broadcasterType === 'custom'">
+            <t-space align="center" v-if="formData.playerMode.type === 'custom'">
               <t-input
-                v-model="formData.externalPlayer"
+                v-model="formData.playerMode.external"
                 :label="$t('pages.setting.base.command')"
                 :placeholder="$t('pages.setting.placeholder.general')"
                 :style="{ width: '255px' }"
@@ -216,8 +216,8 @@ const isVisible = reactive({
 });
 
 const uaDialogData = ref({ data: '', type: 'ua' });
-const webdevDialogData = ref({ webdevUrl:'', webdevUsername:'' ,webdevPassword:'' });
-const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferType' });
+const webdevDialogData = ref({ url:'', username:'' ,password:'' });
+const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferMode' });
 
 const MODE_OPTIONS = computed(() => {
   return [
@@ -264,7 +264,7 @@ const theme = computed(() => {
 const formData = ref({
   version: '3.3.2',
   theme: 'auto',
-  externalPlayer: '',
+  lang: 'zh_CN',
   defaultHot: 'kylive',
   defaultSearchRecommend: 'site',
   defaultSearchType: 'site',
@@ -287,8 +287,14 @@ const formData = ref({
   ],
   defaultDrive: '',
   defaultViewCasual: '',
-  broadcasterType: 'xgplayer',
-  snifferType: 'pie',
+  playerMode: {
+    type: 'xgplayer',
+    external: ''
+  },
+  snifferMode: {
+    type: 'pie',
+    url: ''
+  },
   softSolution: false,
   skipStartEnd: false,
   agreementMask: false,
@@ -297,9 +303,7 @@ const formData = ref({
   hardwareAcceleration: true,
   ua: '',
   communitySubscribe: '',
-  webdevUrl: '',
-  webdevUsername: '',
-  webdevPassword: '',
+  webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }},
   windowPosition: { status: false, position: { width: 1000, height: 640 } }
 });
 
@@ -362,9 +366,8 @@ watch(formData,
     storeSetting.updateConfig({ mode: formData.value.theme });
     storePlayer.updateConfig({
       setting: {
-        broadcasterType: formData.value.broadcasterType,
-        externalPlayer: formData.value.externalPlayer,
-        snifferType: formData.value.snifferType,
+        playerMode: formData.value.playerMode,
+        snifferMode: formData.value.snifferMode,
       },
     });
     if(newValue) {
@@ -646,30 +649,22 @@ const uaEvnet = () => {
 };
 
 const snifferEvent = () => {
-  const { snifferType } = formData.value;
+  const { snifferMode } = formData.value;
   snifferDialogData.value = {
-    data: {
-      type: snifferType.type,
-      url: snifferType.url,
-    },
-    type: 'snifferType',
+    data: { ...snifferMode },
+    type: 'snifferMode',
   };
 
   isVisible.sniffer = true;
 }
 
 const dataMange = () => {
-  const { webdevUrl, webdevUsername, webdevPassword } = formData.value;
-  console.log(webdevUrl, webdevUsername, webdevPassword)
-  webdevDialogData.value = {
-    webdevUrl,
-    webdevUsername,
-    webdevPassword
-  }
+  const { webdev } = formData.value;
+  webdevDialogData.value = { ...webdev };
   isVisible.data = true
 };
 
-// 分类：刷新dialog 数据class 嗅探snifferType
+// 分类：刷新dialog 数据class 嗅探snifferMode
 const flushDialogData = (item) => {
   const { data, type } = item;
   console.log(data, type);

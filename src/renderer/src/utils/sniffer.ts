@@ -147,7 +147,7 @@ const snifferCustom = async (url: string): Promise<string> => {
 }
 
 // 嗅探
-const sniffer = async (type: 'iframe' | 'pie' | 'custom', url: string): Promise<string> => {
+const sniffer = async (type: string, url: string): Promise<string> => {
   let data: string = '';
   if (type === 'iframe') {
     data = await snifferIframe(url);

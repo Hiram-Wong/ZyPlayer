@@ -65,23 +65,15 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const agreementMask = await setting.find({ key: "agreementMask"}).value;
       const theme = await setting.find({ key: "theme"}).value;
       const skipStartEnd = await setting.find({ key: "skipStartEnd"}).value;
-      const broadcasterType = await setting.find({ key: "broadcasterType"}).value;
-      const externalPlayer = await setting.find({ key: "externalPlayer"}).value;
-      const webdevUrl = await setting.find({ key: "webdevUrl"}).value;
-      const webdevUsername = await setting.find({ key: "webdevUsername"}).value;
-      const webdevPassword = await setting.find({ key: "webdevPassword"}).value;
+      const playerMode = await setting.find({ key: "playerMode"}).value;
+      const webdev = await setting.find({ key: "webdev"}).value;
       
       const res = {
         agreementMask,
         theme,
         skipStartEnd,
-        broadcasterType,
-        externalPlayer,
-        webdev: {
-          url: webdevUrl,
-          username: webdevUsername,
-          password: webdevPassword
-        }
+        playerMode,
+        webdev
       };
       reply.code(200).send(res);
     } catch (err) {

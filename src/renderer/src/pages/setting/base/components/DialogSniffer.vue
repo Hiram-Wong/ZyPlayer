@@ -97,15 +97,15 @@ watch(
   },
 );
 
-const onSubmit = (snifferType: 'pie' | 'iframe' | 'custom') => {
-  formData.value.data.type = snifferType;
+const onSubmit = (snifferMode) => {
+  formData.value.data.type = snifferMode;
 
   emit('receiveSnifferData', {
     data: {
-      type: snifferType,
+      type: snifferMode,
       url: formData.value.data.url
     },
-		type: 'snifferType'
+		type: 'snifferMode'
   });
 };
 </script>

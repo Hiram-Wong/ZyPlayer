@@ -26,7 +26,7 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, skipStartEnd, broadcasterType, externalPlayer, webdev } = await setup();
+  const { agreementMask, theme, skipStartEnd, playerMode, webdev } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
   storeSetting.updateConfig({ webdev: webdev });
@@ -35,9 +35,8 @@ const initConfig = async () => {
   const init = {
     ...PLAY_CONFIG.setting,
   };
-  init.broadcasterType = broadcasterType;
+  init.playerMode = playerMode;
   init.skipStartEnd = skipStartEnd;
-  init.externalPlayer = externalPlayer;
   storePlayer.updateConfig({ setting: init });
 }
 

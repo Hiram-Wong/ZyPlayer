@@ -1,10 +1,12 @@
 export default {
   type: 'film',
   setting: {
-    broadcasterType: 'xgplayer',
-    externalPlayer: '',
-    snifferType: {
-      type: 'pie' as 'pie' | 'iframe' | 'custom',
+    playerMode: {
+      type: 'xgplayer',
+      external: ''
+    },
+    snifferMode: {
+      type: 'pie',
       url: ''
     },
     skipStartEnd: true,

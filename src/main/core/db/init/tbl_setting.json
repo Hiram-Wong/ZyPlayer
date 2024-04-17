@@ -105,7 +105,7 @@
       "sync": false,
       "data": {
         "url": "https://dav.jianguoyun.com/dav/",
-        "user": "",
+        "username": "",
         "password": ""
       }
     }

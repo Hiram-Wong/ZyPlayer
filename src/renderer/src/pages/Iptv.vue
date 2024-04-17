@@ -272,10 +272,9 @@ const changeClassEvent = async (id) => {
 
 // 播放
 const playEvent = (item: { name: any }) => {
-  const playerType = storePlayer.getSetting.broadcasterType;
-  const externalPlayer = storePlayer.getSetting.externalPlayer;
-  if (playerType === 'custom' ) {
-    window.electron.ipcRenderer.send('call-player', externalPlayer, item.url);
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom' ) {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, item.url);
   } else {
     const { epg, skipIpv6 } = iptvConfig.value.ext;
     storePlayer.updateConfig({
