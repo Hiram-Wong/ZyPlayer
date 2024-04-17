@@ -4,6 +4,12 @@ import { nanoid } from 'nanoid';
 
 import { setting } from '../../db/service';
 
+interface SettingItem {
+  id: string;
+  key: string;
+  value: string;
+}
+
 const API_VERSION = "api/v1";
 
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
@@ -34,27 +40,19 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   })
   fastify.put(`/${API_VERSION}/setting`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
-      const mergeCustomizer = (objValue, srcValue) => {
-        // PlainObject检查是否是由 Object 构造函数创建
-        if (_.isPlainObject(objValue) && _.isPlainObject(srcValue)) {
-          return _.mergeWith({}, objValue, srcValue, mergeCustomizer);
+      const destination = req.body as Record<string, string>;
+      const source = await setting.source() as SettingItem[];
+
+      for (let i in destination) {
+        const index = _.findIndex(source, { key: i });
+        if (index !== -1) {
+          source[index]["value"] = destination[i];
+        } else {
+          source.push({ key: i, value: destination[i], id: nanoid() });
         }
-        return srcValue; // 保留源对象非对象属性的值
-      };
+      }
 
-      const destination = req.body || {};
-      const source = await setting.source();
-      const mergedSettings = _.mergeWith(_.cloneDeep(source), destination, mergeCustomizer);
-
-      // 添加具有生成ID的新设置项
-      const existingKeys = source.map((item) => item.key);
-      Object.entries(destination).forEach(([key, value]) => {
-        if (!existingKeys.includes(key)) {
-          mergedSettings.push({ key, value, id: nanoid() });
-        }
-      });
-
-      const res = await setting.set(mergedSettings);
+      const res = await setting.set(source);
       reply.code(200).send(res);
     } catch (err) {
       reply.code(500).send(err)
