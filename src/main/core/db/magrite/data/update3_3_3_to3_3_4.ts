@@ -12,6 +12,10 @@ const update3_3_3_to3_3_4 = () => {
     db.get(TABLE_NAME).remove({ key: 'defaultViewCasual' }).write();
   }
   db.get(TABLE_NAME).insert({ key: "defaultViewCasual", value: "" }).write();
+  if (db.get(TABLE_NAME).find({ key: "defaultDanMuKu" }).value()?.value) {
+    db.get(TABLE_NAME).remove({ key: 'defaultDanMuKu' }).write();
+  }
+  db.get(TABLE_NAME).insert({ key: "defaultDanMuKu", value: "" }).write();
   if (db.get(TABLE_NAME).find({ key: "playerMode" }).value()?.value) {
     db.get(TABLE_NAME).remove({ key: 'playerMode' }).write();
   }

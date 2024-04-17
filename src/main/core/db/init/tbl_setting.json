@@ -17,14 +17,12 @@
   { "key": "defaultSearchType",
     "value": "site"
   },
-  { "key": "defaultCheckModel",
-    "value": true
-  },
-  { "key": "defaultChangeModel",
-    "value": false
-  },
   {
     "key": "defaultViewCasual",
+    "value": ""
+  },
+  {
+    "key": "defaultDanMuKu",
     "value": ""
   },
   { "key": "defaultIptvEpg",

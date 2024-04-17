@@ -66,7 +66,7 @@
             :style="{ width: '255px' }"
           >
           </t-input>
-          <span class="title" @click="reset('viewCasual')">{{ $t('pages.setting.base.reset') }}</span>
+          <!-- <span class="title" @click="reset('viewCasual')">{{ $t('pages.setting.base.reset') }}</span> -->
         </t-space>
       </t-form-item>
       <!-- <t-form-item label="弹幕库" name="danmu">
@@ -262,14 +262,12 @@ const theme = computed(() => {
 });
 
 const formData = ref({
-  version: '3.3.2',
+  version: '3.3.4',
   theme: 'auto',
   lang: 'zh_CN',
   defaultHot: 'kylive',
   defaultSearchRecommend: 'site',
   defaultSearchType: 'site',
-  defaultCheckModel: true,
-  defaultChangeModel: false,
   defaultIptvEpg: 'http://diyp.112114.xyz/',
   defaultIptvLogo: 'https://epg.112114.eu.org/logo/',
   iptvSkipIpv6: true,
@@ -287,6 +285,7 @@ const formData = ref({
   ],
   defaultDrive: '',
   defaultViewCasual: '',
+  defaultDanMuKu: '',
   playerMode: {
     type: 'xgplayer',
     external: ''
@@ -310,7 +309,6 @@ const formData = ref({
 const filmEmitReload = useEventBus('film-reload');
 const hotEmitReload = useEventBus('hot-reload');
 const iptvEmitReload = useEventBus('iptv-reload');
-const analyzeEmitReload = useEventBus('analyze-reload');
 
 watch(theme, (newValue,_) => {
   formData.value.theme = newValue;
@@ -347,16 +345,6 @@ watch(
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
       iptvEmitReload.emit('iptv-reload');
-    }
-  },
-);
-
-// 监听刷新analyze
-watch(
-  () => [formData.value.analyzeQuickSearchType],
-  (_, oldValue) => {
-    if (oldValue.every((item) => typeof item !== 'undefined')) {
-      analyzeEmitReload.emit('analyze-reload');
     }
   },
 );
