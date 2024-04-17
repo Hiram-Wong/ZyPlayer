@@ -1791,16 +1791,23 @@ const openMainWinEvent = () => {
           align-items: baseline;
           .title-album {
             font-size: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: stretch;
             .title-text {
-              width: 80%;
-              display: inline-block;
+              flex: 1 1;
               font-weight: 500;
               line-height: 16px;
               font-size: 16px;
               color: var(--td-text-color-primary);
             }
             .title-desc {
-              display: inline;
+              display: flex;
+              flex-direction: row;
+              flex-wrap: nowrap;
+              align-items: center;
               margin-left: 9px;
               font-size: 12px;
               cursor: pointer;
