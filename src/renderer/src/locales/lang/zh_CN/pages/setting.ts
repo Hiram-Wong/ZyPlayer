@@ -240,5 +240,17 @@ export default {
         mainAbility: '更专业更好',
         secondaryAbility: ''
       }
+    },
+    update: {
+      title: '检查更新',
+      noUpdate: '你当前使用的是最新版本',
+      checkWait: '请等待，检查更新中...',
+      foundNewVersion: '发现新版本',
+      systemTip: 'Tips: 仅windwos支持在线更新; mac需签名(没钱); linux不支持。',
+      macAndLinuxTip: 'mac和linux用户请前往',
+      install: '安装',
+      download: '下载',
+      downloading: '下载中',
+      downloaded: '安装包下载完成'
     }
   }

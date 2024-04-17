@@ -240,5 +240,17 @@ export default {
       mainAbility: 'Expert',
       secondaryAbility: ''
     }
+  },
+  update: {
+    title: 'Check updates',
+    noUpdate: 'You are currently using the latest version',
+    checkWait: 'Please wait, checking for updates...',
+    foundNewVersion: 'Discover the new version',
+    systemTip: 'Tips: Only windwos supports online updates',
+    macAndLinuxTip: 'Mac and Linux users please go',
+    install: 'install',
+    download: 'download',
+    downloading: 'downloading',
+    downloaded: 'The download of the installation package is complete'
   }
 }

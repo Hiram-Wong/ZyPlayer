@@ -1,37 +1,44 @@
 <template>
   <t-dialog
     v-model:visible="formVisible"
-    header="检查更新"
+    :header="$t('pages.setting.update.title')"
     placement="center"
     :footer="false"
     :close-on-esc-keydown="false"
     :close-on-overlay-click="false"
   >
     <template #body>
-      <t-loading v-if="load" size="small" indicator :loading="load" text="请等待，检查更新中..." style="min-height: 30px;"/>
+      <t-loading
+        v-if="load"
+        size="small"
+        indicator
+        :loading="load"
+        :text="$t('pages.setting.update.checkWait')"
+        style="min-height: 30px;"
+      />
       <div v-else class="wrapper">
         <div class="body">
           <div v-if="updateInfo.new">
-            <div>发现新版本：{{ updateInfo.version }}</div>
+            <div>{{ $t('pages.setting.update.foundNewVersion') }}: {{ updateInfo.version }}</div>
             <div class="content" v-html="updateInfo.releaseNotes"></div>
             <p class="tip">
-              Tips: 仅windwos支持在线更新; mac需签名(没钱); linux不支持。
+              {{ $t('pages.setting.update.systemTip') }}
               <br />
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mac和linux用户请前往
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $t('pages.setting.update.macAndLinuxTip') }}
               <t-link theme="primary" href="https://github.com/Hiram-Wong/ZyPlayer/releases/" target="_blank">
                 github
               </t-link>
-              下载
+              {{ $t('pages.setting.update.download') }}
             </p>
             <t-progress v-if="isDownload" :percentage="downloadProgress" />
             <div v-if="platform === 'win32'" class="footer">
               <t-button v-if="!isDownloaded" :loading="isDownload" @click="startDownload">
-                {{ isDownload ? '下载中...' : '下载' }}
+                {{ isDownload ? $t('pages.setting.update.downloading') : $t('pages.setting.update.download') }}
               </t-button>
-              <t-button v-else :disabled="!isDownloaded" @click="installUpdate">安装</t-button>
+              <t-button v-else :disabled="!isDownloaded" @click="installUpdate">{{ $t('pages.setting.update.install') }}</t-button>
             </div>
           </div>
-          <p v-else>你当前使用的是最新版本</p>
+          <p v-else>{{ $t('pages.setting.update.noUpdate') }}</p>
         </div>
       </div>
     </template>
@@ -41,6 +48,8 @@
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
+
+import { t } from '@/locales';
 
 const props = defineProps({
   visible: {
@@ -109,7 +118,7 @@ const startDownload = () => {
     console.log('downloaded');
     isDownloaded.value = true;
     downloadProgress.value = 100;
-    MessagePlugin.success('安装包下载完成');
+    MessagePlugin.success(t('pages.setting.update.downloaded'));
   });
 };
 const installUpdate = () => {
