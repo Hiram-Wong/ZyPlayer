@@ -397,6 +397,7 @@ const resetOriginal = () => {
     header: t('pages.setting.dialog.restoreFactoryHeader'),
     width: '320px',
     confirmBtn: t('pages.setting.dialog.confirm'),
+    cancelBtn: t('pages.setting.dialog.cancel'),
     placement: 'center',
     closeBtn: '',
     onConfirm: handleClear,
