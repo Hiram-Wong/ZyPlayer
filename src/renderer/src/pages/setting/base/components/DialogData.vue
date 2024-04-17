@@ -401,30 +401,6 @@ const importData = async() => {
 // 公共导入方法
 const commonDelImportData = (data) => {
   try {
-    // 旧数据 新数据 映射
-    const tblSettingDefaults = [
-      { oldKey: ['version'], key: 'version', value: process.env.npm_package_version }, // 3.3.2
-      { oldKey: ['windowPosition'], key: 'windowPosition', value: { status: false, position: { width: 1000, height: 640 } } }, // 3.3.2
-      { oldKey: ['webdevUrl', 'webdevUsername', 'webdevPassword'], key: 'webdev', value: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } } }, // 3.3.4
-      { oldKey: ['snifferType'], key: 'snifferMode', value: { type: 'pie', url: '' } }, // 3.3.4
-      { oldKey: ['broadcasterType', 'externalPlayer'], key: 'playerMode', value: { type: 'xgplayer', external: '' } }, // 3.3.4
-      { oldKey: ['defaultViewCasual'], key: 'defaultViewCasual', value: 'http://api.yujn.cn/api/zzxjj.php' }, // 3.3.4
-      { oldKey: ['lang'], key: 'lang', value: 'zh_CN' }, // 3.3.4
-    ];
-
-    const formatSettingData = (tblSetting) => {
-      tblSettingDefaults.forEach((defaultItem) => {
-        const index = _.findIndex(tblSetting, { key: defaultItem.oldKey[0] });
-        if (index > -1) {
-          tblSetting.push({ key: defaultItem.key, value: defaultItem.value });
-        };
-        defaultItem.oldKey.forEach(element => {
-          const index = _.findIndex(tblSetting, { key: element });
-          if (index > -1) delete tblSetting[index];
-        });
-      });
-    };
-
     // 先处理旧数据
     ['sites', 'iptv', 'analyze', 'drive', 'setting', 'channel'].forEach(key => {
       if (_.has(data, key)) {
@@ -467,8 +443,6 @@ const commonDelImportData = (data) => {
         delete data[key];
       }
     };
-
-    formatSettingData(data);
 
     console.log(data);
     return data;

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { FastifyReply, FastifyPluginAsync, FastifyRequest } from 'fastify';
 
 import { history, setting, star, site, iptv, channel, analyze, drive, db } from '../../db/service';
+import magrite from '../../db/magrite';
 
 const API_VERSION = "api/v1";
 
@@ -95,8 +96,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       };
       
       if (_.every(tables, table => _.has(data, table))) {
-        const res = db.init(data);
-        reply.code(200).send(res);
+        db.init(data);
       } else {
         tables.forEach(table => {
           const prefix = table.substring(4);
@@ -104,8 +104,11 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
             tableSetters[prefix](data[table]);
           }
         });
-        reply.code(200).send('Tables processed individually.');
       }
+
+      magrite();
+      const res = db.all();
+      reply.code(200).send(res);
     } catch (err) {
       reply.code(500).send(err);
     }
