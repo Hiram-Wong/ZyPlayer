@@ -7,7 +7,7 @@ import { join } from 'path';
 import url from 'url';
 
 import initServer from './core/server';
-import { init as dbInit} from './core/db';
+import { setup as dbInit } from './core/db';
 import { setting } from './core/db/service';
 import createMenu from './core/menu';
 import { ipcListen, tmpDir } from './core/ipc';

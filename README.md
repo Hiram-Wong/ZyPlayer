@@ -122,14 +122,14 @@
   ],
   "setting": [
     {
-      "version": "3.3.2", // 当前版本 3.3.2版本启用参该数
+      "version": "3.3.2", // [3.3.2版本启用]当前版本 (一定要根据实际填写,不然数据库执行会报错)
       "theme": "auto",  // 主题 auto:跟随系统 light:亮色 dark:暗色
-      "externalPlayer": "", // 播放器为custom,调用此处系统命令
+      "lang": "zh_CN",  // [3.3.4版本启用]语言 zh_CN:中文 en_US:英文
       "defaultHot": "kylive",  // 热搜 kylive:酷云数据 enlightent:云合数据
       "defaultSearchRecommend": "site", // 搜索推荐 site:站点 quark:夸克 baidu:百度 douban:豆瓣  弃用
       "defaultSearchType": "site", // 全局搜索模式 site:本站 group:组内 all:全部
-      "defaultCheckModel": true,  // 弃用 忘了干嘛的
-      "defaultChangeModel": false,  // 弃用 忘了干嘛的
+      "defaultCheckModel": true,  // [弃用] 忘了干嘛的
+      "defaultChangeModel": false,  // [弃用] 忘了干嘛的
       "defaultIptvEpg": "https://epg.112114.eu.org/", // iptv epg
       "defaultIptvLogo": "https://epg.112114.eu.org/logo/", // iptv logo
       "iptvSkipIpv6": true, // iptv是否跳过ipv6节目
@@ -139,6 +139,7 @@
       "defaultIptv": "993841fe-5e91-5e5d-35d6-5be81822960b", // iptv 默认源标识
       "defaultAnalyze": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // analyze 默认源标识
       "defaultDrive": "3293dc45-cf14-9c66-3028-5b7765b240b7", // drive 默认源标识
+      "defaultViewCasual": "", // [3.3.4版本启用]随性看地址
       "analyzeFlag": [
         "youku",
         "qq",
@@ -150,19 +151,36 @@
         "pptv",
         "mgtv"
       ],  // 解析标识
-      "broadcasterType": "xgplayer", // 播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合externalPlayer
+      "broadcasterType": "xgplayer", // [3.3.4版本弃用,使用playerMode参数]播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合externalPlayer
+      "externalPlayer": "", // [3.3.4版本弃用,使用playerMode参数]播放器为custom,调用此处系统命令
+      "playerMode": {
+        "type": "xgplayer",  // 播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合external
+        "external": ""  // 播放器为custom,调用此处系统命令
+      },  // [3.3.4版本启用]
       "softSolution": false, // 是否使用软解 预留
       "communitySubscribe": "", // 社区地址 预留
       "skipStartEnd": false, // 是否跳过首尾空白
       "agreementMask": true, // 是否同意协议
       "recordShortcut": "Shift+Command+Z", // 录制快捷键
-      "snifferType" : "pie",  // 嗅探模式 pie iframe
+      "snifferType" : "pie",  // [3.3.4版本弃用,使用snifferMode参数]嗅探模式 pie iframe
+      "snifferMode": {
+        "type": "pie",  // 嗅探模式 pie iframe custom
+        "url": ""  // 当 type 为 custom 时填写自定义地址
+      },  // [3.3.4版本启用]
       "selfBoot": false,  // 是否开机自启动
       "hardwareAcceleration": true,  // 是否启用硬件加速
       "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",  // UA
-      "webdevUrl": "https://dav.jianguoyun.com/dav/",  // webdev同步盘地址  用于备份
-      "webdevUsername": "",  // webdev用户名  用于备份
-      "webdevPassword": "",  // webdev密码  用于备份
+      "webdevUrl": "https://dav.jianguoyun.com/dav/",  // [3.3.4版本弃用,使用webdev参数]webdev同步盘地址 用于备份
+      "webdevUsername": "",  // [3.3.4版本弃用,使用webdev参数]webdev用户名 用于备份
+      "webdevPassword": "",  // [3.3.4版本弃用,使用webdev参数]webdev密码 用于备份
+      "webdev": {
+        "sync": false,  // 自动同步
+        "data": {
+          "url": "https://dav.jianguoyun.com/dav/",
+          "user": "",
+          "password": ""
+        }  // webdev 用于备份
+      },  // [3.3.4版本启用]
       "windowPosition": {
         "status": false,  // 是否记录窗口位置
         "position": {
@@ -171,7 +189,7 @@
         }  // 窗口位置
       }
     }
-  ],
+  ]
 }
 ```
 
