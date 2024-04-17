@@ -165,7 +165,8 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = reactive({
   webdev: {
-    sync: false, data: {
+    sync: false,
+    data: {
       url: '',
       username: '',
       password: ''

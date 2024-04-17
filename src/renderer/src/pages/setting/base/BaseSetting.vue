@@ -216,7 +216,7 @@ const isVisible = reactive({
 });
 
 const uaDialogData = ref({ data: '', type: 'ua' });
-const webdevDialogData = ref({ url:'', username:'' ,password:'' });
+const webdevDialogData = ref({ webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }} });
 const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferMode' });
 
 const MODE_OPTIONS = computed(() => {
@@ -649,7 +649,9 @@ const snifferEvent = () => {
 
 const dataMange = () => {
   const { webdev } = formData.value;
-  webdevDialogData.value = { ...webdev };
+  webdevDialogData.value = {
+    webdev,
+  };
   isVisible.data = true
 };
 
