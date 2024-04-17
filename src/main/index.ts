@@ -1,7 +1,7 @@
 import remote from '@electron/remote/main';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 
-import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, protocol, session, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, session, shell } from 'electron';
 import fixPath from 'fix-path';
 import { join } from 'path';
 import url from 'url';
@@ -32,9 +32,6 @@ app.commandLine.appendSwitch('disable-features', 'BlockInsecurePrivateNetworkReq
 app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书相关错误
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 支持hevc
 app.commandLine.appendSwitch('disable-site-isolation-trials'); // iframe 跨域
-
-// 注册协议  在应用程序准备就绪之前注册
-protocol.registerSchemesAsPrivileged([{ scheme: 'zy', privileges: { secure: true, standard: true } }]);
 
 remote.initialize(); // 主进程初始化
 dbInit(); // 初始化数据库
