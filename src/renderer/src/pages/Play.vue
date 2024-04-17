@@ -1792,21 +1792,15 @@ const openMainWinEvent = () => {
           .title-album {
             font-size: 100%;
             width: 100%;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: stretch;
             .title-text {
-              flex: 1 1;
+              max-width: 80%;
               font-weight: 500;
               line-height: 16px;
               font-size: 16px;
               color: var(--td-text-color-primary);
             }
             .title-desc {
-              display: flex;
-              flex-direction: row;
-              flex-wrap: nowrap;
+              display: inline;
               align-items: center;
               margin-left: 9px;
               font-size: 12px;
