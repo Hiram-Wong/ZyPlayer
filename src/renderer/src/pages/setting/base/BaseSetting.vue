@@ -648,9 +648,10 @@ const snifferEvent = () => {
 }
 
 const dataMange = () => {
-  const { webdev } = formData.value;
+  let { webdev } = formData.value;
+  webdev = webdev ? webdev : { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }};
   webdevDialogData.value = {
-    webdev,
+    webdev
   };
   isVisible.data = true
 };
