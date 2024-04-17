@@ -106,7 +106,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         });
       }
 
-      magrite();
       const res = db.all();
       reply.code(200).send(res);
     } catch (err) {

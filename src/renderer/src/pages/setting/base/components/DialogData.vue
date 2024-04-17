@@ -136,9 +136,10 @@ import { ref, watch, reactive } from 'vue';
 import { createClient } from "webdav";
 
 import { t } from '@/locales';
-
 import { updateSetting, clearDb, exportDb, setDefault, initDb } from '@/api/setting';
 import { getConfig } from '@/utils/tool';
+
+import pkg from '../../../../../../../package.json'
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
@@ -398,6 +399,61 @@ const importData = async() => {
   };
 };
 
+
+const formatSet = (data) => {
+  const pkgVersion = pkg.version;
+
+  // 更新或添加新键值对
+  const newEntries = [
+    { key: 'windowPosition', value: { status: _.get(data, ['restoreWindowPositionAndSize', 'value'], false), position: { width: 1000, height: 640 } } },
+    { key: 'webdev', value: { 
+        sync: false, data: {
+          url: _.get(data, ['webdevUrl', 'value'], 'https://dav.jianguoyun.com/dav/'),
+          username: _.get(data, ['webdevUsername', 'value'], ''),
+          password: _.get(data, ['webdevPassword', 'value'], '')
+        }
+      }
+    },
+    { key: 'lang', value: 'zh_CN' },
+    { key: 'defaultViewCasual', value: '' },
+    { key: 'defaultDanMuKu', value: '' },
+    { key: 'playerMode', value: { type: _.get(data, ['broadcasterType', 'value'], 'xgplayer'), external: _.get(data, ['externalPlayer', 'value'], '') } },
+    { key: 'snifferMode', value: { type: _.get(data, ['snifferType', 'value'], 'pie'), url: '' } },
+    { key: 'version', value: pkgVersion },
+    // ... 其他新键值对
+  ];
+
+  newEntries.forEach(({ key, value }) => {
+    const index = _.findIndex(data, { key });
+    if (index > -1) {
+      const entry = data[index];
+      if (key === 'windowPosition' && typeof entry.value !== 'object') {
+        data[index].value = value;
+      } else if (key === 'version') {
+        data[index].value = value;
+      }
+    } else {
+      data.push({ id: nanoid(), key, value });
+    }
+  });
+
+  // 删除不再需要的旧键
+  const keysToRemove = [
+    'webdevUrl', 'webdevUsername', 'webdevPassword',
+    'broadcasterType', 'externalPlayer', 'snifferType',
+    'restoreWindowPositionAndSize', 'analyzeSupport', 'analyzeQuickSearchType',
+    'pauseWhenMinimize'
+  ];
+  keysToRemove.forEach((key) => {
+    const index = _.findIndex(data, { key });
+    if (index > -1) {
+      data.splice(index, 1);
+    }
+  });
+
+  return data;
+}
+
 // 公共导入方法
 const commonDelImportData = (data) => {
   try {
@@ -416,6 +472,9 @@ const commonDelImportData = (data) => {
         }
       }
     });
+
+    // 处理设置
+    data['tbl_setting'] = formatSet(data['tbl_setting']);
 
     // 规范化 id 字段
     const newDataTypes = ['tbl_site', 'tbl_iptv', 'tbl_channel', 'tbl_analyze', 'tbl_drive', 'tbl_history', 'tbl_star', 'tbl_setting'];
@@ -444,7 +503,6 @@ const commonDelImportData = (data) => {
       }
     };
 
-    console.log(data);
     return data;
   } catch (err) {
     throw err;

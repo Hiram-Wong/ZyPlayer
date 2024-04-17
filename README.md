@@ -130,6 +130,7 @@
       "defaultSearchType": "site", // 全局搜索模式 site:本站 group:组内 all:全部
       "defaultCheckModel": true,  // [弃用] 忘了干嘛的
       "defaultChangeModel": false,  // [弃用] 忘了干嘛的
+      "pauseWhenMinimize": false,  // [弃用] 最小化时暂停
       "defaultIptvEpg": "https://epg.112114.eu.org/", // iptv epg
       "defaultIptvLogo": "https://epg.112114.eu.org/logo/", // iptv logo
       "iptvSkipIpv6": true, // iptv是否跳过ipv6节目
@@ -181,6 +182,7 @@
           "password": ""
         }  // webdev 用于备份
       },  // [3.3.4版本启用]
+      "restoreWindowPositionAndSize" : false, // 弃用
       "windowPosition": {
         "status": false,  // 是否记录窗口位置
         "position": {

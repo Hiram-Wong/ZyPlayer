@@ -8,6 +8,7 @@ const update3_3_1_to3_3_2 = () => {
       position: { width: 1000, height: 640 }
     }
   }).write();
+  db.get(TABLE_NAME).remove({ key: 'restoreWindowPositionAndSize' }).write();
   db.get(TABLE_NAME).insert({ key: 'version', value: '3.3.2' }).write();
 
   logger.info('[db][magrite][update3_3_1_to3_3_2]completed')
