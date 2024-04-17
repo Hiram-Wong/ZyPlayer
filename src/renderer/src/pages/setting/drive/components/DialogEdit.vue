@@ -34,7 +34,7 @@
           <t-textarea
             v-model="formData.params"
             class="input-item input-textarea"
-            :placeholder="$t('pages.setting.placeholder.params')"
+            :placeholder="tip"
             :autosize="{ minRows: 3, maxRows: 3 }"
           />
         </t-form-item>
@@ -51,7 +51,8 @@
 
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { t } from '@/locales';
 
 import { updateDriveItem } from '@/api/drive';
 
@@ -67,6 +68,9 @@ const props = defineProps({
     },
   },
 });
+const tip = computed(() => {
+  return  `{\n\t"${t('pages.setting.placeholder.paramsPath')}": { "password": "${t('pages.setting.placeholder.paramsPasswd')}" }\n}`
+})
 const formVisible = ref(false);
 const formData = ref(props.data);
 

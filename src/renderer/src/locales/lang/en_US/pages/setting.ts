@@ -3,6 +3,8 @@ export default {
   placeholder: {
     general: 'Please enter the content',
     startPage: 'Please enter the start page path, such as /home/',
+    paramsPath: 'path',
+    paramsPasswd: 'password',
     params: '{\n\t"path": { "password": "password" }\n}',
     manualTip: 'Example of M3U:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\nExample of genre\nChannel,https://channel-url',
     groupTip: 'Please select a group',

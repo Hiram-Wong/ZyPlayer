@@ -61,7 +61,7 @@
 
     <dialog-add-view v-model:visible="isVisible.dialogAdd" @refresh-table-data="refreshEvent" />
     <dialog-edit-view v-model:visible="isVisible.dialogEdit" :data="formData" />
-    <dialog-ali-auth-view v-model:visible="isVisible.dialogAliAuth" />
+    <!-- <dialog-ali-auth-view v-model:visible="isVisible.dialogAliAuth" /> -->
   </div>
 </template>
 

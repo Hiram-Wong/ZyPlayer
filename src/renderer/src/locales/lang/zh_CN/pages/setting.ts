@@ -3,6 +3,8 @@ export default {
     placeholder: {
       general: '请输入内容',
       startPage: '请输入起始页路径, 例如/home/',
+      paramsPath: '路径',
+      paramsPasswd: '密码',
       params: `{\n\t"路径": { "password": "密码" }\n}`,
       manualTip: 'M3u格式示例:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\ngenre格式示例\nChannel,https://channel-url',
       groupTip: '请选择分组',
