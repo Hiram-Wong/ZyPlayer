@@ -51,7 +51,7 @@
                   <div v-else class="empty">
                     <div class="image" style="width: 200px" v-html="emptyImage"></div>
                     <div class="desc">
-                      <p>暂无近三天数据, 请查看其他分类!</p>
+                      <p>{{ $t('pages.search.hotNoData') }}</p>
                     </div>
                   </div>
                 </div>
