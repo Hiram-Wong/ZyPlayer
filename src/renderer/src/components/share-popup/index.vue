@@ -11,13 +11,15 @@
       <div class="share-container">
         <div class="share-container-main">
           <div class="share-container-main-left">
-            <div class="header-name">扫一扫，手机继续看</div>
+            <div class="header-name">{{ $t('pages.share.headerName') }}</div>
             <div class="header-info">
-              推荐<span class="header-info-browser">夸克APP</span>-搜索框中的相机-扫码
+              {{ $t('pages.share.headerInfoRecommend') }}
+              <span class="header-info-browser">{{ $t('pages.share.headerInfoBrowser') }}</span>
+              {{ $t('pages.share.headerInfoScan') }}
             </div>
             <div class="header-copyright text-hide">
               <span>{{ data.provider }}</span>
-              <span>提供支持,严禁传播资源</span>
+              <span>&nbsp;{{ $t('pages.share.headerCopyright') }}</span>
             </div>
             <t-divider dashed style="margin: 5px 0" />
           </div>
@@ -28,7 +30,7 @@
         <div class="bottom-title text-hide">{{ data.name }}</div>
         <div class="bottom-copy">
           <input v-model="data.url" class="input-url" readonly />
-          <button class="btn-copy" @click="copyShareUrl">复制地址</button>
+          <button class="btn-copy" @click="copyShareUrl">{{ $t('pages.share.copyUrl') }}</button>
         </div>
       </div>
     </template>
@@ -39,6 +41,7 @@ import QrcodeVue from 'qrcode.vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
 
+import { t } from '@/locales';
 import { copyToClipboardApi } from '@/utils/tool';
 
 const props = defineProps({
@@ -99,8 +102,8 @@ const onShareVisibleChange = (_, context) => {
 
 // 复制分享地址
 const copyShareUrl = async() => {
-  const successMessage = '复制成功，快分享给好友吧!';
-  const errorMessage = '当前环境不支持一键复制，请手动复制链接!';
+  const successMessage = t('pages.share.message.copySuccess');
+  const errorMessage = t('pages.share.message.copyFail');
   await copyToClipboard(data.value.url, successMessage, errorMessage);
 
   formVisible.value = false;
@@ -109,8 +112,8 @@ const copyShareUrl = async() => {
 
 <style lang="less" scoped>
 .share-container {
-  width: 340px;
-  padding: 20px;
+  width: 300px;
+  padding: var(--td-pop-padding-xl);
   border-radius: var(--td-radius-large);
   position: relative;
   cursor: default;
@@ -124,13 +127,16 @@ const copyShareUrl = async() => {
   &-main {
     display: flex;
     justify-content: flex-start;
-    height: 85px;
+    height: 80px;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    align-items: stretch;
 
     &-left {
       width: 210px;
       .header-name {
-        font-size: 15px;
-        line-height: 40px;
+        font-size: 14px;
+        line-height: 30px;
       }
 
       .header-info {
@@ -152,8 +158,8 @@ const copyShareUrl = async() => {
       margin: 0 0 0 10px;
 
       .qrcode {
-        width: 85px;
-        height: 85px;
+        width: 80px;
+        height: 80px;
         border-radius: var(--td-radius-large);
         background: rgba(0, 0, 0, 0.3);
         border: 2px solid var(--td-border-level-2-color);
@@ -162,9 +168,9 @@ const copyShareUrl = async() => {
   }
 
   .bottom-title {
-    margin-top: var(--td-comp-margin-s);
+    margin-top: var(--td-comp-margin-xxs);
     line-height: 20px;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .bottom-copy {
@@ -175,28 +181,28 @@ const copyShareUrl = async() => {
     text-align: right;
     vertical-align: middle;
     background: var(--td-bg-content-input);
-    height: 43px;
+    height: 32px;
     border-radius: var(--td-radius-round);
 
     .input-url {
       width: 100%;
-      height: 40px;
+      height: 32px;
       background-color: initial;
       border: none;
       outline: none;
       font-size: 14px;
       color: var(--td-text-color-primary);
       letter-spacing: 0;
-      padding: 9px 80px 9px 10px;
+      padding: 8px 80px 9px 10px;
       position: absolute;
       left: 0;
     }
     .btn-copy {
       position: relative;
       right: 6px;
-      width: 6em;
-      height: 30px;
-      line-height: 30px;
+      width: 5em;
+      height: 22px;
+      line-height: 20px;
       border-radius: 15px;
       font-weight: 500;
       background-color: var(--td-context-primary);

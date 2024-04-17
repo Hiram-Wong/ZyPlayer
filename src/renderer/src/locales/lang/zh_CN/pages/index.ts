@@ -10,6 +10,7 @@ import sponsor from './sponsor';
 import search from './search';
 import md from './md';
 import justlook from './justlook';
+import share from './share';
 
 export default {
   player,
@@ -23,5 +24,6 @@ export default {
   sponsor,
   search,
   md,
-  justlook
+  justlook,
+  share
 };
