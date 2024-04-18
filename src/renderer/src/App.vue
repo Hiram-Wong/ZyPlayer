@@ -32,7 +32,6 @@ const intervalId = ref();
 watch(
   () => webdev.value,
   (val) => {
-    console.log(val);
     if (intervalId.value) clearInterval(intervalId.value);
     if (val.sync) {
       intervalId.value = setInterval(() => {
