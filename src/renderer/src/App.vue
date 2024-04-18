@@ -33,7 +33,7 @@ watch(
     if (val.sync) {
       intervalId.value = setInterval(() => {
         autoSync(val.data.url, val.data.username, val.data.password);
-      }, 1000 * 5);
+      }, 1000 * 5 * 60);
     }
   }
 );
