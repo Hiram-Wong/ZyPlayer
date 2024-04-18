@@ -3,8 +3,11 @@ export default {
   brandTheme: '#85d46e',
   sysConfigSwitch: 'configBase',
   webdev: {
-    url: '',
-    username: '',
-    password: ''
+    sync: false,
+    data: {
+      url: '',
+      username: '',
+      password: ''
+    }
   }
 };
