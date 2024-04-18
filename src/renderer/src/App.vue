@@ -4,11 +4,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue';
-import PLAY_CONFIG from '@/config/play';
-import { setup } from '@/api/setting';
-import DisclaimerView from '@/pages/Disclaimer.vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+
 import { usePlayStore, useSettingStore } from '@/store';
+import { setup } from '@/api/setting';
+import { autoSync } from '@/utils/webdev';
+import PLAY_CONFIG from '@/config/play';
+
+import DisclaimerView from '@/pages/Disclaimer.vue';
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
@@ -20,6 +23,20 @@ const isVisible = reactive({
 const theme = computed(() => {
   return storeSetting.getStateMode;
 });
+
+const intervalId = ref();
+
+watch(
+  () => storeSetting.webdev,
+  (val) => {
+    if (intervalId.value) clearInterval(intervalId.value);
+    if (val.sync) {
+      intervalId.value = setInterval(() => {
+        autoSync(val.data.url, val.data.username, val.data.password);
+      }, 1000 * 5);
+    }
+  }
+);
 
 onMounted(() => {
   initConfig();

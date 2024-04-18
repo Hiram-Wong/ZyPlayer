@@ -91,17 +91,18 @@
           <p class="title">{{ $t('pages.setting.data.syncDisk') }}</p>
           <p class="content">1.{{ $t('pages.setting.data.content1') }}</p>
           <p class="content">2.{{ $t('pages.setting.data.content2') }}</p>
+          <p class="content">3.{{ $t('pages.setting.data.content3') }}</p>
           <div class="config"> 
             <t-collapse>
               <t-collapse-panel value="0" :header="$t('pages.setting.data.webdev.title')">
                 <template #headerRightContent>
                   <t-space size="small">
-                    <!-- <div>
-                      <span>{{ $t('pages.setting.data.webdev.sync') }}</span>
+                    <span class="sync-switch">
+                      <span class="sync-switch-text">{{ $t('pages.setting.data.webdev.sync') }}</span>
                       <t-switch v-model="formData.webdev.sync" />
-                    </div> -->
-                    <t-button size="small" @click.stop="saveWebdev">{{ $t('pages.setting.data.webdev.save') }}</t-button>
-                    <t-button theme="default" size="small" @click.stop="checkWebdev">{{ $t('pages.setting.data.webdev.check') }}</t-button>
+                    </span>
+                    <t-button size="small" shape="round" @click.stop="saveWebdev">{{ $t('pages.setting.data.webdev.save') }}</t-button>
+                    <t-button size="small" shape="round" theme="default" @click.stop="checkWebdevEvent">{{ $t('pages.setting.data.webdev.check') }}</t-button>
                   </t-space>
                 </template>
                 <t-input :label="$t('pages.setting.data.webdev.url')" v-model="formData.webdev.data.url" class="input-item"></t-input>
@@ -112,10 +113,10 @@
           </div>
           <div class="action">
             <div class="action-item">
-              <t-popconfirm :content="$t('pages.setting.data.syncToCloudTip')" placement="bottom"  @confirm="rsyncRemote">
+              <t-popconfirm :content="$t('pages.setting.data.syncToCloudTip')" placement="bottom"  @confirm="rsyncRemoteEvent">
                 <t-button theme="default" class="btn-2">{{ $t('pages.setting.data.syncToCloud') }}</t-button>
               </t-popconfirm>
-              <t-popconfirm :content="$t('pages.setting.data.syncToLocalTip')" placement="bottom"  @confirm="rsyncLocal">
+              <t-popconfirm :content="$t('pages.setting.data.syncToLocalTip')" placement="bottom"  @confirm="rsyncLocalEvent">
                 <t-button theme="default" class="btn-2">{{ $t('pages.setting.data.syncToLocal') }}</t-button>
               </t-popconfirm>
             </div>
@@ -133,9 +134,9 @@ import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { nanoid } from 'nanoid';
 import { ref, watch, reactive } from 'vue';
-import { createClient } from "webdav";
 
 import { t } from '@/locales';
+import { initializeWebdavClient, rsyncLocal, rsyncRemote } from '@/utils/webdev';
 import { updateSetting, clearDb, exportDb, setDefault, initDb } from '@/api/setting';
 import { getConfig } from '@/utils/tool';
 
@@ -224,7 +225,7 @@ const active = reactive({
   }
 });
 
-const clientWebdev = ref(null);
+const clientWebdev = ref();
 
 const emit = defineEmits(['update:visible']);
 
@@ -661,22 +662,6 @@ const clearData = async() => {
   }
 }
 
-// 初始化
-const initWebdav = async() => {
-  if (!formData.webdev.data.url && !formData.webdev.data.username && !formData.webdev.data.password) return;
-  
-  clientWebdev.value = await createClient(
-    formData.webdev.data.url,
-    {
-      username: formData.webdev.data.username,
-      password: formData.webdev.data.password
-    }
-  );
-  if (await clientWebdev.value.exists("/zyplayer") === false) {
-    await clientWebdev.value.createDirectory("/zyplayer");
-  };
-};
-
 // 保存
 const saveWebdev = async() => {
   try {
@@ -690,41 +675,35 @@ const saveWebdev = async() => {
 };
 
 // 校验
-const checkWebdev = async() => {
-  try {
-    if (!clientWebdev.value) await initWebdav();
-    await clientWebdev.value.getDirectoryContents("/");
+const checkWebdevEvent = async() => {
+  const { url, username, password } = formData.webdev.data;
+  const res = await initializeWebdavClient(url, username, password);
+  if (res) {
     MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+  } else {
+    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   };
 }
 
 // 覆盖远端
-const rsyncRemote = async() => {
-  try {
-    if (!clientWebdev.value) await initWebdav();
-    const str = await exportDb(["all"]);
-    const formatToJson = JSON.stringify(str);
-    await clientWebdev.value.putFileContents("/zyplayer/config.json", formatToJson, { overwrite: false });
+const rsyncRemoteEvent = async() => {
+  const { url, username, password } = formData.webdev.data;
+  const res = await rsyncRemote(url, username, password);
+  if (res) {
     MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-    console.error(err);
+  } else {
+    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   };
 }
 
 // 覆盖本地
-const rsyncLocal = async() => {
-  try {
-    if (!clientWebdev.value) await initWebdav();
-    const str: string = await clientWebdev.value.getFileContents("/zyplayer/config.json", { format: "text" });
-    const formatToJson = JSON.parse(str);
-    await initDb(formatToJson);
+const rsyncLocalEvent = async() => {
+  const { url, username, password } = formData.webdev.data;
+  const res = await rsyncLocal(url, username, password);
+  if (res) {
     MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-    console.error(err);
+  } else {
+    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   };
 }
 </script>
@@ -775,6 +754,11 @@ const rsyncLocal = async() => {
         .btn-3 {
           width: 33%;
         }
+      }
+    }
+    .sync-switch {
+      .sync-switch-text {
+        margin-right: var(--td-comp-margin-xs);
       }
     }
   }
