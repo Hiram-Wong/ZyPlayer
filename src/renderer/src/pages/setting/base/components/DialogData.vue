@@ -225,8 +225,6 @@ const active = reactive({
   }
 });
 
-const clientWebdev = ref();
-
 const emit = defineEmits(['update:visible']);
 
 watch(
@@ -400,7 +398,7 @@ const importData = async() => {
   };
 };
 
-
+// 格式化设置数据
 const formatSet = (data) => {
   const pkgVersion = pkg.version;
 
@@ -665,9 +663,7 @@ const clearData = async() => {
 // 保存
 const saveWebdev = async() => {
   try {
-    await updateSetting({
-      webdev: formData.webdev
-    })
+    await updateSetting({ webdev: formData.webdev })
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);

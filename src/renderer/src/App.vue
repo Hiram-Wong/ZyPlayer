@@ -23,19 +23,23 @@ const isVisible = reactive({
 const theme = computed(() => {
   return storeSetting.getStateMode;
 });
+const webdev = computed(() => {
+  return storeSetting.webdev;
+});
 
 const intervalId = ref();
 
 watch(
-  () => storeSetting.webdev,
+  () => webdev.value,
   (val) => {
+    console.log(val);
     if (intervalId.value) clearInterval(intervalId.value);
     if (val.sync) {
       intervalId.value = setInterval(() => {
         autoSync(val.data.url, val.data.username, val.data.password);
       }, 1000 * 5 * 60);
     }
-  }
+  }, { deep : true }
 );
 
 onMounted(() => {

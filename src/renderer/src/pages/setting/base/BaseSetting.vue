@@ -351,14 +351,17 @@ watch(
 
 watch(formData,
   (newValue, _) => {
-    storeSetting.updateConfig({ mode: formData.value.theme });
+    storeSetting.updateConfig({
+      mode: formData.value.theme,
+      webdev: formData.value.webdev
+    });
     storePlayer.updateConfig({
       setting: {
         playerMode: formData.value.playerMode,
         snifferMode: formData.value.snifferMode,
       },
     });
-    if(newValue) {
+    if (newValue) {
       updateSetting(newValue)
     }
   }, {
