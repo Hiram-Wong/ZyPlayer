@@ -204,8 +204,9 @@ export default {
     syncDisk: 'SyncDisk',
     content1: "Because not collected data, you can choose sync service save data",
     content2: 'Built-in webdav as sync service, recommend jianguo cloud',
+    content3: 'If switch AutoSync on, Sync every 5 minutes',
     webdev: {
-      title: 'SyncService Param',
+      title: 'Param',
       check: 'Check',
       save: 'Save',
       sync: 'AutoSync',

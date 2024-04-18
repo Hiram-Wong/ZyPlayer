@@ -204,6 +204,7 @@ export default {
       syncDisk: '同步盘',
       content1: '因不收集用户的数据, 可以选择同步盘作为配置文件保存服务',
       content2: '内置webdav作为同步盘服务, 推荐坚果云',
+      content3: '如果打开自动同步, 每5分钟同步一次',
       webdev: {
         title: '同步盘参数',
         check: '校验',
