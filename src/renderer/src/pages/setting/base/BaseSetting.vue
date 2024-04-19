@@ -56,7 +56,6 @@
         </div>
         <div class="hot-recommend"></div>
       </t-form-item>
-
       <t-form-item :label="$t('pages.setting.base.viewCasual')" name="viewCasual">
         <t-space align="center">
           <t-input
@@ -69,17 +68,6 @@
           <!-- <span class="title" @click="reset('viewCasual')">{{ $t('pages.setting.base.reset') }}</span> -->
         </t-space>
       </t-form-item>
-      <!-- <t-form-item label="弹幕库" name="danmu">
-        <t-space align="center">
-          <t-input
-            v-model="formData.defaultDanMuKu"
-            label="链接:"
-            placeholder="请输入弹幕库地址"
-            :style="{ width: '255px' }"
-          />
-          <span class="title" @click="reset('danmuku')">重置</span>
-        </t-space>
-      </t-form-item> -->
       <t-form-item :label="$t('pages.setting.base.iptv')" name="iptv">
         <div class="iptv">
           <t-space direction="vertical">
@@ -122,6 +110,7 @@
                 :style="{ width: '255px' }"
               />
               <span class="title" @click="snifferEvent">{{ $t('pages.setting.base.sniffer') }}</span>
+              <span class="title" v-if="formData.playerMode.type === 'xgplayer'" @click="barrageEvent">{{ $t('pages.setting.base.barrage') }}</span>
             </t-space>
             <t-space align="center" v-if="formData.playerMode.type === 'custom'">
               <t-input
@@ -165,10 +154,11 @@
         </t-space>
 
         <dialog-custom-player v-model:visible="isVisible.customPlayer" />
+        <dialog-barrage-view v-model:visible="isVisible.barrage" :barrage="barrageDialogData" @receive-data="flushDialogData"/>
         <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-thumbnail-view v-model:visible="isVisible.iptvThumbnail" />
-        <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData" @receive-sniffer-data="flushDialogData"/>
+        <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData" @receive-data="flushDialogData"/>
         <dialog-disclaimer-view v-model:visible="isVisible.disclaimer" />
       </t-form-item>
     </t-form>
@@ -197,6 +187,7 @@ import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogThumbnailView from './components/DialogThumbnail.vue';
 import DialogCustomPlayer from './components/DialogCustomPlayer.vue';
 import DialogSnifferView from './components/DialogSniffer.vue';
+import DialogBarrageView from './components/DialogBarrage.vue';
 import DialogDisclaimerView from '@/pages/Disclaimer.vue';
 
 const remote = window.require('@electron/remote');
@@ -212,12 +203,14 @@ const isVisible = reactive({
   iptvThumbnail: false,
   sniffer: false,
   customPlayer: false,
+  barrage: false,
   disclaimer: false,
 });
 
 const uaDialogData = ref({ data: '', type: 'ua' });
 const webdevDialogData = ref({ webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }} });
 const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferMode' });
+const barrageDialogData = ref({ url: '', key: '', support: [], start: '', mode: '', color: ''});
 
 const MODE_OPTIONS = computed(() => {
   return [
@@ -230,6 +223,7 @@ const MODE_OPTIONS = computed(() => {
 const PLAYER_OPTIONS = computed(() => {
   return [
     { label: t('pages.setting.base.xgplayer'), value: 'xgplayer' },
+    // { label: t('pages.setting.base.veplayer'), value: 'veplayer' },
     { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
     // { label: '腾讯播放器', value: 'tcplayer' },
     // { label: '阿里播放器', value: 'aliplayer' },
@@ -285,7 +279,6 @@ const formData = ref({
   ],
   defaultDrive: '',
   defaultViewCasual: '',
-  defaultDanMuKu: '',
   playerMode: {
     type: 'xgplayer',
     external: ''
@@ -293,6 +286,14 @@ const formData = ref({
   snifferMode: {
     type: 'pie',
     url: ''
+  },
+  barrage: {
+    url: '',
+    key: '',
+    support: [],
+    start: '',
+    mode: '',
+    color: ''
   },
   softSolution: false,
   skipStartEnd: false,
@@ -359,6 +360,7 @@ watch(formData,
       setting: {
         playerMode: formData.value.playerMode,
         snifferMode: formData.value.snifferMode,
+        barrage: formData.value.barrage
       },
     });
     if (newValue) {
@@ -648,6 +650,13 @@ const snifferEvent = () => {
   };
 
   isVisible.sniffer = true;
+}
+
+const barrageEvent = () => {
+  const { barrage } = formData.value;
+  barrageDialogData.value = barrage;
+
+  isVisible.barrage = true;
 }
 
 const dataMange = () => {

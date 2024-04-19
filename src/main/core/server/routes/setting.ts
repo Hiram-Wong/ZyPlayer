@@ -65,13 +65,15 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const skipStartEnd = await setting.find({ key: "skipStartEnd"}).value;
       const playerMode = await setting.find({ key: "playerMode"}).value;
       const webdev = await setting.find({ key: "webdev"}).value;
+      const barrage = await setting.find({ key: "barrage"}).value;
       
       const res = {
         agreementMask,
         theme,
         skipStartEnd,
         playerMode,
-        webdev
+        webdev,
+        barrage
       };
       reply.code(200).send(res);
     } catch (err) {

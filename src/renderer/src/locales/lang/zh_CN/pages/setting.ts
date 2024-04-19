@@ -106,6 +106,8 @@ export default {
       check: '检查',
       thumbnail: '缩略图',
       player: '播放器',
+      barrage: '弹幕',
+      veplayer: '火山播放器',
       xgplayer: '西瓜播放器',
       dplayer: '呆呆播放器',
       custom: '自定义(调用系统)',
@@ -143,6 +145,18 @@ export default {
       title: 'User-Agent',
       topTip: '模拟用户代理',
       bottomTip: "推荐chrome, 空使用系统默认"
+    },
+    barrage: {
+      title: '弹幕',
+      key: '返回字段',
+      api: '接口',
+      support: '线路',
+      start: '时间',
+      color: '颜色',
+      mode: '模式',
+      content: '内容',
+      param: '参数映射',
+      tip: '每个字段对应弹幕返回的位置, 从0开始'
     },
     data: {
       title: '数据管理',

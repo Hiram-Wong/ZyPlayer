@@ -46,7 +46,7 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, skipStartEnd, playerMode, webdev } = await setup();
+  const { agreementMask, theme, skipStartEnd, playerMode, webdev, barrage } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
   storeSetting.updateConfig({ webdev: webdev });
@@ -57,6 +57,7 @@ const initConfig = async () => {
   };
   init.playerMode = playerMode;
   init.skipStartEnd = skipStartEnd;
+  init.barrage = barrage;
   storePlayer.updateConfig({ setting: init });
 }
 

@@ -10,6 +10,14 @@ export default {
       url: ''
     },
     skipStartEnd: true,
+    barrage: {
+      url: '',
+      key: '',
+      support: [],
+      start: '',
+      mode: '',
+      color: ''
+    }
   },
   data: {
     info: {},

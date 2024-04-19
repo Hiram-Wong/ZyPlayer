@@ -76,7 +76,7 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = ref(props.data);
 
-const emit = defineEmits(['update:visible', 'receiveSnifferData']);
+const emit = defineEmits(['update:visible', 'receiveData']);
 
 watch(
 	() => formVisible.value,
@@ -100,7 +100,7 @@ watch(
 const onSubmit = (snifferMode) => {
   formData.value.data.type = snifferMode;
 
-  emit('receiveSnifferData', {
+  emit('receiveData', {
     data: {
       type: snifferMode,
       url: formData.value.data.url

@@ -105,8 +105,10 @@ export default {
     skipIpv6: 'SkipIpv6',
     check: 'Check',
     thumbnail: 'Thumbnail',
-    player: 'player',
+    player: 'Player',
+    barrage: 'Barrage',
     xgplayer: 'xgplayer',
+    veplayer: 'veplayer',
     dplayer: 'dplayer',
     custom: 'custom(call system)',
     command: 'Command',
@@ -143,6 +145,18 @@ export default {
     title: 'User-Agent',
     topTip: 'Emulate User Agent',
     bottomTip: "recommend chrome, empty use system default"
+  },
+  barrage: {
+    title: 'Barrage',
+    key: 'Return field',
+    api: 'Api',
+    support: 'Line',
+    start: 'Time',
+    color: 'Color',
+    mode: 'Mode',
+    content: 'Text',
+    param: 'Parameter mapping',
+    tip: 'Mapping Field position of the return, starting 0'
   },
   data: {
     title: 'DataMange',
