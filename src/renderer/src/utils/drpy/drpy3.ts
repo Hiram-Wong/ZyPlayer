@@ -7,7 +7,7 @@
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-15T12:39:19+08:00
+ * @modification-date 2023-04-19T16:59:19+08:00
  * @modification-description 使用TypeScript适配, 适用于JavaScript项目, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
@@ -21,8 +21,10 @@
 
 
 import CryptoJS from 'crypto-js';
-import cheerio from "./cheerio.min";
 import joinUrl from 'url';
+import JSEncrypt from 'wxmp-rsa';
+
+import cheerio from "./cheerio.min";
 import { getMubans } from './template';
 import gbkTool from './gbk';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req } from './drpyInject';
@@ -447,31 +449,53 @@ const decodeStr = (input, encoding) => {
 
 // 封装的RSA加解密类
 const RSA = {
-  encode: (data, key, option) => {
-    // @ts-ignore
-    if (typeof rsaEncrypt === 'function') {
-      if (!option || typeof option !== 'object') {
-        // @ts-ignore
-        return rsaEncrypt(data, key);
-      } else {
-        // @ts-ignore
-        return rsaEncrypt(data, key, option);
-      }
-    }
-    return false;
+  decode(data, key, option = { chunkSize: 117 }) {
+    if (typeof (JSEncrypt) === 'function') {
+      const chunkSize = option.chunkSize ?? 117; // 默认分段长度为117
+      const privateKey = this.getPrivateKey(key);
+      const decryptor = new JSEncrypt();
+      decryptor.setPrivateKey(privateKey);
+      return decryptor.decryptLong(data);
+    } return false;
   },
-  decode: (data, key, option) => {
-    // @ts-ignore
-    if (typeof rsaDecrypt === 'function') {
-      if (!option || typeof option !== 'object') {
-        // @ts-ignore
-        return rsaDecrypt(data, key);
-      } else {
-        // @ts-ignore
-        return rsaDecrypt(data, key, option);
-      }
+  encode(data, key, option = { chunkSize: 117 }) {
+    if (typeof (JSEncrypt) === 'function') {
+      const chunkSize = option.chunkSize ?? 117; // 默认分段长度为117
+      const publicKey = this.getPublicKey(key);
+      const encryptor = new JSEncrypt();
+      encryptor.setPublicKey(publicKey);
+      // let encrypted = ''; // 加密结果
+      // const textLen = data.length; // 待加密文本长度
+      // let offset = 0; // 分段偏移量
+      // // 分段加密
+      // while (offset < textLen) {
+      //   let chunk = data.substr(offset, chunkSize); // 提取分段数据
+      //   let enc = encryptor.encrypt(chunk); // 加密分段数据
+      //   encrypted += enc; // 连接加密结果
+      //   offset += chunkSize; // 更新偏移量
+      // }
+      return encryptor.encryptLong(data);
+    } return false;
+  },
+  fixKey(key, prefix, endfix) {
+    key = key.trim();
+    if (!key.startsWith(prefix)) {
+      key = `${prefix}${key}`;
     }
-    return false;
+    if (!key.endsWith(endfix)) {
+      key += endfix;
+    }
+    return key;
+  },
+  getPrivateKey(key) {
+    let prefix = '-----BEGIN RSA PRIVATE KEY-----';
+    let endfix = '-----END RSA PRIVATE KEY-----';
+    return this.fixKey(key, prefix, endfix);
+  },
+  getPublicKey(key) {
+    let prefix = '-----BEGIN PUBLIC KEY-----';
+    let endfix = '-----END PUBLIC KEY-----';
+    return this.fixKey(key, prefix, endfix);
   }
 };
 
