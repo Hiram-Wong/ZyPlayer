@@ -62,7 +62,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.49beta38 202400415`;
+const VERSION = `${vercode} 3.9.49beta38 202400419`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -1810,21 +1810,23 @@ const detailParse = (detailObj) => {
         let p_tab = p.tabs.split(';')[0];
         let vHeader = _pdfa(html, p_tab);
         let tab_text = p.tab_text || 'body&&Text';
-        // print('tab_text:'+tab_text);
         let new_map = {};
         for (let v of vHeader) {
           let v_title = _pdfh(v,tab_text).trim();
-          if(tab_exclude&& (new RegExp(tab_exclude)).test(v_title)){
+          if (!v_title) {
+            v_title = '线路空';
+          };
+          if (tab_exclude && (new RegExp(tab_exclude)).test(v_title)) {
             continue;
-          }
-          if(!new_map.hasOwnProperty(v_title)){
+          };
+          if (!new_map.hasOwnProperty(v_title)) {
             new_map[v_title] = 1;
-          }else{
+          } else {
             new_map[v_title] += 1;
-          }
-          if(new_map[v_title]>1){
+          };
+          if (new_map[v_title]>1) {
             v_title+=Number(new_map[v_title]-1);
-          }
+          };
           playFrom.push(v_title);
         }
       }
