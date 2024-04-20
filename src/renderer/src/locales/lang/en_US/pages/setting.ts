@@ -31,6 +31,7 @@ export default {
     iptvSource: 'IptvSetting',
     analyzeSource: 'AnalyzeSetting',
     driveSource: 'DriveSetting',
+    editSource: 'EditSource'
   },
   table: {
     default: 'Default',
@@ -269,5 +270,40 @@ export default {
     download: 'download',
     downloading: 'downloading',
     downloaded: 'The download of the installation package is complete'
+  },
+  editSource: {
+    import: 'Import',
+    export: 'Export',
+    bug: 'Debug',
+    cache: 'PullCache',
+    delete: 'DeleteCase',
+    title: 'Source Writer Tool [Hjdhnx Co-Branded]',
+    bar: {
+      title: 'Edit Params',
+      theme: 'theme',
+      language: 'language',
+      eol: 'eol',
+      wordWrap: 'wordWrap',
+      disable: 'disable',
+      enable: 'enable'
+    },
+    action: {
+      init: 'Init',
+      classify: 'Classify',
+      source: 'Source',
+      home: 'Home',
+      first: 'First',
+      detail: 'Detail',
+      search: 'Search',
+      play: 'Play'
+    },
+    select: {
+      log: 'Log',
+      debug: 'Debug',
+      source: 'Source'
+    },
+    message: {
+      openDevTools: 'Currently logs can only be viewed via Developer Tools -> Console'
+    }
   }
 }

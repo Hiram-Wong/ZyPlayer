@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { FastifyReply, FastifyPluginAsync, FastifyRequest } from 'fastify';
 
 import { history, setting, star, site, iptv, channel, analyze, drive, db } from '../../db/service';
-import magrite from '../../db/magrite';
 
 const API_VERSION = "api/v1";
 

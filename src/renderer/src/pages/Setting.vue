@@ -25,6 +25,7 @@
         <iptv-view class="container-item" v-else-if="settingSet.select === 'iptvSource'"/>
         <analyze-view class="container-item" v-else-if="settingSet.select === 'analyzeSource'"/>
         <drive-view class="container-item" v-else-if="settingSet.select === 'driveSource'"/>
+        <edit-source-view class="container-item" v-else-if="settingSet.select === 'editSource'"/>
       </div>
     </div>
   </div>
@@ -41,6 +42,7 @@ import baseView from './setting/base/BaseSetting.vue';
 import iptvView from './setting/iptv/IptvSetting.vue';
 import siteView from './setting/site/SiteSetting.vue';
 import driveView from './setting/drive/DriveSetting.vue';
+import editSourceView from './setting/tool/EditSource.vue';
 import CommonNav from '../components/common-nav/index.vue';
 
 const storeSetting = useSettingStore();
@@ -65,6 +67,9 @@ const settingNav = computed(() => {
     },{
       id: 'driveSource',
       name: t('pages.setting.nav.driveSource')
+    },{
+      id: 'editSource',
+      name: t('pages.setting.nav.editSource')
     }
   ]
 });
