@@ -293,6 +293,10 @@ app.whenReady().then(async() => {
     mainWindow!.webContents.send('screen', false);
   });
 
+  mainWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
+    logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+  });
+
   // 检测更新
   autoUpdater(mainWindow!);
   // 引入主 Ipc
@@ -392,6 +396,9 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   playWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
+  });
+  playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
+    logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
   });
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
