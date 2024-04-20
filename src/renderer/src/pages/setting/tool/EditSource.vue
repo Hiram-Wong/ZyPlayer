@@ -104,15 +104,23 @@
           </div>
         </div>
         <div class="log">
-          <div class="select">
-            <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
-              <t-radio-button value="debug">{{ $t('pages.setting.editSource.select.debug') }}</t-radio-button>
-              <t-radio-button value="source">{{ $t('pages.setting.editSource.select.source') }}</t-radio-button>
-              <t-radio-button value="log">{{ $t('pages.setting.editSource.select.log') }}</t-radio-button>
-            </t-radio-group>
-          </div>
           <div class="text">
-            <t-textarea class="t-textarea" readonly v-model="form.content.text"></t-textarea>
+            <div class="select">
+              <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
+                <t-radio-button value="debug">{{ $t('pages.setting.editSource.select.debug') }}</t-radio-button>
+                <t-radio-button value="source">{{ $t('pages.setting.editSource.select.source') }}</t-radio-button>
+                <t-radio-button value="log">{{ $t('pages.setting.editSource.select.log') }}</t-radio-button>
+              </t-radio-group>
+            </div>
+            <json-viewer
+              v-if="form.nav === 'debug'"
+              :value="formatJson"
+              copyable
+              sort
+              :theme="systemTheme"
+              style="height: 100%;"
+            />
+            <t-textarea v-else class="t-textarea" readonly v-model="form.content.text" />
           </div>
         </div>
       </div>
@@ -121,10 +129,13 @@
 </template>
 
 <script setup lang="ts">
+import "vue3-json-viewer/dist/index.css";
+
 import { useEventBus } from '@vueuse/core';
 import * as monaco from 'monaco-editor';
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { JsonViewer } from "vue3-json-viewer";
 import { MessagePlugin } from 'tdesign-vue-next';
 import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon } from 'tdesign-icons-vue-next';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
@@ -133,7 +144,7 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
-import { setDebugSource, delDebugSource } from '@/api/lab';
+import { fetchDebugSource, setDebugSource, delDebugSource } from '@/api/lab';
 import { getConfig } from '@/utils/tool';
 import { doWork as t3Work } from '@/utils/drpy/index';
 
@@ -146,6 +157,17 @@ const storeSetting = useSettingStore();
 const systemTheme = computed(() => {
   return storeSetting.displayMode;
 });
+
+const formatJson = computed(() => {
+  try {
+    if (form.value.content.text) return JSON.parse(form.value.content.text);
+    return {};
+  } catch(err) {
+    console.error(err);
+    return {};
+  };
+});
+
 
 watch(
   () => systemTheme.value,
@@ -369,7 +391,7 @@ const debugEvent = async() => {
 
 const cacheEvent = async() => {
   try {
-    const res = await getConfig('http://127.0.0.1:9978/v1/api/debug/source');
+    const res = await fetchDebugSource();
     if (editor) editor.setValue(res);
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
@@ -407,7 +429,8 @@ const performAction = async (type, requestData = {}) => {
     changeNav('debug');
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+    console.log(err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   }
 };
 
@@ -506,10 +529,9 @@ const getSource = async() => {
         background-color: var(--td-bg-content-input);
         border-radius: var(--td-radius-default);
         align-items: center;
-        border-radius: var(--td-radius-medium);
         .item {
           color: var(--td-text-color-placeholder);
-          border-radius: var(--td-radius-medium);
+          border-radius: var(--td-radius-default);
           display: flex;
           align-items: center;
           padding: 2px 4px;
@@ -576,7 +598,7 @@ const getSource = async() => {
             padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-l);
           }
           .t-collapse-panel__body {
-            border-radius: var(--td-radius-medium);
+            border-radius: var(--td-radius-default);
             margin-bottom: var(--td-comp-margin-xxs);
             .t-collapse-panel__content {
               padding: var(--td-comp-paddingTB-m) var(--td-comp-paddingLR-xxs);
@@ -612,19 +634,16 @@ const getSource = async() => {
           .input {
             margin-right: var(--td-comp-margin-s);
           }
-          .button {
-            // margin-right: var(--td-comp-margin-s);
-          }
         }
       }
       .log {
         flex: 1;
         padding-top: var(--td-comp-paddingTB-m);
-        position: relative;
+        overflow: hidden;
         .select {
           position: absolute;
           z-index: 100;
-          top: -2px;
+          top: -15px;
           left: 10px;
           :deep(.t-radio-group) {
             box-shadow: var(--td-shadow-3);
@@ -633,6 +652,20 @@ const getSource = async() => {
         .text {
           position: relative;
           height: 100%;
+          :deep(.jv-container) {
+            background-color: var(--td-bg-content-input) !important;
+            border-radius: var(--td-radius-default);
+            .jv-button {
+              color: var(--td-brand-color);
+            }
+            .jv-code {
+              overflow-y: auto !important;
+              height: 100%;
+            }
+            .jv-more {
+              display: none;
+            }
+          }
         }
         .t-textarea {
           height: 100%;
