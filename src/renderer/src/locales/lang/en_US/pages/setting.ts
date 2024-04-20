@@ -278,7 +278,9 @@ export default {
     bug: 'Debug',
     cache: 'PullCache',
     delete: 'DeleteCase',
-    title: 'Source Writer Tool [Hjdhnx Co-Branded]',
+    title: 'Edit Source Tool [Hjdhnx Co-Branded]',
+    template: 'template',
+    templateTip: 'select one default template to edit',
     bar: {
       title: 'Edit Params',
       theme: 'theme',

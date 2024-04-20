@@ -279,6 +279,8 @@ export default {
     delete: '删除用例',
     cache: '拉取缓存',
     title: '写源工具 [道长联名]',
+    template: '模板',
+    templateTip: '选择一个要编辑的默认模板',
     bar: {
       title: '编辑器参数',
       theme: '主题',

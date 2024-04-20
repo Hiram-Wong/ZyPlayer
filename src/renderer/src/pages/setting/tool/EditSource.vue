@@ -35,8 +35,24 @@
       <div class="left">
         <div class="edit">
           <div class="code-op">
-            <t-input v-model="form.url" label="url" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-            <t-button class="button" theme="default" @click="getSource">{{ $t('pages.setting.editSource.action.source') }}</t-button>
+            <div class="item">
+              <t-button class="button" theme="default" @click="showTemplateDialog">{{ $t('pages.setting.editSource.template') }}</t-button>
+              <t-dialog
+                v-model:visible="isVisible.template"
+                :header="$t('pages.setting.editSource.template')"
+                width="40%"
+                @confirm="confirmTemplate()"
+              >
+                <p>{{ $t('pages.setting.editSource.templateTip') }}</p>
+                <t-select v-model="form.template" @change="changeTheme()">
+                  <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
+                </t-select>
+              </t-dialog>
+            </div>
+            <div class="item source">
+              <t-input v-model="form.url" label="url" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
+              <t-button class="button" theme="default" @click="getSource">{{ $t('pages.setting.editSource.action.source') }}</t-button>
+            </div>
           </div>
           <t-collapse>
             <t-collapse-panel :header="t('pages.setting.editSource.bar.title')">
@@ -51,7 +67,7 @@
                 <div class="item theme">
                   <span class="codebox-label">{{ $t('pages.setting.editSource.bar.language') }}</span>
                   <t-select v-model="config.language" auto-width @change="changeLanguage()">
-                    <t-option v-for="item in languages" :key="item.label" :value="item.value" :label="item.label" />
+                    <t-option v-for="item in languages" :key="item.label" :value="item.label" :label="item.label" />
                   </t-select>
                 </div>
 
@@ -83,24 +99,24 @@
             <t-button class="button" theme="default" @click="actionHomeVod">{{ $t('pages.setting.editSource.action.home') }}</t-button>
           </div>
             <div class="item">
-              <t-input v-model="form.category.t" label="t" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-              <t-input v-model="form.category.f" label="f" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-              <t-input v-model="form.category.pg" label="pg" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-              <t-button class="button" theme="default" @click="actionList">{{ $t('pages.setting.editSource.action.first') }}</t-button>
+              <t-input v-model="form.category.t" label="t" :placeholder="$t('pages.setting.placeholder.general')" class="input w-33%"/>
+              <t-input v-model="form.category.f" label="f" :placeholder="$t('pages.setting.placeholder.general')" class="input w-33%"/>
+              <t-input v-model="form.category.pg" label="pg" :placeholder="$t('pages.setting.placeholder.general')" class="input w-33%"/>
+              <t-button class="button w-btn" theme="default" @click="actionList">{{ $t('pages.setting.editSource.action.first') }}</t-button>
             </div>
             <div class="item">
-              <t-input v-model="form.detail.ids" label="ids" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-              <t-button class="button" theme="default" @click="actionDetail">{{ $t('pages.setting.editSource.action.detail') }}</t-button>
+              <t-input v-model="form.detail.ids" label="ids" :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%"/>
+              <t-button class="button w-btn" theme="default" @click="actionDetail">{{ $t('pages.setting.editSource.action.detail') }}</t-button>
             </div>
             <div class="item">
-              <t-input v-model="form.search.wd" label="wd" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-              <t-input v-model="form.search.pg" label="pg" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-              <t-button class="button" theme="default" @click="actionSearch">{{ $t('pages.setting.editSource.action.search') }}</t-button>
+              <t-input v-model="form.search.wd" label="wd" :placeholder="$t('pages.setting.placeholder.general')" class="input w-50%"/>
+              <t-input v-model="form.search.pg" label="pg" :placeholder="$t('pages.setting.placeholder.general')" class="input w-50%"/>
+              <t-button class="button w-btn" theme="default" @click="actionSearch">{{ $t('pages.setting.editSource.action.search') }}</t-button>
             </div>
           <div class="item mg-top">
-            <t-input v-model="form.play.flag" label="flag" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-            <t-input v-model="form.play.play" label="play" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
-            <t-button class="button" theme="default" @click="actionPlay">{{ $t('pages.setting.editSource.action.play') }}</t-button>
+            <t-input v-model="form.play.flag" label="flag" :placeholder="$t('pages.setting.placeholder.general')" class="input w-50%"/>
+            <t-input v-model="form.play.play" label="play" :placeholder="$t('pages.setting.placeholder.general')" class="input w-50%"/>
+            <t-button class="button w-btn" theme="default" @click="actionPlay">{{ $t('pages.setting.editSource.action.play') }}</t-button>
           </div>
         </div>
         <div class="log">
@@ -146,6 +162,7 @@ import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { fetchDebugSource, setDebugSource, delDebugSource } from '@/api/lab';
 import { getConfig } from '@/utils/tool';
+import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
 
 const remote = window.require('@electron/remote');
@@ -241,8 +258,8 @@ const languages = [
     value: ['yml', 'yaml'],
   },
   {
-      label: 'xml',
-      value: ['xml'],
+    label: 'xml',
+    value: ['xml'],
   },
   {
     label: 'javascript',
@@ -258,6 +275,12 @@ const languages = [
   },
 ];
 
+const templates = computed(() => {
+  const dictionary = getMubans();
+  const keysAsObjects = Object.keys(dictionary).map(key => ({ label: key, value: key }));
+  return keysAsObjects;
+});
+
 let form = ref({
   content: {
     edit: '',
@@ -266,6 +289,7 @@ let form = ref({
     debug: '',
     source: ''
   },
+  template: 'mxpro',
   url: '',
   nav: 'debug',
   detail: {
@@ -286,6 +310,10 @@ let form = ref({
   }
 });
 
+const isVisible = reactive({
+  template: false
+});
+
 const changeLanguage = () => {
   if (editor) monaco.editor.setModelLanguage(editor.getModel()!, config.language);
 };
@@ -304,6 +332,18 @@ const changeWarp = () => {
   if (editor) editor.updateOptions({
     wordWrap: config.wordWrap,
   });
+};
+
+const confirmTemplate = () => {
+  try {
+    const text = getMubans()[form.value.template];
+    if (editor) editor.setValue(`var rule = ${JSON.stringify(text)}`);
+    MessagePlugin.success(`${t('pages.setting.data.success')}`);
+  } catch (err) {
+    console.log(err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
+  }
+  isVisible.template = false;
 };
 
 const initEditor = () => {
@@ -502,6 +542,10 @@ const getSource = async() => {
     changeNav('source');
   };
 };
+
+const showTemplateDialog = () => {
+  isVisible.template = true;
+};
 </script>
 
 <style lang="less" scoped>
@@ -608,6 +652,15 @@ const getSource = async() => {
         .code-op {
           display: flex;
           grid-gap: var(--td-comp-margin-s);
+          .item {
+            display: flex;
+            grid-gap: var(--td-comp-margin-s);
+          }
+          .source {
+            display: flex;
+            grid-gap: var(--td-comp-margin-s);
+            flex: 1;
+          }
         }
         .code-box {
           flex: 1;
@@ -631,8 +684,27 @@ const getSource = async() => {
         grid-gap: var(--td-comp-margin-s);
         .item {
           display: flex;
+          flex-wrap: nowrap;
+          width: 100%;
+          overflow: hidden;
           .input {
+            width: 100%;
             margin-right: var(--td-comp-margin-s);
+          }
+          .button {
+
+          }
+          .w-btn {
+            width: 50px;
+          }
+          .w-100\% {
+            width: calc((100% - 50px - (var(--td-comp-margin-s))));
+          }
+          .w-50\% {
+            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 2);
+          }
+          .w-33\% {
+            width: calc((100% - 50px - (var(--td-comp-margin-s) * 3)) / 3);
           }
         }
       }
@@ -687,5 +759,6 @@ const getSource = async() => {
 :deep(.t-input) {
   background-color: var(--td-bg-content-input) !important;
   border-color: transparent;
+  box-shadow: none;
 }
 </style>
