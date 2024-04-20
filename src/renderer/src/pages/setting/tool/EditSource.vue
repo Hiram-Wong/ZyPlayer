@@ -369,7 +369,7 @@ const debugEvent = async() => {
 
 const cacheEvent = async() => {
   try {
-    const res = await getConfig('/v1/api/debug/source');
+    const res = await getConfig('http://127.0.0.1:9978/v1/api/debug/source');
     if (editor) editor.setValue(res);
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
