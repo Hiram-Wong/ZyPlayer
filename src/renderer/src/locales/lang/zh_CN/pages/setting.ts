@@ -149,6 +149,7 @@ export default {
   },
   barrage: {
     title: '弹幕',
+    header: '启用该参数需预处理数据, 将增加起播时间',
     key: '返回字段',
     api: '接口',
     support: '线路',

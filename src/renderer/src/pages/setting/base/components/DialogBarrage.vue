@@ -7,7 +7,9 @@
   >
     <template #body>
       <div class="doh-dialog-container dialog-container-padding">
-        <div class="header"></div>
+        <div class="header">
+          <p>{{ $t('pages.setting.barrage.header') }}</p>
+        </div>
 
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
