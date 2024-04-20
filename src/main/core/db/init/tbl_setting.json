@@ -108,6 +108,10 @@
       }
     }
   },
+  {
+    "key": "barrage",
+    "value": { "url": "", "key": "", "support": "", "start": "", "mode": "", "color": "", "content": ""}
+  },
   { "key": "windowPosition",
     "value": {
       "status": false,

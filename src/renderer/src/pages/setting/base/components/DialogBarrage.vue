@@ -86,7 +86,7 @@ const props = defineProps({
   barrage: {
     type: Object,
     default: () => {
-      return { url: '', key: '', support: [], start: '', mode: '', color: ''}
+      return { url: '', key: '', support: [], start: '', mode: '', color: '', content:''}
     }
   },
 });

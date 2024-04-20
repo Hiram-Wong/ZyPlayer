@@ -415,7 +415,7 @@ const formatSet = (data) => {
     },
     { key: 'lang', value: 'zh_CN' },
     { key: 'defaultViewCasual', value: '' },
-    { key: 'barrage', value: { url: '', key: '', support: [], start: '', mode: '', color: ''} },
+    { key: 'barrage', value: { url: '', key: '', support: [], start: '', mode: '', color: '', content: ''} },
     { key: 'playerMode', value: { type: _.get(data, ['broadcasterType', 'value'], 'xgplayer'), external: _.get(data, ['externalPlayer', 'value'], '') } },
     { key: 'snifferMode', value: { type: _.get(data, ['snifferType', 'value'], 'pie'), url: '' } },
     { key: 'version', value: pkgVersion },

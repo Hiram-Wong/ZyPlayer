@@ -16,7 +16,8 @@ export default {
       support: [],
       start: '',
       mode: '',
-      color: ''
+      color: '',
+      content: ''
     }
   },
   data: {

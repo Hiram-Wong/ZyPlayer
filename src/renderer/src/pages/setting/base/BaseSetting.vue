@@ -210,7 +210,7 @@ const isVisible = reactive({
 const uaDialogData = ref({ data: '', type: 'ua' });
 const webdevDialogData = ref({ webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }} });
 const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferMode' });
-const barrageDialogData = ref({ url: '', key: '', support: [], start: '', mode: '', color: ''});
+const barrageDialogData = ref({ url: '', key: '', support: [], start: '', mode: '', color: '', content: ''});
 
 const MODE_OPTIONS = computed(() => {
   return [
@@ -293,7 +293,8 @@ const formData = ref({
     support: [],
     start: '',
     mode: '',
-    color: ''
+    color: '',
+    content: ''
   },
   softSolution: false,
   skipStartEnd: false,

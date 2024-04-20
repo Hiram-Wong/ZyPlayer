@@ -15,7 +15,7 @@ const update3_3_3_to3_3_4 = () => {
   if (db.get(TABLE_NAME).find({ key: "barrage" }).value()?.value) {
     db.get(TABLE_NAME).remove({ key: 'barrage' }).write();
   }
-  db.get(TABLE_NAME).insert({ key: "barrage", value: { url: '', key: '', support: '', start: '', mode: '', color: ''} }).write();
+  db.get(TABLE_NAME).insert({ key: "barrage", value: { url: '', key: '', support: '', start: '', mode: '', color: '', content: ''} }).write();
   if (db.get(TABLE_NAME).find({ key: "playerMode" }).value()?.value) {
     db.get(TABLE_NAME).remove({ key: 'playerMode' }).write();
   }
