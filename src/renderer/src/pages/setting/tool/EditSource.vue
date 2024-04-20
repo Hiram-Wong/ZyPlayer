@@ -337,7 +337,7 @@ const changeWarp = () => {
 const confirmTemplate = () => {
   try {
     const text = getMubans()[form.value.template];
-    if (editor) editor.setValue(`var rule = ${JSON.stringify(text)}`);
+    if (editor) editor.setValue(`var rule = ${JSON.stringify(text, null, 2).split('\n').join('\n  ')}`);
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err) {
     console.log(err);
