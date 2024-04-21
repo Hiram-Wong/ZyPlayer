@@ -281,6 +281,11 @@ export default {
     title: '写源工具 [道长联名]',
     template: '模板',
     templateTip: '选择一个要编辑的默认模板',
+    rule: {
+      pdfa: '列表',
+      pdfh: '节点',
+      try: '执行'
+    },
     bar: {
       title: '编辑器参数',
       theme: '主题',
@@ -298,12 +303,14 @@ export default {
       first: '一级',
       detail: '详情',
       search: '搜索',
-      play: '播放'
+      play: '播放',
+      proxy: '代理'
     },
     select: {
       log: '日志',
       debug: '调试',
-      source: '源代码'
+      source: '源代码',
+      rule: '规则'
     },
     message: {
       openDevTools: '目前只能通过开发者工具->控制台查看日志'

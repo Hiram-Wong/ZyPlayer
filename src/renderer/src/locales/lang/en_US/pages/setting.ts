@@ -281,6 +281,11 @@ export default {
     title: 'Edit Source Tool [Hjdhnx Co-Branded]',
     template: 'template',
     templateTip: 'select one default template to edit',
+    rule: {
+      pdfa: 'Pdfa',
+      pdfh: 'Pdfh',
+      try: 'Try'
+    },
     bar: {
       title: 'Edit Params',
       theme: 'theme',
@@ -298,12 +303,14 @@ export default {
       first: 'First',
       detail: 'Detail',
       search: 'Search',
-      play: 'Play'
+      play: 'Play',
+      proxy: 'Proxy'
     },
     select: {
       log: 'Log',
       debug: 'Debug',
-      source: 'Source'
+      source: 'Source',
+      rule: 'Rule'
     },
     message: {
       openDevTools: 'Currently logs can only be viewed via Developer Tools -> Console'
