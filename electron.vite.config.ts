@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import { defineConfig, externalizeDepsPlugin, swcPlugin, splitVendorChunkPlugin } from 'electron-vite';
+import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
 import { ConfigEnv, loadEnv } from 'vite';
 import svgLoader from 'vite-svg-loader';
 
@@ -93,8 +93,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
               library: 'vue-next',
             }),
           ],
-        }),
-        splitVendorChunkPlugin()
+        })
       ],
       server: {
         strictPort: true, // 端口冲突自动分配端口
