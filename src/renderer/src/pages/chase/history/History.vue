@@ -14,7 +14,7 @@
                 <t-col
                   :md="3" :lg="3" :xl="2" :xxl="1"
                   v-for="detail in item"
-                  :key="detail.id"
+                  :key='detail["id"]'
                   class="card"
                   @click="playEvent(detail)"
                 >
@@ -22,7 +22,7 @@
                   <div class="card-close" @click.stop="removeEvent(detail)"></div>
                   <t-image
                     class="card-main-item"
-                    :src="detail.videoImage"
+                    :src='detail["videoImage"]'
                     :style="{ width: '100%', background: 'none', overflow: 'hidden' }"
                     :lazy="true"
                     fit="cover"
@@ -31,17 +31,17 @@
                   >
                     <template #overlayContent>
                       <div class="op">
-                        <span>{{ detail.siteName ? detail.siteName : $t('pages.chase.sourceDeleted') }}</span>
+                        <span>{{ detail["siteName"] ? detail["siteName"] : $t('pages.chase.sourceDeleted') }}</span>
                       </div>
                     </template>
                   </t-image>
                   </div>
                   <div class="card-footer">
-                    <p class="card-footer-title text-hide">{{ detail.videoName }} {{ detail.videoIndex }}</p>
+                    <p class="card-footer-title text-hide">{{ detail["videoName"] }} {{ formatIndex(detail["videoIndex"]).index }}</p>
                     <p class="card-footer-desc text-hide">
                       <laptop-icon size="1.3em" class="icon" />
-                      <span v-if="detail.playEnd">{{ $t('pages.chase.progress.watched') }}</span>
-                      <span v-else>{{ $t('pages.chase.progress.watching') }} {{ formatProgress(detail.watchTime, detail.duration) }}</span>
+                      <span v-if='detail["playEnd"]'>{{ $t('pages.chase.progress.watched') }}</span>
+                      <span v-else>{{ $t('pages.chase.progress.watching') }} {{ formatProgress(detail["watchTime"], detail["duration"]) }}</span>
                     </p>
                   </div>
                 </t-col>
@@ -77,6 +77,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref, reactive } from 'vue';
 
+import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
 import { delHistory, fetchHistoryList } from '@/api/history';
@@ -140,9 +141,9 @@ const getHistoryList = async () => {
     }
 
     for (const item of history_res.data) {
-      const findItem = siteConfig.value.data.find(({ id }) => id === item.relateId);
+      const findItem: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
       if (findItem) item.site = { ...findItem };
-      item.siteName = findItem ? findItem.name : "";
+      item.siteName = findItem ? findItem["name"] : "";
       const timeDiff = filterDate(item.date);
       let timeKey;
       if (timeDiff === 0) timeKey = 'today';
@@ -182,7 +183,7 @@ const load = async ($state) => {
 const playEvent = async (item) => {
   try {
     const { videoName, videoId } = item;
-    const site = siteConfig.value.data.find(({ id }) => id === item.relateId);
+    const site: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
     siteData.value = site;
     if (site.type === 7) {
       await t3RuleInit(site);
@@ -255,6 +256,12 @@ eventBus.on(() => {
   if (!_.size(options.value)) infiniteId.value++;
   pagination.value.pageIndex = 0;
 });
+
+// 格式化剧集集数
+const formatIndex = (item) => {
+  const [index, url] = item.split('$');
+  return { index, url };
+};
 </script>
 
 <style lang="less" scoped>

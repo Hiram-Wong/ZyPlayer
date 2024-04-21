@@ -7,18 +7,18 @@
             <t-col
               :md="3" :lg="3" :xl="2" :xxl="1"
               v-for="item in bingeConfig.data"
-              :key="item.id"
+              :key='item["id"]'
               class="card"
               @click="playEvent(item)"
             >
               <div class="card-main">
-                <div class="card-tag card-tag-orange" v-if="item.videoUpdate">
+                <div class="card-tag card-tag-orange" v-if='item["videoUpdate"]'>
                   <span class="card-tag-text text-hide">有更新哟</span>
                 </div>
                 <div class="card-close" @click.stop="removeEvent(item)"></div>
                 <t-image
                   class="card-main-item"
-                  :src="item.videoImage"
+                  :src='item["videoImage"]'
                   :style="{ width: '100%', background: 'none', overflow: 'hidden' }"
                   :lazy="true"
                   fit="cover"
@@ -27,14 +27,14 @@
                 >
                   <template #overlayContent>
                     <div class="op">
-                      <span>{{ item.siteName ? item.siteName : $t('pages.chase.sourceDeleted') }}</span>
+                      <span>{{ item["siteName"] ? item["siteName"] : $t('pages.chase.sourceDeleted') }}</span>
                     </div>
                   </template>
                 </t-image>
               </div>
               <div class="card-footer">
-                <p class="card-footer-title text-hide">{{ item.videoName }}</p>
-                <p class="card-footer-desc text-hide">{{ item.videoRemarks ? item.videoRemarks.trim() : '' }}</p>
+                <p class="card-footer-title text-hide">{{ item["videoName"] }}</p>
+                <p class="card-footer-desc text-hide">{{ item["videoRemarks"] ? item["videoRemarks"] : '' }}</p>
               </div>
             </t-col>
           </t-row>
@@ -66,6 +66,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref, reactive } from 'vue';
 
+import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
 import { fetchStarList, delStar } from '@/api/star';
@@ -130,7 +131,7 @@ const getBingeList = async () => {
     }
 
     for (const item of star_res.data) {
-      const findItem = siteConfig.value.data.find(({ id }) => id === item.relateId);
+      const findItem: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
       if (findItem) item.site = { ...findItem };
       item.siteName = findItem ? findItem.name : "";
     }
@@ -166,7 +167,7 @@ const load = async ($state) => {
 const playEvent = async (item) => {
   try {
     const { videoName, videoId } = item;
-    const site = siteConfig.value.data.find(({ id }) => id === item.relateId);
+    const site: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
     siteData.value = site;
     if (site.type === 7) {
       await t3RuleInit(site);
