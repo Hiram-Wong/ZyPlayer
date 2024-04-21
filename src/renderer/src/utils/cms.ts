@@ -114,6 +114,18 @@ const t3RuleInit = async(site) => {
   return data;
 }
 
+const t3RuleProxy = async (url: string): Promise<any[]> => {
+  if (!url || !url.startsWith("http")) {
+    return [];
+  }
+
+  const formatUrl = new URL(url);
+  const params = Object.fromEntries(formatUrl.searchParams.entries());
+
+  const result: any = await t3Work({ type: 'proxy', data: params });
+  return (result?.data ?? []) as any[];
+}
+
 const t3RuleTerminate = async() => {
   const res: any = await t3WorkTerminate();
   if (res.code === 200) return 'sucess'
@@ -1025,6 +1037,7 @@ const fetchDoubanRecommend = async(id, name, year) => {
 
 export {
   t3RuleInit,
+  t3RuleProxy,
   t3RuleTerminate,
   catvodRuleInit,
   checkValid,

@@ -6,7 +6,7 @@
  * @date 2023-03-24T18:21:29+08:00
  */
 
-import { init, home, homeVod, category, detail, play, search, keepUnUse } from './drpy3';
+import { init, home, homeVod, category, detail, play, search, proxy, keepUnUse } from './drpy3';
 
 const initUtils = () => {
   console.log(`[worker][prevent tree-shake] init t3 not use module`);
@@ -42,6 +42,9 @@ const drpyWork = (parms) => {
     case 'search':
       const { wd, quick, pg: searchPg } = data;
       res.data = search(wd, quick, searchPg);
+      break;
+    case 'proxy':
+      res.data = proxy(data);
       break;
     default:
       break;

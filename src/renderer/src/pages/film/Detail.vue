@@ -137,7 +137,8 @@ import { usePlayStore } from '@/store';
 import { fetchAnalyzeDefault } from '@/api/analyze';
 import { updateHistory, detailHistory, addHistory } from '@/api/history';
 import { detailStar, addStar, delStar } from '@/api/star';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, fetchCatvodPlayUrl } from '@/utils/cms';
+import { setT3Proxy } from '@/api/proxy';
+import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, t3RuleProxy, fetchCatvodPlayUrl } from '@/utils/cms';
 import sniffer from '@/utils/sniffer';
 import { getConfig, checkMediaType } from '@/utils/tool';
 
@@ -265,8 +266,13 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   console.log('[detail][t3][start]获取服务端播放链接开启');
   let data: string = '';
   try {
-    const res = await fetchT3PlayUrl(flag, id, flags);
-    data = res.url;
+    const playRes = await fetchT3PlayUrl(flag, id, flags);
+    if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
+      const proxyRes = await t3RuleProxy(playRes.url);
+      await setT3Proxy(proxyRes);
+    }
+
+    data = playRes.url;
     console.log(`[detail][t3][return]${data}`);
   } catch (err) {
     console.log(`[detail][t3][error]${err}`);

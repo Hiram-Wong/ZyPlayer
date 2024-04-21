@@ -1,14 +1,14 @@
 /*!
  * @module drpy3
  * @brief T3数据处理核心库
- * @version 3.1.1
+ * @version 3.1.2
  * 
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-19T16:59:19+08:00
- * @modification-description 使用TypeScript适配, 适用于JavaScript项目, 并采取措施防止 Tree-Shaking 删除关键代码
+ * @modification-date 2023-04-20T23:16:48+08:00
+ * @modification-description 使用TypeScript适配, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
  * - 为了确保 `drpy3.ts` 中的函数和变量不被 Tree Shaking, 已采取以下措施：
@@ -36,6 +36,7 @@ const init_test = () => {
     "rule": rule
   }
   console.log(test_data);
+  return test_data;
 }
 
 /**
@@ -2238,7 +2239,7 @@ const init = (ext) => {
     // @ts-ignore
     RKEY = typeof key !=='undefined' && key ? key : 'drpy_' + (rule["title"] || rule["host"]);
     pre();
-    init_test();
+    return init_test();
   } catch (e) {
     console.info('[t3][init]init_test发生错误:', e);
   }
@@ -2391,13 +2392,13 @@ const search = (wd, quick, pg) => {
  * @param params 代理链接参数比如 /proxy?do=js&url=https://wwww.baidu.com => params就是 {do:'js','url':'https://wwww.baidu.com'}
  * @returns {*}
  */
-const proxy = (params: string) => {
-  let proxy_rule = rule["proxy_rul"]?.trim() || "";
-  
+const proxy = (params) => {
+  let proxy_rule = rule["proxy_rule"]?.trim() || "";
+
   if (proxy_rule.startsWith('js:')) {
     proxy_rule = proxy_rule.replace('js:', '');
   }
-  
+
   const proxyObj = {
     params: params,
     proxy_rule: proxy_rule
@@ -2473,5 +2474,6 @@ export {
   detail,
   play,
   search,
+  proxy,
   keepUnUse
 };
