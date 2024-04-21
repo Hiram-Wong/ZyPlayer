@@ -140,7 +140,21 @@
       "defaultIptv": "993841fe-5e91-5e5d-35d6-5be81822960b", // iptv 默认源标识
       "defaultAnalyze": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // analyze 默认源标识
       "defaultDrive": "3293dc45-cf14-9c66-3028-5b7765b240b7", // drive 默认源标识
-      "defaultViewCasual": "", // [3.3.4版本启用]随性看地址
+      "defaultViewCasual": "", // [3.3.4版本启用]心性看地址
+      "barrage": {
+        "url": "", // 弹幕地址
+        "key": "danmuku", // 弹幕接口返回数据对应的key
+        "support": [
+          "qq",
+          "qiyi",
+          "youku",
+          "mgtv"
+        ], // 弹幕支持的线路
+        "start": "0", // 弹幕接口返回数据对应的开始时间的位置
+        "mode": "1", // 弹幕接口返回数据对应的位置的位置
+        "color": "2", // 弹幕接口返回数据对应的颜色的位置
+        "content": "4" // 弹幕接口返回数据对应的内容的位置
+      }, // [3.3.4版本启用]弹幕参数
       "analyzeFlag": [
         "youku",
         "qq",
@@ -177,9 +191,9 @@
       "webdev": {
         "sync": false,  // 自动同步
         "data": {
-          "url": "https://dav.jianguoyun.com/dav/",
-          "user": "",
-          "password": ""
+          "url": "https://dav.jianguoyun.com/dav/", // webdev同步盘地址
+          "user": "", // webdev用户名
+          "password": "" // webdev密码
         }  // webdev 用于备份
       },  // [3.3.4版本启用]
       "restoreWindowPositionAndSize" : false, // 弃用

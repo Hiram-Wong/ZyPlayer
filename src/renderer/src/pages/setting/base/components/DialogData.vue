@@ -404,21 +404,21 @@ const formatSet = (data) => {
 
   // 更新或添加新键值对
   const newEntries = [
-    { key: 'windowPosition', value: { status: _.get(data, ['restoreWindowPositionAndSize', 'value'], false), position: { width: 1000, height: 640 } } },
-    { key: 'webdev', value: { 
+    { key: "windowPosition", value: { status: _.get(data, ["restoreWindowPositionAndSize", "value"], false), position: { width: 1000, height: 640 } } },
+    { key: "webdev", value: { 
         sync: false, data: {
-          url: _.get(data, ['webdevUrl', 'value'], 'https://dav.jianguoyun.com/dav/'),
-          username: _.get(data, ['webdevUsername', 'value'], ''),
-          password: _.get(data, ['webdevPassword', 'value'], '')
+          url: _.get(data, ["webdevUrl", "value"], "https://dav.jianguoyun.com/dav/"),
+          username: _.get(data, ["webdevUsername", "value"], ""),
+          password: _.get(data, ["webdevPassword", "value"], "")
         }
       }
     },
-    { key: 'lang', value: 'zh_CN' },
-    { key: 'defaultViewCasual', value: '' },
-    { key: 'barrage', value: { url: '', key: '', support: [], start: '', mode: '', color: '', content: ''} },
-    { key: 'playerMode', value: { type: _.get(data, ['broadcasterType', 'value'], 'xgplayer'), external: _.get(data, ['externalPlayer', 'value'], '') } },
-    { key: 'snifferMode', value: { type: _.get(data, ['snifferType', 'value'], 'pie'), url: '' } },
-    { key: 'version', value: pkgVersion },
+    { key: "lang", value: "zh_CN" },
+    { key: "defaultViewCasual", value: "" },
+    { key: "barrage", value: { url: "", key: "danmuku", support: ["qq", "qiyi", "youku", "mgtv"], start: "0", mode: "1", color: "2", content: "4" } },
+    { key: "playerMode", value: { type: _.get(data, ["broadcasterType", "value"], 'xgplayer'), external: _.get(data, ["externalPlayer", "value"], '') } },
+    { key: "snifferMode", value: { type: _.get(data, ["snifferType", "value"], "pie"), url: "" } },
+    { key: "version", value: pkgVersion },
     // ... 其他新键值对
   ];
 
