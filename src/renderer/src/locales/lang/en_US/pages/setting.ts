@@ -14,6 +14,8 @@ export default {
     shortcutKeyNonCompliance: 'Shortcut key combination is not compliant',
     epgTip: 'Only support dipy',
     logoTip: 'Source logo is invalid',
+    pdfaTip: 'List rules (e.g. bosy&&li)',
+    pdfhTip: 'Node rules (e.g. body&&a,0&&href)'
   },
   dialog: {
     cancel: 'Cancel',
@@ -300,7 +302,7 @@ export default {
       classify: 'Classify',
       source: 'Source',
       home: 'Home',
-      first: 'First',
+      list: 'List',
       detail: 'Detail',
       search: 'Search',
       play: 'Play',

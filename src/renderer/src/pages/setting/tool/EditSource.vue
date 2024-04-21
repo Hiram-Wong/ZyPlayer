@@ -48,25 +48,33 @@
                 </t-dialog>
               </div>
               <div class="item source">
-                <t-input v-model="form.url" label="url" :placeholder="$t('pages.setting.placeholder.general')"
-                  class="input" />
-                <t-button class="button" theme="default" @click="getSource">{{
-                  $t('pages.setting.editSource.action.source') }}</t-button>
+                <t-input-adornment prepend="url">
+                  <template #append>
+                    <t-button class="button" theme="default" @click="getSource">{{
+                      $t('pages.setting.editSource.action.source') }}</t-button>
+                  </template>
+                  <t-input v-model="form.url" :placeholder="$t('pages.setting.placeholder.general')" class="input" />
+                </t-input-adornment>
               </div>
             </div>
             <div class="code-op-item">
-              <t-input-adornment>
-                <template #prepend>
-                  <t-select v-model="form.rule.type" auto-width>
-                    <t-option :label="$t('pages.setting.editSource.rule.pdfa')" value="pdfa" />
-                    <t-option :label="$t('pages.setting.editSource.rule.pdfh')" value="pdfh" />
-                  </t-select>
-                </template>
+              <t-input-adornment :prepend="$t('pages.setting.editSource.rule.pdfa')">
                 <template #append>
-                  <t-button theme="default" @click="actionRule()">{{ $t('pages.setting.editSource.rule.try')
-                    }}</t-button>
+                  <t-button theme="default" @click="actionRule('pdfa')">
+                    {{ $t('pages.setting.editSource.rule.try') }}
+                  </t-button>
                 </template>
-                <t-input v-model="form.rule.rule" :placeholder="$t('pages.setting.placeholder.general')" />
+                <t-input v-model="form.rule.pdfa" :placeholder="$t('pages.setting.placeholder.pdfaTip')" />
+              </t-input-adornment>
+            </div>
+            <div class="code-op-item">
+              <t-input-adornment :prepend="$t('pages.setting.editSource.rule.pdfh')">
+                <template #append>
+                  <t-button theme="default" @click="actionRule('pdfh')">
+                    {{ $t('pages.setting.editSource.rule.try') }}
+                  </t-button>
+                </template>
+                <t-input v-model="form.rule.pdfh" :placeholder="$t('pages.setting.placeholder.pdfhTip')" />
               </t-input-adornment>
             </div>
           </div>
@@ -125,7 +133,7 @@
             <t-input-number theme="column" :min="0" v-model="form.category.pg" label="pg"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-33%" />
             <t-button class="button w-btn" theme="default" @click="actionList">{{
-              $t('pages.setting.editSource.action.first') }}</t-button>
+              $t('pages.setting.editSource.action.list') }}</t-button>
           </div>
           <div class="item">
             <t-input v-model="form.detail.ids" label="ids" :placeholder="$t('pages.setting.placeholder.general')"
@@ -177,6 +185,7 @@
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
 import * as monaco from 'monaco-editor';
+import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -214,8 +223,8 @@ let form = ref({
     rule: ''
   },
   rule: {
-    type: 'pdfa',
-    rule: ''
+    pdfa: '',
+    pdfh: ''
   },
   template: 'mxpro',
   url: '',
@@ -367,7 +376,7 @@ const changeWarp = () => {
 const confirmTemplate = () => {
   try {
     const text = getMubans()[form.value.template];
-    if (editor) editor.setValue(`var rule = ${JSON.stringify(text, null, 2).split('\n').join('\n  ')}`);
+    if (editor) editor.setValue(`var rule = ${JSON5.stringify(text, null, 2)}`);
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err) {
     console.log(err);
@@ -409,7 +418,6 @@ const initEditor = () => {
       roundedSelection: false,
       overviewRulerBorder: false,
       wordWrap: config.wordWrap,
-      tabSize: 2,
       minimap: {
         enabled: false,
       },
@@ -501,16 +509,16 @@ const deleteEvent = async () => {
 };
 
 const changeNav = (nav = '') => {
-  if (!nav) nav = form.value.nav;
-  else form.value.nav = nav;
+  nav = nav || form.value.nav;
+  form.value.nav = nav;
 
-  let language = ''
+  let language = '';
   switch (nav) {
     case 'source':
       language = 'html';
       break;
     case 'rule':
-      language = 'html';
+      language = form.value.rule.type === 'pdfa' ? 'json' : 'html';
       break;
     case 'debug':
       language = 'json';
@@ -522,21 +530,23 @@ const changeNav = (nav = '') => {
       break;
   };
 
-  if (log) monaco.editor.setModelLanguage(log.getModel()!, language);
-
-  if (nav === 'log') {
-    form.value.content[nav] = t('pages.setting.editSource.message.openDevTools');
-    const webContents = remote.getCurrentWebContents();
-    if (!webContents.isDevToolsOpened()) {
-      webContents.openDevTools();
-      MessagePlugin.success(t('pages.setting.editSource.message.openDevTools'));
+  if (log) {
+    monaco.editor.setModelLanguage(log.getModel()!, language);
+    if (nav === 'log') {
+      const webContents = remote.getCurrentWebContents();
+      if (!webContents.isDevToolsOpened()) {
+        webContents.openDevTools();
+      }
+      form.value.content[nav] = t('pages.setting.editSource.message.openDevTools');
     }
-  }
 
-  if (typeof form.value.content[nav] === 'object') {
-    form.value.content.text = JSON.stringify(form.value.content[nav], null, 2).split('\n').join('\n  ')
-  } else form.value.content.text = form.value.content[nav];
-  if (log) log.setValue(form.value.content.text);
+    const contentText = typeof form.value.content[nav] === 'object'
+      ? JSON5.stringify(form.value.content[nav], null, 2)
+      : form.value.content[nav];
+
+    form.value.content.text = contentText;
+    log.setValue(contentText);
+  }
 };
 
 const performAction = async (type, requestData = {}) => {
@@ -551,8 +561,8 @@ const performAction = async (type, requestData = {}) => {
   }
 };
 
-const actionRule = async () => {
-  const { rule, type } = form.value.rule;
+const actionRule = async (type) => {
+  const rule = form.value.rule[type];
   const html = form.value.content.source;
 
   if (rule && html.trim()) {
@@ -934,7 +944,8 @@ const showTemplateDialog = () => {
 
 :deep(.t-input),
 :deep(.t-input-number__increase),
-:deep(.t-input-number__decrease) {
+:deep(.t-input-number__decrease),
+:deep(.t-input-adornment__text) {
   background-color: var(--td-bg-content-input) !important;
   border-color: transparent;
   box-shadow: none;

@@ -2045,7 +2045,6 @@ const playParse = (playObj) => {
   let lazy_play = common_play;
   if (rule["play_parse"] && rule["lazy"] && typeof rule["lazy"] === 'string') {
     try {
-      console.log(rule)
       const lazy_code = rule["lazy"].replace('js:','').trim();
       console.log('开始执行js免嗅=>' + lazy_code);
       eval(lazy_code);

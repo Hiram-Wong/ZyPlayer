@@ -14,6 +14,8 @@ export default {
     shortcutKeyNonCompliance: '当前组合键不合规',
     epgTip: '仅支持dipy',
     logoTip: '源台标失效',
+    pdfaTip: '列表规则(如 bosy&&li)',
+    pdfhTip: '节点规则(如 body&&a,0&&href)'
   },
   dialog: {
     cancel: '取消',
@@ -300,7 +302,7 @@ export default {
       source: '源代码',
       classify: '分类',
       home: '首页',
-      first: '一级',
+      list: '列表',
       detail: '详情',
       search: '搜索',
       play: '播放',
