@@ -38,8 +38,7 @@
     "electron-updater": "^6.1.8",
     "ip": "^2.0.1",
     "puppeteer-core": "^22.6.2",
-    "puppeteer-in-electron": "^3.0.5",
-    "winston": "^3.13.0"
+    "puppeteer-in-electron": "^3.0.5"
   },
   "devDependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
