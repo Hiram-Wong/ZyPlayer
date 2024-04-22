@@ -14,7 +14,7 @@ export default {
     shortcutKeyNonCompliance: 'Shortcut key combination is not compliant',
     epgTip: 'Only support dipy',
     logoTip: 'Source logo is invalid',
-    pdfaTip: 'List rules (e.g. bosy&&li)',
+    pdfaTip: 'List rules (e.g. body&&li)',
     pdfhTip: 'Node rules (e.g. body&&a,0&&href)'
   },
   dialog: {

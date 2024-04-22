@@ -14,7 +14,7 @@ export default {
     shortcutKeyNonCompliance: '当前组合键不合规',
     epgTip: '仅支持dipy',
     logoTip: '源台标失效',
-    pdfaTip: '列表规则(如 bosy&&li)',
+    pdfaTip: '列表规则(如 body&&li)',
     pdfhTip: '节点规则(如 body&&a,0&&href)'
   },
   dialog: {
