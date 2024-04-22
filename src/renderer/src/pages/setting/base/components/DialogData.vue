@@ -472,8 +472,8 @@ const commonDelImportData = (data) => {
       }
     });
 
-    // 处理设置
-    data['tbl_setting'] = formatSet(data['tbl_setting']);
+    // 处理设置, 兼容一键配置
+    if(_.has(data, "tbl_setting") && !_.isEmpty(data["tbl_setting"])) data['tbl_setting'] = formatSet(data['tbl_setting']);
 
     // 规范化 id 字段
     const newDataTypes = ['tbl_site', 'tbl_iptv', 'tbl_channel', 'tbl_analyze', 'tbl_drive', 'tbl_history', 'tbl_star', 'tbl_setting'];
