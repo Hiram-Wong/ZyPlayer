@@ -47,7 +47,6 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         reportCompressedSize: false, // 关闭文件计算
         sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
         rollupOptions: {
-          external: ['os'], // 将os模块标记为外部模块, ip库基于os
           output: {
             entryFileNames: `assets/entry/[name][hash].js`, // 引入文件名的名称
             chunkFileNames: `assets/chunk/[name][hash].js`, // 包的入口文件名称
