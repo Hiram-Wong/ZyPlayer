@@ -306,16 +306,27 @@ export default {
       detail: 'Detail',
       search: 'Search',
       play: 'Play',
-      proxy: 'Proxy'
+      proxy: 'Proxy',
+      player: 'Player'
     },
     select: {
       log: 'Log',
       debug: 'Debug',
       source: 'Source',
-      rule: 'Rule'
+      rule: 'Rule',
+      f12: 'F12',
+      clear: 'Clean',
+      play: 'Play',
+      copy: 'Copy',
+      upload: 'Upload'
     },
     message: {
       openDevTools: 'Currently logs can only be viewed via Developer Tools -> Console'
+    },
+    dialog: {
+      player: {
+        title: 'PlayTest'
+      }
     }
   }
 }

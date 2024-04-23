@@ -28,5 +28,9 @@ export default {
   infiniteLoading: {
     complete: 'load complete',
     error: 'load error',
+  },
+  message: {
+    success: 'Success',
+    error: 'Fail'
   }
 }

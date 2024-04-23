@@ -28,5 +28,9 @@ export default {
   infiniteLoading: {
     complete: '人家是有底线的',
     error: '哎呀，出了点差错',
+  },
+  message: {
+    success: '成功',
+    error: '失败'
   }
 };

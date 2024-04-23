@@ -98,8 +98,8 @@ export default {
     reset: '重置',
     search: '搜索',
     site: '本站搜索',
-    group: '聚合搜索',
-    all: '组内搜索',
+    group: '组内搜索',
+    all: '聚合搜索',
     viewCasual: '随性看',
     iptv: '电视',
     globalLogo: '全局台标',
@@ -306,16 +306,27 @@ export default {
       detail: '详情',
       search: '搜索',
       play: '播放',
-      proxy: '代理'
+      proxy: '代理',
+      player: '播放器'
     },
     select: {
       log: '日志',
       debug: '调试',
       source: '源代码',
-      rule: '规则'
+      rule: '规则',
+      f12: 'F12',
+      clear: '清理日志',
+      copy: '复制',
+      play: '播放',
+      upload: '上传'
     },
     message: {
       openDevTools: '目前只能通过开发者工具->控制台查看日志'
+    },
+    dialog: {
+      player: {
+        title: '播放测试'
+      }
     }
   }
 }

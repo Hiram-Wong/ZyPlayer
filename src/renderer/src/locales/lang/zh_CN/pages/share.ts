@@ -2,7 +2,7 @@ export default {
   headerName: '扫一扫, 手机继续看',
   headerInfoRecommend: '推荐',
   headerInfoBrowser: '夸克APP',
-  headerInfoScan: '-搜索框中相机-扫码',
+  headerInfoScan: '-相机-扫码',
   headerCopyright: '提供支持, 严禁传播资源',
   copyUrl: '复制地址',
   message: {
