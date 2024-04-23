@@ -119,7 +119,7 @@ const stopCheckChannel = () => {
  * @param {*} date 日期 2023-01-31
  * @returns 电子节目单列表
  */
-const fetchChannelEpg = async(url: string, tvg_name: string, date: Date) => {
+const fetchChannelEpg = async(url: string, tvg_name: string, date: string) => {
   try {
     const res = await axios.get(url, {
       params: {

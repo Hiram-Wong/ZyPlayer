@@ -103,7 +103,7 @@ const checkLiveM3U8 = async(url: string): Promise<boolean> =>{
     
     return isLiveStream;
   } catch (err) {
-    throw err;
+    return false;
   }
 }
 

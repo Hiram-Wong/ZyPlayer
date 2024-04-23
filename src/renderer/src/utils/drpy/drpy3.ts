@@ -1,14 +1,14 @@
 /*!
  * @module drpy3
  * @brief T3数据处理核心库
- * @version 3.1.2
+ * @version 3.1.3
  * 
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-20T23:16:48+08:00
- * @modification-description 使用TypeScript适配, 并采取措施防止 Tree-Shaking 删除关键代码
+ * @modification-date 2023-04-22T17:36:03+08:00
+ * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
  * - 为了确保 `drpy3.ts` 中的函数和变量不被 Tree Shaking, 已采取以下措施：
@@ -28,6 +28,33 @@ import cheerio from "./cheerio.min";
 import { getMubans } from './template';
 import gbkTool from './gbk';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req } from './drpyInject';
+
+let consoleHistory: string[] = [];
+console["oldLog"] = console.log;
+console.log = (str: string) => {
+	console["oldLog"](str);
+	consoleHistory.push(str);
+}
+
+const getConsoleHistory = () => {
+  return consoleHistory;
+};
+
+const clearConsoleHistory = () => {
+  consoleHistory = [];
+  return consoleHistory;
+};
+
+// const evilFn = (fn) => {
+//   let Fn = Function; // 一个变量指向Function，防止有些前端编译工具报错
+//   return new Fn(`${fn}`)();
+// };
+
+// (function() {
+//   self.eval = function(code) {
+//     return evilFn(code);
+//   };
+// })();
 
 const init_test = () => {
   const test_data = {
@@ -917,7 +944,7 @@ const getHome = (url) => {
   try {
     url = new URL(url).origin;
   } catch (e) {
-    console.error('[t3]URL 解析失败:', e);
+    console.info('[t3]URL 解析失败:', e);
   }
 
   return url;
@@ -1550,7 +1577,7 @@ const searchParse = (searchObj) => {
 
   fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
   let d: any = [];
-  let p = searchObj.搜索 === '*' && rule["一级"] ? rule["一级"] : searchObj["搜索"];
+  let p = searchObj["搜索"] === '*' && rule["一级"] ? rule["一级"] : searchObj["搜索"];
 
   if (!p || typeof p !== 'string') return '{}';
 
@@ -1558,45 +1585,46 @@ const searchParse = (searchObj) => {
   let pp = rule["一级"].split(';');
   let url = searchObj.searchUrl.replaceAll('**', searchObj.wd);
 
-  if (searchObj.pg === 1 && url.includes('[')&&url.includes(']')&&!url.includes('#')) {
+  if (searchObj.pg === 1 && url.includes('[') && url.includes(']') && !url.includes('#')) {
     url = url.split('[')[1].split(']')[0];
-  } else if(searchObj.pg > 1 && url.includes('[')&&url.includes(']')&&!url.includes('#')) {
+  } else if(searchObj.pg > 1 && url.includes('[') && url.includes(']') && !url.includes('#')) {
     url = url.split('[')[0];
   }
 
   if (/fypage/.test(url)) {
-    if (url.includes('(')&&url.includes(')')) {
+    if (url.includes('(') && url.includes(')')) {
       let url_rep = url.match(/.*?\((.*)\)/)[1];
       let cnt_page = url_rep.replaceAll('fypage', searchObj.pg);
       let cnt_pg = eval(cnt_page);
-      url = url.replaceAll(url_rep,cnt_pg).replaceAll('(','').replaceAll(')','');
+      url = url.replaceAll(url_rep, cnt_pg).replaceAll('(','').replaceAll(')','');
     } else {
-      url = url.replaceAll('fypage',searchObj.pg);
+      url = url.replaceAll('fypage', searchObj.pg);
     }
   }
 
   MY_URL = url;
-  if (p.startsWith('js:')) {
+  console.log(MY_URL);
+  if (p.startsWith("js:")) {
     const TYPE = 'search';
     const MY_PAGE = searchObj.pg;
     const KEY = searchObj.wd;
     var input = MY_URL;
-    var detailUrl = rule["detailUrl"] || '';
+    var detailUrl = rule["detailUrl"] || "";
     [TYPE, MY_PAGE, KEY, input, detailUrl].map(item =>{item.length}); // 防止tree-shake
-    eval(p.trim().replace('js:',''));
+    eval(p.trim().replace("js:", ""));
     d = VODS;
   } else {
-    p = p.split(';');
+    p = p.split(";");
 
-    if (p.length < 5) return '{}';
+    if (p.length < 5) return "{}";
 
     let p0 = getPP(p, 0, pp, 0);
     let _ps = parseTags.getParse(p0);
     _pdfa = _ps.pdfa;
     _pdfh = _ps.pdfh;
     _pd = _ps.pd;
-    let is_json = p0.startsWith('json:');
-    p0 = p0.replace(/^(jsp:|json:|jq:)/,'');
+    let is_json = p0.startsWith("json:");
+    p0 = p0.replace(/^(jsp:|json:|jq:)/, "");
 
     try {
       let req_method = MY_URL.split(';').length > 1 ? MY_URL.split(';')[1].toLowerCase() : 'get';
@@ -1664,15 +1692,15 @@ const searchParse = (searchObj) => {
             'vod_id': vod_id,
             'vod_name': vod_name,
             'vod_pic': vod_pic,
-            'vod_remarks': _pdfh(it, p3).replace(/\n|\t/g,'').trim(),
-            'vod_content': content.replace(/\n|\t/g,'').trim(),
+            'vod_remarks': _pdfh(it, p3).replace(/\n|\t/g, "").trim(),
+            'vod_content': content.replace(/\n|\t/g, "").trim(),
           };
           d.push(ob);
         });
       }
     } catch (e) {
-      console.log('[t3][search]错误:', e);
-      return '{}'
+      console.log("[t3][search]错误:", e);
+      return "{}"
     }
   }
 
@@ -2012,7 +2040,7 @@ const tellIsJx = (url: string) => {
     const is_vip = !/\.(m3u8|mp4|m4a)$/.test(url.split('?')[0]) && isGenuine(url);
     return is_vip ? 1 : 0;
   } catch (e) {
-    console.error('Error in tellIsJx:', e);
+    console.info('Error in tellIsJx:', e);
     return 1;
   }
 };
@@ -2087,7 +2115,7 @@ const proxyParse = (proxyObj) => {
   var input = proxyObj.params;
 
   if (proxyObj.proxy_rule) {
-    console.log('准备执行本地代理规则:\n' + proxyObj.proxy_rule);
+    console.log(`[t3][proxy][proxyParse]准备执行本地代理规则:${proxyObj.proxy_rule}`);
 
     try {
       eval(proxyObj.proxy_rule);
@@ -2095,13 +2123,13 @@ const proxyParse = (proxyObj) => {
       if (input && input !== proxyObj.params && Array.isArray(input) && input.length === 3) {
         return input;
       } else {
-        return [404, 'text/plain', 'Not Found'];
+        return [404, "text/plain", "Not Found"];
       }
-    } catch (e) {
-      return [500, 'text/plain', '代理规则错误: ' + e];
+    } catch (err) {
+      return [500, "text/plain", `代理规则错误:${err}`];
     }
   } else {
-    return [404, 'text/plain', 'Not Found'];
+    return [404, "text/plain", "Not Found"];
   }
 }
 
@@ -2474,5 +2502,7 @@ export {
   play,
   search,
   proxy,
+  getConsoleHistory,
+  clearConsoleHistory,
   keepUnUse
 };

@@ -6,7 +6,7 @@
  * @date 2023-03-24T18:21:29+08:00
  */
 
-import { init, home, homeVod, category, detail, play, search, proxy, keepUnUse } from './drpy3';
+import { init, home, homeVod, category, detail, play, search, proxy, getConsoleHistory, clearConsoleHistory, keepUnUse } from './drpy3';
 
 const initUtils = () => {
   console.log(`[worker][prevent tree-shake] init t3 not use module`);
@@ -45,6 +45,11 @@ const drpyWork = (parms) => {
       break;
     case 'proxy':
       res.data = proxy(data);
+      break;
+    case 'console':
+      const { type } = data;
+      if (type === 'get') res.data = getConsoleHistory();
+      else if (type === 'clear') res.data = clearConsoleHistory();
       break;
     default:
       break;
