@@ -276,12 +276,12 @@ const playEvent = (item: { name: any }) => {
   if (playerMode.type === 'custom' ) {
     window.electron.ipcRenderer.send('call-player', playerMode.external, item.url);
   } else {
-    const { epg, skipIpv6 } = iptvConfig.value.ext;
+    const { epg, skipIpv6, logo } = iptvConfig.value.ext;
     storePlayer.updateConfig({
       type: 'iptv',
       data: {
         info: item,
-        ext: { epg, skipIpv6: skipIpv6 },
+        ext: { epg, skipIpv6, logo },
       },
     });
     window.electron.ipcRenderer.send('openPlayWindow', item.name);
