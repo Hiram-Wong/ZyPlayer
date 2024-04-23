@@ -132,13 +132,13 @@
               class="input w-33%" />
             <t-input-number theme="column" :min="0" v-model="form.category.pg" label="pg"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-33%" />
-            <t-button class="button w-btn" theme="default" @click="actionList">{{
+            <t-button class="button w-btn" theme="default" @click="actionList()">{{
               $t('pages.setting.editSource.action.list') }}</t-button>
           </div>
           <div class="item">
             <t-input v-model="form.detail.ids" label="ids" :placeholder="$t('pages.setting.placeholder.general')"
               class="input w-100%" />
-            <t-button class="button w-btn" theme="default" @click="actionDetail">{{
+            <t-button class="button w-btn" theme="default" @click="actionDetail()">{{
               $t('pages.setting.editSource.action.detail') }}</t-button>
           </div>
           <div class="item">
@@ -146,7 +146,7 @@
               class="input w-50%" />
             <t-input-number theme="column" :min="0" v-model="form.search.pg" label="pg"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-50%" />
-            <t-button class="button w-btn" theme="default" @click="actionSearch">{{
+            <t-button class="button w-btn" theme="default" @click="actionSearch()">{{
               $t('pages.setting.editSource.action.search') }}</t-button>
           </div>
           <div class="item">
@@ -154,24 +154,49 @@
               class="input w-50%" />
             <t-input v-model="form.play.play" label="play" :placeholder="$t('pages.setting.placeholder.general')"
               class="input w-50%" />
-            <t-button class="button w-btn" theme="default" @click="actionPlay">{{
+            <t-button class="button w-btn" theme="default" @click="actionPlay()">{{
               $t('pages.setting.editSource.action.play') }}</t-button>
           </div>
           <div class="item">
             <t-input v-model="form.proxy.url" label="url" :placeholder="$t('pages.setting.placeholder.general')"
               class="input w-100%" />
-            <t-button class="button w-btn" theme="default" @click="actionProxy">{{
+            <t-button class="button w-btn" theme="default" @click="actionProxy()">{{
               $t('pages.setting.editSource.action.proxy') }}</t-button>
+          </div>
+          <div class="item">
+            <t-input v-model="form.player.url" label="url" :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-100%" />
+            <t-button class="button w-btn" theme="default" @click="actionPlayer()">{{
+              $t('pages.setting.editSource.action.player') }}</t-button>
           </div>
         </div>
         <div class="log-box">
           <div class="nav">
-            <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
-              <t-radio-button value="debug">{{ $t('pages.setting.editSource.select.debug') }}</t-radio-button>
-              <t-radio-button value="source">{{ $t('pages.setting.editSource.select.source') }}</t-radio-button>
-              <t-radio-button value="rule">{{ $t('pages.setting.editSource.select.rule') }}</t-radio-button>
-              <t-radio-button value="log">{{ $t('pages.setting.editSource.select.log') }}</t-radio-button>
-            </t-radio-group>
+            <div class="nav-left">
+              <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
+                <t-radio-button value="debug">{{ $t('pages.setting.editSource.select.debug') }}</t-radio-button>
+                <t-radio-button value="source">{{ $t('pages.setting.editSource.select.source') }}</t-radio-button>
+                <t-radio-button value="rule">{{ $t('pages.setting.editSource.select.rule') }}</t-radio-button>
+                <t-radio-button value="log">{{ $t('pages.setting.editSource.select.log') }}</t-radio-button>
+              </t-radio-group>
+            </div>
+            <div class="nav-right">
+              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.log" @change="logEvent()" v-if="form.nav === 'log'">
+                <t-radio-button value="f12">{{ $t('pages.setting.editSource.select.f12') }}</t-radio-button>
+                <t-radio-button value="clear">{{ $t('pages.setting.editSource.select.clear') }}</t-radio-button>
+              </t-radio-group>
+              <t-radio-group  
+                variant="default-filled"
+                size="small"
+                v-model="form.clickType.proxy"
+                @change="proxyEvent()"
+                v-if='form.nav === "debug" && form.action === "proxy"'
+              >
+                <t-radio-button value="upload">{{ $t('pages.setting.editSource.select.upload') }}</t-radio-button>
+                <t-radio-button value="play">{{ $t('pages.setting.editSource.select.play') }}</t-radio-button>
+                <t-radio-button value="copy">{{ $t('pages.setting.editSource.select.copy') }}</t-radio-button>
+              </t-radio-group>
+            </div>
           </div>
           <div class="text">
             <div class="log-box" id="logBox"></div>
@@ -179,6 +204,8 @@
         </div>
       </div>
     </div>
+
+    <dialog-player-view v-model:visible="isVisible.player" :url="formDialog.player.url" />
   </div>
 </template>
 
@@ -195,10 +222,14 @@ import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
+import dialogPlayerView from './components/DialogPlayer.vue';
+
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
+
+import { setT3Proxy } from '@/api/proxy';
 import { fetchDebugSource, setDebugSource, delDebugSource } from '@/api/lab';
-import { getConfig } from '@/utils/tool';
+import { getConfig, copyToClipboardApi } from '@/utils/tool';
 import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
 import { pdfh, pdfa } from '@/utils/drpy/drpyInject';
@@ -223,6 +254,7 @@ let form = ref({
     rule: ''
   },
   rule: {
+    type: '',
     pdfa: '',
     pdfh: ''
   },
@@ -235,11 +267,11 @@ let form = ref({
   category: {
     t: '',
     f: '',
-    pg: ''
+    pg: 1
   },
   search: {
     wd: '',
-    pg: ''
+    pg: 1
   },
   play: {
     flag: '',
@@ -247,11 +279,29 @@ let form = ref({
   },
   proxy: {
     url: ''
+  },
+  player: {
+    url: ''
+  },
+  log: {
+    nav: ''
+  },
+  action: '',
+  clickType: {
+    log: '',
+    proxy: ''
   }
 });
 
 const isVisible = reactive({
-  template: false
+  template: false,
+  player: false
+});
+
+const formDialog = reactive({
+  player: {
+    url: ''
+  }
 });
 
 watch(
@@ -508,23 +558,29 @@ const deleteEvent = async () => {
   };
 };
 
-const changeNav = (nav = '') => {
+const changeNav = async (nav = '', action = '') => {
   nav = nav || form.value.nav;
+  action = action || form.value.action;
   form.value.nav = nav;
 
   let language = '';
+  let readOnly = true;
   switch (nav) {
     case 'source':
       language = 'html';
+      readOnly = true;
       break;
     case 'rule':
       language = form.value.rule.type === 'pdfa' ? 'json' : 'html';
+      readOnly = true;
       break;
     case 'debug':
       language = 'json';
+      readOnly = action === 'proxy' ? false : true;
       break;
     case 'log':
-      language = 'text';
+      language = 'json';
+      readOnly = true;
       break;
     default:
       break;
@@ -532,12 +588,10 @@ const changeNav = (nav = '') => {
 
   if (log) {
     monaco.editor.setModelLanguage(log.getModel()!, language);
+    log.updateOptions({ readOnly });
     if (nav === 'log') {
-      const webContents = remote.getCurrentWebContents();
-      if (!webContents.isDevToolsOpened()) {
-        webContents.openDevTools();
-      }
-      form.value.content[nav] = t('pages.setting.editSource.message.openDevTools');
+      const res: any = await t3Work({type:'console',data:{type:'get'}})
+      form.value.content[nav] = res.data;
     }
 
     const contentText = typeof form.value.content[nav] === 'object'
@@ -553,7 +607,8 @@ const performAction = async (type, requestData = {}) => {
   try {
     const res: any = await t3Work({ type, data: requestData });
     form.value.content.debug = res.data as string;
-    changeNav('debug');
+    form.value.action = type;
+    changeNav('debug', type);
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
     console.log(err);
@@ -562,6 +617,7 @@ const performAction = async (type, requestData = {}) => {
 };
 
 const actionRule = async (type) => {
+  form.value.rule.type = type;
   const rule = form.value.rule[type];
   const html = form.value.content.source;
 
@@ -574,7 +630,7 @@ const actionRule = async (type) => {
       res = await pdfh(html, rule);
     }
     form.value.content.rule = res;
-    changeNav('rule');
+    changeNav('rule', type);
   }
 };
 
@@ -599,10 +655,10 @@ const actionList = async () => {
   if (t) {
     const data = {
       tid: t,
-      pg: pg ?? 1,
+      pg: pg || 1,
       filter: f ? true : false,
-      extend: f ?? {}
-    }
+      extend: f || {}
+    };
     await performAction('category', data);
   }
 };
@@ -620,7 +676,7 @@ const actionSearch = async () => {
     const data = {
       wd,
       quick: false,
-      pg: pg ?? 1
+      pg: pg || 1
     };
     await performAction('search', data);
   }
@@ -647,17 +703,67 @@ const actionProxy = async () => {
   }
 };
 
+const actionPlayer = async (url = "") => {
+  url = url ? url : form.value.player.url;
+  if (url) {
+    formDialog.player.url = url;
+    isVisible.player = true;
+  };
+};
+
 const getSource = async () => {
   const url = form.value.url;
   if (url) {
     const res = await getConfig(url);
     form.value.content.source = res;
-    changeNav('source');
+    changeNav('source', 'html');
   };
 };
 
 const showTemplateDialog = () => {
   isVisible.template = true;
+};
+
+const logEvent = async () => {
+  const type = form.value.clickType.log;
+  if (type === 'f12') {
+    const webContents = remote.getCurrentWebContents();
+    if (!webContents.isDevToolsOpened()) {
+      webContents.openDevTools();
+    };
+  } else if (type === 'clear') {
+    await t3Work({type:'console',data:{type:'clear'}})
+    form.value.content.log = "";
+    form.value.content.text = "";
+    console.clear();
+    if (log) log.setValue("");
+  };
+
+  form.value.clickType.log = "";
+};
+
+const proxyEvent = async () => {
+  try {
+    const type = form.value.clickType.proxy;
+    const str: any = log ? log.getValue() : "";
+    const formatStr = str.split('\n').filter(s => !!s.trim()).join('');
+    const jsonStr = JSON5.parse(formatStr);
+
+    if (type === 'copy') {
+      await copyToClipboardApi(form.value.proxy.url);
+    } else if (type === 'play') {
+      actionPlayer(form.value.proxy.url);
+    } else if (type === 'upload') {
+      await setT3Proxy(jsonStr);
+    };
+
+    MessagePlugin.info(`${t('pages.setting.data.success')}`);
+  } catch (err) {
+    console.log(`[editSource][proxy][err]${err}`)
+    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
+  } finally {
+    form.value.clickType.proxy = "";
+  };
 };
 </script>
 
@@ -870,9 +976,12 @@ const showTemplateDialog = () => {
 
         .nav {
           position: absolute;
+          width: calc(100% - 30px);
           z-index: 100;
           top: -15px;
           left: 15px;
+          display: flex;
+          justify-content: space-between;
 
           :deep(.t-radio-group) {
             box-shadow: var(--td-shadow-3);
