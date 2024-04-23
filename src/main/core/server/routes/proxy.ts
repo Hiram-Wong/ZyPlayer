@@ -4,7 +4,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(`/proxy`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
       // @ts-ignore
-      const dbData = await req.server.db.getData("/t3-proxy").catch(() => [500, 'text/plain', '缓存读取失败']);
+      const dbData = await req.server.db.getData("/t3-proxy").catch(() => [500, "text/plain", "缓存读取失败"]);
       // @ts-ignore
       await req.server.db.delete('/t3-proxy');
 
@@ -18,9 +18,10 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   })
   fastify.post(`/proxy`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
-      const body = req.body;
       // @ts-ignore
-      const res = await req.server.db.push('/t3-proxy', body);
+      const { text } = req.body;
+      // @ts-ignore
+      const res = await req.server.db.push('/t3-proxy', text);
       reply.code(200).send(res);
     } catch (err) {
       reply.code(500).send(err)
