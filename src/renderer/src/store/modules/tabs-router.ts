@@ -28,7 +28,9 @@ export const useTabsRouterStore = defineStore('tabsRouter', {
     },
     // 处理新增
     appendTabRouterList(newRoute: TRouterInfo) {
-      const needAlive = !ignoreCacheRoutes.includes(newRoute.name as string);
+      // 不要将判断条件newRoute.meta.keepAlive !== false修改为newRoute.meta.keepAlive，starter默认开启保活，所以meta.keepAlive未定义时也需要进行保活，只有显式说明false才禁用保活。
+      // @ts-ignore
+      const needAlive = !ignoreCacheRoutes.includes(newRoute.name as string) && newRoute.meta?.keepAlive !== false;
       if (!this.tabRouters.find((route: TRouterInfo) => route.path === newRoute.path)) {
         // eslint-disable-next-line no-param-reassign
         this.tabRouterList = this.tabRouterList.concat({ ...newRoute, isAlive: needAlive });
@@ -37,14 +39,14 @@ export const useTabsRouterStore = defineStore('tabsRouter', {
     // 处理关闭当前
     subtractCurrentTabRouter(newRoute: TRouterInfo) {
       const { routeIdx } = newRoute;
-      this.tabRouterList = this.tabRouterList.slice(0, routeIdx).concat(this.tabRouterList.slice(routeIdx + 1));
+      this.tabRouterList = this.tabRouterList.slice(0, routeIdx).concat(this.tabRouterList.slice(routeIdx! + 1));
     },
     // 处理关闭右侧
     subtractTabRouterBehind(newRoute: TRouterInfo) {
       const { routeIdx } = newRoute;
       const homeIdx: number = this.tabRouters.findIndex((route) => route.isHome);
-      let tabRouterList: Array<TRouterInfo> = this.tabRouterList.slice(0, routeIdx + 1);
-      if (routeIdx < homeIdx) {
+      let tabRouterList: Array<TRouterInfo> = this.tabRouterList.slice(0, routeIdx! + 1);
+      if (routeIdx! < homeIdx) {
         tabRouterList = tabRouterList.concat(homeRoute);
       }
       this.tabRouterList = tabRouterList;
@@ -54,7 +56,7 @@ export const useTabsRouterStore = defineStore('tabsRouter', {
       const { routeIdx } = newRoute;
       const homeIdx: number = this.tabRouters.findIndex((route) => route.isHome);
       let tabRouterList: Array<TRouterInfo> = this.tabRouterList.slice(routeIdx);
-      if (routeIdx > homeIdx) {
+      if (routeIdx! > homeIdx) {
         tabRouterList = homeRoute.concat(tabRouterList);
       }
       this.tabRouterList = tabRouterList;

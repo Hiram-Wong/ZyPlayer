@@ -1,6 +1,6 @@
 import { LocationQueryRaw, RouteRecordName } from 'vue-router';
 
-import STYLE_CONFIG from '@/config/style';
+import STYLE_CONFIG from '@/config/system';
 
 export interface MenuRoute {
   path: string;
@@ -17,6 +17,8 @@ export interface MenuRoute {
 }
 
 export type ModeType = 'dark' | 'light';
+
+export type ConfigType = 'configBase' | 'siteSource' | 'iptvSource' | 'analyzeSource' | 'driveSource' | 'editSource';
 
 export type SettingType = typeof STYLE_CONFIG;
 

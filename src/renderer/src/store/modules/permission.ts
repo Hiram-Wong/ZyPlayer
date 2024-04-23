@@ -5,10 +5,10 @@ import router, { allRoutes } from '@/router';
 import { store } from '@/store';
 
 function filterPermissionsRouters(routes: Array<RouteRecordRaw>, roles: Array<unknown>) {
-  const res = [];
-  const removeRoutes = [];
+  const res: Array<RouteRecordRaw> = [];
+  const removeRoutes: Array<RouteRecordRaw> = [];
   routes.forEach((route) => {
-    const children = [];
+    const children: Array<RouteRecordRaw> = [];
     route.children?.forEach((childRouter) => {
       const roleCode = childRouter.meta?.roleCode || childRouter.name;
       if (roles.indexOf(roleCode) !== -1) {
@@ -33,9 +33,9 @@ export const usePermissionStore = defineStore('permission', {
   }),
   actions: {
     async initRoutes(roles: Array<unknown>) {
-      let accessedRouters = [];
+      let accessedRouters: Array<RouteRecordRaw> = [];
 
-      let removeRoutes = [];
+      let removeRoutes: Array<RouteRecordRaw> = [];
       // special token
       if (roles.includes('all')) {
         accessedRouters = allRoutes;
@@ -45,11 +45,14 @@ export const usePermissionStore = defineStore('permission', {
         removeRoutes = res.removeRoutes;
       }
 
+      // @ts-ignore
       this.routers = accessedRouters;
+      // @ts-ignore
       this.removeRoutes = removeRoutes;
+
       removeRoutes.forEach((item: RouteRecordRaw) => {
-        if (router.hasRoute(item.name)) {
-          router.removeRoute(item.name);
+        if (router.hasRoute(item.name!)) {
+          router.removeRoute(item.name!);
         }
       });
     },

@@ -1,55 +1,57 @@
 import { defineStore } from 'pinia';
 
-import STYLE_CONFIG from '@/config/style';
+import SYSTEM_CONFIG from '@/config/system';
 import { store } from '@/store';
 
-const state = {
-  ...STYLE_CONFIG,
+import { ModeType } from '@/types/interface';
+
+const state: Record<string, any> = {
+  ...SYSTEM_CONFIG
 };
 
 export type TState = typeof state;
+export type TStateKey = keyof typeof state;
 
 export const useSettingStore = defineStore('setting', {
-  persist: true, // 数据持久化
   state: () => state,
   getters: {
-    getStateMode: (state): 'dark' | 'light' | 'auto' => {
-      return state.mode as 'dark' | 'light' | 'auto';
+    getStateMode: (state): ModeType | 'auto' => {
+      return state.mode as ModeType | 'auto';
     },
-    displayMode: (state): 'dark' | 'light' => {
+    displayMode: (state): ModeType => {
       if (state.mode === 'auto') {
         const media = window.matchMedia('(prefers-color-scheme:dark)');
         if (media.matches) {
           return 'dark';
         }
-        return 'light';
+        return 'light'; 
       }
-      return state.mode as 'dark' | 'light';
-    },
-    getSysConfigSwitch: (state): 'configBase' | 'siteSource' | 'iptvSource' | 'analyzeSource' | 'driveSource' => {
-      return state.sysConfigSwitch as 'configBase' | 'siteSource' | 'iptvSource' | 'analyzeSource' | 'driveSource';
-    },
+      return state.mode as ModeType;
+    }
   },
   actions: {
-    async changeMode(mode: 'dark' | 'light' | 'auto') {
+    async changeMode(mode: ModeType | 'auto') {
       let theme = mode;
 
       if (mode === 'auto') {
-        const media = window.matchMedia('(prefers-color-scheme:dark)');
-        if (media.matches) {
-          theme = 'dark';
-        } else {
-          theme = 'light';
-        }
+        theme = this.getMediaColor();
       }
       const isDarkMode = theme === 'dark';
 
       document.documentElement.setAttribute('theme-mode', isDarkMode ? 'dark' : '');
     },
+    getMediaColor() {
+      const media = window.matchMedia('(prefers-color-scheme:dark)');
+
+      if (media.matches) {
+        return 'dark';
+      }
+      return 'light';
+    },
     updateConfig(payload: Partial<TState>) {
       for (const key in payload) {
-        if (payload[key] !== undefined) {
-          this[key] = payload[key];
+        if (payload[key as TStateKey] !== undefined) {
+          this[key as TStateKey] = payload[key as TStateKey];
         }
         if (key === 'mode') {
           this.changeMode(payload[key]);
@@ -57,6 +59,7 @@ export const useSettingStore = defineStore('setting', {
       }
     },
   },
+  persist: true // 数据持久化
 });
 
 export function getSettingStore() {
