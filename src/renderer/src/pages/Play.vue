@@ -28,13 +28,13 @@
                 </div>
                 <div v-if="set.skipStartEnd" class="setting-item-warp">
                   <div class="skip-time-in-start">
-                    <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right">
+                    <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right" @click="skipTimeInEndChange">
                       <template #label>开头: </template>
                       <template #suffix> 秒</template>
                     </t-input-number>
                   </div>
                   <div class="skip-time-in-end">
-                    <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right">
+                    <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right" @click="skipTimeInEndChange">
                       <template #label>结尾: </template>
                       <template #suffix> 秒</template>
                     </t-input-number>
@@ -61,12 +61,9 @@
       <div class="player">
         <div class="container-player" :class='["subject", isVisible.aside ? "subject-ext" : ""]'>
           <div class="player-panel">
-            <div v-show="!onlineUrl" class="player-media">
-              <div v-show="xg" id="xgplayer" ref="xgpayerRef" class="xgplayer player"></div>
-              <div v-show="tc" ref="tcplayerRef">
-                <video id="tcplayer" preload="auto" playsinline webkit-playsinline class="tcplayer player"></video>
-              </div>
-              <div v-show="dp" id="dplayer" ref="dplayerRef" class="dplayer player"></div>
+            <div class="player-media">
+              <div v-show="player.xgplayer" id="xgplayer" ref="xgpayerRef" class="xgplayer player"></div>
+              <div v-show="player.dplayer" id="dplayer" ref="dplayerRef" class="dplayer player"></div>
             </div>
           </div>
         </div>
@@ -87,7 +84,7 @@
                   <div v-for="(item, index) in iptvConfig.epgData" :key="index" class="content">
                     <div class="content-item content-item-between">
                       <div class="time-warp">{{ item["start"] }}</div>
-                      <div class="title-wrap nowrap title-warp-epg">{{ item["title"] }}</div>
+                      <div class="title-wrap nowrap">{{ item["title"] }}</div>
                       <div class="status-wrap">
                         <span v-if='filterEpgStatus(item["start"], item["end"]) === "played"' class="played">
                           {{ $t(`pages.player.status.${filterEpgStatus(item["start"], item["end"])}`) }}
@@ -107,9 +104,9 @@
               <t-tab-panel value="channel" :label="$t('pages.player.iptv.channel')">
                 <div class="contents-wrap scroll-y channel-wrap">
                   <div v-for="item in iptvConfig.channelData" :key='item["id"]' class="content">
-                    <div class="content-item content-item-start" @click="changeIptvEvent(item)">
+                    <div class="content-item content-item-start" @click="changeChannelEvent(item)">
                       <div class="logo-wrap">
-                        <t-image class="logo" fit="contain" :src='item["logo"]'
+                        <t-image class="logo" fit="contain" :src='generateLogo(item)'
                           :style="{ width: '64px', height: '32px', maxHeight: '32px', background: 'none' }" :lazy="true"
                           :loading="renderLoading" :error="renderError">
                         </t-image>
@@ -289,10 +286,10 @@
                       <div class="content-item content-item-start" @click="changeDriveEvent(item)">
                         <div class="logo-wrap">
                           <t-image class="logo" fit="cover" :src='item["thumb"]'
-                            :style="{ width: '64px', height: '32px', background: 'none', borderRadius: '6px' }"
+                            :style="{ width: '64px', height: '28px', background: 'none', borderRadius: '6px' }"
                             :lazy="true" :loading="renderLoading" :error="renderError" />
                         </div>
-                        <div class="title-wrap nowrap title-warp-channel">{{ item["name"] }}</div>
+                        <div class="title-wrap nowrap">{{ item["name"] }}</div>
                         <div class="status-wrap">
                           <span :class='info["name"] === item["name"] ? "playing" : "unplay"'>
                             {{ item["name"] === info["name"] ? $t('pages.player.status.playing') :
@@ -345,7 +342,7 @@ import {
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive, watch } from 'vue';
-import Player, { Events } from 'xgplayer';
+import Player, { Events, SimplePlayer } from 'xgplayer';
 import Danmu from 'xgplayer/es/plugins/danmu';
 import LivePreset from 'xgplayer/es/presets/live';
 import FlvPlugin from 'xgplayer-flv';
@@ -370,6 +367,8 @@ import sniffer from '@/utils/sniffer';
 import { usePlayStore } from '@/store';
 
 import SharePopup from '../components/share-popup/index.vue';
+import { t } from '@/locales';
+import logoIcon from '@/assets/icon.png';
 
 const remote = window.require('@electron/remote');
 const { BrowserWindow } = require('@electron/remote');
@@ -388,12 +387,8 @@ const data = computed(() => {
 const set = computed(() => {
   return store.getSetting;
 });
-const info = computed(() => {
-  return data.value.info
-});
-const ext = computed(() => {
-  return data.value.ext
-});
+const info = ref(data.value.info) as any;
+const ext = ref(data.value.ext) as any;
 
 const downloadDialogData = ref({ season: '', current: '' });
 const dplayerRef = ref(null); // 呆呆播放器dom节点
@@ -446,37 +441,6 @@ const commonConfig = {
   height: 'calc(100vh - 56px)'
 }; // 西瓜、火山公共部分
 
-const config = ref({
-  ...commonConfig,
-  id: 'xgplayer',
-  enableContextmenu: true,
-  dynamicBg: {
-    disable: false
-  },
-  hls: {
-    preloadTime: 90,
-    retryCount: 3,
-    retryDelay: 1000,
-    loadTimeout: 10000,
-    fetchOptions: {
-      mode: 'cors',
-    },
-  },
-  mp4plugin: {
-    maxBufferLength: 30,
-    minBufferLength: 10,
-    reqOptions: {
-      mode: 'cors',
-    },
-  },
-  flv: {},
-  danmu: {
-    panel: true,
-    comments: [],
-    area: { start: 0, end: 1 }
-  },
-}); // 西瓜播放器参数
-
 const playerConfig = ref({
   veplayer: {
     ...commonConfig,
@@ -499,12 +463,22 @@ const playerConfig = ref({
   dplayer: {
     container: dplayerRef,
     autoplay: true,
-    screenshot: true,
-    video: {
-
-    },
+    screenshot: false,
+    video: {}
   }
-})
+}) as any;
+
+const player = ref({
+  veplayer: null,
+  xgplayer: null,
+  dplayer: null
+}) as any;
+
+const tmp = reactive({
+  skipTime: 0,
+  url: "",
+  sourceUrl: ""
+});
 
 const active = reactive({
   iptvNav: 'epg',
@@ -516,17 +490,26 @@ const active = reactive({
 });
 const recommend = ref([]); // 推荐
 const season = ref(); // 选集
-const xg = ref(null); // 西瓜播放器
-const tc = ref(null); // 腾讯播放器
-const dp = ref(null); // dp播放器
-const tcplayerRef = ref(null); // 腾讯云播放器dom节点
 const xgpayerRef = ref(null); // 西瓜播放器dom节点
 const isSettingVisible = ref(false);
 
-const dataHistory = ref({}); // 历史
+const dataHistory = ref({
+  id: null,
+  date: moment().unix(),
+  type: 'film',
+  // relateId: ext.value["site"]["id"] || null,
+  siteSource: active.flimSource,
+  playEnd: false,
+  videoId: info.value["vod_id"],
+  videoImage: info.value["vod_pic"],
+  videoName: info.value["vod_name"],
+  videoIndex: active.filmIndex,
+  watchTime: 0,
+  duration: null,
+  skipTimeInStart: 30,
+  skipTimeInEnd: 30,
+}) as any; // 历史
 
-const onlineUrl = ref(); // 解析接口+需解析的地址
-const currentUrl = ref(); // 当前未解析前的url
 const reverseOrder = ref(true); // true 正序 false 倒序
 
 const driveDataList = ref({});
@@ -562,12 +545,11 @@ const VIP_LIST = [
   'tudou.com',
 ];
 
-const VIDEO_PROCESS_DOC = {
-  date: moment().unix(),
+const VIDEO_PROCESS_DOC = reactive({
   playEnd: false,
   watchTime: 0,
   duration: 0,
-};
+});
 
 const analyzeConfig = ref({
   default: {
@@ -607,31 +589,10 @@ const renderLoading = () => {
   );
 };
 
-// 更新跳过数据
-watch(
-  () => skipConfig.value,
-  () => {
-    skipHistoryConfig();
-  },
-  { deep: true },
-);
-
 onMounted(() => {
   initPlayer();
   minMaxEvent();
-  // document.documentElement.setAttribute('theme-mode', 'dark');
 });
-
-// 选集排序
-const seasonReverseOrder = () => {
-  if (reverseOrder.value) {
-    console.log('[play][season]positive order');
-    season.value = JSON.parse(JSON.stringify(info.value["fullList"]));
-  } else {
-    console.log('[play][season]reverse order');
-    season.value = _.mapValues(season.value, list => _.reverse([...list]));
-  }
-};
 
 const loadDanmu = async (resUrl: string) => {
   try {
@@ -641,7 +602,7 @@ const loadDanmu = async (resUrl: string) => {
     if (!(url && key && support && start && mode && color)) return [];
     if (!_.some(support, source => source === active.flimSource)) return [];
 
-    const sourceUrl = currentUrl.value.split('$')[1];
+    const sourceUrl = formatIndex(active.filmIndex).url;
     if (sourceUrl.startsWith('http')) {
       const { hostname } = new URL(sourceUrl);
       if (VIP_LIST.some((item) => hostname.includes(item))) resUrl = sourceUrl;
@@ -667,24 +628,37 @@ const loadDanmu = async (resUrl: string) => {
     const endTime = new Date().getTime();
     console.log(`[play][danmu]Time-consuming:${endTime - startTime}`)
 
-    return comments ?? [];
+    return comments || [];
   } catch (err) {
     console.log(`[play][danmu][error]${err}`);
     return [];
   }
 };
 
-// 根据不同类型加载不同播放器
-const createPlayer = async (url, videoType = '') => {
+// 加载播放器
+const createPlayer = async (url: string, videoType: string = '') => {
+  tmp.url = url;
   const { playerMode } = set.value;
+
   if (!videoType) {
     const meadiaType = await checkMediaType(url);
     if (meadiaType !== 'unknown' && meadiaType !== 'error') {
-      videoType = meadiaType;
-    }
-  }
+      videoType = meadiaType!;
+    };
+  };
+
+  let isLive = false;
+  if (type.value === 'iptv') {
+    isLive = await checkLiveM3U8(info.value["url"]);
+  };
+
   if (playerMode.type === 'xgplayer') {
+    if (tmp.skipTime) playerConfig.value.xgplayer.startTime = tmp.skipTime;
     playerConfig.value.xgplayer.danmu.comments = await loadDanmu(url);
+    if (isLive) {
+      SimplePlayer.defaultPreset = LivePreset;
+      playerConfig.value.xgplayer.isLive = true;
+    };
     switch (videoType) {
       case 'mp4':
         playerConfig.value.xgplayer.plugins = [Mp4Plugin, Danmu];
@@ -701,21 +675,24 @@ const createPlayer = async (url, videoType = '') => {
       default:
         playerConfig.value.xgplayer.plugins = [HlsPlugin, Danmu];
         break;
-    }
+    };
     playerConfig.value.xgplayer.url = url;
-    xg.value = new Player({ ...playerConfig.value.xgplayer });
-    console.log(`[player] 加载西瓜${videoType}播放器`);
+    if (isLive) player.value.xgplayer = new SimplePlayer({ ...playerConfig.value.xgplayer });
+    else player.value.xgplayer = new Player({ ...playerConfig.value.xgplayer });
+    console.log(`[player][xgplayer]load:${videoType}`);
   } else if (playerMode.type === 'dplayer') {
+    let config;
+    if (isLive) playerConfig.value.dplayer.live = true;
     switch (videoType) {
       case 'mp4':
-        playerConfig.value.dplayer.video = { url };
+        config = { url };
         break;
       case 'flv':
-        playerConfig.value.dplayer.video = {
-          url: url,
+        config = {
+          url,
           type: 'customFlv',
           customType: {
-            customFlv: function (video, player) {
+            customFlv: (video, _) => {
               const flvPlayer = flvjs.createPlayer({
                 type: 'flv',
                 url: video.src,
@@ -727,11 +704,11 @@ const createPlayer = async (url, videoType = '') => {
         };
         break;
       case 'm3u8':
-        playerConfig.value.dplayer.video = {
-          url: url,
+        config = {
+          url,
           type: 'customHls',
           customType: {
-            customHls: function (video, player) {
+            customHls: (video, _) => {
               const hls = new Hls();
               hls.loadSource(video.src);
               hls.attachMedia(video);
@@ -740,11 +717,11 @@ const createPlayer = async (url, videoType = '') => {
         }
         break;
       default:
-        playerConfig.value.dplayer.video = {
-          url: url,
+        config = {
+          url,
           type: 'customHls',
           customType: {
-            customHls: function (video, player) {
+            customHls: (video, _) => {
               const hls = new Hls();
               hls.loadSource(video.src);
               hls.attachMedia(video);
@@ -752,10 +729,11 @@ const createPlayer = async (url, videoType = '') => {
           },
         }
         break;
-    }
-    console.log(`[player] 加载呆呆播放器`);
-    dp.value = new DPlayer({ ...playerConfig.value.dplayer });
-    if (config.value.startTime) dp.value.seek(config.value.startTime);
+    };
+    playerConfig.value.dplayer.video = { ...config };
+    player.value.dplayer = new DPlayer({ ...playerConfig.value.dplayer });
+    if (tmp.skipTime) player.value.dplayer.seek(tmp.skipTime);
+    console.log(`[player][dplayer]load:${videoType}`);
   }
 
   if (type.value === 'film') await timerUpdatePlayProcess();
@@ -766,37 +744,45 @@ const createPlayer = async (url, videoType = '') => {
 // 设置系统媒体信息
 const setSystemMediaInfo = () => {
   if ("mediaSession" in navigator) {
-    let title, artist, artwork;
-
-    if (type.value === 'iptv') {
-      title = info.value["name"];
-      artist = '直播';
-    } else if (type.value === 'drive') {
-      title = info.value["name"];
-      artist = 'alist';
-    } else {
-      title = info.value["vod_name"];
-      artist = formatIndex(active.filmIndex).index;
-      artwork = [
-        {
-          src: info.value["vod_pic"],
-          type: "image/png",
-        }
-      ];
-    }
-
-    const doc = {
-      title,
-      artist,
-      artwork,
+    let doc = {
+      title: '' as string,
+      artist: '' as string,
+      artwork: [] as any[],
     };
 
-    if (type.value === 'iptv' || type.value === 'drive') {
-      delete doc.artwork;
+    if (type.value === 'iptv') {
+      doc = {
+        title: info.value["name"],
+        artist: '直播',
+        artwork: [
+          { src: logoIcon, sizes: "128x128", type: "image/png" },
+        ]
+      };
+    } else if (type.value === 'drive') {
+      doc = {
+        title: info.value["name"],
+        artist: '网盘',
+        artwork: [
+          { src: logoIcon, sizes: "128x128", type: "image/png" },
+        ]
+      };
+    } else {
+      doc = {
+        title: info.value["vod_name"],
+        artist: formatIndex(active.filmIndex).index,
+        artwork: [
+          { src: info.value["vod_pic"], sizes: "128x128", type: "image/png" },
+        ]
+      }
     }
 
     navigator.mediaSession.metadata = new MediaMetadata(doc);
-  }
+  };
+
+  let title;
+  if (type.value === 'film') title = `${info.value["vod_name"]} ${formatIndex(active.filmIndex).index}`;
+  else title = info.value["name"];
+  document.title = title;
 };
 
 // 获取解析地址
@@ -808,7 +794,7 @@ const getAnalyzeFlag = async () => {
 
     console.log(`[play][analyze][jx]:${res.default.url}; flag:${[...res.flag]}`);
   } catch (error) {
-    console.error(error);
+    console.error(`[play][analyze][jx][error]${error}`);
   }
 };
 
@@ -825,101 +811,58 @@ const getHistoryData = async (): Promise<void> => {
 
       const { skipTimeInStart, skipTimeInEnd } = res;
       skipConfig.value = { skipTimeInStart, skipTimeInEnd };
-    } else {
-      const doc = {
-        date: moment().unix(),
-        type: 'film',
-        relateId: id,
-        siteSource: active.flimSource,
-        playEnd: false,
-        videoId: info.value["vod_id"],
-        videoImage: info.value["vod_pic"],
-        videoName: info.value["vod_name"],
-        videoIndex: active.filmIndex,
-        watchTime: 0,
-        duration: null,
-        skipTimeInStart: 30,
-        skipTimeInEnd: 30,
-      };
-      dataHistory.value = { ...doc };
     };
   } catch (err) {
     console.error(`[detail][history][error]${err}`);
-  }
+  };
 };
 
 // 更新历史
 const putHistoryData = async () => {
   try {
-    const { id } = ext.value["site"];
-    const res = await detailHistory({ relateId: id, videoId: info.value["vod_id"] });
+    const { id: relateId } = ext.value["site"];
+    let { id: historyId } = dataHistory.value;
+
     const doc = {
       date: moment().unix(),
       type: 'film',
-      relateId: id,
+      relateId: relateId,
       siteSource: active.flimSource,
-      playEnd: false,
+      playEnd: VIDEO_PROCESS_DOC.playEnd,
       videoId: info.value["vod_id"],
       videoImage: info.value["vod_pic"],
       videoName: info.value["vod_name"],
       videoIndex: active.filmIndex,
-      watchTime: 0,
-      duration: null,
-      skipTimeInStart: 30,
-      skipTimeInEnd: 30,
+      watchTime: VIDEO_PROCESS_DOC.watchTime,
+      duration: VIDEO_PROCESS_DOC.duration,
+      skipTimeInStart: skipConfig.value.skipTimeInStart,
+      skipTimeInEnd: skipConfig.value.skipTimeInEnd
     };
 
-    if (res) {
-      if (res.siteSource !== active.flimSource || res.videoIndex !== active.filmIndex) {
-        await updateHistory(res.id, doc);
-        dataHistory.value = { ...doc, id: res.id };
-      } else {
-        dataHistory.value = { ...res };
-      };
+    if (!historyId) {
+      const res = await addHistory(doc);
+      historyId = res.id;
     } else {
-      const add_res = await addHistory(doc);
-      dataHistory.value = add_res;
+      await updateHistory(historyId, doc);
     };
 
-    const { skipTimeInStart, skipTimeInEnd } = doc;
-    skipConfig.value = { skipTimeInStart, skipTimeInEnd };
+    dataHistory.value = { ...doc, id: historyId };
   } catch (error) {
     console.error(error);
-  }
+  };
 };
 
 // 摧毁播放器
 const destroyPlayer = () => {
-  if (xg.value) {
-    xg.value.destroy();
-    xg.value = null;
-  }
+  if (player.value.xgplayer) {
+    player.value.xgplayer.destroy();
+    player.value.xgplayer = null;
+  };
 
-  if (dp.value) {
-    dp.value.destroy();
-    dp.value = null;
-  }
-
-  if (onlineUrl.value) onlineUrl.value = '';
-};
-
-// 初始化iptv
-const initIptvPlayer = async () => {
-  if (data.value.ext["epg"]) getEpgList(ext.value["epg"], info.value["name"], moment().format('YYYY-MM-DD'));
-  config.value.url = info.value["url"];
-
-  if (set.value.playerMode.type !== 'tcplayer') {
-    try {
-      const isLive = await checkLiveM3U8(info.value["url"]);
-      config.value.isLive = isLive;
-      config.value.presets = isLive ? [LivePreset] : [];
-      playerConfig.value.dplayer.live = true;
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  createPlayer(config.value.url);
+  if (player.value.dplayer) {
+    player.value.dplayer.destroy();
+    player.value.dplayer = null;
+  };
 };
 
 // Helper functions
@@ -935,7 +878,7 @@ const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string
   } finally {
     console.log(`[detail][hipy][end]获取服务端播放链接结束`);
     return data;
-  }
+  };
 };
 
 const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<string> => {
@@ -944,9 +887,9 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   try {
     const playRes = await fetchT3PlayUrl(flag, id, flags);
     if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
-      const proxyRes = await t3RuleProxy(playRes.url);
+      const proxyRes: any = await t3RuleProxy(playRes.url);
       await setT3Proxy(proxyRes);
-    }
+    };
 
     data = playRes.url;
     console.log(`[detail][t3][return]${data}`);
@@ -955,7 +898,7 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   } finally {
     console.log(`[detail][t3][end]获取服务端播放链接结束`);
     return data;
-  }
+  };
 };
 
 const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
@@ -970,7 +913,7 @@ const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: stri
   } finally {
     console.log(`[detail][catvod][end]获取服务端播放链接结束`);
     return data;
-  }
+  };
 };
 
 const fetchDrpyPlayUrlHelper = async (site: { [key: string]: any }, url: string): Promise<string> => {
@@ -981,13 +924,13 @@ const fetchDrpyPlayUrlHelper = async (site: { [key: string]: any }, url: string)
     if (res.redirect) {
       data = res.url;
       console.log(`[detail][drpy][return]${data}`);
-    }
+    };
   } catch (err) {
     console.log(`[detail][drpy][error]:${err}`);
   } finally {
     console.log(`[detail][drpy][end]免嗅流程结束`);
     return data;
-  }
+  };
 };
 
 const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<string> => {
@@ -998,7 +941,7 @@ const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<str
     if (res.url) {
       data = res.url;
       console.log(`[detail][json][return]${data}`);
-    }
+    };
   } catch (err) {
     console.log(`[detail][json][error]${err}`);
   } finally {
@@ -1021,60 +964,59 @@ const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> 
     console.log(`[detail][jx][end]官解流程结束`);
     MessagePlugin.info('官解流程结束,如未加载播放器则嗅探失败,请换源');
     return data;
-  }
+  };
 };
 
 // 初始化film
 const initFilmPlayer = async (isFirst) => {
   const { site } = ext.value;
+  tmp.skipTime = 0;
   await getDetailInfo();
 
   if (!isFirst) {
     await getHistoryData();
+    if (!_.has(dataHistory.value, "id")) await putHistoryData();
     await getAnalyzeFlag();
 
-    if (site.type !== 7) {
-      if (site.search !== 0) getDoubanRecommend();
-    }
+    if (site.type !== 7 && site.search !== 0) getDoubanRecommend();
+
     getBinge();
 
-    const item = season.value[active.flimSource].find(
-      (item) => item.split('$')[0] === dataHistory.value["videoIndex"],
-    );
-    currentUrl.value = item;
-    config.value.url = item ? item.split('$')[1] : season.value[active.flimSource][0].split('$')[1];
-
     // 跳过时间
-    // if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
-    if (set.value.skipStartEnd && dataHistory.value["watchTime"] < skipConfig.value.skipTimeInStart) {
-      config.value.startTime = skipConfig.value.skipTimeInStart;
-    } else {
-      config.value.startTime = dataHistory.value["watchTime"] || 0;
-    }
-  } else {
-    config.value.startTime = dataHistory.value.watchTime || 0;
-    // if (set.value.skipStartEnd && dataHistory.value.watchTime < set.value.skipTimeInStart) {
     if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
-      config.value.startTime = skipConfig.value.skipTimeInStart;
-    }
-  }
+      tmp.skipTime = skipConfig.value.skipTimeInStart;
+    } else {
+      tmp.skipTime = dataHistory.value["watchTime"] || 0;
+    };
+  } else {
+    tmp.skipTime = dataHistory.value.watchTime || 0;
+    if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
+      tmp.skipTime = skipConfig.value.skipTimeInStart;
+    };
+  };
 
   // 解析直链
-  let playerUrl = config.value.url;
   const { snifferMode } = set.value;
+
+  const { url } = formatIndex(active.filmIndex);
+
+  tmp.url = url;
+  tmp.sourceUrl = url;
+  let playerUrl = url;
+
   if (site.playUrl) {
-    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, config.value.url);
+    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
   } else {
-    if (config.value.url.startsWith('http')) {
-      const { hostname } = new URL(config.value.url);
-      let snifferUrl;
-      if (config.value.url.includes('uri=')) snifferUrl = config.value.url; // 判断有播放器的
+    if (url.startsWith('http')) {
+      const { hostname } = new URL(url);
+      let snifferUrl = '';
+      if (url.includes('uri=')) snifferUrl = url; // 判断有播放器的
       if (
         VIP_LIST.some((item) => hostname.includes(item)) ||
         analyzeConfig.value.flag.some((item) => active.flimSource.includes(item))
       ) {
         // 官解iframe
-        snifferUrl = analyzeConfig.value.default.url + config.value.url;
+        snifferUrl = analyzeConfig.value.default.url + url;
       }
       if (snifferUrl) {
         playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${snifferUrl}` : snifferUrl);
@@ -1085,32 +1027,32 @@ const initFilmPlayer = async (isFirst) => {
     switch (site.type) {
       case 2:
         // drpy免嗅
-        playerUrl = await fetchDrpyPlayUrlHelper(site, config.value.url);
+        playerUrl = await fetchDrpyPlayUrlHelper(site, url);
         break;
       case 6:
         // hipy获取服务端播放链接
-        playerUrl = await fetchHipyPlayUrlHelper(site, active.flimSource, config.value.url);
+        playerUrl = await fetchHipyPlayUrlHelper(site, active.flimSource, url);
         break;
       case 7:
         // t3获取服务端播放链接
         await t3RuleInit(site);
-        playerUrl = await fetchT3PlayUrlHelper(active.flimSource, config.value.url, []);
+        playerUrl = await fetchT3PlayUrlHelper(active.flimSource, url, []);
         break;
       case 8:
         // catvox获取服务端播放链接
         await catvodRuleInit(site);
-        playerUrl = await fetchCatvodPlayUrlHelper(site, active.flimSource, config.value.url);
+        playerUrl = await fetchCatvodPlayUrlHelper(site, active.flimSource, url);
         break;
     }
   }
 
-  if (!playerUrl) playerUrl = config.value.url;
+  if (!playerUrl) playerUrl = url;
 
   if (playerUrl) {
     const mediaType = await checkMediaType(playerUrl);
     console.log(`[detail][mediaType]${mediaType}`)
     if (mediaType !== 'unknown' && mediaType !== 'error') {
-      createPlayer(playerUrl, mediaType);
+      createPlayer(playerUrl, mediaType!);
       return;
     }
   }
@@ -1119,28 +1061,11 @@ const initFilmPlayer = async (isFirst) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    playerUrl = await sniffer(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${config.value.url}` : config.value.url);
+    playerUrl = await sniffer(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${url}` : url);
     createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
   };
-};
-
-// 初始化网盘
-const initCloudPlayer = async () => {
-  driveDataList.value = ext.value["files"];
-  config.value.url = info.value["url"];
-  createPlayer(config.value.url);
-};
-
-const spiderInit = async () => {
-  if (!spider.value) spider.value = __jsEvalReturn();
-  await spider.value.init({
-    skey: 'siteKey',
-    ext: [
-      { ...ext.value.site }
-    ],
-  });
 };
 
 // 初始化播放器
@@ -1160,49 +1085,16 @@ const initPlayer = async (isFirst = false) => {
     default:
       break;
   };
-
-  let title = info.value["name"];
-  if (type.value === 'film') title = `${info.value["vod_name"]} ${formatIndex(active.filmIndex).index}`
-  document.title = title;
-};
-
-// 在追
-const bingeEvent = async () => {
-  try {
-    const { id } = ext.value["site"];
-    const db = await detailStar({ relateId: id, videoId: info.value["vod_id"] });
-
-    if (isVisible.binge) {
-      const doc = {
-        relateId: id,
-        videoId: info.value["vod_id"],
-        videoImage: info.value["vod_pic"],
-        videoName: info.value["vod_name"],
-        videoType: info.value["type_name"],
-        videoRemarks: info.value["vod_remarks"],
-      };
-      if (!db) {
-        await addStar(doc);
-      }
-    } else {
-      await delStar(db.id);
-    }
-
-    isVisible.binge = !isVisible.binge;
-  } catch (error) {
-    console.error(error);
-    MessagePlugin.error(`操作失败:${error}`);
-  }
 };
 
 // 格式化剧集名称
-const formatName = (item) => {
+const formatName = (item: string): string => {
   const [first] = item.split('$');
   return first.includes('http') ? '正片' : first;
 };
 
 // 格式化剧集集数
-const formatIndex = (item) => {
+const formatIndex = (item: string): { index: string, url: string } => {
   const [index, url] = item.split('$');
   return { index, url };
 };
@@ -1241,23 +1133,11 @@ const getDetailInfo = async (): Promise<void> => {
   videoList.fullList = fullList;
   info.value = videoList;
   season.value = fullList;
-
-  console.log(season.value)
 };
 
 // 切换选集
 const changeEvent = async (item) => {
-  currentUrl.value = item;
-  const { url } = formatIndex(item);
   active.filmIndex = item;
-  config.value.url = url;
-  const doc = {
-    watchTime: xg.value ? xg.value.currentTime : 0,
-    duration: null,
-    playEnd: false,
-    siteSource: active.flimSource,
-    videoIndex: active.filmIndex,
-  };
 
   // 当前源dataHistory.value.siteSource 选择源active.flimSource；当前集dataHistory.value.videoIndex 选择源index
   // 1. 同源 不同集 变   return true
@@ -1267,54 +1147,16 @@ const changeEvent = async (item) => {
   // 待优化 不同源的index不同，要重新索引  但是 综艺不对应
   if (dataHistory.value["siteSource"] === active.flimSource) {  // 同源
     if (formatIndex(dataHistory.value["videoIndex"]).index !== formatIndex(active.filmIndex).index) {
-      doc.watchTime = 0;
-      delete doc.duration;
-    }
-  } else if (formatIndex(dataHistory.value["videoIndex"]).index !== formatIndex(active.filmIndex).index) {  // 不同源
-    doc.watchTime = 0;
-    delete doc.duration;
-  }
-
-  updateHistory(dataHistory.value["id"], doc);
-
-  for (const key in doc) {
-    dataHistory.value[key] = doc[key];
-  }
-  await initPlayer(true);
+      VIDEO_PROCESS_DOC.watchTime = 0;
+      VIDEO_PROCESS_DOC.playEnd = false;
+    };
+  } else if (formatIndex(dataHistory.value["videoIndex"]).index !== formatIndex(active.filmIndex).index) { // 不同源
+    VIDEO_PROCESS_DOC.watchTime = 0;
+    VIDEO_PROCESS_DOC.playEnd = false;
+  };
 
   await putHistoryData();
-};
-
-// 切换iptv
-const changeIptvEvent = async (item) => {
-  store.updateConfig({
-    type: 'iptv',
-    data: {
-      info: item,
-      ext: { epg: data.value.ext["epg"] },
-    },
-  });
-  info.value = item;
-  await initPlayer();
-};
-
-// 切换cloud
-const changeDriveEvent = async (item) => {
-  await spiderInit();
-  const res = JSON.parse(await spider.value.file(item.path));
-  store.updateConfig({
-    type: 'drive',
-    data: {
-      info: {
-        name: res.name,
-        url: res.url,
-        vod_pic: res.thumb
-      }
-    },
-  });
-  info.value = res;
-
-  await initPlayer();
+  await initPlayer(true);
 };
 
 // 获取豆瓣影片推荐
@@ -1360,25 +1202,34 @@ const filterContent = (item) => {
 
 // 定时更新播放进度
 const timerUpdatePlayProcess = () => {
+  const autoPlayNext = () => {
+    const { playerMode } = set.value;
+    const { siteSource } = dataHistory.value;
+    const index = season.value[siteSource].indexOf(active.filmIndex);
+
+    VIDEO_PROCESS_DOC.playEnd = true;
+    VIDEO_PROCESS_DOC.duration = 0;
+
+    if (season.value[siteSource].length === index + 1) {  // 最后一集
+      putHistoryData();
+      if (playerMode.type === 'xgplayer') {
+        player.value.xgplayer.pause();
+      } else if (playerMode.type === 'dplayer') {
+        player.value.dplayer.pause();
+      };
+      return;
+    };
+    changeEvent(season.value[siteSource][index + 1]);
+    MessagePlugin.info('请稍候,正在切换下集');
+  };
+
   const onTimeUpdate = (currentTime, duration) => {
     VIDEO_PROCESS_DOC.watchTime = currentTime;
     VIDEO_PROCESS_DOC.duration = duration;
-    updateHistory(dataHistory.value["id"], VIDEO_PROCESS_DOC);
-    // history.update(dataHistory.value.id, VIDEO_PROCESS_DOC);
 
     const watchTime = set.value.skipStartEnd ? currentTime + skipConfig.value.skipTimeInEnd : currentTime;
-
-    if (watchTime >= duration) {
-      if (set.value.playerMode.type === 'xgplayer') {
-        const pipInstance = xg.value.plugins.pip;
-        if (pipInstance.isPip) {
-          xg.value.pause();
-          return;
-        }
-      }
-
-      if (duration !== 0) autoPlayNext();
-    }
+    if (watchTime >= duration && duration !== 0) autoPlayNext();
+    else putHistoryData();
 
     // console.log(
     //   `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
@@ -1393,69 +1244,184 @@ const timerUpdatePlayProcess = () => {
   };
 
   if (set.value.playerMode.type === 'xgplayer') {
-    xg.value.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
+    player.value.xgplayer.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
       onTimeUpdate(currentTime, duration);
     });
 
-    xg.value.on(Events.ENDED, () => {
+    player.value.xgplayer.on(Events.ENDED, () => {
       onEnded();
     });
   } else if (set.value.playerMode.type === 'dplayer') {
-    dp.value.on('timeupdate', () => {
-      const duration = dp.value.video.duration;
-      const currentTime = dp.value.video.currentTime;
-      onTimeUpdate(currentTime, duration);
+    player.value.dplayer.on('timeupdate', () => {
+      if (player.value.dplayer?.video) {
+        const duration = player.value.dplayer.video.duration || 0; // 会获取到NaN
+        const currentTime = player.value.dplayer.video.currentTime;
+        onTimeUpdate(currentTime, duration);
+      };
     });
 
-    dp.value.on('ended', () => {
+    player.value.dplayer.on('ended', () => {
       onEnded();
     });
   }
-};
-
-// 是否自动进入下集
-const autoPlayNext = () => {
-  const { siteSource } = dataHistory.value;
-  const index = season.value[siteSource].indexOf(currentUrl.value);
-
-  const doc = {
-    playEnd: true,
-  };
-  updateHistory(dataHistory.value.id, doc);
-  // history.update(dataHistory.value.id, doc);
-
-  if (season.value[siteSource].length === index + 1) {
-    xg.value.pause();
-    return;
-  }
-  changeEvent(season.value[siteSource][index + 1]);
-  MessagePlugin.info('请稍候,正在切换下集');
 };
 
 // 获取是否追剧
 const getBinge = async () => {
-  const { id } = ext.value["site"];
+  const { id } = ext.value.site;
   const { vod_id } = info.value;
   const res = await detailStar({ relateId: id, videoId: vod_id });
   isVisible.binge = !res;
 };
 
+// 在追
+const bingeEvent = async () => {
+  try {
+    const { id } = ext.value.site;
+    const db = await detailStar({ relateId: id, videoId: info.value.vod_id });
+
+    if (isVisible.binge) {
+      const doc = {
+        relateId: id,
+        videoId: info.value.vod_id,
+        videoImage: info.value.vod_pic,
+        videoName: info.value.vod_name,
+        videoType: info.value.type_name,
+        videoRemarks: info.value.vod_remarks
+      };
+      if (!db) {
+        await addStar(doc);
+      }
+    } else {
+      await delStar(db.id);
+    }
+
+    isVisible.binge = !isVisible.binge;
+  } catch (error) {
+    console.info(error);
+    MessagePlugin.error(t('pages.player.message.error'));
+  }
+};
+
+// 选集排序
+const reverseOrderEvent = () => {
+  reverseOrder.value = !reverseOrder.value;
+  if (reverseOrder.value) {
+    console.log('[play][season]positive order');
+    season.value = JSON.parse(JSON.stringify(info.value.fullList));
+  } else {
+    console.log('[play][season]reverse order');
+    season.value = _.mapValues(season.value, list => _.reverse([...list]));
+  }
+};
+
+// 推荐刷新数据
+const recommendEvent = async (item) => {
+  const { id } = ext.value.site;
+
+  if (!('vod_play_from' in item && 'vod_play_url' in item)) {
+    const [detailItem] = await fetchFilmDetail(id, item.vod_id);
+    item = detailItem;
+  };
+
+  info.value = item;
+  recommend.value = [];
+  dataHistory.value = {};
+  skipConfig.value = { skipTimeInStart: 30, skipTimeInEnd: 30 };
+  VIDEO_PROCESS_DOC.duration = 0;
+  VIDEO_PROCESS_DOC.watchTime = 0;
+  VIDEO_PROCESS_DOC.playEnd = false;
+
+  tmp.skipTime = 0;
+  active.flimSource = '';
+  active.filmIndex = '';
+  season.value = '';
+  isVisible.binge = false;
+  store.updateConfig({
+    type: 'film',
+    data: { info: item, ext: ext.value }
+  });
+
+  initPlayer();
+};
+
+// 更新历史跳过参数
+const skipTimeInEndChange = () => {
+  putHistoryData();
+};
+
+// 更新跳过开关全局存储
+const updateLocalPlayer = async (item) => {
+  await store.updateConfig({
+    // @ts-ignore
+    setting: { skipStartEnd: item },
+  });
+
+  await setDefault("skipStartEnd", item);
+};
+
+// 分享
+const shareEvent = () => {
+  const sourceUrl = 'https://web.zyplayer.fun/?url=';
+  let name;
+
+  if (type.value === 'film') name = `${info.value["vod_name"]} ${formatIndex(active.filmIndex).index}`;
+  else name = info.value["name"];
+
+  const params = `${tmp.url}&name=${name}`;
+  const url = `${sourceUrl}${params}`;
+
+  shareData.value = {
+    ...shareData.value,
+    name,
+    url,
+  };
+
+  isVisible.share = true;
+};
+
+//下载 dialog 数据
+const downloadEvent = () => {
+  downloadDialogData.value = {
+    season: season.value,
+    current: tmp.url
+  };
+  isVisible.download = true;
+};
+
+// 初始化iptv
+const initIptvPlayer = async () => {
+  if (data.value.ext["epg"]) getEpgList(ext.value["epg"], info.value["name"], moment().format('YYYY-MM-DD'));
+  tmp.url = info.value["url"];
+
+  createPlayer(tmp.url);
+};
+
 // 电子节目单播放状态
-const filterEpgStatus = (start: any, end: any) => {
+const filterEpgStatus = (start: string, end: string): 'playing' | 'unplay' | 'played' => {
   const nowTimestamp = moment();
-  const startTimestamp = moment(`${nowTimestamp.format('YYYY-MM-DD')} ${start}`);
-  const endTimestamp = moment(`${nowTimestamp.format('YYYY-MM-DD')} ${end}`);
+  const startTimestamp = moment().set({
+    hours: parseInt(start.split(':')[0], 10),
+    minutes: parseInt(start.split(':')[1], 10),
+  });
+  const endTimestamp = moment().set({
+    hours: parseInt(end.split(':')[0], 10),
+    minutes: parseInt(end.split(':')[1], 10),
+  });
 
   if (nowTimestamp.isBetween(startTimestamp, endTimestamp)) return 'playing';
   if (nowTimestamp.isBefore(startTimestamp)) return 'unplay';
   if (nowTimestamp.isAfter(endTimestamp)) return 'played';
+
+  throw new Error('Invalid state: unable to determine EPG status');
 };
 
+// 加载channel
 const load = async ($state) => {
-  console.log('loading...');
+  console.log('[play][channel]loading...');
   try {
     const resLength = await getChannelList();
-    console.log(`[channel] 返回数据长度${resLength}`);
+    console.log(`[play][channel]return length: ${resLength}`);
     if (resLength === 0) $state.complete();
     else $state.loaded();
   } catch (err) {
@@ -1465,14 +1431,14 @@ const load = async ($state) => {
 };
 
 // 检查ipv6
-const checkChannelListIpv6 = async (data) => {
+const checkChannelListIpv6 = async (data: any[]) => {
   const newdata = await Promise.all(
     data.map(async (item) => {
       try {
         const checkStatus = await checkUrlIpv6(item.url);
         return checkStatus !== 'IPv6' ? item : null;
       } catch (err) {
-        console.log(err);
+        console.log(`[play][channel][checkIpv6][error]${err}`);
         return null;
       }
     })
@@ -1509,95 +1475,74 @@ const getChannelList = async () => {
 };
 
 // 获取电子节目单
-const getEpgList = async (url, name, date) => {
+const getEpgList = async (url: string, name: string, date: string): Promise<void> => {
   try {
     const res = await fetchChannelEpg(url, name, date);
     iptvConfig.value.epgData = res;
   } catch (err) {
-    console.log(err);
+    console.log(`[play][epg][error]${err}`);
   }
 };
 
-// 选择倒序
-const reverseOrderEvent = () => {
-  reverseOrder.value = !reverseOrder.value;
-  seasonReverseOrder();
-};
-
-// 推荐刷新数据
-const recommendEvent = async (item) => {
-  const { id } = ext.value["site"];
-
-  if (!('vod_play_from' in item && 'vod_play_url' in item)) {
-    const [detailItem] = await fetchFilmDetail(id, item.vod_id);
-    item = detailItem;
-  }
-
-  info.value = item;
-  recommend.value = [];
-  dataHistory.value = {};
-  active.flimSource = '';
-  active.filmIndex = '';
-  season.value = '';
-  isVisible.binge = false;
+// 切换channel
+const changeChannelEvent = async (item) => {
   store.updateConfig({
-    type: 'film',
-    data: {
-      info: item,
-      ext: ext.value,
-    },
+    type: 'iptv',
+    data: { info: item, ext: ext.value }
   });
-  initPlayer();
+  info.value = item;
+  tmp.url = info.value["url"];
+  createPlayer(tmp.url);
 };
 
-// 更新历史跳过参数
-const skipHistoryConfig = async () => {
-  const { skipTimeInStart, skipTimeInEnd } = skipConfig.value;
-  await updateHistory(dataHistory.value["id"], { skipTimeInStart, skipTimeInEnd });
-};
-
-// 更新跳过开关全局存储
-const updateLocalPlayer = async (item) => {
-  await store.updateConfig({
-    setting: {
-      skipStartEnd: item,
-    },
-  });
-
-  await setDefault("skipStartEnd", item);
-};
-
-// 分享
-const shareEvent = () => {
-  isVisible.share = true;
-
-  let name;
-  if (type.value === 'film') name = `${info.value["vod_name"]} ${formatIndex(active.filmIndex)}`;
-  else name = info.value["name"];
-
-  const sourceUrl = 'https://web.zyplayer.fun/?url=';
-  let params;
-  if (type.value === 'film') params = `${config.value.url}&name=${info.value["vod_name"]} ${formatIndex(active.filmIndex)}`;
-  else params = `${config.value.url}&name=${info.value["name"]}`;
-  const url = onlineUrl.value || sourceUrl + params;
-
-  shareData.value = {
-    ...shareData.value,
-    name,
-    url,
+// 生成台标
+const generateLogo = (item) => {
+  let url = item.logo;
+  if (ext.value.logo) {
+    url = `${ext.value.logo}${item.name}.png`;
   };
-};
-
-const downloadEvent = () => {
-  downloadDialogData.value = {
-    season: season.value,
-    current: config.value.url
-  };
-  isVisible.download = true;
+  return url;
 }
 
+// 初始化网盘
+const initCloudPlayer = async () => {
+  driveDataList.value = ext.value["files"];
+  tmp.url = info.value["url"];
+  createPlayer(tmp.url);
+};
+
+const spiderInit = async () => {
+  if (!spider.value) spider.value = __jsEvalReturn();
+  await spider.value.init({
+    skey: 'siteKey',
+    ext: [
+      { ...ext.value.site }
+    ],
+  });
+};
+
+// 切换cloud
+const changeDriveEvent = async (item) => {
+  await spiderInit();
+  const res = JSON.parse(await spider.value.file(item.path));
+  store.updateConfig({
+    type: 'drive',
+    data: {
+      info: {
+        name: res.name,
+        url: res.url,
+        vod_pic: res.thumb
+      }
+    },
+  });
+  info.value = res;
+  tmp.url = info.value["url"];
+  createPlayer(tmp.url);
+  // await initPlayer();
+};
+
 // electron窗口置顶
-const toggleAlwaysOnTop = () => {
+const toggleAlwaysOnTop = (): void => {
   const isAlwaysOnTop = win.isAlwaysOnTop();
   const newValue = !isAlwaysOnTop;
 
@@ -1607,9 +1552,8 @@ const toggleAlwaysOnTop = () => {
 };
 
 // 全屏事件 mac修复状态栏 css 用
-const minMaxEvent = () => {
+const minMaxEvent = (): void => {
   const handleFullScreen = (isFullScreen) => {
-    console.log(isFullScreen ? '进入全屏模式' : '退出全屏模式');
     isVisible.macMaximize = isFullScreen;
   };
 
@@ -1618,7 +1562,7 @@ const minMaxEvent = () => {
 };
 
 // 打开主窗口
-const openMainWinEvent = () => {
+const openMainWinEvent = (): void => {
   window.electron.ipcRenderer.send('showMainWin');
 };
 </script>
@@ -1752,7 +1696,7 @@ const openMainWinEvent = () => {
 
           .player {
             width: 100%;
-            height: calc(100vh - 50px);
+            height: calc(100vh - 56px);
           }
         }
       }
@@ -1810,7 +1754,7 @@ const openMainWinEvent = () => {
       box-sizing: border-box;
 
       .content {
-        height: 100%;
+        height: auto;
 
         .title-warp {
           height: 26px;
@@ -1851,9 +1795,12 @@ const openMainWinEvent = () => {
 
               .content-item {
                 display: flex;
+                grid-column-gap: var(--td-size-2);
+                height: 38px;
                 align-items: center;
                 font-weight: 500;
                 cursor: pointer;
+                padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-m);
 
                 .time-warp {
                   width: 40px;
@@ -1884,14 +1831,7 @@ const openMainWinEvent = () => {
 
                 .title-wrap {
                   font-weight: bold;
-                }
-
-                .title-warp-channel {
-                  width: calc(100% - 120px);
-                }
-
-                .title-warp-epg {
-                  width: calc(100% - 110px);
+                  flex: 1;
                 }
 
                 &:hover {
