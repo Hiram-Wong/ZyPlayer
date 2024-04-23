@@ -47,7 +47,7 @@ import CommonNav from '../components/common-nav/index.vue';
 
 const storeSetting = useSettingStore();
 const sysConfigSwitch = computed(() => {
-  return storeSetting.getSysConfigSwitch;
+  return storeSetting.sysConfigSwitch;
 });
 
 const settingNav = computed(() => {
@@ -79,8 +79,8 @@ const settingSet = reactive({
   list: settingNav
 });
 
-if (storeSetting.getSysConfigSwitch) {
-  settingSet.select = storeSetting.getSysConfigSwitch;
+if (storeSetting.sysConfigSwitch) {
+  settingSet.select = storeSetting.sysConfigSwitch;
 };
 
 watch(() => settingSet.select, (newValue) => {
