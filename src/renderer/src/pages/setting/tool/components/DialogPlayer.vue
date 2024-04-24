@@ -1,6 +1,7 @@
 <template>
   <t-dialog
     v-model:visible="formVisible"
+    :closeOnOverlayClick="false"
     :width="650"
     :header="$t('pages.setting.editSource.dialog.player.title')"
     placement="center"
