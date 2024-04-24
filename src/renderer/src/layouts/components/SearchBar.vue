@@ -8,7 +8,7 @@
         </t-select>
       </template>
       <template #append>
-        <search-icon size="large" @click="searchEvent" style="cursor: pointer;"/>
+        <search-icon size="large" @click="searchEvent(searchValue)" style="cursor: pointer;"/>
       </template>
       <t-popup placement="bottom-right" :visible="isVisible.popup" :on-visible-change="popupVisibleEvent">
         <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" :on-focus="focusEvent" v-model="searchValue" :on-enter="searchEvent"/>
@@ -96,7 +96,7 @@ const active = reactive({
   flag: ''
 });
 
-const searchList = ref([]);
+const searchList = ref([]) as any;
 
 const searchValue = ref('');
 
@@ -109,7 +109,7 @@ const hotConfig = reactive({
   hotUpdateTime: moment().format('YYYY-MM-DD'),
   hotData: [],
   hotOption: [] || {},
-})
+}) as any;
 
 const focusEvent = async () => {
   getSearchHistory();
@@ -222,19 +222,19 @@ const searchEvent = async (item) => {
     } else {
       searchList.value.unshift(doc);
       searchList.value.pop();
-    }
+    };
     addHistory(doc);
   }
   
   if (active.type === 'film') {
     router.push({
       name: 'FilmIndex',
-    })
+    });
     filmSearchEmitReload.emit(searchValue.value);
   } else {
     router.push({
       name: 'IptvIndex',
-    })
+    });
     channelSearchEmitReload.emit(searchValue.value);
   };
 
