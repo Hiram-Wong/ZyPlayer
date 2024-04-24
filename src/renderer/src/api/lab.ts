@@ -1,19 +1,20 @@
 import request from '@/utils/request';
 
-export function fetchDebugSource() {
+export function fetchDebugSource(action) {
   return request({
     url: '/v1/lab/debugSource',
-    method: 'get'
+    method: 'get',
+    params: {
+      action
+    }
   })
 }
 
-export function setDebugSource(text: string) {
+export function setDebugSource(text) {
   return request({
     url: '/v1/lab/debugSource',
     method: 'post',
-    data: {
-      text
-    }
+    data: text
   })
 }
 

@@ -280,6 +280,7 @@ export default {
     bug: 'Debug',
     cache: 'PullCache',
     delete: 'DeleteCase',
+    help: 'Help',
     title: 'Edit Source Tool [Hjdhnx Co-Branded]',
     template: 'template',
     templateTip: 'select one default template to edit',

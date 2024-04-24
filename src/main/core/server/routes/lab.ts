@@ -9,12 +9,19 @@ const API_VERSION = "api/v1";
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(`/${API_VERSION}/lab/debugSource`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
+      const action = req.query.action;
       let db = {text: '', oldSiteId: '', debugSiteId: ''};
+      let res;
       try {
         // @ts-ignore
         db = await req.server.db.getData("/debug-edit-source");
       } catch(error) {};
-      const res = db?.text ?? '';
+
+      if (action === "all") {
+        res = db?.text || '';
+      } else {
+        res = db?.text[action];
+      };
 
       reply.code(200).send(res);
     } catch (err) {
@@ -24,7 +31,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post(`/${API_VERSION}/lab/debugSource`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
       // @ts-ignore
-      const { text } = req.body;
+      const text = req.body;
       let debugSiteId = nanoid();
       let db = {text: '', oldSiteId: '', debugSiteId: ''};
       let oldSiteId = await setting.find({ key: "defaultSite" }).value;
@@ -46,7 +53,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
           group: "debug",
           isActive: true,
           type: 7,
-          ext: "http://127.0.0.1:9978/api/v1/lab/debugSource",
+          ext: "http://127.0.0.1:9978/api/v1/lab/debugSource?action=content",
           categories: ""
         };
         await site.add(newSiteData);
@@ -54,7 +61,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       if (dbOldSiteId) oldSiteId = dbOldSiteId;
 
       // @ts-ignore
-      await req.server.db.push('/debug-edit-source', { oldSiteId, text: `${text}`, debugSiteId });
+      await req.server.db.push('/debug-edit-source', { oldSiteId, text, debugSiteId });
       const res = await setting.update_data('defaultSite', { value: debugSiteId });
 
       reply.code(200).send(res);

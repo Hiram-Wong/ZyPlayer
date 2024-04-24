@@ -545,8 +545,13 @@ const exportFileEvent = async () => {
 
 const debugEvent = async () => {
   try {
-    const text = form.value.content.edit;
-    const res = await setDebugSource(text);
+    const { url, rule, category, detail, search, play, proxy, player, content } = form.value;
+    const doc = {
+      url, rule, category, detail, search, play, proxy, player,
+      content: content.edit
+    };
+
+    const res = await setDebugSource(doc);
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
     emitReload.emit('film-reload');
     router.push({ name: 'FilmIndex' });
@@ -557,8 +562,19 @@ const debugEvent = async () => {
 
 const cacheEvent = async () => {
   try {
-    const res = await fetchDebugSource();
-    if (editor) editor.setValue(res);
+    const res = await fetchDebugSource('all');
+    const { url, rule, category, detail, search, play, proxy, player, content } = res;
+    if (editor) editor.setValue(content);
+    Object.assign(form.value, {
+      url,
+      rule,
+      category,
+      detail,
+      search,
+      play,
+      proxy,
+      player
+    });
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
