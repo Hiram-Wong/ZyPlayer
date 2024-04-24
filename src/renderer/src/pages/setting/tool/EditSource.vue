@@ -509,8 +509,15 @@ const exportFileEvent = async () => {
   if (!str.trim()) return;
 
   try {
+    let title = 'source.js'
+    const regex = /title:\s*'([^']+)'/i; // 匹配"title": 后紧跟着双引号内的任何非双引号字符
+    const matchResult = regex.exec(str);
+    if (matchResult) {
+      title = `${matchResult[1]}.js`; // 匹配到的title值
+    };
+
     const saveDialogResult = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
-      defaultPath: 'source.js',
+      defaultPath: title,
       filters: [{ name: 'JavaScript Files', extensions: ['js'] }],
     });
 
