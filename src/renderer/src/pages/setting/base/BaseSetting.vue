@@ -308,6 +308,10 @@ const formData = ref({
   windowPosition: { status: false, position: { width: 1000, height: 640 } }
 });
 
+const tmp = reactive({
+  recordedSourceShortcut: ''
+});
+
 const filmEmitReload = useEventBus('film-reload');
 const hotEmitReload = useEventBus('hot-reload');
 const iptvEmitReload = useEventBus('iptv-reload');
@@ -450,7 +454,7 @@ const formatShortcut = computed(() => {
 // 设置组合键更换焦点placeholder
 const focusShortcut = () => {
   // 复制快捷键
-  formData.value.recordedSourceShortcut = formData.value.recordShortcut;
+  tmp.recordedSourceShortcut = formData.value.recordShortcut;
   formData.value.recordShortcut = '';
   placeholderShortcut.value = t('pages.setting.placeholder.shortcutKeyEnterTip');
 };
@@ -458,8 +462,8 @@ const focusShortcut = () => {
 // 设置组合键更换失去焦点placeholder
 const blurShortcut = () => {
   // 还原快捷键
-  if (formData.value.recordedSourceShortcut && !formData.value.recordShortcut)
-    formData.value.recordShortcut = formData.value.recordedSourceShortcut;
+  if (tmp.recordedSourceShortcut && !formData.value.recordShortcut)
+    formData.value.recordShortcut = tmp.recordedSourceShortcut;
   placeholderShortcut.value = t('pages.setting.placeholder.shortcutKeyTip');
 };
 
@@ -586,6 +590,8 @@ const isLegalShortcut = (item) => {
 const cancelShortcut = () => {
   console.log('cancelShortcut');
   formData.value.recordShortcut = '';
+  placeholderShortcut.value = t('pages.setting.placeholder.shortcutKeyTip');
+  tipShortcut.value = '';
   window.electron.ipcRenderer.send('uninstallShortcut');
 };
 
@@ -596,13 +602,15 @@ const reset = (type: string) => {
     if (platform === 'darwin') formData.value.recordShortcut = 'Shift+Command+Z';
     else formData.value.recordShortcut = 'Shift+Alt+Z';
     shortcutInputRef.value.blur();
+    tipShortcut.value = '';
+    placeholderShortcut.value = t('pages.setting.placeholder.shortcutKeyTip');
     window.electron.ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
   } else if (type === 'epg') {
     formData.value.defaultIptvEpg = 'https://epg.112114.eu.org/';
   } else if (type === 'logo') {
     formData.value.defaultIptvLogo = 'https://epg.112114.eu.org/logo/';
   } else if(type === 'danmuku') {
-    formData.value.defaultDanMuKu = 'https://dm.bbj.icu/dm?ac=dm';
+    formData.value.barrage.url = 'https://dm.bbj.icu/dm?ac=dm';
   } else if(type === 'viewCasual') {
     formData.value.defaultViewCasual = 'http://api.yujn.cn/api/zzxjj.php';
   }
