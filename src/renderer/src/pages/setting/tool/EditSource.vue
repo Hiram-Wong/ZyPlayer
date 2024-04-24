@@ -27,6 +27,10 @@
               <delete-icon />
               <span>{{ $t('pages.setting.editSource.delete') }}</span>
             </div>
+            <div class="item" @click="helpEvent">
+              <help-rectangle-icon />
+              <span>{{ $t('pages.setting.editSource.help') }}</span>
+            </div>
           </div>
         </div>
       </t-row>
@@ -39,8 +43,13 @@
               <div class="item">
                 <t-button class="button" theme="default" @click="showTemplateDialog">{{
                   $t('pages.setting.editSource.template') }}</t-button>
-                <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.template')"
-                  width="40%" @confirm="confirmTemplate()">
+                <t-dialog
+                  v-model:visible="isVisible.template"
+                  :header="$t('pages.setting.editSource.template')"
+                  show-in-attached-element
+                  width="40%"
+                  @confirm="confirmTemplate()"
+                >
                   <p>{{ $t('pages.setting.editSource.templateTip') }}</p>
                   <t-select v-model="form.template" @change="changeTheme()">
                     <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
@@ -216,7 +225,7 @@ import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon } from 'tdesign-icons-vue-next';
+import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon } from 'tdesign-icons-vue-next';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
@@ -295,7 +304,8 @@ let form = ref({
 
 const isVisible = reactive({
   template: false,
-  player: false
+  player: false,
+  help: false
 });
 
 const formDialog = reactive({
@@ -563,6 +573,10 @@ const deleteEvent = async () => {
   } catch (err) {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   };
+};
+
+const helpEvent = async () => {
+  window.electron.ipcRenderer.send('open-url', 'https://zy.catni.cn/edit-source.html')
 };
 
 const changeNav = async (nav = '', action = '') => {
@@ -1085,6 +1099,17 @@ const proxyEvent = async () => {
     .toolbar-item {
       margin-right: var(--td-comp-margin-xs);
     }
+  }
+}
+
+.help-box {
+  height: 100%;
+  width: 100%;
+}
+
+.help-dialog {
+  :deep(.t-dialog__ctx .t-dialog__position.t-dialog--top) {
+    padding: 0 !important;
   }
 }
 </style>

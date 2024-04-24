@@ -143,6 +143,10 @@ const ipcListen = () => {
 
     return res;
   });
+
+  ipcMain.on('open-url', async (_, url) => {
+    shell.openExternal(url);
+  });
   
   // 重启app
   ipcMain.on('relaunch-app', () => {
