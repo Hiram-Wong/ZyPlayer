@@ -341,7 +341,7 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onMounted, ref, reactive, watch } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 import Player, { Events, SimplePlayer } from 'xgplayer';
 import Danmu from 'xgplayer/es/plugins/danmu';
 import LivePreset from 'xgplayer/es/presets/live';
@@ -1219,11 +1219,13 @@ const timerUpdatePlayProcess = () => {
       };
       return;
     };
+
+    console.log('[player][progress] autoPlayNext');
     changeEvent(season.value[siteSource][index + 1]);
     MessagePlugin.info('请稍候,正在切换下集');
   };
 
-  const onTimeUpdate = (currentTime, duration) => {
+  const onTimeUpdate = (currentTime: number, duration: number) => {
     VIDEO_PROCESS_DOC.watchTime = currentTime;
     VIDEO_PROCESS_DOC.duration = duration;
 
@@ -1238,18 +1240,9 @@ const timerUpdatePlayProcess = () => {
     // );
   };
 
-  const onEnded = () => {
-    console.log('[player] ProgressBar ended');
-    autoPlayNext();
-  };
-
   if (set.value.playerMode.type === 'xgplayer') {
     player.value.xgplayer.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
       onTimeUpdate(currentTime, duration);
-    });
-
-    player.value.xgplayer.on(Events.ENDED, () => {
-      onEnded();
     });
   } else if (set.value.playerMode.type === 'dplayer') {
     player.value.dplayer.on('timeupdate', () => {
@@ -1258,10 +1251,6 @@ const timerUpdatePlayProcess = () => {
         const currentTime = player.value.dplayer.video.currentTime;
         onTimeUpdate(currentTime, duration);
       };
-    });
-
-    player.value.dplayer.on('ended', () => {
-      onEnded();
     });
   }
 };
