@@ -567,10 +567,12 @@ const debugEvent = async () => {
       content: content.edit
     };
 
-    const res = await setDebugSource(doc);
-    if (res) MessagePlugin.success(t('pages.setting.data.success'));
-    emitReload.emit('film-reload');
-    router.push({ name: 'FilmIndex' });
+    if (content.edit) {
+      const res = await setDebugSource(doc);
+      if (res) MessagePlugin.success(t('pages.setting.data.success'));
+      emitReload.emit('film-reload');
+      router.push({ name: 'FilmIndex' });
+    };
   } catch (err) {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   };
