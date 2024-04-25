@@ -92,7 +92,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.49beta38 202400419`;
+const VERSION = `${vercode} 3.9.49beta40 202400426`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -219,12 +219,12 @@ if (typeof String.prototype.endsWith != 'function') {
   };
 }
 // Object.prototype["myValues"] = (obj) => {
-//   if(obj == null) {
+//   if(obj === null) {
 //     throw new TypeError("Cannot convert undefined or null to object");
 //   }
-//   let res= [];
+//   let res: any[] = [];
 //   for(let k in obj){
-//     if (obj.hasOwnProperty(k)) { //需判断是否是本身的属性
+//     if (obj.hasOwnProperty(k)) { // 需判断是否是本身的属性
 //       res.push(obj[k]);
 //     }
 //   }
@@ -232,12 +232,12 @@ if (typeof String.prototype.endsWith != 'function') {
 // }
 // if (typeof Object.prototype["values"] !== 'function') {
 //   Object.prototype["values"] = (obj) => {
-//     if(obj ==null) {
+//     if(obj === null) {
 //       throw new TypeError("Cannot convert undefined or null to object");
 //     }
-//     let res=[]
+//     let res: any[] = [];
 //     for(let k in obj){
-//       if(obj.hasOwnProperty(k)){//需判断是否是本身的属性
+//       if (obj.hasOwnProperty(k)) { // 需判断是否是本身的属性
 //         res.push(obj[k]);
 //       }
 //     }
@@ -260,6 +260,14 @@ if (typeof Array.prototype.join !== 'function') {
       str += String(emoji)+String(self[i]);
     }
     return str;
+  };
+}
+if (typeof Array.prototype.toReversed != 'function') {
+  Array.prototype.toReversed = function () {
+    const clonedList = this.slice();
+    // 倒序新数组
+    const reversedList = clonedList.reverse();
+    return reversedList;
   };
 }
 
