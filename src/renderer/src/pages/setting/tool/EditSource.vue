@@ -43,13 +43,8 @@
               <div class="item">
                 <t-button class="button" theme="default" @click="showTemplateDialog">{{
                   $t('pages.setting.editSource.template') }}</t-button>
-                <t-dialog
-                  v-model:visible="isVisible.template"
-                  :header="$t('pages.setting.editSource.template')"
-                  show-in-attached-element
-                  width="40%"
-                  @confirm="confirmTemplate()"
-                >
+                <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.template')"
+                  show-in-attached-element width="40%" @confirm="confirmTemplate()">
                   <p>{{ $t('pages.setting.editSource.templateTip') }}</p>
                   <t-select v-model="form.template" @change="changeTheme()">
                     <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
@@ -97,21 +92,21 @@
                   </t-select>
                 </div>
 
-                <div class="item theme">
+                <div class="item language">
                   <span class="codebox-label">{{ $t('pages.setting.editSource.bar.language') }}</span>
                   <t-select v-model="config.language" auto-width @change="changeLanguage()">
                     <t-option v-for="item in languages" :key="item.label" :value="item.label" :label="item.label" />
                   </t-select>
                 </div>
 
-                <div class="item theme">
+                <div class="item eol">
                   <span class="codebox-label">{{ $t('pages.setting.editSource.bar.eol') }}</span>
                   <t-select v-model="config.eol" auto-width @change="changeEOL()">
                     <t-option v-for="item in eols" :key="item.label" :value="item.value" :label="item.label" />
                   </t-select>
                 </div>
 
-                <div class="item theme">
+                <div class="item wordWrap">
                   <span class="codebox-label">{{ $t('pages.setting.editSource.bar.wordWrap') }}</span>
                   <t-select v-model="config.wordWrap" auto-width @change="changeWarp()">
                     <t-option :label="$t('pages.setting.editSource.bar.enable')" value="on" />
@@ -127,8 +122,17 @@
       <div class="right">
         <div class="action">
           <div class="item">
-            <t-button class="button" theme="default" @click="actionInit">{{ $t('pages.setting.editSource.action.init')
-              }}</t-button>
+            <t-button class="button init" theme="default" @click="actionInit">
+              <div class="status">
+                <span class="title">{{ $t('pages.setting.editSource.action.init') }}</span>
+                <span class="desc">{{ $t('pages.setting.editSource.action.initStatus') }}: {{ form.init.auto ?
+                  $t('pages.setting.editSource.action.initAuto') :
+                  $t('pages.setting.editSource.action.initManual') }}</span>
+              </div>
+              <div class="click" @click.stop="form.init.auto = !form.init.auto">
+                <gesture-click-icon />
+              </div>
+            </t-button>
             <t-button class="button" theme="default" @click="actionHome">{{
               $t('pages.setting.editSource.action.classify') }}</t-button>
             <t-button class="button" theme="default" @click="actionHomeVod">{{
@@ -190,17 +194,13 @@
               </t-radio-group>
             </div>
             <div class="nav-right">
-              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.log" @change="logEvent()" v-if="form.nav === 'log'">
+              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.log" @change="logEvent()"
+                v-if="form.nav === 'log'">
                 <t-radio-button value="f12">{{ $t('pages.setting.editSource.select.f12') }}</t-radio-button>
                 <t-radio-button value="clear">{{ $t('pages.setting.editSource.select.clear') }}</t-radio-button>
               </t-radio-group>
-              <t-radio-group  
-                variant="default-filled"
-                size="small"
-                v-model="form.clickType.proxy"
-                @change="proxyEvent()"
-                v-if='form.nav === "debug" && form.action === "proxy"'
-              >
+              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.proxy" @change="proxyEvent()"
+                v-if='form.nav === "debug" && form.action === "proxy"'>
                 <t-radio-button value="upload">{{ $t('pages.setting.editSource.select.upload') }}</t-radio-button>
                 <t-radio-button value="play">{{ $t('pages.setting.editSource.select.play') }}</t-radio-button>
                 <t-radio-button value="copy">{{ $t('pages.setting.editSource.select.copy') }}</t-radio-button>
@@ -220,12 +220,13 @@
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
+import moment from 'moment';
 import * as monaco from 'monaco-editor';
 import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon } from 'tdesign-icons-vue-next';
+import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon, LinkUnlinkIcon, Link1Icon, GestureClickIcon } from 'tdesign-icons-vue-next';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
@@ -299,6 +300,13 @@ let form = ref({
   clickType: {
     log: '',
     proxy: ''
+  },
+  lastEditTime: {
+    edit: 0,
+    init: 0
+  },
+  init: {
+    auto: false
   }
 });
 
@@ -326,7 +334,7 @@ let editor: monaco.editor.IStandaloneCodeEditor | undefined;
 let log: monaco.editor.IStandaloneCodeEditor | undefined;
 
 self.MonacoEnvironment = {
-  getWorker(workerId, label) {
+  getWorker(_: any, label: string) {
     if (label === 'json') {
       return new jsonWorker();
     }
@@ -459,9 +467,16 @@ const initEditor = () => {
       roundedSelection: false,
       overviewRulerBorder: false,
       wordWrap: config.wordWrap,
+      scrollBeyondLastLine: false,
+      minimap: {
+        enabled: false,
+      },
     });
     editor.onDidChangeModelContent(() => {
-      if (editor) form.value.content.edit = editor.getValue();
+      if (editor) {
+        form.value.content.edit = editor.getValue();
+        form.value.lastEditTime.edit = moment().unix();
+      };
     });
 
     // After onDidChangeModelContent
@@ -478,6 +493,7 @@ const initEditor = () => {
       roundedSelection: false,
       overviewRulerBorder: false,
       wordWrap: config.wordWrap,
+      scrollBeyondLastLine: false,
       minimap: {
         enabled: false,
       },
@@ -545,9 +561,9 @@ const exportFileEvent = async () => {
 
 const debugEvent = async () => {
   try {
-    const { url, rule, category, detail, search, play, proxy, player, content } = form.value;
+    const { url, rule, category, detail, search, play, proxy, player, content, init } = form.value;
     const doc = {
-      url, rule, category, detail, search, play, proxy, player,
+      url, rule, category, detail, search, play, proxy, player, init,
       content: content.edit
     };
 
@@ -563,7 +579,7 @@ const debugEvent = async () => {
 const cacheEvent = async () => {
   try {
     const res = await fetchDebugSource('all');
-    const { url, rule, category, detail, search, play, proxy, player, content } = res;
+    const { url, rule, category, detail, search, play, proxy, player, content, init } = res;
     if (editor) editor.setValue(content);
     Object.assign(form.value, {
       url,
@@ -573,7 +589,8 @@ const cacheEvent = async () => {
       search,
       play,
       proxy,
-      player
+      player,
+      init
     });
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
@@ -627,7 +644,7 @@ const changeNav = async (nav = '', action = '') => {
     monaco.editor.setModelLanguage(log.getModel()!, language);
     log.updateOptions({ readOnly });
     if (nav === 'log') {
-      const res: any = await t3Work({type:'console',data:{type:'get'}})
+      const res: any = await t3Work({ type: 'console', data: { type: 'get' } })
       form.value.content[nav] = res.data;
     }
 
@@ -642,6 +659,13 @@ const changeNav = async (nav = '', action = '') => {
 
 const performAction = async (type, requestData = {}) => {
   try {
+    if (type === 'init' || (form.value.lastEditTime.edit > form.value.lastEditTime.init && form.value.init.auto)) {
+      const currentTime = moment().unix();
+      form.value.lastEditTime.init = currentTime;
+      if (type !== 'init') {
+        await t3Work({ type: 'init', data: form.value.content.edit });
+      };
+    };
     const res: any = await t3Work({ type, data: requestData });
     form.value.content.debug = res.data as string;
     form.value.action = type;
@@ -769,7 +793,7 @@ const logEvent = async () => {
       webContents.openDevTools();
     };
   } else if (type === 'clear') {
-    await t3Work({type:'console',data:{type:'clear'}})
+    await t3Work({ type: 'console', data: { type: 'clear' } })
     form.value.content.log = "";
     form.value.content.text = "";
     console.clear();
@@ -978,6 +1002,40 @@ const proxyEvent = async () => {
           flex-wrap: nowrap;
           width: 100%;
           overflow: hidden;
+
+          .init {
+            :deep(.t-button__text) {
+              display: flex;
+              flex-direction: row;
+              align-items: center;
+            }
+
+            .click {
+              margin-left: var(--td-comp-margin-s);
+              border: 2px solid rgba(132, 133, 141, 0.7);
+              border-radius: var(--td-radius-circle);
+              width: 24px;
+              height: 24px;
+            }
+
+            .status {
+              display: flex;
+              flex-direction: column;
+              font-size: 12px;
+              line-height: 14px;
+              align-content: flex-start;
+
+              .title {
+                font-weight: 500;
+                text-align: left;
+              }
+
+              .desc {
+                font-size: 10px;
+                text-align: left;
+              }
+            }
+          }
 
           .input {
             width: 100%;
