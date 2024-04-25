@@ -296,10 +296,14 @@ export default {
       eol: 'eol',
       wordWrap: 'wordWrap',
       disable: 'disable',
-      enable: 'enable'
+      enable: 'enable',
+      autoInit: 'autoInit'
     },
     action: {
       init: 'Init',
+      initStatus: 'Status',
+      initManual: 'Manual',
+      initAuto: 'Auto',
       classify: 'Classify',
       source: 'Source',
       home: 'Home',

@@ -294,12 +294,16 @@ export default {
       theme: '主题',
       language: '语言',
       eol: '行尾符',
-      wordWrap: '自动换行',
+      wordWrap: '换行',
       disable: '禁用',
-      enable: '启用'
+      enable: '启用',
+      autoInit: '自动初始化'
     },
     action: {
       init: '初始化',
+      initStatus: '当前状态',
+      initManual: '手动',
+      initAuto: '自动',
       source: '源代码',
       classify: '分类',
       home: '首页',
