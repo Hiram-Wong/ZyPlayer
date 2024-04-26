@@ -86,7 +86,7 @@ linux:
   # 可执行文件名
   executableName: zyplayer
   # 应用程序的图标文件路径
-  icon: build/icons/logo.png
+  icon: build/icons/logo.icns
   # 构建类型
   target:
     - target: AppImage
