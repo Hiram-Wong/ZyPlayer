@@ -1,13 +1,13 @@
 /*!
  * @module drpy3
  * @brief T3数据处理核心库
- * @version 3.1.3
+ * @version 3.1.4
  * 
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-22T17:36:03+08:00
+ * @modification-date 2023-04-26T19:21:07+08:00
  * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
@@ -21,6 +21,7 @@
 
 
 import CryptoJS from 'crypto-js';
+import pako from 'pako';
 import joinUrl from 'url';
 import JSEncrypt from 'wxmp-rsa';
 
@@ -92,7 +93,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.49beta40 202400426`;
+const VERSION = `${vercode} 3.9.50beta1 202400426`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -138,9 +139,9 @@ var oheaders;
 var _pdfh;
 var _pdfa;
 var _pd;
-var pdfh = pdfh;
-var pdfa = pdfa;
-var pd = pd;
+var pdfh = pdfhModule;
+var pdfa = pdfaModule;
+var pd = pdModule;
 // const DOM_CHECK_ATTR = ['url', 'src', 'href', 'data-original', 'data-src'];
 const DOM_CHECK_ATTR = /(url|src|href|-original|-src|-play|-url|style)$/;
 // 过滤特殊链接,不走urlJoin
@@ -150,10 +151,87 @@ const URLJOIN_ATTR = /(url|src|href|-original|-src|-play|-url|style)$/;  // 需�
 const SELECT_REGEX = /:eq|:lt|:gt|#/g;
 const SELECT_REGEX_A = /:eq|:lt|:gt/g;
 
+function window_b64() {
+  let b64map = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let base64DecodeChars = new Array(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1);
+  function btoa(str) {
+    var out, i, len;
+    var c1, c2, c3;
+    len = str.length;
+    i = 0;
+    out = "";
+    while (i < len) {
+      c1 = str.charCodeAt(i++) & 0xff;
+      if (i == len) {
+        out += b64map.charAt(c1 >> 2);
+        out += b64map.charAt((c1 & 0x3) << 4);
+        out += "==";
+        break;
+      }
+      c2 = str.charCodeAt(i++);
+      if (i == len) {
+        out += b64map.charAt(c1 >> 2);
+        out += b64map.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+        out += b64map.charAt((c2 & 0xF) << 2);
+        out += "=";
+        break;
+      }
+      c3 = str.charCodeAt(i++);
+      out += b64map.charAt(c1 >> 2);
+      out += b64map.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+      out += b64map.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+      out += b64map.charAt(c3 & 0x3F);
+    }
+    return out;
+  }
+  
+  function atob(str) {
+    var c1, c2, c3, c4;
+    var i, len, out;
+    len = str.length;
+    i = 0;
+    out = "";
+    while (i < len) {
+      do {
+        c1 = base64DecodeChars[str.charCodeAt(i++) & 0xff];
+      } while (i < len && c1 == -1);
+      if (c1 == -1) break;
+      do {
+        c2 = base64DecodeChars[str.charCodeAt(i++) & 0xff];
+      } while (i < len && c2 == -1);
+      if (c2 == -1) break;
+      out += String.fromCharCode((c1 << 2) | ((c2 & 0x30) >> 4));
+      do {
+        c3 = str.charCodeAt(i++) & 0xff;
+        if (c3 == 61) return out;
+        c3 = base64DecodeChars[c3];
+      } while (i < len && c3 == -1);
+      if (c3 == -1) break;
+      out += String.fromCharCode(((c2 & 0XF) << 4) | ((c3 & 0x3C) >> 2));
+      do {
+        c4 = str.charCodeAt(i++) & 0xff;
+        if (c4 == 61) return out;
+        c4 = base64DecodeChars[c4];
+      } while (i < len && c4 == -1);
+      if (c4 == -1) break;
+      out += String.fromCharCode(((c3 & 0x03) << 6) | c4);
+    }
+    return out;
+  }
+  return {
+    atob,
+    btoa
+  }
+}
+
 /**
- es6py扩展
+ es6扩展 手动造轮子
  */
-if (typeof Object.assign != 'function') {
+// @ts-ignore
+ if (typeof atob !== 'function' || typeof btoa !== 'function') {
+  var { atob, btoa } = window_b64();
+}
+if (typeof Object.assign !== 'function') {
   Object.assign = function () {
     var target = arguments[0];
     for (var i = 1; i < arguments.length; i++) {
@@ -180,7 +258,6 @@ if (!String.prototype.includes) {
     }
   };
 }
-
 if (!Array.prototype.includes) {
   Object.defineProperty(Array.prototype, 'includes', {
     value: function (searchElement, fromIndex) {
@@ -208,52 +285,67 @@ if (!Array.prototype.includes) {
     }
   });
 }
-if (typeof String.prototype.startsWith != 'function') {
+if (typeof String.prototype.startsWith !== 'function') {
   String.prototype.startsWith = function (prefix){
     return this.slice(0, prefix.length) === prefix;
   };
 }
-if (typeof String.prototype.endsWith != 'function') {
+if (typeof String.prototype.endsWith !== 'function') {
   String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
   };
 }
-// Object.prototype["myValues"] = (obj) => {
-//   if(obj === null) {
-//     throw new TypeError("Cannot convert undefined or null to object");
-//   }
-//   let res: any[] = [];
-//   for(let k in obj){
-//     if (obj.hasOwnProperty(k)) { // 需判断是否是本身的属性
-//       res.push(obj[k]);
-//     }
-//   }
-//   return res;
-// }
-// if (typeof Object.prototype["values"] !== 'function') {
-//   Object.prototype["values"] = (obj) => {
-//     if(obj === null) {
-//       throw new TypeError("Cannot convert undefined or null to object");
-//     }
-//     let res: any[] = [];
-//     for(let k in obj){
-//       if (obj.hasOwnProperty(k)) { // 需判断是否是本身的属性
-//         res.push(obj[k]);
-//       }
-//     }
-//     return res;
-//   }
-// }
+Object.defineProperty(Object.prototype, 'myValues', {
+  value: function() {
+    if (this == null) {
+      throw new TypeError("Cannot convert undefined or null to object");
+    }
+
+    const res: string[] = [];
+
+    for (const key in this) {
+      if (Object.prototype.hasOwnProperty.call(this, key)) {
+        res.push(this[key]);
+      }
+    }
+
+    return res;
+  },
+  configurable: true,
+  enumerable: false,
+  writable: true,
+})
+if (!Object.prototype.hasOwnProperty('values')) {
+  Object.defineProperty(Object.prototype, 'values', {
+    value: function() {
+      if (this == null) {
+        throw new TypeError("Cannot convert undefined or null to object");
+      }
+
+      const values: string[] = [];
+
+      for (const key in this) {
+        if (Object.prototype.hasOwnProperty.call(this, key)) {
+          values.push(this[key]);
+        }
+      }
+
+      return values;
+    },
+    configurable: true,
+    enumerable: false,
+    writable: true,
+  });
+}
 if (typeof Array.prototype.join !== 'function') {
   Array.prototype.join = function (emoji) {
-    // emoji = emoji||',';
-    emoji = emoji||'';
+    emoji = emoji || '';
     let self = this;
     let str = "";
     let i = 0;
-    if (!Array.isArray(self)) {throw String(self)+'is not Array'}
-    if(self.length===0){return ''}
-    if (self.length === 1){return String(self[0])}
+    if (!Array.isArray(self)) throw String(self) + 'is not Array';
+    if (self.length === 0) return '';
+    if (self.length === 1) return String(self[0]);
     i = 1;
     str = this[0];
     for (; i < self.length; i++) {
@@ -262,7 +354,7 @@ if (typeof Array.prototype.join !== 'function') {
     return str;
   };
 }
-if (typeof Array.prototype.toReversed != 'function') {
+if (typeof Array.prototype.toReversed !== 'function') {
   Array.prototype.toReversed = function () {
     const clonedList = this.slice();
     // 倒序新数组
@@ -271,10 +363,10 @@ if (typeof Array.prototype.toReversed != 'function') {
   };
 }
 
-// 去除字符串末尾的字符
-const rstrip = (str, chars) =>{
-  let regex = new RegExp(chars + "$");
-  return str.replace(regex, "");
+// @ts-ignore
+String.prototype.rstrip = function (chars: string) {
+  const regex = new RegExp(chars + "$");
+  return this.replace(regex, "");
 }
 
 Array.prototype["append"] = Array.prototype.push;
@@ -447,6 +539,74 @@ const base64Decode = (text: string) => {
 
 const md5 = (text: string) => {
   return `${CryptoJS.MD5(text)}`;
+}
+
+const uint8ArrayToBase64 = (uint8Array: Uint8Array) => {
+  const binaryString = String.fromCharCode.apply(null, Array.from(uint8Array));
+  return btoa(binaryString);
+}
+
+const Utf8ArrayToStr = (array: Uint8Array) => {
+  let out: string, i: number, len: number, c: number;
+  let char2: number, char3: number;
+  out = "";
+  len = array.length;
+  i = 0;
+  while (i < len) {
+    c = array[i++];
+    switch (c >> 4) {
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+        out += String.fromCharCode(c);
+        break;
+      case 12:
+      case 13:
+        char2 = array[i++];
+        out += String.fromCharCode(((c & 0x1f) << 6) | (char2 & 0x3f));
+        break;
+      case 14:
+        char2 = array[i++];
+        char3 = array[i++];
+        out += String.fromCharCode(
+          ((c & 0x0f) << 12) | ((char2 & 0x3f) << 6) | ((char3 & 0x3f) << 0)
+        );
+        break;
+    }
+  }
+  return out;
+}
+
+/**
+* gzip压缩base64|压缩率80%+
+* @param str
+* @returns {string}
+*/
+const gzip = (str) => {
+  const arr = pako.gzip(str, {
+    to: 'string'
+  });
+  return uint8ArrayToBase64(arr)
+}
+
+/**
+* gzip解压base64数据
+* @param b64Data
+* @returns {string}
+*/
+const ungzip = (b64Data: string) => {
+  let strData = atob(b64Data);
+  const charData = strData.split('').map((x) => {
+    return x.charCodeAt(0);
+  });
+  const binData = new Uint8Array(charData);
+  const data = pako.inflate(binData);
+  return Utf8ArrayToStr(data);
 }
 
 /**
@@ -951,16 +1111,16 @@ const jq = parseTags.jq;
  * @param filePath
  * @returns {string}
  */
-// const readFile = (filePath) => {
-//   filePath = filePath || './uri.min.js';
-//   var fd = os.open(filePath);
-//   var buffer = new ArrayBuffer(1024);
-//   var len = os.read(fd, buffer, 0, 1024);
-//   console.log(len);
-//   let text = String.fromCharCode.apply(null, new Uint8Array(buffer));
-//   console.log(text);
-//   return text
-// }
+const readFile = (filePath) => {
+  // filePath = filePath || './uri.min.js';
+  // var fd = os.open(filePath);
+  // var buffer = new ArrayBuffer(1024);
+  // var len = os.read(fd, buffer, 0, 1024);
+  // console.log(len);
+  // let text = String.fromCharCode.apply(null, new Uint8Array(buffer));
+  // console.log(text);
+  // return text
+};
 
 /**
  * 处理返回的json数据
@@ -2335,13 +2495,13 @@ const init = (ext) => {
 
     rule["cate_exclude"] = rule_cate_excludes.join('|');
     rule["tab_exclude"] = rule_tab_excludes.join('|');
-    rule["host"] = rstrip(rule["host"] || '', '/');
+    rule["host"] = (rule["host"] || '').rstrip('/');
     HOST = rule["host"];
     if (rule["hostJs"]) {
       console.log(`[t3][publish]检测到hostJs,准备执行...`);
       try {
         eval(rule["hostJs"]);
-        rule["host"] = rstrip(HOST, '/');
+        rule["host"] = HOST.rstrip('/');
         console.log(`[t3][publish]最新域名为${rule["host"]}`)
       } catch (e) {
         console.log(`[t3][publish]执行${rule["hostJs"]}获取host发生错误:${e}`);
@@ -2433,6 +2593,15 @@ let homeHtmlCache: any = undefined;
  * @returns {string}
  */
 const home = () => {
+  if (typeof(rule["filter"]) === 'string' && rule["filter"].trim().length > 0) {
+    try {
+      let filter_json = ungzip(rule["filter"].trim());
+      rule["filter"] = JSON.parse(filter_json);
+    } catch (e) {
+      rule["filter"] = {};
+    }
+  };
+
   const homeObj = {
     filter: rule["filter"] || false,
     MY_URL: rule["homeUrl"],
@@ -2637,7 +2806,7 @@ const keepUnUse = {
       pdfa, pdfh, pd, // html parser
       log, oheaders, // global parms
       NOADD_INDEX, URLJOIN_ATTR, SELECT_REGEX, SELECT_REGEX_A, // REGEX
-      urlDeal, setResult2, setHomeResult, rc, maoss, getProxyUrl, urljoin2, stringify, jsp, jq, buildUrl, $require, proxy, sniffer, isVideo,
+      urlDeal, setResult2, setHomeResult, rc, maoss, getProxyUrl, urljoin2, stringify, jsp, jq, buildUrl, $require, proxy, sniffer, isVideo, gzip, readFile,
       fixAdM3u8, fixAdM3u8Ai, // ad
       base64Encode, md5, decodeStr, RSA, // encryption and decryption
       clearItem, // cache
