@@ -165,7 +165,7 @@ const filter = ref({
     area: '全部',
     year: '全部',
   },
-});
+}) as any;
 
 const infiniteCompleteTip = ref(`${t('pages.film.infiniteLoading.noMore')}`);
 
@@ -179,7 +179,7 @@ const siteConfig = ref({
   search: '',
   data: [],
   searchGroup: []
-})
+}) as any;
 
 const active = ref({
   site: '',
@@ -192,16 +192,16 @@ const active = ref({
     area: '全部',
     year: '全部',
   }
-})
+}) as any;
 
 const filmData = ref({
   list: [],
   rawList: [],
-});
+}) as any;
 
 const classConfig = ref({
   data: [{ type_id: 0, type_name: '最新' }]
-})
+}) as any;
 
 onMounted(() => {
   getSetting();
@@ -234,9 +234,10 @@ const filterApiEvent = async () => {
   const { type } = siteConfig.value.default;
   let filterFormat;
   if (type === 2 || type === 6 || type === 7) {
-    filterFormat = Object.entries(active.value.filter).reduce((item, [key, value]) => {
-      if (value !== '' && value.length !== 0) {
-        item[key] = value;
+    filterFormat = Object.entries(active.value.filter)
+      .reduce<{ [key: string]: string | undefined }>((item, [key, value]) => {
+      if (typeof value === 'string' && value !== '') {
+        item[key] = value as string;
       }
       return item;
     }, {});
@@ -465,7 +466,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       const res = await t3RuleInit(defaultSite);
       if (res.code === 200) isVisible.t3Work = true;
       else $state.error();
-    } else if (defaultSite.type === 8 && !isVisible.catvodWork) {
+    } else if (defaultSite.type === 8 && !isVisible.catvod) {
       const content = await catvodRuleInit(defaultSite);
       if (typeof content === 'object') isVisible.catvod = true;
       else $state.error();
@@ -504,11 +505,13 @@ const searchEvent = async () => {
 // 搜索加载数据
 const getSearchList = async () => {
   let length = 0;
-  const defaultSite = siteConfig.value.default;
-  const searchGroup = siteConfig.value.searchGroup;
+  const searchGroup: any = siteConfig.value.searchGroup;
   const currentSite = searchCurrentSite.value;
 
-  if (!currentSite) return 0; // 没有搜索站点
+  if (!currentSite) {
+    console.log('[film][search] No search site found.');
+    return 0;
+  }
 
   const index = searchGroup.indexOf(currentSite);
   const isLastSite = index + 1 >= searchGroup.length;
@@ -519,15 +522,29 @@ const getSearchList = async () => {
 
   try {
     const resultSearch = await fetchSearch(currentSite, searchTxt.value);
-    if (!resultSearch) {
+    if (!resultSearch || resultSearch.length === 0) {
+      console.log('[film][search] Empty search results.');
       length = 1;
       return;
     }
 
     let resultDetail = resultSearch;
-    if (![3, 4, 5].includes(defaultSite.type)) {
-      const ids = resultSearch.map((item) => item.vod_id);
-      resultDetail = await fetchDetail(currentSite, ids.join(','));
+    if (resultSearch.length > 0 && !_.has(resultSearch[0], 'vod_pic')) {
+      if ([0, 1].includes(currentSite.type)) {
+        const ids = resultSearch.map((item) => item.vod_id);
+        resultDetail = await fetchDetail(currentSite, ids.join(','));
+      } else {
+        const updatePic = async (item) => {
+          try {
+            const result = await fetchDetail(currentSite, item.vod_id);
+            return result[0];
+          } catch (error) {
+            return false;
+          }
+        };
+        const res = await Promise.all(resultSearch.map(item => queue.add(() => updatePic(item))));
+        resultDetail = res.filter(Boolean);
+      }
     }
 
     const filmList = resultDetail.map((item) => ({
@@ -537,6 +554,7 @@ const getSearchList = async () => {
 
     const newFilms = _.differenceWith(filmList, filmData.value.list, _.isEqual); // 去重
     filmData.value.list.push(...newFilms);
+
     length = isLastSite ? 0 : newFilms.length;
   } catch (err) {
     length = searchGroup.length === 1 ? 0 : 1;
