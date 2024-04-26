@@ -246,7 +246,7 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   try {
     const playRes = await fetchT3PlayUrl(flag, id, flags);
     if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
-      const proxyRes = await t3RuleProxy(playRes.url);
+      const proxyRes: any = await t3RuleProxy(playRes.url);
       await setT3Proxy(proxyRes);
     }
 
