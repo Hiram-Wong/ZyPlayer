@@ -90,7 +90,10 @@ const createMenu = () => {
           click() {
             logger.info('[menu] open devlop tool');
             const focusedWindow = BrowserWindow.getFocusedWindow();
-            focusedWindow && focusedWindow.toggleDevTools();
+            if (focusedWindow) {
+              const webContents = focusedWindow.webContents;
+              webContents && webContents.toggleDevTools(); 
+            };
           },
         },
         {

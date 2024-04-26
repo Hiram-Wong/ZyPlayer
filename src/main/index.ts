@@ -2,6 +2,7 @@ import remote from '@electron/remote/main';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 
 import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, session, shell } from 'electron';
+import electronLocalshortcut from 'electron-localshortcut';
 import fixPath from 'fix-path';
 import { join } from 'path';
 import url from 'url';
@@ -156,6 +157,7 @@ const createWindow = (): void => {
       contextIsolation: false,
       webviewTag: true, // 启用webview
       webSecurity: false, // 禁用同源策略
+      spellcheck: false, // 禁用拼写检查器
       allowRunningInsecureContent: true, // 允许 https 页面运行来自http url的JavaScript, CSS 或 plugins
     },
   })
@@ -165,6 +167,7 @@ const createWindow = (): void => {
   // 关闭window时触发下列事件.
   mainWindow.on('close', () => {
     windowManage(mainWindow);
+    electronLocalshortcut.unregisterAll(mainWindow!);
   });
 
   mainWindow.on('closed', () => {
@@ -172,6 +175,15 @@ const createWindow = (): void => {
   });
 
   mainWindow.on('ready-to-show', () => {
+    electronLocalshortcut.register(mainWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
+      const webContents = mainWindow!.webContents;
+      if (webContents.isDevToolsOpened()) {
+        webContents.closeDevTools();
+      } else {
+        webContents.openDevTools();
+      }
+    });
+
     setTimeout(() => {
       mainWindow!.show();
       if (loadWindow && !loadWindow.isDestroyed()) {
@@ -305,10 +317,10 @@ app.whenReady().then(async() => {
   createTray(mainWindow!);
   // 菜单
   createMenu();
-  // 快捷键
-  // createGlobalShortcut(mainWindow);
   // 协议注册
   protocolResgin();
+  // 快捷键
+  // createGlobalShortcut(mainWindow);
   if (shortcutsState) {
     globalShortcut.register(shortcutsState, () => {
       // Do stuff when Y and either Command/Control is pressed.
@@ -389,6 +401,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
       nodeIntegration: true,
       contextIsolation: false,
       webSecurity: false, // 允许跨域
+      spellcheck: false, // 禁用拼写检查器
       allowRunningInsecureContent: true
     },
   });
@@ -420,7 +433,21 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   });
 
   playWindow.on('ready-to-show', () => {
+    electronLocalshortcut.register(playWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
+      const webContents = playWindow!.webContents;
+      if (webContents.isDevToolsOpened()) {
+        webContents.closeDevTools();
+      } else {
+        webContents.openDevTools();
+      }
+    });
+
     playWindow!.show();
+  });
+
+  // 关闭window时触发下列事件.
+  playWindow.on('close', () => {
+    electronLocalshortcut.unregisterAll(playWindow!);
   });
 
   playWindow.on('closed', () => {
