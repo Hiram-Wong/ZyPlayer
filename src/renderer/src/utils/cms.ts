@@ -795,36 +795,8 @@ const fetchDetail = async(site, id) => {
     } else if (site.type === 4) {
       videoList = jsondata.data.list;
     }
-
-    if (!videoList) return;
-
-    const videoData = videoList.map((video) => {
-      // 播放源
-      const playFrom = video.vod_play_from;
-      const playSource = playFrom.split("$").filter(Boolean);
-      // 剧集
-      const playUrl = video.vod_play_url;
-      const playUrlDiffPlaySource = playUrl.split("$$$"); // 分离不同播放源
-      const playEpisodes = playUrlDiffPlaySource.map((item) =>
-        item
-          .replace(/\$+/g, '$')
-          .split('#')
-          .map((e) => {
-            if (!e.includes('$')) e = `正片$${e}`;
-            return e;
-          }),
-      );
-      const fullList = Object.fromEntries(
-        playSource.map((key, index) => [key, playEpisodes[index]])
-      );
-
-      return {
-        ...video,
-        fullList: fullList
-      };
-    });
-
-    return videoData;
+    
+    return videoList ? videoList : [];
   } catch (err) {
     throw err;
   }
