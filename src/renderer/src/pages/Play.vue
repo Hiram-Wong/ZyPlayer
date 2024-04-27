@@ -1743,7 +1743,7 @@ const openMainWinEvent = (): void => {
       box-sizing: border-box;
 
       .content {
-        height: auto;
+        height: -webkit-fill-available;
 
         .title-warp {
           height: 26px;
