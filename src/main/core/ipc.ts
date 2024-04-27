@@ -147,6 +147,13 @@ const ipcListen = () => {
   ipcMain.on('open-url', async (_, url) => {
     shell.openExternal(url);
   });
+
+  ipcMain.on('open-path', async (_, file, create) => {
+    const path = join(app.getPath("userData"), file);
+    // 查看目录是否存在，如果不存在，就创建一个
+    if (create) fs.ensureDirSync(path);
+    shell.openPath(path);
+  });
   
   // 重启app
   ipcMain.on('relaunch-app', () => {

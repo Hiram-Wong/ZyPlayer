@@ -280,8 +280,9 @@ export default {
     bug: 'Debug',
     cache: 'PullCache',
     delete: 'DeleteCase',
+    file: 'Server',
     help: 'Help',
-    title: 'Edit Source Tool [Hjdhnx Co-Branded]',
+    title: 'Source Tool [Hjdhnx United]',
     template: 'template',
     templateTip: 'select one default template to edit',
     rule: {

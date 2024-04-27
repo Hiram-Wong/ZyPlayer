@@ -1,10 +1,12 @@
 import { app } from "electron";
 import fastify from 'fastify';
 import fastifyLogger from "fastify-logger";
+import fastifyMultipart from "fastify-multipart";
+
 import { JsonDB, Config } from 'node-json-db';
 import { join } from "path";
 import logger from '../logger';
-import { analyze, iptv, setting, drive, site, history, star, db, proxy, catbox, cache, lab } from './routes';
+import { analyze, iptv, setting, drive, site, history, star, db, proxy, catbox, cache, lab, file } from './routes';
 import initConfig from './routes/catbox/config';
 
 logger.info('[server] fastify module initialized');
@@ -45,6 +47,7 @@ const initServer = async () => {
     server.get('/', async (_, reply) => {
       reply.code(200).send({status: 'run'})
     })
+    server.register(fastifyMultipart);
     server.register(analyze);
     server.register(iptv);
     server.register(setting);
@@ -57,6 +60,7 @@ const initServer = async () => {
     server.register(catbox);
     server.register(cache);
     server.register(lab);
+    server.register(file);
 
     await server.listen({ port: 9978, host: '0.0.0.0' });
   } catch (err) {

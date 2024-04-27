@@ -280,6 +280,7 @@ export default {
     bug: '调试',
     delete: '删除用例',
     cache: '拉取缓存',
+    file: '服务',
     help: '帮助',
     title: '写源工具 [道长联名]',
     template: '模板',

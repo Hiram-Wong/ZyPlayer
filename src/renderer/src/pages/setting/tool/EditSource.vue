@@ -1,39 +1,41 @@
 <template>
   <div class="lab view-container">
     <div class="header">
-      <t-row justify="space-between">
-        <div class="left-operation-container">
-          <h3 class="title">{{ $t('pages.setting.editSource.title') }}</h3>
-        </div>
-        <div class="right-operation-container">
-          <div class="component-op">
-            <div class="item" @click="importFileEvent">
-              <file-import-icon />
-              <span>{{ $t('pages.setting.editSource.import') }}</span>
-            </div>
-            <div class="item" @click="exportFileEvent">
-              <file-export-icon />
-              <span>{{ $t('pages.setting.editSource.export') }}</span>
-            </div>
-            <div class="item" @click="cacheEvent">
-              <file-download-icon />
-              <span>{{ $t('pages.setting.editSource.cache') }}</span>
-            </div>
-            <div class="item" @click="debugEvent">
-              <bug-icon />
-              <span>{{ $t('pages.setting.editSource.bug') }}</span>
-            </div>
-            <div class="item" @click="deleteEvent">
-              <delete-icon />
-              <span>{{ $t('pages.setting.editSource.delete') }}</span>
-            </div>
-            <div class="item" @click="helpEvent">
-              <help-rectangle-icon />
-              <span>{{ $t('pages.setting.editSource.help') }}</span>
-            </div>
+      <div class="left-operation-container">
+        <h3 class="title">{{ $t('pages.setting.editSource.title') }}</h3>
+      </div>
+      <div class="right-operation-container">
+        <div class="component-op">
+          <div class="item" @click="importFileEvent">
+            <file-import-icon />
+            <span>{{ $t('pages.setting.editSource.import') }}</span>
+          </div>
+          <div class="item" @click="exportFileEvent">
+            <file-export-icon />
+            <span>{{ $t('pages.setting.editSource.export') }}</span>
+          </div>
+          <div class="item" @click="cacheEvent">
+            <file-download-icon />
+            <span>{{ $t('pages.setting.editSource.cache') }}</span>
+          </div>
+          <div class="item" @click="debugEvent">
+            <bug-icon />
+            <span>{{ $t('pages.setting.editSource.bug') }}</span>
+          </div>
+          <div class="item" @click="deleteEvent">
+            <delete-icon />
+            <span>{{ $t('pages.setting.editSource.delete') }}</span>
+          </div>
+          <div class="item" @click="fileEvent">
+            <internet-icon />
+            <span>{{ $t('pages.setting.editSource.file') }}</span>
+          </div>
+          <div class="item" @click="helpEvent">
+            <help-rectangle-icon />
+            <span>{{ $t('pages.setting.editSource.help') }}</span>
           </div>
         </div>
-      </t-row>
+      </div>
     </div>
     <div class="content">
       <div class="left">
@@ -226,7 +228,7 @@ import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon, LinkUnlinkIcon, Link1Icon, GestureClickIcon } from 'tdesign-icons-vue-next';
+import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon, InternetIcon, GestureClickIcon } from 'tdesign-icons-vue-next';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
@@ -610,6 +612,10 @@ const deleteEvent = async () => {
   };
 };
 
+const fileEvent = async () => {
+  window.electron.ipcRenderer.send('open-path', 'file', true)
+};
+
 const helpEvent = async () => {
   window.electron.ipcRenderer.send('open-url', 'https://zy.catni.cn/edit-source.html')
 };
@@ -840,6 +846,12 @@ const proxyEvent = async () => {
 
   .header {
     margin: var(--td-comp-margin-s) 0;
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
 
     .left-operation-container {
       display: flex;

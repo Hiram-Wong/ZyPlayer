@@ -10,5 +10,6 @@ import proxy from './proxy';
 import catbox from './catbox';
 import cache from './cache';
 import lab from './lab';
+import file from './file';
 
-export { analyze, site, star, history, drive, setting, iptv, db, proxy, catbox, cache, lab };
+export { analyze, site, star, history, drive, setting, iptv, db, proxy, catbox, cache, lab, file };
