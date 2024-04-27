@@ -134,6 +134,7 @@ import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { nanoid } from 'nanoid';
 import { ref, watch, reactive } from 'vue';
+import joinUrl from 'url';
 
 import { t } from '@/locales';
 import { initializeWebdavClient, rsyncLocal, rsyncRemote } from '@/utils/webdev';
@@ -260,7 +261,7 @@ const easyConfig = async() => {
 
   let data = {};
 
-  const formatType = (selectType, soureceType) => {
+  const formatType = (selectType: number, soureceType: number) => {
     // 0cms[xml] 1cms[json] 2drpy[js0] 6hipy[t4] 3app[v3] 4app[v3]
 
     if (selectType === 1) return 2; // drpy
@@ -282,6 +283,10 @@ const easyConfig = async() => {
       case 3: return 'hipy';
       default: return '';
     }
+  };
+
+  const formatUrl = (relativeUrl: string, baseUrl: string): string => {
+    return joinUrl.resolve(baseUrl, relativeUrl);
   };
 
   try {
@@ -310,42 +315,61 @@ const easyConfig = async() => {
     } else {
       if (_.has(config, "sites")) {
         data["tbl_site"] = config.sites
-          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.endsWith('.js') && item.ext.endsWith('.js'))) // 先过滤掉不需要的数据
+          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.endsWith('.js') && item.ext && item.ext.endsWith('.js')))
           .map((item) => ({
             id: nanoid(),
             name: item.name,
             type: formatType(type, item.type),
-            api: item.api,
+            api: formatUrl(item.api, url),
             group: formatGroup(type),
             search: _.has(item, "searchable") ? item.searchable : 0,
             categories: _.has(item, "categories") ? (_.isArray(item.categories) ? _.join(item.categories, ',') : item.categories) : null, // 转字符串
-            ext: _.has(item, "ext") ? item.ext : '',
+            ext: _.has(item, "ext") ? formatUrl(item.ext, url) : '',
             isActive: true,
             status: true,
           }));
       };
       if (_.has(config, 'lives')) {
-        const redirectChannels = _.find(config.lives, { group: 'redirect' }).channels;
-        const iptv = redirectChannels.map(channel => {
-          const urlBase64 = channel.urls[0].split('&ext=')[1];
-          let url = urlBase64;
+        let oldLives = _.find(config.lives, { group: 'redirect' });
+        if (oldLives && !Array.isArray(oldLives)) {
+          oldLives = [oldLives]
+        };
+        let iptv;
+        console.log(oldLives)
+        if (oldLives && oldLives.length > 0 && oldLives[0].channels) {
+          iptv = oldLives.map(live => {
+            const channel = live.channels[0];
+            console.log(channel)
+            const urlBase64 = channel.urls[0].split('&ext=')[1];
+            let url = urlBase64;
 
-          // 使用正则表达式判断字符串是否为 Base64 编码
-          const isBase64 = /^[a-zA-Z0-9+/]*={0,2}$/.test(urlBase64);
+            // 使用正则表达式判断字符串是否为 Base64 编码
+            const isBase64 = /^[a-zA-Z0-9+/]*={0,2}$/.test(urlBase64);
 
-          if (isBase64) {
-            // 如果具有 Base64 编码的特征，则解码
-            url = Base64.parse(urlBase64);
-          }
+            if (isBase64) {
+              // 如果具有 Base64 编码的特征，则解码
+              url = Base64.parse(urlBase64);
+            }
 
-          return {
-            id: nanoid(),
-            name: channel.name,
-            type: 'remote',
-            isActive: true,
-            url: url
-          };
-        });
+            return {
+              id: nanoid(),
+              name: channel.name,
+              type: 'remote',
+              isActive: true,
+              url: url
+            };
+          })
+        } else {
+          iptv = config.lives.map(live => {
+            return {
+              id: nanoid(),
+              name: live.name,
+              type: 'remote',
+              isActive: true,
+              url: formatUrl(live.url, url)
+            };
+          });
+        }
         data['tbl_iptv'] = iptv;
       };
       if (_.has(config, 'parses')) {
