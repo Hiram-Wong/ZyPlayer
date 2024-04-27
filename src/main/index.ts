@@ -239,7 +239,10 @@ app.whenReady().then(async() => {
 
     for (const filter of filters) {
       if (url.includes(filter)) {
-        callback({ cancel: true });
+        callback({
+          cancel: true,
+          confirmed: false
+        });
         return;
       }
     }
@@ -251,9 +254,12 @@ app.whenReady().then(async() => {
 
       callback({
         cancel: false,
-        redirectURL: redirectURL
+        redirectURL: redirectURL,
+        confirmed: false
       });
-    } else callback({});
+    } else callback({
+      confirmed: false
+    });
   });
 
   defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
@@ -305,9 +311,9 @@ app.whenReady().then(async() => {
     mainWindow!.webContents.send('screen', false);
   });
 
-  mainWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
-    logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
-  });
+  // mainWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
+  //   logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+  // });
 
   // 检测更新
   autoUpdater(mainWindow!);
@@ -410,9 +416,9 @@ ipcMain.on('openPlayWindow', (_, arg) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
   });
-  playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
-    logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
-  });
+  // playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
+  //   logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+  // });
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     playWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/play`)
