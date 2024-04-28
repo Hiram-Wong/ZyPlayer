@@ -341,6 +341,13 @@ const fetchClassify = async(site) => {
       //   total = category_json.total;
       // }
       filters = jsondata?.filters === undefined ? [] : jsondata.filters;
+      Object.keys(filters).forEach(key => {
+        filters[key].forEach(item => {
+          if (!item.name) {
+            item.name = item.key;
+          }
+        });
+      });
     }
 
     return {
