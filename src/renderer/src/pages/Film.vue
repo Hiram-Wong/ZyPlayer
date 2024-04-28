@@ -2,7 +2,7 @@
   <div class="film view-container">
     <common-nav :title="$t('pages.film.name')" :list="siteConfig.data" :active="active.nav" @change-key="changeSitesEvent" />
     <div class="content">
-      <header class="header">
+      <header class="header" v-if="classConfig.data.length > 0">
         <div class="header-nav">
           <tag-nav :list="classConfig.data" :active="active.class" @change-key="changeClassEvent" />
         </div>
@@ -10,7 +10,7 @@
           <root-list-icon size="large" @click="isVisible.toolbar = !isVisible.toolbar" />
         </div>
       </header>
-      <div class="container">
+      <div class="container" :class="classConfig.data ? 'container-hidden' : 'container-full'">
         <!-- 过滤工具栏 -->
         <div v-show="isVisible.toolbar" class="filter header-wrapper">
           <div class="tags">
@@ -233,7 +233,7 @@ const filterEvent = () => {
 const filterApiEvent = async () => {
   const { type } = siteConfig.value.default;
   let filterFormat;
-  if (type === 2 || type === 6 || type === 7) {
+  if (type === 2 || type === 6 || type === 7 || type === 8) {
     filterFormat = Object.entries(active.value.filter)
       .reduce<{ [key: string]: string | undefined }>((item, [key, value]) => {
       if (typeof value === 'string' && value !== '') {
@@ -597,6 +597,8 @@ const changeSitesEvent = async (key: string) => {
 
 // 播放
 const playEvent = async (item) => {
+  console.log(item)
+
   let site = siteConfig.value.default;
   if (_.has(item, 'relateSite')) site = item.relateSite;
 
@@ -606,7 +608,7 @@ const playEvent = async (item) => {
   }
 
   const playerMode = storePlayer.getSetting.playerMode;
-
+  console.log(item)
   if (playerMode.type === 'custom' ) {
     formDetailData.value = item;
     isVisible.detail = true;
@@ -704,12 +706,17 @@ filmReloadeventBus.on(async () => {
         overflow: hidden;
       }
     }
+    .container-full {
+      height: calc(100% - 58px);
+    }
+    .container-hidden {
+      height: 100%;
+    }
     .container {
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
-      height: calc(100% - 58px);
       width: 100%;
       .filter {
         position: relative;
