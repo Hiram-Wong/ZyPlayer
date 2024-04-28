@@ -7,7 +7,7 @@
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  * 
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-26T19:21:07+08:00
+ * @modification-date 2023-04-28T17:12:25+08:00
  * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取, 并采取措施防止 Tree-Shaking 删除关键代码
  * 
  * **防止 Tree-Shake 说明**:
@@ -93,7 +93,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta2 202400427`;
+const VERSION = `${vercode} 3.9.50beta3 202400428`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -914,6 +914,26 @@ let TABS: any = [];// 二级的自定义线路列表 如: TABS=['道长在线','
 let LISTS: any = [];// 二级的自定义选集播放列表 如: LISTS=[['第1集$http://1.mp4','第2集$http://2.mp4'],['第3集$http://1.mp4','第4集$http://2.mp4']]
 globalThis.encodeUrl = urlencode;
 globalThis.urlencode = urlencode;
+
+/**
+ * 获取链接的query请求转为js的object字典对象
+ * @param url
+ * @returns {{}}
+ */
+const getQuery = (url: string) => {
+  try {
+    let arr = url.split("?")[1].split("#")[0].split("&");
+    const resObj = {};
+    arr.forEach(item => { 
+      let [key, value = ''] = item.split("=");
+      resObj[key] = value;
+    })
+    return resObj;
+  } catch (err) {
+    console.log(`[t3][getQuery][error]${err}`);
+    return {};
+  }
+}
 
 /**
  *  url拼接
@@ -2487,9 +2507,15 @@ const init = (ext) => {
     if (typeof ext == 'object') rule = ext;
     else if (typeof ext == 'string') {
       if (ext.startsWith('http')) {
+        let query = getQuery(ext); // 获取链接传参
         let js: any = request(ext, {'method':'GET'});
         if (js) eval(js.replace('var rule', 'rule'));
-      } else eval(ext.replace('var rule', 'rule'));
+        if (query["type"] === 'url' && query["params"]) { // 指定type是链接并且传了params支持简写如 ./xx.json
+          rule["params"] = urljoin(ext,query["params"]);
+        } else if(query["params"]){ // 没指定type直接视为字符串
+          rule["params"] = query["params"];
+        }
+        } else eval(ext.replace('var rule', 'rule'));
     }
     if (rule["模板"] && muban.hasOwnProperty(rule["模板"])) {
       console.log(`继承模板:${rule["模板"]}`);
