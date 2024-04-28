@@ -998,7 +998,8 @@ const initFilmPlayer = async (isFirst) => {
   // 解析直链
   const { snifferMode } = set.value;
 
-  const { url } = formatIndex(active.filmIndex);
+  let { url } = formatIndex(active.filmIndex);
+  url = decodeURIComponent(url);
 
   tmp.url = url;
   tmp.sourceUrl = url;
