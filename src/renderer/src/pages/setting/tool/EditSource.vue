@@ -726,7 +726,7 @@ const actionList = async () => {
       tid: t,
       pg: pg || 1,
       filter: f ? true : false,
-      extend: f || {}
+      extend: JSON5.parse(f) || {}
     };
     await performAction('category', data);
   }
@@ -764,8 +764,14 @@ const actionPlay = async () => {
 };
 
 const actionProxy = async () => {
-  const { url } = form.value.proxy;
+  let { url } = form.value.proxy;
+
   if (url && url.startsWith("http")) {
+    if (!url.startsWith("http://127.0.0.1:9978/")) {
+      const formatUrl = `http://127.0.0.1:9978/proxy?do=js&url=${url}`;
+      form.value.proxy.url = formatUrl;
+      url = formatUrl;
+    };
     const formatUrl = new URL(url);
     const params = Object.fromEntries(formatUrl.searchParams.entries());
     await performAction('proxy', params);
