@@ -94,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+import jsonpath from 'jsonpath';
 import {
   HeartIcon,
   HeartFilledIcon,
@@ -297,8 +298,8 @@ const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<str
   let data: string = '';
   try {
     const res = await getConfig(`${playUrl}${url}`);
-    if (res.url) {
-      data = res.url;
+    if (jsonpath.value(res, '$.url')) {
+      data = jsonpath.value(res, '$.url');
       console.log(`[detail][json][return]${data}`);
     }
   } catch (err) {
@@ -326,7 +327,8 @@ const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> 
 
 // 调用本地播放器 + 历史
 const gotoPlay = async (item) => {
-  const { url } = formatIndex(item);
+  let { url } = formatIndex(item);
+  url = decodeURIComponent(url);
   active.filmIndex = item;
   const { playUrl, type } = formData.value;
   const { snifferMode } = set.value;

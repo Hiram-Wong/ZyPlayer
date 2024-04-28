@@ -320,6 +320,7 @@ import flvjs from 'flv.js';
 import Hls from 'hls.js';
 import _ from 'lodash';
 import moment from 'moment';
+import jsonpath from 'jsonpath';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -938,8 +939,9 @@ const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<str
   let data: string = '';
   try {
     const res = await getConfig(`${playUrl}${url}`);
-    if (res.url) {
-      data = res.url;
+    // 存在 url data.url 两种结构
+    if (jsonpath.value(res, '$.url')) {
+      data = jsonpath.value(res, '$.url');
       console.log(`[detail][json][return]${data}`);
     };
   } catch (err) {
