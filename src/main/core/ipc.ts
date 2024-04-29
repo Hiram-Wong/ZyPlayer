@@ -33,7 +33,7 @@ const ipcListen = () => {
     logger.info(`[ipcMain] set-selfBoot: ${status}`);
     electronApp.setAutoLaunch(status);
   });
-  
+
   ipcMain.on('open-proxy-setting', () => {
     logger.info(`[ipcMain] open-proxy-setting`);
     if (platform.isWindows) shell.openPath('ms-settings:network-proxy');
@@ -42,27 +42,27 @@ const ipcListen = () => {
   });
 
   ipcMain.on('call-player', (_, path, url) => {
-    const command = `${path} '${url}'`;
+    const command = `${path} "${url}"`;
     exec(command);
     logger.info(`[ipcMain] call-player: command:${command}`);
   });
-  
+
   ipcMain.on('reboot-app', () => {
     logger.info(`[ipcMain] reboot-app`);
     app.relaunch();
     app.exit();
   });
-  
+
   const getFolderSize = (folderPath: string): number => {
     let totalSize = 0;
-  
+
     if (fs.existsSync(folderPath)) {
       const entries = fs.readdirSync(folderPath);
-  
+
       for (const entry of entries) {
         const entryPath = join(folderPath, entry);
         const entryStats = fs.statSync(entryPath);
-  
+
         if (entryStats.isFile()) {
           totalSize += entryStats.size;
         } else if (entryStats.isDirectory()) {
@@ -70,10 +70,10 @@ const ipcListen = () => {
         }
       }
     }
-  
+
     return totalSize;
   };
-  
+
   ipcMain.on('tmpdir-manage',  (event, action, trails) => {
     let formatPath;
     if (is.dev) {
@@ -84,7 +84,7 @@ const ipcListen = () => {
     if (action === 'rmdir' || action === 'mkdir' || action === 'init') tmpDir(formatPath);
     if (action === 'size') event.reply("tmpdir-manage-size", getFolderSize(formatPath));
   });
-  
+
   ipcMain.handle('ffmpeg-thumbnail',  async(_, url, key) => {
     let uaState: any = setting.find({ key: "ua" }).value;
     const formatPath = is.dev
@@ -101,7 +101,7 @@ const ipcListen = () => {
       `"${formatPath}"`
     ];
     const command = [ffmpegCommand, ...outputOptions , ...inputOptions].join(" "); // 确保 -user_agent 选项位于输入 URL 之前
-  
+
     try {
       await exec(command);
       const isGenerat = fs.existsSync(formatPath);
@@ -118,7 +118,7 @@ const ipcListen = () => {
       };
     };
   });
-  
+
   ipcMain.handle('ffmpeg-installed-check', async () => {
     try {
       const { stdout } = await exec('ffmpeg -version');
@@ -154,13 +154,13 @@ const ipcListen = () => {
     if (create) fs.ensureDirSync(path);
     shell.openPath(path);
   });
-  
+
   // 重启app
   ipcMain.on('relaunch-app', () => {
     app.relaunch();
     app.quit();
   });
-  
+
   // 关闭app
   ipcMain.on('quit-app', () => {
     app.quit();
