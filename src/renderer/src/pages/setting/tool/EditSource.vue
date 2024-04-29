@@ -142,11 +142,11 @@
           </div>
           <div class="item">
             <t-input v-model="form.category.t" label="t" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33%" />
+              class="input w-33-30%" />
             <t-input v-model="form.category.f" label="f" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33%" />
+              class="input w-33-40%" />
             <t-input-number theme="column" :min="0" v-model="form.category.pg" label="pg"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-33%" />
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-30%" />
             <t-button class="button w-btn" theme="default" @click="actionList()">{{
               $t('pages.setting.editSource.action.list') }}</t-button>
           </div>
@@ -158,17 +158,17 @@
           </div>
           <div class="item">
             <t-input v-model="form.search.wd" label="wd" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50%" />
+              class="input w-50-70%" />
             <t-input-number theme="column" :min="0" v-model="form.search.pg" label="pg"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50%" />
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-30%" />
             <t-button class="button w-btn" theme="default" @click="actionSearch()">{{
               $t('pages.setting.editSource.action.search') }}</t-button>
           </div>
           <div class="item">
             <t-input v-model="form.play.flag" label="flag" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50%" />
+              class="input w-50-30%" />
             <t-input v-model="form.play.play" label="play" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50%" />
+              class="input w-50-70%" />
             <t-button class="button w-btn" theme="default" @click="actionPlay()">{{
               $t('pages.setting.editSource.action.play') }}</t-button>
           </div>
@@ -726,7 +726,7 @@ const actionList = async () => {
       tid: t,
       pg: pg || 1,
       filter: f ? true : false,
-      extend: JSON5.parse(f) || {}
+      extend: f ? JSON5.parse(f) : {}
     };
     await performAction('category', data);
   }
@@ -1074,6 +1074,22 @@ const proxyEvent = async () => {
 
           .w-50\% {
             width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 2);
+          }
+
+          .w-50-30\% {
+            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 3);
+          }
+
+          .w-50-70\% {
+            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 7);
+          }
+
+          .w-33-30\% {
+            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 3);
+          }
+
+          .w-33-40\% {
+            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 4);
           }
 
           .w-33\% {
