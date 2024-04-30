@@ -10,7 +10,7 @@
           <root-list-icon size="large" @click="isVisible.toolbar = !isVisible.toolbar" />
         </div>
       </header>
-      <div class="container" :class="classConfig.data ? 'container-full' : 'container-hidden'">
+      <div class="container" :class="classConfig.data.length > 0 ? 'container-full' : 'container-hidden'">
         <!-- 过滤工具栏 -->
         <div v-show="isVisible.toolbar" class="filter header-wrapper">
           <div class="tags">
@@ -448,7 +448,7 @@ const getFilmList = async () => {
   } finally {
     console.log(`[film] load data length: ${length}`);
     return length;
-  } 
+  }
 };
 
 // 加载
