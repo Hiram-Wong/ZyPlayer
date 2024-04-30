@@ -637,7 +637,7 @@ filmSearcheventBus.on((kw: string)=>{
 filmReloadeventBus.on(async () => {
   isVisible.loadClass = false;
   isVisible.t3Work = false;
-  if (siteConfig.value.default.type === 8) await t3RuleTerminate();
+  if (siteConfig.value.default.type === 7) await t3RuleTerminate();
   isVisible.catvod = false;
   infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
   searchTxt.value = '';
