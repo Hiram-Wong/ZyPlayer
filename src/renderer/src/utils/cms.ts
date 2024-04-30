@@ -2,7 +2,7 @@ import axios from 'axios';
 import { XMLParser } from "fast-xml-parser";
 import * as cheerio from "cheerio";
 import _ from "lodash";
-import Base64 from 'crypto-js/enc-base64';
+import { Base64 } from 'js-base64';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 
@@ -35,7 +35,7 @@ const buildUrl = (url, paramsStr) => {
   const u = new URL(url);
   const api = u.origin + u.pathname.replace(/\/$/, '');
   const params = new URLSearchParams(u.search);
-  
+
   if (paramsStr.startsWith('?') || paramsStr.startsWith('&')) {
     const p = new URLSearchParams(paramsStr);
     p.forEach((value, key) => params.set(key, value));
@@ -110,7 +110,7 @@ const t3RuleInit = async(site) => {
       data.msg = err as string;
     }
   }
-  
+
   return data;
 }
 
@@ -150,7 +150,7 @@ const catvodRuleInit = async(site) => {
 const fetchClassify = async(site) => {
   try {
     let url, classData, page, pagecount, limit, total, filters;
-    
+
     if (site.type === 1 || site.type === 0) {
       url = buildUrl(site.api, `?ac=class`);
     } else if (site.type === 2) {
@@ -437,7 +437,7 @@ const fetchList = async(site, pg = 1, t, f = {}) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}&extend=${site.ext}`);
       if (Object.keys(f).length !== 0) {
-        const encodedStr = Base64.stringify(Base64.parse(JSON.stringify(f)));
+        const encodedStr = Base64.encode(JSON.stringify(f));
         url = buildUrl(url, `&ext=${encodedStr}`);
       }
     } else if (site.type === 7) {
@@ -467,7 +467,7 @@ const fetchList = async(site, pg = 1, t, f = {}) => {
 
     const jsondata = json.rss || json;
     let videoList = jsondata.list || jsondata.data || [];
-    
+
     if (site.type === 0) {
       videoList = convertVideoList(jsondata.list.video);
     } else if (site.type === 3) {
@@ -802,7 +802,7 @@ const fetchDetail = async(site, id) => {
     } else if (site.type === 4) {
       videoList = jsondata.data.list;
     }
-    
+
     return videoList ? videoList : [];
   } catch (err) {
     throw err;
