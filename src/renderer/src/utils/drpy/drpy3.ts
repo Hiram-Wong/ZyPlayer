@@ -2,21 +2,21 @@
  * @module drpy3
  * @brief T3数据处理核心库
  * @version 3.1.4
- * 
+ *
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
- * 
+ *
  * @modified-by HiramWong <admin@catni.cn>
  * @modification-date 2023-04-28T17:12:25+08:00
  * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取, 并采取措施防止 Tree-Shaking 删除关键代码
- * 
+ *
  * **防止 Tree-Shake 说明**:
  * - 为了确保 `drpy3.ts` 中的函数和变量不被 Tree Shaking, 已采取以下措施：
  *   - 作用域参数举例：`[a, b, c].forEach(item => item.length)` —— 显式遍历数组元素防止数组相关操作被优化掉。
  *   - 作用域函数举例：`let temp = _; temp.stringify({});` —— 对于 `_` 符合的对象，确保其方法被调用，防止被误删。
  *   - 全局函数与参数举例：`keepUnUse.useful._` —— 对于 `_` 符合的对象，确保其方法被调用，防止被误删。
- * 
- * --- 
+ *
+ * ---
  */
 
 
@@ -184,7 +184,7 @@ function window_b64() {
     }
     return out;
   }
-  
+
   function atob(str) {
     var c1, c2, c3, c4;
     var i, len, out;
@@ -437,7 +437,7 @@ const setHomeResult = (res) => {
   if (!res || typeof res !== 'object') {
     return [];
   }
-  
+
   return setResult(res.list);
 };
 
@@ -470,7 +470,7 @@ const rc = (js) =>{
   }
   return {};
 };
-    
+
 
 // 千万不要用for in 推荐 forEach (for in 会打乱顺序)
 //猫函数
@@ -617,12 +617,12 @@ const ungzip = (b64Data: string) => {
  */
 const encodeStr = (input, encoding) => {
   encoding = encoding || 'gbk';
-  
+
   if (encoding.startsWith('gb')) {
     const strTool = gbkTool();
     input = strTool.encode(input);
   }
-  
+
   return input;
 };
 
@@ -874,7 +874,7 @@ const forceOrder = (lists, key, option) => {
   const end = Math.min(lists.length - 1, start + 1);
 
   if (start >= end) return lists;
-  
+
   let first = lists[start];
   let second = lists[end];
 
@@ -899,12 +899,12 @@ const forceOrder = (lists, key, option) => {
   if (first.match(/(\d+)/) && second.match(/(\d+)/)) {
     const num1 = Number(first.match(/(\d+)/)[1]);
     const num2 = Number(second.match(/(\d+)/)[1]);
-    
+
     if (num1 > num2) {
       lists.reverse();
     }
   }
-  
+
   return lists;
 };
 
@@ -924,7 +924,7 @@ const getQuery = (url: string) => {
   try {
     let arr = url.split("?")[1].split("#")[0].split("&");
     const resObj = {};
-    arr.forEach(item => { 
+    arr.forEach(item => {
       let [key, value = ''] = item.split("=");
       resObj[key] = value;
     })
@@ -975,7 +975,7 @@ const pdfh2 = (html, parse) => {
 
   let result = defaultParser.pdfh(html2, parse);
   let option = parse.includes('&&') ? parse.split('&&').slice(-1)[0] : parse.split(' ').slice(-1)[0];
-  
+
   if (/style/.test(option.toLowerCase()) && /url\(/.test(result)) {
     try {
       result = result.match(/url\((.*?)\)/)![1];
@@ -1739,7 +1739,7 @@ const homeVodParse = (homeVodObj) => {
       }
     });
   }
-  
+
   if (rule["图片来源"]) {
     // @ts-ignore
     d.filter(it => it["vod_pic"] && it["vod_pic"].startsWith('http'))
@@ -2061,7 +2061,7 @@ const searchParse = (searchObj) => {
         // @ts-ignore
         it["vod_pic"] += rule["图片来源"];
       });
-  }  
+  }
 
   return {
     'page': parseInt(searchObj.pg),
@@ -2224,7 +2224,7 @@ const detailParse = (detailObj) => {
           playFrom.push(v_title);
         }
       }
-    } else { 
+    } else {
       playFrom = ['道长在线']
     }
     vod["vod_play_from"] = playFrom.join(vod_play_from);
@@ -2515,10 +2515,10 @@ const init = (ext) => {
         if (js) eval(js.replace('var rule', 'rule'));
         if (query["type"] === 'url' && query["params"]) { // 指定type是链接并且传了params支持简写如 ./xx.json
           rule["params"] = urljoin(ext,query["params"]);
-        } else if(query["params"]){ // 没指定type直接视为字符串
+        } else if(query["params"]) { // 没指定type直接视为字符串
           rule["params"] = query["params"];
         }
-        } else eval(ext.replace('var rule', 'rule'));
+      } else eval(ext.replace('var rule', 'rule'));
     }
     if (rule["模板"] && muban.hasOwnProperty(rule["模板"])) {
       console.log(`继承模板:${rule["模板"]}`);
@@ -2681,7 +2681,7 @@ const category = (tid, pg, filter, extend) => {
   const cateObj = {
     url: rule["url"],
     一级: rule["一级"],
-    tid: tid,
+    tid: `${tid}`,
     pg: parseInt(pg),
     filter: filter,
     extend: extend
@@ -2757,7 +2757,7 @@ const play = (flag, id, flags) => {
  */
 const search = (wd, quick, pg) => {
   let search_encoding = rule["search_encoding"]?.toLowerCase() || rule["encoding"]?.toLowerCase();
-  
+
   if (search_encoding !== 'utf-8') {
     wd = encodeStr(wd, search_encoding);
   }
@@ -2789,7 +2789,7 @@ const proxy = (params) => {
     params: params,
     proxy_rule: proxy_rule
   };
-  
+
   return proxyParse(proxyObj);
 };
 
@@ -2799,11 +2799,11 @@ const proxy = (params) => {
  */
 const sniffer = () => {
   const enable_sniffer = rule["sniffer"] || false;
-  
+
   if (enable_sniffer) {
     console.log('开始执行辅助嗅探代理规则...');
   }
-  
+
   return enable_sniffer;
 };
 
@@ -2826,7 +2826,7 @@ const isVideo = (url: string) => {
     isVideo: is_video,
     t: t,
   };
-  
+
   const result = isVideoParse(isVideoObj);
 
   if (result) {

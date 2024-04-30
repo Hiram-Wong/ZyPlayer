@@ -99,9 +99,7 @@ const t3RuleInit = async(site) => {
 
   if (_.has(site, 'ext')) {
     try {
-      const res = await axios.get(site.ext);
-      const rule = res.data;
-      await t3Work({type:'init', data: rule});
+      await t3Work({type:'init', data: site.ext});
       data = {
         code: 200,
         msg: 'sucess'
