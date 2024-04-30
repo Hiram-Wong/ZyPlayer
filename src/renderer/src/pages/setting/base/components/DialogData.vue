@@ -6,7 +6,7 @@
           <span class="separator"></span>
           <p class="title">{{ $t('pages.setting.data.config') }}</p>
           <p class="content">{{ $t('pages.setting.data.configTip') }}</p>
-          <div class="config"> 
+          <div class="config">
             <t-collapse expand-mutex>
               <t-collapse-panel value="easyConfig" :header="$t('pages.setting.data.easyConfig.title')">
                 <t-radio-group v-model="formData.easyConfig.type">
@@ -33,7 +33,7 @@
                   <t-input :label="$t('pages.setting.data.configImport.address')" v-model="formData.importData.remoteImpoUrl" class="input-item" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
                 </div>
                 <div v-else>
-                  <t-upload 
+                  <t-upload
                     v-model="formData.importData.localImpoFile"
                     class="input-item"
                     theme="file"
@@ -92,7 +92,7 @@
           <p class="content">1.{{ $t('pages.setting.data.content1') }}</p>
           <p class="content">2.{{ $t('pages.setting.data.content2') }}</p>
           <p class="content">3.{{ $t('pages.setting.data.content3') }}</p>
-          <div class="config"> 
+          <div class="config">
             <t-collapse>
               <t-collapse-panel value="0" :header="$t('pages.setting.data.webdev.title')">
                 <template #headerRightContent>
@@ -286,6 +286,7 @@ const easyConfig = async() => {
   };
 
   const formatUrl = (relativeUrl: string, baseUrl: string): string => {
+    if (!relativeUrl) return '';
     return joinUrl.resolve(baseUrl, relativeUrl);
   };
 
@@ -306,7 +307,7 @@ const easyConfig = async() => {
           defaultObject[`default${_.upperFirst(tblKey)}`] = `${config[key].default}`;
         }
       });
-      
+
       for (const key in defaultObject) {
         if (defaultObject[key]) {
           await setDefault(key, defaultObject[key]);
@@ -315,7 +316,7 @@ const easyConfig = async() => {
     } else {
       if (_.has(config, "sites")) {
         data["tbl_site"] = config.sites
-          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.endsWith('.js') && item.ext && item.ext.endsWith('.js')))
+          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.includes('.js') && item.ext && item.ext.includes('.js')))
           .map((item) => ({
             id: nanoid(),
             name: item.name,
@@ -429,7 +430,7 @@ const formatSet = (data) => {
   // 更新或添加新键值对
   const newEntries = [
     { key: "windowPosition", value: { status: _.get(data, ["restoreWindowPositionAndSize", "value"], false), position: { width: 1000, height: 640 } } },
-    { key: "webdev", value: { 
+    { key: "webdev", value: {
         sync: false, data: {
           url: _.get(data, ["webdevUrl", "value"], "https://dav.jianguoyun.com/dav/"),
           username: _.get(data, ["webdevUsername", "value"], ""),
@@ -488,7 +489,7 @@ const commonDelImportData = (data) => {
           const tblSetting = data.setting[0]
             ? Object.entries(data.setting[0]).map(([k, v]) => ({ key: k, value: v }))
             : [];
-          
+
           data[`tbl_${tblKey}`] = tblSetting;
         } else {
           data[`tbl_${tblKey}`] = data[key].data || data[key];
@@ -585,7 +586,7 @@ const exportData = async() => {
   const activeList = _.keys(_.pickBy(active.export, _.identity));
   const dbData = await exportDb(activeList);
   const str = JSON.stringify(dbData, null, 2);
-  
+
   try {
     const saveDialogResult = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
       defaultPath: 'config.json',
@@ -626,7 +627,7 @@ const getThumbnailSize = () => {
 // 清理缓存
 const clearData = async() => {
   if (!_.some(active.clear)) return;
-  
+
   try {
     const activeList = _.keys(_.pickBy(active.clear, _.identity));
     let activeToRemove = ["thumbnail"];
