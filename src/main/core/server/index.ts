@@ -13,12 +13,12 @@ logger.info('[server] fastify module initialized');
 
 let logOpt = {
   console: true, // 是否开启console.log 。。。
-  file: join(app.getPath("userData"), 'logs/fastify.log'), // 文件路径  
+  file: join(app.getPath("userData"), 'logs/fastify.log'), // 文件路径
   maxBufferLength: 4096, // 日志写入缓存队列最大长度
   flushInterval: 1000, // flush间隔
   logrotator: { // 分割配置
     byHour: false,
-    byDay: true,    
+    byDay: true,
     hourDelimiter: '_'
   }
 }
