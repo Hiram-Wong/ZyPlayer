@@ -6,11 +6,11 @@ export default [
     name: 'film',
     redirect: '/film/index',
     component: Layout,
-    meta: { 
+    meta: {
       title: {
         zh_CN: "影视",
         en_US: "Film"
-      }, 
+      },
       icon: 'movie-clapper'
     },
     children: [
@@ -33,7 +33,7 @@ export default [
     name: 'iptv',
     redirect: '/iptv/index',
     component: Layout,
-    meta: { 
+    meta: {
       title: {
         zh_CN: "电视",
         en_US: "IPTV"
@@ -45,7 +45,7 @@ export default [
         path: 'index',
         name: 'IptvIndex',
         component: () => import('@/pages/Iptv.vue'),
-        meta: { 
+        meta: {
           icon: 'tv-1',
           title: {
             zh_CN: "电视",
@@ -60,7 +60,7 @@ export default [
     name: 'drive',
     redirect: '/drive/index',
     component: Layout,
-    meta: { 
+    meta: {
       title: {
         zh_CN: "网盘",
         en_US: "Drive"
@@ -72,7 +72,7 @@ export default [
         path: 'index',
         name: 'DriveIndex',
         component: () => import('@/pages/Drive.vue'),
-        meta: { 
+        meta: {
           icon: 'cloud',
           title: {
             zh_CN: "网盘",
@@ -90,7 +90,7 @@ export default [
       title: {
         zh_CN: "播放",
         en_US: " Play"
-      }, 
+      },
       icon: 'play-circle-stroke',
       hidden: true
     },
@@ -126,7 +126,7 @@ export default [
         path: 'index',
         name: 'AnalyzeIndex',
         component: () => import('@/pages/Analyze.vue'),
-        meta: { 
+        meta: {
           icon: 'view-in-ar',
           title: {
             zh_CN: "解析",
@@ -153,7 +153,7 @@ export default [
         path: 'index',
         name: 'ChaseIndex',
         component: () => import('@/pages/Chase.vue'),
-        meta: { 
+        meta: {
           icon: 'data-display',
           title: {
             zh_CN: "过刻",
@@ -168,7 +168,7 @@ export default [
     name: 'setting',
     component: Layout,
     redirect: '/setting/index',
-    meta: { 
+    meta: {
       title: {
         zh_CN: "设置",
         en_US: "Setting"
@@ -181,7 +181,7 @@ export default [
         path: 'index',
         name: 'SettingIndex',
         component: () => import('@/pages/Setting.vue'),
-        meta: { 
+        meta: {
           icon: 'setting-1',
           title: {
             zh_CN: "设置",
@@ -196,7 +196,7 @@ export default [
     name: 'test',
     component: Layout,
     redirect: '/test/index',
-    meta: { 
+    meta: {
       title: {
         zh_CN: "测试",
         en_US: " Test"
@@ -209,7 +209,7 @@ export default [
         path: 'index',
         name: 'TestIndex',
         component: () => import('@/pages/Test.vue'),
-        meta: { 
+        meta: {
           title: {
             zh_CN: "测试",
             en_US: " Test"
