@@ -2,10 +2,10 @@
  * @module drpyInject
  * @brief T3网络请求、缓存模块处理库
  * @version 3.1.1
- * 
+ *
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/utils/quickjs_ctx.py | Source on GitHub}
- * 
+ *
  * @modified-by HiramWong <admin@catni.cn>
  * @modification-date 2023-03-29T23:02:29+08:00
  * @modification-description Python转TypeScript, 适用于JavaScript项目
@@ -58,7 +58,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     'User-Agent': 'custom-ua',
     'Referer': 'custom-referer',
   };
-  
+
   for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
     if (headers.hasOwnProperty(originalHeader)) {
       headers[customHeader] = headers[originalHeader];
@@ -147,6 +147,17 @@ const joinUrl = (base: string, url: string) => {
   return u.toString();
 }
 
+const resolve = (from, to) => {
+  const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
+  if (resolvedUrl.protocol === 'resolve:') {
+    // `from` is a relative URL.
+    const { pathname, search, hash } = resolvedUrl;
+    return pathname + search + hash;
+  }
+  // return resolvedUrl.toString();
+  return resolvedUrl.href;
+}
+
 const pdfh = (html: string, parse: string, base_url: string = '') => {
   const jsp = new jsoup(base_url);
   return jsp.pdfh(html, parse, base_url);
@@ -205,4 +216,4 @@ const local = {
   'delete': local_delete
 }
 
-export { pdfh, pdfa, pdfl, pd, local , req, joinUrl }
+export { pdfh, pdfa, pdfl, pd, local , req, joinUrl, resolve }
