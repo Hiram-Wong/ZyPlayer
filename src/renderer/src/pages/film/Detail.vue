@@ -95,6 +95,8 @@
 
 <script setup lang="ts">
 import jsonpath from 'jsonpath';
+import Base64 from 'crypto-js/enc-base64';
+import Utf8 from 'crypto-js/enc-utf8.js';
 import {
   HeartIcon,
   HeartFilledIcon,
@@ -202,7 +204,7 @@ watch(
   () => props.data,
   (val) => {
     info.value = val;
-    
+
     getDetailInfo();
   }
 );
@@ -226,39 +228,43 @@ const getAnalyzeFlag = async (): Promise<void> => {
 };
 
 // Helper functions
-const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<string> => {
+const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<object> => {
   console.log('[detail][hipy][start]获取服务端播放链接开启');
-  let data: string = '';
+  let playUrl: string = '';
+  let script: string = '';
   try {
-    const res = await fetchHipyPlayUrl(site, flag, url);
-    data = res;
-    console.log(`[detail][hipy][return]${data}`);
+    const playRes = await fetchHipyPlayUrl(site, flag, url);
+    playUrl = playRes.url;
+    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    console.log(`[detail][hipy][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][hipy][error]${err}`);
   } finally {
     console.log(`[detail][hipy][end]获取服务端播放链接结束`);
-    return data;
-  }
+    return {playUrl,script};
+  };
 };
 
-const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<string> => {
+const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<object> => {
   console.log('[detail][t3][start]获取服务端播放链接开启');
-  let data: string = '';
+  let playUrl: string = '';
+  let script: string = '';
   try {
     const playRes = await fetchT3PlayUrl(flag, id, flags);
     if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
       const proxyRes: any = await t3RuleProxy(playRes.url);
       await setT3Proxy(proxyRes);
-    }
+    };
 
-    data = playRes.url;
-    console.log(`[detail][t3][return]${data}`);
+    playUrl = playRes.url;
+    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    console.log(`[detail][t3][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][t3][error]${err}`);
   } finally {
     console.log(`[detail][t3][end]获取服务端播放链接结束`);
-    return data;
-  }
+    return {playUrl,script};
+  };
 };
 
 const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
@@ -334,6 +340,8 @@ const gotoPlay = async (item) => {
   const { snifferMode } = set.value;
 
   let playerUrl = url;
+  let script:string = '';
+  let playData: object = {playUrl:url,script:''};
 
   if (playUrl) {
     playerUrl = await fetchJsonPlayUrlHelper(playUrl, url);
@@ -362,11 +370,15 @@ const gotoPlay = async (item) => {
         break;
       case 6:
         // hipy获取服务端播放链接
-        playerUrl = await fetchHipyPlayUrlHelper(formData.value, active.flimSource, url);
+        playData = await fetchHipyPlayUrlHelper(formData.value, active.flimSource, url);
+        playerUrl = playData.playUrl;
+        script = playData.script;
         break;
       case 7:
         // t3获取服务端播放链接
-        playerUrl = await fetchT3PlayUrlHelper(active.flimSource, url, []);
+        playData = await fetchT3PlayUrlHelper(active.flimSource, url, []);
+        playerUrl = playData.playUrl;
+        script = playData.script;
         break;
       case 8:
         // catvod获取服务端播放链接
@@ -390,7 +402,13 @@ const gotoPlay = async (item) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    playerUrl = await sniffer(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${url}` : url);
+    let snifferPlayUrl:string = url;
+    if(snifferMode.type === 'custom'){
+      let snifferTool = new URL(snifferMode.url);
+      let snifferApi = snifferTool.origin + snifferTool.pathname;
+      snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}`;
+    }
+    playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     if (playerUrl) callSysPlayer(playerUrl);
   } catch (err) {
     console.error(err);
@@ -457,7 +475,7 @@ const getHistoryData = async (): Promise<void> => {
   try {
     const { id } = formData.value;
     const res = await detailHistory({ relateId: id, videoId: info.value.vod_id });
-    
+
     if (res) {
       dataHistory.value = { ...res };
       active.flimSource = res.siteSource;
