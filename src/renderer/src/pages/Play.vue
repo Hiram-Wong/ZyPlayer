@@ -315,6 +315,9 @@ import '@/style/player/veplayer.css';
 import 'v3-infinite-loading/lib/style.css';
 import 'xgplayer/es/plugins/danmu/index.css';
 
+import Base64 from 'crypto-js/enc-base64';
+import Utf8 from 'crypto-js/enc-utf8.js';
+
 import DPlayer from 'dplayer';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
@@ -555,7 +558,7 @@ const VIDEO_PROCESS_DOC = reactive({
 const analyzeConfig = ref({
   default: {
     url: ''
-  }, // 
+  }, //
   flag: [] //标识
 })
 
@@ -867,24 +870,27 @@ const destroyPlayer = () => {
 };
 
 // Helper functions
-const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<string> => {
+const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<object> => {
   console.log('[detail][hipy][start]获取服务端播放链接开启');
-  let data: string = '';
+  let playUrl: string = '';
+  let script: string = '';
   try {
-    const res = await fetchHipyPlayUrl(site, flag, url);
-    data = res;
-    console.log(`[detail][hipy][return]${data}`);
+    const playRes = await fetchHipyPlayUrl(site, flag, url);
+    playUrl = playRes.url;
+    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    console.log(`[detail][hipy][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][hipy][error]${err}`);
   } finally {
     console.log(`[detail][hipy][end]获取服务端播放链接结束`);
-    return data;
+    return {playUrl,script};
   };
 };
 
-const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<string> => {
+const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<object> => {
   console.log('[detail][t3][start]获取服务端播放链接开启');
-  let data: string = '';
+  let playUrl: string = '';
+  let script: string = '';
   try {
     const playRes = await fetchT3PlayUrl(flag, id, flags);
     if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
@@ -892,13 +898,14 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
       await setT3Proxy(proxyRes);
     };
 
-    data = playRes.url;
-    console.log(`[detail][t3][return]${data}`);
+    playUrl = playRes.url;
+    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    console.log(`[detail][t3][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][t3][error]${err}`);
   } finally {
     console.log(`[detail][t3][end]获取服务端播放链接结束`);
-    return data;
+    return {playUrl,script};
   };
 };
 
@@ -1006,6 +1013,8 @@ const initFilmPlayer = async (isFirst) => {
   tmp.url = url;
   tmp.sourceUrl = url;
   let playerUrl = url;
+  let script:string = '';
+  let playData: object = {playUrl:url,script:''};
 
   if (site.playUrl) {
     playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
@@ -1034,12 +1043,16 @@ const initFilmPlayer = async (isFirst) => {
         break;
       case 6:
         // hipy获取服务端播放链接
-        playerUrl = await fetchHipyPlayUrlHelper(site, active.flimSource, url);
+        playData = await fetchHipyPlayUrlHelper(site, active.flimSource, url);
+        playerUrl = playData.playUrl;
+        script = playData.script;
         break;
       case 7:
         // t3获取服务端播放链接
         await t3RuleInit(site);
-        playerUrl = await fetchT3PlayUrlHelper(active.flimSource, url, []);
+        playData = await fetchT3PlayUrlHelper(active.flimSource, url, []);
+        playerUrl = playData.playUrl;
+        script = playData.script;
         break;
       case 8:
         // catvox获取服务端播放链接
@@ -1064,7 +1077,13 @@ const initFilmPlayer = async (isFirst) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    playerUrl = await sniffer(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${url}` : url);
+    let snifferPlayUrl:string = url;
+    if(snifferMode.type === 'custom'){
+      let snifferTool = new URL(snifferMode.url);
+      let snifferApi = snifferTool.origin + snifferTool.pathname;
+      snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}`;
+    }
+    playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
