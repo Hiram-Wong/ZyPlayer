@@ -22,13 +22,12 @@
 
 import CryptoJS from 'crypto-js';
 import pako from 'pako';
-import joinUrl from 'url';
 import JSEncrypt from 'wxmp-rsa';
 
 import cheerio from "./cheerio.min";
 import { getMubans } from './template';
 import gbkTool from './gbk';
-import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req } from './drpyInject';
+import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve } from './drpyInject';
 
 let consoleHistory: string[] = [];
 console["oldLog"] = console.log;
@@ -93,7 +92,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta3 202400428`;
+const VERSION = `${vercode} 3.9.50beta5 202400502`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -944,7 +943,7 @@ const getQuery = (url: string) => {
 const urljoin = (fromPath, nowPath) => {
   fromPath = fromPath || '';
   nowPath = nowPath || '';
-  return joinUrl.resolve(fromPath, nowPath);
+  return resolve(fromPath, nowPath);
 }
 
 var urljoin2 = urljoin;
@@ -1777,7 +1776,8 @@ const categoryParse = (cateObj) => {
     } else {
       url = url.replace('fyfilter', rule["filter_url"]);
     }
-
+    // filter_url支持fyclass
+    url = url.replaceAll('fyclass', cateObj.tid);
     let fl = cateObj.filter ? cateObj.extend : {};
     // 自动合并 不同分类对应的默认筛选
     if (rule["filter_def"] && typeof rule["filter_def"] === 'object') {

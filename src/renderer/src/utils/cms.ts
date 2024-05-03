@@ -818,9 +818,10 @@ const fetchHipyPlayUrl = async(site, flag, play) => {
   try {
     const url = buildUrl(site.api, `?extend=${site.ext}&flag=${flag}&play=${play}`);
     const { data } = await axios.get(url);
-    let playUrl = data;
-    if (data?.url) playUrl = data.url;
-    return playUrl;
+    return data;
+    // let playUrl = data;
+    // if (data?.url) playUrl = data.url;
+    // return playUrl;
   } catch (err) {
     throw err;
   }
