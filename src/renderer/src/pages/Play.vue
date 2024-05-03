@@ -874,16 +874,18 @@ const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string
   console.log('[detail][hipy][start]获取服务端播放链接开启');
   let playUrl: string = '';
   let script: string = '';
+  let extra: string = '';
   try {
     const playRes = await fetchHipyPlayUrl(site, flag, url);
     playUrl = playRes.url;
     script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    extra = playRes.parse_extra||extra;
     console.log(`[detail][hipy][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][hipy][error]${err}`);
   } finally {
     console.log(`[detail][hipy][end]获取服务端播放链接结束`);
-    return {playUrl,script};
+    return {playUrl,script,extra};
   };
 };
 
@@ -891,6 +893,7 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   console.log('[detail][t3][start]获取服务端播放链接开启');
   let playUrl: string = '';
   let script: string = '';
+  let extra: string = '';
   try {
     const playRes = await fetchT3PlayUrl(flag, id, flags);
     if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
@@ -900,12 +903,13 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
 
     playUrl = playRes.url;
     script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    extra = playRes.parse_extra||extra;
     console.log(`[detail][t3][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][t3][error]${err}`);
   } finally {
     console.log(`[detail][t3][end]获取服务端播放链接结束`);
-    return {playUrl,script};
+    return {playUrl,script,extra};
   };
 };
 
@@ -1014,7 +1018,8 @@ const initFilmPlayer = async (isFirst) => {
   tmp.sourceUrl = url;
   let playerUrl = url;
   let script:string = '';
-  let playData: object = {playUrl:url,script:''};
+  let extra:string = '';
+  let playData: object = {playUrl:url,script:'',extra:''};
 
   if (site.playUrl) {
     playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
@@ -1046,6 +1051,7 @@ const initFilmPlayer = async (isFirst) => {
         playData = await fetchHipyPlayUrlHelper(site, active.flimSource, url);
         playerUrl = playData.playUrl;
         script = playData.script;
+        extra = playData.extra;
         break;
       case 7:
         // t3获取服务端播放链接
@@ -1053,6 +1059,7 @@ const initFilmPlayer = async (isFirst) => {
         playData = await fetchT3PlayUrlHelper(active.flimSource, url, []);
         playerUrl = playData.playUrl;
         script = playData.script;
+        extra = playData.extra;
         break;
       case 8:
         // catvox获取服务端播放链接
@@ -1081,7 +1088,7 @@ const initFilmPlayer = async (isFirst) => {
     if(snifferMode.type === 'custom'){
       let snifferTool = new URL(snifferMode.url);
       let snifferApi = snifferTool.origin + snifferTool.pathname;
-      snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}`;
+      snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
     }
     playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     createPlayer(playerUrl);
