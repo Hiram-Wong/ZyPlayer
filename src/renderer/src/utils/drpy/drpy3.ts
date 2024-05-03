@@ -92,7 +92,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta5 202400502`;
+const VERSION = `${vercode} 3.9.50beta6 202400504`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -149,6 +149,14 @@ const NOADD_INDEX = /:eq|:lt|:gt|:first|:last|^body$|^#/;  // 不自动加eq下�
 const URLJOIN_ATTR = /(url|src|href|-original|-src|-play|-url|style)$/;  // 需要自动urljoin的属性
 const SELECT_REGEX = /:eq|:lt|:gt|#/g;
 const SELECT_REGEX_A = /:eq|:lt|:gt/g;
+
+// 增加$js工具，支持$js.toString(()=>{});
+const $js = {
+  toString(func) {
+    let strfun = func.toString();
+    return strfun.replace(/^\(\)(\s+)?=>(\s+)?\{/, "js:").replace(/\}$/,'');
+  }
+};
 
 function window_b64() {
   let b64map = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -2847,6 +2855,7 @@ const keepUnUse = {
       fixAdM3u8, fixAdM3u8Ai, // ad
       base64Encode, md5, decodeStr, RSA, // encryption and decryption
       clearItem, // cache
+      $js, // $工具
     };
     let temp = _;
     temp.stringify({});
