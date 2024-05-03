@@ -285,6 +285,12 @@ export default {
     title: '写源工具 [道长联名]',
     template: '模板',
     templateTip: '选择一个要编辑的默认模板',
+    reqHeaderTitle: '请求头',
+    reqBodyTitle: '请求体',
+    placeholder: {
+      reqHeader: '{ "User-Agent": "Mozilla/5.0 zyplayer" }',
+      reqBody: '{ "key": "01b9b7" }',
+    },
     rule: {
       pdfa: '列表',
       pdfh: '节点',
@@ -306,6 +312,7 @@ export default {
       initManual: '手动',
       initAuto: '自动',
       source: '源代码',
+      obtain: '获取',
       classify: '分类',
       home: '首页',
       list: '列表',
@@ -332,6 +339,10 @@ export default {
     dialog: {
       player: {
         title: '播放测试'
+      },
+      request: {
+        title: '请求参数',
+        cancel: '重置'
       }
     }
   }

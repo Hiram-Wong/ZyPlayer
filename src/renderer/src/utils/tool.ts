@@ -4,20 +4,36 @@ import ip from 'ip';
 
 axios.defaults.withCredentials = true; //让ajax携带cookie
 
-const getConfig = async (url, header = {}) => {
+const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) => {
   try {
-    let res;
-    if( header ) res = await axios.get(url, {headers: { ...header }});
-    else res = await axios.get(url);
-    let response;
+    const customHeaders = {
+      'Cookie': 'custom-cookie',
+      'User-Agent': 'custom-ua',
+      'Referer': 'custom-referer',
+    };
 
-    try {
-      response = JSON5.parse(res.data);
-    } catch (err) {
-      response = res.data;
+    for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
+      if (headers.hasOwnProperty(originalHeader)) {
+        headers[customHeader] = headers[originalHeader];
+        delete headers[originalHeader];
+      }
     }
 
-    return response || false;
+    const response = await axios({
+      method,
+      url,
+      data: method !== 'GET' ? body : undefined,
+      headers: headers || undefined
+    })
+
+    let responseData;
+    try {
+      responseData = JSON5.parse(response.data);
+    } catch (parseError) {
+      responseData = response.data;
+    }
+
+    return responseData || false;
   } catch (err) {
     throw err;
   }
@@ -25,9 +41,9 @@ const getConfig = async (url, header = {}) => {
 
 // 判断媒体类型
 const checkMediaType = async (url: string): Promise<string | null> => {
-  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi'];
+  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi', 'magnet'];
 
-  if (url.startsWith('http')) {
+  if (url.startsWith('http') || url.startsWith('magnet')) {
     const fileType = supportedFormats.find(format => url.includes(format));
     if (fileType) {
       return fileType;
@@ -92,7 +108,7 @@ const checkLiveM3U8 = async(url: string): Promise<boolean> =>{
   try {
     const res = await axios.get(url);
     const m3u8Content = res.data;
-    
+
     const isLiveStream = !(
       m3u8Content.indexOf('#EXT-X-ENDLIST') !== -1 ||
       (m3u8Content.indexOf('#EXT-X-PLAYLIST-TYPE') !== -1 &&
@@ -100,7 +116,7 @@ const checkLiveM3U8 = async(url: string): Promise<boolean> =>{
       (m3u8Content.indexOf('#EXT-X-MEDIA-SEQUENCE') !== -1 &&
         parseInt(m3u8Content.match(/#EXT-X-MEDIA-SEQUENCE:(\d+)/)[1]) === 0)
     );
-    
+
     return isLiveStream;
   } catch (err) {
     return false;

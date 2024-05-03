@@ -6,6 +6,10 @@
       </div>
       <div class="right-operation-container">
         <div class="component-op">
+          <div class="item" @click="showTemplateDialog">
+            <extension-icon />
+            <span>{{ $t('pages.setting.editSource.template') }}</span>
+          </div>
           <div class="item" @click="importFileEvent">
             <file-import-icon />
             <span>{{ $t('pages.setting.editSource.import') }}</span>
@@ -34,6 +38,14 @@
             <help-rectangle-icon />
             <span>{{ $t('pages.setting.editSource.help') }}</span>
           </div>
+
+          <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.template')"
+            show-in-attached-element width="40%" @confirm="confirmTemplate()">
+            <p>{{ $t('pages.setting.editSource.templateTip') }}</p>
+            <t-select v-model="form.template" @change="changeTheme()">
+              <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
+            </t-select>
+          </t-dialog>
         </div>
       </div>
     </div>
@@ -42,25 +54,46 @@
         <div class="edit">
           <div class="code-op">
             <div class="code-op-item">
-              <div class="item">
-                <t-button class="button" theme="default" @click="showTemplateDialog">{{
-                  $t('pages.setting.editSource.template') }}</t-button>
-                <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.template')"
-                  show-in-attached-element width="40%" @confirm="confirmTemplate()">
-                  <p>{{ $t('pages.setting.editSource.templateTip') }}</p>
-                  <t-select v-model="form.template" @change="changeTheme()">
-                    <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
-                  </t-select>
-                </t-dialog>
-              </div>
               <div class="item source">
-                <t-input-adornment prepend="url">
+                <t-input-adornment>
+                  <template #prepend>
+                    <t-select v-model="form.req.method" auto-width>
+                      <t-option v-for="item in reqMethods" :key="item.value" :value="item.value" :label="item.label" />
+                    </t-select>
+                  </template>
                   <template #append>
-                    <t-button class="button" theme="default" @click="getSource">{{
+                    <t-button class="button" theme="default" @click="getSource()">{{
                       $t('pages.setting.editSource.action.source') }}</t-button>
                   </template>
-                  <t-input v-model="form.url" :placeholder="$t('pages.setting.placeholder.general')" class="input" />
+                  <div class="input-container">
+                    <t-input v-model="form.req.url" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
+                    <div class="method" @click="showReqParamDialog()">
+                      <transform-icon />
+                    </div>
+                  </div>
                 </t-input-adornment>
+                <t-dialog
+                  v-model:visible="isVisible.reqParam"
+                  :header="$t('pages.setting.editSource.dialog.request.title')"
+                  :cancel-btn="$t('pages.setting.editSource.dialog.request.cancel')"
+                  show-in-attached-element
+                  @confirm="isVisible.reqParam = false"
+                  @cancel="reqCancel()"
+                >
+                  <div>
+                    <p>{{ $t('pages.setting.editSource.reqHeaderTitle') }}</p>
+                    <t-textarea v-model="form.req.header"
+                      placeholder='{ "User-Agent": "Mozilla/5.0 zyplayer" }' />
+                  </div>
+                  <div v-if="form.req.method !== 'GET'">
+                    <p>{{ $t('pages.setting.editSource.reqBodyTitle') }}</p>
+                    <t-select v-model="form.req.contentType" class="contentType" style="margin-bottom: 5px;">
+                      <t-option v-for="item in reqContentTypes" :key="item.label" :value="item.value" :label="item.label" />
+                    </t-select>
+                    <t-textarea v-model="form.req.body"
+                      placeholder='{ "key": "01b9b7" }' />
+                  </div>
+                </t-dialog>
               </div>
             </div>
             <div class="code-op-item">
@@ -228,7 +261,7 @@ import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { BugIcon, DeleteIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon, InternetIcon, GestureClickIcon } from 'tdesign-icons-vue-next';
+import { BugIcon, DeleteIcon, ExtensionIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon, InternetIcon, GestureClickIcon, TransformIcon } from 'tdesign-icons-vue-next';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
@@ -273,6 +306,13 @@ let form = ref({
   template: 'mxpro',
   url: '',
   nav: 'debug',
+  req: {
+    method: 'GET',
+    header: '',
+    body: '',
+    url: '',
+    contentType: 'application/json'
+  },
   detail: {
     ids: ''
   },
@@ -315,7 +355,8 @@ let form = ref({
 const isVisible = reactive({
   template: false,
   player: false,
-  help: false
+  help: false,
+  reqParam: false
 });
 
 const formDialog = reactive({
@@ -360,6 +401,44 @@ interface EditorConfig {
   eol: number;
   wordWrap: WordWrapOptions;
 }
+
+const reqMethods = [
+  {
+    label: 'GET',
+    value: 'GET',
+  },
+  {
+    label: 'POST',
+    value: 'POST',
+  },
+  {
+    label: 'DELETE',
+    value: 'DELETE',
+  },
+  {
+    label: 'PUT',
+    value: 'PUT',
+  },
+  {
+    label: 'OPTIONS',
+    value: 'OPTIONS',
+  },
+  {
+    label: 'HEAD',
+    value: 'HEAD',
+  }
+];
+
+const reqContentTypes = [
+  {
+    label: 'application/json',
+    value: 'application/json',
+  },
+  {
+    label: 'application/x-www-form-urlencoded',
+    value: 'application/x-www-form-urlencoded',
+  },
+];
 
 const config = reactive<EditorConfig>({
   theme: systemTheme.value === 'light' ? 'vs' : 'vs-dark',
@@ -676,6 +755,13 @@ const performAction = async (type, requestData = {}) => {
     };
     const res: any = await t3Work({ type, data: requestData });
     form.value.content.debug = res.data as string;
+    switch (type) {
+      case 'play':
+        if (res.data?.url) form.value.player.url = res.data.url;
+        break;
+      case 'detail':
+        break;
+    }
     form.value.action = type;
     changeNav('debug', type);
     MessagePlugin.success(t('pages.setting.data.success'));
@@ -787,12 +873,43 @@ const actionPlayer = async (url = "") => {
 };
 
 const getSource = async () => {
-  const url = form.value.url;
-  if (url) {
-    const res = await getConfig(url);
-    form.value.content.source = res;
+  let { url, method, header, body, contentType } = form.value.req;
+  header = header ? header : '{}';
+  body = body ? body : '{}';
+
+  if (!url) return;
+
+  try {
+    const parsedHeader = JSON5.parse(header);
+    let parsedBody = JSON5.parse(body);
+
+    if (method !== 'GET' && parsedBody) {
+      parsedHeader['Content-Type'] = contentType;
+      if (contentType === 'application/x-www-form-urlencoded') {
+        parsedBody instanceof URLSearchParams
+          ? parsedBody
+          : (parsedBody = new URLSearchParams(parsedBody));
+      }
+    }
+
+    const response = await getConfig(url, method, parsedHeader, parsedBody);
+
+    form.value.content.source = response;
     changeNav('source', 'html');
-  };
+  } catch (error) {
+    console.error('Error parsing header or body:', error);
+  }
+};
+
+const showReqParamDialog = () => {
+  isVisible.reqParam = true;
+};
+
+const reqCancel = (e) => {
+  form.value.req.header = '';
+  form.value.req.body = '';
+  form.value.req.contentType = 'application/json';
+  e.preventDefault();
 };
 
 const showTemplateDialog = () => {
@@ -979,6 +1096,34 @@ const proxyEvent = async () => {
 
             :deep(.t-input-adornment) {
               width: 100%;
+
+              .input-container {
+                width: inherit;
+                background-color: var(--td-bg-content-input) !important;
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                align-items: center;
+                justify-content: space-between;
+
+                .method {
+                  margin-right: 5px;
+                  width: 24px;
+                  height: 24px;
+                  border-radius: var(--td-radius-default);
+                  background-color: var(--td-bg-color-component);
+                  display: flex;
+                  flex-direction: row;
+                  align-content: center;
+                  align-items: center;
+                  justify-content: center;
+                  cursor: pointer;
+                }
+
+                .contentType {
+                  margin-bottom: 5px;
+                }
+              }
             }
           }
 
@@ -1185,7 +1330,8 @@ const proxyEvent = async () => {
 :deep(.t-input),
 :deep(.t-input-number__increase),
 :deep(.t-input-number__decrease),
-:deep(.t-input-adornment__text) {
+:deep(.t-input-adornment__text),
+:deep(.t-textarea__inner) {
   background-color: var(--td-bg-content-input) !important;
   border-color: transparent;
   box-shadow: none;

@@ -285,6 +285,12 @@ export default {
     title: 'Source Tool [Hjdhnx United]',
     template: 'template',
     templateTip: 'select one default template to edit',
+    reqHeaderTitle: 'Request Header',
+    reqBodyTitle: 'Request Body',
+    placeholder: {
+      reqHeader: '{ "User-Agent": "Mozilla/5.0 zyplayer" }',
+      reqBody: '{ "key": "01b9b7" }',
+    },
     rule: {
       pdfa: 'Pdfa',
       pdfh: 'Pdfh',
@@ -307,6 +313,7 @@ export default {
       initAuto: 'Auto',
       classify: 'Classify',
       source: 'Source',
+      obtain: 'Obtain',
       home: 'Home',
       list: 'List',
       detail: 'Detail',
@@ -332,6 +339,10 @@ export default {
     dialog: {
       player: {
         title: 'PlayTest'
+      },
+      request: {
+        title: 'RequestParameters',
+        cancel: 'Reset'
       }
     }
   }
