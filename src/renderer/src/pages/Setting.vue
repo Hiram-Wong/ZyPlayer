@@ -20,12 +20,12 @@
     </common-nav>
     <div class="content">
       <div class="container">
-        <base-view class="container-item" v-if="settingSet.select === 'configBase'"/>
-        <site-view class="container-item" v-else-if="settingSet.select === 'siteSource'"/>
-        <iptv-view class="container-item" v-else-if="settingSet.select === 'iptvSource'"/>
-        <analyze-view class="container-item" v-else-if="settingSet.select === 'analyzeSource'"/>
-        <drive-view class="container-item" v-else-if="settingSet.select === 'driveSource'"/>
-        <edit-source-view class="container-item" v-else-if="settingSet.select === 'editSource'"/>
+        <base-view class="container-item" v-show="settingSet.select === 'configBase'"/>
+        <site-view class="container-item" v-show="settingSet.select === 'siteSource'"/>
+        <iptv-view class="container-item" v-show="settingSet.select === 'iptvSource'"/>
+        <analyze-view class="container-item" v-show="settingSet.select === 'analyzeSource'"/>
+        <drive-view class="container-item" v-show="settingSet.select === 'driveSource'"/>
+        <edit-source-view class="container-item" v-show="settingSet.select === 'editSource'"/>
       </div>
     </div>
   </div>
