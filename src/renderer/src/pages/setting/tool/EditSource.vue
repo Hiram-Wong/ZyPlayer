@@ -6,22 +6,27 @@
       </div>
       <div class="right-operation-container">
         <div class="component-op">
-          <div class="item" @click="showTemplateDialog">
+          <div class="item" @click="showTemplateDialog()">
             <extension-icon />
             <span>{{ $t('pages.setting.editSource.template') }}</span>
           </div>
-          <div class="item" @click="importFileEvent">
-            <file-import-icon />
-            <span>{{ $t('pages.setting.editSource.import') }}</span>
+          <div class="item">
+            <!-- <file-import-icon />
+            <span>{{ $t('pages.setting.editSource.import') }}</span> -->
+            <t-select autoWidth borderless v-model="tmp.file" @change="fileEvent()">
+              <t-option key="import" :label="$t('pages.setting.editSource.import')" value="import" @click="importFileEvent" />
+              <t-option key="export" :label="$t('pages.setting.editSource.export')" value="export" @click="exportFileEvent" />
+              <t-option key="cache" :label="$t('pages.setting.editSource.cache')" value="cache" @click="cacheEvent" />
+            </t-select>
           </div>
-          <div class="item" @click="exportFileEvent">
+          <!-- <div class="item" @click="exportFileEvent">
             <file-export-icon />
             <span>{{ $t('pages.setting.editSource.export') }}</span>
           </div>
           <div class="item" @click="cacheEvent">
             <file-download-icon />
             <span>{{ $t('pages.setting.editSource.cache') }}</span>
-          </div>
+          </div> -->
           <div class="item" @click="debugEvent">
             <bug-icon />
             <span>{{ $t('pages.setting.editSource.bug') }}</span>
@@ -30,7 +35,7 @@
             <delete-icon />
             <span>{{ $t('pages.setting.editSource.delete') }}</span>
           </div>
-          <div class="item" @click="fileEvent">
+          <div class="item" @click="serverEvent">
             <internet-icon />
             <span>{{ $t('pages.setting.editSource.file') }}</span>
           </div>
@@ -261,7 +266,7 @@ import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { BugIcon, DeleteIcon, ExtensionIcon, FileDownloadIcon, FileExportIcon, FileImportIcon, HelpRectangleIcon, InternetIcon, GestureClickIcon, TransformIcon } from 'tdesign-icons-vue-next';
+import { BugIcon, DeleteIcon, ExtensionIcon, HelpRectangleIcon, InternetIcon, GestureClickIcon, TransformIcon } from 'tdesign-icons-vue-next';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
@@ -278,6 +283,7 @@ import { getConfig, copyToClipboardApi } from '@/utils/tool';
 import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
 import { pdfh, pdfa } from '@/utils/drpy/drpyInject';
+import { createDependencyProposals } from '@/utils/drpy/drpy_suggestions/drpy_suggestions';
 
 const remote = window.require('@electron/remote');
 const router = useRouter();
@@ -350,6 +356,10 @@ let form = ref({
   init: {
     auto: false
   }
+});
+
+const tmp = reactive({
+  file: '文件管理'
 });
 
 const isVisible = reactive({
@@ -563,6 +573,34 @@ const initEditor = () => {
     // After onDidChangeModelContent
     editor.getModel()!.pushEOL(config.eol);
 
+    monaco.languages.registerCompletionItemProvider('javascript', {
+      provideCompletionItems: (model, position, context, token) => {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn
+        };
+        const monacoRange = new monaco.Range(
+          range.startLineNumber,
+          range.startColumn,
+          range.endLineNumber,
+          range.endColumn
+        );
+        return {
+          suggestions: createDependencyProposals(monacoRange, monaco).map(proposal => ({
+            label: proposal.label,
+            kind: proposal.kind || monaco.languages.CompletionItemKind.Function, // 确保指定了一个有效的kind
+            insertText: proposal.insertText,
+            insertTextRules: proposal.insertTextRules || monaco.languages.CompletionItemInsertTextRule.None,
+            documentation: proposal.documentation,
+            range: monacoRange // 使用正确的范围类型
+          }))
+        };
+      }
+    });
+
     const logBox = document.getElementById('logBox');
     log = monaco.editor.create(logBox as HTMLElement, {
       theme: config.theme,
@@ -692,6 +730,10 @@ const deleteEvent = async () => {
 };
 
 const fileEvent = async () => {
+  tmp.file = '文件';
+};
+
+const serverEvent = async () => {
   window.electron.ipcRenderer.send('open-path', 'file', true)
 };
 
@@ -905,11 +947,11 @@ const showReqParamDialog = () => {
   isVisible.reqParam = true;
 };
 
-const reqCancel = (e) => {
+const reqCancel = () => {
+  nextTick(() => (isVisible.reqParam = true));
   form.value.req.header = '';
   form.value.req.body = '';
   form.value.req.contentType = 'application/json';
-  e.preventDefault();
 };
 
 const showTemplateDialog = () => {
@@ -1004,6 +1046,16 @@ const proxyEvent = async () => {
           height: 22px;
           cursor: pointer;
           text-decoration: none;
+
+          :deep(.t-select-input--borderless .t-input:hover:not(.t-input--focused)) {
+            border-color: transparent;
+            color: var(--td-text-color-primary);
+            background-color: var(--td-bg-color-container-hover) !important;
+          }
+
+          :deep(.t-input) {
+            padding: 0;
+          }
 
           &:hover {
             transition: all 0.2s ease 0s;
