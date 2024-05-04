@@ -10,34 +10,19 @@
             <extension-icon />
             <span>{{ $t('pages.setting.editSource.template') }}</span>
           </div>
-          <div class="item">
-            <!-- <file-import-icon />
-            <span>{{ $t('pages.setting.editSource.import') }}</span> -->
-            <t-select autoWidth borderless v-model="tmp.file" @change="fileEvent()">
+          <div class="item item-pad-select">
+            <t-select v-model="tmp.file" @change="fileEvent()" width="120">
               <t-option key="import" :label="$t('pages.setting.editSource.import')" value="import" @click="importFileEvent" />
               <t-option key="export" :label="$t('pages.setting.editSource.export')" value="export" @click="exportFileEvent" />
               <t-option key="cache" :label="$t('pages.setting.editSource.cache')" value="cache" @click="cacheEvent" />
             </t-select>
           </div>
-          <!-- <div class="item" @click="exportFileEvent">
-            <file-export-icon />
-            <span>{{ $t('pages.setting.editSource.export') }}</span>
-          </div>
-          <div class="item" @click="cacheEvent">
-            <file-download-icon />
-            <span>{{ $t('pages.setting.editSource.cache') }}</span>
-          </div> -->
-          <div class="item" @click="debugEvent">
-            <bug-icon />
-            <span>{{ $t('pages.setting.editSource.bug') }}</span>
-          </div>
-          <div class="item" @click="deleteEvent">
-            <delete-icon />
-            <span>{{ $t('pages.setting.editSource.delete') }}</span>
-          </div>
-          <div class="item" @click="serverEvent">
-            <internet-icon />
-            <span>{{ $t('pages.setting.editSource.file') }}</span>
+          <div class="item item-pad-select">
+            <t-select v-model="tmp.run" size="small" @change="fileEvent()">
+              <t-option key="bug" :label="$t('pages.setting.editSource.bug')" value="bug" @click="debugEvent" />
+              <t-option key="delete" :label="$t('pages.setting.editSource.delete')" value="expdeleteodeletert" @click="deleteEvent" />
+              <t-option key="file" :label="$t('pages.setting.editSource.file')" value="file" @click="serverEvent" />
+            </t-select>
           </div>
           <div class="item" @click="helpEvent">
             <help-rectangle-icon />
@@ -359,7 +344,8 @@ let form = ref({
 });
 
 const tmp = reactive({
-  file: '文件管理'
+  file: t('pages.setting.editSource.fileManage'),
+  run: t('pages.setting.editSource.run')
 });
 
 const isVisible = reactive({
@@ -730,7 +716,8 @@ const deleteEvent = async () => {
 };
 
 const fileEvent = async () => {
-  tmp.file = '文件';
+  tmp.file =  t('pages.setting.editSource.fileManage');
+  tmp.run = t('pages.setting.editSource.run');
 };
 
 const serverEvent = async () => {
@@ -1037,6 +1024,10 @@ const proxyEvent = async () => {
         border-radius: var(--td-radius-default);
         align-items: center;
 
+        .item-pad-select {
+          padding: 0 !important;
+        }
+
         .item {
           color: var(--td-text-color-placeholder);
           border-radius: var(--td-radius-default);
@@ -1047,14 +1038,25 @@ const proxyEvent = async () => {
           cursor: pointer;
           text-decoration: none;
 
-          :deep(.t-select-input--borderless .t-input:hover:not(.t-input--focused)) {
-            border-color: transparent;
-            color: var(--td-text-color-primary);
-            background-color: var(--td-bg-color-container-hover) !important;
-          }
-
           :deep(.t-input) {
             padding: 0;
+            border: none;
+            width: 54px;
+            height: var(--td-comp-size-s);
+            font: var(--td-font-body-medium);
+            padding: 0 4px !important;
+            .t-input__suffix:not(:empty) {
+              margin-left: var(--td-comp-margin-xxs);
+            }
+            &:hover:not(.t-input--focused) {
+              border-color: transparent;
+              background-color: transparent !important;
+              height: 24px;
+            }
+          }
+
+          :deep(.t-input__inner) {
+            color: var(--td-text-color-placeholder);
           }
 
           &:hover {
