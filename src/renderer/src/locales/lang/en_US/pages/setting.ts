@@ -283,10 +283,12 @@ export default {
     file: 'Server',
     help: 'Help',
     title: 'Source Tool [Hjdhnx United]',
-    template: 'template',
+    template: 'Template',
     templateTip: 'select one default template to edit',
     reqHeaderTitle: 'Request Header',
     reqBodyTitle: 'Request Body',
+    run: 'Run',
+    fileManage: 'File',
     placeholder: {
       reqHeader: '{ "User-Agent": "Mozilla/5.0 zyplayer" }',
       reqBody: '{ "key": "01b9b7" }',

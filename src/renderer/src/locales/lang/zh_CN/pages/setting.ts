@@ -287,6 +287,8 @@ export default {
     templateTip: '选择一个要编辑的默认模板',
     reqHeaderTitle: '请求头',
     reqBodyTitle: '请求体',
+    run: '运行',
+    fileManage: '文件',
     placeholder: {
       reqHeader: '{ "User-Agent": "Mozilla/5.0 zyplayer" }',
       reqBody: '{ "key": "01b9b7" }',
