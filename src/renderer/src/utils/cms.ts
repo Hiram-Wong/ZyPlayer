@@ -2,7 +2,8 @@ import axios from 'axios';
 import { XMLParser } from "fast-xml-parser";
 import * as cheerio from "cheerio";
 import _ from "lodash";
-import { Base64 } from 'js-base64';
+import Base64 from 'crypto-js/enc-base64';
+import Utf8 from 'crypto-js/enc-utf8';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 
@@ -435,7 +436,7 @@ const fetchList = async(site, pg = 1, t, f = {}) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}&extend=${site.ext}`);
       if (Object.keys(f).length !== 0) {
-        const encodedStr = Base64.encode(JSON.stringify(f));
+        const encodedStr =  Base64.stringify(Utf8.parse(JSON.stringify(f)));
         url = buildUrl(url, `&ext=${encodedStr}`);
       }
     } else if (site.type === 7) {
