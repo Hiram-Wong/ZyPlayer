@@ -534,6 +534,8 @@ const confirmTemplate = () => {
 
 const initEditor = () => {
   if (editor) editor.dispose();
+  if (log) log.dispose();
+
   nextTick(() => {
     const codeBox = document.getElementById('codeBox');
     editor = monaco.editor.create(codeBox as HTMLElement, {
@@ -548,8 +550,9 @@ const initEditor = () => {
       wordWrap: config.wordWrap,
       scrollBeyondLastLine: false,
       minimap: {
-        enabled: false,
+        enabled: true,
       },
+      fixedOverflowWidgets: true
     });
     editor.onDidChangeModelContent(() => {
       if (editor) {
@@ -588,7 +591,6 @@ const initEditor = () => {
         };
       }
     });
-
     const logBox = document.getElementById('logBox');
     log = monaco.editor.create(logBox as HTMLElement, {
       theme: config.theme,
@@ -604,6 +606,7 @@ const initEditor = () => {
       minimap: {
         enabled: false,
       },
+      fixedOverflowWidgets: true
     });
     log.onDidChangeModelContent(() => {
       if (log) form.value.content.text = log.getValue();
@@ -633,6 +636,7 @@ const importFileEvent = async () => {
     if (editor) editor.setValue(content);
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
+    console.log(`[setting][editSource][importFileEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
 };
@@ -661,7 +665,7 @@ const exportFileEvent = async () => {
       MessagePlugin.success(t('pages.setting.data.success'));
     }
   } catch (err) {
-    console.error('Failed to save or open save dialog:', err);
+    console.log(`[setting][editSource][exportFileEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
 };
@@ -681,6 +685,7 @@ const debugEvent = async () => {
       router.push({ name: 'FilmIndex' });
     };
   } catch (err) {
+    console.log(`[setting][editSource][debugEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   };
 };
@@ -703,6 +708,7 @@ const cacheEvent = async () => {
     });
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
+    console.log(`[setting][editSource][cacheEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   };
 };
@@ -713,6 +719,7 @@ const deleteEvent = async () => {
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
     emitReload.emit('film-reload');
   } catch (err) {
+    console.log(`[setting][editSource][deleteEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   };
 };
@@ -797,7 +804,7 @@ const performAction = async (type, requestData = {}) => {
     changeNav('debug', type);
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
-    console.log(err);
+    console.log(`[setting][editSource][performAction][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   }
 };
@@ -807,7 +814,16 @@ const actionRule = async (type) => {
   const rule = form.value.rule[type];
   const html = form.value.content.source;
 
-  if (rule && html.trim()) {
+  if (!rule) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.ruleNoRule'));
+    return;
+  }
+  if (!html) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.ruleNoHtml'));
+    return;
+  }
+
+  try {
     let res;
     if (type === 'pdfa') {
       res = await pdfa(html, rule);
@@ -817,15 +833,23 @@ const actionRule = async (type) => {
     }
     form.value.content.rule = res;
     changeNav('rule', type);
+
+    MessagePlugin.success(`${t('pages.setting.data.success')}`);
+  } catch (err) {
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
 };
 
 const actionInit = async () => {
   const { edit } = form.value.content;
   const data = edit.trim();
-  if (data) {
-    await performAction('init', data);
+
+  if (!data) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.initNoData'));
+    return;
   }
+
+  await performAction('init', data);
 };
 
 const actionHome = async () => {
@@ -837,51 +861,77 @@ const actionHomeVod = async () => {
 };
 
 const actionList = async () => {
-  const { t, f, pg } = form.value.category;
-  if (t) {
-    const data = {
-      tid: t,
-      pg: pg || 1,
-      filter: f ? true : false,
-      extend: f ? JSON5.parse(f) : {}
-    };
-    await performAction('category', data);
+  const { t: tid, f, pg } = form.value.category;
+
+  if (!tid) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.listNoT'));
+    return;
   }
+
+  const data = {
+    tid,
+    pg: pg || 1,
+    filter: f ? true : false,
+    extend: f ? JSON5.parse(f) : {}
+  };
+  await performAction('category', data);
 };
 
 const actionDetail = async () => {
   const { ids } = form.value.detail;
-  if (ids) {
-    await performAction('detail', ids);
+
+  if (!ids) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.detailNoIds'));
+    return;
   }
+
+  await performAction('detail', ids);
 };
 
 const actionSearch = async () => {
   const { wd, pg } = form.value.search;
-  if (wd) {
-    const data = {
-      wd,
-      quick: false,
-      pg: pg || 1
-    };
-    await performAction('search', data);
+
+  if (!wd) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.searchNoWd'));
+    return;
   }
+
+  const data = {
+    wd,
+    quick: false,
+    pg: pg || 1
+  };
+  await performAction('search', data);
 };
 
 const actionPlay = async () => {
   const { flag, play } = form.value.play;
-  if (flag && play) {
-    const data = {
-      flag: flag,
-      id: play,
-      flags: []
-    };
-    await performAction('play', data);
+
+  if (!flag) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.playNoFlag'));
+    return;
   }
+
+  if (!play) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.playNoPlay'));
+    return;
+  }
+
+  const data = {
+    flag: flag,
+    id: play,
+    flags: []
+  };
+  await performAction('play', data);
 };
 
 const actionProxy = async () => {
   let { url } = form.value.proxy;
+
+  if (!url) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.proxyNoUrl'));
+    return;
+  }
 
   if (url && url.startsWith("http")) {
     if (!url.startsWith("http://127.0.0.1:9978/")) {
@@ -897,10 +947,14 @@ const actionProxy = async () => {
 
 const actionPlayer = async (url = "") => {
   url = url ? url : form.value.player.url;
-  if (url) {
-    formDialog.player.url = url;
-    isVisible.player = true;
-  };
+
+  if (!url) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.playerNoUrl'));
+    return;
+  }
+
+  formDialog.player.url = url;
+  isVisible.player = true;
 };
 
 const getSource = async () => {
@@ -908,7 +962,10 @@ const getSource = async () => {
   header = header ? header : '{}';
   body = body ? body : '{}';
 
-  if (!url) return;
+  if (!url) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.htmlNoUrl'));
+    return;
+  };
 
   try {
     const parsedHeader = JSON5.parse(header);
@@ -927,8 +984,10 @@ const getSource = async () => {
 
     form.value.content.source = response;
     changeNav('source', 'html');
-  } catch (error) {
-    console.error('Error parsing header or body:', error);
+    MessagePlugin.success(`${t('pages.setting.data.success')}`);
+  } catch (err) {
+    console.error('Error parsing header or body:', err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
 };
 

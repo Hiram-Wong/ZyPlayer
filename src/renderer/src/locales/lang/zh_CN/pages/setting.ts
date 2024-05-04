@@ -336,7 +336,18 @@ export default {
       upload: '上传'
     },
     message: {
-      openDevTools: '目前只能通过开发者工具->控制台查看日志'
+      openDevTools: '目前只能通过开发者工具->控制台查看日志',
+      htmlNoUrl: '地址为空',
+      ruleNoHtml: '必须先获取源代码',
+      ruleNoRule: '规则为空',
+      initNoData: '编辑器内容为空',
+      listNoT: '参数t为空',
+      detailNoIds: '参数ids为空',
+      searchNoWd: '参数wd为空',
+      playNoFlag: '参数flag为空',
+      playNoPlay: '参数play为空',
+      proxyNoUrl: '参数url为空',
+      playerNoUrl: '参数url为空',
     },
     dialog: {
       player: {

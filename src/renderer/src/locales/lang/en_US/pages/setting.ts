@@ -336,7 +336,18 @@ export default {
       upload: 'Upload'
     },
     message: {
-      openDevTools: 'Currently logs can only be viewed via Developer Tools -> Console'
+      openDevTools: 'Currently logs can only be viewed via Developer Tools -> Console',
+      htmlNoUrl: 'The parameter url is empty',
+      ruleNoHtml: 'You must get the source code first',
+      ruleNoRule: 'The parameter rule is empty',
+      initNoData: 'The editor content is empty',
+      listNoT: 'The parameter t is empty',
+      detailNoIds: 'The parameter ids is empty',
+      searchNoWd: 'The parameter wd is empty',
+      playNoFlag: 'The parameter flag is empty',
+      playNoPlay: 'The parameter play is empty',
+      proxyNoUrl: 'The parameter url is empty',
+      playerNoUrl: 'The parameter url is empty',
     },
     dialog: {
       player: {
