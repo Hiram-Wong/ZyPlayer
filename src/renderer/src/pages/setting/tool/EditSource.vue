@@ -11,14 +11,16 @@
             <span>{{ $t('pages.setting.editSource.template') }}</span>
           </div>
           <div class="item item-pad-select">
-            <t-select v-model="tmp.file" @change="fileEvent()" width="120">
+            <file-icon />
+            <t-select v-model="tmp.file" @change="fileEvent()">
               <t-option key="import" :label="$t('pages.setting.editSource.import')" value="import" @click="importFileEvent" />
               <t-option key="export" :label="$t('pages.setting.editSource.export')" value="export" @click="exportFileEvent" />
               <t-option key="cache" :label="$t('pages.setting.editSource.cache')" value="cache" @click="cacheEvent" />
             </t-select>
           </div>
           <div class="item item-pad-select">
-            <t-select v-model="tmp.run" size="small" @change="fileEvent()">
+            <bug-icon />
+            <t-select v-model="tmp.run" @change="fileEvent()">
               <t-option key="bug" :label="$t('pages.setting.editSource.bug')" value="bug" @click="debugEvent" />
               <t-option key="delete" :label="$t('pages.setting.editSource.delete')" value="expdeleteodeletert" @click="deleteEvent" />
               <t-option key="file" :label="$t('pages.setting.editSource.file')" value="file" @click="serverEvent" />
@@ -251,7 +253,7 @@ import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { BugIcon, DeleteIcon, ExtensionIcon, HelpRectangleIcon, InternetIcon, GestureClickIcon, TransformIcon } from 'tdesign-icons-vue-next';
+import { BugIcon, ExtensionIcon, HelpRectangleIcon, FileIcon, GestureClickIcon, TransformIcon } from 'tdesign-icons-vue-next';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
@@ -1025,7 +1027,7 @@ const proxyEvent = async () => {
         align-items: center;
 
         .item-pad-select {
-          padding: 0 !important;
+          padding: 0 4px !important;
         }
 
         .item {
@@ -1041,16 +1043,15 @@ const proxyEvent = async () => {
           :deep(.t-input) {
             padding: 0;
             border: none;
-            width: 54px;
+            width: 46px;
             height: var(--td-comp-size-s);
             font: var(--td-font-body-medium);
-            padding: 0 4px !important;
+            background-color: transparent !important;
             .t-input__suffix:not(:empty) {
               margin-left: var(--td-comp-margin-xxs);
             }
             &:hover:not(.t-input--focused) {
               border-color: transparent;
-              background-color: transparent !important;
               height: 24px;
             }
           }
