@@ -582,6 +582,7 @@ const initEditor = () => {
         return {
           suggestions: createDependencyProposals(monacoRange, monaco).map(proposal => ({
             label: proposal.label,
+            detail: proposal.detail,
             kind: proposal.kind || monaco.languages.CompletionItemKind.Function, // 确保指定了一个有效的kind
             insertText: proposal.insertText,
             insertTextRules: proposal.insertTextRules || monaco.languages.CompletionItemInsertTextRule.None,
