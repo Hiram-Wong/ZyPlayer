@@ -96,7 +96,7 @@
 <script setup lang="ts">
 import jsonpath from 'jsonpath';
 import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8.js';
+import Utf8 from 'crypto-js/enc-utf8';
 import {
   HeartIcon,
   HeartFilledIcon,
@@ -236,7 +236,7 @@ const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string
   try {
     const playRes = await fetchHipyPlayUrl(site, flag, url);
     playUrl = playRes.url;
-    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
     extra = playRes.parse_extra||extra;
     console.log(`[detail][hipy][return]${playUrl}`);
   } catch (err) {
@@ -260,7 +260,7 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
     };
 
     playUrl = playRes.url;
-    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
+    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
     extra = playRes.parse_extra||extra;
     console.log(`[detail][t3][return]${playUrl}`);
   } catch (err) {
@@ -344,9 +344,9 @@ const gotoPlay = async (item) => {
   const { snifferMode } = set.value;
 
   let playerUrl = url;
-  let script:string = '';
-  let extra:string = '';
-  let playData: object = {playUrl:url,script:'',extra:''};
+  let script: string = '';
+  let extra: string = '';
+  let playData: object = { playUrl: url, script: '', extra: ''};
 
   if (playUrl) {
     playerUrl = await fetchJsonPlayUrlHelper(playUrl, url);
@@ -410,11 +410,9 @@ const gotoPlay = async (item) => {
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
     let snifferPlayUrl:string = url;
-    if(snifferMode.type === 'custom'){
-      let snifferTool = new URL(snifferMode.url);
-      let snifferApi = snifferTool.origin + snifferTool.pathname;
-      snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
-    }
+    let snifferTool = new URL(snifferMode.url);
+    let snifferApi = snifferTool.origin + snifferTool.pathname;
+    snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
     playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     if (playerUrl) callSysPlayer(playerUrl);
   } catch (err) {

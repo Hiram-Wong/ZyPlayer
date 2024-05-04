@@ -316,7 +316,7 @@ import 'v3-infinite-loading/lib/style.css';
 import 'xgplayer/es/plugins/danmu/index.css';
 
 import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8.js';
+import Utf8 from 'crypto-js/enc-utf8';
 
 import DPlayer from 'dplayer';
 import flvjs from 'flv.js';
@@ -878,8 +878,8 @@ const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string
   try {
     const playRes = await fetchHipyPlayUrl(site, flag, url);
     playUrl = playRes.url;
-    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
-    extra = playRes.parse_extra||extra;
+    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
+    extra = playRes.parse_extra || extra;
     console.log(`[detail][hipy][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][hipy][error]${err}`);
@@ -902,8 +902,8 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
     };
 
     playUrl = playRes.url;
-    script = playRes.js?Base64.stringify(Utf8.parse(playRes.js)):'';
-    extra = playRes.parse_extra||extra;
+    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
+    extra = playRes.parse_extra || extra;
     console.log(`[detail][t3][return]${playUrl}`);
   } catch (err) {
     console.log(`[detail][t3][error]${err}`);
@@ -1017,9 +1017,9 @@ const initFilmPlayer = async (isFirst) => {
   tmp.url = url;
   tmp.sourceUrl = url;
   let playerUrl = url;
-  let script:string = '';
-  let extra:string = '';
-  let playData: object = {playUrl:url,script:'',extra:''};
+  let script: string = '';
+  let extra: string = '';
+  let playData: object = { playUrl: url, script: '',extra: ''};
 
   if (site.playUrl) {
     playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
@@ -1084,12 +1084,10 @@ const initFilmPlayer = async (isFirst) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    let snifferPlayUrl:string = url;
-    if(snifferMode.type === 'custom'){
-      let snifferTool = new URL(snifferMode.url);
-      let snifferApi = snifferTool.origin + snifferTool.pathname;
-      snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
-    }
+    let snifferPlayUrl: string = url;
+    let snifferTool = new URL(snifferMode.url);
+    let snifferApi = snifferTool.origin + snifferTool.pathname;
+    snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
     playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     createPlayer(playerUrl);
   } catch (err) {

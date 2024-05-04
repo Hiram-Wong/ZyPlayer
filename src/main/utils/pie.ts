@@ -45,14 +45,14 @@ const isVideoUrl = (reqUrl) => {
   return reqUrl.match(urlRegex) && !isExcludedUrl(reqUrl);
 }
 
-
-const puppeteerInElectron = async (url: string, ua: string | null = null): Promise<PieResponse> => {
+const puppeteerInElectron = async (url: string, script: string = '', ua: string | null = null): Promise<PieResponse> => {
   logger.info(`[sniffer] sniffer url: ${url}`);
+  logger.info(`[sniffer] sniffer script: ${script}`);
   logger.info(`[sniffer] sniffer ua: ${ua}`);
 
   try {
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
-    snifferWindow = new BrowserWindow({ show: false }); // 创建无界面窗口
+    snifferWindow = new BrowserWindow({ show: true }); // 创建无界面窗口
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
     const page = await pie.getPage(browser, snifferWindow); // 获取页面
 
@@ -60,7 +60,7 @@ const puppeteerInElectron = async (url: string, ua: string | null = null): Promi
 
     await page.setRequestInterception(true); // 开启请求拦截
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
       page.on('request', async(req) => {
         const reqUrl = req.url(); // 请求url
 
@@ -73,15 +73,19 @@ const puppeteerInElectron = async (url: string, ua: string | null = null): Promi
 
           await page.close();
           await browser.disconnect();
-          req.abort().catch((e) => console.error(e));
+          req.abort().catch((e) => logger.error(e));
           resolve(handleResponse(200, 'sucess', { url: reqUrl, header: headers }));
         }
 
         if (req.isInterceptResolutionHandled()) return; // 已处理过的请求不再处理
-        if (req.resourceType() === 'image') {
-          req.abort().catch((err) => console.error(err));
+        if (req.method().toLowerCase() === 'head') {
+          req.abort().catch((err) => logger.error(err));
+        }
+        const resourceTypesToAbort = ['image', 'stylesheet', 'font'];
+        if (resourceTypesToAbort.includes(req.resourceType())) {
+          req.abort().catch((err) => logger.error(err));
         } else {
-          req.continue().catch((err) => console.error(err));
+          req.continue().catch((err) => logger.error(err));
         }
       });
 
@@ -95,10 +99,35 @@ const puppeteerInElectron = async (url: string, ua: string | null = null): Promi
         }, 15000);
       }
 
-      page.goto(url).catch(e => reject(e));
+      await page.goto(url, { waitUntil: 'domcontentloaded' }).catch(err => reject(err));
+      if (script) {
+        try {
+          logger.info(`[pie]start run script`)
+          const js_code = `
+            (function() {
+              var scriptTimer;
+              var scriptCounter = 0;
+              scriptTimer = setInterval(function() {
+                if (location.href !== 'about:blank') {
+                  scriptCounter += 1;
+                  console.log('---第' + scriptCounter + '次执行script[' + location.href + ']---');
+                  ${script}
+                  clearInterval(scriptTimer);
+                  scriptCounter = 0;
+                  console.log('---执行script成功---');
+                }
+              }, 200);
+            })();
+          `;
+          await page.evaluateOnNewDocument(script=js_code);
+          await page.evaluate(js_code);
+        } catch (err) {
+          logger.info(`[pie][error]run script: ${err}`);
+        }
+      }
     });
-  } catch (e) {
-    return handleResponse(500, 'fail', e as Error);
+  } catch (err) {
+    return handleResponse(500, 'fail', err as Error);
   }
 };
 

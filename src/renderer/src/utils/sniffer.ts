@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { nanoid } from 'nanoid';
+import Base64 from 'crypto-js/enc-base64';
+import Utf8 from 'crypto-js/enc-utf8';
 
 const { getCurrentWindow } = require('@electron/remote');
 const win = getCurrentWindow();
@@ -15,12 +17,17 @@ const isExcludedUrl = (reqUrl) => {
   );
 }
 
-const snifferPie = async (url: string): Promise<string> => {
+const getQueryParam = (url: string, paramName: string) => {
+  const searchParams = new URLSearchParams(new URL(url).search);
+  return searchParams.get(paramName);
+}
+
+const snifferPie = async (url: string, script: string): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
   let data: string = '';
 
   try {
-    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url);
+    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url, script);
 
     if (res.code === 200) {
       data = res.data.url;
@@ -39,13 +46,13 @@ const snifferPie = async (url: string): Promise<string> => {
 const createIframe = (iframeId: string, url: string): Promise<{ iframeRef: HTMLIFrameElement, contentWindow: Window | null }> => {
   return new Promise((resolve) => {
     const iframeRef = document.createElement("iframe");
-    iframeRef.style.height = '0';
-    iframeRef.style.width = '0';
-    iframeRef.style.position = 'fixed';
-    iframeRef.style.top = '-10px';
-    iframeRef.style.left = '-10px';
+    // iframeRef.style.height = '0';
+    // iframeRef.style.width = '0';
+    // iframeRef.style.position = 'fixed';
+    // iframeRef.style.top = '-10px';
+    // iframeRef.style.left = '-10px';
     iframeRef.id = iframeId;
-    iframeRef.setAttribute("frameborder", "0");
+    // iframeRef.setAttribute("frameborder", "0");
     iframeRef.src = url;
 
     iframeRef.onload = () => {
@@ -60,7 +67,7 @@ const removeIframe = (iframeId: string): void => {
   const iframeRef = document.getElementById(iframeId);
   if (iframeRef && iframeRef.parentNode) {
     iframeRef.parentNode.removeChild(iframeRef);
-    
+
     // 清理可能存在的事件监听器等
     iframeRef.onload = null;
     iframeRef.onerror = null;
@@ -68,10 +75,29 @@ const removeIframe = (iframeId: string): void => {
   }
 };
 
-const snifferIframe = async (url: string, totalTime: number = 15000, speeder: number = 250): Promise<string> => {
+const snifferIframe = async (url: string, script: string, totalTime: number = 15000, speeder: number = 250): Promise<string> => {
   win.webContents.setAudioMuted(true); // 静音
   const iframeId = nanoid();
   const iframeWindow = await createIframe(iframeId, url);
+  // if (script) {
+  //   const js_code = `
+  //     (function() {
+  //       var scriptTimer;
+  //       var scriptCounter = 0;
+  //       scriptTimer = setInterval(function() {
+  //         if (location.href !== 'about:blank') {
+  //           scriptCounter += 1;
+  //           console.log('---第' + scriptCounter + '次执行script[' + location.href + ']---');
+  //           ${script}
+  //           clearInterval(scriptTimer);
+  //           scriptCounter = 0;
+  //           console.log('---执行script成功---');
+  //         }
+  //       }, 2000);
+  //     })();
+  //   `;
+  //   iframeWindow.contentWindow!.eval(js_code);
+  // }
 
   const totalCounter = totalTime / speeder; // 计算总次数
 
@@ -80,6 +106,7 @@ const snifferIframe = async (url: string, totalTime: number = 15000, speeder: nu
   let data = '';
 
   const checkResourceName = (resourceName: string) => {
+    // console.log('https://v3-cha.toutiaovod.com/1583f35430641ba3ca5b9c9411e45d57/6636a17c/video/tos/cn/tos-cn-v-0004/owPbPen5Q8AqRdBIIeDDKdAFArL9bRGBmvXRgm/?a=13&ch=0&cr=0&dr=0&net=5&cd=0%7C0%7C0%7C0&br=1014&bt=1014&cs=0&ds=3&ft=WG6aM0-ERR0sLOC3NNn2Nc.xBiGNbLpAP5sU_4jJPUwJNv7TGW&mime_type=video_mp4&qs=13&rc=M3M5eGQ6ZmhlcjMzNDczM0BpM3M5eGQ6ZmhlcjMzNDczM0BlYXJtcjRfaWRgLS1kLTBzYSNlYXJtcjRfaWRgLS1kLTBzcw%3D%3D&btag=80000200078030&dy_q=1714844945&l=202405050149052CDB97F0CB25211326A4'.match(urlRegex) && !isExcludedUrl('https://v3-cha.toutiaovod.com/1583f35430641ba3ca5b9c9411e45d57/6636a17c/video/tos/cn/tos-cn-v-0004/owPbPen5Q8AqRdBIIeDDKdAFArL9bRGBmvXRgm/?a=13&ch=0&cr=0&dr=0&net=5&cd=0%7C0%7C0%7C0&br=1014&bt=1014&cs=0&ds=3&ft=WG6aM0-ERR0sLOC3NNn2Nc.xBiGNbLpAP5sU_4jJPUwJNv7TGW&mime_type=video_mp4&qs=13&rc=M3M5eGQ6ZmhlcjMzNDczM0BpM3M5eGQ6ZmhlcjMzNDczM0BlYXJtcjRfaWRgLS1kLTBzYSNlYXJtcjRfaWRgLS1kLTBzcw%3D%3D&btag=80000200078030&dy_q=1714844945&l=202405050149052CDB97F0CB25211326A4'))
     return resourceName.match(urlRegex) && !isExcludedUrl(resourceName);
     // const formatIndex = videoFormats.findIndex((format) => resourceName.toLowerCase().includes(format));
     // return formatIndex > -1;
@@ -130,7 +157,7 @@ const snifferIframe = async (url: string, totalTime: number = 15000, speeder: nu
 
 const snifferCustom = async (url: string): Promise<string> => {
   let data: string = '';
-  try { 
+  try {
     const res = await axios.get(url);
     if (res.data.code === 200) {
       data = res.data.url;
@@ -149,10 +176,13 @@ const snifferCustom = async (url: string): Promise<string> => {
 // 嗅探
 const sniffer = async (type: string, url: string): Promise<string> => {
   let data: string = '';
+  let script = getQueryParam(url, 'script');
+  if (script) script = Base64.parse(script).toString(Utf8);
+  const realUrl = getQueryParam(url, 'url');
   if (type === 'iframe') {
-    data = await snifferIframe(url);
+    data = await snifferIframe(realUrl!, script!);
   } else if (type === 'pie') {
-    data = await snifferPie(url);
+    data = await snifferPie(realUrl!, script!);
   } else if (type === 'custom') {
     data = await snifferCustom(url);
   }

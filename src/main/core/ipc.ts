@@ -130,9 +130,9 @@ const ipcListen = () => {
     }
   });
 
-  ipcMain.handle('sniffer-media', async (_, url) => {
+  ipcMain.handle('sniffer-media', async (_, url, script) => {
     const ua = setting.find({ key: "ua" }).value;
-    const res = await puppeteerInElectron(url, ua);
+    const res = await puppeteerInElectron(url, script, ua);
     return res;
   });
 
