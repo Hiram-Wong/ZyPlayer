@@ -62,6 +62,197 @@ const Snippet = [
 })`,
   },
   {
+    label: '$rule',
+    insertText: `
+var rule = {
+  title:'',
+  host:'',
+  url:'',
+  searchUrl:'',
+  searchable:2,
+  quickSearch:0,
+  filterable:1,
+  filter:'',
+  filter_url:'',
+  headers:{
+      'User-Agent':'MOBILE_UA',
+  },
+  timeout:5000,
+  class_parse:'#side-menu li;a&&Text;a&&href;/(.*?)\\.html',
+  cate_exclude:'',
+  play_parse:true,
+  lazy:\\$js.toString(()=>{
+    input = {parse:0,url:input,js:''};
+  }),
+  double:true,
+  推荐:'列表1;列表2;标题;图片;描述;链接;详情',
+  一级:'列表;标题;图片;描述;链接;详情',
+  二级:{
+    title:'vod_name;vod_type',
+    img:'图片链接',
+    desc:'主要信息;年代;地区;演员;导演',
+    content:'简介',
+    tabs:'',
+    lists:'',
+    tab_text:'body&&Text',
+    list_text:'body&&Text',
+    list_url:'a&&href'
+  },
+  搜索:'列表;标题;图片;描述;链接;详情',
+}
+    `.trim(),
+    detail: '常用简单列表定位规则写法',
+    documentation: `var rule = {};`,
+  },
+  {
+    label: '$ruleJs',
+    insertText: `
+var rule = {
+  title:'',
+  host:'',
+  url:'',
+  searchUrl:'',
+  searchable:2,
+  quickSearch:0,
+  filterable:1,
+  filter:'',
+  filter_url:'',
+  headers:{
+      'User-Agent':'MOBILE_UA',
+  },
+  timeout:5000,
+  class_parse:'#side-menu li;a&&Text;a&&href;/(.*?)\\.html',
+  cate_exclude:'',
+  play_parse:true,
+  double:true,
+  推荐:\\$js.toString(()=>{
+    let html=request(input);
+    let data=pdfa(html,'');
+    VODS = [];
+  }),
+  一级:\\$js.toString(()=>{
+    let html=request(input);
+    let data=pdfa(html,'');
+    VODS = [];
+  }),
+  二级:\\$js.toString(()=>{
+    let html=request(input);
+    let vod_name=pdfh(html,'.title&&Text');
+    VOD = {vod_name:vod_name};
+  }),
+  搜索:\\$js.toString(()=>{
+    let html=request(input);
+    let data=pdfa(html,'');
+    VODS = [];
+  }),
+  lazy:\\$js.toString(()=>{
+    input = {parse:0,url:input,js:''};
+  }),
+}
+    `.trim(),
+    detail: '常用简单纯JS规则写法',
+    documentation: `var rule = {};`,
+  },
+  {
+    label: '$ruleInherit',
+    insertText: `
+var rule = {
+  title:'cokemv',
+  模板:'mxpro',
+  host:'https://cokemv.me',
+  class_parse:\`.navbar-items li:gt(1):lt(7);a&&Text;a&&href;/(\\\\d+).html\`,
+}
+    `.trim(),
+    detail: '简单继承写法',
+    documentation: `var rule = {};`,
+  },
+  {
+    label: '$ruleTemplate',
+    insertText: `
+var rule = {
+    title:'规则标题',
+    编码:'utf-8',
+    搜索编码:'utf-8',
+    host:'网页的域名根',
+    hostJs:'print(HOST);let html=request(HOST,{headers:{"User-Agent":PC_UA}});let src = jsp.pdfh(html,"ul&&li&&a&&href");print(src);HOST=src.replace("/index.php","")',
+    homeUrl:'/latest/',
+    url:'/fyclass/fypage.html[/fyclass/]',
+    detailUrl:'https://yanetflix.com/voddetail/fyid.html',
+    searchUrl:'',
+    searchable:2,
+    quickSearch:0,
+    filterable:1,
+    filter:{},
+    filter_def:{
+        1:{
+        年份:'2024',
+        },
+    },
+    filter_url:'style={{fl.style}}&zone={{fl.zone}}&year={{fl.year}}&fee={{fl.fee}}&order={{fl.order}}',
+    headers:{
+        'User-Agent':'MOBILE_UA',
+        "Cookie": "searchneed=ok"
+    },
+    timeout:5000,
+    class_name:'电影&电视剧&动漫&综艺',
+    class_url:'1&2&3&4',
+    class_parse:'#side-menu:lt(1) li;a&&Text;a&&href;com/(.*?)/',
+    cate_exclude:'',
+    tab_exclude:'',
+    tab_remove:['tkm3u8'],
+    tab_order:['lzm3u8','wjm3u8','1080zyk','zuidam3u8','snm3u8'],
+    tab_rename:{'lzm3u8':'量子','1080zyk':'1080看','zuidam3u8':'最大资源','kuaikan':'快看',
+    'bfzym3u8':'暴风','ffm3u8':'非凡','snm3u8':'索尼','tpm3u8':'淘片','tkm3u8':'天空',},
+    play_parse:true,
+    play_json:[{
+        re:'*',
+        json:{
+            jx:1,
+            parse:1,
+        },
+    }],
+    pagecount:{"1":1,"2":1,"3":1,"4":1,"5":1,"7":1,"时间表":1},
+    lazy:'',
+    limit:6,
+    double:true,
+    图片来源:'@Referer=http://www.jianpianapp.com@User-Agent=jianpian-version350',
+    图片替换:'https://www.keke6.app/=>https://vres.a357899.cn/',
+    预处理:'rule_fetch_params.headers.Cookie = "xxxx";',
+    推荐:'列表;标题;图片;描述;链接;详情',
+    一级:'列表;标题;图片;描述;链接;详情',
+    二级访问前:'log(MY_URL);let jump=request(MY_URL).match(/href="(.*?)"/)[1];log(jump);MY_URL=urljoin2(MY_URL,jump)',
+    二级:{
+      title:'vod_name;vod_type',
+      img:'图片链接',
+      desc:'主要信息;年代;地区;演员;导演',
+      content:'简介',
+      tabs:'',
+      lists:'',
+      tab_text:'body&&Text',
+      list_text:'body&&Text',
+      list_url:'a&&href'
+    },
+    搜索:'列表;标题;图片;描述;链接;详情',
+    proxy_rule:\`js:
+    log(input);
+    input = [200,'text;plain','hello drpy']
+    \`,
+    sniffer:1,
+    isVideo:"http((?!http).){26,}\\\\.(m3u8|mp4|flv|avi|mkv|wmv|mpg|mpeg|mov|ts|3gp|rm|rmvb|asf|m4a|mp3|wma)",
+    isVideo:\`js:
+    log(input);
+    if(/m3u8/.test(input)){
+    input = true
+    }else{
+    input = false
+    }
+    \`,
+}
+    `.trim(),
+    detail: '快捷规则带参说明',
+    documentation: `var rule = {};`,
+  },
+  {
     label: 'list.map',
     insertText: `list.map((item,index)=>{
   $1
@@ -340,7 +531,6 @@ const Keyword = [
     detail: '同海阔，跟setResult的区别在于数据格式为{list:[]}',
     documentation: 'setHomeResult(d)',
   },
-
   {
     label: 'Referer',
     insertText: 'Referer',
@@ -351,6 +541,12 @@ const Keyword = [
     label: 'User-Agent',
     insertText: 'User-Agent',
     detail: 'headers里的属性-请求头',
+    documentation: 'headers里的属性之一',
+  },
+  {
+    label: 'Content-Type',
+    insertText: 'Content-Type',
+    detail: 'headers里的属性-请求数据格式',
     documentation: 'headers里的属性之一',
   },
   {
@@ -380,14 +576,14 @@ const Variable = [
   {
     label: 'rule_fetch_params',
     insertText: 'rule_fetch_params',
-    detail: 'rule_fetch_params',
-    documentation: 'rule_fetch_params',
+    detail: '源自带的请求参数',
+    documentation: '原始参数不允许修改',
   },
   {
     label: 'fetch_params',
     insertText: 'fetch_params',
-    detail: 'fetch_params',
-    documentation: 'fetch_params',
+    detail: '可变变量，每次请求时使用的请求参数',
+    documentation: 'fetch_params.headers={}',
   },
   {
     label: 'rule',
@@ -396,10 +592,88 @@ const Variable = [
     documentation: '可以对顶层源对象的属性进行操作',
   },
   {
+    label: 'HOST',
+    insertText: 'HOST',
+    detail: '源主页地址',
+    documentation: '只能用在hostJs',
+  },
+  {
+    label: 'TYPE',
+    insertText: 'TYPE',
+    detail: '标识js的执行环境，是主页。一级还是搜索等',
+    documentation: 'if(TYPE == \'home\')',
+  },
+  {
+    label: 'input',
+    insertText: 'input',
+    detail: '一级二级搜索lazy的传入url',
+    documentation: 'input',
+  },
+  {
+    label: 'VODS',
+    insertText: 'VODS',
+    detail: '一级、推荐、搜索的cms列表变量',
+    documentation: 'VODS=[{vod_id,vod_name,vod_pic,vod_remarks}]',
+  },
+  {
+    label: 'VOD',
+    insertText: 'VOD',
+    detail: '二级的cms详情变量',
+    documentation: 'VOD',
+  },
+  {
+    label: 'TABS',
+    insertText: 'TABS',
+    detail: '二级的tabs自定义js',
+    documentation: 'TABS',
+  },
+  {
+    label: 'LISTS',
+    insertText: 'LISTS',
+    detail: '二级的lists自定义js',
+    documentation: 'LISTS',
+  },
+  {
     label: 'MY_URL',
     insertText: 'MY_URL',
     detail: '获取当前网络请求地址',
-    documentation: '',
+    documentation: '一级和二级js里通用',
+  },
+  {
+    label: 'MY_CATE',
+    insertText: 'MY_CATE',
+    detail: '一级分类传入的tid',
+    documentation: '仅在一级的js里可用',
+  },
+  {
+    label: 'MY_FL',
+    insertText: 'MY_FL',
+    detail: '一级分类传入的筛选',
+    documentation: '仅在一级的js里可用',
+  },
+  {
+    label: 'MY_PAGE',
+    insertText: 'MY_PAGE',
+    detail: '一级分类或搜索传入的页数',
+    documentation: '仅在一级和搜索的js里可用',
+  },
+  {
+    label: 'MY_FLAG',
+    insertText: 'MY_FLAG',
+    detail: 'lazy里传入的flag',
+    documentation: '仅在lazy的js里可用，等同flag',
+  },
+  {
+    label: 'flag',
+    insertText: 'flag',
+    detail: 'lazy里传入的flag',
+    documentation: '仅在lazy的js里可用',
+  },
+  {
+    label: 'KEY',
+    insertText: 'KEY',
+    detail: '搜索传入的搜索关键词',
+    documentation: '仅在搜索的js里可用',
   },
   {
     label: 'UA',
