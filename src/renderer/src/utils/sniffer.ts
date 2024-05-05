@@ -22,12 +22,12 @@ const getQueryParam = (url: string, paramName: string) => {
   return searchParams.get(paramName);
 }
 
-const snifferPie = async (url: string, script: string): Promise<string> => {
+const snifferPie = async (url: string, script: string, customRegex: string): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
   let data: string = '';
 
   try {
-    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url, script);
+    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url, script, customRegex);
 
     if (res.code === 200) {
       data = res.data.url;
@@ -43,7 +43,7 @@ const snifferPie = async (url: string, script: string): Promise<string> => {
   }
 };
 
-const createIframe = (iframeId: string, url: string): Promise<{ iframeRef: HTMLIFrameElement, contentWindow: Window | null }> => {
+const createIframe = (iframeId: string, url: string, customRegex: string): Promise<{ iframeRef: HTMLIFrameElement, contentWindow: Window | null }> => {
   return new Promise((resolve) => {
     const iframeRef = document.createElement("iframe");
     // iframeRef.style.height = '0';
@@ -176,13 +176,16 @@ const snifferCustom = async (url: string): Promise<string> => {
 // 嗅探
 const sniffer = async (type: string, url: string): Promise<string> => {
   let data: string = '';
+
   let script = getQueryParam(url, 'script');
   if (script) script = Base64.parse(script).toString(Utf8);
+  const customRegex = getQueryParam(url, 'custom_regex');
+
   const realUrl = getQueryParam(url, 'url');
   if (type === 'iframe') {
-    data = await snifferIframe(realUrl!, script!);
+    data = await snifferIframe(realUrl!, script!, customRegex!);
   } else if (type === 'pie') {
-    data = await snifferPie(realUrl!, script!);
+    data = await snifferPie(realUrl!, script!, customRegex!);
   } else if (type === 'custom') {
     data = await snifferCustom(url);
   }

@@ -45,7 +45,7 @@ const isVideoUrl = (reqUrl) => {
   return reqUrl.match(urlRegex) && !isExcludedUrl(reqUrl);
 }
 
-const puppeteerInElectron = async (url: string, script: string = '', ua: string | null = null): Promise<PieResponse> => {
+const puppeteerInElectron = async (url: string, script: string = '', customRegex: string, ua: string | null = null): Promise<PieResponse> => {
   logger.info(`[sniffer] sniffer url: ${url}`);
   logger.info(`[sniffer] sniffer script: ${script}`);
   logger.info(`[sniffer] sniffer ua: ${ua}`);
@@ -63,14 +63,22 @@ const puppeteerInElectron = async (url: string, script: string = '', ua: string 
     return new Promise(async(resolve, reject) => {
       page.on('request', async(req) => {
         const reqUrl = req.url(); // 请求url
+        const reqHeaders = req.headers();
+        const { referer, 'user-agent': userAgent } = reqHeaders;
+        const headers = {};
+        if (referer) headers['referer'] = referer;
+        if (userAgent) headers['user-agent'] = userAgent;
+
+        if (customRegex && reqUrl.match(new RegExp(customRegex, 'gi'))) {
+          logger.info(`[pie]通过custom_regex嗅探到真实地址:${reqUrl}`);
+          await page.close();
+          await browser.disconnect();
+          req.abort().catch((e) => logger.error(e));
+          resolve(handleResponse(200, 'sucess', { url: reqUrl, header: headers }));
+        }
 
         if (isVideoUrl(reqUrl)) {
-          const reqHeaders = req.headers();
-          const { referer, 'user-agent': userAgent } = reqHeaders;
-          const headers = {};
-          if (referer) headers['referer'] = referer;
-          if (userAgent) headers['user-agent'] = userAgent;
-
+          logger.info(`[pie]后缀名匹配嗅探到真实地址:${reqUrl}`);
           await page.close();
           await browser.disconnect();
           req.abort().catch((e) => logger.error(e));
@@ -124,7 +132,7 @@ const puppeteerInElectron = async (url: string, script: string = '', ua: string 
         } catch (err) {
           logger.info(`[pie][error]run script: ${err}`);
         }
-      }
+      };
     });
   } catch (err) {
     return handleResponse(500, 'fail', err as Error);
