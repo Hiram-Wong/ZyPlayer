@@ -78,6 +78,7 @@ export default {
   },
   analyze: {
     name: 'name',
+    type: 'type',
     api: 'api'
   },
   drive: {

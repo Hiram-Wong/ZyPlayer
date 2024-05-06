@@ -78,6 +78,7 @@ export default {
   },
   analyze: {
     name: '名称',
+    type: '类型',
     api: '接口'
   },
   drive: {
