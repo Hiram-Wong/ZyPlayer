@@ -1085,8 +1085,12 @@ const initFilmPlayer = async (isFirst) => {
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
     let snifferPlayUrl: string = url;
-    let snifferTool = new URL(snifferMode.url);
-    let snifferApi = snifferTool.origin + snifferTool.pathname;
+    let snifferApi: string = '';
+    // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
+    if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
+      let snifferTool = new URL(snifferMode.url);
+      snifferApi = snifferTool.origin + snifferTool.pathname;
+    }
     snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
     playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     createPlayer(playerUrl);
