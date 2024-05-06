@@ -43,16 +43,16 @@ const snifferPie = async (url: string, script: string, customRegex: string): Pro
   }
 };
 
-const createIframe = (iframeId: string, url: string, customRegex: string): Promise<{ iframeRef: HTMLIFrameElement, contentWindow: Window | null }> => {
+const createIframe = (iframeId: string, url: string): Promise<{ iframeRef: HTMLIFrameElement, contentWindow: Window | null }> => {
   return new Promise((resolve) => {
     const iframeRef = document.createElement("iframe");
-    // iframeRef.style.height = '0';
-    // iframeRef.style.width = '0';
-    // iframeRef.style.position = 'fixed';
-    // iframeRef.style.top = '-10px';
-    // iframeRef.style.left = '-10px';
+    iframeRef.style.height = '0';
+    iframeRef.style.width = '0';
+    iframeRef.style.position = 'fixed';
+    iframeRef.style.top = '-10px';
+    iframeRef.style.left = '-10px';
     iframeRef.id = iframeId;
-    // iframeRef.setAttribute("frameborder", "0");
+    iframeRef.setAttribute("frameborder", "0");
     iframeRef.src = url;
 
     iframeRef.onload = () => {
@@ -75,7 +75,7 @@ const removeIframe = (iframeId: string): void => {
   }
 };
 
-const snifferIframe = async (url: string, script: string, totalTime: number = 15000, speeder: number = 250): Promise<string> => {
+const snifferIframe = async (url: string, script: string, customRegex: string, totalTime: number = 15000, speeder: number = 250): Promise<string> => {
   win.webContents.setAudioMuted(true); // 静音
   const iframeId = nanoid();
   const iframeWindow = await createIframe(iframeId, url);
