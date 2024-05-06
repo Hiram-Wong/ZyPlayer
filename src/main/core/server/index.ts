@@ -1,7 +1,7 @@
 import { app } from "electron";
 import fastify from 'fastify';
 import fastifyLogger from "fastify-logger";
-import fastifyMultipart from "fastify-multipart";
+import fastifyMultipart from "@fastify/multipart";
 
 import { JsonDB, Config } from 'node-json-db';
 import { join } from "path";
