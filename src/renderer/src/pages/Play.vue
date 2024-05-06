@@ -875,17 +875,19 @@ const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string
   let playUrl: string = '';
   let script: string = '';
   let extra: string = '';
+  let parse: boolean = true;
   try {
     const playRes = await fetchHipyPlayUrl(site, flag, url);
     playUrl = playRes.url;
     script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
     extra = playRes.parse_extra || extra;
+    parse = !!playRes.parse;
     console.log(`[play][hipy][return]${playUrl}`);
   } catch (err) {
     console.log(`[play][hipy][error]${err}`);
   } finally {
     console.log(`[play][hipy][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra};
+    return {playUrl,script,extra,parse};
   };
 };
 
@@ -894,22 +896,24 @@ const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = 
   let playUrl: string = '';
   let script: string = '';
   let extra: string = '';
+  let parse: boolean = true;
   try {
     const playRes = await fetchT3PlayUrl(flag, id, flags);
     if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
       const proxyRes: any = await t3RuleProxy(playRes.url);
       await setT3Proxy(proxyRes);
-    };
+    }
 
     playUrl = playRes.url;
     script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
     extra = playRes.parse_extra || extra;
+    parse = !!playRes.parse;
     console.log(`[play][t3][return]${playUrl}`);
   } catch (err) {
     console.log(`[play][t3][error]${err}`);
   } finally {
     console.log(`[play][t3][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra};
+    return {playUrl,script,extra,parse};
   };
 };
 
@@ -1003,13 +1007,13 @@ const initFilmPlayer = async (isFirst) => {
       tmp.skipTime = skipConfig.value.skipTimeInStart;
     } else {
       tmp.skipTime = dataHistory.value["watchTime"] || 0;
-    };
+    }
   } else {
     tmp.skipTime = dataHistory.value.watchTime || 0;
     if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
       tmp.skipTime = skipConfig.value.skipTimeInStart;
-    };
-  };
+    }
+  }
 
   // 解析直链
   const { snifferMode } = set.value;
@@ -1022,11 +1026,11 @@ const initFilmPlayer = async (isFirst) => {
   let playerUrl = url;
   let script: string = '';
   let extra: string = '';
-  let playData: object = { playUrl: url, script: '',extra: ''};
-
-  if (site.playUrl) {
-    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
-  } else {
+  // 需要嗅探
+  let parse = true;
+  let playData: object = { playUrl: url, script: '',extra: '', parse: parse};
+  // 解析播放
+  const jxPlay = async (url)=>{
     if (url.startsWith('http')) {
       const { hostname } = new URL(url);
       // 默认解析对象
@@ -1058,9 +1062,19 @@ const initFilmPlayer = async (isFirst) => {
           snifferPlayUrl = `${snifferApi}?url=${snifferUrl}`;
           playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferPlayUrl);
         }
-        if (playerUrl) createPlayer(playerUrl);
-        return;
+        return playerUrl
       }
+    }
+    return ''
+  }
+
+  if (site.playUrl) {
+    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
+  } else {
+    playerUrl = await jxPlay(url);
+    if (playerUrl){
+      createPlayer(playerUrl);
+      return
     }
     switch (site.type) {
       case 2:
@@ -1073,6 +1087,7 @@ const initFilmPlayer = async (isFirst) => {
         playerUrl = playData.playUrl;
         script = playData.script;
         extra = playData.extra;
+        parse = playData.parse;
         break;
       case 7:
         // t3获取服务端播放链接
@@ -1081,6 +1096,7 @@ const initFilmPlayer = async (isFirst) => {
         playerUrl = playData.playUrl;
         script = playData.script;
         extra = playData.extra;
+        parse = playData.parse;
         break;
       case 8:
         // catvox获取服务端播放链接
@@ -1088,6 +1104,16 @@ const initFilmPlayer = async (isFirst) => {
         playerUrl = await fetchCatvodPlayUrlHelper(site, active.flimSource, url);
         break;
     }
+  }
+  // 直链直接播放
+  if(playerUrl && !parse){
+    createPlayer(playerUrl);
+    return;
+  }
+  let jxUrl = await jxPlay(playerUrl);
+  if (jxUrl){
+    createPlayer(jxUrl);
+    return
   }
 
   if (!playerUrl) playerUrl = url;
@@ -1100,24 +1126,23 @@ const initFilmPlayer = async (isFirst) => {
       return;
     }
   }
-
   // 兜底办法:嗅探
   console.log(`[play][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    let snifferPlayUrl: string = url;
+    let snifferPlayUrl: string = '';
     let snifferApi: string = '';
     // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
     if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
       let snifferTool = new URL(snifferMode.url);
       snifferApi = snifferTool.origin + snifferTool.pathname;
     }
-    snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
+    snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
     playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
-  };
+  }
 };
 
 // 初始化播放器

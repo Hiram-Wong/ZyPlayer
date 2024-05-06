@@ -409,15 +409,19 @@ const gotoPlay = async (item) => {
   console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    let snifferPlayUrl:string = url;
-    let snifferTool = new URL(snifferMode.url);
-    let snifferApi = snifferTool.origin + snifferTool.pathname;
-    snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
+    let snifferPlayUrl: string = '';
+    let snifferApi: string = '';
+    // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
+    if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
+      let snifferTool = new URL(snifferMode.url);
+      snifferApi = snifferTool.origin + snifferTool.pathname;
+    }
+    snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
     playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
-    if (playerUrl) callSysPlayer(playerUrl);
+    callSysPlayer(playerUrl);
   } catch (err) {
     console.error(err);
-  };
+  }
 };
 
 const callSysPlayer = (url: string): void => {
