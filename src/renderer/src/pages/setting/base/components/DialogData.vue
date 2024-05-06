@@ -379,6 +379,7 @@ const easyConfig = async() => {
             id: nanoid(),
             name: item.name,
             url: item.url,
+            type: item.type ? item.type : 0,
             isActive: true,
           }));
         data['tbl_analyze'] = analyze;
@@ -419,7 +420,7 @@ const importData = async() => {
   if (type === 'remote') {
     await importFromRemote(remoteImpoUrl);
   } else {
-    await importFromLocal(localImpoFile[0].raw);
+    await importFromLocal(localImpoFile[0]['raw']);
   };
 };
 

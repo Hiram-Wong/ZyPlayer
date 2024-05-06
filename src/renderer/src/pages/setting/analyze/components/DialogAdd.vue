@@ -10,6 +10,12 @@
         <t-form-item :label="$t('pages.setting.analyze.name')" name="name">
           <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
+        <t-form-item :label="$t('pages.setting.analyze.type')" name="type">
+          <t-radio-group v-model="formData.type">
+            <t-radio :value="0">web</t-radio>
+            <t-radio :value="1">json</t-radio>
+          </t-radio-group>
+        </t-form-item>
         <t-form-item :label="$t('pages.setting.analyze.api')" name="url">
           <t-input v-model="formData.url" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
@@ -41,6 +47,7 @@ const formVisible = ref(false);
 const formData = reactive({
   name: '',
   url: '',
+  type: 0,
   isActive: true,
 });
 
@@ -76,6 +83,7 @@ const onClickCloseBtn = () => {
 // 表单校验
 const rulesSingle = {
   name: [{ required: true, message: '请输入源站名', type: 'error' }],
+  type: [{ required: true, message: '请选择类型', type: 'error' }],
   url: [{ required: true, message: '请输入Api接口url', type: 'error' }],
 };
 </script>
