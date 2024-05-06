@@ -22,6 +22,26 @@ const getQueryParam = (url: string, paramName: string) => {
   return searchParams.get(paramName);
 }
 
+/***
+ * 链接中问号后面的query字符串转为object对象
+ * @param url 链接，可以直接是?开头的
+ * @param paramName object对象键值，如果不传就返回整个object
+ */
+const getQuery = (url: string,paramName: string) => {
+  try {
+    let arr = url.split("?")[1].split("#")[0].split("&");
+    const resObj = {};
+    arr.forEach(item => {
+      let [key, value = ''] = item.split("=");
+      resObj[key] = value;
+    })
+    return paramName?resObj[paramName]:resObj;
+  } catch (err) {
+    console.log(`[t3][getQuery][error]${err}`);
+    return {};
+  }
+}
+
 const snifferPie = async (url: string, script: string, customRegex: string): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
   let data: string = '';
@@ -177,11 +197,11 @@ const snifferCustom = async (url: string): Promise<string> => {
 const sniffer = async (type: string, url: string): Promise<string> => {
   let data: string = '';
 
-  let script = getQueryParam(url, 'script');
+  let script = getQuery(url, 'script');
   if (script) script = Base64.parse(script).toString(Utf8);
-  const customRegex = getQueryParam(url, 'custom_regex');
+  const customRegex = getQuery(url, 'custom_regex');
 
-  const realUrl = getQueryParam(url, 'url');
+  const realUrl = getQuery(url, 'url');
   if (type === 'iframe') {
     data = await snifferIframe(realUrl!, script!, customRegex!);
   } else if (type === 'pie') {
