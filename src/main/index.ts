@@ -264,13 +264,13 @@ app.whenReady().then(async() => {
 
   defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     let { requestHeaders, url, id } = details;
-    const requestUrl = new URL(url);
+    const { origin } = new URL(url);
 
-    if (!url.includes('//localhost')) {
+    if (!url.includes('//localhost') || !url.includes('//237.0.0.1')) {
       const headers = reqIdMethod[`${id}`];
 
       // 添加 Origin 头部
-      requestHeaders.Origin = requestUrl.origin;
+      if (origin) requestHeaders.Origin = origin;
       // 处理自定义 User-Agent 头部
       requestHeaders['User-Agent'] = requestHeaders['custom-ua'] || headers?.['User-Agent'] || uaState;
       delete requestHeaders['custom-ua'];
@@ -278,7 +278,7 @@ app.whenReady().then(async() => {
       requestHeaders['Cookie'] = requestHeaders['custom-cookie'] || headers?.['Cookie'];
       delete requestHeaders['custom-cookie'];
       // 处理自定义 Referer 头部
-      requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'] || requestUrl.origin;
+      if (requestHeaders['custom-referer'] || headers?.['Referer']) requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
     }
 
     callback({ requestHeaders });
@@ -311,9 +311,11 @@ app.whenReady().then(async() => {
     mainWindow!.webContents.send('screen', false);
   });
 
-  // mainWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
-  //   logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
-  // });
+  if (is.dev) {
+    mainWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
+      logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+    });
+  };
 
   // 检测更新
   autoUpdater(mainWindow!);
@@ -337,20 +339,20 @@ app.whenReady().then(async() => {
   defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const headersToRemove = ['X-Frame-Options', 'x-frame-options'];
     const cookieHeader = details.responseHeaders?.['Set-Cookie'] || details.responseHeaders?.['set-cookie'];
-  
+
     for (const header of headersToRemove) {
       if (details.responseHeaders?.[header]) {
         delete details.responseHeaders[header];
       }
     }
-  
+
     if (cookieHeader) {
       const updatedCookieHeader = cookieHeader.map((cookie) => `${cookie}; SameSite=None; Secure`);
       delete details.responseHeaders!['Set-Cookie'];
       details.responseHeaders!['custom-set-cookie'] = cookieHeader;
       details.responseHeaders!['set-cookie'] = updatedCookieHeader;
     }
-  
+
     callback({ cancel: false, responseHeaders: details.responseHeaders });
   });
 
@@ -416,9 +418,12 @@ ipcMain.on('openPlayWindow', (_, arg) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
   });
-  // playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
-  //   logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
-  // });
+
+  if (is.dev) {
+    playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
+      logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+    });
+  };
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     playWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/play`)
@@ -473,7 +478,7 @@ ipcMain.on('showMainWin', () => {
     mainWindow.show();
   }
 });
-  
+
 ipcMain.on('updateShortcut', (_, { shortcut }) => {
   logger.info(`[ipcMain] storage-shortcuts: ${shortcut}`);
   globalShortcut.unregisterAll();

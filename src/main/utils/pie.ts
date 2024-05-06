@@ -52,7 +52,7 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
 
   try {
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
-    snifferWindow = new BrowserWindow({ show: false }); // 创建无界面窗口
+    snifferWindow = new BrowserWindow({ show: true }); // 创建无界面窗口
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
     const page = await pie.getPage(browser, snifferWindow); // 获取页面
 
@@ -89,7 +89,7 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
         if (req.method().toLowerCase() === 'head') {
           req.abort().catch((err) => logger.error(err));
         }
-        const resourceTypesToAbort = ['image', 'stylesheet', 'font'];
+        const resourceTypesToAbort = ['font'];
         if (resourceTypesToAbort.includes(req.resourceType())) {
           req.abort().catch((err) => logger.error(err));
         } else {
@@ -108,7 +108,7 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
       }
 
       await page.goto(url, { waitUntil: 'domcontentloaded' }).catch(err => reject(err));
-      if (script) {
+      if (script.trim()) {
         try {
           logger.info(`[pie]start run script`)
           const js_code = `
