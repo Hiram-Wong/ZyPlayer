@@ -52,7 +52,7 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
 
   try {
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
-    snifferWindow = new BrowserWindow({ show: true }); // 创建无界面窗口
+    snifferWindow = new BrowserWindow({ show: false }); // 创建无界面窗口
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
     const page = await pie.getPage(browser, snifferWindow); // 获取页面
 

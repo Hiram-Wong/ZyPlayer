@@ -2,7 +2,8 @@ export default {
   type: 'film',
   setting: {
     playerMode: {
-      type: 'xgplayer',
+      // type: 'xgplayer',
+      type: 'dplayer',
       external: ''
     },
     snifferMode: {

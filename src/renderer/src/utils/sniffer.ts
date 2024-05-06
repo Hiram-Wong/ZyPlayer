@@ -29,12 +29,17 @@ const getQueryParam = (url: string, paramName: string) => {
  */
 const getQuery = (url: string,paramName: string) => {
   try {
-    let arr = url.split("?")[1].split("#")[0].split("&");
+    if(url.indexOf('?')>-1){
+      url = url.slice(url.indexOf('?')+1);
+    }
+    let arr = url.split("#")[0].split("&");
     const resObj = {};
     arr.forEach(item => {
-      let [key, value = ''] = item.split("=");
+      let arr1 = item.split("=");
+      let key = arr1[0];
+      let value = arr1.slice(1).join('=');
       resObj[key] = value;
-    })
+    });
     return paramName?resObj[paramName]:resObj;
   } catch (err) {
     console.log(`[t3][getQuery][error]${err}`);
@@ -196,12 +201,13 @@ const snifferCustom = async (url: string): Promise<string> => {
 // 嗅探
 const sniffer = async (type: string, url: string): Promise<string> => {
   let data: string = '';
-
-  let script = getQuery(url, 'script');
+  let query:object = getQuery(url,'');
+  console.log(`[detail][sniffer][query]`,query);
+  let script = query.script;
   if (script) script = Base64.parse(script).toString(Utf8);
-  const customRegex = getQuery(url, 'custom_regex');
+  const customRegex = query.custom_regex;
 
-  const realUrl = getQuery(url, 'url');
+  const realUrl = query.url;
   if (type === 'iframe') {
     data = await snifferIframe(realUrl!, script!, customRegex!);
   } else if (type === 'pie') {
