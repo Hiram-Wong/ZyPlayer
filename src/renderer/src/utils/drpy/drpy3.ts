@@ -1361,6 +1361,9 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
     if (!keys.includes('user-agent')) {
       headers['User-Agent'] = MOBILE_UA;
     }
+    if(!keys.includes('referer')){
+      headers['Referer'] = getHome(url);
+    }
     obj.headers = headers;
   }
   if (rule["encoding"] && rule["encoding"] !== 'utf-8' && !ocr_flag) {
@@ -1381,6 +1384,10 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
     obj.buffer = 2;
     delete obj.toBase64;
   }
+  if(obj.redirect===false){
+    obj.redirect = 0;
+  }
+  console.log(`[t3][request]headers:${JSON.stringify(obj.headers)}`);
   console.log(`[t3][request]url:${url}| method:${obj.method || 'GET'}| body:${obj.body || ''}`);
   const res = req(url, obj);
   const html = res["content"] || '';
