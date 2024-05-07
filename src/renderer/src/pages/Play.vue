@@ -344,6 +344,7 @@ import Hls from 'hls.js';
 import _ from 'lodash';
 import moment from 'moment';
 import {
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronRightSIcon,
