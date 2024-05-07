@@ -316,7 +316,7 @@ const easyConfig = async() => {
     } else {
       if (_.has(config, "sites")) {
         data["tbl_site"] = config.sites
-          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.includes('.js') && item.ext && item.ext.includes('.js')))
+          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.includes('.js') && item.ext && typeof item.ext === 'string' && item.ext.includes('.js')))
           .map((item) => ({
             id: nanoid(),
             name: item.name,
