@@ -1,6 +1,7 @@
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
 import jsonpath from 'jsonpath';
+import PQueue from 'p-queue';
 
 import { updateHistory, detailHistory, addHistory } from '@/api/history';
 import { detailStar, addStar, delStar, updateStar } from '@/api/star';
@@ -9,6 +10,8 @@ import { setT3Proxy } from '@/api/proxy';
 import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, t3RuleProxy, t3RuleInit, catvodRuleInit, fetchDetail, fetchSearch, fetchCatvodPlayUrl, fetchDoubanRecommend } from '@/utils/cms';
 import sniffer from '@/utils/sniffer';
 import { checkMediaType, dictDeepClone, getConfig } from '@/utils/tool';
+
+const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
 // 官解地址
 const VIP_LIST = [
@@ -171,18 +174,19 @@ const fetchAnalyzeData = async (): Promise<{ default: any; flag: any[]; active: 
 const playHelper = async (snifferMode, url: string, site, analyze, flimSource) => {
   console.log(`[film_common][playHelper][start]播放处理流程开始`);
   console.log(`[film_common][playHelper][url]${url}`);
-  console.log(analyze)
-  let data: { url: string; mediaType: string | null } = { url: '', mediaType: '' };
+
+  let data: { url: string; mediaType: string | null, isOfficial: boolean } = { url: '', mediaType: '', isOfficial: false };
 
   try {
     let playerUrl = url;
     let script: string = '';
     let extra: string = '';
+    let isOfficial: boolean = false;
     let parse = true;
     let playData: any = { playUrl: url, script: '',extra: '', parse: parse};
 
     // 解析播放
-    const jxPlay = async (url: string, analyze: any, snifferMode: any): Promise<string> => {
+    const jxPlay = async (url: string, analyze: any, snifferMode: any): Promise<any> => {
       let playerUrl = url;
       const urlObj = url.startsWith('http') ? new URL(url) : null;
       const hostname = urlObj?.hostname;
@@ -199,7 +203,6 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
       if (preSnifferUrl) {
         switch (analyze.type) {
           case 1: // JSON类型
-          console.log(111)
             playerUrl = await fetchJxJsonPlayUrlHelper(analyze.url, url);
             break;
           case 0: // Web类型
@@ -213,7 +216,10 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
         }
       }
 
-      return playerUrl;
+      return {
+        url: playerUrl,
+        isOfficial: isOfficial
+      };
     }
 
     if (site.playUrl) {
@@ -248,13 +254,17 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
           break;
       }
       if (!playerUrl) playerUrl = url; // 可能出现处理后是空链接
-      if (analyze?.url) playerUrl = await jxPlay(playerUrl, analyze, snifferMode);
+      if (analyze?.url) {
+        const resJX = await jxPlay(playerUrl, analyze, snifferMode);
+        playerUrl = resJX.url;
+        isOfficial = resJX.isOfficial;
+      }
     }
 
     if (playerUrl) {
       const mediaType = await checkMediaType(playerUrl);
       if (mediaType !== 'unknown' && mediaType !== 'error') {
-        data = { url: playerUrl, mediaType };
+        data = { url: playerUrl, mediaType, isOfficial };
         return;
       }
     }
@@ -270,6 +280,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
     const snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
     data.url = await sniffer(snifferMode.type, snifferPlayUrl);
     data.mediaType = 'm3u8';
+    data.isOfficial = false;
 
     console.log(`[film_common][playHelper][return]`, data);
   } catch (err) {
@@ -295,36 +306,62 @@ const reverseOrderHelper = (action: 'positive' | 'negative', data: Record<string
 };
 
 // DouBan Recommend
-const fetchDoubanRecommendHelper = async (site:any, info:any): Promise<any[]> => {
-  console.log('[detafilm_commonil][fetchDoubanRecommendHelper][start]获取豆瓣推荐流程开启');
+const fetchDoubanRecommendHelper = async (site: any, info: any): Promise<any[]> => {
+  console.log('[film_common][fetchDoubanRecommendHelper][start]获取豆瓣推荐流程开启');
   let data: any = [];
 
   try {
-    const { vod_name: name, vod_year: year, vod_douban_id: doubanId } = info;
-    const doubanRecommendName = await fetchDoubanRecommend(doubanId, name, year);
+    if (site.search !== 0) {
+      const { vod_name: name, vod_year: year, vod_douban_id: doubanId } = info;
+      const recommendNames = await fetchDoubanRecommend(doubanId, name, year);
 
-    // 并行查询搜索结果
-    const searchResults = await Promise.all(doubanRecommendName.map(async (title) => {
-      try {
-        const results = await fetchSearch(site, title);
-        return results?.[0];
-      } catch (error) {
-        console.error(`[film_common][fetchDoubanRecommendHelper][searchError]查询错误：${title}`, error);
-        return null; // 或根据需要处理错误
+      if (site.type === 7) await t3RuleInit(site);
+      else if(site.type ===8) await catvodRuleInit(site);
+
+      console.log(recommendNames)
+      // 并行查询搜索结果
+      const searchPromises = recommendNames.map(title =>
+        queue.add(async () => {
+          try {
+            const results = await fetchSearch(site, title);
+            console.log(results[0])
+            return results?.[0];
+          } catch (error) {
+            console.error(`[film_common][fetchDoubanRecommendHelper][searchError]搜索错误: ${title}`, error);
+            return false; // 处理错误，返回null表示无效结果
+          }
+        })
+      );
+
+      const searchResults = await Promise.all(searchPromises);
+
+      console.log(searchResults)
+
+      data = searchResults.filter(Boolean).slice(0, 10);
+
+      if (data && data.length > 0 && !('vod_pic' in data[0])) {
+        if ([0, 1].includes(site.type)) {
+          const ids = data.map((item) => item.vod_id);
+          data = await fetchDetail(site, ids.join(','));
+        } else {
+          const updatePromises = data.map(item =>
+            queue.add(async () => {
+              try {
+                const detail = await fetchDetail(site, item.vod_id);
+                return detail[0];
+              } catch (error) {
+                console.error(`[film_common][fetchDoubanRecommendHelper][detailError]获取详情错误: ${item.vod_id}`, error);
+                return null;
+              }
+            })
+          );
+          data = await Promise.all(updatePromises).then(results => results.filter(Boolean));
+        }
       }
-    }));
 
-    // 过滤掉无效结果，最多保留10个有效结果
-    const validResults = searchResults.filter(Boolean).slice(0, 10);
-
-    // 如果有结果但第一个结果缺少封面图片，则按vod_id获取详细信息
-    if (validResults.length > 0 && !('vod_pic' in validResults[0])) {
-      const vodIds = validResults.map(movie => movie['vod_id']).join(',');
-      const detailedData = await fetchDetail(site, vodIds);
-      return detailedData;
+      // 过滤掉无效结果，最多保留10个有效结果
+      data = data.filter(Boolean).slice(0, 10);
     }
-
-    data = validResults;
 
     console.log(`[film_common][fetchDoubanRecommendHelper][return]`, data);
   } catch (err) {
@@ -337,7 +374,7 @@ const fetchDoubanRecommendHelper = async (site:any, info:any): Promise<any[]> =>
 
 // Helper functions
 const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<{ playUrl: string; script: string; extra: string; parse: boolean }> => {
-  console.log('[detafilm_commonil][fetchHipyPlayUrlHelper][start]获取服务端播放链接开启');
+  console.log('[film_common][fetchHipyPlayUrlHelper][start]获取服务端播放链接开启');
   let data: { playUrl: string; script: string; extra: string; parse: boolean } = { playUrl: '', script: '', extra: '', parse: false };
 
   try {
@@ -459,7 +496,7 @@ const formatIndex = (item: string): { index: string, url: string} => {
   return { index, url };
 };
 
-// 替换style
+// 格式化style
 const formatContent = (item: string | undefined | null): string => {
   if (!item) return '';
   return item!.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
@@ -503,6 +540,15 @@ const formatSeason = (videoList: Record<string, any>): Record<string, any> => {
   };
 };
 
+// 格式化倒序集数
+const formatReverseOrder = (action: 'positive' | 'negative', current: number, total: number) => {
+  // 当前 0 总 37 正序 1 倒序 37
+  // 当前 1 总 37 正序 2 倒序 36
+  if (action === 'positive') return current + 1;
+  else if (action === 'negative') return total - current;
+  return 1;
+};
+
 export {
   VIP_LIST,
   fetchBingeData,
@@ -517,4 +563,5 @@ export {
   formatIndex,
   formatContent,
   formatSeason,
+  formatReverseOrder
 }
