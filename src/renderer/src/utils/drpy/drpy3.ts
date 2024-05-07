@@ -92,7 +92,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta6 202400504`;
+const VERSION = `${vercode} 3.9.50beta8 202400507`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -929,12 +929,17 @@ globalThis.urlencode = urlencode;
  */
 const getQuery = (url: string) => {
   try {
-    let arr = url.split("?")[1].split("#")[0].split("&");
+    if(url.indexOf('?')>-1){
+      url = url.slice(url.indexOf('?')+1);
+    }
+    let arr = url.split("#")[0].split("&");
     const resObj = {};
     arr.forEach(item => {
-      let [key, value = ''] = item.split("=");
+      let arr1 = item.split("=");
+      let key = arr1[0];
+      let value = arr1.slice(1).join('=');
       resObj[key] = value;
-    })
+    });
     return resObj;
   } catch (err) {
     console.log(`[t3][getQuery][error]${err}`);
@@ -1356,6 +1361,9 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
     if (!keys.includes('user-agent')) {
       headers['User-Agent'] = MOBILE_UA;
     }
+    if(!keys.includes('referer')){
+      headers['Referer'] = getHome(url);
+    }
     obj.headers = headers;
   }
   if (rule["encoding"] && rule["encoding"] !== 'utf-8' && !ocr_flag) {
@@ -1376,6 +1384,10 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
     obj.buffer = 2;
     delete obj.toBase64;
   }
+  if(obj.redirect===false){
+    obj.redirect = 0;
+  }
+  console.log(`[t3][request]headers:${JSON.stringify(obj.headers)}`);
   console.log(`[t3][request]url:${url}| method:${obj.method || 'GET'}| body:${obj.body || ''}`);
   const res = req(url, obj);
   const html = res["content"] || '';

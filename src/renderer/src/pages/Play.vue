@@ -817,7 +817,7 @@ const getHistoryData = async (): Promise<void> => {
       skipConfig.value = { skipTimeInStart, skipTimeInEnd };
     };
   } catch (err) {
-    console.error(`[detail][history][error]${err}`);
+    console.error(`[play][history][error]${err}`);
   };
 };
 
@@ -871,110 +871,117 @@ const destroyPlayer = () => {
 
 // Helper functions
 const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<object> => {
-  console.log('[detail][hipy][start]获取服务端播放链接开启');
+  console.log('[play][hipy][start]获取服务端播放链接开启');
   let playUrl: string = '';
   let script: string = '';
   let extra: string = '';
+  let parse: boolean = true;
   try {
     const playRes = await fetchHipyPlayUrl(site, flag, url);
     playUrl = playRes.url;
     script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
     extra = playRes.parse_extra || extra;
-    console.log(`[detail][hipy][return]${playUrl}`);
+    parse = !!playRes.parse;
+    console.log(`[play][hipy][return]${playUrl}`);
   } catch (err) {
-    console.log(`[detail][hipy][error]${err}`);
+    console.log(`[play][hipy][error]${err}`);
   } finally {
-    console.log(`[detail][hipy][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra};
+    console.log(`[play][hipy][end]获取服务端播放链接结束`);
+    return {playUrl,script,extra,parse};
   };
 };
 
 const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<object> => {
-  console.log('[detail][t3][start]获取服务端播放链接开启');
+  console.log('[play][t3][start]获取服务端播放链接开启');
   let playUrl: string = '';
   let script: string = '';
   let extra: string = '';
+  let parse: boolean = true;
   try {
     const playRes = await fetchT3PlayUrl(flag, id, flags);
     if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
       const proxyRes: any = await t3RuleProxy(playRes.url);
       await setT3Proxy(proxyRes);
-    };
+    }
 
     playUrl = playRes.url;
     script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
     extra = playRes.parse_extra || extra;
-    console.log(`[detail][t3][return]${playUrl}`);
+    parse = !!playRes.parse;
+    console.log(`[play][t3][return]${playUrl}`);
   } catch (err) {
-    console.log(`[detail][t3][error]${err}`);
+    console.log(`[play][t3][error]${err}`);
   } finally {
-    console.log(`[detail][t3][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra};
+    console.log(`[play][t3][end]获取服务端播放链接结束`);
+    return {playUrl,script,extra,parse};
   };
 };
 
 const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
-  console.log('[detail][catvod][start]获取服务端播放链接开启');
+  console.log('[play][catvod][start]获取服务端播放链接开启');
   let data: string = '';
   try {
     const res = await fetchCatvodPlayUrl(site, flag, id);
     data = res.url;
-    console.log(`[detail][catvod][return]${data}`);
+    console.log(`[play][catvod][return]${data}`);
   } catch (err) {
-    console.log(`[detail][catvod][error]${err}`);
+    console.log(`[play][catvod][error]${err}`);
   } finally {
-    console.log(`[detail][catvod][end]获取服务端播放链接结束`);
+    console.log(`[play][catvod][end]获取服务端播放链接结束`);
     return data;
   };
 };
 
 const fetchDrpyPlayUrlHelper = async (site: { [key: string]: any }, url: string): Promise<string> => {
-  console.log('[detail][drpy][start]免嗅流程开启');
+  console.log('[play][drpy][start]免嗅流程开启');
   let data: string = '';
   try {
     const res = await fetchDrpyPlayUrl(site, url);
     if (res.redirect) {
       data = res.url;
-      console.log(`[detail][drpy][return]${data}`);
+      console.log(`[play][drpy][return]${data}`);
     };
   } catch (err) {
-    console.log(`[detail][drpy][error]:${err}`);
+    console.log(`[play][drpy][error]:${err}`);
   } finally {
-    console.log(`[detail][drpy][end]免嗅流程结束`);
+    console.log(`[play][drpy][end]免嗅流程结束`);
     return data;
   };
 };
 
 const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<string> => {
-  console.log('[detail][json][start]json解析流程开启');
+  console.log('[play][json][start]json解析流程开启');
   let data: string = '';
   try {
-    const res = await getConfig(`${playUrl}${url}`);
+    let parseUrl = `${playUrl}${url}`;
+    console.log(`[play][json][http get]${parseUrl}`);
+    const res = await getConfig(parseUrl);
     // 存在 url data.url 两种结构
     if (jsonpath.value(res, '$.url')) {
       data = jsonpath.value(res, '$.url');
-      console.log(`[detail][json][return]${data}`);
+      console.log(`[play][json][return]${data}`);
     };
   } catch (err) {
-    console.log(`[detail][json][error]${err}`);
+    console.log(`[play][json][error]${err}`);
   } finally {
-    console.log(`[detail][json][end]json解析流程结束`);
+    console.log(`[play][json][end]json解析流程结束`);
     return data;
   }
 };
 
 const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> => {
-  console.log('[detail][jx][start]官解流程开启');
+  console.log('[play][jx][start]官解流程开启');
   MessagePlugin.info('官解流程开启,请稍等');
   let data: string = '';
   try {
+    console.log(`[play][jx][sniffer]type:${type},url:${url}`);
     const res = await sniffer(type, url);
     data = res;
-    console.log(`[detail][jx][return]${data}`);
+    console.log(`[play][jx][return]${data}`);
   } catch (err) {
-    console.log(`[detail][jx][error]${err}`);
+    console.log(`[play][jx][error]${err}`);
   } finally {
-    console.log(`[detail][jx][end]官解流程结束`);
+    console.log(`[play][jx][end]官解流程结束`);
     MessagePlugin.info('官解流程结束,如未加载播放器则嗅探失败,请换源');
     return data;
   };
@@ -1000,13 +1007,13 @@ const initFilmPlayer = async (isFirst) => {
       tmp.skipTime = skipConfig.value.skipTimeInStart;
     } else {
       tmp.skipTime = dataHistory.value["watchTime"] || 0;
-    };
+    }
   } else {
     tmp.skipTime = dataHistory.value.watchTime || 0;
     if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
       tmp.skipTime = skipConfig.value.skipTimeInStart;
-    };
-  };
+    }
+  }
 
   // 解析直链
   const { snifferMode } = set.value;
@@ -1019,13 +1026,19 @@ const initFilmPlayer = async (isFirst) => {
   let playerUrl = url;
   let script: string = '';
   let extra: string = '';
-  let playData: object = { playUrl: url, script: '',extra: ''};
-
-  if (site.playUrl) {
-    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
-  } else {
+  // 需要嗅探
+  let parse = true;
+  let playData: object = { playUrl: url, script: '',extra: '', parse: parse};
+  // 解析播放
+  const jxPlay = async (url)=>{
     if (url.startsWith('http')) {
       const { hostname } = new URL(url);
+      // 默认解析对象
+      let parse_obj = analyzeConfig.value.default;
+      // 解析地址
+      let parse_url = parse_obj.url;
+      // 解析类型:0 web 1 json
+      let parse_type = parse_obj.type;
       let snifferUrl = '';
       if (url.includes('uri=')) snifferUrl = url; // 判断有播放器的
       if (
@@ -1033,13 +1046,35 @@ const initFilmPlayer = async (isFirst) => {
         analyzeConfig.value.flag.some((item) => active.flimSource.includes(item))
       ) {
         // 官解iframe
-        snifferUrl = analyzeConfig.value.default.url + url;
+        snifferUrl = parse_url + url;
       }
       if (snifferUrl) {
-        playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${snifferUrl}` : snifferUrl);
-        if (playerUrl) createPlayer(playerUrl);
-        return;
+        if (parse_type == 1) {
+          playerUrl = await fetchJsonPlayUrlHelper(parse_url, url);
+        }else {
+          let snifferPlayUrl: string = url;
+          let snifferApi: string = '';
+          // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
+          if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
+            let snifferTool = new URL(snifferMode.url);
+            snifferApi = snifferTool.origin + snifferTool.pathname;
+          }
+          snifferPlayUrl = `${snifferApi}?url=${snifferUrl}`;
+          playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferPlayUrl);
+        }
+        return playerUrl
       }
+    }
+    return ''
+  }
+
+  if (site.playUrl) {
+    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
+  } else {
+    playerUrl = await jxPlay(url);
+    if (playerUrl){
+      createPlayer(playerUrl);
+      return
     }
     switch (site.type) {
       case 2:
@@ -1052,6 +1087,7 @@ const initFilmPlayer = async (isFirst) => {
         playerUrl = playData.playUrl;
         script = playData.script;
         extra = playData.extra;
+        parse = playData.parse;
         break;
       case 7:
         // t3获取服务端播放链接
@@ -1060,6 +1096,7 @@ const initFilmPlayer = async (isFirst) => {
         playerUrl = playData.playUrl;
         script = playData.script;
         extra = playData.extra;
+        parse = playData.parse;
         break;
       case 8:
         // catvox获取服务端播放链接
@@ -1068,35 +1105,44 @@ const initFilmPlayer = async (isFirst) => {
         break;
     }
   }
+  // 直链直接播放
+  if(playerUrl && !parse){
+    createPlayer(playerUrl);
+    return;
+  }
+  let jxUrl = await jxPlay(playerUrl);
+  if (jxUrl){
+    createPlayer(jxUrl);
+    return
+  }
 
   if (!playerUrl) playerUrl = url;
 
   if (playerUrl) {
     const mediaType = await checkMediaType(playerUrl);
-    console.log(`[detail][mediaType]${mediaType}`)
+    console.log(`[play][mediaType]${mediaType}`)
     if (mediaType !== 'unknown' && mediaType !== 'error') {
       createPlayer(playerUrl, mediaType!);
       return;
     }
   }
-
   // 兜底办法:嗅探
-  console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
+  console.log(`[play][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
   try {
     MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    let snifferPlayUrl: string = url;
+    let snifferPlayUrl: string = '';
     let snifferApi: string = '';
     // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
     if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
       let snifferTool = new URL(snifferMode.url);
       snifferApi = snifferTool.origin + snifferTool.pathname;
     }
-    snifferPlayUrl = `${snifferApi}?url=${url}&script=${script}${extra}`;
+    snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
     playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
     createPlayer(playerUrl);
   } catch (err) {
     console.error(err);
-  };
+  }
 };
 
 // 初始化播放器
