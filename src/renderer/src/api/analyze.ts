@@ -75,3 +75,11 @@ export function fetchAnalyzeDefault() {
     method: 'get',
   })
 }
+
+// analyze播放
+export function fetchAnalyzePlay() {
+  return request({
+    url: `/v1/analyze/play`,
+    method: 'get',
+  })
+}

@@ -94,6 +94,22 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       reply.code(500).send(err)
     }
   })
+  fastify.get(`/${API_VERSION}/analyze/play`, async (_, reply: FastifyReply) => {
+    try {
+      const tacitly_id = await setting.find({ key: "defaultAnalyze"}).value;
+      const tacitly = await analyze.find({ id: tacitly_id });
+      const flag = await setting.find({ key: "analyzeFlag"}).value;
+      const active = await analyze.filter({ isActive: true });
+      const res = {
+        default: tacitly,
+        flag: flag,
+        active: active
+      }
+      reply.code(200).send(res);
+    } catch (err) {
+      reply.code(500).send(err)
+    }
+  })
   fastify.get(`/${API_VERSION}/analyze/search`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
     try {
       const res = await analyze.search(req.query.kw);
