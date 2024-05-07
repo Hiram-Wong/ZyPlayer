@@ -41,10 +41,12 @@ const ipcListen = () => {
     if (platform.isLinux) shell.openPath('gnome-control-center network');
   });
 
-  ipcMain.on('call-player', (_, path, url) => {
-    const command = `${path} "${url}"`;
-    exec(command);
-    logger.info(`[ipcMain] call-player: command:${command}`);
+  ipcMain.on('call-player', (_, path: string, url: string) => {
+    if (url && path) {
+      const command = `${path} "${url}"`;
+      exec(command);
+      logger.info(`[ipcMain] call-player: command:${command}`);
+    };
   });
 
   ipcMain.on('reboot-app', () => {
