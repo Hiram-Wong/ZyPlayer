@@ -50,6 +50,10 @@ export default {
       remote: 'Remote',
       local: 'Local',
       manual: 'Manual'
+    },
+    analyze: {
+      web: 'Web',
+      json: 'Json'
     }
   },
   header: {

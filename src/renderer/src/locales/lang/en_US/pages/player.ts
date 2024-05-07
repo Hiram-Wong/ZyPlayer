@@ -32,7 +32,8 @@ export default {
   message: {
     success: 'Success',
     error: 'Fail',
-    play: 'Please later, data processing, If not played for a long time, please change the source'
+    play: 'Please later, data processing, If not played for a long time, please change the source',
+    official: 'Analyze completed, data is derived from {0}'
   },
   placeholder: {
     analyze: 'AnalyzeApi'

@@ -32,7 +32,8 @@ export default {
   message: {
     success: '成功',
     error: '失败',
-    play: '请稍后,数据处理中,如长时间未播放请换源'
+    play: '请稍后,数据处理中,如长时间未播放请换源',
+    official: '解析流程处理完成,数据来源于:{0}'
   },
   placeholder: {
     analyze: '解析接口'

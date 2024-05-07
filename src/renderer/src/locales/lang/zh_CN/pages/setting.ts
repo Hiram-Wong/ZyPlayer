@@ -50,6 +50,10 @@ export default {
       remote: '远程',
       local: '本地',
       manual: '手动'
+    },
+    analyze: {
+      web: 'Web',
+      json: 'Json'
     }
   },
   header: {
