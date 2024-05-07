@@ -11,7 +11,12 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     ellipsis: true,
     sorter: (a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'),
   },
-  // { title: '类型', colKey: 'type', width: 100 },
+  {
+    title: '类型',
+    colKey: 'type',
+    width: 100,
+    sorter: (a, b) => a.type - b.type,
+  },
   { title: '启用',
     colKey: 'isActive',
     width: 100,
