@@ -31,6 +31,7 @@ export default {
   },
   message: {
     success: 'Success',
-    error: 'Fail'
+    error: 'Fail',
+    play: 'Please later, data processing, If not played for a long time, please change the source'
   }
 }

@@ -31,6 +31,7 @@ export default {
   },
   message: {
     success: '成功',
-    error: '失败'
+    error: '失败',
+    play: '请稍后,数据处理中,如长时间未播放请换源'
   }
 };
