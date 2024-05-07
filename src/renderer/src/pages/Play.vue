@@ -916,6 +916,7 @@ const initFilmPlayer = async (isFirst) => {
   MessagePlugin.info(t('pages.player.message.play'));
   const response = await playHelper(snifferMode, url, site, analyze, active.flimSource);
   isVisible.official = response!.isOfficial;
+  if (isVisible.official) MessagePlugin.info(t('pages.player.message.official', [analyzeSource.name]));
   createPlayer(response!.url, response!.mediaType!);
 };
 

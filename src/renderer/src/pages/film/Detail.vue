@@ -260,6 +260,7 @@ const gotoPlay = async (item) => {
   MessagePlugin.info(t('pages.player.message.play'));
   const response = await playHelper(snifferMode, url, formData.value, analyze, active.flimSource);
   isVisible.official = response!.isOfficial;
+  if (isVisible.official) MessagePlugin.info(t('pages.player.message.official', [analyzeSource.name]));
   callSysPlayer(response!.url);
 };
 
