@@ -504,6 +504,7 @@ const formatSeason = (videoList: Record<string, any>): Record<string, any> => {
 };
 
 export {
+  VIP_LIST,
   fetchBingeData,
   putBingeData,
   fetchHistoryData,

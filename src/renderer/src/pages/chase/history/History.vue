@@ -83,6 +83,7 @@ import { usePlayStore } from '@/store';
 import { delHistory, fetchHistoryList } from '@/api/history';
 import { fetchSiteList } from '@/api/site';
 import { fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
+import { formatIndex} from '@/utils/film_common';
 
 import DetailView from '../../film/Detail.vue';
 
@@ -163,7 +164,7 @@ const getHistoryList = async () => {
   } finally {
     console.log(`[history] load data length: ${length}`);
     return length;
-  } 
+  }
 };
 
 const load = async ($state) => {
@@ -256,12 +257,6 @@ eventBus.on(() => {
   if (!_.size(options.value)) infiniteId.value++;
   pagination.value.pageIndex = 0;
 });
-
-// 格式化剧集集数
-const formatIndex = (item) => {
-  const [index, url] = item.split('$');
-  return { index, url };
-};
 </script>
 
 <style lang="less" scoped>

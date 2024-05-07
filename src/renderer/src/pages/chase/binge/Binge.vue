@@ -140,7 +140,7 @@ const getBingeList = async () => {
 
     pagination.value.count = star_res.total;
     pagination.value.pageIndex++;
-    
+
     length = _.size(star_res.data);
     return length;
   } catch (err) {
@@ -149,7 +149,7 @@ const getBingeList = async () => {
   } finally {
     console.log(`[binge] load data length: ${length}`);
     return length;
-  } 
+  }
 };
 
 const load = async ($state) => {
