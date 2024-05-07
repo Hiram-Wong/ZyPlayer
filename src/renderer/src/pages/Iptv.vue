@@ -62,6 +62,7 @@
         </div>
       </div>
     </div>
+    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
     <t-back-top
       container="#back-top"
       size="small"
@@ -84,8 +85,9 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive } from 'vue';
 
-import { usePlayStore, useSettingStore } from '@/store';
+import { prefix } from '@/config/global';
 import { t } from '@/locales';
+import { usePlayStore, useSettingStore } from '@/store';
 
 import { checkUrlIpv6, copyToClipboardApi } from '@/utils/tool';
 import { fetchIptvActive, clearChannel, addChannel, fetchChannelList, delChannelItem } from '@/api/iptv';
@@ -115,7 +117,8 @@ const renderLoading = () => {
 
 const isVisible = reactive({
   infiniteLoading: false, // 筛选
-  contentMenu: false
+  contentMenu: false,
+  loading: false
 });
 const searchTxt = ref('');
 const infiniteId = ref(+new Date());
@@ -272,19 +275,28 @@ const changeClassEvent = async (id) => {
 
 // 播放
 const playEvent = (item: { name: any }) => {
-  const playerMode = storePlayer.getSetting.playerMode;
-  if (playerMode.type === 'custom' ) {
-    window.electron.ipcRenderer.send('call-player', playerMode.external, item.url);
-  } else {
-    const { epg, skipIpv6, logo } = iptvConfig.value.ext;
-    storePlayer.updateConfig({
-      type: 'iptv',
-      data: {
-        info: item,
-        ext: { epg, skipIpv6, logo },
-      },
-    });
-    window.electron.ipcRenderer.send('openPlayWindow', item.name);
+  isVisible.loading = true;
+
+  try {
+    const playerMode = storePlayer.getSetting.playerMode;
+    if (playerMode.type === 'custom' ) {
+      window.electron.ipcRenderer.send('call-player', playerMode.external, item.url);
+    } else {
+      const { epg, skipIpv6, logo } = iptvConfig.value.ext;
+      storePlayer.updateConfig({
+        type: 'iptv',
+        data: {
+          info: item,
+          ext: { epg, skipIpv6, logo },
+        },
+      });
+      window.electron.ipcRenderer.send('openPlayWindow', item.name);
+    }
+  } catch (err) {
+    console.error(`[iptv][playEvent][error]`, err);
+    MessagePlugin.warning(t('pages.chase.reqError'));
+  } finally {
+    isVisible.loading = false;
   }
 };
 

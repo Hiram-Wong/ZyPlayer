@@ -80,8 +80,8 @@
         </div>
       </div>
     </div>
-
     <detail-view v-model:visible="isVisible.detail" :site="siteConfig.default" :data="formDetailData"/>
+    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
     <t-back-top
       container="#back-top"
       size="small"
@@ -98,10 +98,12 @@ import lazyImg from '@/assets/lazy.png';
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import PQueue from 'p-queue';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { onMounted, reactive, ref } from 'vue';
 
+import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
@@ -147,7 +149,8 @@ const isVisible = reactive({
   infiniteLoading: false,
   gridList: false,
   t3Work: false,
-  catvod: false
+  catvod: false,
+  loading: false
 });
 const pagination = ref({
   pageIndex: 1,
@@ -597,31 +600,37 @@ const changeSitesEvent = async (key: string) => {
 
 // 播放
 const playEvent = async (item) => {
-  console.log(item)
+  isVisible.loading = true;
 
-  let site = siteConfig.value.default;
-  if (_.has(item, 'relateSite')) site = item.relateSite;
+  try {
+    let site = siteConfig.value.default;
+    if (_.has(item, 'relateSite')) site = item.relateSite;
 
-  if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
-    const [detailItem] = await fetchDetail(site, item.vod_id);
-    item = detailItem;
-  }
+    if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
+      const [detailItem] = await fetchDetail(site, item.vod_id);
+      item = detailItem;
+    }
 
-  const playerMode = storePlayer.getSetting.playerMode;
-  console.log(item)
-  if (playerMode.type === 'custom' ) {
-    formDetailData.value = item;
-    isVisible.detail = true;
-  } else {
-    storePlayer.updateConfig({
-      type: 'film',
-      data: {
-        info: item,
-        ext: { site: site },
-      },
-    });
+    const playerMode = storePlayer.getSetting.playerMode;
+    if (playerMode.type === 'custom' ) {
+      formDetailData.value = item;
+      isVisible.detail = true;
+    } else {
+      storePlayer.updateConfig({
+        type: 'film',
+        data: {
+          info: item,
+          ext: { site: site },
+        },
+      });
 
-    window.electron.ipcRenderer.send('openPlayWindow', item.vod_name);
+      window.electron.ipcRenderer.send('openPlayWindow', item.vod_name);
+    }
+  } catch (err) {
+    console.error(`[film][playEvent][error]`, err);
+    MessagePlugin.warning(t('pages.chase.reqError'));
+  } finally {
+    isVisible.loading = false;
   }
 };
 

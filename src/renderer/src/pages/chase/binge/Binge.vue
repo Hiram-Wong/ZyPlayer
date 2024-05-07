@@ -50,8 +50,8 @@
         </div>
       </div>
     </div>
-
     <detail-view v-model:visible="isVisible.detail" :site="siteData" :data="formDetailData"/>
+    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
   </div>
 </template>
 
@@ -66,6 +66,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { ref, reactive } from 'vue';
 
+import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
@@ -105,7 +106,8 @@ const formDetailData = ref({
 }); //  详情组件源传参
 const siteData = ref();
 const isVisible = reactive({
-  detail: false
+  detail: false,
+  loading: false
 });
 const bingeConfig = ref({
   data: []
@@ -165,6 +167,8 @@ const load = async ($state) => {
 
 // 播放
 const playEvent = async (item) => {
+  isVisible.loading = true;
+
   try {
     const { videoName, videoId } = item;
     const site: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
@@ -196,8 +200,10 @@ const playEvent = async (item) => {
       window.electron.ipcRenderer.send('openPlayWindow', videoName);
     }
   } catch (err) {
-    console.error(err);
+    console.error(`[binge][playEvent][error]`, err);
     MessagePlugin.warning(t('pages.chase.reqError'));
+  } finally {
+    isVisible.loading = false;
   }
 };
 

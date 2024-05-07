@@ -57,6 +57,7 @@
         </div>
       </div>
     </div>
+    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
     <t-back-top
       container=".container"
       :visible-height="200"
@@ -64,7 +65,7 @@
       :offset="['1.4rem', '0.5rem']"
       :duration="2000"
       :firstload="false"
-    ></t-back-top>
+    />
   </div>
 </template>
 
@@ -75,8 +76,9 @@ import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { Tv1Icon, LoadingIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
+import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
@@ -118,6 +120,9 @@ const driveConfig = ref({
 const active = ref({
   nav: '',
 })
+const isVisible = reactive({
+  loading: false
+});
 
 const driveList = ref([]);
 const driveContent = ref([]);
@@ -145,7 +150,7 @@ const getSetting = async() => {
     if (_.has(data, 'data') && !_.isEmpty(data["data"])) {
       driveConfig.value.data = data["data"];
     }
-    
+
     initCloud();
   } catch (err) {
     console.error(err);
@@ -232,26 +237,34 @@ const getCloudFile = async (item) => {
 
 // 播放
 const playEvent = (item, fullPath) => {
-  const playerMode = storePlayer.getSetting.playerMode;
-  const shareUrl = `${driveConfig.value.default.server}/d/${fullPath}${item.sign ? `?sign=${item.sign}`: ''}`
-  if (playerMode.type === 'custom' ) {
-    window.electron.ipcRenderer.send('call-player', playerMode.external, shareUrl);
-  } else {
-    storePlayer.updateConfig({
-      type: 'drive',
-      data: {
-        info: {
-          name: item.name,
-          url: item.url,
-          vod_pic: item.thumb
+  isVisible.loading = true;
+
+  try {
+    const playerMode = storePlayer.getSetting.playerMode;
+    const shareUrl = `${driveConfig.value.default.server}/d/${fullPath}${item.sign ? `?sign=${item.sign}`: ''}`
+    if (playerMode.type === 'custom' ) {
+      window.electron.ipcRenderer.send('call-player', playerMode.external, shareUrl);
+    } else {
+      storePlayer.updateConfig({
+        type: 'drive',
+        data: {
+          info: {
+            name: item.name,
+            url: item.url,
+            vod_pic: item.thumb
+          },
+          ext: {
+            files: driveContent.value,
+            site: driveConfig.value.default
+          }
         },
-        ext: {
-          files: driveContent.value,
-          site: driveConfig.value.default
-        }
-      },
-    });
-    window.electron.ipcRenderer.send('openPlayWindow', item.name);
+      });
+      window.electron.ipcRenderer.send('openPlayWindow', item.name);
+    }
+  }  catch (err) {
+    console.error(`[film][playEvent][error]`, err);
+  } finally {
+    isVisible.loading = false;
   }
 };
 

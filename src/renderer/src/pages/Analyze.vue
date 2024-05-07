@@ -150,7 +150,6 @@ const getSetting = async () => {
   }
 };
 
-
 // 格式化 url 公共方法
 const formatUrlMethod = (url) => {
   return url.split('?')[0];
@@ -173,7 +172,7 @@ const getVideoInfo = async (url, title) => {
   MessagePlugin.info(t('pages.analyze.message.info'));
 
   const res = await detailHistory({ relateId: active.value.nav, videoUrl: url });
-  
+
   if (res) updateHistory(res.id, { date: moment().unix() });
   else {
     const doc = {
