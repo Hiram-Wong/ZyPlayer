@@ -217,7 +217,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
       }
 
       return {
-        url: playerUrl,
+        url: playerUrl || url,
         isOfficial: isOfficial
       };
     }
