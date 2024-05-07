@@ -33,5 +33,8 @@ export default {
     success: 'Success',
     error: 'Fail',
     play: 'Please later, data processing, If not played for a long time, please change the source'
+  },
+  placeholder: {
+    analyze: 'AnalyzeApi'
   }
 }

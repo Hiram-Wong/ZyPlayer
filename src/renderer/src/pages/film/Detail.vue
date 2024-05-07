@@ -22,7 +22,7 @@
               </div>
             </div>
             <div class="binge">
-              <div class="video-subscribe-text" @click="bingeEvent">
+              <div class="video-subscribe-text" @click="putBinge(false)">
                 <span>
                   <heart-icon class="icon" v-if="isVisible.binge" />
                   <heart-filled-icon class="icon" v-else />
@@ -49,7 +49,7 @@
                 <div v-show="info.vod_content" class="des introduce-item">
                   <span class="title">{{ $t('pages.player.film.desc') }}: </span>
                   <div class="info">
-                    <span v-html="filterContent(info.vod_content)"></span>
+                    <span v-html="formatContent(info.vod_content)"></span>
                   </div>
                 </div>
               </div>
@@ -58,31 +58,46 @@
         </div>
         <div class="plist-listbox">
           <div class="box-anthology-header">
-            <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
-            <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
-              <order-descending-icon v-if="reverseOrder" size="1.3em" />
-              <order-ascending-icon v-else size="1.3em" />
+            <div class="left">
+              <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
+              <div class="box-anthology-analyze" v-show="isVisible.official">
+                <t-dropdown placement="bottom" :max-height="250">
+                  <t-button size="small" theme="default" variant="text" auto-width>
+                    <span>解析</span>
+                    <template #suffix>
+                      <chevron-down-icon size="16" />
+                    </template>
+                  </t-button>
+                  <t-dropdown-menu>
+                    <t-dropdown-item v-for="item in dataAnalyze.active" :key="item.id" :value="item.id"
+                      @click="(options) => switchAnalyzeEvent(options.value as string)">
+                      <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
+                    </t-dropdown-item>
+                  </t-dropdown-menu>
+                </t-dropdown>
+              </div>
+            </div>
+            <div class="right">
+              <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
+                <order-descending-icon v-if="isVisible.reverseOrder" size="1.2em" />
+                <order-ascending-icon v-else size="1.2em" />
+              </div>
             </div>
           </div>
-          <div class="box-anthology-items">
+          <div class="listbox">
             <t-tabs v-model="active.flimSource" class="film-tabs">
-              <t-tab-panel
-                v-for="(value, key, index) in season"
-                :key="index"
-                :value="key"
-                :label="key"
-                >
-                <div class="">
-                  <t-space break-line size="small" align="center">
-                    <t-tag
-                      v-for="item in value"
-                      :key="item"
-                      :class="['tag', item === active.filmIndex ? 'select' : '' ]"
-                      @click="gotoPlay(item)"
-                    >
-                      {{ formatName(item) }}
-                    </t-tag>
-                  </t-space>
+              <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key" :label="key">
+                <div class="tag-container">
+                  <div v-for="(item, index) in value" :key="item"
+                    :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
+                    @click="gotoPlay(item)">
+                    <t-tooltip :content="formatName(item)">
+                      <div class="mainVideo_inner">
+                        {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index, value.length) }}
+                        <div class="playing"></div>
+                      </div>
+                    </t-tooltip>
+                  </div>
                 </div>
               </t-tab-panel>
             </t-tabs>
@@ -94,10 +109,10 @@
 </template>
 
 <script setup lang="ts">
-import jsonpath from 'jsonpath';
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
+import _ from 'lodash';
+import moment from 'moment';
 import {
+  ChevronDownIcon,
   HeartIcon,
   HeartFilledIcon,
   OrderAscendingIcon,
@@ -105,17 +120,24 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, reactive, watch, computed } from 'vue';
-import moment from 'moment';
 
 import { usePlayStore } from '@/store';
+import { t } from '@/locales';
 
-import { fetchAnalyzeDefault } from '@/api/analyze';
-import { updateHistory, detailHistory, addHistory } from '@/api/history';
-import { detailStar, addStar, delStar } from '@/api/star';
-import { setT3Proxy } from '@/api/proxy';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, t3RuleProxy, fetchCatvodPlayUrl } from '@/utils/cms';
-import sniffer from '@/utils/sniffer';
-import { getConfig, checkMediaType } from '@/utils/tool';
+import {
+  fetchBingeData,
+  putBingeData,
+  fetchHistoryData,
+  putHistoryData,
+  fetchAnalyzeData,
+  playHelper,
+  reverseOrderHelper,
+  formatName,
+  formatIndex,
+  formatContent,
+  formatSeason,
+  formatReverseOrder
+} from '@/utils/film_common';
 
 const props = defineProps({
   visible: {
@@ -143,55 +165,50 @@ const set = computed(() => {
 const formVisible = ref(false);
 const info = ref(props.data);
 const formData = ref(props.site);
-const reverseOrder = ref(true); // true 正序 false 倒序
 const season = ref(); // 选集
-const dataHistory = ref({}); // 历史
-
-const analyzeConfig = ref({
-  default: {
-    url: ''
-  },
-  flag: [] //标识
-})
+const dataHistory = ref({}) as any; // 历史
+const dataBinge = ref({}) as any;
+const dataAnalyze = ref({
+  default: { url: '' },
+  flag: [],
+  active: []
+}) as any;
 
 const isVisible = reactive({
-  binge: false
+  binge: false,
+  reverseOrder: true,
+  official: false
 })
 
 const active = reactive({
   flimSource: '',
-  filmIndex: ''
+  filmIndex: '',
+  analyzeId: ''
 })
 
-// 嗅探
-const VIP_LIST = [
-  'iqiyi.com',
-  'iq.com',
-  'mgtv.com',
-  'qq.com',
-  'youku.com',
-  'le.com',
-  'sohu.com',
-  'pptv.com',
-  'bilibili.com',
-  'tudou.com',
-];
-
 const emit = defineEmits(['update:visible']);
+
+const loadData = () => {
+  fetchBinge();
+  fetchHistory();
+  fetchAnalyze();
+}
+
+const resetStates = () => {
+  active.flimSource = active.filmIndex = active.analyzeId = '';
+  isVisible.official = isVisible.binge = false;
+  isVisible.reverseOrder = true;
+  season.value = [];
+  dataHistory.value = dataBinge.value = dataAnalyze.value = {};
+}
+
 watch(
   () => formVisible.value,
   (val) => {
     emit('update:visible', val);
 
-    if (val) {
-      getBinge();
-      getHistoryData();
-      getAnalyzeFlag();
-    } else {
-      active.flimSource = '';
-      active.filmIndex = '';
-      season.value = [];
-    }
+    if (val) loadData();
+    else resetStates();
   }
 );
 watch(
@@ -215,124 +232,12 @@ watch(
   }
 );
 
-const getAnalyzeFlag = async (): Promise<void> => {
-  try {
-    const res = await fetchAnalyzeDefault();
-    if (res.hasOwnProperty('default')) analyzeConfig.value.default = res.default;
-    if (res.hasOwnProperty('flag')) analyzeConfig.value.flag = res.flag;
+// 获取解析
+const fetchAnalyze = async (): Promise<void> => {
+  const response = await fetchAnalyzeData();
+  dataAnalyze.value = response;
 
-    console.log(`[detail][analyze]-[jx]:${res.default.url}; flag:${[...res.flag]}`);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-// Helper functions
-const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<object> => {
-  console.log('[detail][hipy][start]获取服务端播放链接开启');
-  let playUrl: string = '';
-  let script: string = '';
-  let extra: string = '';
-  try {
-    const playRes = await fetchHipyPlayUrl(site, flag, url);
-    playUrl = playRes.url;
-    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
-    extra = playRes.parse_extra||extra;
-    console.log(`[detail][hipy][return]${playUrl}`);
-  } catch (err) {
-    console.log(`[detail][hipy][error]${err}`);
-  } finally {
-    console.log(`[detail][hipy][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra};
-  };
-};
-
-const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<object> => {
-  console.log('[detail][t3][start]获取服务端播放链接开启');
-  let playUrl: string = '';
-  let script: string = '';
-  let extra: string = '';
-  try {
-    const playRes = await fetchT3PlayUrl(flag, id, flags);
-    if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
-      const proxyRes: any = await t3RuleProxy(playRes.url);
-      await setT3Proxy(proxyRes);
-    };
-
-    playUrl = playRes.url;
-    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
-    extra = playRes.parse_extra||extra;
-    console.log(`[detail][t3][return]${playUrl}`);
-  } catch (err) {
-    console.log(`[detail][t3][error]${err}`);
-  } finally {
-    console.log(`[detail][t3][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra};
-  };
-};
-
-const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
-  console.log('[detail][catvod][start]获取服务端播放链接开启');
-  let data: string = '';
-  try {
-    const res = await fetchCatvodPlayUrl(site, flag, id);
-    data = res.url;
-    console.log(`[detail][catvod][return]${data}`);
-  } catch (err) {
-    console.log(`[detail][catvod][error]${err}`);
-  } finally {
-    console.log(`[detail][catvod][end]获取服务端播放链接结束`);
-    return data;
-  }
-};
-
-const fetchDrpyPlayUrlHelper = async (site: { [key: string]: any }, url: string): Promise<string> => {
-  console.log('[detail][drpy][start]免嗅流程开启');
-  let data: string = '';
-  try {
-    const res = await fetchDrpyPlayUrl(site, url);
-    if (res.redirect) {
-      data = res.url;
-      console.log(`[detail][drpy][return]${data}`);
-    }
-  } catch (err) {
-    console.log(`[detail][drpy][error]:${err}`);
-  } finally {
-    console.log(`[detail][drpy][end]免嗅流程结束`);
-    return data;
-  }
-};
-
-const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<string> => {
-  console.log('[detail][json][start]json解析流程开启');
-  let data: string = '';
-  try {
-    const res = await getConfig(`${playUrl}${url}`);
-    if (jsonpath.value(res, '$.url')) {
-      data = jsonpath.value(res, '$.url');
-      console.log(`[detail][json][return]${data}`);
-    }
-  } catch (err) {
-    console.log(`[detail][json][error]${err}`);
-  } finally {
-    console.log(`[detail][json][end]json解析流程结束`);
-    return data;
-  }
-};
-
-const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> => {
-  console.log('[detail][jx][start]官解流程开启');
-  let data: string = '';
-  try {
-    const res = await sniffer(type, url);
-    data = res;
-    console.log(`[detail][jx][return]${data}`);
-  } catch (err) {
-    console.log(`[detail][jx][error]${err}`);
-  } finally {
-    console.log(`[detail][jx][end]官解流程结束`);
-    return data;
-  }
+  if (response.default?.id) active.analyzeId = response.default?.id;
 };
 
 // 调用本地播放器 + 历史
@@ -340,250 +245,136 @@ const gotoPlay = async (item) => {
   let { url } = formatIndex(item);
   url = decodeURIComponent(url);
   active.filmIndex = item;
-  const { playUrl, type } = formData.value;
   const { snifferMode } = set.value;
 
-  let playerUrl = url;
-  let script: string = '';
-  let extra: string = '';
-  let playData: object = { playUrl: url, script: '', extra: ''};
+  const analyzeSource = active.analyzeId
+    ? _.find(dataAnalyze.value.active, { id: active.analyzeId })
+    : dataAnalyze.value.default;
 
-  if (playUrl) {
-    playerUrl = await fetchJsonPlayUrlHelper(playUrl, url);
-  } else {
-    if (url.startsWith('http')) {
-      const { hostname } = new URL(url);
-      let snifferUrl;
-      if (url.includes('uri=')) snifferUrl = url; // 判断有播放器的
-      if (
-        VIP_LIST.some((item) => hostname.includes(item)) ||
-        analyzeConfig.value.flag.some((item) => active.flimSource.includes(item))
-      ) {
-        // 官解iframe
-        snifferUrl = analyzeConfig.value.default.url + url;
-      }
-      if (snifferUrl) {
-        playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferMode.type === 'custom' ? `${snifferMode.url}${snifferUrl}` : snifferUrl);
-        if (playerUrl) callSysPlayer(playerUrl);
-        return;
-      }
-    }
-    switch (type) {
-      case 2:
-        // drpy免嗅
-        playerUrl = await fetchDrpyPlayUrlHelper(formData.value, url);
-        break;
-      case 6:
-        // hipy获取服务端播放链接
-        playData = await fetchHipyPlayUrlHelper(formData.value, active.flimSource, url);
-        playerUrl = playData.playUrl;
-        script = playData.script;
-        extra = playData.extra;
-        break;
-      case 7:
-        // t3获取服务端播放链接
-        playData = await fetchT3PlayUrlHelper(active.flimSource, url, []);
-        playerUrl = playData.playUrl;
-        script = playData.script;
-        extra = playData.extra;
-        break;
-      case 8:
-        // catvod获取服务端播放链接
-        playerUrl = await fetchCatvodPlayUrlHelper(formData.value, active.flimSource, url);
-        break;
-    }
-  }
+  const analyze = {
+    flag: dataAnalyze.value.flag,
+    url: analyzeSource.url,
+    type: analyzeSource.type,
+  };
 
-  if (!playerUrl) playerUrl = url;
+  MessagePlugin.info(t('pages.player.message.play'));
+  const response = await playHelper(snifferMode, url, formData.value, analyze, active.flimSource);
+  isVisible.official = response!.isOfficial;
+  callSysPlayer(response!.url);
+};
 
-  if (playerUrl) {
-    const mediaType = await checkMediaType(playerUrl);
-    console.log(`[detail][mediaType]${mediaType}`)
-    if (mediaType !== 'unknown' && mediaType !== 'error') {
-      callSysPlayer(playerUrl);
-      return;
-    }
-  }
-
-  // 兜底办法:嗅探
-  console.log(`[detail][sniffer][reveal]尝试提取播放链接,type:${type}`);
-  try {
-    MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    let snifferPlayUrl: string = '';
-    let snifferApi: string = '';
-    // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
-    if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
-      let snifferTool = new URL(snifferMode.url);
-      snifferApi = snifferTool.origin + snifferTool.pathname;
-    }
-    snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
-    playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
-    callSysPlayer(playerUrl);
-  } catch (err) {
-    console.error(err);
-  }
+// 切换解析接口
+const switchAnalyzeEvent = (id: string) => {
+  active.analyzeId = id;
+  if (active.filmIndex) gotoPlay(active.filmIndex);
 };
 
 const callSysPlayer = (url: string): void => {
   const playerMode = set.value.playerMode;
   window.electron.ipcRenderer.send('call-player', playerMode.external, url);
-  putHistoryData();
+  putHistory();
 };
 
-// 在追
-const bingeEvent = async (): Promise<void> => {
-  try {
-    const { id } = formData.value;
-    const db = await detailStar({ relateId: id, videoId: info.value.vod_id });
-
-    if (isVisible.binge) {
-      const doc = {
-        relateId: id,
-        videoId: info.value.vod_id,
-        videoImage: info.value.vod_pic,
-        videoName: info.value.vod_name,
-        videoType: info.value.type_name,
-        videoRemarks: info.value.vod_remarks,
-      };
-      if (!db) await addStar(doc);
-    } else {
-      if (db) await delStar(db.id);
-    }
-
-    isVisible.binge = !isVisible.binge;
-  } catch (err) {
-    console.error(`[detail][binge][error]${err}`);
-    MessagePlugin.error(`操作失败:${err}`);
-  }
-};
-
-// 获取是否收藏
-const getBinge = async (): Promise<void> => {
+// 获取收藏
+const fetchBinge = async () => {
   const { id } = formData.value;
   const { vod_id } = info.value;
-  const res = await detailStar({ relateId: id, videoId: vod_id });
-  isVisible.binge = !res;
+  const response = await fetchBingeData(id, vod_id);
+  dataBinge.value = response.data;
+  isVisible.binge = !response.status;
 };
 
-// 选择倒序
-const reverseOrderEvent = (): void => {
-  reverseOrder.value = !reverseOrder.value;
-  if (reverseOrder.value) {
-    console.log('[detail][season]正序');
-    season.value = JSON.parse(JSON.stringify(info.value.fullList));
-  } else {
-    console.log('[detail][season]倒序');
-    for (const key in season.value) {
-      season.value[key].reverse();
+// 更新收藏
+const putBinge = async (update: boolean = false) => {
+  const constructDoc = () => ({
+    relateId: formData.value.id,
+    videoId: info.value.vod_id,
+    videoImage: info.value.vod_pic,
+    videoName: info.value.vod_name,
+    videoType: info.value.type_name,
+    videoRemarks: info.value.vod_remarks,
+  });
+
+  let response: any;
+
+  if (dataBinge.value?.id) {
+    if (update) {
+      response = await putBingeData('update', dataBinge.value.id, constructDoc());
+      if (response?.data) dataBinge.value = response.data;
+    } else {
+      response = await putBingeData('del', dataBinge.value.id);
+      dataBinge.value = {
+        relateId: null,
+        videoId: 0,
+        videoImage: "",
+        videoName: "",
+        videoType: "",
+        videoRemarks: "",
+        id: null
+      };
     }
+  } else if (!update) {
+    response = await putBingeData('add', constructDoc());
+    if (response?.data) dataBinge.value = response.data;
+  }
+
+  if (response && !response.status) {
+    MessagePlugin.error(t('pages.player.message.error'));
+    return;
+  }
+
+  if (!update) isVisible.binge = !isVisible.binge;
+};
+
+// 选集排序
+const reverseOrderEvent = () => {
+  isVisible.reverseOrder = !isVisible.reverseOrder;
+  if (isVisible.reverseOrder) {
+    season.value = reverseOrderHelper('positive', info.value.fullList);
+  } else {
+    season.value = reverseOrderHelper('negative', season.value);
   }
 };
 
 // 获取历史
-const getHistoryData = async (): Promise<void> => {
-  try {
-    const { id } = formData.value;
-    const res = await detailHistory({ relateId: id, videoId: info.value.vod_id });
-
-    if (res) {
-      dataHistory.value = { ...res };
-      active.flimSource = res.siteSource;
-      active.filmIndex = res.videoIndex;
-    };
-  } catch (err) {
-    console.error(`[detail][history][error]${err}`);
-  }
+const fetchHistory = async (): Promise<void> => {
+  const response = await fetchHistoryData(formData.value.id, info.value.vod_id);
+  dataHistory.value = response;
+  if (response.siteSource) active.flimSource = response.siteSource;
+  if (response.videoIndex) active.filmIndex = response.videoIndex;
 };
 
 // 更新历史
-const putHistoryData = async (): Promise<void> => {
-  try {
-    const { id } = formData.value;
-    const res = await detailHistory({ relateId: id, videoId: info.value["vod_id"] });
-    const doc = {
-      date: moment().unix(),
-      type: 'film',
-      relateId: id,
-      siteSource: active.flimSource,
-      playEnd: false,
-      videoId: info.value["vod_id"],
-      videoImage: info.value["vod_pic"],
-      videoName: info.value["vod_name"],
-      videoIndex: active.filmIndex,
-      watchTime: 0,
-      duration: null,
-      skipTimeInStart: 30,
-      skipTimeInEnd: 30,
-    };
+const putHistory = async (): Promise<void> => {
+  const doc = {
+    date: moment().unix(),
+    type: 'film',
+    relateId: formData.value.id,
+    siteSource: active.flimSource,
+    playEnd: false,
+    videoId: info.value["vod_id"],
+    videoImage: info.value["vod_pic"],
+    videoName: info.value["vod_name"],
+    videoIndex: active.filmIndex,
+    watchTime: 0,
+    duration: null,
+    skipTimeInStart: 30,
+    skipTimeInEnd: 30,
+  };
 
-    if (res) {
-      if (res.siteSource !== active.flimSource || res.videoIndex !== active.filmIndex) {
-        await updateHistory(res.id, doc);
-        dataHistory.value = { ...doc, id: res.id };
-      } else {
-        dataHistory.value = { ...res };
-      }
-    } else {
-      const add_res = await addHistory(doc);
-      dataHistory.value = add_res;
-    }
-  } catch (err) {
-    console.error(`[detail][history][error]${err}`);
-  }
+  const response = await putHistoryData(dataHistory.value?.id, doc);
+  dataHistory.value = response;
 };
 
 // 获取播放源及剧集
 const getDetailInfo = async (): Promise<void> => {
-  const videoList = info.value;
+  const formattedSeason = await formatSeason(info.value);
 
-  // 播放源
-  const playFrom = videoList["vod_play_from"];
-  const playSource = playFrom.split('$').filter(Boolean);
-  const [source] = playSource;
+  active.flimSource = active.flimSource || Object.keys(formattedSeason)[0];
+  active.filmIndex = active.filmIndex || formattedSeason[active.flimSource][0];
 
-  if (!active.flimSource) active.flimSource = source;
-
-  // 剧集
-  const playUrl = videoList["vod_play_url"];
-  const playUrlDiffPlaySource = playUrl.split('$$$'); // 分离不同播放源
-  const playEpisodes = playUrlDiffPlaySource.map((item) =>
-    item
-      .replace(/\$+/g, '$')
-      .split('#')
-      .map((e) => {
-        if (!e.includes('$')) e = `正片$${e}`;
-        return e;
-      }),
-  );
-
-  if (!active.filmIndex) active.filmIndex = playEpisodes[0][0];
-
-  // 合并播放源和剧集
-  const fullList: Record<string, string[][]> = Object.fromEntries(
-    playSource.map((key, index) => [key, playEpisodes[index]])
-  );
-
-  videoList.fullList = fullList;
-  info.value = videoList;
-  season.value = fullList;
-};
-
-// 格式化剧集名称
-const formatName = (item: string): string => {
-  const [first] = item.split('$');
-  return first.includes('http') ? '正片' : first;
-};
-
-// 格式化剧集集数
-const formatIndex = (item) => {
-  const [index, url] = item.split('$');
-  return { index, url };
-};
-
-// 替换style
-const filterContent = (item: string | undefined | null): string => {
-  if (!item) return '';
-  return item.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
+  info.value.fullList = formattedSeason;
+  season.value = formattedSeason;
 };
 </script>
 
@@ -714,25 +505,136 @@ const filterContent = (item: string | undefined | null): string => {
     overflow-x: hidden;
 
     .box-anthology-header {
+      font-size: 16px;
+      line-height: 18px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      color: var(--td-text-color-primary);
 
-      .box-anthology-title {
-        position: relative;
-        font-size: 18px;
-        line-height: 25px;
-        font-weight: 600;
+      .left {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: flex-end;
+
+        .mg-left {
+          margin-left: var(--td-comp-margin-xs);
+        }
+
+        .box-anthology-title {
+          white-space: nowrap;
+          position: relative;
+          font-size: 18px;
+          line-height: 25px;
+          font-weight: 600;
+        }
+
+        .box-anthology-analyze {
+          :deep(.t-button) {
+            padding: 0;
+          }
+
+          :deep(.t-button--variant-text) {
+            .t-button__suffix {
+              margin-left: var(--td-comp-margin-xxs);
+            }
+
+            .t-button__text {
+              &:before {
+                content: "";
+                width: 1px;
+                margin: 0 var(--td-comp-margin-xs);
+                background: linear-gradient(180deg, transparent, var(--td-border-level-1-color), transparent);
+              }
+            }
+
+            &:hover {
+              background-color: transparent !important;
+              border-color: transparent !important;
+              color: var(--td-brand-color);
+            }
+          }
+        }
       }
 
-      .box-anthology-reverse-order {
-        cursor: pointer;
+      .right {
+        .box-anthology-reverse-order {
+          cursor: pointer;
+        }
       }
     }
 
-    .box-anthology-items {
+    .listbox {
       .film-tabs {
-        .tag {
-          cursor: pointer;
+        .tag-container {
+          display: flex;
+          flex-wrap: wrap;
+          padding-top: 10px;
+
+          .mainVideo-num {
+            position: relative;
+            width: 41px;
+            font-size: 18px;
+            height: 41px;
+            line-height: 41px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 4px;
+            margin-right: 4px;
+            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .08);
+
+            &:hover {
+              background-image: linear-gradient(var(--td-brand-color-2), var(--td-brand-color-3));
+            }
+
+            &:before {
+              content: "";
+              display: block;
+              position: absolute;
+              top: 1px;
+              left: 1px;
+              right: 1px;
+              bottom: 1px;
+              border-radius: 8px;
+              background-color: var(--td-bg-color-container);
+              z-index: 2;
+            }
+
+            .mainVideo_inner {
+              position: absolute;
+              top: 1px;
+              left: 1px;
+              right: 1px;
+              bottom: 1px;
+              border-radius: 8px;
+              z-index: 3;
+              overflow: hidden;
+              background-image: linear-gradient(hsla(0, 0%, 100%, .04), hsla(0, 0%, 100%, .06));
+
+              .playing {
+                display: none;
+                min-width: 10px;
+                height: 8px;
+                background: url(@/assets/player/playon-green.gif) no-repeat;
+              }
+            }
+          }
+
+          .mainVideo-selected {
+            color: var(--td-brand-color);
+            background-image: linear-gradient(hsla(0, 0%, 100%, .1), hsla(0, 0%, 100%, .06));
+
+            // box-shadow: 0 2px 8px 0 rgba(0,0,0,.08), inset 0 4px 10px 0 rgba(0,0,0,.14);
+            .playing {
+              display: inline-block !important;
+              position: absolute;
+              left: 6px;
+              bottom: 6px;
+            }
+          }
         }
       }
     }
@@ -752,5 +654,9 @@ const filterContent = (item: string | undefined | null): string => {
   max-height: 150px;
   padding: 10px 0 0 0;
   overflow-y: auto;
+}
+
+.active {
+  color: var(--td-brand-color);
 }
 </style>

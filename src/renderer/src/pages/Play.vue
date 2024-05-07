@@ -28,13 +28,15 @@
                 </div>
                 <div v-if="set.skipStartEnd" class="setting-item-warp">
                   <div class="skip-time-in-start">
-                    <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right" @click="skipTimeInEndChange">
+                    <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right"
+                      @click="skipTimeInEndChange">
                       <template #label>开头: </template>
                       <template #suffix> 秒</template>
                     </t-input-number>
                   </div>
                   <div class="skip-time-in-end">
-                    <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right" @click="skipTimeInEndChange">
+                    <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right"
+                      @click="skipTimeInEndChange">
                       <template #label>结尾: </template>
                       <template #suffix> 秒</template>
                     </t-input-number>
@@ -153,7 +155,7 @@
                 <span v-show='info["vod_year"]'>{{ info["vod_year"] }}</span>
               </div>
               <div class="function">
-                <div class="func-item like" @click="bingeEvent">
+                <div class="func-item like" @click="putBinge(false)">
                   <span>
                     <heart-icon class="icon" v-if="isVisible.binge" />
                     <heart-filled-icon class="icon" v-else />
@@ -181,10 +183,30 @@
             </div>
             <div class="anthology-contents-scroll">
               <div class="box-anthology-header">
-                <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
-                <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
-                  <order-descending-icon v-if="reverseOrder" size="1.2em" />
-                  <order-ascending-icon v-else size="1.2em" />
+                <div class="left">
+                  <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
+                  <div class="box-anthology-analyze" v-show="isVisible.official">
+                    <t-dropdown placement="bottom" :max-height="250">
+                      <t-button size="small" theme="default" variant="text" auto-width>
+                        <span>解析</span>
+                        <template #suffix>
+                          <chevron-down-icon size="16" />
+                        </template>
+                      </t-button>
+                      <t-dropdown-menu>
+                        <t-dropdown-item v-for="item in dataAnalyze.active" :key="item.id" :value="item.id"
+                          @click="(options) => switchAnalyzeEvent(options.value as string)">
+                          <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
+                        </t-dropdown-item>
+                      </t-dropdown-menu>
+                    </t-dropdown>
+                  </div>
+                </div>
+                <div class="right">
+                  <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
+                    <order-descending-icon v-if="isVisible.reverseOrder" size="1.2em" />
+                    <order-ascending-icon v-else size="1.2em" />
+                  </div>
                 </div>
               </div>
               <div class="listbox">
@@ -196,7 +218,8 @@
                         @click="changeEvent(item)">
                         <t-tooltip :content="formatName(item)">
                           <div class="mainVideo_inner">
-                            {{ index + 1 }}
+                            {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index, value.length)
+                            }}
                             <div class="playing"></div>
                           </div>
                         </t-tooltip>
@@ -255,7 +278,7 @@
                 </div>
               </div>
               <div class="text">
-                <span v-html='filterContent(info["vod_content"])'></span>
+                <span v-html='formatContent(info["vod_content"])'></span>
               </div>
               <div class="case">
                 <div class="title">{{ $t('pages.player.film.actors') }}</div>
@@ -315,15 +338,11 @@ import '@/style/player/veplayer.css';
 import 'v3-infinite-loading/lib/style.css';
 import 'xgplayer/es/plugins/danmu/index.css';
 
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
-
 import DPlayer from 'dplayer';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
 import _ from 'lodash';
 import moment from 'moment';
-import jsonpath from 'jsonpath';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -353,23 +372,33 @@ import FlvPlugin from 'xgplayer-flv';
 import HlsPlugin from 'xgplayer-hls';
 import Mp4Plugin from 'xgplayer-mp4';
 
-import SystemControl from '@/layouts/components/SystemControl.vue';
-import DialogDownloadView from './play/componets/DialogDownload.vue';
 import { setDefault } from '@/api/setting';
-import { fetchAnalyzeDefault } from '@/api/analyze';
 import { fetchFilmDetail } from '@/api/site';
-import { updateHistory, detailHistory, addHistory } from '@/api/history';
-import { detailStar, addStar, delStar } from '@/api/star';
 import { fetchChannelList } from '@/api/iptv';
-import { setT3Proxy } from '@/api/proxy';
 
 import { getConfig, checkMediaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
+import {
+  VIP_LIST,
+  fetchBingeData,
+  putBingeData,
+  fetchHistoryData,
+  putHistoryData,
+  fetchAnalyzeData,
+  playHelper,
+  reverseOrderHelper,
+  fetchDoubanRecommendHelper,
+  formatName,
+  formatIndex,
+  formatContent,
+  formatSeason,
+  formatReverseOrder
+} from '@/utils/film_common';
 import { __jsEvalReturn } from '@/utils/alist_open';
-import { fetchDrpyPlayUrl, fetchHipyPlayUrl, fetchT3PlayUrl, t3RuleProxy, fetchDetail, fetchSearch, t3RuleInit, catvodRuleInit, fetchCatvodPlayUrl, fetchDoubanRecommend } from '@/utils/cms';
 import { fetchChannelEpg } from '@/utils/channel';
-import sniffer from '@/utils/sniffer';
 import { usePlayStore } from '@/store';
 
+import SystemControl from '@/layouts/components/SystemControl.vue';
+import DialogDownloadView from './play/componets/DialogDownload.vue';
 import SharePopup from '../components/share-popup/index.vue';
 import { t } from '@/locales';
 import logoIcon from '@/assets/icon.png';
@@ -490,9 +519,10 @@ const active = reactive({
   flimSource: '',
   filmIndex: '',
   filmCurrent: '',
-  profile: false
+  profile: false,
+  analyzeId: ''
 });
-const recommend = ref([]); // 推荐
+const recommend = ref([]) as any; // 推荐
 const season = ref(); // 选集
 const xgpayerRef = ref(null); // 西瓜播放器dom节点
 const isSettingVisible = ref(false);
@@ -513,8 +543,7 @@ const dataHistory = ref({
   skipTimeInStart: 30,
   skipTimeInEnd: 30,
 }) as any; // 历史
-
-const reverseOrder = ref(true); // true 正序 false 倒序
+const dataBinge = ref({}) as any;
 
 const driveDataList = ref({});
 const spider = ref(null);
@@ -536,31 +565,17 @@ const shareData = ref({
   provider: 'zyplayer',
 });
 
-const VIP_LIST = [
-  'iqiyi.com',
-  'iq.com',
-  'mgtv.com',
-  'qq.com',
-  'youku.com',
-  'le.com',
-  'sohu.com',
-  'pptv.com',
-  'bilibili.com',
-  'tudou.com',
-];
-
 const VIDEO_PROCESS_DOC = reactive({
   playEnd: false,
   watchTime: 0,
   duration: 0,
 });
 
-const analyzeConfig = ref({
-  default: {
-    url: ''
-  }, //
-  flag: [] //标识
-})
+const dataAnalyze = ref({
+  default: { url: '' },
+  flag: [],
+  active: []
+}) as any;
 
 const isVisible = reactive({
   share: false,
@@ -568,7 +583,9 @@ const isVisible = reactive({
   macMaximize: false,
   download: false,
   binge: false,
-  aside: false
+  aside: false,
+  reverseOrder: true,
+  official: false
 })
 
 const iptvConfig = ref({
@@ -789,71 +806,50 @@ const setSystemMediaInfo = () => {
   document.title = title;
 };
 
-// 获取解析地址
-const getAnalyzeFlag = async () => {
-  try {
-    const res = await fetchAnalyzeDefault();
-    if (_.has(res, 'default')) analyzeConfig.value.default = res.default;
-    if (_.has(res, 'flag')) analyzeConfig.value.flag = res.flag;
+// 获取解析
+const fetchAnalyze = async (): Promise<void> => {
+  const response = await fetchAnalyzeData();
+  dataAnalyze.value = response;
 
-    console.log(`[play][analyze][jx]:${res.default.url}; flag:${[...res.flag]}`);
-  } catch (error) {
-    console.error(`[play][analyze][jx][error]${error}`);
-  }
+  if (response.default?.id) active.analyzeId = response.default?.id;
+};
+
+// 切换解析接口
+const switchAnalyzeEvent = (id: string) => {
+  active.analyzeId = id;
+  if (active.filmIndex) initPlayer(true);
 };
 
 // 获取历史
-const getHistoryData = async (): Promise<void> => {
-  try {
-    const { id } = ext.value["site"];
-    const res = await detailHistory({ relateId: id, videoId: info.value["vod_id"] });
-
-    if (res) {
-      dataHistory.value = { ...res };
-      active.flimSource = res.siteSource;
-      active.filmIndex = res.videoIndex;
-
-      const { skipTimeInStart, skipTimeInEnd } = res;
-      skipConfig.value = { skipTimeInStart, skipTimeInEnd };
-    };
-  } catch (err) {
-    console.error(`[play][history][error]${err}`);
-  };
+const fetchHistory = async (): Promise<void> => {
+  const response = await fetchHistoryData(ext.value.site.id, info.value.vod_id);
+  dataHistory.value = response;
+  if (response.siteSource) active.flimSource = response.siteSource;
+  if (response.videoIndex) active.filmIndex = response.videoIndex;
+  const { skipTimeInStart, skipTimeInEnd } = response;
+  skipConfig.value = { skipTimeInStart, skipTimeInEnd };
 };
 
 // 更新历史
-const putHistoryData = async () => {
-  try {
-    const { id: relateId } = ext.value["site"];
-    let { id: historyId } = dataHistory.value;
-
-    const doc = {
-      date: moment().unix(),
-      type: 'film',
-      relateId: relateId,
-      siteSource: active.flimSource,
-      playEnd: VIDEO_PROCESS_DOC.playEnd,
-      videoId: info.value["vod_id"],
-      videoImage: info.value["vod_pic"],
-      videoName: info.value["vod_name"],
-      videoIndex: active.filmIndex,
-      watchTime: VIDEO_PROCESS_DOC.watchTime,
-      duration: VIDEO_PROCESS_DOC.duration,
-      skipTimeInStart: skipConfig.value.skipTimeInStart,
-      skipTimeInEnd: skipConfig.value.skipTimeInEnd
-    };
-
-    if (!historyId) {
-      const res = await addHistory(doc);
-      historyId = res.id;
-    } else {
-      await updateHistory(historyId, doc);
-    };
-
-    dataHistory.value = { ...doc, id: historyId };
-  } catch (error) {
-    console.error(error);
+const putHistory = async (): Promise<void> => {
+  const doc = {
+    date: moment().unix(),
+    type: 'film',
+    relateId: ext.value.site.id,
+    siteSource: active.flimSource,
+    playEnd: VIDEO_PROCESS_DOC.playEnd,
+    videoId: info.value["vod_id"],
+    videoImage: info.value["vod_pic"],
+    videoName: info.value["vod_name"],
+    videoIndex: active.filmIndex,
+    watchTime: VIDEO_PROCESS_DOC.watchTime,
+    duration: VIDEO_PROCESS_DOC.duration,
+    skipTimeInStart: skipConfig.value.skipTimeInStart,
+    skipTimeInEnd: skipConfig.value.skipTimeInEnd
   };
+
+  const response = await putHistoryData(dataHistory.value?.id, doc);
+  dataHistory.value = response;
 };
 
 // 摧毁播放器
@@ -869,124 +865,6 @@ const destroyPlayer = () => {
   };
 };
 
-// Helper functions
-const fetchHipyPlayUrlHelper = async (site: { [key: string]: any }, flag: string, url: string): Promise<object> => {
-  console.log('[play][hipy][start]获取服务端播放链接开启');
-  let playUrl: string = '';
-  let script: string = '';
-  let extra: string = '';
-  let parse: boolean = true;
-  try {
-    const playRes = await fetchHipyPlayUrl(site, flag, url);
-    playUrl = playRes.url;
-    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
-    extra = playRes.parse_extra || extra;
-    parse = !!playRes.parse;
-    console.log(`[play][hipy][return]${playUrl}`);
-  } catch (err) {
-    console.log(`[play][hipy][error]${err}`);
-  } finally {
-    console.log(`[play][hipy][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra,parse};
-  };
-};
-
-const fetchT3PlayUrlHelper = async (flag: string, id: string, flags: string[] = []): Promise<object> => {
-  console.log('[play][t3][start]获取服务端播放链接开启');
-  let playUrl: string = '';
-  let script: string = '';
-  let extra: string = '';
-  let parse: boolean = true;
-  try {
-    const playRes = await fetchT3PlayUrl(flag, id, flags);
-    if (playRes?.parse === 0 && playRes?.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
-      const proxyRes: any = await t3RuleProxy(playRes.url);
-      await setT3Proxy(proxyRes);
-    }
-
-    playUrl = playRes.url;
-    script = playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '';
-    extra = playRes.parse_extra || extra;
-    parse = !!playRes.parse;
-    console.log(`[play][t3][return]${playUrl}`);
-  } catch (err) {
-    console.log(`[play][t3][error]${err}`);
-  } finally {
-    console.log(`[play][t3][end]获取服务端播放链接结束`);
-    return {playUrl,script,extra,parse};
-  };
-};
-
-const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: string, id: string): Promise<string> => {
-  console.log('[play][catvod][start]获取服务端播放链接开启');
-  let data: string = '';
-  try {
-    const res = await fetchCatvodPlayUrl(site, flag, id);
-    data = res.url;
-    console.log(`[play][catvod][return]${data}`);
-  } catch (err) {
-    console.log(`[play][catvod][error]${err}`);
-  } finally {
-    console.log(`[play][catvod][end]获取服务端播放链接结束`);
-    return data;
-  };
-};
-
-const fetchDrpyPlayUrlHelper = async (site: { [key: string]: any }, url: string): Promise<string> => {
-  console.log('[play][drpy][start]免嗅流程开启');
-  let data: string = '';
-  try {
-    const res = await fetchDrpyPlayUrl(site, url);
-    if (res.redirect) {
-      data = res.url;
-      console.log(`[play][drpy][return]${data}`);
-    };
-  } catch (err) {
-    console.log(`[play][drpy][error]:${err}`);
-  } finally {
-    console.log(`[play][drpy][end]免嗅流程结束`);
-    return data;
-  };
-};
-
-const fetchJsonPlayUrlHelper = async (playUrl: string, url: string): Promise<string> => {
-  console.log('[play][json][start]json解析流程开启');
-  let data: string = '';
-  try {
-    let parseUrl = `${playUrl}${url}`;
-    console.log(`[play][json][http get]${parseUrl}`);
-    const res = await getConfig(parseUrl);
-    // 存在 url data.url 两种结构
-    if (jsonpath.value(res, '$.url')) {
-      data = jsonpath.value(res, '$.url');
-      console.log(`[play][json][return]${data}`);
-    };
-  } catch (err) {
-    console.log(`[play][json][error]${err}`);
-  } finally {
-    console.log(`[play][json][end]json解析流程结束`);
-    return data;
-  }
-};
-
-const fetchJxPlayUrlHelper = async (type: string, url: string): Promise<string> => {
-  console.log('[play][jx][start]官解流程开启');
-  MessagePlugin.info('官解流程开启,请稍等');
-  let data: string = '';
-  try {
-    console.log(`[play][jx][sniffer]type:${type},url:${url}`);
-    const res = await sniffer(type, url);
-    data = res;
-    console.log(`[play][jx][return]${data}`);
-  } catch (err) {
-    console.log(`[play][jx][error]${err}`);
-  } finally {
-    console.log(`[play][jx][end]官解流程结束`);
-    MessagePlugin.info('官解流程结束,如未加载播放器则嗅探失败,请换源');
-    return data;
-  };
-};
-
 // 初始化film
 const initFilmPlayer = async (isFirst) => {
   const { site } = ext.value;
@@ -994,13 +872,12 @@ const initFilmPlayer = async (isFirst) => {
   await getDetailInfo();
 
   if (!isFirst) {
-    await getHistoryData();
-    if (!_.has(dataHistory.value, "id")) await putHistoryData();
-    await getAnalyzeFlag();
+    await fetchHistory();
+    if (!_.has(dataHistory.value, "id")) await putHistory();
+    await fetchAnalyze();
 
-    if (site.type !== 7 && site.search !== 0) getDoubanRecommend();
-
-    getBinge();
+    fetchRecommend();
+    fetchBinge();
 
     // 跳过时间
     if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
@@ -1023,126 +900,22 @@ const initFilmPlayer = async (isFirst) => {
 
   tmp.url = url;
   tmp.sourceUrl = url;
-  let playerUrl = url;
-  let script: string = '';
-  let extra: string = '';
-  // 需要嗅探
-  let parse = true;
-  let playData: object = { playUrl: url, script: '',extra: '', parse: parse};
-  // 解析播放
-  const jxPlay = async (url)=>{
-    if (url.startsWith('http')) {
-      const { hostname } = new URL(url);
-      // 默认解析对象
-      let parse_obj = analyzeConfig.value.default;
-      // 解析地址
-      let parse_url = parse_obj.url;
-      // 解析类型:0 web 1 json
-      let parse_type = parse_obj.type;
-      let snifferUrl = '';
-      if (url.includes('uri=')) snifferUrl = url; // 判断有播放器的
-      if (
-        VIP_LIST.some((item) => hostname.includes(item)) ||
-        analyzeConfig.value.flag.some((item) => active.flimSource.includes(item))
-      ) {
-        // 官解iframe
-        snifferUrl = parse_url + url;
-      }
-      if (snifferUrl) {
-        if (parse_type == 1) {
-          playerUrl = await fetchJsonPlayUrlHelper(parse_url, url);
-        }else {
-          let snifferPlayUrl: string = url;
-          let snifferApi: string = '';
-          // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
-          if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
-            let snifferTool = new URL(snifferMode.url);
-            snifferApi = snifferTool.origin + snifferTool.pathname;
-          }
-          snifferPlayUrl = `${snifferApi}?url=${snifferUrl}`;
-          playerUrl = await fetchJxPlayUrlHelper(snifferMode.type, snifferPlayUrl);
-        }
-        return playerUrl
-      }
-    }
-    return ''
-  }
 
-  if (site.playUrl) {
-    playerUrl = await fetchJsonPlayUrlHelper(site.playUrl, url);
-  } else {
-    playerUrl = await jxPlay(url);
-    if (playerUrl){
-      createPlayer(playerUrl);
-      return
-    }
-    switch (site.type) {
-      case 2:
-        // drpy免嗅
-        playerUrl = await fetchDrpyPlayUrlHelper(site, url);
-        break;
-      case 6:
-        // hipy获取服务端播放链接
-        playData = await fetchHipyPlayUrlHelper(site, active.flimSource, url);
-        playerUrl = playData.playUrl;
-        script = playData.script;
-        extra = playData.extra;
-        parse = playData.parse;
-        break;
-      case 7:
-        // t3获取服务端播放链接
-        await t3RuleInit(site);
-        playData = await fetchT3PlayUrlHelper(active.flimSource, url, []);
-        playerUrl = playData.playUrl;
-        script = playData.script;
-        extra = playData.extra;
-        parse = playData.parse;
-        break;
-      case 8:
-        // catvox获取服务端播放链接
-        await catvodRuleInit(site);
-        playerUrl = await fetchCatvodPlayUrlHelper(site, active.flimSource, url);
-        break;
-    }
-  }
-  // 直链直接播放
-  if(playerUrl && !parse){
-    createPlayer(playerUrl);
-    return;
-  }
-  let jxUrl = await jxPlay(playerUrl);
-  if (jxUrl){
-    createPlayer(jxUrl);
-    return
-  }
 
-  if (!playerUrl) playerUrl = url;
+  const analyzeSource = active.analyzeId
+    ? _.find(dataAnalyze.value.active, { id: active.analyzeId })
+    : dataAnalyze.value.default;
 
-  if (playerUrl) {
-    const mediaType = await checkMediaType(playerUrl);
-    console.log(`[play][mediaType]${mediaType}`)
-    if (mediaType !== 'unknown' && mediaType !== 'error') {
-      createPlayer(playerUrl, mediaType!);
-      return;
-    }
-  }
-  // 兜底办法:嗅探
-  console.log(`[play][sniffer][reveal]尝试提取播放链接,type:${site.type}`);
-  try {
-    MessagePlugin.info('嗅探资源中, 如10s没有结果请换源,咻咻咻!');
-    let snifferPlayUrl: string = '';
-    let snifferApi: string = '';
-    // 自定义嗅探器并且链接正确才有嗅探器api接口前缀
-    if(snifferMode.type=='custom' && /^http/.test(snifferMode.url)){
-      let snifferTool = new URL(snifferMode.url);
-      snifferApi = snifferTool.origin + snifferTool.pathname;
-    }
-    snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
-    playerUrl = await sniffer(snifferMode.type, snifferPlayUrl);
-    createPlayer(playerUrl);
-  } catch (err) {
-    console.error(err);
-  }
+  const analyze = {
+    flag: dataAnalyze.value.flag,
+    url: analyzeSource.url,
+    type: analyzeSource.type,
+  };
+
+  MessagePlugin.info(t('pages.player.message.play'));
+  const response = await playHelper(snifferMode, url, site, analyze, active.flimSource);
+  isVisible.official = response!.isOfficial;
+  createPlayer(response!.url, response!.mediaType!);
 };
 
 // 初始化播放器
@@ -1164,52 +937,16 @@ const initPlayer = async (isFirst = false) => {
   };
 };
 
-// 格式化剧集名称
-const formatName = (item: string): string => {
-  const [first] = item.split('$');
-  return first.includes('http') ? '正片' : first;
-};
-
-// 格式化剧集集数
-const formatIndex = (item: string): { index: string, url: string } => {
-  const [index, url] = item.split('$');
-  return { index, url };
-};
 
 // 获取播放源及剧集
 const getDetailInfo = async (): Promise<void> => {
-  const videoList = info.value;
+  const formattedSeason = await formatSeason(info.value);
 
-  // 播放源
-  const playFrom = videoList["vod_play_from"];
-  const playSource = playFrom.split('$').filter(Boolean);
-  const [source] = playSource;
+  active.flimSource = active.flimSource || Object.keys(formattedSeason)[0];
+  active.filmIndex = active.filmIndex || formattedSeason[active.flimSource][0];
 
-  if (!active.flimSource) active.flimSource = source;
-
-  // 剧集
-  const playUrl = videoList["vod_play_url"];
-  const playUrlDiffPlaySource = playUrl.split('$$$'); // 分离不同播放源
-  const playEpisodes = playUrlDiffPlaySource.map((item) =>
-    item
-      .replace(/\$+/g, '$')
-      .split('#')
-      .map((e) => {
-        if (!e.includes('$')) e = `正片$${e}`;
-        return e;
-      }),
-  );
-
-  if (!active.filmIndex) active.filmIndex = playEpisodes[0][0];
-
-  // 合并播放源和剧集
-  const fullList: Record<string, string[][]> = Object.fromEntries(
-    playSource.map((key, index) => [key, playEpisodes[index]])
-  );
-
-  videoList.fullList = fullList;
-  info.value = videoList;
-  season.value = fullList;
+  info.value.fullList = formattedSeason;
+  season.value = formattedSeason;
 };
 
 // 切换选集
@@ -1232,49 +969,14 @@ const changeEvent = async (item) => {
     VIDEO_PROCESS_DOC.playEnd = false;
   };
 
-  await putHistoryData();
+  await putHistory();
   await initPlayer(true);
 };
 
 // 获取豆瓣影片推荐
-const getDoubanRecommend = async () => {
-  const { site } = ext.value;
-  const { vod_name: name, vod_year: year, vod_douban_id: id } = info.value;
-  const ids = [];
-  let flag = true;
-  let vodIds = '';
-
-  try {
-    const doubanRecommendName = await fetchDoubanRecommend(id, name, year);
-
-    const searchPromises = doubanRecommendName.map(async (element) => {
-      try {
-        const item = await fetchSearch(site, element);
-        if (item && ids.length < 10) {
-          ids.push(item[0]);
-        }
-      } catch (err) { }
-    });
-
-    await Promise.all(searchPromises);
-    if (ids.length > 0) {
-      const idsFirst = ids[0]
-      if (!('vod_pic' in idsFirst)) {
-        flag = false;
-        vodIds = ids.map((movie) => movie["vod_id"]).join(',');
-      }
-    }
-
-    if (flag) recommend.value = ids;
-    else recommend.value = await fetchDetail(site, vodIds);
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-// 替换style
-const filterContent = (item) => {
-  return _.replace(item, /style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
+const fetchRecommend = async () => {
+  const response = await fetchDoubanRecommendHelper(ext.value.site, info.value);
+  recommend.value = response;
 };
 
 // 定时更新播放进度
@@ -1288,7 +990,7 @@ const timerUpdatePlayProcess = () => {
     VIDEO_PROCESS_DOC.duration = 0;
 
     if (season.value[siteSource].length === index + 1) {  // 最后一集
-      putHistoryData();
+      putHistory();
       if (playerMode.type === 'xgplayer') {
         player.value.xgplayer.pause();
       } else if (playerMode.type === 'dplayer') {
@@ -1308,7 +1010,7 @@ const timerUpdatePlayProcess = () => {
 
     const watchTime = set.value.skipStartEnd ? currentTime + skipConfig.value.skipTimeInEnd : currentTime;
     if (watchTime >= duration && duration !== 0) autoPlayNext();
-    else putHistoryData();
+    else putHistory();
 
     // console.log(
     //   `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
@@ -1332,52 +1034,64 @@ const timerUpdatePlayProcess = () => {
   }
 };
 
-// 获取是否追剧
-const getBinge = async () => {
+// 获取收藏
+const fetchBinge = async () => {
   const { id } = ext.value.site;
   const { vod_id } = info.value;
-  const res = await detailStar({ relateId: id, videoId: vod_id });
-  isVisible.binge = !res;
+  const response = await fetchBingeData(id, vod_id);
+  dataBinge.value = response.data;
+  isVisible.binge = !response.status;
 };
 
-// 在追
-const bingeEvent = async () => {
-  try {
-    const { id } = ext.value.site;
-    const db = await detailStar({ relateId: id, videoId: info.value.vod_id });
+// 更新收藏
+const putBinge = async (update: boolean = false) => {
+  const constructDoc = () => ({
+    relateId: ext.value.site.id,
+    videoId: info.value.vod_id,
+    videoImage: info.value.vod_pic,
+    videoName: info.value.vod_name,
+    videoType: info.value.type_name,
+    videoRemarks: info.value.vod_remarks,
+  });
 
-    if (isVisible.binge) {
-      const doc = {
-        relateId: id,
-        videoId: info.value.vod_id,
-        videoImage: info.value.vod_pic,
-        videoName: info.value.vod_name,
-        videoType: info.value.type_name,
-        videoRemarks: info.value.vod_remarks
-      };
-      if (!db) {
-        await addStar(doc);
-      }
+  let response: any;
+
+  if (dataBinge.value?.id) {
+    if (update) {
+      response = await putBingeData('update', dataBinge.value.id, constructDoc());
+      if (response?.data) dataBinge.value = response.data;
     } else {
-      await delStar(db.id);
+      response = await putBingeData('del', dataBinge.value.id);
+      dataBinge.value = {
+        relateId: null,
+        videoId: 0,
+        videoImage: "",
+        videoName: "",
+        videoType: "",
+        videoRemarks: "",
+        id: null
+      };
     }
-
-    isVisible.binge = !isVisible.binge;
-  } catch (error) {
-    console.info(error);
-    MessagePlugin.error(t('pages.player.message.error'));
+  } else if (!update) {
+    response = await putBingeData('add', constructDoc());
+    if (response?.data) dataBinge.value = response.data;
   }
+
+  if (response && !response.status) {
+    MessagePlugin.error(t('pages.player.message.error'));
+    return;
+  }
+
+  if (!update) isVisible.binge = !isVisible.binge;
 };
 
 // 选集排序
 const reverseOrderEvent = () => {
-  reverseOrder.value = !reverseOrder.value;
-  if (reverseOrder.value) {
-    console.log('[play][season]positive order');
-    season.value = JSON.parse(JSON.stringify(info.value.fullList));
+  isVisible.reverseOrder = !isVisible.reverseOrder;
+  if (isVisible.reverseOrder) {
+    season.value = reverseOrderHelper('positive', info.value.fullList);
   } else {
-    console.log('[play][season]reverse order');
-    season.value = _.mapValues(season.value, list => _.reverse([...list]));
+    season.value = reverseOrderHelper('negative', season.value);
   }
 };
 
@@ -1413,7 +1127,7 @@ const recommendEvent = async (item) => {
 
 // 更新历史跳过参数
 const skipTimeInEndChange = () => {
-  putHistoryData();
+  putHistory();
 };
 
 // 更新跳过开关全局存储
@@ -2017,10 +1731,60 @@ const openMainWinEvent = (): void => {
             line-height: 18px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             color: var(--td-text-color-primary);
 
-            .box-anthology-reverse-order {
-              cursor: pointer;
+            .left {
+              display: flex;
+              flex-direction: row;
+              flex-wrap: nowrap;
+              justify-content: flex-start;
+              align-items: flex-end;
+
+              .mg-left {
+                margin-left: var(--td-comp-margin-xs);
+              }
+
+              .box-anthology-title {
+                white-space: nowrap;
+                position: relative;
+                font-size: 18px;
+                line-height: 25px;
+                font-weight: 600;
+              }
+
+              .box-anthology-analyze {
+                :deep(.t-button) {
+                  padding: 0;
+                }
+
+                :deep(.t-button--variant-text) {
+                  .t-button__suffix {
+                    margin-left: var(--td-comp-margin-xxs);
+                  }
+
+                  .t-button__text {
+                    &:before {
+                      content: "";
+                      width: 1px;
+                      margin: 0 var(--td-comp-margin-xs);
+                      background: linear-gradient(180deg, transparent, var(--td-border-level-1-color), transparent);
+                    }
+                  }
+
+                  &:hover {
+                    background-color: transparent !important;
+                    border-color: transparent !important;
+                    color: var(--td-brand-color);
+                  }
+                }
+              }
+            }
+
+            .right {
+              .box-anthology-reverse-order {
+                cursor: pointer;
+              }
             }
           }
 
@@ -2275,5 +2039,9 @@ const openMainWinEvent = (): void => {
     position: absolute;
     left: calc(var(--td-comp-paddingLR-xxl) + var(--td-size-1));
   }
+}
+
+.active {
+  color: var(--td-brand-color);
 }
 </style>

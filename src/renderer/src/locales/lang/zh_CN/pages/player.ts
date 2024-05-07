@@ -33,5 +33,8 @@ export default {
     success: '成功',
     error: '失败',
     play: '请稍后,数据处理中,如长时间未播放请换源'
+  },
+  placeholder: {
+    analyze: '解析接口'
   }
 };
