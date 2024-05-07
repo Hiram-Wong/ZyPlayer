@@ -1761,6 +1761,10 @@ const openMainWinEvent = (): void => {
                   padding: 0;
                 }
 
+                :deep(.t-button:not(.t-is-disabled):not(.t-button--ghost)) {
+                  --ripple-color: transparent;
+                }
+
                 :deep(.t-button--variant-text) {
                   .t-button__suffix {
                     margin-left: var(--td-comp-margin-xxs);
@@ -1775,7 +1779,7 @@ const openMainWinEvent = (): void => {
                     }
                   }
 
-                  &:hover {
+                  &:hover, &:focus-visible {
                     background-color: transparent !important;
                     border-color: transparent !important;
                     color: var(--td-brand-color);
