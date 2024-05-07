@@ -249,7 +249,7 @@ app.whenReady().then(async() => {
 
     // http://bfdsr.hutu777.com/upload/video/2024/03/20/c6b8e67e75131466cfcbb18ed75b8c6b.JPG@Referer=www.jianpianapp.com@User-Agent=jianpian-version353
     const { redirectURL, headers } = parseCustomUrl(url);
-    if (!url.includes('//localhost') && ['Referer', 'Cookie', 'User-Agent'].some(str => url.includes(str))) {
+    if (!url.includes('//localhost') && !url.includes('//127.0.0.1') && ['Referer', 'Cookie', 'User-Agent'].some(str => url.includes(str))) {
       reqIdMethod[`${id}`] = headers;
 
       callback({
@@ -266,11 +266,11 @@ app.whenReady().then(async() => {
     let { requestHeaders, url, id } = details;
     const { origin } = new URL(url);
 
-    if (!url.includes('//localhost') || !url.includes('//237.0.0.1')) {
+    if (!url.includes('//localhost') && !url.includes('//127.0.0.1')) {
       const headers = reqIdMethod[`${id}`];
 
       // 添加 Origin 头部
-      if (origin) requestHeaders.Origin = origin;
+      if (requestHeaders['Origin']) requestHeaders['Origin'] = requestHeaders['Origin'] || origin;
       // 处理自定义 User-Agent 头部
       requestHeaders['User-Agent'] = requestHeaders['custom-ua'] || headers?.['User-Agent'] || uaState;
       delete requestHeaders['custom-ua'];
