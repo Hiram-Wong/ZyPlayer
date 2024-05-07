@@ -142,17 +142,17 @@
                   <chevron-right-s-icon />
                 </div>
               </div>
-              <div class="hot-block">
+              <div class="hot-block nowrap">
                 <span class="rate">
                   <star-icon />
                   {{ info["vod_score"] ? info["vod_score"] : '0.0' }}
                 </span>
                 <t-divider layout="vertical" v-show='info["type_name"]' />
-                <span v-show='info["type_name"]'>{{ info["type_name"] }}</span>
+                <span v-show='info["type_name"]' class="nowrap">{{ info["type_name"] }}</span>
                 <t-divider layout="vertical" v-show='info["vod_area"]' />
-                <span v-show='info["vod_area"]'>{{ info["vod_area"] }}</span>
+                <span v-show='info["vod_area"]' class="nowrap">{{ info["vod_area"] }}</span>
                 <t-divider layout="vertical" v-show='info["vod_year"]' />
-                <span v-show='info["vod_year"]'>{{ info["vod_year"] }}</span>
+                <span v-show='info["vod_year"]' class="nowrap">{{ info["vod_year"] }}</span>
               </div>
               <div class="function">
                 <div class="func-item like" @click="putBinge(false)">
@@ -1669,6 +1669,7 @@ const openMainWinEvent = (): void => {
             overflow: visible;
             position: relative;
             margin-top: 8px;
+            width: inherit;
 
             .rate {
               color: var(--td-brand-color);
