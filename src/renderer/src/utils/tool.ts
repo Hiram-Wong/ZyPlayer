@@ -132,4 +132,9 @@ const copyToClipboardApi = async (text: string): Promise<boolean> => {
   }
 };
 
-export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8, copyToClipboardApi }
+// 深拷贝辅助函数
+const dictDeepClone = (obj: any): any => {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8, copyToClipboardApi, dictDeepClone }
