@@ -303,7 +303,7 @@ const putBinge = async (update: boolean = false) => {
       response = await putBingeData('update', dataBinge.value.id, constructDoc());
       if (response?.data) dataBinge.value = response.data;
     } else {
-      response = await putBingeData('del', dataBinge.value.id);
+      response = await putBingeData('del', dataBinge.value.id, {});
       dataBinge.value = {
         relateId: null,
         videoId: 0,
@@ -315,7 +315,7 @@ const putBinge = async (update: boolean = false) => {
       };
     }
   } else if (!update) {
-    response = await putBingeData('add', constructDoc());
+    response = await putBingeData('add', '', constructDoc());
     if (response?.data) dataBinge.value = response.data;
   }
 
