@@ -334,32 +334,34 @@ const easyConfig = async() => {
         let oldLives = _.find(config.lives, { group: 'redirect' });
         if (oldLives && !Array.isArray(oldLives)) {
           oldLives = [oldLives]
-        };
-        let iptv;
-        console.log(oldLives)
+        }
+        let iptv = [];
+        console.log(oldLives);
         if (oldLives && oldLives.length > 0 && oldLives[0].channels) {
-          iptv = oldLives.map(live => {
-            const channel = live.channels[0];
-            console.log(channel)
-            const urlBase64 = channel.urls[0].split('&ext=')[1];
-            let url = urlBase64;
+            oldLives.forEach(live => {
+            live.channels.forEach(channel=>{
+              console.log(channel);
+              const urlBase64 = channel.urls[0].split('&ext=')[1];
+              let url = urlBase64;
 
-            // 使用正则表达式判断字符串是否为 Base64 编码
-            const isBase64 = /^[a-zA-Z0-9+/]*={0,2}$/.test(urlBase64);
+              // 使用正则表达式判断字符串是否为 Base64 编码
+              const isBase64 = /^[a-zA-Z0-9+/]*={0,2}$/.test(urlBase64);
 
-            if (isBase64) {
-              // 如果具有 Base64 编码的特征，则解码
-              url = Base64.parse(urlBase64);
-            }
+              if (isBase64) {
+                // 如果具有 Base64 编码的特征，则解码
+                url = Base64.parse(urlBase64);
+              }
 
-            return {
-              id: nanoid(),
-              name: channel.name,
-              type: 'remote',
-              isActive: true,
-              url: url
-            };
-          })
+              iptv.push({
+                id: nanoid(),
+                name: channel.name,
+                type: 'remote',
+                isActive: true,
+                url: url
+              });
+
+            });
+          });
         } else {
           iptv = config.lives.map(live => {
             return {
