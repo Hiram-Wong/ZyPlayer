@@ -235,24 +235,10 @@
                     <div class="videoItem-left" @click="recommendEvent(content)">
                       <t-image class="card-main-item" :src='content["vod_pic"]'
                         :style="{ width: '126px', height: '70px', 'border-radius': '5px' }" :lazy="true" fit="cover">
-                        <template #overlayContent>
-                          <span class="nowrap" :style="{
-                            position: 'absolute',
-                            right: '6px',
-                            bottom: '2px',
-                            maxWidth: '90%',
-                            color: '#fff'
-                          }">
-                            {{ content["vod_remarks"] }}
-                          </span>
-                        </template>
                       </t-image>
                     </div>
                     <div class="videoItem-right">
                       <div class="title nowrap">{{ content["vod_name"] }}</div>
-                      <div class="subtitle nowrap">
-                        {{ content["vod_blurb"] ? content["vod_blurb"] : '' }}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -388,6 +374,7 @@ import {
   playHelper,
   reverseOrderHelper,
   fetchDoubanRecommendHelper,
+  fetchRecommendSearchHelper,
   formatName,
   formatIndex,
   formatContent,
@@ -980,7 +967,7 @@ const changeEvent = async (item) => {
 
 // 获取豆瓣影片推荐
 const fetchRecommend = async () => {
-  const response = await fetchDoubanRecommendHelper(ext.value.site, info.value);
+  const response = await fetchDoubanRecommendHelper(info.value);
   recommend.value = response;
 };
 
@@ -1102,32 +1089,33 @@ const reverseOrderEvent = () => {
 
 // 推荐刷新数据
 const recommendEvent = async (item) => {
-  const { id } = ext.value.site;
+  const { site } = ext.value;
 
-  if (!('vod_play_from' in item && 'vod_play_url' in item)) {
-    const [detailItem] = await fetchFilmDetail(id, item.vod_id);
-    item = detailItem;
-  };
+  const response = await fetchRecommendSearchHelper(site, item.vod_name);
 
-  info.value = item;
-  recommend.value = [];
-  dataHistory.value = {};
-  skipConfig.value = { skipTimeInStart: 30, skipTimeInEnd: 30 };
-  VIDEO_PROCESS_DOC.duration = 0;
-  VIDEO_PROCESS_DOC.watchTime = 0;
-  VIDEO_PROCESS_DOC.playEnd = false;
+  if (!_.isEmpty(response)) {
+    info.value = response;
+    recommend.value = [];
+    dataHistory.value = {};
+    skipConfig.value = { skipTimeInStart: 30, skipTimeInEnd: 30 };
+    VIDEO_PROCESS_DOC.duration = 0;
+    VIDEO_PROCESS_DOC.watchTime = 0;
+    VIDEO_PROCESS_DOC.playEnd = false;
 
-  tmp.skipTime = 0;
-  active.flimSource = '';
-  active.filmIndex = '';
-  season.value = '';
-  isVisible.binge = false;
-  store.updateConfig({
-    type: 'film',
-    data: { info: item, ext: ext.value }
-  });
+    tmp.skipTime = 0;
+    active.flimSource = '';
+    active.filmIndex = '';
+    season.value = '';
+    isVisible.binge = false;
+    store.updateConfig({
+      type: 'film',
+      data: { info: item, ext: ext.value }
+    });
 
-  initPlayer();
+    initPlayer();
+  } else {
+    MessagePlugin.warning(t('pages.player.message.noRecommendSearch'))
+  }
 };
 
 // 更新历史跳过参数

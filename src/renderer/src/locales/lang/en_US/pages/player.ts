@@ -33,8 +33,10 @@ export default {
     success: 'Success',
     error: 'Fail',
     play: 'Please later, data processing, If not played for a long time, please change the source',
+    sniiferError: 'Sniffing failed, please change the source',
     official: 'Analyze completed, data is derived from {0}',
-    noDefaultAnalyze: 'Default resolution is not configured. Go to Setting-AnalyzeSetting-SetDefault'
+    noDefaultAnalyze: 'Not set default, Choose your own analysis line',
+    noRecommendSearch: 'No recommendation found for this source,  Switch is not performed'
   },
   placeholder: {
     analyze: 'AnalyzeApi'

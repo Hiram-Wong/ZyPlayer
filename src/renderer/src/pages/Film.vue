@@ -606,7 +606,7 @@ const playEvent = async (item) => {
     let site = siteConfig.value.default;
     if (_.has(item, 'relateSite')) site = item.relateSite;
 
-    if ( !('vod_play_from' in item && 'vod_play_url' in item) ) {
+    if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const [detailItem] = await fetchDetail(site, item.vod_id);
       item = detailItem;
     }

@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { XMLParser } from "fast-xml-parser";
-import * as cheerio from "cheerio";
 import _ from "lodash";
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
@@ -918,71 +917,102 @@ const extractPlayerUrl = async(url) => {
 }
 
 /**
- * 获取豆瓣页面链接
- * @param {*} id 视频唯一标识
- * @param {*} name 视频名称
- * @param {*} year 视频年份
- * @returns 豆瓣页面链接，如果没有搜到该视频，返回搜索页面链接
+ * 搜索视频ID和类型
+ * @param {string} name 视频名称
+ * @param {string} year 视频年份
+ * @returns {Promise<{id: string, type: string}>|null} 匹配的视频ID和类型，或null
  */
-const fetchDoubanLink = async (id: string, name: string, year: string) => {
-  const nameToSearch = encodeURI(name.trim());
-  const doubanSearchLink =
-    id && parseInt(id) !== 0
-      ? `https://movie.douban.com/subject/${id}`
-      : `https://www.douban.com/search?cat=1002&q=${nameToSearch}`;
+const fetchDoubanSearch = async (name: string, year: string) => {
   try {
-    const { data } = await axios.get(doubanSearchLink);
-    const $ = cheerio.load(data);
-    let link: any = "";
-    $("div.result").each((_, element) => {
-      const linkInDouban = $(element).find("div>div>h3>a").first();
-      const nameInDouban = linkInDouban.text().replace(/\s/g, "");
-      const subjectCast = $(element).find("span.subject-cast").text();
-      if (
-        nameToSearch === encodeURI(nameInDouban) &&
-        subjectCast &&
-        subjectCast.includes(year)
-      ) {
-        link = linkInDouban.attr("href");
-        return;
+    let data = {};
+    const url = `https://m.douban.com/rexxar/api/v2/search/subjects?q=${encodeURIComponent(name.trim())}`;
+
+    const response = await axios.get(url, { headers: {
+      "custom-referer": 'https://movie.douban.com'
+    }});
+    if (response.status === 200 && response.data.subjects.items.length > 0) {
+      for (const subject of response.data.subjects.items) {
+        const item = subject.target;
+        if (item.title === name && item.year === year && subject.target_type === 'movie' || subject.target_type === 'tv') {
+          data = {
+            vod_douban_id: item.id,
+            vod_douban_type: subject.target_type,
+            vod_score: item.rating.value,
+            vod_name: item.title,
+            vod_year: item.year,
+          }
+        }
       }
-    });
-    return link || doubanSearchLink;
+    }
+    console.log(data)
+    return data;
   } catch (err) {
-    throw err;
+    console.error(`[cms][fetchDoubanSearch][error]`, err);
+    return {};
   }
-}
+};
+
+
+/**
+ * 搜索视频ID和类型
+ * @param {string} id 豆瓣标识
+ * @param {string} type movie | tv
+ * @returns {Promise<{id: string, type: string}>|null} 匹配的视频ID和类型，或null
+ */
+const fetchDoubanDetail = async (id: string, type: string) => {
+  try {
+    let data = {}
+    if (id && type) {
+      const url = `https://m.douban.com/rexxar/api/v2/${type}/${id}`;
+
+      const response = await axios.get(url, { headers: {
+        "custom-referer": 'https://movie.douban.com'
+      }});
+      if (response.status === 200 && response.data) {
+        const item = response.data;
+        data = {
+          type_name: item.genres.json(','),
+          vod_douban_id: item.id,
+          vod_douban_type: item.target_type,
+          vod_lang: item.languages.json(','),
+          vod_score: item.rating.value,
+          vod_name: item.title,
+          vod_year: item.year,
+          vod_pic: item.pic?.normal || item.pic?.large,
+          vod_blurb: item.intro,
+          vod_content: item.intro,
+          vod_director: item.directors.map(item => item.name).join(','),
+          vod_actor: item.actors.map(item => item.name).join(','),
+        }
+      }
+    }
+    return data;
+  } catch (err) {
+    console.error(`[cms][fetchDoubanDetail][error]`, err);
+    return {};
+  }
+};
 
 /**
  * 获取豆瓣评分
  * @param {*} id 视频唯一标识
+ * @param {*} type 类型 tv｜movie
  * @param {*} name 视频名称
  * @param {*} year 视频年份
  * @returns 豆瓣评分
  */
-const fetchDoubanRate = async(id, name, year) => {
+const fetchDoubanRate = async(id, type, name, year) => {
   try {
-    const link = await fetchDoubanLink(id, name, year);
-    if (link.includes("https://www.douban.com/search")) {
-      return "暂无评分";
+    let rate = 0.0;
+    if (!id || !type) {
+      const { vod_score: foundRate } = await fetchDoubanSearch(name, year) as any;
+      rate = foundRate;
     } else {
-      const response = await axios.get(link);
-      const parsedHtml = cheerio.load(response.data);
-      const rating = parsedHtml("body")
-        .find("#interest_sectl")
-        .first()
-        .find("strong")
-        .first()
-        .text()
-        .replace(/\s/g, "");
-      return rating || "暂无评分";
-      // const rating = parsedHtml('body').find('#interest_sectl').first().find('strong').first();
-      // if (rating.text()) {
-      //   return rating.text().replace(/\s/g, '');
-      // } else {
-      //   return '暂无评分';
-      // }
-    }
+      const { vod_score: foundRate } = await fetchDoubanDetail(id, type) as any;
+      rate = foundRate;
+    };
+
+    return rate;
   } catch (err) {
     throw err;
   }
@@ -991,26 +1021,37 @@ const fetchDoubanRate = async(id, name, year) => {
 /**
  * 获取豆瓣相关视频推荐列表
  * @param {*} id 视频唯一标识
+ * @param {*} type 类型 tv｜movie
  * @param {*} name 视频名称
  * @param {*} year 视频年份
  * @returns 豆瓣相关视频推荐列表
  */
-const fetchDoubanRecommend = async(id, name, year) => {
+const fetchDoubanRecommend = async(id, type, name, year) => {
   try {
-    const link = await fetchDoubanLink(id, name, year);
-    if (link.includes("https://www.douban.com/search")) {
-      return [];
-    } else {
-      const response = await axios.get(link);
-      const $ = cheerio.load(response.data);
-      const recommendations = $("div.recommendations-bd")
-        .find("div>dl>dd>a")
-        .map((_, element) => $(element).text())
-        .get();
-      return recommendations;
+    if (!id || !type) {
+      const { vod_douban_id: foundId, vod_douban_type: foundType } = await fetchDoubanSearch(name, year) as any;
+      id = foundId;
+      type = foundType;
     }
+
+    if (id && type) {
+      const url = `https://m.douban.com/rexxar/api/v2/${type}/${id}/recommendations`;
+      const response = await axios.get(url, { headers: {
+        "custom-referer": 'https://movie.douban.com'
+      }});
+
+      return response.data.map((item) => ({
+        vod_douban_id: item.id,
+        vod_douban_type: item.id,
+        vod_pic: item.pic.large || item.pic.normal,
+        vod_name: item.title
+      })) || [];
+    }
+
+    return [];
   } catch (err) {
-    throw err;
+    console.error(`[cms][fetchDoubanRecommend][error]`, err);
+    return [];
   }
 }
 

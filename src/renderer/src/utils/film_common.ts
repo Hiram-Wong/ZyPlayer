@@ -308,68 +308,44 @@ const reverseOrderHelper = (action: 'positive' | 'negative', data: Record<string
 };
 
 // DouBan Recommend
-const fetchDoubanRecommendHelper = async (site: any, info: any): Promise<any[]> => {
+const fetchDoubanRecommendHelper = async (info: any): Promise<any[]> => {
   console.log('[film_common][fetchDoubanRecommendHelper][start]获取豆瓣推荐流程开启');
   let data: any = [];
 
   try {
-    if (site.search !== 0) {
-      const { vod_name: name, vod_year: year, vod_douban_id: doubanId } = info;
-      const recommendNames = await fetchDoubanRecommend(doubanId, name, year);
-
-      if (site.type === 7) await t3RuleInit(site);
-      else if(site.type ===8) await catvodRuleInit(site);
-
-      console.log(recommendNames)
-      // 并行查询搜索结果
-      const searchPromises = recommendNames.map(title =>
-        queue.add(async () => {
-          try {
-            const results = await fetchSearch(site, title);
-            console.log(results[0])
-            return results?.[0];
-          } catch (error) {
-            console.error(`[film_common][fetchDoubanRecommendHelper][searchError]搜索错误: ${title}`, error);
-            return false; // 处理错误，返回null表示无效结果
-          }
-        })
-      );
-
-      const searchResults = await Promise.all(searchPromises);
-
-      console.log(searchResults)
-
-      data = searchResults.filter(Boolean).slice(0, 10);
-
-      if (data && data.length > 0 && !('vod_pic' in data[0])) {
-        if ([0, 1].includes(site.type)) {
-          const ids = data.map((item) => item.vod_id);
-          data = await fetchDetail(site, ids.join(','));
-        } else {
-          const updatePromises = data.map(item =>
-            queue.add(async () => {
-              try {
-                const detail = await fetchDetail(site, item.vod_id);
-                return detail[0];
-              } catch (error) {
-                console.error(`[film_common][fetchDoubanRecommendHelper][detailError]获取详情错误: ${item.vod_id}`, error);
-                return null;
-              }
-            })
-          );
-          data = await Promise.all(updatePromises).then(results => results.filter(Boolean));
-        }
-      }
-
-      // 过滤掉无效结果，最多保留10个有效结果
-      data = data.filter(Boolean).slice(0, 10);
-    }
+    let { vod_name: name, vod_year: year, vod_douban_id: doubanId, vod_douban_type: doubanType } = info;
+    if (!year) year = new Date().getFullYear();
+    const recommendNames = await fetchDoubanRecommend(doubanId, doubanType, name, year);
+    data = recommendNames || [];
 
     console.log(`[film_common][fetchDoubanRecommendHelper][return]`, data);
   } catch (err) {
     console.log(`[film_common][fetchDoubanRecommendHelper][error]`, err);
   } finally {
     console.log(`[film_common][fetchDoubanRecommendHelper][end]获取豆瓣推荐流程结束`);
+    return data;
+  }
+};
+
+const fetchRecommendSearchHelper = async (site: any, kw: any): Promise<any[]> => {
+  console.log('[film_common][fetchDoubanRecommendHelper][start]推荐搜索流程开启');
+  let data: any = {};
+
+  try {
+    if (site.search !== 0) {
+      const response = await fetchSearch(site, kw);
+      if (response.length > 0) {
+        const item = response[0];
+        if (!('vod_play_from' in item && 'vod_play_url' in item)) {
+          [data] = await fetchDetail(site, item.vod_id);
+        }
+      }
+    };
+    console.log(`[film_common][fetchRecommendSearchHelper][return]`, data);
+  } catch (err) {
+    console.log(`[film_common][fetchRecommendSearchHelper][error]`, err);
+  } finally {
+    console.log(`[film_common][fetchRecommendSearchHelper][end]推荐搜索流程结束`);
     return data;
   }
 };
@@ -561,6 +537,7 @@ export {
   playHelper,
   reverseOrderHelper,
   fetchDoubanRecommendHelper,
+  fetchRecommendSearchHelper,
   formatName,
   formatIndex,
   formatContent,

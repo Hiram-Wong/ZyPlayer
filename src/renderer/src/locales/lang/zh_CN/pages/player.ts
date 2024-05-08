@@ -34,7 +34,9 @@ export default {
     error: '失败',
     play: '请稍后,数据处理中,如长时间未播放请换源',
     official: '解析流程处理完成,数据来源于:{0}',
-    noDefaultAnalyze: '未配置默认解析,前往设置-解析-设置默认'
+    sniiferError: '嗅探失败,请换源',
+    noDefaultAnalyze: '未配置默认解析,自行选择解析线路',
+    noRecommendSearch: '该源未找到相关推荐,不执行本次切换'
   },
   placeholder: {
     analyze: '解析接口'
