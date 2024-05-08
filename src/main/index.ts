@@ -263,26 +263,42 @@ app.whenReady().then(async() => {
   });
 
   defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    let { requestHeaders, url, id } = details;
-    const { origin } = new URL(url);
+    const { requestHeaders, url } = details;
+    const isLocalhostRef = (headerValue) => `${headerValue}`.includes('//localhost') || `${headerValue}`.includes('//127.0.0.1');
 
-    if (!url.includes('//localhost') && !url.includes('//127.0.0.1')) {
-      const headers = reqIdMethod[`${id}`];
-
-      // 添加 Origin 头部
-      if (requestHeaders['Origin']) requestHeaders['Origin'] = requestHeaders['Origin'] || origin;
-      // 处理自定义 User-Agent 头部
-      requestHeaders['User-Agent'] = requestHeaders['custom-ua'] || headers?.['User-Agent'] || uaState;
-      delete requestHeaders['custom-ua'];
-      // 处理自定义 Cookie 头部
-      requestHeaders['Cookie'] = requestHeaders['custom-cookie'] || headers?.['Cookie'];
-      delete requestHeaders['custom-cookie'];
-      // 处理自定义 Referer 头部
-      if (requestHeaders['custom-referer'] || headers?.['Referer']) requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
+    // 不处理本地地址
+    if (isLocalhostRef(url)) {
+      callback({ requestHeaders });
+      return;
     }
 
+    const origin = new URL(url).origin;
+    const headers = reqIdMethod[details.id] || {};
+
+    // 设置或清除可能的本地Origin
+    if (requestHeaders['Origin'] === origin) delete requestHeaders['Origin'];
+    if (isLocalhostRef(requestHeaders['Origin'])) {
+      delete requestHeaders['Origin']
+    }
+
+    // 设置或清除 User-Agent
+    requestHeaders['User-Agent'] = requestHeaders['custom-ua'] || headers['User-Agent'] || uaState;
+    delete requestHeaders['custom-ua'];
+
+    // 处理 Cookie
+    requestHeaders['Cookie'] = requestHeaders['custom-cookie'] || headers['Cookie'];
+    delete requestHeaders['custom-cookie'];
+
+    // 设置或清除可能的本地 Referer
+    if (requestHeaders['custom-referer'] || headers?.['Referer']) requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
+    if (isLocalhostRef(requestHeaders['Referer'])) {
+      delete requestHeaders['Referer']
+    }
+
+    // 清理不再需要的记录
+    delete reqIdMethod[details.id];
+
     callback({ requestHeaders });
-    delete reqIdMethod[`${id}`];
   });
 
   // Set app user model id for windows
