@@ -194,25 +194,27 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
       // 官方解析条件
       const isOfficial = (hostname && (VIP_LIST.some(host => hostname.includes(host))) || analyze.flag.some(flag => flimSource.includes(flag)));
 
-      // 官方解析地址
-      const officialSnifferUrl = isOfficial && analyze.url ? `${analyze.url}${url}` : '';
+      if (analyze?.url) {
+        // 官方解析地址
+        const officialSnifferUrl = isOfficial && analyze.url ? `${analyze.url}${url}` : '';
 
-      // 预处理嗅探URL
-      const preSnifferUrl = officialSnifferUrl;
+        // 预处理嗅探URL
+        const preSnifferUrl = officialSnifferUrl;
 
-      if (preSnifferUrl) {
-        switch (analyze.type) {
-          case 1: // JSON类型
-            playerUrl = await fetchJxJsonPlayUrlHelper(analyze.url, url);
-            break;
-          case 0: // Web类型
-            const snifferApi = snifferMode.type === 'custom' && /^http/.test(snifferMode.url)
-              ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
-              : '';
-            playerUrl = await fetchJxWebPlayUrlHelper(snifferMode.type, `${snifferApi}?url=${preSnifferUrl}`);
-            break;
-          default: // 不支持的解析类型处理
-            console.warn(`[film_common][playHelper][warn]不支持的解析类型: ${analyze.type}`);
+        if (preSnifferUrl) {
+          switch (analyze.type) {
+            case 1: // JSON类型
+              playerUrl = await fetchJxJsonPlayUrlHelper(analyze.url, url);
+              break;
+            case 0: // Web类型
+              const snifferApi = snifferMode.type === 'custom' && /^http/.test(snifferMode.url)
+                ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
+                : '';
+              playerUrl = await fetchJxWebPlayUrlHelper(snifferMode.type, `${snifferApi}?url=${preSnifferUrl}`);
+              break;
+            default: // 不支持的解析类型处理
+              console.warn(`[film_common][playHelper][warn]不支持的解析类型: ${analyze.type}`);
+          }
         }
       }
 
@@ -254,7 +256,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
           break;
       }
       if (!playerUrl) playerUrl = url; // 可能出现处理后是空链接
-      if (analyze?.url) {
+      if (analyze) {
         const resJX = await jxPlay(playerUrl, analyze, snifferMode);
         playerUrl = resJX.url;
         isOfficial = resJX.isOfficial;
@@ -280,7 +282,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
     const snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
     data.url = await sniffer(snifferMode.type, snifferPlayUrl);
     data.mediaType = 'm3u8';
-    data.isOfficial = false;
+    data.isOfficial = isOfficial;
 
     console.log(`[film_common][playHelper][return]`, data);
   } catch (err) {

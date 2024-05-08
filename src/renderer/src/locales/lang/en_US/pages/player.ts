@@ -33,7 +33,8 @@ export default {
     success: 'Success',
     error: 'Fail',
     play: 'Please later, data processing, If not played for a long time, please change the source',
-    official: 'Analyze completed, data is derived from {0}'
+    official: 'Analyze completed, data is derived from {0}',
+    noDefaultAnalyze: 'Default resolution is not configured. Go to Setting-AnalyzeSetting-SetDefault'
   },
   placeholder: {
     analyze: 'AnalyzeApi'

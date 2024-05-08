@@ -33,7 +33,8 @@ export default {
     success: '成功',
     error: '失败',
     play: '请稍后,数据处理中,如长时间未播放请换源',
-    official: '解析流程处理完成,数据来源于:{0}'
+    official: '解析流程处理完成,数据来源于:{0}',
+    noDefaultAnalyze: '未配置默认解析,前往设置-解析-设置默认'
   },
   placeholder: {
     analyze: '解析接口'
