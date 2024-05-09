@@ -19,28 +19,25 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     main: {
       resolve: {
         alias: {
-          '@main': resolve('src/main')
-        }
+          '@main': resolve('src/main'),
+        },
       },
       build: {
         rollupOptions: {
-          external: ['sqlite3']
-        }
+          external: ['sqlite3'],
+        },
       },
-      plugins: [
-        externalizeDepsPlugin(),
-        swcPlugin()
-      ]
+      plugins: [externalizeDepsPlugin(), swcPlugin()],
     },
     preload: {
-      plugins: [externalizeDepsPlugin()]
+      plugins: [externalizeDepsPlugin()],
     },
     renderer: {
       resolve: {
         alias: {
           '@renderer': resolve('src/renderer'),
-          '@': resolve('src/renderer/src')
-        }
+          '@': resolve('src/renderer/src'),
+        },
       },
       build: {
         emptyOutDir: true, // 打包时先清空上一次构建生成的目录
@@ -52,12 +49,14 @@ export default defineConfig(({ mode }: ConfigEnv) => {
             chunkFileNames: `assets/chunk/[name][hash].js`, // 包的入口文件名称
             assetFileNames: `assets/file/[name][hash].[ext]`, // 资源文件像 字体，图片等
             manualChunks(id) {
-              if (id.includes("monaco-editor")) return "monaco-editor_"; //代码分割为编辑器
-              else if (id.includes("node_modules")) return "vendor_"; //代码分割为第三方包
-              else if (id.includes("src/renderer/src/utils/drpy")) return "worker_t3_"; //代码分割为worker进程
-            }
-          }
-        }
+              if (id.includes('monaco-editor'))
+                return 'monaco-editor_'; //代码分割为编辑器
+              else if (id.includes('node_modules'))
+                return 'vendor_'; //代码分割为第三方包
+              else if (id.includes('src/renderer/src/utils/drpy')) return 'worker_t3_'; //代码分割为worker进程
+            },
+          },
+        },
       },
       css: {
         preprocessorOptions: {
@@ -93,17 +92,17 @@ export default defineConfig(({ mode }: ConfigEnv) => {
               library: 'vue-next',
             }),
           ],
-        })
+        }),
       ],
       server: {
         strictPort: true, // 端口冲突自动分配端口
         proxy: {
           [VITE_API_URL_PREFIX]: {
-            target: VITE_API_URL,  // 后台接口域名
-            changeOrigin: true,  //是否跨域
-          }
-        }
-      }
-    }
-  }
-})
+            target: VITE_API_URL, // 后台接口域名
+            changeOrigin: true, //是否跨域
+          },
+        },
+      },
+    },
+  };
+});
