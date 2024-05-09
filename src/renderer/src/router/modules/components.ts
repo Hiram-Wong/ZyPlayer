@@ -8,10 +8,10 @@ export default [
     component: Layout,
     meta: {
       title: {
-        zh_CN: "影视",
-        en_US: "Film"
+        zh_CN: '影视',
+        en_US: 'Film',
       },
-      icon: 'movie-clapper'
+      icon: 'movie-clapper',
     },
     children: [
       {
@@ -21,9 +21,9 @@ export default [
         meta: {
           icon: 'movie-clapper',
           title: {
-            zh_CN: "影视",
-            en_US: "Film"
-          }
+            zh_CN: '影视',
+            en_US: 'Film',
+          },
         },
       },
     ],
@@ -35,10 +35,10 @@ export default [
     component: Layout,
     meta: {
       title: {
-        zh_CN: "电视",
-        en_US: "IPTV"
+        zh_CN: '电视',
+        en_US: 'IPTV',
       },
-      icon: 'tv-1'
+      icon: 'tv-1',
     },
     children: [
       {
@@ -48,9 +48,9 @@ export default [
         meta: {
           icon: 'tv-1',
           title: {
-            zh_CN: "电视",
-            en_US: "IPTV"
-          }
+            zh_CN: '电视',
+            en_US: 'IPTV',
+          },
         },
       },
     ],
@@ -62,10 +62,10 @@ export default [
     component: Layout,
     meta: {
       title: {
-        zh_CN: "网盘",
-        en_US: "Drive"
+        zh_CN: '网盘',
+        en_US: 'Drive',
       },
-      icon: 'cloud'
+      icon: 'cloud',
     },
     children: [
       {
@@ -75,10 +75,10 @@ export default [
         meta: {
           icon: 'cloud',
           title: {
-            zh_CN: "网盘",
-            en_US: "Drive"
-          }
-        }
+            zh_CN: '网盘',
+            en_US: 'Drive',
+          },
+        },
       },
     ],
   },
@@ -88,11 +88,11 @@ export default [
     redirect: '/play/index',
     meta: {
       title: {
-        zh_CN: "播放",
-        en_US: " Play"
+        zh_CN: '播放',
+        en_US: 'Play',
       },
       icon: 'play-circle-stroke',
-      hidden: true
+      hidden: true,
     },
     children: [
       {
@@ -101,11 +101,11 @@ export default [
         component: () => import('@/pages/Play.vue'),
         meta: {
           title: {
-            zh_CN: "播放",
-            en_US: " Play"
+            zh_CN: '播放',
+            en_US: 'Play',
           },
-          icon: 'play-circle-stroke'
-        }
+          icon: 'play-circle-stroke',
+        },
       },
     ],
   },
@@ -116,10 +116,10 @@ export default [
     component: Layout,
     meta: {
       title: {
-        zh_CN: "解析",
-        en_US: "Analyze"
+        zh_CN: '解析',
+        en_US: 'Analyze',
       },
-      icon: 'view-in-ar'
+      icon: 'view-in-ar',
     },
     children: [
       {
@@ -129,10 +129,10 @@ export default [
         meta: {
           icon: 'view-in-ar',
           title: {
-            zh_CN: "解析",
-            en_US: "Analyze"
-          }
-        }
+            zh_CN: '解析',
+            en_US: 'Analyze',
+          },
+        },
       },
     ],
   },
@@ -143,10 +143,10 @@ export default [
     component: Layout,
     meta: {
       title: {
-        zh_CN: "过刻",
-        en_US: "Moment"
+        zh_CN: '过刻',
+        en_US: 'Moment',
       },
-      icon: 'data-display'
+      icon: 'data-display',
     },
     children: [
       {
@@ -156,10 +156,10 @@ export default [
         meta: {
           icon: 'data-display',
           title: {
-            zh_CN: "过刻",
-            en_US: "Moment"
-          }
-        }
+            zh_CN: '过刻',
+            en_US: 'Moment',
+          },
+        },
       },
     ],
   },
@@ -170,11 +170,11 @@ export default [
     redirect: '/setting/index',
     meta: {
       title: {
-        zh_CN: "设置",
-        en_US: "Setting"
+        zh_CN: '设置',
+        en_US: 'Setting',
       },
       icon: 'setting-1',
-      hidden: true
+      hidden: true,
     },
     children: [
       {
@@ -184,10 +184,10 @@ export default [
         meta: {
           icon: 'setting-1',
           title: {
-            zh_CN: "设置",
-            en_US: "Setting"
-          }
-        }
+            zh_CN: '设置',
+            en_US: 'Setting',
+          },
+        },
       },
     ],
   },
@@ -198,11 +198,11 @@ export default [
     redirect: '/test/index',
     meta: {
       title: {
-        zh_CN: "测试",
-        en_US: " Test"
+        zh_CN: '测试',
+        en_US: 'Test',
       },
       icon: 'fill-color-1',
-      hidden: true
+      hidden: true,
     },
     children: [
       {
@@ -211,11 +211,11 @@ export default [
         component: () => import('@/pages/Test.vue'),
         meta: {
           title: {
-            zh_CN: "测试",
-            en_US: " Test"
+            zh_CN: '测试',
+            en_US: 'Test',
           },
-          icon: 'fill-color-1'
-        }
+          icon: 'fill-color-1',
+        },
       },
     ],
   },
