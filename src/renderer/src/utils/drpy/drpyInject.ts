@@ -1,13 +1,13 @@
 /*!
  * @module drpyInject
  * @brief T3网络请求、缓存模块处理库
- * @version 3.1.1
+ * @version 3.1.2
  *
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/utils/quickjs_ctx.py | Source on GitHub}
  *
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-03-29T23:02:29+08:00
+ * @modification-date 2023-05-09T22:16:27+08:00
  * @modification-description Python转TypeScript, 适用于JavaScript项目
  */
 
@@ -54,10 +54,14 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       data[key] = value;
     });
   } else if (!body && Object.keys(data).length !== 0 && method !== 'GET') {
-    let contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type');
-    let contentType = 'application/json';
+    const contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type');
+    const contentType = 'application/json';
     if (contentTypeKeys.length > 0) {
-      headers[contentTypeKeys[contentTypeKeys.length - 1]] = contentType;
+      const contentTypeKey = contentTypeKeys.slice(-1)[0];
+      const oldContentType = headers[contentTypeKey];
+      if (!oldContentType.includes(contentType)) {
+        headers[contentTypeKey] = contentType;
+      }
     } else {
       headers['Content-Type'] = contentType;
     }
