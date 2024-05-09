@@ -56,7 +56,7 @@ const puppeteerInElectron = async (
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
 
     const page = await pie.getPage(browser, snifferWindow); // 获取页面
-    const pageRecord = { page, browser, timestamp: Date.now() / 1000, timeoutId: null };
+    const pageRecord = { page, browser, timestamp: Date.now() / 1000, timerId: null };
     pageStore[pageId] = pageRecord; // 存储页面
 
     if (ua) await page.setUserAgent(ua); // 设置ua
@@ -66,7 +66,7 @@ const puppeteerInElectron = async (
       const cleanup = async (pageId: string) => {
         if (pageId) {
           if (pageStore[pageId]) {
-            if (pageStore[pageId]?.timeoutId) clearTimeout(pageStore[pageId].timeoutId);
+            if (pageStore[pageId]?.timerId) await clearTimeout(pageStore[pageId].timerId);
             if (pageStore[pageId]?.page) await pageStore[pageId].page.close().catch((err) => logger.error(err));
             if (pageStore[pageId]?.browser) await pageStore[pageId].browser.disconnect();
             delete pageStore[pageId];
@@ -114,6 +114,7 @@ const puppeteerInElectron = async (
         logger.info('--------!timerId---------');
         pageStore[pageId].timerId = setTimeout(async () => {
           await cleanup(pageId);
+          logger.info(`[pie]id: ${pageId} sniffer timeout`);
           reject(handleResponse(500, 'fail', new Error('fail', { cause: 'sniffer timeout' })));
         }, 15000);
       } else {
