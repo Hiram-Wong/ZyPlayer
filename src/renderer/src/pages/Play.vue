@@ -327,6 +327,7 @@ import 'xgplayer/es/plugins/danmu/index.css';
 import DPlayer from 'dplayer';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
+import WebTorrent from './play/js/webtorrent';
 import _ from 'lodash';
 import moment from 'moment';
 import {
@@ -360,7 +361,6 @@ import HlsPlugin from 'xgplayer-hls';
 import Mp4Plugin from 'xgplayer-mp4';
 
 import { setDefault } from '@/api/setting';
-import { fetchFilmDetail } from '@/api/site';
 import { fetchChannelList } from '@/api/iptv';
 
 import { getConfig, checkMediaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
@@ -721,6 +721,31 @@ const createPlayer = async (url: string, videoType: string = '') => {
               const hls = new Hls();
               hls.loadSource(video.src);
               hls.attachMedia(video);
+            },
+          },
+        }
+        break;
+      case 'magnet':
+        config = {
+          url,
+          type: 'customWebTorrent',
+          customType: {
+            customWebTorrent: function (video, player) {
+              player.container.classList.add('dplayer-loading');
+              const client = new WebTorrent();
+              const torrentId = video.src;
+              client.add(torrentId, (torrent) => {
+                const file = torrent.files.find((file) => file.name.endsWith('.mp4') || file.name.endsWith('.mkv'));
+                file.renderTo(
+                  video,
+                  {
+                    autoplay: player.options.autoplay,
+                  },
+                  () => {
+                    player.container.classList.remove('dplayer-loading');
+                  }
+                );
+              });
             },
           },
         }
