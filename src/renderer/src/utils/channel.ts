@@ -50,11 +50,11 @@ const txt = (text: string) => {
   return docs;
 };
 
-const parseChannel = async(type: 'local'|'remote'|'url', path: string) => {
+const parseChannel = async (type: 'local' | 'remote' | 'url', path: string) => {
   try {
     let fileContent;
     if (type === 'local') {
-      await window.electron.ipcRenderer.invoke('read-file', path).then(res => {
+      await window.electron.ipcRenderer.invoke('read-file', path).then((res) => {
         fileContent = res;
       });
     } else if (type === 'remote') {
@@ -73,7 +73,7 @@ const parseChannel = async(type: 'local'|'remote'|'url', path: string) => {
         channelContent = txt(fileContent);
       }
 
-      for(let i = 0 ;i < channelContent.length; i++ ) {
+      for (let i = 0; i < channelContent.length; i++) {
         const dataItem = channelContent[i];
         if (_.has(dataItem, 'id')) {
           // 使用 _.isString() 检查 dataItem.id 是否为字符串类型
@@ -91,9 +91,9 @@ const parseChannel = async(type: 'local'|'remote'|'url', path: string) => {
   } catch (err) {
     throw err;
   }
-}
+};
 
-const checkChannel = async(url:string) => {
+const checkChannel = async (url: string) => {
   try {
     const startTime: Date = new Date(); // 记录开始请求的时间
     await axios.get(url, { timeout: 3000 }); // 3s超时
@@ -104,13 +104,13 @@ const checkChannel = async(url:string) => {
     console.error(err);
     return false;
   }
-}
+};
 
 const stopCheckChannel = () => {
   controller.abort();
 
   controller = new AbortController();
-}
+};
 
 /**
  * 获取电子节目单
@@ -119,19 +119,19 @@ const stopCheckChannel = () => {
  * @param {*} date 日期 2023-01-31
  * @returns 电子节目单列表
  */
-const fetchChannelEpg = async(url: string, tvg_name: string, date: string) => {
+const fetchChannelEpg = async (url: string, tvg_name: string, date: string) => {
   try {
     const res = await axios.get(url, {
       params: {
         ch: tvg_name,
-        date: date
-      }
+        date: date,
+      },
     });
     const epgData = res.data.epg_data;
     return epgData;
   } catch (err) {
     throw err;
   }
-}
+};
 
-export { parseChannel, checkChannel, stopCheckChannel, fetchChannelEpg }
+export { parseChannel, checkChannel, stopCheckChannel, fetchChannelEpg };

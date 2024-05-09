@@ -2,13 +2,13 @@ import _ from 'lodash';
 import db from '../index';
 
 export default {
-  all () {
+  all() {
     return db.value();
   },
-  clear () {
+  clear() {
     return db.setState({}).write();
   },
-  init (docs) {
+  init(docs) {
     return db.setState(docs).write();
-  }
-}
+  },
+};

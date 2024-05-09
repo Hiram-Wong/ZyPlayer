@@ -1,10 +1,10 @@
-import { app } from "electron";
+import { app } from 'electron';
 import fastify from 'fastify';
-import fastifyLogger from "fastify-logger";
-import fastifyMultipart from "@fastify/multipart";
+import fastifyLogger from 'fastify-logger';
+import fastifyMultipart from '@fastify/multipart';
 
 import { JsonDB, Config } from 'node-json-db';
-import { join } from "path";
+import { join } from 'path';
 import logger from '../logger';
 import { analyze, iptv, setting, drive, site, history, star, db, proxy, catbox, cache, lab, file } from './routes';
 import initConfig from './routes/catbox/config';
@@ -13,15 +13,16 @@ logger.info('[server] fastify module initialized');
 
 let logOpt = {
   console: true, // 是否开启console.log 。。。
-  file: join(app.getPath("userData"), 'logs/fastify.log'), // 文件路径
+  file: join(app.getPath('userData'), 'logs/fastify.log'), // 文件路径
   maxBufferLength: 4096, // 日志写入缓存队列最大长度
   flushInterval: 1000, // flush间隔
-  logrotator: { // 分割配置
+  logrotator: {
+    // 分割配置
     byHour: false,
     byDay: true,
-    hourDelimiter: '_'
-  }
-}
+    hourDelimiter: '_',
+  },
+};
 const { opt } = fastifyLogger(logOpt);
 opt.stream = null;
 
@@ -42,11 +43,11 @@ const initServer = async () => {
     });
 
     server.decorate('config', initConfig);
-    server.decorate('db', new JsonDB(new Config(join(app.getPath("userData"), "cache.json"), true, true, '/')));
+    server.decorate('db', new JsonDB(new Config(join(app.getPath('userData'), 'cache.json'), true, true, '/')));
 
     server.get('/', async (_, reply) => {
-      reply.code(200).send({status: 'run'})
-    })
+      reply.code(200).send({ status: 'run' });
+    });
     server.register(fastifyMultipart);
     server.register(analyze);
     server.register(iptv);
@@ -67,6 +68,6 @@ const initServer = async () => {
     server.log.error(err);
     process.exit(1);
   }
-}
+};
 
 export default initServer;

@@ -7,42 +7,42 @@ import { findBestLCS } from './similarity';
 let __drives = {};
 let __subtitle_cache = {};
 
-const get_drives_path = async(tid) => {
-	const index = tid.indexOf('/', 1);
-	const name = tid.substring(1, index);
-	const path = tid.substring(index);
-	return { drives: await get_drives(name), path };
-}
+const get_drives_path = async (tid) => {
+  const index = tid.indexOf('/', 1);
+  const name = tid.substring(1, index);
+  const path = tid.substring(index);
+  return { drives: await get_drives(name), path };
+};
 
-const get_drives = async(name) => {
-	try {
-		const { settings, api, server } = __drives[name];
-		if (settings.v3 == null) {
-			//获取 设置
-			settings.v3 = false;
-			const data = (await fetch(server + '/api/public/settings')).json().data;
-			if (_.isArray(data)) {
-				settings.title = data.find((x) => x.key == 'title')?.value;
-				settings.v3 = false;
-				settings.version = data.find((x) => x.key == 'version')?.value;
-				settings.enableSearch = data.find((x) => x.key == 'enable search')?.value == 'true';
-			} else {
-				settings.title = data.title;
-				settings.v3 = true;
-				settings.version = data.version;
-				settings.enableSearch = false; //v3 没有找到 搜索配置
-			}
-			//不同版本 接口不一样
-			api.path = settings.v3 ? '/api/fs/list' : '/api/public/path';
-			api.file = settings.v3 ? '/api/fs/get' : '/api/public/path';
-			api.search = settings.v3 ? '/api/public/search' : '/api/public/search';
-			api.other = settings.v3 ? '/api/fs/other' : null;
-		}
-		return __drives[name];
-	} catch (err) {
-		throw err
-	}
-}
+const get_drives = async (name) => {
+  try {
+    const { settings, api, server } = __drives[name];
+    if (settings.v3 == null) {
+      //获取 设置
+      settings.v3 = false;
+      const data = (await fetch(server + '/api/public/settings')).json().data;
+      if (_.isArray(data)) {
+        settings.title = data.find((x) => x.key == 'title')?.value;
+        settings.v3 = false;
+        settings.version = data.find((x) => x.key == 'version')?.value;
+        settings.enableSearch = data.find((x) => x.key == 'enable search')?.value == 'true';
+      } else {
+        settings.title = data.title;
+        settings.v3 = true;
+        settings.version = data.version;
+        settings.enableSearch = false; //v3 没有找到 搜索配置
+      }
+      //不同版本 接口不一样
+      api.path = settings.v3 ? '/api/fs/list' : '/api/public/path';
+      api.file = settings.v3 ? '/api/fs/get' : '/api/public/path';
+      api.search = settings.v3 ? '/api/public/search' : '/api/public/search';
+      api.other = settings.v3 ? '/api/fs/other' : null;
+    }
+    return __drives[name];
+  } catch (err) {
+    throw err;
+  }
+};
 
 const init = ({ skey, stype, ext }) => {
   const item = ext;
@@ -68,28 +68,28 @@ const init = ({ skey, stype, ext }) => {
 
     //获取路径
     async getPath(path) {
-      const response = await fetch(this.server + this.api.path,{
-        method: "POST",
+      const response = await fetch(this.server + this.api.path, {
+        method: 'POST',
         mode: 'cors',
         headers: {
-          "Content-Type": "application/json; charset=UTF-8"
+          'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: this.getParams(path)
-      })
+        body: this.getParams(path),
+      });
       const res = await response.json();
       return this.settings.v3 ? res.data.content : res.data.files;
     },
 
     //获取文件
     async getFile(path) {
-      const response = await fetch(this.server + this.api.file,{
-        method: "POST",
+      const response = await fetch(this.server + this.api.file, {
+        method: 'POST',
         mode: 'cors',
         headers: {
-          "Content-Type": "application/json; charset=UTF-8"
+          'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: this.getParams(path)
-      })
+        body: this.getParams(path),
+      });
       const res = await response.json();
       const data = this.settings.v3 ? res.data : res.data.files[0];
       if (!this.settings.v3) data.raw_url = data.url; //v2 的url和v3不一样
@@ -99,13 +99,13 @@ const init = ({ skey, stype, ext }) => {
     //获取其他
     async getOther(method, path) {
       const data = this.getParams(path);
-      const response = await fetch(this.server + this.api.other,{
-        method: "POST",
+      const response = await fetch(this.server + this.api.other, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json; charset=UTF-8"
+          'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: data
-      })
+        body: data,
+      });
       const res = await response.json();
       return res;
     },
@@ -117,7 +117,7 @@ const init = ({ skey, stype, ext }) => {
 
     //是否是视频
     isVideo(data) {
-      return this.settings["v3"] ? data.type === 2 : data.type === 3;
+      return this.settings['v3'] ? data.type === 2 : data.type === 3;
     },
 
     //是否是字幕
@@ -135,8 +135,13 @@ const init = ({ skey, stype, ext }) => {
 
     //获取封面
     getPic(data) {
-      let pic = this.settings["v3"] ? data.thumb : data.thumbnail;
-      return pic || (this.isFolder(data) ? 'https://img.alicdn.com/imgextra/i1/O1CN01rGJZac1Zn37NL70IT_!!6000000003238-2-tps-230-180.png' : '');
+      let pic = this.settings['v3'] ? data.thumb : data.thumbnail;
+      return (
+        pic ||
+        (this.isFolder(data)
+          ? 'https://img.alicdn.com/imgextra/i1/O1CN01rGJZac1Zn37NL70IT_!!6000000003238-2-tps-230-180.png'
+          : '')
+      );
     },
 
     //获取大小
@@ -145,7 +150,6 @@ const init = ({ skey, stype, ext }) => {
       const i = Math.floor(Math.log(size) / Math.log(1024));
       return `${(size / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
     },
-  
 
     //获取备注
     getRemark(data) {
@@ -210,7 +214,7 @@ const dir = async (dir, pg = 1) => {
     pagecount: pg,
     list: allList,
   });
-}
+};
 
 async function file(file) {
   let { drives, path } = await get_drives_path(file);
@@ -278,11 +282,10 @@ async function file(file) {
   }
 }
 
-
 const search = (wd) => {
-	return JSON.stringify({
-		list: [],
-	});
-}
+  return JSON.stringify({
+    list: [],
+  });
+};
 
-export { init, dir, file, search }
+export { init, dir, file, search };

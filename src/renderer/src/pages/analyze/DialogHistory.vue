@@ -1,28 +1,19 @@
 <template>
-  <t-drawer
-    v-model:visible="formVisible"
-    show-in-attached-element
-    :header="$t('pages.analyze.history.title')"
-    size="small"
-    class="history-items"
-    >
-    <div v-for="item in historyList" :key="item.id" @click="historyPlayEvent(item)" >
+  <t-drawer v-model:visible="formVisible" show-in-attached-element :header="$t('pages.analyze.history.title')"
+    size="small" class="history-items">
+    <div v-for="item in historyList" :key="item.id" @click="historyPlayEvent(item)">
       <div class="history-item">
         <div class="date">{{ formatDate(item.date) }}</div>
-        <t-popup
-          placement="bottom"
-          :content="item.videoName"
-          :overlay-style="{ maxWidth: '290px' }"
+        <t-popup placement="bottom" :content="item.videoName" :overlay-style="{ maxWidth: '290px' }"
           :overlay-inner-style="{
             background: 'var(--td-bg-color-page)',
             boxShadow: '0 15px 30px rgba(0,0,0,.2)',
-          }"
-        >
+          }">
           <div class="title">{{ item.videoName }}</div>
         </t-popup>
         <div class="clear" @click.stop="histroyDeleteEvent(item.id)">
           <!-- <t-popconfirm content="确认删除吗" @confirm="histroyDeleteEvent(item.id)"> -->
-            <delete-icon />
+          <delete-icon />
           <!-- </t-popconfirm> -->
         </div>
       </div>
@@ -98,7 +89,7 @@ const historyPlayEvent = async (item) => {
 
 // 历史删除
 const histroyDeleteEvent = async (id) => {
-  const index = _.findIndex(historyList.value, {id});
+  const index = _.findIndex(historyList.value, { id });
   if (index !== -1) {
     historyList.value.splice(index, 1);
     delHistory(id);
@@ -166,14 +157,17 @@ const formatDate = (timestamp) => {
     font-weight: 500;
     cursor: pointer;
     padding: 0 var(--td-comp-paddingLR-xs);
+
     &:hover {
       border-radius: var(--td-radius-medium);
       background-color: rgba(132, 133, 141, 0.16);
     }
   }
+
   .date {
     width: 6em;
   }
+
   .title {
     padding: 0 var(--td-comp-paddingLR-xs);
     flex: 1 1 auto;

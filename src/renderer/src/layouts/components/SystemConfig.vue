@@ -1,9 +1,9 @@
 <template>
-	<div class="system-config" @click="gotoSetting">
+  <div class="system-config" @click="gotoSetting">
     <t-button theme="default" shape="square" variant="text">
       <setting-icon />
     </t-button>
-	</div>
+  </div>
 </template>
 
 <script setup lang="ts">

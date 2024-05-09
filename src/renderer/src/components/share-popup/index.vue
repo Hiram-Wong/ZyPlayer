@@ -1,11 +1,6 @@
 <template>
-  <t-popup
-    v-model:visible="formVisible"
-    :on-visible-change="onShareVisibleChange"
-    trigger="click"
-    placement="bottom"
-    :overlay-inner-style="{ boxShadow: 'none', padding: '0', borderRadius: '8px' }"
-  >
+  <t-popup v-model:visible="formVisible" :on-visible-change="onShareVisibleChange" trigger="click" placement="bottom"
+    :overlay-inner-style="{ boxShadow: 'none', padding: '0', borderRadius: '8px' }">
     <slot name="customize"></slot>
     <template #content>
       <div class="share-container">
@@ -85,7 +80,7 @@ watch(
   },
 );
 
-const copyToClipboard = async(content, successMessage, errorMessage) => {
+const copyToClipboard = async (content, successMessage, errorMessage) => {
   const res = await copyToClipboardApi(content);
   if (res) {
     MessagePlugin.info(successMessage);
@@ -101,7 +96,7 @@ const onShareVisibleChange = (_, context) => {
 };
 
 // 复制分享地址
-const copyShareUrl = async() => {
+const copyShareUrl = async () => {
   const successMessage = t('pages.share.message.copySuccess');
   const errorMessage = t('pages.share.message.copyFail');
   await copyToClipboard(data.value.url, successMessage, errorMessage);
@@ -134,6 +129,7 @@ const copyShareUrl = async() => {
 
     &-left {
       width: 210px;
+
       .header-name {
         font-size: 14px;
         line-height: 30px;
@@ -197,6 +193,7 @@ const copyShareUrl = async() => {
       position: absolute;
       left: 0;
     }
+
     .btn-copy {
       position: relative;
       right: 6px;
@@ -215,4 +212,3 @@ const copyShareUrl = async() => {
   }
 }
 </style>
-  

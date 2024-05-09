@@ -4,53 +4,58 @@ import db from '../index';
 const TABLE_NAME = 'tbl_setting';
 
 export default {
-  all () {
+  all() {
     const db_res = db.get(TABLE_NAME).value();
     return _.castArray(db_res);
   },
-  format_all () {
+  format_all() {
     const db_res = _.castArray(db.get(TABLE_NAME).value());
-    const res = _.reduce(_.map(db_res, obj => [obj.key, obj.value]), (acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {});
+    const res = _.reduce(
+      _.map(db_res, (obj) => [obj.key, obj.value]),
+      (acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      },
+      {},
+    );
     return res;
   },
-  source () {
+  source() {
     return _.castArray(db.get(TABLE_NAME).value());
   },
-  update (id, doc) {
-    return db.get(TABLE_NAME).find({id}).assign(doc).write();
+  update(id, doc) {
+    return db.get(TABLE_NAME).find({ id }).assign(doc).write();
   },
-  update_data (key, doc) {
+  update_data(key, doc) {
     return db.get(TABLE_NAME).find({ key: key }).assign(doc).write();
   },
-  clear () {
+  clear() {
     return db.set(TABLE_NAME, []).write();
   },
-  set (docs) {
+  set(docs) {
     docs = _.castArray(docs);
     return db.set(TABLE_NAME, docs).write();
   },
-  find (doc) {
+  find(doc) {
     const res = db.get(TABLE_NAME).find(doc).value();
     if (res) return res;
-    else return {
-      id: '',
-      key: '',
-      value: ''
-    };
+    else
+      return {
+        id: '',
+        key: '',
+        value: '',
+      };
   },
-  filter (doc) {
+  filter(doc) {
     return db.get(TABLE_NAME).filter(doc).value();
   },
-  get (id: string) {
+  get(id: string) {
     return db.get(TABLE_NAME).find({ id }).value();
   },
-  add (doc) {
+  add(doc) {
     return db.get(TABLE_NAME).insert(doc).write();
   },
-  remove (id: string) {
+  remove(id: string) {
     return db.get(TABLE_NAME).removeById(id).write();
-  }
-}
+  },
+};

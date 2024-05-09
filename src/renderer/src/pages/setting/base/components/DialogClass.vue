@@ -4,13 +4,8 @@
       <div class="class-dialog-container dialog-container-padding">
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
-          <t-textarea
-            v-model="classData"
-            class="textarea"
-            placeholder="请输入过滤关键词,逗号分隔"
-            autofocus
-            :autosize="{ minRows: 3, maxRows: 5 }"
-          />
+          <t-textarea v-model="classData" class="textarea" placeholder="请输入过滤关键词,逗号分隔" autofocus
+            :autosize="{ minRows: 3, maxRows: 5 }" />
           <p class="tip bottom-tip">分隔符请使用英文状态下","</p>
           <div class="optios">
             <t-form-item style="float: right; margin: ">

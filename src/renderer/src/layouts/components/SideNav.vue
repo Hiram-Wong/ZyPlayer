@@ -1,6 +1,6 @@
 <template>
   <div :class="[`${prefix}-sidebar-layout`, platform === 'darwin' && !macFull ? 'mac_unmax_style' : '']">
-    <t-menu :value="active"  :class="`${prefix}-block-column`">
+    <t-menu :value="active" :class="`${prefix}-block-column`">
       <img class="logo" src="@/assets/icon.png" alt="logo" />
       <template v-for="item in list" :key="item.path">
         <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)[0])">
@@ -70,7 +70,7 @@ const list = computed(() => {
 });
 
 const menuIcon = (item: ListItemType) => {
-  if (typeof item.icon === 'string') return <t-icon name={item.icon} style="" stroke-width="2.5"/>;
+  if (typeof item.icon === 'string') return <t-icon name={item.icon} style="" stroke-width="2.5" />;
   const RenderIcon = item.icon;
   return RenderIcon;
 };

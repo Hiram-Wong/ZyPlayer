@@ -5,10 +5,10 @@
  * @see https://www.npmjs.com/package/electron-log
  */
 import { ipcMain, app } from 'electron';
-import { join } from "path";
+import { join } from 'path';
 import logger from 'electron-log';
 
-const LOG_PATH = join(app.getPath("userData"), 'logs/main.log');
+const LOG_PATH = join(app.getPath('userData'), 'logs/main.log');
 
 // 日志级别error, warn, info, verbose, debug, silly。默认是silly最低级别否则不生成日志
 logger.transports.file.level = 'silly';
@@ -18,8 +18,8 @@ logger.transports.file.resolvePathFn = () => LOG_PATH;
 
 logger.info(`[logger] log module initialized; path: ${LOG_PATH}`);
 
-ipcMain.handle('logger', (_, level,arg)=> {
-  if (level === "info") {
+ipcMain.handle('logger', (_, level, arg) => {
+  if (level === 'info') {
     logger.info(arg);
   } else if (level === 'warn') {
     logger.warn(arg);
@@ -28,6 +28,6 @@ ipcMain.handle('logger', (_, level,arg)=> {
   } else if (level === 'debug') {
     logger.debug(arg);
   }
-})
+});
 
 export default logger;

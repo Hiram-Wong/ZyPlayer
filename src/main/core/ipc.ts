@@ -8,8 +8,7 @@ import logger from './logger';
 import { setting } from './db/service';
 import puppeteerInElectron from '../utils/pie';
 
-
-const tmpDir = async(path: string) => {
+const tmpDir = async (path: string) => {
   try {
     const pathExists = await fs.pathExistsSync(path);
     logger.info(`[ipcMain] tmpDir: ${path}-exists-${pathExists}`);
@@ -19,7 +18,7 @@ const tmpDir = async(path: string) => {
     await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
     logger.info(`[ipcMain] tmpDir: ${path}-created-sucess`);
   } catch (err) {
-    logger.error(err)
+    logger.error(err);
   }
 };
 
@@ -46,7 +45,7 @@ const ipcListen = () => {
       const command = `${path} "${url}"`;
       exec(command);
       logger.info(`[ipcMain] call-player: command:${command}`);
-    };
+    }
   });
 
   ipcMain.on('reboot-app', () => {
@@ -76,7 +75,7 @@ const ipcListen = () => {
     return totalSize;
   };
 
-  ipcMain.on('tmpdir-manage',  (event, action, trails) => {
+  ipcMain.on('tmpdir-manage', (event, action, trails) => {
     let formatPath;
     if (is.dev) {
       formatPath = join(process.cwd(), trails);
@@ -84,25 +83,28 @@ const ipcListen = () => {
       formatPath = join(app.getPath('userData'), trails);
     }
     if (action === 'rmdir' || action === 'mkdir' || action === 'init') tmpDir(formatPath);
-    if (action === 'size') event.reply("tmpdir-manage-size", getFolderSize(formatPath));
+    if (action === 'size') event.reply('tmpdir-manage-size', getFolderSize(formatPath));
   });
 
-  ipcMain.handle('ffmpeg-thumbnail',  async(_, url, key) => {
-    let uaState: any = setting.find({ key: "ua" }).value;
+  ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
+    let uaState: any = setting.find({ key: 'ua' }).value;
     const formatPath = is.dev
-    ? join(process.cwd(), 'thumbnail', `${key}.jpg`)
-    : join(app.getPath('userData'), 'thumbnail', `${key}.jpg`);
+      ? join(process.cwd(), 'thumbnail', `${key}.jpg`)
+      : join(app.getPath('userData'), 'thumbnail', `${key}.jpg`);
 
-    const ffmpegCommand = "ffmpeg"; // ffmpeg 命令
-    const inputOptions = ["-i", url]; // 输入选项，替换为实际视频流 URL
+    const ffmpegCommand = 'ffmpeg'; // ffmpeg 命令
+    const inputOptions = ['-i', url]; // 输入选项，替换为实际视频流 URL
     const outputOptions = [
-      "-y", // 使用 -y 选项强制覆盖输出文件
-      "-frames:v", "1",
-      "-q:v", "20", // 设置输出图片质量为5
-      "-user_agent", `"${uaState}"`,
-      `"${formatPath}"`
+      '-y', // 使用 -y 选项强制覆盖输出文件
+      '-frames:v',
+      '1',
+      '-q:v',
+      '20', // 设置输出图片质量为5
+      '-user_agent',
+      `"${uaState}"`,
+      `"${formatPath}"`,
     ];
-    const command = [ffmpegCommand, ...outputOptions , ...inputOptions].join(" "); // 确保 -user_agent 选项位于输入 URL 之前
+    const command = [ffmpegCommand, ...outputOptions, ...inputOptions].join(' '); // 确保 -user_agent 选项位于输入 URL 之前
 
     try {
       await exec(command);
@@ -110,15 +112,15 @@ const ipcListen = () => {
       logger.info(`[ipcMain] ffmpeg-thumbnail status:${isGenerat} command:${command}`);
       return {
         key,
-        url: `file://${formatPath}`
+        url: `file://${formatPath}`,
       };
     } catch (err) {
       logger.error(`[ipcMain] Error generating thumbnail: ${err}`);
       return {
         key,
-        url: ''
+        url: '',
       };
-    };
+    }
   });
 
   ipcMain.handle('ffmpeg-installed-check', async () => {
@@ -133,7 +135,7 @@ const ipcListen = () => {
   });
 
   ipcMain.handle('sniffer-media', async (_, url, script, customRegex) => {
-    const ua = setting.find({ key: "ua" }).value;
+    const ua = setting.find({ key: 'ua' }).value;
     const res = await puppeteerInElectron(url, script, customRegex, ua);
     return res;
   });
@@ -141,7 +143,7 @@ const ipcListen = () => {
   ipcMain.handle('read-file', async (_, path) => {
     const fileContent = await fs.readFileSync(path, 'utf8').toString();
     const res = fileContent ? fileContent : '';
-    logger.info(res)
+    logger.info(res);
 
     return res;
   });
@@ -151,7 +153,7 @@ const ipcListen = () => {
   });
 
   ipcMain.on('open-path', async (_, file, create) => {
-    const path = join(app.getPath("userData"), file);
+    const path = join(app.getPath('userData'), file);
     // 查看目录是否存在，如果不存在，就创建一个
     if (create) fs.ensureDirSync(path);
     shell.openPath(path);
@@ -167,6 +169,6 @@ const ipcListen = () => {
   ipcMain.on('quit-app', () => {
     app.quit();
   });
-}
+};
 
-export { ipcListen, tmpDir }
+export { ipcListen, tmpDir };

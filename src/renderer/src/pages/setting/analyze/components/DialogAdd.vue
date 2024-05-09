@@ -1,12 +1,8 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center"
+    :footer="false">
     <template #body>
-      <t-form
-        :data="formData"
-        :rules="rulesSingle"
-        :label-width="60"
-        @submit="onSubmit"
-      >
+      <t-form :data="formData" :rules="rulesSingle" :label-width="60" @submit="onSubmit">
         <t-form-item :label="$t('pages.setting.analyze.name')" name="name">
           <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
@@ -65,7 +61,7 @@ watch(
   },
 );
 
-const onSubmit = async() => {
+const onSubmit = async () => {
   try {
     const res = await addAnalyzeItem(formData);
     MessagePlugin.success('添加成功');
@@ -88,5 +84,4 @@ const rulesSingle = {
 };
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

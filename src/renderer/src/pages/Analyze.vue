@@ -1,16 +1,18 @@
 <template>
   <div class="analyze view-container">
-    <common-nav :title="$t('pages.analyze.name')" :list="analyzeConfig.data" :active="active.nav" @change-key="changeDefaultEvent" />
+    <common-nav :title="$t('pages.analyze.name')" :list="analyzeConfig.data" :active="active.nav"
+      @change-key="changeDefaultEvent" />
     <div class="content">
       <div class="container">
         <div class="analyze-player">
           <div class="player-bg"></div>
-          <div class="head-info-section" :style="[ iframeUrl ? 'background-color: rgba(37, 37, 37, 0.78)' : '']">
+          <div class="head-info-section" :style="[iframeUrl ? 'background-color: rgba(37, 37, 37, 0.78)' : '']">
             <div class="left">
               <div class="info">
                 <!-- <div class="avatar mg-right"></div> -->
                 <div class="title mg-right">{{ urlTitle ? urlTitle : $t('pages.analyze.noPlay') }}</div>
-                <t-button shape="round" size="small" class="open mg-right" v-if="iframeUrl" @click="openCurrentUrl">{{ $t('pages.analyze.source') }}</t-button>
+                <t-button shape="round" size="small" class="open mg-right" v-if="iframeUrl" @click="openCurrentUrl">{{
+                  $t('pages.analyze.source') }}</t-button>
                 <div class="share mg-right" v-if="iframeUrl" @click="shareEvent">
                   <share-popup v-model:visible="isVisible.share" :data="shareData">
                     <template #customize>
@@ -31,32 +33,18 @@
               </div>
             </div>
           </div>
-          <iframe
-            v-if="iframeUrl"
-            class="webview"
-            :src="iframeUrl"
-            allowtransparency="true"
-            frameborder="0"
-            scrolling="no"
-            allowfullscreen="true"
-            webkit-playsinline
-            playsinline
-            sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
-          ></iframe>
+          <iframe v-if="iframeUrl" class="webview" :src="iframeUrl" allowtransparency="true" frameborder="0"
+            scrolling="no" allowfullscreen="true" webkit-playsinline playsinline
+            sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
           <!-- <webview class="webview" v-if="iframeUrl" :src="iframeUrl" disablewebsecurity allowfullscreen/> -->
         </div>
         <div class="analyze-setting">
           <div class="analyze-setting-group">
-            <t-input
-              v-model="analysisUrl"
-              class="input-url"
-              :placeholder="$t('pages.analyze.inputUrl')"
-              size="large"
-              @change="formatUrlEvent"
-            />
+            <t-input v-model="analysisUrl" class="input-url" :placeholder="$t('pages.analyze.inputUrl')" size="large"
+              @change="formatUrlEvent" />
             <div class="analyze-bottom-group">
               <div class="popover" @click="isVisible.search = true">
-                <app-icon size="1.3rem" class="popover-icon"/>
+                <app-icon size="1.3rem" class="popover-icon" />
               </div>
             </div>
             <t-button class="analyze-play" size="large" @click="analysisEvent">
@@ -66,11 +54,7 @@
         </div>
       </div>
     </div>
-    <dialog-iframem-view
-      v-model:visible="isVisible.platform"
-      :data="platformData"
-      @platform-play="platformPlay"
-    />
+    <dialog-iframem-view v-model:visible="isVisible.platform" :data="platformData" @platform-play="platformPlay" />
     <dialog-search-view v-model:visible="isVisible.search" class="dialog-search-view" @open-platform="openPlatform" />
     <dialog-history-view v-model:visible="isVisible.history" @history-play="historyPlayEvent" />
   </div>
@@ -108,7 +92,7 @@ const shareData = ref({
 
 const platformData = ref({
   name: '',
-  url:''
+  url: ''
 });
 
 const analyzeConfig = ref({
@@ -263,7 +247,7 @@ const shareEvent = () => {
 // 切换源
 const changeDefaultEvent = async (id) => {
   active.value.nav = id;
-  if(analysisUrl.value) await getVideoInfo(analysisUrl.value, urlTitle.value);
+  if (analysisUrl.value) await getVideoInfo(analysisUrl.value, urlTitle.value);
 };
 </script>
 
@@ -287,11 +271,13 @@ const changeDefaultEvent = async (id) => {
     border-radius: 5px;
     cursor: pointer;
     font-size: 20px;
+
     .member-name {
       font-size: 12px;
       margin-left: 4px;
     }
   }
+
   .nav-sub-tab-member-info {
     margin-top: 16px;
   }
@@ -307,12 +293,14 @@ const changeDefaultEvent = async (id) => {
     position: relative;
     overflow: hidden;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+
     .container {
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+
       .analyze-player {
         flex: 1 1;
         border-radius: var(--td-radius-extraLarge);
@@ -321,6 +309,7 @@ const changeDefaultEvent = async (id) => {
         width: 100%;
         position: relative;
         overflow: hidden;
+
         .player-bg {
           z-index: 1;
           height: 100%;
@@ -329,6 +318,7 @@ const changeDefaultEvent = async (id) => {
           position: absolute;
           background: var(--td-bg-color-page) url(../assets/bg-player.jpg) center center;
         }
+
         .head-info-section {
           z-index: 3;
           position: relative;
@@ -339,35 +329,42 @@ const changeDefaultEvent = async (id) => {
           display: flex;
           justify-content: space-between;
           border-radius: var(--td-radius-large) var(--td-radius-large) 0 0;
+
           .mg-right {
             margin-right: 6px;
-            color: rgba(255,255,255,.9);
+            color: rgba(255, 255, 255, .9);
           }
+
           .mg-left {
             margin-left: 6px;
-            color: rgba(255,255,255,.9);
+            color: rgba(255, 255, 255, .9);
           }
+
           .left {
             display: flex;
             align-items: center;
+
             .info {
               height: 32px;
               cursor: pointer;
-              background: rgba(0,0,0,.2);
+              background: rgba(0, 0, 0, .2);
               border-radius: 33px;
               align-items: center;
               padding: 2px;
               display: flex;
+
               .avatar {
                 width: 32px;
                 height: 32px;
+
                 img {
                   width: 100%;
                   height: 100%;
-                  border: 2px solid rgba(22,24,35,.06);
+                  border: 2px solid rgba(22, 24, 35, .06);
                   border-radius: 50%;
                 }
               }
+
               .title {
                 padding-left: 6px;
                 text-overflow: ellipsis;
@@ -377,7 +374,9 @@ const changeDefaultEvent = async (id) => {
                 max-width: 150px;
                 min-width: 64px;
               }
-              .share, .close {
+
+              .share,
+              .close {
                 height: 24px;
                 width: 24px;
                 display: flex;
@@ -390,18 +389,22 @@ const changeDefaultEvent = async (id) => {
               }
             }
           }
+
           .right {
             display: flex;
             align-items: center;
+
             .action {
               height: 32px;
               cursor: pointer;
-              background: rgba(0,0,0,.2);
+              background: rgba(0, 0, 0, .2);
               border-radius: 33px;
               align-items: center;
               padding: 2px 6px 2px 2px;
               display: flex;
-              .history, .close {
+
+              .history,
+              .close {
                 height: 24px;
                 width: 24px;
                 display: flex;
@@ -415,6 +418,7 @@ const changeDefaultEvent = async (id) => {
             }
           }
         }
+
         .webview {
           position: relative;
           z-index: 3;
@@ -422,8 +426,10 @@ const changeDefaultEvent = async (id) => {
           width: 100%;
         }
       }
+
       .analyze-setting {
         margin-top: 5px;
+
         &-group {
           position: relative;
           height: 40px;
@@ -431,16 +437,19 @@ const changeDefaultEvent = async (id) => {
           border-radius: 20px;
           background-color: var(--td-bg-content-input);
           display: flex;
+
           :deep(.t-input) {
             border-radius: 20px;
             background-color: var(--td-bg-content-input);
             border: none;
             outline: none;
           }
+
           :deep(.t-input--focused) {
             box-shadow: none;
             color: none;
           }
+
           :deep(.input-url) {
             overflow: visible;
             outline: none;
@@ -451,27 +460,33 @@ const changeDefaultEvent = async (id) => {
             color: var(--td-text-color-primary);
             display: inline-block;
           }
+
           .analyze-bottom-group {
             display: flex;
             align-items: center;
             height: 40px;
+
             .popover {
               cursor: pointer;
+
               &:hover {
                 .popover-icon {
                   opacity: 1;
                   color: var(--td-text-color-primary);
                 }
               }
+
               &-icon {
                 opacity: .6;
                 margin-right: 20px;
               }
             }
           }
+
           .analyze-play {
             border-radius: 0 20px 20px;
             width: 5em;
+
             .analyze-tip {
               color: hsl(0deg 0% 0% / 60%);
               font-size: 15px;
@@ -483,6 +498,7 @@ const changeDefaultEvent = async (id) => {
         }
       }
     }
+
     .analyze-flex {
       .mini-box {
         border-radius: var(--td-radius-round);
@@ -492,29 +508,35 @@ const changeDefaultEvent = async (id) => {
         display: flex;
         align-items: center;
         cursor: pointer;
+
         &-close {
           margin-right: var(--td-comp-margin-s);
           width: 15px;
           display: flex;
           justify-content: center;
           color: var(--td-brand-color);
+
           svg {
             margin: 0 auto;
           }
         }
+
         &-title-warp {
           margin: 0 var(--td-comp-margin-xs) 0 var(--td-comp-margin-l);
           overflow: hidden;
           width: 100%;
+
           .mini-box-title {
             display: inline-block;
             white-space: nowrap;
             animation: marquee 10s linear infinite;
           }
+
           @keyframes marquee {
             0% {
               transform: translateX(100%);
             }
+
             100% {
               transform: translateX(-100%);
             }
@@ -530,13 +552,16 @@ const changeDefaultEvent = async (id) => {
   .t-dialog__wrap {
     overflow: hidden;
   }
+
   .t-dialog__position {
     padding: 0;
     flex-direction: column;
+
     .t-dialog--top {
       flex-grow: 1;
       display: flex;
       flex-direction: column;
+
       .t-dialog__body {
         flex: 1;
         display: flex;

@@ -1,12 +1,6 @@
 <template>
-  <t-dialog
-    v-model:visible="formVisible"
-    :header="$t('pages.setting.dialog.edit')"
-    :width="650"
-    placement="center"
-    :footer="false"
-    class="dialog-edit"
-  >
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.edit')" :width="650" placement="center"
+    :footer="false" class="dialog-edit">
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
@@ -55,7 +49,7 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = ref(props.data);
 
-const onSubmit = async() => {
+const onSubmit = async () => {
   try {
     await updateAnalyzeItem(formData.value.id, formData.value)
     MessagePlugin.success('修改成功');
@@ -95,5 +89,4 @@ const rules = {
   url: [{ required: true, message: '请输入Api接口url', type: 'error' }],
 };
 </script>
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

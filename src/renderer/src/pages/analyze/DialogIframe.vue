@@ -1,12 +1,6 @@
 <template>
-  <t-dialog
-    v-model:visible="formVisible"
-    show-in-attached-element
-    width="100%"
-    :header="platformData.name"
-    :footer="false"
-    @close="closeEvent"
-  >
+  <t-dialog v-model:visible="formVisible" show-in-attached-element width="100%" :header="platformData.name"
+    :footer="false" @close="closeEvent">
     <div v-if="platformData.url" class="platform-container">
       <webview ref="webviewRef" :src="platformData.url" class="platform-play-box" disablewebsecurity allowpopups />
       <div class="side-floatbtn">
@@ -136,14 +130,17 @@ const clearIframe = () => {
   display: flex;
   flex-direction: column;
   flex: 1;
+
   .platform-play-box {
     flex: 1;
     width: 100%;
     height: 100%;
+
     &::-webkit-scrollbar {
       width: 8px;
       background: transparent;
     }
+
     &::-webkit-scrollbar-thumb {
       border-radius: 6px;
       border: 2px solid transparent;
@@ -151,20 +148,24 @@ const clearIframe = () => {
       background-color: var(--td-scrollbar-color);
     }
   }
+
   .side-floatbtn {
     position: absolute;
     left: 0;
     bottom: 40px;
     display: inline-block;
+
     .btn-lists {
       float: right;
       width: 32px;
+
       .btn-list {
         position: relative;
         float: left;
         display: block;
         width: 100%;
         margin-bottom: 10px;
+
         .btn {
           position: relative;
           left: 0;
@@ -174,6 +175,7 @@ const clearIframe = () => {
           border-radius: 0 40px 40px 0;
           color: var(--td-text-color-primary);
           background: var(--td-bg-aside);
+
           .icon {
             position: absolute;
             top: 9px;

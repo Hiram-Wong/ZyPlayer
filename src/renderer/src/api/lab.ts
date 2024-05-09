@@ -5,22 +5,22 @@ export function fetchDebugSource(action) {
     url: '/v1/lab/debugSource',
     method: 'get',
     params: {
-      action
-    }
-  })
+      action,
+    },
+  });
 }
 
 export function setDebugSource(text) {
   return request({
     url: '/v1/lab/debugSource',
     method: 'post',
-    data: text
-  })
+    data: text,
+  });
 }
 
 export function delDebugSource() {
   return request({
     url: `/v1/lab/debugSource`,
     method: 'delete',
-  })
+  });
 }

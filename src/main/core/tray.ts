@@ -1,6 +1,6 @@
 import { platform } from '@electron-toolkit/utils';
-import { Tray, Menu, app, nativeImage, nativeTheme } from "electron";
-import { join } from "path";
+import { Tray, Menu, app, nativeImage, nativeTheme } from 'electron';
+import { join } from 'path';
 import logger from './logger';
 
 /**
@@ -23,7 +23,7 @@ const createSystemTray = (win) => {
   Menu.setApplicationMenu(createTrayMenu(win));
   mainTray.setToolTip('zyplayer');
   // 左键事件
-  mainTray.on("click", () => {
+  mainTray.on('click', () => {
     if (!win.isDestroyed()) {
       if (win.isVisible()) {
         win.hide();
@@ -58,7 +58,7 @@ const createTrayMenu = (win) => {
     },
     { type: 'separator' },
     {
-      label: "退出",
+      label: '退出',
       click: () => {
         app.quit();
       },
@@ -66,5 +66,5 @@ const createTrayMenu = (win) => {
   ]);
 };
 
-logger.info("[tray] tray module initialized");
+logger.info('[tray] tray module initialized');
 export default createSystemTray;

@@ -7,8 +7,8 @@ export function fetchIPTVList() {
     method: 'get',
     params: {
       timestamp: new Date().getTime(),
-    }
-  })
+    },
+  });
 }
 
 // 获取iptv活跃列表
@@ -16,19 +16,19 @@ export function fetchIptvActive() {
   return request({
     url: '/v1/iptv/active',
     method: 'get',
-    params: {}
-  })
+    params: {},
+  });
 }
 
-// iptv分页
+// iptv分页ß
 export function fetchIptvPage(kw: string) {
   return request({
     url: `/v1/iptv/page`,
     method: 'get',
     params: {
-      kw
-    }
-  })
+      kw,
+    },
+  });
 }
 
 // 清空 channel
@@ -36,8 +36,8 @@ export function clearChannel() {
   return request({
     url: '/v1/channel/clear',
     method: 'delete',
-    params: {}
-  })
+    params: {},
+  });
 }
 
 // 添加 channel
@@ -45,40 +45,43 @@ export function addChannel(doc) {
   return request({
     url: '/v1/channel',
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
-export function fetchChannelList(page, limit, key=null, group=null) {
+export function fetchChannelList(page, limit, key = null, group = null) {
   return request({
     url: '/v1/channel/page',
     method: 'get',
     params: {
-      page, limit, key, group
-    }
-  })
+      page,
+      limit,
+      key,
+      group,
+    },
+  });
 }
 
 export function delChannelItem(id) {
   return request({
     url: `/v1/channel/${id}`,
     method: 'delete',
-  })
+  });
 }
 
 export function updateIptvItem(id, doc) {
   return request({
     url: `/v1/iptv/${id}`,
     method: 'put',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 export function delIptvItem(id) {
   return request({
     url: `/v1/iptv/${id}`,
     method: 'delete',
-  })
+  });
 }
 
 // iptv添加
@@ -86,6 +89,6 @@ export function addIptvItem(doc) {
   return request({
     url: `/v1/iptv`,
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }

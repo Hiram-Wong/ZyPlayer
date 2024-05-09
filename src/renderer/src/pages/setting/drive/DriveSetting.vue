@@ -20,7 +20,8 @@
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" :placeholder="$t('pages.setting.header.search')" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
+            <t-input v-model="searchValue" :placeholder="$t('pages.setting.header.search')" clearable
+              @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -29,20 +30,12 @@
         </div>
       </t-row>
     </div>
-    <t-table
-      row-key="id"
-      :data="driveTableConfig.data"
-      :sort="driveTableConfig.sort"
-      height="calc(100vh - 180px)"
-      :columns="COLUMNS"
-      :hover="true"
-      :pagination="pagination"
-      @sort-change="rehandleSortChange"
-      @select-change="rehandleSelectChange"
-      @page-change="rehandlePageChange"
-    >
+    <t-table row-key="id" :data="driveTableConfig.data" :sort="driveTableConfig.sort" height="calc(100vh - 180px)"
+      :columns="COLUMNS" :hover="true" :pagination="pagination" @sort-change="rehandleSortChange"
+      @select-change="rehandleSelectChange" @page-change="rehandlePageChange">
       <template #name="{ row }">
-        <t-badge v-if="row.id === driveTableConfig.default" size="small" :offset="[0, 3]" count="默" dot>{{ row.name }}</t-badge>
+        <t-badge v-if="row.id === driveTableConfig.default" size="small" :offset="[0, 3]" count="默" dot>{{ row.name
+          }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
@@ -50,7 +43,7 @@
       </template>
       <template #op="slotProps">
         <t-space>
-          <t-link theme="primary" @click="defaultEvent(slotProps.row)">{{ $t('pages.setting.table.default') }}</t-link> 
+          <t-link theme="primary" @click="defaultEvent(slotProps.row)">{{ $t('pages.setting.table.default') }}</t-link>
           <t-link theme="primary" @click="editEvent(slotProps)">{{ $t('pages.setting.table.edit') }}</t-link>
           <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="removeEvent(slotProps.row)">
             <t-link theme="danger">{{ $t('pages.setting.table.delete') }}</t-link>
@@ -114,8 +107,8 @@ watch(
       emitReload.emit('drive-reload');
     }
   }, {
-    deep: true
-  }
+  deep: true
+}
 );
 
 const rehandleSelectChange = (val) => {
@@ -217,9 +210,11 @@ const aliAuthEvent = () => {
 .setting-iptv-container {
   height: 100%;
   padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+
   .header {
     margin: var(--td-comp-margin-s) 0;
   }
+
   .left-operation-container {
     .component-op {
       display: flex;
@@ -229,6 +224,7 @@ const aliAuthEvent = () => {
       border-radius: var(--td-radius-default);
       align-items: center;
       border-radius: var(--td-radius-medium);
+
       .item {
         color: var(--td-text-color-placeholder);
         border-radius: var(--td-radius-medium);
@@ -238,6 +234,7 @@ const aliAuthEvent = () => {
         height: 22px;
         cursor: pointer;
         text-decoration: none;
+
         &:hover {
           transition: all 0.2s ease 0s;
           color: var(--td-text-color-primary);
@@ -249,16 +246,20 @@ const aliAuthEvent = () => {
 
   :deep(.t-table) {
     background-color: var(--td-bg-color-container);
+
     tr {
       background-color: var(--td-bg-color-container);
+
       &:hover {
         background-color: var(--td-bg-color-container-hover);
       }
     }
   }
-  :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
+
+  :deep(.t-table__header--fixed):not(.t-table__header--multiple)>tr>th {
     background-color: var(--td-bg-color-container);
   }
+
   :deep(.t-table__pagination) {
     background-color: var(--td-bg-color-container);
   }

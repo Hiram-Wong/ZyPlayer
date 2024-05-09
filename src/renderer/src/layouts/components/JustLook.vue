@@ -3,16 +3,8 @@
     <t-button theme="default" shape="square" variant="text" @click="toggleDrawerAndHandlePlayer">
       <dvd-icon />
     </t-button>
-    <t-drawer
-      v-model:visible="isVisible.drawer"
-      size-draggable
-      show-in-attached-element
-      :footer=null
-      :attach="`.${prefix}-content`"
-      @confirm="change"
-      @close="close"
-      size="320px"
-    >
+    <t-drawer v-model:visible="isVisible.drawer" size-draggable show-in-attached-element :footer=null
+      :attach="`.${prefix}-content`" @confirm="change" @close="close" size="320px">
       <div class="content">
         <div id="mse"></div>
         <t-button shape="round" theme="default" variant="dashed" class="btn" @click="change">
@@ -105,10 +97,12 @@ const change = () => {
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  #player{
+
+  #player {
     height: 100%;
     border-radius: var(--td-radius-large);
   }
+
   .btn {
     margin-top: var(--td-comp-margin-xs);
     width: 100%;

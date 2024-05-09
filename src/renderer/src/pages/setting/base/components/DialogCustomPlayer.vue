@@ -1,29 +1,19 @@
 <template>
-	<div class="custtom-player-dialog-container dialog-container-padding">
-		<t-dialog v-model:visible="formVisible"
-      :close-btn="false"
-      :header="false"
-      :confirm-btn="$t('pages.md.customPlayer.confirm')"
-      :cancel-btn=null
-      :on-confirm="confirmEvent"
-      placement="center"
-      width="480px"
-		>
-			<template #body>
-				<div class="custtom-player">
+  <div class="custtom-player-dialog-container dialog-container-padding">
+    <t-dialog v-model:visible="formVisible" :close-btn="false" :header="false"
+      :confirm-btn="$t('pages.md.customPlayer.confirm')" :cancel-btn=null :on-confirm="confirmEvent" placement="center"
+      width="480px">
+      <template #body>
+        <div class="custtom-player">
           <div class="header">{{ $t('pages.md.customPlayer.title') }}</div>
           <div class="main-content">
-            <MdPreview 
-              editorId="privacy-policy"
-              :modelValue="$t('pages.md.customPlayer.content')"
-              previewTheme="vuepress"
-              :theme="theme"
-            />
+            <MdPreview editorId="privacy-policy" :modelValue="$t('pages.md.customPlayer.content')"
+              previewTheme="vuepress" :theme="theme" />
           </div>
         </div>
-			</template>
-		</t-dialog>
-	</div>
+      </template>
+    </t-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -34,10 +24,10 @@ import { MdPreview } from 'md-editor-v3';
 import { useSettingStore } from '@/store';
 
 const props = defineProps({
-	visible: {
-		type: Boolean,
-		default: false,
-	},
+  visible: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const formVisible = ref(false);
@@ -48,16 +38,16 @@ const theme = computed(() => {
 const emit = defineEmits(['update:visible']);
 
 watch(
-	() => formVisible.value,
-	(val) => {
-		emit('update:visible', val);
-	},
+  () => formVisible.value,
+  (val) => {
+    emit('update:visible', val);
+  },
 );
 watch(
-	() => props.visible,
-	(val) => {
-		formVisible.value = val;
-	},
+  () => props.visible,
+  (val) => {
+    formVisible.value = val;
+  },
 );
 
 const confirmEvent = () => {
@@ -71,7 +61,8 @@ const confirmEvent = () => {
     .t-dialog__footer {
       display: flex;
       justify-content: space-around;
-			padding: 0 !important;
+      padding: 0 !important;
+
       .t-button {
         width: 180px;
         height: 45px;
@@ -82,28 +73,36 @@ const confirmEvent = () => {
       }
     }
   }
+
   .custtom-player {
     opacity: 1;
+
     .header {
       margin-top: 45px;
       font-weight: 700;
       font-size: 28px;
       text-align: center;
     }
+
     .main-content {
       height: 280px;
       margin: 15px auto 10px;
       overflow-y: auto;
     }
   }
+
   :deep(.md-editor-preview-wrapper) {
     padding: 0;
+
     .md-editor-preview {
       color: var(--td-text-color-primary);
+
       blockquote {
         margin: 0;
       }
-      p, li {
+
+      p,
+      li {
         font-weight: 500;
         font-size: 14px;
         line-height: 22px;
@@ -111,5 +110,4 @@ const confirmEvent = () => {
     }
   }
 }
-
 </style>

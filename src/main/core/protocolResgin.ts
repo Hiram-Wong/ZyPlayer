@@ -7,7 +7,7 @@ const PROTOCOL = 'zy';
 
 const protocolHandler = () => {
   const args: string[] = [];
-  
+
   if (!app.isPackaged) {
     // 在开发阶段，将脚本的绝对路径加入参数中
     args.push(resolve(process.argv[1]));

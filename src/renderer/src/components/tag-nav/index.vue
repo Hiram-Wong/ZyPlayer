@@ -1,7 +1,8 @@
 <template>
   <div class="tag-nav">
     <t-tabs v-model="tagFlag" @change="handleItemClick(tagFlag)">
-      <t-tab-panel v-for="item in listData" :key="item.type_id" :value="item.type_id" :label="item.type_name" class="bar" />
+      <t-tab-panel v-for="item in listData" :key="item.type_id" :value="item.type_id" :label="item.type_name"
+        class="bar" />
     </t-tabs>
   </div>
 </template>

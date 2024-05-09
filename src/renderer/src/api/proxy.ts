@@ -5,7 +5,7 @@ export function setT3Proxy(text: string) {
     url: 'http://127.0.0.1:9978/proxy',
     method: 'post',
     data: {
-      text
-    }
-  })
+      text,
+    },
+  });
 }

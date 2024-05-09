@@ -8,9 +8,9 @@ export function fetchHistoryList(page, limit, action) {
     params: {
       page,
       limit,
-      action
-    }
-  })
+      action,
+    },
+  });
 }
 
 // 清空analyze历史列表
@@ -19,9 +19,9 @@ export function clearHistoryAnalyzeList() {
     url: '/v1/history/clear',
     method: 'delete',
     params: {
-      action: "analyze"
-    }
-  })
+      action: 'analyze',
+    },
+  });
 }
 
 export function clearHistorySearchList() {
@@ -29,9 +29,9 @@ export function clearHistorySearchList() {
     url: '/v1/history/clear',
     method: 'delete',
     params: {
-      action: "search"
-    }
-  })
+      action: 'search',
+    },
+  });
 }
 
 // 获取search历史列表
@@ -40,9 +40,9 @@ export function fetchHistorySearchList() {
     url: '/v1/history/list',
     method: 'get',
     params: {
-      action: "search"
-    }
-  })
+      action: 'search',
+    },
+  });
 }
 
 // 获取film历史列表
@@ -51,33 +51,33 @@ export function fetchHistoryFilmList() {
     url: '/v1/history/list',
     method: 'get',
     params: {
-      action: "film"
-    }
-  })
+      action: 'film',
+    },
+  });
 }
 
 export function updateHistory(id, doc) {
   return request({
     url: `/v1/history/${id}`,
     method: 'put',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 export function addHistory(doc) {
   return request({
     url: '/v1/history',
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 export function detailHistory(doc) {
   return request({
     url: `/v1/history/detail`,
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 // 删除单个历史记录
@@ -85,7 +85,6 @@ export function delHistory(id) {
   return request({
     url: `/v1/history/${id}`,
     method: 'delete',
-    params: {
-    }
-  })
+    params: {},
+  });
 }

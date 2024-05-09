@@ -2,10 +2,10 @@
  * @module htmlParser
  * @brief T3解析html处理库
  * @version 3.1.0
- * 
+ *
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/base/htmlParser.py | Source on GitHub}
- * 
+ *
  * @modified-by HiramWong <admin@catni.cn>
  * @modification-date 2023-04-09T18:31:59+08:00
  * @modification-description Python转TypeScript, 适用于JavaScript项目
@@ -15,10 +15,10 @@ import * as cheerio from 'cheerio';
 import jsonpath from 'jsonpath';
 import urlJoin from 'url';
 
-const PARSE_CACHE = true;  // 解析缓存
-const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|^body$|^#';  // 不自动加eq下标索引
-const URLJOIN_ATTR = '(url|src|href|-original|-src|-play|-url|style)$';  // 需要自动urljoin的属性
-const SPECIAL_URL = '^(ftp|magnet|thunder|ws):';  // 过滤特殊链接,不走urlJoin
+const PARSE_CACHE = true; // 解析缓存
+const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|^body$|^#'; // 不自动加eq下标索引
+const URLJOIN_ATTR = '(url|src|href|-original|-src|-play|-url|style)$'; // 需要自动urljoin的属性
+const SPECIAL_URL = '^(ftp|magnet|thunder|ws):'; // 过滤特殊链接,不走urlJoin
 
 class Jsoup {
   MY_URL: string = '';
@@ -52,13 +52,14 @@ class Jsoup {
    */
   parseHikerToJq(parse: string, first: boolean = false): string {
     if (this.contains(parse, '&&')) {
-      const parses = parse.split('&&');  // 带&&的重新拼接
-      let new_parses: string[] = [];  //  构造新的解析表达式列表
+      const parses = parse.split('&&'); // 带&&的重新拼接
+      let new_parses: string[] = []; //  构造新的解析表达式列表
       for (let i = 0; i < parses.length; i++) {
         const ps_list = parses[i].split(' ');
-        const ps = ps_list[ps_list.length - 1];  // 如果分割&&后带空格就取最后一个元素
+        const ps = ps_list[ps_list.length - 1]; // 如果分割&&后带空格就取最后一个元素
         if (!this.test(NOADD_INDEX, ps)) {
-          if (!first && i >= parses.length - 1) {  // 不传first且遇到最后一个,不用补eq(0)
+          if (!first && i >= parses.length - 1) {
+            // 不传first且遇到最后一个,不用补eq(0)
             new_parses.push(parses[i]);
           } else {
             new_parses.push(`${parses[i]}:eq(0)`);
@@ -70,7 +71,7 @@ class Jsoup {
       parse = new_parses.join(' ');
     } else {
       const ps_list = parse.split(' ');
-      const ps = ps_list[ps_list.length - 1];  // 如果带空格就取最后一个元素
+      const ps = ps_list[ps_list.length - 1]; // 如果带空格就取最后一个元素
       if (!this.test(NOADD_INDEX, ps) && first) {
         parse = `${parse}:eq(0)`;
       }
@@ -84,10 +85,10 @@ class Jsoup {
    * @param nparse
    * @returns {rule: string, index: number, excludes: string[]}
    */
-  getParseInfo(nparse: string): { nparse_rule: string, nparse_index: number, excludes: string[] } {
-    let excludes: string[] = [];  // 定义排除列表默认值为空
-    let nparse_index: number = 0;  // 定义位置索引默认值为0
-    let nparse_rule: string = nparse;  // 定义规则默认值为本身
+  getParseInfo(nparse: string): { nparse_rule: string; nparse_index: number; excludes: string[] } {
+    let excludes: string[] = []; // 定义排除列表默认值为空
+    let nparse_index: number = 0; // 定义位置索引默认值为0
+    let nparse_rule: string = nparse; // 定义规则默认值为本身
 
     if (this.contains(nparse, ':eq')) {
       nparse_rule = nparse.split(':eq')[0];
@@ -97,7 +98,7 @@ class Jsoup {
         nparse_rule = nparse_rule.split('--')[0];
       } else if (this.contains(nparse_pos, '--')) {
         excludes = nparse_pos.split('--').slice(1);
-        nparse_pos = nparse_pos.split('--')[0]
+        nparse_pos = nparse_pos.split('--')[0];
       }
       try {
         nparse_index = parseInt(nparse_pos.split('(')[1].split(')')[0]);
@@ -128,7 +129,7 @@ class Jsoup {
     if (excludes.length > 0 && ret) {
       ret = ret.clone(); // 克隆一个，避免直接remove影响原始DOM
       // ret = ret.toArray().map(element => doc(element));
-      
+
       for (let exclude of excludes) {
         ret.find(exclude).remove();
       }
@@ -147,7 +148,7 @@ class Jsoup {
   pdfa(html: string, parse: string): string[] {
     if (!html || !parse) return [];
     parse = this.parseHikerToJq(parse);
-    
+
     const doc = cheerio.load(html);
     if (PARSE_CACHE) {
       if (this.pdfa_html !== html) {
@@ -166,12 +167,12 @@ class Jsoup {
     const res: string[] = (ret?.toArray() ?? []).map((item: any) => {
       const res_html = `${doc(item)}`; // outerHTML()
       // const res_html = doc(item).html(); // innerHTML()
-      return res_html ? res_html : ""; // 空值检查，将 null 值转换为空字符串
+      return res_html ? res_html : ''; // 空值检查，将 null 值转换为空字符串
     });
     return res;
   }
 
-  pdfl(html: string, parse: string ,list_text: string, list_url: string, url_key: string): string[] {
+  pdfl(html: string, parse: string, list_text: string, list_url: string, url_key: string): string[] {
     if (!html || !parse) return [];
     parse = this.parseHikerToJq(parse, false);
     const new_vod_list: any = [];
@@ -183,15 +184,15 @@ class Jsoup {
       ret = this.parseOneRule(doc, pars, ret);
       if (!ret) return [];
     }
-    
+
     ret!.each((_, element) => {
       new_vod_list.push(`${doc(element)}`); // outerHTML()
       // new_vod_list.push(doc(element).html()); // innerHTML()
     });
-  
+
     return new_vod_list;
   }
-  
+
   /**
    * 解析空格分割后的原生表达式,返回处理后的ret
    * https://pyquery.readthedocs.io/en/latest/api.html
@@ -295,11 +296,11 @@ class Jsoup {
       const queryResult = jsonpath.query(html, path);
       if (Array.isArray(queryResult)) ret = queryResult[0] ? `${queryResult[0]}` : '';
       else ret = queryResult ? `${queryResult}` : '';
-      
+
       if (addUrl && ret) {
         ret = urlJoin.resolve(this.MY_URL, ret);
       }
-      if (ret)  break;
+      if (ret) break;
     }
 
     return ret;
@@ -322,7 +323,7 @@ class Jsoup {
 
     const result = jsonpath.query(html, parse);
     if (Array.isArray(result) && Array.isArray(result[0]) && result.length === 1) {
-      return result[0];  // 自动解包
+      return result[0]; // 自动解包
     }
 
     return result || [];

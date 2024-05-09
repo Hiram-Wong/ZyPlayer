@@ -20,7 +20,8 @@
         </div>
         <div class="right-operation-container">
           <div class="search">
-            <t-input v-model="searchValue" :placeholder="$t('pages.setting.header.search')" clearable @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
+            <t-input v-model="searchValue" :placeholder="$t('pages.setting.header.search')" clearable
+              @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
@@ -29,20 +30,12 @@
         </div>
       </t-row>
     </div>
-    <t-table
-      row-key="id"
-      height="calc(100vh - 180px)"
-      :data="siteTableConfig.data"
-      :sort="siteTableConfig.sort"
-      :columns="COLUMNS"
-      :hover="true"
-      :pagination="pagination"
-      @sort-change="rehandleSortChange"
-      @select-change="rehandleSelectChange"
-      @page-change="rehandlePageChange"
-    >
+    <t-table row-key="id" height="calc(100vh - 180px)" :data="siteTableConfig.data" :sort="siteTableConfig.sort"
+      :columns="COLUMNS" :hover="true" :pagination="pagination" @sort-change="rehandleSortChange"
+      @select-change="rehandleSelectChange" @page-change="rehandlePageChange">
       <template #name="{ row }">
-        <t-badge v-if="row.id === siteTableConfig.default" size="small" :offset="[0, 3]" count="默" dot>{{ row.name }}</t-badge>
+        <t-badge v-if="row.id === siteTableConfig.default" size="small" :offset="[0, 3]" count="默" dot>{{ row.name
+          }}</t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
@@ -53,14 +46,18 @@
         <span v-else>无数据</span>
       </template>
       <template #search="{ row }">
-        <t-tag v-if="row.search === 0" shape="round" theme="danger" variant="light-outline">{{ $t('pages.setting.table.site.close') }}</t-tag>
-        <t-tag v-else-if="row.search === 1" theme="success" shape="round" variant="light-outline">{{ $t('pages.setting.table.site.together') }}</t-tag>
-        <t-tag v-else-if="row.search === 2" theme="warning" shape="round" variant="light-outline">{{ $t('pages.setting.table.site.local') }}</t-tag>
+        <t-tag v-if="row.search === 0" shape="round" theme="danger" variant="light-outline">{{
+          $t('pages.setting.table.site.close') }}</t-tag>
+        <t-tag v-else-if="row.search === 1" theme="success" shape="round" variant="light-outline">{{
+          $t('pages.setting.table.site.together') }}</t-tag>
+        <t-tag v-else-if="row.search === 2" theme="warning" shape="round" variant="light-outline">{{
+          $t('pages.setting.table.site.local') }}</t-tag>
       </template>
       <template #op="slotProps">
         <t-space>
           <t-link theme="primary" @click="defaultEvent(slotProps.row)">{{ $t('pages.setting.table.default') }}</t-link>
-          <t-link theme="primary" @click="checkSingleEvent(slotProps.row)">{{ $t('pages.setting.table.check') }}</t-link>
+          <t-link theme="primary" @click="checkSingleEvent(slotProps.row)">{{ $t('pages.setting.table.check')
+            }}</t-link>
           <t-link theme="primary" @click="editEvent(slotProps)">{{ $t('pages.setting.table.edit') }}</t-link>
           <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="removeEvent(slotProps.row)">
             <t-link theme="danger">{{ $t('pages.setting.table.delete') }}</t-link>
@@ -68,17 +65,10 @@
         </t-space>
       </template>
     </t-table>
-    <dialog-add-view
-      v-model:visible="isVisible.dialogAdd"
-      :group="siteTableConfig.group"
-      @refresh-table-data="refreshEvent"
-    />
-    <dialog-edit-view
-      v-model:visible="isVisible.dialogEdit"
-      :data="formData"
-      :group="siteTableConfig.group"
-      @refresh-table-data="refreshEvent"
-    />
+    <dialog-add-view v-model:visible="isVisible.dialogAdd" :group="siteTableConfig.group"
+      @refresh-table-data="refreshEvent" />
+    <dialog-edit-view v-model:visible="isVisible.dialogEdit" :data="formData" :group="siteTableConfig.group"
+      @refresh-table-data="refreshEvent" />
   </div>
 </template>
 
@@ -100,8 +90,8 @@ import { COLUMNS } from './constants';
 
 // Define item form data & dialog status
 const isVisible = reactive({
-  dialogAdd : false,
-  dialogEdit : false
+  dialogAdd: false,
+  dialogEdit: false
 })
 
 const formData = ref();
@@ -139,8 +129,8 @@ watch(
       emitReload.emit('film-reload');
     }
   }, {
-    deep: true
-  }
+  deep: true
+}
 );
 
 // Business Processing
@@ -191,7 +181,7 @@ const checkAllSite = async () => {
     checkData = [...data]
   } else {
     select.forEach((item) => {
-      const res = _.find(data, {id: item})
+      const res = _.find(data, { id: item })
       checkData.push(res)
     })
   }
@@ -234,7 +224,7 @@ const editEvent = (row) => {
   isVisible.dialogEdit = true;
 };
 
-const switchStatus = async(row) => {
+const switchStatus = async (row) => {
   console.log(row.isActive);
   updateSiteItem(row.id, { isActive: row.isActive });
 };
@@ -280,9 +270,11 @@ const defaultEvent = async (row) => {
 .setting-site-container {
   height: 100%;
   padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+
   .header {
     margin: var(--td-comp-margin-s) 0;
   }
+
   .default-dot {
     display: inline-block;
     width: 6px;
@@ -290,6 +282,7 @@ const defaultEvent = async (row) => {
     border-radius: var(--td-radius-circle);
     background-color: var(--td-error-color);
   }
+
   .left-operation-container {
     .component-op {
       display: flex;
@@ -299,6 +292,7 @@ const defaultEvent = async (row) => {
       border-radius: var(--td-radius-default);
       align-items: center;
       border-radius: var(--td-radius-medium);
+
       .item {
         color: var(--td-text-color-placeholder);
         border-radius: var(--td-radius-medium);
@@ -308,6 +302,7 @@ const defaultEvent = async (row) => {
         height: 22px;
         cursor: pointer;
         text-decoration: none;
+
         &:hover {
           transition: all 0.2s ease 0s;
           color: var(--td-text-color-primary);
@@ -319,16 +314,20 @@ const defaultEvent = async (row) => {
 
   :deep(.t-table) {
     background-color: var(--td-bg-color-container);
+
     tr {
       background-color: var(--td-bg-color-container);
+
       &:hover {
         background-color: var(--td-bg-color-container-hover);
       }
     }
   }
-  :deep(.t-table__header--fixed):not(.t-table__header--multiple) > tr > th {
+
+  :deep(.t-table__header--fixed):not(.t-table__header--multiple)>tr>th {
     background-color: var(--td-bg-color-container) !important;
   }
+
   :deep(.t-table__pagination) {
     background-color: var(--td-bg-color-container) !important;
   }

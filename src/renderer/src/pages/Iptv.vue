@@ -1,31 +1,25 @@
 <template>
   <div class="iptv view-container">
-    <common-nav :title="$t('pages.iptv.name')" :list="iptvConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
+    <common-nav :title="$t('pages.iptv.name')" :list="iptvConfig.data" :active="active.nav"
+      @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">
         <div class="header-nav">
-          <TagNav :list="classConfig.data" :active="active.class" @change-key="changeClassEvent"/>
+          <TagNav :list="classConfig.data" :active="active.class" @change-key="changeClassEvent" />
         </div>
       </header>
       <div class="container">
         <div class="content-wrapper" id="back-top">
           <t-row :gutter="[16, 16]">
-            <t-col
-              :md="3" :lg="3" :xl="2" :xxl="1"
-              v-for="item in channelData.list"
-              :key="item.id"
-              class="card"
-              @click="playEvent(item)"
-              @contextmenu="conButtonClick(item, $event)"
-            >
+            <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in channelData.list" :key="item.id" class="card"
+              @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
               <div class="card-main">
                 <div v-show="iptvConfig.ext.status" class="card-tag">
                   <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
-                  <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : $t('pages.iptv.delay') }}</span>
+                  <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : $t('pages.iptv.delay')
+                    }}</span>
                 </div>
-                <t-image
-                  class="card-main-item"
-                  :src="iptvConfig.ext.thumbnail? item.thumbnail: generateLogo(item)"
+                <t-image class="card-main-item" :src="iptvConfig.ext.thumbnail ? item.thumbnail : generateLogo(item)"
                   :style="{
                     width: '100%',
                     background: 'none',
@@ -33,29 +27,21 @@
                     padding: iptvConfig.ext.thumbnail
                       ? 'none'
                       : '35px 30px'
-                    }"
-                  :lazy="true"
-                  :loading="renderLoading"
-                  :error="renderError"
-                />
+                  }" :lazy="true" :loading="renderLoading" :error="renderError" />
               </div>
               <div class="card-footer">
                 <span class="card-footer-title text-hide">{{ item.name }}</span>
               </div>
             </t-col>
 
-            <context-menu :show="isVisible.contentMenu" :options="optionsComponent" @close="isVisible.contentMenu = false">
+            <context-menu :show="isVisible.contentMenu" :options="optionsComponent"
+              @close="isVisible.contentMenu = false">
               <context-menu-item :label="$t('pages.iptv.contextMenu.copyChannel')" @click="copyChannelEvent" />
               <context-menu-item :label="$t('pages.iptv.contextMenu.delChannel')" @click="delChannelEvent" />
             </context-menu>
           </t-row>
-          <infinite-loading
-            v-if="isVisible.infiniteLoading"
-            :identifier="infiniteId"
-            style="text-align: center"
-            :duration="200"
-            @infinite="load"
-          >
+          <infinite-loading v-if="isVisible.infiniteLoading" :identifier="infiniteId" style="text-align: center"
+            :duration="200" @infinite="load">
             <template #complete>{{ $t(`pages.iptv.infiniteLoading.${infiniteCompleteTip}`) }}</template>
             <template #error>{{ $t('pages.iptv.infiniteLoading.error') }}</template>
           </infinite-loading>
@@ -63,12 +49,7 @@
       </div>
     </div>
     <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
-    <t-back-top
-      container="#back-top"
-      size="small"
-      :offset="['1.4rem', '0.5rem']"
-      :duration="2000"
-    />
+    <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
 </template>
 
@@ -103,14 +84,14 @@ const storeSetting = useSettingStore();
 const renderError = () => {
   return (
     <div class="renderIcon" style="width: 100%;">
-      <img src={ lazyImg } style="width: 100%;object-fit: cover;"/>
+      <img src={lazyImg} style="width: 100%;object-fit: cover;" />
     </div>
   );
 };
 const renderLoading = () => {
   return (
     <div class="renderIcon" style="width: 100%;">
-      <img src={ lazyImg } style="width: 100%; object-fit: cover;"/>
+      <img src={lazyImg} style="width: 100%; object-fit: cover;" />
     </div>
   );
 };
@@ -239,7 +220,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
   try {
     const resLength = await getChannel();
 
-    if (_.isEmpty(active.value.nav) && _.isEmpty(channelData.value.list) ) {
+    if (_.isEmpty(active.value.nav) && _.isEmpty(channelData.value.list)) {
       infiniteCompleteTip.value = 'noData';
       $state.complete();
       // return;
@@ -279,7 +260,7 @@ const playEvent = (item: { name: any }) => {
 
   try {
     const playerMode = storePlayer.getSetting.playerMode;
-    if (playerMode.type === 'custom' ) {
+    if (playerMode.type === 'custom') {
       window.electron.ipcRenderer.send('call-player', playerMode.external, item.url);
     } else {
       const { epg, skipIpv6, logo } = iptvConfig.value.ext;
@@ -364,7 +345,7 @@ const generateThumbnail = async (pageIndex: number, pageSize: number) => {
   const updateThumbnail = async (item) => {
     window.electron.ipcRenderer.invoke('ffmpeg-thumbnail', item.url, item.id).then(res => {
       if (res) {
-        const index = _.findIndex(channelData.value.list, {id: res.key});
+        const index = _.findIndex(channelData.value.list, { id: res.key });
         channelData.value.list[index]["thumbnail"] = res.url;
       }
     });
@@ -418,7 +399,7 @@ const changeDefaultIptvEvent = async (id: string) => {
 const iptvReloadeventBus = useEventBus<string>('iptv-reload');
 const channelSearcheventBus = useEventBus<string>('channel-search');
 
-channelSearcheventBus.on((kw: string)=>{
+channelSearcheventBus.on((kw: string) => {
   searchTxt.value = kw;
   searchEvent();
 });
@@ -453,7 +434,7 @@ const delChannelEvent = () => {
 };
 
 // 拷贝
-const copyToClipboard = async(content, successMessage, errorMessage) => {
+const copyToClipboard = async (content, successMessage, errorMessage) => {
   const res = await copyToClipboardApi(content);
   if (res) {
     MessagePlugin.info(successMessage);
@@ -461,7 +442,7 @@ const copyToClipboard = async(content, successMessage, errorMessage) => {
     MessagePlugin.warning(errorMessage);
   }
 };
-const copyChannelEvent = async() => {
+const copyChannelEvent = async () => {
   const successMessage = t('pages.iptv.message.copySucess');
   const errorMessage = t('pages.iptv.message.copyFail');
   await copyToClipboard(channelItem.value.url, successMessage, errorMessage);
@@ -499,11 +480,13 @@ const generateLogo = (item) => {
     border-radius: 5px;
     cursor: pointer;
     font-size: 20px;
+
     .member-name {
       font-size: 12px;
       margin-left: 4px;
     }
   }
+
   .nav-sub-tab-member-info {
     margin-top: 16px;
   }
@@ -514,6 +497,7 @@ const generateLogo = (item) => {
     position: relative;
     overflow: hidden;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+
     .header {
       display: flex;
       align-items: center;
@@ -522,33 +506,39 @@ const generateLogo = (item) => {
       white-space: nowrap;
       flex-shrink: 0;
       width: 100%;
+
       .header-nav {
         width: 100%;
         overflow: hidden;
       }
     }
+
     .container {
       flex: 1;
       height: calc(100% - 58px);
       width: 100%;
+
       .content-wrapper {
         overflow-y: auto;
         overflow-x: hidden;
         width: 100%;
         height: 100%;
         position: relative;
+
         .card {
           box-sizing: border-box;
           width: inherit;
           position: relative;
           cursor: pointer;
           border-radius: var(--td-radius-medium);
+
           .text-hide {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             display: block;
           }
+
           .card-main {
             position: relative;
             width: 100%;
@@ -559,6 +549,7 @@ const generateLogo = (item) => {
             box-shadow: var(--td-shadow-1);
             border: 5px solid #211f20;
             background-color: #373536;
+
             .card-tag {
               z-index: 15;
               display: flex;
@@ -574,16 +565,20 @@ const generateLogo = (item) => {
               position: absolute;
               top: 5px;
               right: 5px;
+
               .status-item {
                 font-size: 10px;
               }
+
               .error {
                 color: var(--td-error-color);
               }
+
               .sucess {
                 color: var(--td-success-color);
               }
             }
+
             .card-main-item {
               position: absolute;
               top: 0;
@@ -594,9 +589,11 @@ const generateLogo = (item) => {
               border-radius: 5px;
             }
           }
+
           .card-footer {
             position: relative;
             padding-top: var(--td-comp-paddingTB-s);
+
             .card-footer-title {
               font-weight: 700;
               line-height: var(--td-line-height-title-medium);
@@ -604,6 +601,7 @@ const generateLogo = (item) => {
             }
           }
         }
+
         .card:hover {
           .card-footer-title {
             color: var(--td-brand-color);
@@ -617,6 +615,7 @@ const generateLogo = (item) => {
 .content-items {
   overflow: hidden;
   width: 100%;
+
   .content-item {
     float: left;
     box-sizing: border-box;
@@ -624,6 +623,7 @@ const generateLogo = (item) => {
     padding-left: 30px;
     height: 46px;
     cursor: pointer;
+
     span {
       text-shadow: 0 0 0 rgba(0, 0, 0, 0.2);
       font-size: 15px;
@@ -634,6 +634,7 @@ const generateLogo = (item) => {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
+
       &:hover {
         color: var(--td-brand-color);
       }

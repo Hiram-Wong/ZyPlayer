@@ -1,5 +1,6 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.edit')" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.edit')" :width="650" placement="center"
+    :footer="false">
     <template #body>
       <!-- 表单内容 -->
       <t-form ref="form" :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
@@ -20,7 +21,8 @@
           </t-radio-group>
         </t-form-item>
         <t-form-item :label="$t('pages.setting.site.api')" name="api">
-          <t-input v-if="formData.type !==5" v-model="formData.api" :placeholder="$t('pages.setting.placeholder.general')" />
+          <t-input v-if="formData.type !== 5" v-model="formData.api"
+            :placeholder="$t('pages.setting.placeholder.general')" />
           <t-textarea v-else v-model="formData.api" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
         <t-form-item :label="$t('pages.setting.site.search')" name="search">
@@ -43,21 +45,10 @@
           <t-input v-model="formData.ext" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
         <t-form-item :label="$t('pages.setting.site.group')" name="group">
-          <t-select
-            v-model="formData.group"
-            creatable
-            filterable
-            :placeholder="$t('pages.setting.placeholder.groupTip')"
-            class="input-item"
-            @create="createOptions"
-          >
-            <t-option
-              v-for="item in formGroup"
-              :key="item.value"
-              :value="item.value"
-              :label="item.label"
-              class="select-options"
-            />
+          <t-select v-model="formData.group" creatable filterable
+            :placeholder="$t('pages.setting.placeholder.groupTip')" class="input-item" @create="createOptions">
+            <t-option v-for="item in formGroup" :key="item.value" :value="item.value" :label="item.label"
+              class="select-options" />
           </t-select>
         </t-form-item>
         <t-form-item :label="$t('pages.setting.site.category')" name="category">
@@ -103,7 +94,7 @@ const formVisible = ref(false);
 const formData = ref(props.data);
 const formGroup = ref(props.group);
 
-const onSubmit = async() => {
+const onSubmit = async () => {
   try {
     await updateSiteItem(formData.value.id, formData.value)
     MessagePlugin.success('修改成功');
@@ -158,5 +149,4 @@ const rules = {
 };
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

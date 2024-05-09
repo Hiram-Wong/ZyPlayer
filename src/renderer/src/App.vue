@@ -38,7 +38,7 @@ watch(
         autoSync(val.data.url, val.data.username, val.data.password);
       }, 1000 * 5 * 60);
     }
-  }, { deep : true }
+  }, { deep: true }
 );
 
 onMounted(() => {

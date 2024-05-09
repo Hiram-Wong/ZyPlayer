@@ -7,8 +7,8 @@ export function fetchAnalyzeList() {
     method: 'get',
     params: {
       timestamp: new Date().getTime(),
-    }
-  })
+    },
+  });
 }
 
 // 获取analyze活跃列表
@@ -16,8 +16,8 @@ export function fetchAnalyzeActive() {
   return request({
     url: '/v1/analyze/active',
     method: 'get',
-    params: {}
-  })
+    params: {},
+  });
 }
 
 // analyze分页
@@ -26,9 +26,9 @@ export function fetchAnalyzePage(kw: string) {
     url: `/v1/analyze/page`,
     method: 'get',
     params: {
-      kw
-    }
-  })
+      kw,
+    },
+  });
 }
 
 // 解析标题
@@ -37,9 +37,9 @@ export function fetchAnalyzeTitle(url: string) {
     url: '/v1/analyze/title',
     method: 'get',
     params: {
-      url
-    }
-  })
+      url,
+    },
+  });
 }
 
 // analyze更新
@@ -47,8 +47,8 @@ export function updateAnalyzeItem(id, doc) {
   return request({
     url: `/v1/analyze/${id}`,
     method: 'put',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 // analyze删除
@@ -56,7 +56,7 @@ export function delAnalyzeItem(id) {
   return request({
     url: `/v1/analyze/${id}`,
     method: 'delete',
-  })
+  });
 }
 
 // analyze添加
@@ -64,8 +64,8 @@ export function addAnalyzeItem(doc) {
   return request({
     url: `/v1/analyze`,
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 // analyze默认
@@ -73,7 +73,7 @@ export function fetchAnalyzeDefault() {
   return request({
     url: `/v1/analyze/default`,
     method: 'get',
-  })
+  });
 }
 
 // analyze播放
@@ -81,5 +81,5 @@ export function fetchAnalyzePlay() {
   return request({
     url: `/v1/analyze/play`,
     method: 'get',
-  })
+  });
 }

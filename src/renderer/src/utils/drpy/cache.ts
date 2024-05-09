@@ -78,15 +78,15 @@ class LocalCache {
   public async set(id: string, key: string, value: any) {
     await this.initialize();
     if (!this.db) throw new Error('Database is not initialized.');
-  
+
     return new Promise<void>((resolve, reject) => {
       const store = this.getObjectStore();
       const request = store.put(value, `${id}${key}`);
-  
+
       request.onerror = () => {
         reject(new Error('Failed to set value in cache.'));
       };
-  
+
       request.onsuccess = () => {
         resolve();
       };

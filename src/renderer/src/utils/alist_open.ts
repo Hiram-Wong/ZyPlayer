@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import axiosRetry from "axios-retry";
-import JSON5 from "json5";
+import axiosRetry from 'axios-retry';
+import JSON5 from 'json5';
 
 import { findBestLCS } from './similarity';
 
@@ -16,7 +16,7 @@ axiosRetry(axios, {
   retries: 2,
   retryDelay: (retryCount) => {
     return retryCount * 500;
-  }
+  },
 });
 
 const http = async function (url: string, options: AxiosRequestConfig = {}): Promise<AxiosResponse> {
@@ -49,46 +49,46 @@ let __drives = {};
 let __subtitle_cache = {};
 
 async function get_drives_path(tid) {
-	const index = tid.indexOf('/', 1);
-	const name = tid.substring(1, index);
-	const path = tid.substring(index);
-	return { drives: await get_drives(name), path };
+  const index = tid.indexOf('/', 1);
+  const name = tid.substring(1, index);
+  const path = tid.substring(index);
+  return { drives: await get_drives(name), path };
 }
 
 async function get_drives(name) {
-	try {
-		const { settings, api, server } = __drives[name];
-		if (settings.v3 == null) {
-			//获取 设置
-			settings.v3 = false;
-			let { data } = (await http.get(server + '/api/public/settings'));
-			data = data.data;
-			if (_.isArray(data)) {
-				settings.title = data.find((x) => x.key == 'title')?.value;
-				settings.v3 = false;
-				settings.version = data.find((x) => x.key == 'version')?.value;
-				settings.enableSearch = data.find((x) => x.key == 'enable search')?.value == 'true';
-			} else {
-				settings.title = data.title;
-				settings.v3 = true;
-				settings.version = data.version;
-				settings.enableSearch = false; //v3 没有找到 搜索配置
-			}
-			//不同版本 接口不一样
-			api.path = settings.v3 ? '/api/fs/list' : '/api/public/path';
-			api.file = settings.v3 ? '/api/fs/get' : '/api/public/path';
-			api.search = settings.v3 ? '/api/public/search' : '/api/public/search';
-			api.other = settings.v3 ? '/api/fs/other' : null;
-		}
-		return __drives[name];
-	} catch (err) {
-		throw err
-	}
+  try {
+    const { settings, api, server } = __drives[name];
+    if (settings.v3 == null) {
+      //获取 设置
+      settings.v3 = false;
+      let { data } = await http.get(server + '/api/public/settings');
+      data = data.data;
+      if (_.isArray(data)) {
+        settings.title = data.find((x) => x.key == 'title')?.value;
+        settings.v3 = false;
+        settings.version = data.find((x) => x.key == 'version')?.value;
+        settings.enableSearch = data.find((x) => x.key == 'enable search')?.value == 'true';
+      } else {
+        settings.title = data.title;
+        settings.v3 = true;
+        settings.version = data.version;
+        settings.enableSearch = false; //v3 没有找到 搜索配置
+      }
+      //不同版本 接口不一样
+      api.path = settings.v3 ? '/api/fs/list' : '/api/public/path';
+      api.file = settings.v3 ? '/api/fs/get' : '/api/public/path';
+      api.search = settings.v3 ? '/api/public/search' : '/api/public/search';
+      api.other = settings.v3 ? '/api/fs/other' : null;
+    }
+    return __drives[name];
+  } catch (err) {
+    throw err;
+  }
 }
 
 const init = ({ skey: siteKey, stype: siteType, ext }) => {
   ext.forEach((item) => {
-		const { name, server, startPage = '/', showAll = false, params = {}, headers = {} } = item;
+    const { name, server, startPage = '/', showAll = false, params = {}, headers = {} } = item;
 
     const cleanedServer = server.endsWith('/') ? server.slice(0, -1) : server;
 
@@ -97,16 +97,16 @@ const init = ({ skey: siteKey, stype: siteType, ext }) => {
       server: cleanedServer,
       startPage,
       showAll,
-			headers,
+      headers,
       params: params ? JSON5.parse(params) : {},
       settings: {},
       api: {},
 
       getParams(path) {
-				let password = { password: "" };
-				const formatPath = path.replace(/\/+$/, '');
-				const checkPasswd = this.params[formatPath];
-				if (checkPasswd !== undefined) password = this.params[formatPath];
+        let password = { password: '' };
+        const formatPath = path.replace(/\/+$/, '');
+        const checkPasswd = this.params[formatPath];
+        if (checkPasswd !== undefined) password = this.params[formatPath];
         return Object.assign({}, password, { path });
       },
 
@@ -149,8 +149,13 @@ const init = ({ skey: siteKey, stype: siteType, ext }) => {
       },
 
       getPic(data) {
-				let pic = this.settings.v3 ? data.thumb : data.thumbnail;
-        return pic || (this.isFolder(data) ? 'https://img.alicdn.com/imgextra/i1/O1CN01rGJZac1Zn37NL70IT_!!6000000003238-2-tps-230-180.png' : '');
+        let pic = this.settings.v3 ? data.thumb : data.thumbnail;
+        return (
+          pic ||
+          (this.isFolder(data)
+            ? 'https://img.alicdn.com/imgextra/i1/O1CN01rGJZac1Zn37NL70IT_!!6000000003238-2-tps-230-180.png'
+            : '')
+        );
       },
 
       getSize(data) {
@@ -173,12 +178,11 @@ const init = ({ skey: siteKey, stype: siteType, ext }) => {
   });
 };
 
-
 const dir = async (dir, pg = 1) => {
   for (const k in __subtitle_cache) {
     delete __subtitle_cache[k];
   }
-  
+
   pg = pg || 1;
 
   if (pg === 0) {
@@ -207,7 +211,7 @@ const dir = async (dir, pg = 1) => {
 
   const subtList = list.filter((item) => drives.isSubtitle(item)).map((item) => item.name);
   const videos = list
-    .filter((item) => (drives.showAll || drives.isFolder(item) || drives.isVideo(item)))
+    .filter((item) => drives.showAll || drives.isFolder(item) || drives.isVideo(item))
     .map((item) => ({
       name: item.name.replace(/[$#]/g, '_'),
       path: `${id}${item.name}${drives.isFolder(item) ? '/' : ''}`,
@@ -236,7 +240,6 @@ const dir = async (dir, pg = 1) => {
   });
 };
 
-
 const file = async (file) => {
   try {
     const { drives, path } = await get_drives_path(file);
@@ -256,7 +259,7 @@ const file = async (file) => {
     const result = {
       name: item.name,
       url: '',
-			sign: item.sign ? item.sign : '',
+      sign: item.sign ? item.sign : '',
       size: drives.getSize(item),
       remark: drives.getRemark(item),
       header: {},
@@ -280,7 +283,7 @@ const file = async (file) => {
     } else if (item.provider === '123Pan') {
       try {
         let { data } = await http.get(item.raw_url);
-				data = data.data;
+        data = data.data;
         const redirectUrl = response.data.redirect_url;
         result.url = redirectUrl;
       } catch (error) {}
@@ -295,24 +298,23 @@ const file = async (file) => {
   }
 };
 
+const search = async (wd) => {
+  return JSON.stringify({
+    list: [],
+  });
+};
 
-const search = async(wd) => {
-	return JSON.stringify({
-		list: [],
-	});
-}
-
-const destroy = async() => {
-	__drives = {};
-	__subtitle_cache = {};
-}
+const destroy = async () => {
+  __drives = {};
+  __subtitle_cache = {};
+};
 
 export function __jsEvalReturn() {
-	return {
-		init: init,
-		dir: dir,
-		file: file,
-		search: search,
-		destroy: destroy,
-	};
+  return {
+    init: init,
+    dir: dir,
+    file: file,
+    search: search,
+    destroy: destroy,
+  };
 }

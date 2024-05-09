@@ -4,36 +4,36 @@ import db from '../index';
 const TABLE_NAME = 'tbl_history';
 
 export default {
-  all () {
+  all() {
     const db_res = db.get(TABLE_NAME).value();
     return _.castArray(db_res);
   },
-  update (id, doc) {
-    return db.get(TABLE_NAME).find({id}).assign(doc).write();
+  update(id, doc) {
+    return db.get(TABLE_NAME).find({ id }).assign(doc).write();
   },
-  clear () {
+  clear() {
     return db.set(TABLE_NAME, []).write();
   },
-  set (docs) {
+  set(docs) {
     docs = _.castArray(docs);
     return db.set(TABLE_NAME, docs).write();
   },
-  clear_part (type) {
-    return db.get(TABLE_NAME).remove({ type }).write()
+  clear_part(type) {
+    return db.get(TABLE_NAME).remove({ type }).write();
   },
-  find (doc) {
+  find(doc) {
     return db.get(TABLE_NAME).find(doc).value();
   },
-  filter (doc) {
+  filter(doc) {
     return db.get(TABLE_NAME).filter(doc).value();
   },
-  get (id: string) {
+  get(id: string) {
     return db.get(TABLE_NAME).find({ id }).value();
   },
-  add (doc) {
+  add(doc) {
     return db.get(TABLE_NAME).insert(doc).write();
   },
-  remove (id: string) {
+  remove(id: string) {
     return db.get(TABLE_NAME).removeById(id).write();
   },
   pagination(pageIndex = 0, pageSize = 10, type = 'all') {
@@ -46,14 +46,14 @@ export default {
       items = db.get(TABLE_NAME).orderBy('date', 'desc').value();
     } else {
       items = db.get(TABLE_NAME).filter({ type }).orderBy('date', 'desc').value();
-    };
+    }
 
     data = _.slice(items, jumpCount, jumpCount + pageSize);
     total = _.size(items);
 
     return {
       data: data,
-      total: total
-    }
-  }
-}
+      total: total,
+    };
+  },
+};

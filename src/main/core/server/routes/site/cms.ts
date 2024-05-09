@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
-import { XMLParser } from "fast-xml-parser";
-import _ from "lodash";
+import { XMLParser } from 'fast-xml-parser';
+import _ from 'lodash';
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8.js';
 import xpath from 'xpath';
@@ -13,10 +13,10 @@ import CLASS_FILTER_CONFIG from './config/app_filter';
 const xmlOptions = {
   // XML 转 JSON 配置
   trimValues: true,
-  textNodeName: "_t",
+  textNodeName: '_t',
   ignoreAttributes: false,
-  attributeNamePrefix: "_",
-  parseAttributeValue: true
+  attributeNamePrefix: '_',
+  parseAttributeValue: true,
 };
 const parser = new XMLParser(xmlOptions);
 
@@ -33,11 +33,11 @@ const buildUrl = (url, paramsStr) => {
   const u = new URL(url);
   const api = u.origin + u.pathname.replace(/\/$/, '');
   const params = new URLSearchParams(u.search);
-  
+
   if (paramsStr.startsWith('?') || paramsStr.startsWith('&')) {
     const p = new URLSearchParams(paramsStr);
     p.forEach((value, key) => params.set(key, value));
-    return api + "?" + params.toString();
+    return api + '?' + params.toString();
   } else {
     const cleanParamsStr = paramsStr.startsWith('/') ? paramsStr.slice(1) : paramsStr;
     return api + (cleanParamsStr ? '/' + cleanParamsStr : '');
@@ -57,7 +57,7 @@ const reptileApiFormat = (item, key) => {
     console.error('Error occurred while parsing JSON:', error);
     return '';
   }
-}
+};
 
 // 解析xpath
 const reptileXpathFormat = (item, pat) => {
@@ -65,15 +65,15 @@ const reptileXpathFormat = (item, pat) => {
     const doc = new DOMParser().parseFromString(item);
     const res = xpath.select(pat, doc);
     if (res && res.length > 0) {
-      return res.map(item => item.textContent);
+      return res.map((item) => item.textContent);
     } else {
       return [];
     }
   } catch (error) {
-    console.error("Error occurred while parsing or selecting XPath:", error);
+    console.error('Error occurred while parsing or selecting XPath:', error);
     return [];
   }
-}
+};
 
 // 去除url最后的/
 const removeTrailingSlash = (url) => {
@@ -81,13 +81,13 @@ const removeTrailingSlash = (url) => {
     url = url.slice(0, -1);
   }
   return url;
-}
+};
 
 const removeHTMLTagsAndSpaces = (str) => {
   // 去除HTML标签
-  const strippedString = str.replace(/(<([^>]+)>)/gi, "");
+  const strippedString = str.replace(/(<([^>]+)>)/gi, '');
   // 去除空格
-  const trimmedString = strippedString.replace(/\s+/g, "");
+  const trimmedString = strippedString.replace(/\s+/g, '');
   return trimmedString;
 };
 
@@ -96,9 +96,9 @@ const removeHTMLTagsAndSpaces = (str) => {
  * @param {*} id 资源网 id
  * @returns
  */
-const classify = async(id) => {
+const classify = async (id) => {
   try {
-    const site = db_site.find({id});
+    const site = db_site.find({ id });
 
     let url;
     if (site.type === 1 || site.type === 0) {
@@ -126,42 +126,43 @@ const classify = async(id) => {
 
     const cmsFilterData = [
       {
-        key: "area",
-        name: "地区",
+        key: 'area',
+        name: '地区',
         value: [
           {
-            "n": "全部",
-            "v": ""
-          }
-        ]
+            n: '全部',
+            v: '',
+          },
+        ],
       },
       {
-        key: "year",
-        name:  "年份",
+        key: 'year',
+        name: '年份',
         value: [
           {
-            "n": "全部",
-            "v": ""
-          }
-        ]
+            n: '全部',
+            v: '',
+          },
+        ],
       },
       {
-        key: "sort",
-        name: "排序",
+        key: 'sort',
+        name: '排序',
         value: [
           {
-            "n": "按更新时间",
-            "v": "按更新时间"
+            n: '按更新时间',
+            v: '按更新时间',
           },
           {
-            "n": "按上映年份",
-            "v": "按上映年份"
-          },{
-            "n": "按片名",
-            "v": "按片名"
-          }
-        ]
-      }
+            n: '按上映年份',
+            v: '按上映年份',
+          },
+          {
+            n: '按片名',
+            v: '按片名',
+          },
+        ],
+      },
     ];
 
     if (site.type === 0) {
@@ -173,7 +174,7 @@ const classify = async(id) => {
       classData.unshift({
         type_id: 0,
         type_name: '最新',
-      })
+      });
       page = jsondata.list._page;
       pagecount = jsondata.list._pagecount;
       limit = parseInt(jsondata.list._pagesize);
@@ -181,15 +182,15 @@ const classify = async(id) => {
 
       filters = {};
       for (let item of classData) {
-        const key = item.type_id
-        filters[key]  = cmsFilterData
+        const key = item.type_id;
+        filters[key] = cmsFilterData;
       }
     } else if (site.type === 1) {
       classData = jsondata.class;
       classData.unshift({
         type_id: 0,
         type_name: '最新',
-      })
+      });
       page = jsondata.page;
       pagecount = jsondata.pagecount;
       limit = parseInt(jsondata.limit);
@@ -197,16 +198,15 @@ const classify = async(id) => {
 
       filters = {};
       for (let item of classData) {
-        const key = item.type_id
-        filters[key]  = cmsFilterData
+        const key = item.type_id;
+        filters[key] = cmsFilterData;
       }
     } else if (site.type === 2) {
       const classResponse = await fetch(site.api);
       const textResponse = classResponse.text();
 
       const jsonClass = textResponse;
-      const jsondataClass =
-        jsonClass?.rss === undefined ? jsonClass : jsonClass.rss;
+      const jsondataClass = jsonClass?.rss === undefined ? jsonClass : jsonClass.rss;
       classData = jsondataClass.class;
       page = jsondata.page;
       pagecount = jsondata.pagecount;
@@ -223,24 +223,28 @@ const classify = async(id) => {
       filters = {};
 
       if (site.type === 4) {
-        const type_4_response = await fetch(removeTrailingSlash(site.api),);
+        const type_4_response = await fetch(removeTrailingSlash(site.api));
         const text_4_response = type_4_response.json();
-        limit = text_4_response["data"]["limit"];
-        total = text_4_response["data"]["total"];
+        limit = text_4_response['data']['limit'];
+        total = text_4_response['data']['total'];
       }
 
-      classData.forEach(classItem => {
+      classData.forEach((classItem) => {
         if (classItem.type_extend) {
           const result = [];
           for (const key in classItem.type_extend) {
             const value = classItem.type_extend[key];
-            if (!_.isEmpty(value) && !['star','state','version','director'].includes(key)) {
+            if (!_.isEmpty(value) && !['star', 'state', 'version', 'director'].includes(key)) {
               const valueList = value.split(',').map((item) => item.trim());
-              const options = valueList.map((value) => ({ n: value === "全部" ? "全部" : value, v: value }));
-              result.push({ key, name: _.find(CLASS_FILTER_CONFIG, { key }).desc, value: [{ n: "全部", v: "" }, ...options] });
+              const options = valueList.map((value) => ({ n: value === '全部' ? '全部' : value, v: value }));
+              result.push({
+                key,
+                name: _.find(CLASS_FILTER_CONFIG, { key }).desc,
+                value: [{ n: '全部', v: '' }, ...options],
+              });
             }
           }
-          filters[classItem.type_id]= result
+          filters[classItem.type_id] = result;
         }
       });
     } else if (site.type === 6) {
@@ -255,10 +259,10 @@ const classify = async(id) => {
         const category_url = buildUrl(site.api, `&extend=${site.ext}&ac=videolist&t=${classData[0].type_id}&pg=1`);
         const category_response = await fetch(category_url);
         const category_json = category_response.json();
-        page = category_json["page"];
-        pagecount = category_json["pagecount"];
-        limit = parseInt(category_json["limit"]);
-        total = category_json["total"];
+        page = category_json['page'];
+        pagecount = category_json['pagecount'];
+        limit = parseInt(category_json['limit']);
+        total = category_json['total'];
       }
       filters = jsondata?.filters === undefined ? [] : jsondata.filters;
     }
@@ -269,12 +273,12 @@ const classify = async(id) => {
       pagecount,
       limit,
       total,
-      filters
+      filters,
     };
   } catch (err) {
     throw err;
   }
-}
+};
 
 /**
  * 获取资源列表
@@ -296,7 +300,7 @@ const convertVideoList = (videoItems) => {
       year: vod_year,
       area: vod_area,
       director: vod_director,
-      actor: vod_actor
+      actor: vod_actor,
     }) => ({
       vod_id,
       type_id,
@@ -309,13 +313,13 @@ const convertVideoList = (videoItems) => {
       vod_area,
       vod_content,
       vod_director,
-      vod_actor
-    })
+      vod_actor,
+    }),
   );
-}
-const list = async(id, pg = 1, t, f = {}) => {
+};
+const list = async (id, pg = 1, t, f = {}) => {
   try {
-    const site = db_site.find({id});
+    const site = db_site.find({ id });
     let url;
     if (site.type === 3) {
       url = buildUrl(site.api, `video?tid=${t}&pg=${pg}`);
@@ -349,19 +353,19 @@ const list = async(id, pg = 1, t, f = {}) => {
 
     const jsondata = json.rss || json;
     let videoList = jsondata.list || jsondata.data || [];
-    
+
     if (site.type === 0) {
       videoList = convertVideoList(jsondata.list.video);
     } else if (site.type === 3) {
-      videoList = jsondata.data || jsondata.list
+      videoList = jsondata.data || jsondata.list;
     } else if (site.type === 4) {
-      videoList = jsondata.data.list
+      videoList = jsondata.data.list;
     }
     return videoList;
   } catch (err) {
     throw err;
   }
-}
+};
 
 /**
  * 搜索资源
@@ -378,7 +382,7 @@ const convertSearchList = (searchItem) => {
       note: vod_remark,
       name: vod_name,
       last: vod_time,
-      dt: vod_play_from
+      dt: vod_play_from,
     } = item;
     return {
       vod_id,
@@ -387,21 +391,21 @@ const convertSearchList = (searchItem) => {
       vod_remark,
       vod_name,
       vod_time,
-      vod_play_from
+      vod_play_from,
     };
   });
 
   return result;
-}
-const search = async(id, wd) => {
+};
+const search = async (id, wd) => {
   // xml坑: 单条结果是dict 多条结果list
   try {
-    const site = db_site.find({id});
+    const site = db_site.find({ id });
 
     let url;
-    if ( site.type === 3 ) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
-    else if ( site.type === 5 ) url = `${reptileApiFormat(site.api, 'websearchurl')}${encodeURIComponent(wd)}`;
-    else if ( site.type === 6 ) url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}&extend=${site.ext}`);
+    if (site.type === 3) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
+    else if (site.type === 5) url = `${reptileApiFormat(site.api, 'websearchurl')}${encodeURIComponent(wd)}`;
+    else if (site.type === 6) url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}&extend=${site.ext}`);
     else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
 
     const response = await fetch(url);
@@ -421,12 +425,12 @@ const search = async(id, wd) => {
       const searchstarrRes = reptileXpathFormat(json, searchstarrPat);
 
       let zippedData = _.zip(searchnameRes, searchidRes, searchpicRes, searchstarrRes);
-      let list = zippedData.map(item => {
+      let list = zippedData.map((item) => {
         return {
           vod_name: item[0],
           vod_id: item[1],
           vod_pic: item[2],
-          vod_remarks: item[3]
+          vod_remarks: item[3],
         };
       });
       return list;
@@ -449,7 +453,7 @@ const search = async(id, wd) => {
   } catch (err) {
     throw err;
   }
-}
+};
 
 /**
  * 获取资源详情
@@ -460,14 +464,14 @@ const search = async(id, wd) => {
 const convertDetailList = (detailItems) => {
   const vodPlayFrom = (dldd) => {
     if (_.isArray(dldd)) {
-      return dldd.map((item) => item._flag).join("$$$");
+      return dldd.map((item) => item._flag).join('$$$');
     } else {
       return dldd._flag;
     }
   };
   const vodPlayUrl = (dldd) => {
     if (_.isArray(dldd)) {
-      return dldd.map((item) => item._t).join("$$$");
+      return dldd.map((item) => item._t).join('$$$');
     } else {
       return dldd._t;
     }
@@ -486,7 +490,7 @@ const convertDetailList = (detailItems) => {
       area: vod_area,
       director: vod_director,
       actor: vod_actor,
-      dl: { dd: dldd }
+      dl: { dd: dldd },
     }) => ({
       vod_id,
       type_id,
@@ -501,20 +505,20 @@ const convertDetailList = (detailItems) => {
       vod_director,
       vod_actor,
       vod_play_from: vodPlayFrom(dldd),
-      vod_play_url: vodPlayUrl(dldd)
-    })
+      vod_play_url: vodPlayUrl(dldd),
+    }),
   );
-}
-const detail = async(key, id) => {
+};
+const detail = async (key, id) => {
   try {
-    const site = db_site.find({"id": key});
+    const site = db_site.find({ id: key });
     let url;
     if (site.type === 3) {
       url = buildUrl(site.api, `/video_detail?id=${id}`);
     } else if (site.type === 4) {
       url = buildUrl(site.api, `/detail?vod_id=${id}`);
     } else if (site.type === 5) {
-      url = id.startsWith('http')? id : `${reptileApiFormat(site.api, 'searchUrl')}${id}`;
+      url = id.startsWith('http') ? id : `${reptileApiFormat(site.api, 'searchUrl')}${id}`;
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=detail&ids=${id}&extend=${site.ext}`);
     } else {
@@ -538,12 +542,12 @@ const detail = async(key, id) => {
 
       const vod_from = detailxlRes.join('$$$');
       let zippedData = _.zip(detaillistRes, detailjsurlRes);
-      console.log(detaillistRes, detailjsurlRes)
+      console.log(detaillistRes, detailjsurlRes);
       console.log(vod_from);
       let list = {
         vod_from,
-        vod_url: []
-      }
+        vod_url: [],
+      };
       return list;
     }
 
@@ -566,10 +570,10 @@ const detail = async(key, id) => {
     const videoData = videoList.map((video) => {
       // 播放源
       const playFrom = video.vod_play_from;
-      const playSource = playFrom.split("$").filter(Boolean);
+      const playSource = playFrom.split('$').filter(Boolean);
       // 剧集
       const playUrl = video.vod_play_url;
-      const playUrlDiffPlaySource = playUrl.split("$$$"); // 分离不同播放源
+      const playUrlDiffPlaySource = playUrl.split('$$$'); // 分离不同播放源
       const playEpisodes = playUrlDiffPlaySource.map((item) =>
         item
           .replace(/\$+/g, '$')
@@ -579,13 +583,11 @@ const detail = async(key, id) => {
             return e;
           }),
       );
-      const fullList = Object.fromEntries(
-        playSource.map((key, index) => [key, playEpisodes[index]])
-      );
+      const fullList = Object.fromEntries(playSource.map((key, index) => [key, playEpisodes[index]]));
 
       return {
         ...video,
-        fullList: fullList
+        fullList: fullList,
       };
     });
 
@@ -593,39 +595,39 @@ const detail = async(key, id) => {
   } catch (err) {
     throw err;
   }
-}
+};
 
 /**
  * hipy[drpy t4]获取播放详情
  * @param {*} id 资源网 id
- * @param {*} flag 
- * @param {*} play 
+ * @param {*} flag
+ * @param {*} play
  * @returns
  */
-const get_hipy_play_url = async(id, flag, play) => {
+const get_hipy_play_url = async (id, flag, play) => {
   try {
-    const site = db_site.find({id});
+    const site = db_site.find({ id });
     const url = buildUrl(site.api, `?extend=${site.ext}&flag=${flag}&play=${play}`);
     const response = await fetch(url);
     const data = await response.json();
     let playUrl = data;
-    if (_.has(data, 'url')) playUrl = data["url"];
+    if (_.has(data, 'url')) playUrl = data['url'];
     return playUrl;
   } catch (err) {
     throw err;
   }
-}
+};
 
 /**
  * drpy获取播放详情
  * @param {*} id 资源网 id
- * @param {*} flag 
- * @param {*} play 
+ * @param {*} flag
+ * @param {*} play
  * @returns
  */
-const get_drpy_play_url = async(id, url) => {
+const get_drpy_play_url = async (id, url) => {
   try {
-    const site = db_site.find({id});
+    const site = db_site.find({ id });
     const parsusePrefix = site.api;
 
     const hostname = new URL(parsusePrefix).hostname;
@@ -633,14 +635,8 @@ const get_drpy_play_url = async(id, url) => {
     const port = new URL(parsusePrefix).port;
 
     let parsueUrl;
-    if (port)
-      parsueUrl = `${protocol}//${hostname}:${port}/web/302redirect?url=${encodeURIComponent(
-        url
-      )}`;
-    else
-      parsueUrl = `${protocol}//${hostname}/web/302redirect?url=${encodeURIComponent(
-        url
-      )}`;
+    if (port) parsueUrl = `${protocol}//${hostname}:${port}/web/302redirect?url=${encodeURIComponent(url)}`;
+    else parsueUrl = `${protocol}//${hostname}/web/302redirect?url=${encodeURIComponent(url)}`;
 
     const response = await fetch(url);
     const text = response.json();
@@ -648,24 +644,24 @@ const get_drpy_play_url = async(id, url) => {
   } catch (err) {
     throw err;
   }
-}
+};
 
 /**
  * 检查资源
  * @param {*} key 资源网 key
  * @returns boolean
  */
-const check = async(key) => {
+const check = async (key) => {
   try {
     const data = await classify(key);
     return {
       status: !_.isEmpty(data.classData),
-      resource: data.total
-    }
+      resource: data.total,
+    };
   } catch (err) {
     console.log(err);
     return false;
   }
-}
+};
 
-export { classify, detail, get_hipy_play_url, get_drpy_play_url, check, search, list }
+export { classify, detail, get_hipy_play_url, get_drpy_play_url, check, search, list };
