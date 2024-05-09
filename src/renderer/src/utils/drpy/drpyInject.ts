@@ -84,10 +84,9 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   let r: any;
 
   if (method === 'GET') {
-    r = syncFetch(_url, {
+    const url = Object.keys(data).length === 0 ? _url : `${_url}?${new URLSearchParams(data).toString()}`;
+    r = syncFetch(url, {
       headers,
-      parms: data,
-      credentials: 'include',
     });
   } else {
     const requestOptions: any = {
