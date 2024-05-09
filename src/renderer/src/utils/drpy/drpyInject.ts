@@ -39,18 +39,31 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   const withHeaders: boolean = _object.withHeaders || false;
   const body: string = _object.body || '';
   const bufferType: number = _object.buffer || 0;
-  const redirect = _object?.redirect === 1 || _object?.redirect === true ? 'follow' : 'manual';
+  const redirect = _object?.redirect === 0 || _object?.redirect === false ? 'manual' : 'follow';
   let data: any = _object.data || {};
   const headers = _object.headers || {};
   if (redirect) headers['Redirect'] = redirect;
-  const emptyResult: Response = { content: '', body: '', headers: {} };
+  const emptyResult: Response = {content: '', body: '', headers: {}};
 
   if (body && Object.keys(data).length == 0) {
     body.split('&').forEach((param) => {
       const [key, value] = param.split('=');
       data[key] = value;
     });
+  } else if (!body && Object.keys(data).length > 0 && method != 'GET') {
+    let content_type_keys = Object.keys(headers).filter(key => key.toLowerCase() == 'content-type');
+    let content_type = 'application/json';
+    if (content_type_keys.length > 0) {
+      let content_type_key = content_type_keys.slice(-1)[0];
+      let old_content_type = headers[content_type_key];
+      if (!old_content_type.includes(content_type)) {
+        headers[content_type_key] = content_type
+      }
+    } else {
+      headers['Content-Type'] = content_type
+    }
   }
+
 
   if (headers['Content-Type']?.includes('application/x-www-form-urlencoded')) {
     data = new URLSearchParams(data).toString();
@@ -99,7 +112,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
 
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: r.text(), headers: formatHeaders } || emptyResult;
+      return {body: r.text(), headers: formatHeaders} || emptyResult;
     } else {
       return r.text() || '';
     }
@@ -111,7 +124,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
       content = base64String;
     } else content = r.text();
-    return { content, headers: formatHeaders } || emptyResult;
+    return {content, headers: formatHeaders} || emptyResult;
   } else {
     return emptyResult;
   }
@@ -155,7 +168,7 @@ const resolve = (from, to) => {
   const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
   if (resolvedUrl.protocol === 'resolve:') {
     // `from` is a relative URL.
-    const { pathname, search, hash } = resolvedUrl;
+    const {pathname, search, hash} = resolvedUrl;
     return pathname + search + hash;
   }
   // return resolvedUrl.toString();
@@ -220,4 +233,4 @@ const local = {
   'delete': local_delete
 }
 
-export { pdfh, pdfa, pdfl, pd, local , req, joinUrl, resolve }
+export {pdfh, pdfa, pdfl, pd, local, req, joinUrl, resolve}
