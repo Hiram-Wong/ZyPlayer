@@ -39,17 +39,28 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   const withHeaders: boolean = _object.withHeaders || false;
   const body: string = _object.body || '';
   const bufferType: number = _object.buffer || 0;
-  const redirect = _object?.redirect === 1 || _object?.redirect === true ? 'follow' : 'manual';
   let data: any = _object.data || {};
   const headers = _object.headers || {};
-  if (redirect) headers['Redirect'] = redirect;
   const emptyResult: Response = { content: '', body: '', headers: {} };
 
-  if (body && Object.keys(data).length == 0) {
+  if (_object.hasOwnProperty('redirect')) {
+    const redirect = _object.redirect === 1 || _object.redirect === true ? 'follow' : 'manual';
+    headers['Redirect'] = redirect;
+  }
+
+  if (body && Object.keys(data).length === 0) {
     body.split('&').forEach((param) => {
       const [key, value] = param.split('=');
       data[key] = value;
     });
+  } else if (!body && Object.keys(data).length !== 0 && method !== 'GET') {
+    let contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type');
+    let contentType = 'application/json';
+    if (contentTypeKeys.length > 0) {
+      headers[contentTypeKeys[contentTypeKeys.length - 1]] = contentType;
+    } else {
+      headers['Content-Type'] = contentType;
+    }
   }
 
   if (headers['Content-Type']?.includes('application/x-www-form-urlencoded')) {
@@ -57,10 +68,10 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   }
 
   const customHeaders = {
-    'Cookie': 'custom-cookie',
+    Cookie: 'custom-cookie',
     'User-Agent': 'custom-ua',
-    'Referer': 'custom-referer',
-    'Redirect': 'custom-redirect'
+    Referer: 'custom-referer',
+    Redirect: 'custom-redirect',
   };
 
   for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
@@ -76,14 +87,14 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     r = syncFetch(_url, {
       headers,
       parms: data,
-      credentials: 'include'
+      credentials: 'include',
     });
   } else {
     const requestOptions: any = {
       method,
       headers,
       body: typeof data === 'string' ? data : JSON.stringify(data),
-      credentials: 'include'
+      credentials: 'include',
     };
     r = syncFetch(_url, requestOptions);
   }
@@ -115,18 +126,18 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   } else {
     return emptyResult;
   }
-}
+};
 
 const req = (_url, _object) => {
   return baseRequest(_url, _object, 1);
-}
+};
 
 const joinUrl = (base: string, url: string) => {
   base = base || '';
   url = url || '';
   base = base.trim().replace(/\/+$/, '');
   url = url.trim().replace(/\/+$/, '');
-  console.log('joinUrl:', base, url)
+  console.log('joinUrl:', base, url);
 
   let u;
 
@@ -149,75 +160,75 @@ const joinUrl = (base: string, url: string) => {
   }
 
   return u.toString();
-}
+};
 
 const resolve = (from, to) => {
   const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
   if (resolvedUrl.protocol === 'resolve:') {
-    // `from` is a relative URL.
     const { pathname, search, hash } = resolvedUrl;
     return pathname + search + hash;
   }
-  // return resolvedUrl.toString();
   return resolvedUrl.href;
-}
+};
 
 const pdfh = (html: string, parse: string, base_url: string = '') => {
   const jsp = new jsoup(base_url);
   return jsp.pdfh(html, parse, base_url);
-}
+};
 
 const pd = (html: string, parse: string, base_url: string = '') => {
   const jsp = new jsoup(base_url);
   return jsp.pd(html, parse);
-}
+};
 
 const pdfa = (html: string, parse: string) => {
   const jsp = new jsoup();
   return jsp.pdfa(html, parse);
-}
+};
 
 const pdfl = (html: string, parse: string, list_text: string, list_url: string, url_key: string) => {
   const jsp = new jsoup();
   return jsp.pdfl(html, parse, list_text, list_url, url_key);
-}
+};
 
-const CACHE_URL = String(import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`) + '/v1/cache';
+const CACHE_URL =
+  String(import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`) +
+  '/v1/cache';
 
 const local_get = (_id: string, key: string, value: string = '') => {
   const url = `${CACHE_URL}/${_id}${key}`;
   const res: any = req(url, {});
   return JSON.parse(res.content).data || value;
-}
+};
 
 const local_set = (_id, key, value) => {
   const headers = {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     data: {
       key: `${_id}${key}`,
-      value
-    }
+      value,
+    },
   };
   const res: any = req(CACHE_URL, headers);
   return JSON.parse(res.content).data;
-}
+};
 
 const local_delete = (_id, key) => {
   const url = `${CACHE_URL}/${_id}${key}`;
   const headers = {
-    method: 'DELETE'
+    method: 'DELETE',
   };
   const res: any = req(url, headers);
   return JSON.parse(res.content).data;
-}
+};
 
 const local = {
-  'get': local_get,
-  'set': local_set,
-  'delete': local_delete
-}
+  get: local_get,
+  set: local_set,
+  delete: local_delete,
+};
 
-export { pdfh, pdfa, pdfl, pd, local , req, joinUrl, resolve }
+export { pdfh, pdfa, pdfl, pd, local, req, joinUrl, resolve };
