@@ -462,9 +462,10 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       infiniteCompleteTip.value = t('pages.film.infiniteLoading.noData');
       $state.complete();
       return;
-    }
+    };
 
-    const defaultSite = siteConfig.value.default;
+    const defaultSite = searchTxt.value ? searchCurrentSite.value: siteConfig.value.default;
+
     if (defaultSite.type === 7 && !isVisible.t3Work) {
       const res = await t3RuleInit(defaultSite);
       if (res.code === 200) isVisible.t3Work = true;
@@ -473,8 +474,9 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       const content = await catvodRuleInit(defaultSite);
       if (typeof content === 'object') isVisible.catvod = true;
       else $state.error();
-    }
-    if (!isVisible.loadClass) await getClassList(defaultSite); // 加载分类
+    };
+
+    if (!isVisible.loadClass && !searchTxt.value) await getClassList(defaultSite); // 加载分类
 
     const loadFunction = searchTxt.value ? getSearchList : getFilmList;
     const resLength = await loadFunction(); // 动态加载数据
@@ -513,8 +515,9 @@ const getSearchList = async () => {
 
   if (!currentSite) {
     console.log('[film][search] No search site found.');
-    return 0;
-  }
+    length = 0;
+    return;
+  };
 
   const index = searchGroup.indexOf(currentSite);
   const isLastSite = index + 1 >= searchGroup.length;
@@ -564,6 +567,9 @@ const getSearchList = async () => {
     console.error(err);
   } finally {
     console.log(`[film] load data length: ${length}`);
+    isVisible.t3Work = false;
+    isVisible.catvod = false;
+    console.log(isVisible)
     return length;
   }
 };
