@@ -24,6 +24,7 @@ interface RequestOptions {
   headers?: { [key: string]: string };
   withHeaders?: boolean;
   buffer?: number;
+  redirect?: 0 | 1 | true | false;
 }
 
 interface Response {
@@ -38,8 +39,10 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   const withHeaders: boolean = _object.withHeaders || false;
   const body: string = _object.body || '';
   const bufferType: number = _object.buffer || 0;
+  const redirect = _object?.redirect === 1 || _object?.redirect === true ? 'follow' : 'manual';
   let data: any = _object.data || {};
   const headers = _object.headers || {};
+  if (redirect) headers['Redirect'] = redirect;
   const emptyResult: Response = { content: '', body: '', headers: {} };
 
   if (body && Object.keys(data).length == 0) {
@@ -57,6 +60,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     'Cookie': 'custom-cookie',
     'User-Agent': 'custom-ua',
     'Referer': 'custom-referer',
+    'Redirect': 'custom-redirect'
   };
 
   for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {

@@ -53,6 +53,7 @@ let windowState: any = setting.find({ key: "windowPosition" }).value || {
   }
 };
 let reqIdMethod = {}; // 请求id与header列表
+let reqIdRedirect = {};
 
 const windowManage = (win) => {
   const bounds = win.getBounds();
@@ -263,7 +264,7 @@ app.whenReady().then(async() => {
   });
 
   defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    const { requestHeaders, url } = details;
+    const { requestHeaders, url, id } = details;
     const isLocalhostRef = (headerValue) => `${headerValue}`.includes('//localhost') || `${headerValue}`.includes('//127.0.0.1');
 
     // 不处理本地地址
@@ -293,10 +294,18 @@ app.whenReady().then(async() => {
     if (requestHeaders['custom-referer'] || headers?.['Referer']) requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
     if (isLocalhostRef(requestHeaders['Referer'])) {
       delete requestHeaders['Referer']
-    }
+    };
+
+    if (requestHeaders['custom-redirect'] === 'manual') {
+      delete requestHeaders['custom-redirect']
+      logger.info(requestHeaders)
+      logger.info(url)
+
+      reqIdRedirect[`${id}`] = headers;
+    };
 
     // 清理不再需要的记录
-    delete reqIdMethod[details.id];
+    delete reqIdMethod[`${id}`];
 
     callback({ requestHeaders });
   });
@@ -353,21 +362,35 @@ app.whenReady().then(async() => {
   }
 
   defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const { id, responseHeaders, statusCode } = details;
+
     const headersToRemove = ['X-Frame-Options', 'x-frame-options'];
-    const cookieHeader = details.responseHeaders?.['Set-Cookie'] || details.responseHeaders?.['set-cookie'];
+    const cookieHeader = responseHeaders?.['Set-Cookie'] || responseHeaders?.['set-cookie'];
 
     for (const header of headersToRemove) {
-      if (details.responseHeaders?.[header]) {
-        delete details.responseHeaders[header];
-      }
-    }
+      if (responseHeaders?.[header]) {
+        delete responseHeaders[header];
+      };
+    };
 
     if (cookieHeader) {
       const updatedCookieHeader = cookieHeader.map((cookie) => `${cookie}; SameSite=None; Secure`);
-      delete details.responseHeaders!['Set-Cookie'];
-      details.responseHeaders!['custom-set-cookie'] = cookieHeader;
-      details.responseHeaders!['set-cookie'] = updatedCookieHeader;
-    }
+      delete responseHeaders!['Set-Cookie'];
+      responseHeaders!['custom-set-cookie'] = cookieHeader;
+      responseHeaders!['set-cookie'] = updatedCookieHeader;
+    };
+
+    if (reqIdRedirect[`${id}`] && statusCode === 302) {
+      callback({
+        cancel: false,
+        responseHeaders: {
+          ...details.responseHeaders
+        },
+        statusLine: 'HTTP/1.1 200 OK' // 篡改响应头第一行
+      });
+      delete reqIdRedirect[`${id}`];
+      return;
+    };
 
     callback({ cancel: false, responseHeaders: details.responseHeaders });
   });
