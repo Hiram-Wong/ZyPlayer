@@ -6,7 +6,7 @@ import { store } from '@/store';
 import { ModeType } from '@/types/interface';
 
 const state: Record<string, any> = {
-  ...SYSTEM_CONFIG
+  ...SYSTEM_CONFIG,
 };
 
 export type TState = typeof state;
@@ -24,10 +24,10 @@ export const useSettingStore = defineStore('setting', {
         if (media.matches) {
           return 'dark';
         }
-        return 'light'; 
+        return 'light';
       }
       return state.mode as ModeType;
-    }
+    },
   },
   actions: {
     async changeMode(mode: ModeType | 'auto') {
@@ -59,7 +59,7 @@ export const useSettingStore = defineStore('setting', {
       }
     },
   },
-  persist: true // 数据持久化
+  persist: true, // 数据持久化
 });
 
 export function getSettingStore() {

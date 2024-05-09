@@ -262,7 +262,7 @@ const gotoPlay = async (item) => {
   isVisible.official = response!.isOfficial;
   if (isVisible.official) {
     if (analyzeSource?.name) MessagePlugin.info(t('pages.player.message.official', [analyzeSource.name]));
-    else  MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
+    else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
   }
   callSysPlayer(response!.url);
 };
@@ -558,7 +558,8 @@ const getDetailInfo = async (): Promise<void> => {
               }
             }
 
-            &:hover, &:focus-visible {
+            &:hover,
+            &:focus-visible {
               background-color: transparent !important;
               border-color: transparent !important;
               color: var(--td-brand-color);

@@ -1,4 +1,4 @@
-import { is } from "@electron-toolkit/utils";
+import { is } from '@electron-toolkit/utils';
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import fs from 'fs-extra';
@@ -9,14 +9,13 @@ const updaterCacheDirName = 'zyplayer-updater';
 const updatePath = join(app.getAppPath(), updaterCacheDirName, 'pending');
 logger.info(`[update] update module initialized; path: ${updatePath}`);
 
-
 if (is.dev) {
   Object.defineProperty(app, 'isPackaged', {
     get() {
       return true;
-    }
+    },
   });
-  autoUpdater.updateConfigPath = resolve(__dirname, '../../dev-app-update.yml')
+  autoUpdater.updateConfigPath = resolve(__dirname, '../../dev-app-update.yml');
 }
 autoUpdater.autoDownload = false; // 自动下载更新
 autoUpdater.autoInstallOnAppQuit = false; // 退出时自动安装更新
@@ -26,7 +25,7 @@ export default (win: BrowserWindow) => {
   const downloadUpdate = () => {
     autoUpdater.downloadUpdate().catch((e: any) => {
       if (e.message && e.message.includes('file already exists') && e.path) {
-        fs.emptyDirSync(e.path)
+        fs.emptyDirSync(e.path);
         logger.info('[update] error: old version file already exists');
         downloadUpdate();
       } else {
@@ -34,7 +33,7 @@ export default (win: BrowserWindow) => {
         win.webContents.send('update-error', e);
       }
     });
-  }
+  };
 
   // 主进程监听检查更新事件
   ipcMain.on('checkForUpdate', () => {

@@ -1,4 +1,4 @@
-import { globalShortcut } from "electron";
+import { globalShortcut } from 'electron';
 
 /**
  * 注册全局快捷键
@@ -6,15 +6,15 @@ import { globalShortcut } from "electron";
  */
 const createGlobalShortcut = (win) => {
   // 刷新程序
-  globalShortcut.register("CmdOrCtrl+Shift+R", () => {
+  globalShortcut.register('CmdOrCtrl+Shift+R', () => {
     if (win && win.isFocused()) win?.reload();
   });
 
   // 打开开发者工具
-  globalShortcut.register("CmdOrCtrl+Shift+I", () => {
+  globalShortcut.register('CmdOrCtrl+Shift+I', () => {
     if (win && win.isFocused()) {
       win?.webContents.openDevTools({
-        mode: "right",
+        mode: 'right',
         activate: true,
       });
     }

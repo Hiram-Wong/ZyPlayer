@@ -13,7 +13,9 @@ interface PieResponse {
 pie.initialize(app);
 let snifferWindow: BrowserWindow;
 
-const urlRegex: RegExp = new RegExp('http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3|tos)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*');
+const urlRegex: RegExp = new RegExp(
+  'http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3|tos)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*',
+);
 const pageStore: object = {};
 
 const handleResponse = (code: number, message: 'success' | 'fail', data: object | Error): PieResponse => {
@@ -24,7 +26,7 @@ const handleResponse = (code: number, message: 'success' | 'fail', data: object 
     dataString = data;
   }
   logger.info(`[sniffer] code: ${code} - message: ${message} - data: ${dataString}`);
-  return ({ code, message, data });
+  return { code, message, data };
 };
 
 // 排除url
@@ -37,7 +39,12 @@ const isVideoUrl = (reqUrl) => {
   return reqUrl.match(urlRegex) && !isExcludedUrl(reqUrl);
 };
 
-const puppeteerInElectron = async (url: string, script: string = '', customRegex: string, ua: string | null = null): Promise<PieResponse> => {
+const puppeteerInElectron = async (
+  url: string,
+  script: string = '',
+  customRegex: string,
+  ua: string | null = null,
+): Promise<PieResponse> => {
   logger.info(`[sniffer] sniffer url: ${url}`);
   logger.info(`[sniffer] sniffer ua: ${ua}`);
 
@@ -60,11 +67,11 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
         if (pageId) {
           if (pageStore[pageId]) {
             if (pageStore[pageId]?.timeoutId) clearTimeout(pageStore[pageId].timeoutId);
-            if (pageStore[pageId]?.page) await pageStore[pageId].page.close().catch(err => logger.error(err));
+            if (pageStore[pageId]?.page) await pageStore[pageId].page.close().catch((err) => logger.error(err));
             if (pageStore[pageId]?.browser) await pageStore[pageId].browser.disconnect();
             delete pageStore[pageId];
           }
-        };
+        }
       };
 
       page.on('request', async (req) => {
@@ -82,22 +89,22 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
           await cleanup(pageId);
           req.abort().catch((e) => logger.error(e));
           resolve(handleResponse(200, 'success', { url: reqUrl, header: headers }));
-        };
+        }
 
         if (isVideoUrl(reqUrl)) {
           logger.info(`[pie]后缀名匹配:${reqUrl}`);
           await cleanup(pageId);
           req.abort().catch((e) => logger.error(e));
           resolve(handleResponse(200, 'success', { url: reqUrl, header: headers }));
-        };
+        }
 
         if (req.method().toLowerCase() === 'head') {
           req.abort().catch((err) => logger.error(err));
-        };
+        }
 
         if (['font'].includes(req.resourceType())) {
           req.abort().catch((err) => logger.error(err));
-        };
+        }
 
         req.continue().catch((err) => logger.error(err));
       });
@@ -111,7 +118,7 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
         }, 15000);
       } else {
         logger.info('--------has timerId------');
-      };
+      }
 
       await page.goto(url, { waitUntil: 'domcontentloaded' }).catch((err) => logger.error(err));
 
@@ -134,12 +141,12 @@ const puppeteerInElectron = async (url: string, script: string = '', customRegex
               }, 200);
             })();
           `;
-          await page.evaluateOnNewDocument(script = js_code);
+          await page.evaluateOnNewDocument((script = js_code));
           await page.evaluate(js_code);
         } catch (err) {
           logger.info(`[pie][error]run script: ${err}`);
         }
-      };
+      }
     });
   } catch (err) {
     return handleResponse(500, 'fail', err as Error);

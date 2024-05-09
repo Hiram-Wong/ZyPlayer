@@ -7,8 +7,8 @@ export function fetchSiteList() {
     method: 'get',
     params: {
       timestamp: new Date().getTime(),
-    }
-  })
+    },
+  });
 }
 
 // 获取site活跃列表
@@ -16,8 +16,8 @@ export function fetchSiteActive() {
   return request({
     url: '/v1/site/active',
     method: 'get',
-    params: {}
-  })
+    params: {},
+  });
 }
 
 // 获取site活跃列表
@@ -25,8 +25,8 @@ export function fetchSiteGroup() {
   return request({
     url: '/v1/site/group',
     method: 'get',
-    params: {}
-  })
+    params: {},
+  });
 }
 
 // 获取分类列表
@@ -35,9 +35,9 @@ export function fetchFilmClass(id: string) {
     url: '/v1/film/class',
     method: 'get',
     params: {
-      id
-    }
-  })
+      id,
+    },
+  });
 }
 
 // 获取影视列表
@@ -49,9 +49,9 @@ export function fetchFilmList(id: string, pg: number, t: string, f: any) {
       id,
       pg,
       t,
-      f
-    }
-  })
+      f,
+    },
+  });
 }
 // film搜索
 export function searchFilmList(id: string, kw: string) {
@@ -60,9 +60,9 @@ export function searchFilmList(id: string, kw: string) {
     method: 'get',
     params: {
       id,
-      kw
-    }
-  })
+      kw,
+    },
+  });
 }
 
 // film详情
@@ -72,17 +72,17 @@ export function fetchFilmDetail(id: string, video_id: string) {
     method: 'get',
     params: {
       id,
-      video_id
-    }
-  })
+      video_id,
+    },
+  });
 }
 
 // site详情
 export function fetchSiteDetail(id: string) {
   return request({
     url: `/v1/site/${id}`,
-    method: 'get'
-  })
+    method: 'get',
+  });
 }
 
 // site分页
@@ -91,35 +91,34 @@ export function fetchSitePage(kw: string) {
     url: `/v1/site/page`,
     method: 'get',
     params: {
-      kw
-    }
-  })
+      kw,
+    },
+  });
 }
 
 export function updateSiteItem(id, doc) {
   return request({
     url: `/v1/site/${id}`,
     method: 'put',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 export function delSiteItem(id) {
   return request({
     url: `/v1/site/${id}`,
     method: 'delete',
-  })
+  });
 }
-
 
 export function checkFilm(id) {
   return request({
     url: `/v1/film/check`,
     method: 'get',
     params: {
-      id
-    }
-  })
+      id,
+    },
+  });
 }
 
 // site添加
@@ -127,6 +126,6 @@ export function addSiteItem(doc) {
   return request({
     url: `/v1/site`,
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }

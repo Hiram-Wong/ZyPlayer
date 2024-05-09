@@ -1,23 +1,18 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center"
+    :footer="false">
     <template #body>
       <t-form :data="formData" :rules="rulesSingle" :label-width="60" @submit="onSubmit">
         <t-form-item :label="$t('pages.setting.drive.name')" name="name">
           <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
         <t-form-item :label="$t('pages.setting.drive.server')" name="server">
-          <t-input
-            v-model="formData.server"
-            class="input-item"
-            :placeholder="$t('pages.setting.placeholder.general')"
-          />
+          <t-input v-model="formData.server" class="input-item"
+            :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
         <t-form-item :label="$t('pages.setting.drive.startPage')" name="startPage">
-          <t-input
-            v-model="formData.startPage"
-            class="input-item"
-            :placeholder="$t('pages.setting.placeholder.startPage')"
-          />
+          <t-input v-model="formData.startPage" class="input-item"
+            :placeholder="$t('pages.setting.placeholder.startPage')" />
         </t-form-item>
         <!-- <t-form-item label="搜索" name="search">
           <t-switch v-model="formData.search"/>
@@ -31,12 +26,8 @@
           />
         </t-form-item> -->
         <t-form-item :label="$t('pages.setting.drive.params')" name="params">
-          <t-textarea
-            v-model="formData.params"
-            class="input-item input-textarea"
-            :placeholder="tip"
-            :autosize="{ minRows: 3, maxRows: 3 }"
-          />
+          <t-textarea v-model="formData.params" class="input-item input-textarea" :placeholder="tip"
+            :autosize="{ minRows: 3, maxRows: 3 }" />
         </t-form-item>
         <div class="optios">
           <t-form-item style="float: right">
@@ -63,7 +54,7 @@ const props = defineProps({
   },
 });
 const tip = computed(() => {
-  return  `{\n\t"${t('pages.setting.placeholder.paramsPath')}": { "password": "${t('pages.setting.placeholder.paramsPasswd')}" }\n}`
+  return `{\n\t"${t('pages.setting.placeholder.paramsPath')}": { "password": "${t('pages.setting.placeholder.paramsPasswd')}" }\n}`
 })
 const formVisible = ref(false);
 const formData = reactive({
@@ -75,7 +66,7 @@ const formData = reactive({
   params: null,
   isActive: true
 });
-const onSubmit = async() => {
+const onSubmit = async () => {
   try {
     const res = await addDriveItem(formData);
     MessagePlugin.success('添加成功');

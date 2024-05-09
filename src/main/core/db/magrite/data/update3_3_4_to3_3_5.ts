@@ -8,14 +8,14 @@ const update3_3_4_to3_3_5 = () => {
     if (!Array.isArray(db_res_analyze)) {
       arr.push(db_res_analyze);
     } else arr = db_res_analyze;
-    const res = arr.map(obj => ({ ...obj, type: obj?.type ? obj.type : 0 }));
+    const res = arr.map((obj) => ({ ...obj, type: obj?.type ? obj.type : 0 }));
     logger.info(res);
     db.set('tbl_analyze', res).write();
   }
 
   db.get('tbl_setting').find({ key: 'version' }).assign({ key: 'version', value: '3.3.5' }).write();
 
-  logger.info('[db][magrite][update3_3_4_to3_3_5]completed')
-}
+  logger.info('[db][magrite][update3_3_4_to3_3_5]completed');
+};
 
 export default update3_3_4_to3_3_5;

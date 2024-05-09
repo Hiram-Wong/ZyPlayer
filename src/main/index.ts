@@ -17,7 +17,7 @@ import autoUpdater from './core/update';
 import createTray from './core/tray';
 import protocolResgin from './core/protocolResgin';
 
-import loadHtml from '../../resources/html/load.html?asset'
+import loadHtml from '../../resources/html/load.html?asset';
 
 /**
  * fix env is important
@@ -39,18 +39,18 @@ dbInit(); // 初始化数据库
 initServer(); // 后端服务
 
 // 禁用硬件加速
-if (!setting.find({ key: "hardwareAcceleration" }).value) {
+if (!setting.find({ key: 'hardwareAcceleration' }).value) {
   app.disableHardwareAcceleration();
-};
+}
 
-let shortcutsState: any = setting.find({ key: "recordShortcut" }).value;
-let uaState: any = setting.find({ key: "ua" }).value;
-let windowState: any = setting.find({ key: "windowPosition" }).value || {
+let shortcutsState: any = setting.find({ key: 'recordShortcut' }).value;
+let uaState: any = setting.find({ key: 'ua' }).value;
+let windowState: any = setting.find({ key: 'windowPosition' }).value || {
   status: false,
   position: {
     width: 1000,
     height: 640,
-  }
+  },
 };
 let reqIdMethod = {}; // 请求id与header列表
 let reqIdRedirect = {};
@@ -65,10 +65,10 @@ const windowManage = (win) => {
         y: bounds.y,
         width: bounds.width,
         height: bounds.height,
-      }
-    }
+      },
+    },
   });
-}
+};
 
 // 老板键隐藏恢复事件
 const showOrHidden = () => {
@@ -94,7 +94,7 @@ const parseCustomUrl = (url) => {
   }
 
   return { redirectURL, headers };
-}
+};
 
 // 主题更新事件
 nativeTheme.on('updated', () => {
@@ -125,7 +125,7 @@ const showLoading = () => {
     trafficLightPosition: {
       x: 12,
       y: 20,
-    }
+    },
   });
 
   loadWindow.loadFile(loadHtml);
@@ -161,7 +161,7 @@ const createWindow = (): void => {
       spellcheck: false, // 禁用拼写检查器
       allowRunningInsecureContent: true, // 允许 https 页面运行来自http url的JavaScript, CSS 或 plugins
     },
-  })
+  });
 
   remote.enable(mainWindow.webContents); // 启用remote
 
@@ -208,9 +208,9 @@ const createWindow = (): void => {
 
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
   mainWindow.webContents.on('did-attach-webview', (_, wc) => {
@@ -220,12 +220,12 @@ const createWindow = (): void => {
       return { action: 'deny' };
     });
   });
-}
+};
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(async() => {
+app.whenReady().then(async () => {
   // 获取默认的 session
   const defaultSession = session.defaultSession;
 
@@ -233,16 +233,13 @@ app.whenReady().then(async() => {
   defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
     let { url, id } = details;
 
-    const filters = [
-      'devtools-detector.min.js',
-      'devtools-detector.js'
-    ];
+    const filters = ['devtools-detector.min.js', 'devtools-detector.js'];
 
     for (const filter of filters) {
       if (url.includes(filter)) {
         callback({
           cancel: true,
-          confirmed: false
+          confirmed: false,
         });
         return;
       }
@@ -250,22 +247,28 @@ app.whenReady().then(async() => {
 
     // http://bfdsr.hutu777.com/upload/video/2024/03/20/c6b8e67e75131466cfcbb18ed75b8c6b.JPG@Referer=www.jianpianapp.com@User-Agent=jianpian-version353
     const { redirectURL, headers } = parseCustomUrl(url);
-    if (!url.includes('//localhost') && !url.includes('//127.0.0.1') && ['Referer', 'Cookie', 'User-Agent'].some(str => url.includes(str))) {
+    if (
+      !url.includes('//localhost') &&
+      !url.includes('//127.0.0.1') &&
+      ['Referer', 'Cookie', 'User-Agent'].some((str) => url.includes(str))
+    ) {
       reqIdMethod[`${id}`] = headers;
 
       callback({
         cancel: false,
         redirectURL: redirectURL,
-        confirmed: false
+        confirmed: false,
       });
-    } else callback({
-      confirmed: false
-    });
+    } else
+      callback({
+        confirmed: false,
+      });
   });
 
   defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders, url, id } = details;
-    const isLocalhostRef = (headerValue) => `${headerValue}`.includes('//localhost') || `${headerValue}`.includes('//127.0.0.1');
+    const isLocalhostRef = (headerValue) =>
+      `${headerValue}`.includes('//localhost') || `${headerValue}`.includes('//127.0.0.1');
 
     // 不处理本地地址
     if (isLocalhostRef(url)) {
@@ -279,7 +282,7 @@ app.whenReady().then(async() => {
     // 设置或清除可能的本地Origin
     if (requestHeaders['Origin'] === origin) delete requestHeaders['Origin'];
     if (isLocalhostRef(requestHeaders['Origin'])) {
-      delete requestHeaders['Origin']
+      delete requestHeaders['Origin'];
     }
 
     // 设置或清除 User-Agent
@@ -291,18 +294,19 @@ app.whenReady().then(async() => {
     delete requestHeaders['custom-cookie'];
 
     // 设置或清除可能的本地 Referer
-    if (requestHeaders['custom-referer'] || headers?.['Referer']) requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
+    if (requestHeaders['custom-referer'] || headers?.['Referer'])
+      requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
     if (isLocalhostRef(requestHeaders['Referer'])) {
-      delete requestHeaders['Referer']
-    };
+      delete requestHeaders['Referer'];
+    }
 
     if (requestHeaders['custom-redirect'] === 'manual') {
-      delete requestHeaders['custom-redirect']
-      logger.info(requestHeaders)
-      logger.info(url)
+      delete requestHeaders['custom-redirect'];
+      logger.info(requestHeaders);
+      logger.info(url);
 
       reqIdRedirect[`${id}`] = headers;
-    };
+    }
 
     // 清理不再需要的记录
     delete reqIdMethod[`${id}`];
@@ -340,7 +344,7 @@ app.whenReady().then(async() => {
     mainWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
       logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
     });
-  };
+  }
 
   // 检测更新
   autoUpdater(mainWindow!);
@@ -370,27 +374,27 @@ app.whenReady().then(async() => {
     for (const header of headersToRemove) {
       if (responseHeaders?.[header]) {
         delete responseHeaders[header];
-      };
-    };
+      }
+    }
 
     if (cookieHeader) {
       const updatedCookieHeader = cookieHeader.map((cookie) => `${cookie}; SameSite=None; Secure`);
       delete responseHeaders!['Set-Cookie'];
       responseHeaders!['custom-set-cookie'] = cookieHeader;
       responseHeaders!['set-cookie'] = updatedCookieHeader;
-    };
+    }
 
     if (reqIdRedirect[`${id}`] && statusCode === 302) {
       callback({
         cancel: false,
         responseHeaders: {
-          ...details.responseHeaders
+          ...details.responseHeaders,
         },
-        statusLine: 'HTTP/1.1 200 OK' // 篡改响应头第一行
+        statusLine: 'HTTP/1.1 200 OK', // 篡改响应头第一行
       });
       delete reqIdRedirect[`${id}`];
       return;
-    };
+    }
 
     callback({ cancel: false, responseHeaders: details.responseHeaders });
   });
@@ -402,8 +406,8 @@ app.whenReady().then(async() => {
       showLoading();
       createWindow();
     }
-  })
-})
+  });
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -414,9 +418,9 @@ app.on('window-all-closed', () => {
   // unregister all global shortcuts
   globalShortcut.unregisterAll();
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+});
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
@@ -426,7 +430,7 @@ app.on('browser-window-created', (_, window) => {
 });
 
 ipcMain.on('openPlayWindow', (_, arg) => {
-  logger.info(process.env['ELECTRON_RENDERER_URL'])
+  logger.info(process.env['ELECTRON_RENDERER_URL']);
   if (playWindow) playWindow.destroy();
   playWindow = new BrowserWindow({
     width: 875,
@@ -449,7 +453,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
       contextIsolation: false,
       webSecurity: false, // 允许跨域
       spellcheck: false, // 禁用拼写检查器
-      allowRunningInsecureContent: true
+      allowRunningInsecureContent: true,
     },
   });
 
@@ -462,10 +466,10 @@ ipcMain.on('openPlayWindow', (_, arg) => {
     playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
       logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
     });
-  };
+  }
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    playWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/play`)
+    playWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/play`);
   } else {
     playWindow.loadURL(
       url.format({
@@ -473,8 +477,8 @@ ipcMain.on('openPlayWindow', (_, arg) => {
         protocol: 'file:',
         slashes: true,
         hash: 'play',
-      })
-    )
+      }),
+    );
   }
 
   // 禁止下载

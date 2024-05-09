@@ -1,27 +1,14 @@
 <template>
   <div class="disclaimer view-container">
-    <t-dialog
-      v-model:visible="formVisible"
-      :close-btn="false"
-      :close-on-esc-keydown="false"
-      :header="false"
-      :close-on-overlay-click="false"
-      :confirm-btn="$t('pages.md.privacyPolicy.confirm')"
-      :cancel-btn="$t('pages.md.privacyPolicy.cancel')"
-      :on-confirm="confirmEvent"
-      :on-close="cancelEvent"
-      placement="center"
-      width="480px"
-    >
+    <t-dialog v-model:visible="formVisible" :close-btn="false" :close-on-esc-keydown="false" :header="false"
+      :close-on-overlay-click="false" :confirm-btn="$t('pages.md.privacyPolicy.confirm')"
+      :cancel-btn="$t('pages.md.privacyPolicy.cancel')" :on-confirm="confirmEvent" :on-close="cancelEvent"
+      placement="center" width="480px">
       <div class="privacy-policy">
         <div class="header">{{ $t('pages.md.privacyPolicy.title') }}</div>
         <div class="main-content">
-          <MdPreview 
-            editorId="privacy-policy"
-            :modelValue="$t('pages.md.privacyPolicy.content')"
-            previewTheme="vuepress"
-            :theme="theme"
-          />
+          <MdPreview editorId="privacy-policy" :modelValue="$t('pages.md.privacyPolicy.content')"
+            previewTheme="vuepress" :theme="theme" />
         </div>
       </div>
     </t-dialog>
@@ -85,6 +72,7 @@ const cancelEvent = () => {
     .t-dialog__footer {
       display: flex;
       justify-content: space-around;
+
       .t-button {
         width: 180px;
         height: 45px;
@@ -95,8 +83,10 @@ const cancelEvent = () => {
       }
     }
   }
+
   .privacy-policy {
     opacity: 1;
+
     .header {
       margin-top: 45px;
       font-weight: 700;
@@ -104,20 +94,26 @@ const cancelEvent = () => {
       text-align: center;
       color: var(--td-text-color-primary);
     }
+
     .main-content {
       height: 280px;
       margin: 15px auto 10px;
       overflow-y: auto;
     }
   }
+
   :deep(.md-editor-preview-wrapper) {
     padding: 0;
+
     .md-editor-preview {
       color: var(--td-text-color-primary);
+
       blockquote {
         margin: 0;
       }
-      p, li {
+
+      p,
+      li {
         font-weight: 500;
         font-size: 14px;
         line-height: 22px;

@@ -1,12 +1,14 @@
 <template>
   <div class="drive-container">
-    <common-nav :title="$t('pages.drive.name')" :list="driveConfig.data" :active="active.nav" @change-key="changeDefaultIptvEvent" />
+    <common-nav :title="$t('pages.drive.name')" :list="driveConfig.data" :active="active.nav"
+      @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">
         <div class="page-title">
           <div class="title">
             <t-breadcrumb :max-item-width="'80%'">
-              <t-breadcrumbItem @click="gotoBreadcrumbPath(item.path)" v-for="item in breadcrumb">{{ item.name }}</t-breadcrumbItem>
+              <t-breadcrumbItem @click="gotoBreadcrumbPath(item.path)" v-for="item in breadcrumb">{{ item.name
+                }}</t-breadcrumbItem>
             </t-breadcrumb>
           </div>
         </div>
@@ -16,8 +18,8 @@
               <template #prefix-icon>
                 <search-icon size="16px" />
               </template>
-            </t-input>
-          </div> -->
+</t-input>
+</div> -->
         </div>
       </header>
       <div class="container">
@@ -27,14 +29,9 @@
               <div class="card" @click="getCloudFile(item)">
                 <div class="cover">
                   <div class="folder-cover">
-                    <t-image
-                      class="card-main-item"
-                      :src="item.thumb"
-                      :style="{ width: '115px', height: '90px', background: 'none' }"
-                      :lazy="true"
-                      :loading="renderLoading"
-                      :error="renderError"
-                    >
+                    <t-image class="card-main-item" :src="item.thumb"
+                      :style="{ width: '115px', height: '90px', background: 'none' }" :lazy="true"
+                      :loading="renderLoading" :error="renderError">
                     </t-image>
                   </div>
                 </div>
@@ -44,28 +41,19 @@
               </div>
             </div>
           </div>
-          <div
-            v-if="driveList.length === 0 || driveContent.length === 0"
-            style="
+          <div v-if="driveList.length === 0 || driveContent.length === 0" style="
               min-height: 1px;
               text-align: center;
               margin-bottom: 2em;
-            "
-          >
-          {{ infiniteCompleteTip }}
-        </div>
+            ">
+            {{ infiniteCompleteTip }}
+          </div>
         </div>
       </div>
     </div>
     <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
-    <t-back-top
-      container=".container"
-      :visible-height="200"
-      size="small"
-      :offset="['1.4rem', '0.5rem']"
-      :duration="2000"
-      :firstload="false"
-    />
+    <t-back-top container=".container" :visible-height="200" size="small" :offset="['1.4rem', '0.5rem']"
+      :duration="2000" :firstload="false" />
   </div>
 </template>
 
@@ -137,13 +125,13 @@ onMounted(() => {
 });
 
 // 获取配置
-const getSetting = async() => {
+const getSetting = async () => {
   try {
     const data = await fetchDriveActive();
     if (_.has(data, 'default') && !_.isEmpty(data["default"])) {
       driveConfig.value.default = data["default"];
       active.value.nav = data["default"]["id"];
-      driveConfig.value.default.startPage = driveConfig.value.default.startPage ?  driveConfig.value.default.startPage : '/';
+      driveConfig.value.default.startPage = driveConfig.value.default.startPage ? driveConfig.value.default.startPage : '/';
     } else {
       infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noData');
     }
@@ -157,7 +145,7 @@ const getSetting = async() => {
   }
 };
 
-const initCloud = async() => {
+const initCloud = async () => {
   await spiderInit();
   const { startPage } = driveConfig.value.default;
   let path = startPage;
@@ -191,13 +179,13 @@ const formatBreadcrumb = (str: string) => {
 };
 
 // 面包屑跳转
-const gotoBreadcrumbPath = async(path) => {
+const gotoBreadcrumbPath = async (path) => {
   const res = JSON.parse(await spider.value.dir(path));
   driveContent.value = res.list;
   formatBreadcrumb(path);
 };
 
-const spiderInit = async() => {
+const spiderInit = async () => {
   if (!spider.value) spider.value = __jsEvalReturn();
   await spider.value.init({
     skey: 'siteKey',
@@ -222,7 +210,7 @@ const getCloudFile = async (item) => {
       const path = tid.substring(index);
       playEvent(res, path);
     };
-  } catch(err){
+  } catch (err) {
     console.log(err);
     MessagePlugin.error(t('pages.drive.message.reqError'));
   }
@@ -241,8 +229,8 @@ const playEvent = (item, fullPath) => {
 
   try {
     const playerMode = storePlayer.getSetting.playerMode;
-    const shareUrl = `${driveConfig.value.default.server}/d/${fullPath}${item.sign ? `?sign=${item.sign}`: ''}`
-    if (playerMode.type === 'custom' ) {
+    const shareUrl = `${driveConfig.value.default.server}/d/${fullPath}${item.sign ? `?sign=${item.sign}` : ''}`
+    if (playerMode.type === 'custom') {
       window.electron.ipcRenderer.send('call-player', playerMode.external, shareUrl);
     } else {
       storePlayer.updateConfig({
@@ -261,7 +249,7 @@ const playEvent = (item, fullPath) => {
       });
       window.electron.ipcRenderer.send('openPlayWindow', item.name);
     }
-  }  catch (err) {
+  } catch (err) {
     console.error(`[film][playEvent][error]`, err);
   } finally {
     isVisible.loading = false;
@@ -272,15 +260,15 @@ const playEvent = (item, fullPath) => {
 const changeDefaultIptvEvent = async (id) => {
   console.log(`[drive] change source: ${id}`);
 
-  const item = _.find(driveConfig.value.data, {id})
+  const item = _.find(driveConfig.value.data, { id })
 
   spider.value.destroy();
   driveContent.value = [];
   breadcrumb.value = [];
-  infiniteCompleteTip.value =  t('pages.drive.infiniteLoading.noMore');
+  infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
   active.value.nav = id;
   driveConfig.value.default = item;
-  driveConfig.value.default.startPage = item.startPage ?  item.startPage : '/';
+  driveConfig.value.default.startPage = item.startPage ? item.startPage : '/';
   initCloud();
 };
 
@@ -288,7 +276,7 @@ const changeDefaultIptvEvent = async (id) => {
 const eventBus = useEventBus('drive-reload');
 eventBus.on(async () => {
   spider.value.destroy();
-  infiniteCompleteTip.value =  t('pages.drive.infiniteLoading.noMore');
+  infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
   getSetting();
 });
 </script>
@@ -315,11 +303,13 @@ eventBus.on(async () => {
     border-radius: 5px;
     cursor: pointer;
     font-size: 20px;
+
     .member-name {
       font-size: 12px;
       margin-left: 4px;
     }
   }
+
   .nav-sub-tab-member-info {
     margin-top: 16px;
   }
@@ -328,6 +318,7 @@ eventBus.on(async () => {
     flex: 1 1;
     position: relative;
     overflow: hidden;
+
     .header {
       height: 40px;
       padding: 0 40px;
@@ -337,6 +328,7 @@ eventBus.on(async () => {
       justify-content: space-between;
       white-space: nowrap;
       flex-shrink: 0;
+
       .page-title {
         display: flex;
         flex-direction: row;
@@ -345,6 +337,7 @@ eventBus.on(async () => {
         height: 100%;
         overflow: hidden;
         position: relative;
+
         .title {
           font-size: 18px;
           font-weight: 600;
@@ -352,11 +345,13 @@ eventBus.on(async () => {
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
+
           .menu {
             .is-active {
               font-size: 18px !important;
               color: var(--td-text-color-primary) !important;
             }
+
             .menu-item {
               font-size: 14px;
               margin-right: 20px;
@@ -365,6 +360,7 @@ eventBus.on(async () => {
               opacity: 1\9\0;
               animation: blockshow .2s ease .2s forwards;
               cursor: pointer;
+
               a {
                 display: block;
                 color: var(--td-text-color-secondary);
@@ -372,6 +368,7 @@ eventBus.on(async () => {
                 font-size: 14px;
               }
             }
+
             .morebtn {
               position: relative;
               display: block;
@@ -386,12 +383,14 @@ eventBus.on(async () => {
           }
         }
       }
+
       .actions {
         flex-shrink: 0;
         display: flex;
         align-items: center;
       }
     }
+
     .container {
       height: calc(100% - 45px);
       display: flex;
@@ -400,6 +399,7 @@ eventBus.on(async () => {
       position: relative;
       overflow-y: auto;
       width: 100%;
+
       .content-wrapper {
         width: 100%;
         height: 100%;
@@ -408,6 +408,7 @@ eventBus.on(async () => {
         flex-direction: column;
         position: relative;
         flex-grow: 1;
+
         .container-flow-wrap {
           display: grid;
           padding: 10px 0;
@@ -416,9 +417,11 @@ eventBus.on(async () => {
           grid-row-gap: 10px;
           justify-content: center;
           width: inherit;
+
           .card-wrap {
             flex-direction: column;
             position: relative;
+
             .card {
               position: relative;
               width: 115px;
@@ -431,9 +434,11 @@ eventBus.on(async () => {
               justify-content: flex-start;
               align-items: stretch;
               padding: 8px 4px 10px;
+
               .cover {
                 margin-bottom: 12px;
                 position: relative;
+
                 .folder-cover {
                   position: relative;
                   display: flex;
@@ -443,6 +448,7 @@ eventBus.on(async () => {
                   flex-grow: 0;
                 }
               }
+
               .info {
                 width: 100%;
                 text-align: center;
@@ -459,8 +465,9 @@ eventBus.on(async () => {
                 transition: color .3s ease;
               }
             }
+
             .card:hover {
-              background-color:rgba(132, 133, 141, 0.16);
+              background-color: rgba(132, 133, 141, 0.16);
             }
           }
         }
@@ -468,12 +475,13 @@ eventBus.on(async () => {
     }
   }
 }
+
 :deep(.renderIcon) {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: rgba(255,255,255, 0.72);
+  color: rgba(255, 255, 255, 0.72);
 }
 </style>

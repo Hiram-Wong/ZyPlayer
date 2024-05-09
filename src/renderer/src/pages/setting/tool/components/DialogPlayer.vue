@@ -1,12 +1,6 @@
 <template>
-  <t-dialog
-    v-model:visible="formVisible"
-    :closeOnOverlayClick="false"
-    :width="650"
-    :header="$t('pages.setting.editSource.dialog.player.title')"
-    placement="center"
-    :footer="false"
-  >
+  <t-dialog v-model:visible="formVisible" :closeOnOverlayClick="false" :width="650"
+    :header="$t('pages.setting.editSource.dialog.player.title')" placement="center" :footer="false">
     <template #body>
       <div id="previewMse" ref="dpRef"></div>
     </template>
@@ -79,7 +73,7 @@ watch(
   },
 );
 
-const setupPlayer = async(url) => {
+const setupPlayer = async (url) => {
   const videoType = await checkMediaType(url);
 
   switch (videoType) {
@@ -134,5 +128,4 @@ const setupPlayer = async(url) => {
 };
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

@@ -7,9 +7,9 @@ export function setDefault(type, id) {
     method: 'post',
     data: {
       type,
-      id
-    }
-  })
+      id,
+    },
+  });
 }
 
 // 获取设置列表
@@ -17,53 +17,53 @@ export function fetchSettingList() {
   return request({
     url: '/v1/setting/list',
     method: 'get',
-  })
+  });
 }
 
 export function updateSetting(docs) {
   return request({
     url: '/v1/setting',
     method: 'put',
-    data: docs
-  })
+    data: docs,
+  });
 }
 
 export function fetchAgreement() {
   return request({
     url: '/v1/setting/agreement',
-    method: 'get'
-  })
+    method: 'get',
+  });
 }
 
 export function clearDb(type) {
   return request({
     url: '/v1/db/clear',
     method: 'delete',
-    data: type
-  })
+    data: type,
+  });
 }
 
 export function exportDb(type) {
   return request({
     url: '/v1/db/export',
     method: 'post',
-    data: type
-  })
+    data: type,
+  });
 }
 
 export function initDb(docs) {
   return request({
     url: '/v1/db/init',
     method: 'post',
-    data: docs
-  })
+    data: docs,
+  });
 }
 
 export function setup() {
   return request({
     url: '/v1/setting/setup',
     method: 'get',
-  })
+  });
 }
 
 export function fetchSettingDetail(key) {
@@ -71,7 +71,7 @@ export function fetchSettingDetail(key) {
     url: '/v1/setting/detail',
     method: 'get',
     params: {
-      key
-    }
-  })
+      key,
+    },
+  });
 }

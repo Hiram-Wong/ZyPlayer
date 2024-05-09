@@ -5,9 +5,9 @@
         <p class="title">{{ $t('pages.chase.name') }}</p>
         <div class="container">
           <t-radio-group v-model="chaseTag" variant="default-filled" size="small">
-          <t-radio-button value="history">{{ $t('pages.chase.history') }}</t-radio-button>
-          <t-radio-button value="binge">{{ $t('pages.chase.like') }}</t-radio-button>
-        </t-radio-group>
+            <t-radio-button value="history">{{ $t('pages.chase.history') }}</t-radio-button>
+            <t-radio-button value="binge">{{ $t('pages.chase.like') }}</t-radio-button>
+          </t-radio-group>
         </div>
       </div>
       <div class="actions">
@@ -23,17 +23,12 @@
     </header>
     <div class="layout-container" id="back-top">
       <div class="layout-content-wrapper">
-        <history-view ref="historyRef" class="container-item" v-if="chaseTag === 'history'"/>
-        <binge-view ref="bingeRef" class="container-item" v-else/>
+        <history-view ref="historyRef" class="container-item" v-if="chaseTag === 'history'" />
+        <binge-view ref="bingeRef" class="container-item" v-else />
       </div>
     </div>
-    
-    <t-back-top
-      container="#back-top"
-      size="small"
-      :offset="['1.4rem', '0.5rem']"
-      :duration="2000"
-    />
+
+    <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
 </template>
 <script setup lang="ts">
@@ -57,6 +52,7 @@ const checkUpdaterEvent = () => {
 .view-container {
   width: 100%;
   height: 100%;
+
   .header {
     height: 40px;
     padding: 0 40px;
@@ -66,6 +62,7 @@ const checkUpdaterEvent = () => {
     justify-content: space-between;
     white-space: nowrap;
     flex-shrink: 0;
+
     .page-title {
       display: flex;
       flex-direction: row;
@@ -74,6 +71,7 @@ const checkUpdaterEvent = () => {
       height: 100%;
       overflow: hidden;
       position: relative;
+
       .title {
         font-size: 18px;
         line-height: 1.4;
@@ -83,6 +81,7 @@ const checkUpdaterEvent = () => {
         white-space: nowrap;
         text-overflow: ellipsis;
       }
+
       .container {
         width: 128px;
         height: 26px;
@@ -92,6 +91,7 @@ const checkUpdaterEvent = () => {
         align-items: center;
       }
     }
+
     .actions {
       flex-shrink: 0;
       display: flex;
@@ -110,6 +110,7 @@ const checkUpdaterEvent = () => {
     position: relative;
     overflow-y: auto;
     width: 100%;
+
     .layout-content-wrapper {
       width: 100%;
       height: 100%;

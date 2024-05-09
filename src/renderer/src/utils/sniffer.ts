@@ -7,7 +7,9 @@ const { getCurrentWindow } = require('@electron/remote');
 const win = getCurrentWindow();
 
 // const videoFormats = ['.m3u8', '.mp4', '.flv', 'avi', 'mkv'];
-const urlRegex: RegExp = new RegExp('http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*');
+const urlRegex: RegExp = new RegExp(
+  'http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*',
+);
 const isExcludedUrl = (reqUrl) => {
   return (
     reqUrl.indexOf('url=http') >= 0 ||
@@ -15,37 +17,37 @@ const isExcludedUrl = (reqUrl) => {
     reqUrl.indexOf('.css') >= 0 ||
     reqUrl.indexOf('.html') >= 0
   );
-}
+};
 
 const getQueryParam = (url: string, paramName: string) => {
   const searchParams = new URLSearchParams(new URL(url).search);
   return searchParams.get(paramName);
-}
+};
 
 /***
  * 链接中问号后面的query字符串转为object对象
  * @param url 链接，可以直接是?开头的
  * @param paramName object对象键值，如果不传就返回整个object
  */
-const getQuery = (url: string,paramName: string) => {
+const getQuery = (url: string, paramName: string) => {
   try {
-    if(url.indexOf('?')>-1){
-      url = url.slice(url.indexOf('?')+1);
+    if (url.indexOf('?') > -1) {
+      url = url.slice(url.indexOf('?') + 1);
     }
-    let arr = url.split("#")[0].split("&");
+    let arr = url.split('#')[0].split('&');
     const resObj = {};
-    arr.forEach(item => {
-      let arr1 = item.split("=");
+    arr.forEach((item) => {
+      let arr1 = item.split('=');
       let key = arr1[0];
       let value = arr1.slice(1).join('=');
       resObj[key] = value;
     });
-    return paramName?resObj[paramName]:resObj;
+    return paramName ? resObj[paramName] : resObj;
   } catch (err) {
     console.log(`[t3][getQuery][error]${err}`);
     return {};
   }
-}
+};
 
 const snifferPie = async (url: string, script: string, customRegex: string): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
@@ -68,16 +70,19 @@ const snifferPie = async (url: string, script: string, customRegex: string): Pro
   }
 };
 
-const createIframe = (iframeId: string, url: string): Promise<{ iframeRef: HTMLIFrameElement, contentWindow: Window | null }> => {
+const createIframe = (
+  iframeId: string,
+  url: string,
+): Promise<{ iframeRef: HTMLIFrameElement; contentWindow: Window | null }> => {
   return new Promise((resolve) => {
-    const iframeRef = document.createElement("iframe");
+    const iframeRef = document.createElement('iframe');
     iframeRef.style.height = '0';
     iframeRef.style.width = '0';
     iframeRef.style.position = 'fixed';
     iframeRef.style.top = '-10px';
     iframeRef.style.left = '-10px';
     iframeRef.id = iframeId;
-    iframeRef.setAttribute("frameborder", "0");
+    iframeRef.setAttribute('frameborder', '0');
     iframeRef.src = url;
 
     iframeRef.onload = () => {
@@ -100,7 +105,13 @@ const removeIframe = (iframeId: string): void => {
   }
 };
 
-const snifferIframe = async (url: string, script: string, customRegex: string, totalTime: number = 15000, speeder: number = 250): Promise<string> => {
+const snifferIframe = async (
+  url: string,
+  script: string,
+  customRegex: string,
+  totalTime: number = 15000,
+  speeder: number = 250,
+): Promise<string> => {
   win.webContents.setAudioMuted(true); // 静音
   const iframeId = nanoid();
   const iframeWindow = await createIframe(iframeId, url);
@@ -175,7 +186,6 @@ const snifferIframe = async (url: string, script: string, customRegex: string, t
     }, speeder);
   });
 
-
   console.log(`[detail][sniffer][iframe][end]iframe嗅探流程结束`);
   return data;
 };
@@ -196,13 +206,13 @@ const snifferCustom = async (url: string): Promise<string> => {
     console.log(`[detail][sniffer][custom][end]: custom嗅探流程结束`);
     return data;
   }
-}
+};
 
 // 嗅探
 const sniffer = async (type: string, url: string): Promise<string> => {
   let data: string = '';
-  let query:object = getQuery(url,'');
-  console.log(`[detail][sniffer][query]`,query);
+  let query: object = getQuery(url, '');
+  console.log(`[detail][sniffer][query]`, query);
   let script = query.script;
   if (script) script = Base64.parse(script).toString(Utf8);
   const customRegex = query.custom_regex;

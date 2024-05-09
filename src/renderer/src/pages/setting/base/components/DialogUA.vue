@@ -8,14 +8,8 @@
 
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
-          <t-textarea
-            v-model="formData.data"
-            class="dns-input"
-            :placeholder="$t('pages.setting.placeholder.general')"
-            autofocus
-            :autosize="{ minRows: 2, maxRows: 4 }"
-            @change="changeUatextarea"
-          />
+          <t-textarea v-model="formData.data" class="dns-input" :placeholder="$t('pages.setting.placeholder.general')"
+            autofocus :autosize="{ minRows: 2, maxRows: 4 }" @change="changeUatextarea" />
           <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeUaSelect">
             <t-radio-button v-for="item in UA_LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
           </t-radio-group>
@@ -110,5 +104,4 @@ const onClickCloseBtn = () => {
 };
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

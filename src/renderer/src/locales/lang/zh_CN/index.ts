@@ -5,5 +5,5 @@ import pages from './pages';
 export default {
   lang: '简体中文',
   pages,
-  componentsLocale
-}
+  componentsLocale,
+};

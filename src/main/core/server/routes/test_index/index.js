@@ -24,8 +24,8 @@ async function main() {
       name: _name,
       url: _url,
       type: _type,
-      'ext': {
-        'flag': [
+      ext: {
+        flag: [
           'qiyi',
           'imgo',
           '爱奇艺',
@@ -48,11 +48,10 @@ async function main() {
           '风行',
         ],
       },
-      'header': {
+      header: {
         'User-Agent': 'Mozilla/5.0',
       },
     };
-
   });
   let js_files = pathLib.readDir(pathLib.join(path_dir, js_path));
   // console.log(js_files);
@@ -64,32 +63,26 @@ async function main() {
     absp = 'http://127.0.0.1:9978/api/v1/file/' + absp.split('/zyplayer/file/')[1];
     let aname = it.split('.')[0];
     channels.push({
-      'name': aname,
-      'urls': [
-        'proxy://do=live&type=txt&ext=' + absp,
-      ],
+      name: aname,
+      urls: ['proxy://do=live&type=txt&ext=' + absp],
     });
   });
   channels = channels.concat([
     {
-      'name': '云星日记直播',
-      'urls': [
-        'proxy://do=live&type=txt&ext=http://itvbox.cc/云星日记/Ipv4.txt',
-      ],
+      name: '云星日记直播',
+      urls: ['proxy://do=live&type=txt&ext=http://itvbox.cc/云星日记/Ipv4.txt'],
     },
     {
-      'name': '本地嗅探器直播',
-      'urls': [
-        'proxy://do=live&type=txt&ext=http://127.0.0.1:5708/ysp',
-      ],
+      name: '本地嗅探器直播',
+      urls: ['proxy://do=live&type=txt&ext=http://127.0.0.1:5708/ysp'],
     },
   ]);
   let json_config = {
-    'wallpaper': 'https://tuapi.eees.cc/api.php?category=fengjing&type=302',
-    'homepage': 'https://github.com/hjdhnx/hipy-server',
-    'sites': [],
-    'parses': parses,
-    'flags': [
+    wallpaper: 'https://tuapi.eees.cc/api.php?category=fengjing&type=302',
+    homepage: 'https://github.com/hjdhnx/hipy-server',
+    sites: [],
+    parses: parses,
+    flags: [
       'imgo',
       'youku',
       'qq',
@@ -110,13 +103,12 @@ async function main() {
       'bilibili',
       'renrenmi',
     ],
-    'lives': [
+    lives: [
       {
-        'group': 'redirect',
-        'channels': channels,
+        group: 'redirect',
+        channels: channels,
       },
     ],
-
   };
   js_files.forEach((it, index) => {
     let rname = it.replace('.js', '');
@@ -125,22 +117,25 @@ async function main() {
       extra = '?type=url&params=../json/小学教育.json';
     }
     let data = {
-      'key': `hipy_js_${rname}`,
-      'name': `${rname}(drpy_t3)`,
-      'type': 3,
-      'api': js_api,
-      'searchable': 1,
-      'quickSearch': 1,
-      'filterable': 1,
-      'order_num': index,
-      'ext': `${js_path}/${it}${extra}`,
+      key: `hipy_js_${rname}`,
+      name: `${rname}(drpy_t3)`,
+      type: 3,
+      api: js_api,
+      searchable: 1,
+      quickSearch: 1,
+      filterable: 1,
+      order_num: index,
+      ext: `${js_path}/${it}${extra}`,
     };
     json_config.sites.push(data);
   });
   json_config.sites = json_config.sites.sort((a, b) => {
     let i = a.name.split('(')[0];
     let j = b.name.split('(')[0];
-    return (js_order.indexOf(i) === -1 ? 9999 : js_order.indexOf(i)) - (js_order.indexOf(j) === -1 ? 9999 : js_order.indexOf(j));
+    return (
+      (js_order.indexOf(i) === -1 ? 9999 : js_order.indexOf(i)) -
+      (js_order.indexOf(j) === -1 ? 9999 : js_order.indexOf(j))
+    );
   });
   return JSON.stringify(json_config);
 }

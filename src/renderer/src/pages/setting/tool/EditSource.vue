@@ -13,8 +13,10 @@
           <div class="item item-pad-select">
             <file-icon />
             <t-select v-model="tmp.file" @change="fileEvent()">
-              <t-option key="import" :label="$t('pages.setting.editSource.import')" value="import" @click="importFileEvent" />
-              <t-option key="export" :label="$t('pages.setting.editSource.export')" value="export" @click="exportFileEvent" />
+              <t-option key="import" :label="$t('pages.setting.editSource.import')" value="import"
+                @click="importFileEvent" />
+              <t-option key="export" :label="$t('pages.setting.editSource.export')" value="export"
+                @click="exportFileEvent" />
               <t-option key="cache" :label="$t('pages.setting.editSource.cache')" value="cache" @click="cacheEvent" />
             </t-select>
           </div>
@@ -22,7 +24,8 @@
             <bug-icon />
             <t-select v-model="tmp.run" @change="fileEvent()">
               <t-option key="bug" :label="$t('pages.setting.editSource.bug')" value="bug" @click="debugEvent" />
-              <t-option key="delete" :label="$t('pages.setting.editSource.delete')" value="expdeleteodeletert" @click="deleteEvent" />
+              <t-option key="delete" :label="$t('pages.setting.editSource.delete')" value="expdeleteodeletert"
+                @click="deleteEvent" />
               <t-option key="file" :label="$t('pages.setting.editSource.file')" value="file" @click="serverEvent" />
             </t-select>
           </div>
@@ -58,32 +61,28 @@
                       $t('pages.setting.editSource.action.source') }}</t-button>
                   </template>
                   <div class="input-container">
-                    <t-input v-model="form.req.url" :placeholder="$t('pages.setting.placeholder.general')" class="input"/>
+                    <t-input v-model="form.req.url" :placeholder="$t('pages.setting.placeholder.general')"
+                      class="input" />
                     <div class="method" @click="showReqParamDialog()">
                       <transform-icon />
                     </div>
                   </div>
                 </t-input-adornment>
-                <t-dialog
-                  v-model:visible="isVisible.reqParam"
+                <t-dialog v-model:visible="isVisible.reqParam"
                   :header="$t('pages.setting.editSource.dialog.request.title')"
-                  :cancel-btn="$t('pages.setting.editSource.dialog.request.cancel')"
-                  show-in-attached-element
-                  @confirm="isVisible.reqParam = false"
-                  @cancel="reqCancel()"
-                >
+                  :cancel-btn="$t('pages.setting.editSource.dialog.request.cancel')" show-in-attached-element
+                  @confirm="isVisible.reqParam = false" @cancel="reqCancel()">
                   <div>
                     <p>{{ $t('pages.setting.editSource.reqHeaderTitle') }}</p>
-                    <t-textarea v-model="form.req.header"
-                      placeholder='{ "User-Agent": "Mozilla/5.0 zyplayer" }' />
+                    <t-textarea v-model="form.req.header" placeholder='{ "User-Agent": "Mozilla/5.0 zyplayer" }' />
                   </div>
                   <div v-if="form.req.method !== 'GET'">
                     <p>{{ $t('pages.setting.editSource.reqBodyTitle') }}</p>
                     <t-select v-model="form.req.contentType" class="contentType" style="margin-bottom: 5px;">
-                      <t-option v-for="item in reqContentTypes" :key="item.label" :value="item.value" :label="item.label" />
+                      <t-option v-for="item in reqContentTypes" :key="item.label" :value="item.value"
+                        :label="item.label" />
                     </t-select>
-                    <t-textarea v-model="form.req.body"
-                      placeholder='{ "key": "01b9b7" }' />
+                    <t-textarea v-model="form.req.body" placeholder='{ "key": "01b9b7" }' />
                   </div>
                 </t-dialog>
               </div>
@@ -726,7 +725,7 @@ const deleteEvent = async () => {
 };
 
 const fileEvent = async () => {
-  tmp.file =  t('pages.setting.editSource.fileManage');
+  tmp.file = t('pages.setting.editSource.fileManage');
   tmp.run = t('pages.setting.editSource.run');
 };
 
@@ -1107,9 +1106,11 @@ const proxyEvent = async () => {
             height: var(--td-comp-size-s);
             font: var(--td-font-body-medium);
             background-color: transparent !important;
+
             .t-input__suffix:not(:empty) {
               margin-left: var(--td-comp-margin-xxs);
             }
+
             &:hover:not(.t-input--focused) {
               border-color: transparent;
               height: 24px;

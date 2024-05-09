@@ -8,14 +8,8 @@
 
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
-          <t-textarea
-            v-model="formData.data"
-            class="dns-input"
-            placeholder="请输入dns"
-            autofocus
-            :autosize="{ minRows: 2, maxRows: 4 }"
-            @change="changeDnstextarea"
-          />
+          <t-textarea v-model="formData.data" class="dns-input" placeholder="请输入dns" autofocus
+            :autosize="{ minRows: 2, maxRows: 4 }" @change="changeDnstextarea" />
           <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeDnsSelect">
             <t-radio-button v-for="item in DNS_LIST" :key="item.name" :value="item.dns">{{ item.name }}</t-radio-button>
           </t-radio-group>
@@ -112,5 +106,4 @@ const onClickCloseBtn = () => {
 };
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

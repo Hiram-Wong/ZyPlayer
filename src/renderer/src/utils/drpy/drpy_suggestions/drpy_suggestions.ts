@@ -278,7 +278,6 @@ var rule = {
   url:''
 })`,
   },
-
 ];
 
 /**
@@ -287,7 +286,7 @@ var rule = {
 const Function = [
   {
     label: 'getProxyUrl',
-    insertText: 'getProxyUrl()+\'&url=\'',
+    insertText: "getProxyUrl()+'&url='",
     detail: '获取本地代理链接',
     documentation: 'getProxyUrl()',
   },
@@ -553,19 +552,23 @@ const Keyword = [
     label: 'MOBILE_UA',
     insertText: 'MOBILE_UA',
     detail: '应用注入的手机UA',
-    documentation: 'Mozilla/5.0 (Linux; Android 11; M2007J3SC Build/RKQ1.200826.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045714 Mobile Safari/537.36',
+    documentation:
+      'Mozilla/5.0 (Linux; Android 11; M2007J3SC Build/RKQ1.200826.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/6.2 TBS/045714 Mobile Safari/537.36',
   },
   {
     label: 'PC_UA',
     insertText: 'PC_UA',
     detail: '应用注入的电脑UA',
-    documentation: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36',
+    documentation:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36',
   },
   {
     label: 'headers',
-    insertText: 'headers:{ \'User-Agent\': PC_UA, \'Referer\': \'\', \'content-type\': \'application/x-www-form-urlencoded\', \'Cookie\': \'\'}',
+    insertText:
+      "headers:{ 'User-Agent': PC_UA, 'Referer': '', 'content-type': 'application/x-www-form-urlencoded', 'Cookie': ''}",
     detail: '常用headers参数',
-    documentation: 'headers:{ \'User-Agent\': PC_UA, \'Referer\': \'\', \'content-type\': \'application/x-www-form-urlencoded\', \'Cookie\': \'\'}',
+    documentation:
+      "headers:{ 'User-Agent': PC_UA, 'Referer': '', 'content-type': 'application/x-www-form-urlencoded', 'Cookie': ''}",
   },
 ];
 
@@ -601,7 +604,7 @@ const Variable = [
     label: 'TYPE',
     insertText: 'TYPE',
     detail: '标识js的执行环境，是主页。一级还是搜索等',
-    documentation: 'if(TYPE == \'home\')',
+    documentation: "if(TYPE == 'home')",
   },
   {
     label: 'input',
@@ -680,20 +683,22 @@ const Variable = [
     insertText: 'UA',
     detail: '最简ua',
     documentation: 'Mozilla/5.0',
-
   },
   {
     label: 'UC_UA',
     insertText: 'UC_UA',
     detail: 'uc浏览器的ua',
-    documentation: 'Mozilla/5.0 (Linux; U; Android 9; zh-CN; MI 9 Build/PKQ1.181121.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 UCBrowser/12.5.5.1035 Mobile Safari/537.36',
+    documentation:
+      'Mozilla/5.0 (Linux; U; Android 9; zh-CN; MI 9 Build/PKQ1.181121.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 UCBrowser/12.5.5.1035 Mobile Safari/537.36',
   },
   {
     label: 'IOS_UA',
     insertText: 'IOS_UA',
     detail: '苹果设备的ua',
-    documentation: 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
-  }];
+    documentation:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+  },
+];
 
 const createDependencyProposals = (range: object, monaco: any) => {
   let suggestions = [];

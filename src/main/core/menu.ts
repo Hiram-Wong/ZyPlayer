@@ -1,6 +1,6 @@
 import { platform } from '@electron-toolkit/utils';
 import { shell, app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
-import { join } from "path";
+import { join } from 'path';
 import logger from './logger';
 
 const createMenu = () => {
@@ -92,8 +92,8 @@ const createMenu = () => {
             const focusedWindow = BrowserWindow.getFocusedWindow();
             if (focusedWindow) {
               const webContents = focusedWindow.webContents;
-              webContents && webContents.toggleDevTools(); 
-            };
+              webContents && webContents.toggleDevTools();
+            }
           },
         },
         {
@@ -117,7 +117,7 @@ const createMenu = () => {
           accelerator: process.platform === 'darwin' ? 'Cmd+Shift+T' : 'Ctrl+Shift+T',
           click() {
             const fileName = '/logs/';
-            const url = join(app.getPath("userData"), fileName);
+            const url = join(app.getPath('userData'), fileName);
             logger.info(`[menu] visit local log, path is ${url}`);
             shell.openPath(url);
           },
@@ -129,5 +129,5 @@ const createMenu = () => {
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuBar));
 };
 
-logger.info("[menu] menu module initialized");
+logger.info('[menu] menu module initialized');
 export default createMenu;

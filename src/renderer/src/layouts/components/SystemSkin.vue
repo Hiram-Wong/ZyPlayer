@@ -5,12 +5,7 @@
         <component :is="currentIcon" />
       </t-button>
       <t-dropdown-menu>
-        <t-dropdown-item
-          v-for="(icon, name) in themeIcons"
-          :key="name"
-          :value="name"
-          @click="setTheme(name)"
-        >
+        <t-dropdown-item v-for="(icon, name) in themeIcons" :key="name" :value="name" @click="setTheme(name)">
           <div class="skin-item">
             <component :is="icon" size="large" />
             <span class="skin-title">{{ $t(`pages.skin.${name}`) }}</span>
@@ -53,6 +48,7 @@ const setTheme = (theme: 'light' | 'dark' | 'auto') => {
   display: flex;
   flex-direction: row;
   align-items: center;
+
   .skin-title {
     margin-left: 5px;
   }

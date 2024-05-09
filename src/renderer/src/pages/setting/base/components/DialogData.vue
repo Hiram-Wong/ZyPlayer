@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.data.title')" placement="center" :footer="false" >
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.data.title')" placement="center" :footer="false">
     <template #body>
       <div class="data-dialog-container dialog-container-padding">
         <div class="data-item">
@@ -15,11 +15,16 @@
                   <t-radio :value="2">{{ $t('pages.setting.data.easyConfig.tvbox') }}</t-radio>
                   <t-radio :value="3">{{ $t('pages.setting.data.easyConfig.hipy') }}</t-radio>
                 </t-radio-group>
-                <p v-if="formData.easyConfig.type === 0" class="tip">{{ $t('pages.setting.data.easyConfig.appTip') }}</p>
-                <p v-else-if="formData.easyConfig.type === 1" class="tip">{{ $t('pages.setting.data.easyConfig.drpyTip') }}</p>
-                <p v-else-if="formData.easyConfig.type === 2" class="tip">{{ $t('pages.setting.data.easyConfig.tvboxTip') }}</p>
-                <t-input :label="$t('pages.setting.data.easyConfig.address')" v-model="formData.easyConfig.url" class="input-item" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
-                <t-popconfirm :content="$t('pages.setting.data.easyConfig.confirmTip')" placement="bottom" @confirm="easyConfig">
+                <p v-if="formData.easyConfig.type === 0" class="tip">{{ $t('pages.setting.data.easyConfig.appTip') }}
+                </p>
+                <p v-else-if="formData.easyConfig.type === 1" class="tip">{{ $t('pages.setting.data.easyConfig.drpyTip')
+                  }}</p>
+                <p v-else-if="formData.easyConfig.type === 2" class="tip">{{
+                  $t('pages.setting.data.easyConfig.tvboxTip') }}</p>
+                <t-input :label="$t('pages.setting.data.easyConfig.address')" v-model="formData.easyConfig.url"
+                  class="input-item" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
+                <t-popconfirm :content="$t('pages.setting.data.easyConfig.confirmTip')" placement="bottom"
+                  @confirm="easyConfig">
                   <t-button size="small" block ghost>{{ $t('pages.setting.data.easyConfig.confirm') }}</t-button>
                 </t-popconfirm>
               </t-collapse-panel>
@@ -30,44 +35,56 @@
                 </t-radio-group>
                 <p class="content">{{ $t('pages.setting.data.configImport.dropTip') }}</p>
                 <div v-if="formData.importData.type === 'remote'">
-                  <t-input :label="$t('pages.setting.data.configImport.address')" v-model="formData.importData.remoteImpoUrl" class="input-item" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
+                  <t-input :label="$t('pages.setting.data.configImport.address')"
+                    v-model="formData.importData.remoteImpoUrl" class="input-item"
+                    :placeholder="$t('pages.setting.placeholder.general')"></t-input>
                 </div>
                 <div v-else>
-                  <t-upload
-                    v-model="formData.importData.localImpoFile"
-                    class="input-item"
-                    theme="file"
-                    :max="1"
-                    accept="application/json"
-                    :draggable="true"
-                    :request-method="requestMethod"
-                  />
+                  <t-upload v-model="formData.importData.localImpoFile" class="input-item" theme="file" :max="1"
+                    accept="application/json" :draggable="true" :request-method="requestMethod" />
                 </div>
-                <t-popconfirm :content="$t('pages.setting.data.configImport.importTip')" placement="bottom" @confirm="importData">
+                <t-popconfirm :content="$t('pages.setting.data.configImport.importTip')" placement="bottom"
+                  @confirm="importData">
                   <t-button size="small" block ghost>{{ $t('pages.setting.data.configImport.import') }}</t-button>
                 </t-popconfirm>
               </t-collapse-panel>
               <t-collapse-panel value="exportData" :header="$t('pages.setting.data.configExport.title')">
-                <t-radio v-model="active.export.site" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.site') }}</t-radio>
-                <t-radio v-model="active.export.iptv" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.iptv') }}</t-radio>
-                <t-radio v-model="active.export.channel" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.channel') }}</t-radio>
-                <t-radio v-model="active.export.analyze" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.analyze') }}</t-radio>
-                <t-radio v-model="active.export.drive" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.drive') }}</t-radio>
-                <t-radio v-model="active.export.history" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.history') }}</t-radio>
-                <t-radio v-model="active.export.star" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.star') }}</t-radio>
-                <t-radio v-model="active.export.setting" allow-uncheck class="radio-item">{{ $t('pages.setting.data.configExport.setting') }}</t-radio>
-                <t-popconfirm :content="$t('pages.setting.data.configExport.exportTip')" placement="bottom" @confirm="exportData">
+                <t-radio v-model="active.export.site" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.site') }}</t-radio>
+                <t-radio v-model="active.export.iptv" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.iptv') }}</t-radio>
+                <t-radio v-model="active.export.channel" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.channel') }}</t-radio>
+                <t-radio v-model="active.export.analyze" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.analyze') }}</t-radio>
+                <t-radio v-model="active.export.drive" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.drive') }}</t-radio>
+                <t-radio v-model="active.export.history" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.history') }}</t-radio>
+                <t-radio v-model="active.export.star" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.star') }}</t-radio>
+                <t-radio v-model="active.export.setting" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.configExport.setting') }}</t-radio>
+                <t-popconfirm :content="$t('pages.setting.data.configExport.exportTip')" placement="bottom"
+                  @confirm="exportData">
                   <t-button size="small" block ghost>{{ $t('pages.setting.data.configExport.export') }}</t-button>
                 </t-popconfirm>
               </t-collapse-panel>
               <t-collapse-panel value="clearData" :header="$t('pages.setting.data.clearData.title')">
-                <t-radio v-model="active.clear.site" allow-uncheck class="radio-item">{{ $t('pages.setting.data.clearData.site') }}</t-radio>
-                <t-radio v-model="active.clear.iptv" allow-uncheck class="radio-item">{{ $t('pages.setting.data.clearData.iptv') }}</t-radio>
-                <t-radio v-model="active.clear.channel" allow-uncheck class="radio-item">{{ $t('pages.setting.data.clearData.channel') }}</t-radio>
-                <t-radio v-model="active.clear.analyze" allow-uncheck class="radio-item">{{ $t('pages.setting.data.clearData.analyze') }}</t-radio>
-                <t-radio v-model="active.clear.drive" allow-uncheck class="radio-item">{{ $t('pages.setting.data.clearData.drive') }}</t-radio>
-                <t-radio v-model="active.clear.history" allow-uncheck class="radio-item">{{ $t('pages.setting.data.clearData.history') }}</t-radio>
-                <t-radio v-model="active.clear.star" allow-uncheck class="radio-item">{{ $t('pages.setting.data.clearData.star') }}</t-radio>
+                <t-radio v-model="active.clear.site" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.clearData.site') }}</t-radio>
+                <t-radio v-model="active.clear.iptv" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.clearData.iptv') }}</t-radio>
+                <t-radio v-model="active.clear.channel" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.clearData.channel') }}</t-radio>
+                <t-radio v-model="active.clear.analyze" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.clearData.analyze') }}</t-radio>
+                <t-radio v-model="active.clear.drive" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.clearData.drive') }}</t-radio>
+                <t-radio v-model="active.clear.history" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.clearData.history') }}</t-radio>
+                <t-radio v-model="active.clear.star" allow-uncheck class="radio-item">{{
+                  $t('pages.setting.data.clearData.star') }}</t-radio>
                 <t-radio v-model="active.clear.thumbnail" allow-uncheck class="radio-item">
                   {{ $t('pages.setting.data.clearData.thumbnail') }}
                   <span class="title">「{{ formData.size.thumbnail }}MB」</span>
@@ -76,7 +93,8 @@
                   {{ $t('pages.setting.data.clearData.cache') }}
                   <span class="title">「{{ formData.size.cache }}MB」</span>
                 </t-radio>
-                <t-popconfirm :content="$t('pages.setting.data.clearData.clearTip')" placement="bottom"  @confirm="clearData">
+                <t-popconfirm :content="$t('pages.setting.data.clearData.clearTip')" placement="bottom"
+                  @confirm="clearData">
                   <t-button size="small" block ghost>{{ $t('pages.setting.data.clearData.clear') }}</t-button>
                 </t-popconfirm>
               </t-collapse-panel>
@@ -101,22 +119,29 @@
                       <span class="sync-switch-text">{{ $t('pages.setting.data.webdev.sync') }}</span>
                       <t-switch v-model="formData.webdev.sync" />
                     </span>
-                    <t-button size="small" shape="round" @click.stop="saveWebdev">{{ $t('pages.setting.data.webdev.save') }}</t-button>
-                    <t-button size="small" shape="round" theme="default" @click.stop="checkWebdevEvent">{{ $t('pages.setting.data.webdev.check') }}</t-button>
+                    <t-button size="small" shape="round" @click.stop="saveWebdev">{{
+                      $t('pages.setting.data.webdev.save') }}</t-button>
+                    <t-button size="small" shape="round" theme="default" @click.stop="checkWebdevEvent">{{
+                      $t('pages.setting.data.webdev.check') }}</t-button>
                   </t-space>
                 </template>
-                <t-input :label="$t('pages.setting.data.webdev.url')" v-model="formData.webdev.data.url" class="input-item"></t-input>
-                <t-input :label="$t('pages.setting.data.webdev.username')" v-model="formData.webdev.data.username" class="input-item"></t-input>
-                <t-input :label="$t('pages.setting.data.webdev.password')" v-model="formData.webdev.data.password" type="password" class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.data.webdev.url')" v-model="formData.webdev.data.url"
+                  class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.data.webdev.username')" v-model="formData.webdev.data.username"
+                  class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.data.webdev.password')" v-model="formData.webdev.data.password"
+                  type="password" class="input-item"></t-input>
               </t-collapse-panel>
             </t-collapse>
           </div>
           <div class="action">
             <div class="action-item">
-              <t-popconfirm :content="$t('pages.setting.data.syncToCloudTip')" placement="bottom"  @confirm="rsyncRemoteEvent">
+              <t-popconfirm :content="$t('pages.setting.data.syncToCloudTip')" placement="bottom"
+                @confirm="rsyncRemoteEvent">
                 <t-button theme="default" class="btn-2">{{ $t('pages.setting.data.syncToCloud') }}</t-button>
               </t-popconfirm>
-              <t-popconfirm :content="$t('pages.setting.data.syncToLocalTip')" placement="bottom"  @confirm="rsyncLocalEvent">
+              <t-popconfirm :content="$t('pages.setting.data.syncToLocalTip')" placement="bottom"
+                @confirm="rsyncLocalEvent">
                 <t-button theme="default" class="btn-2">{{ $t('pages.setting.data.syncToLocal') }}</t-button>
               </t-popconfirm>
             </div>
@@ -252,7 +277,7 @@ watch(
 )
 
 // 一键配置
-const easyConfig = async() => {
+const easyConfig = async () => {
   const { url, type } = formData.easyConfig;
   if (!url) return;
 
@@ -338,8 +363,8 @@ const easyConfig = async() => {
         let iptv = [];
         console.log(oldLives);
         if (oldLives && oldLives.length > 0 && oldLives[0].channels) {
-            oldLives.forEach(live => {
-            live.channels.forEach(channel=>{
+          oldLives.forEach(live => {
+            live.channels.forEach(channel => {
               console.log(channel);
               const urlBase64 = channel.urls[0].split('&ext=')[1];
               let url = urlBase64;
@@ -412,10 +437,10 @@ const easyConfig = async() => {
 };
 
 // 配置导入
-const importData = async() => {
+const importData = async () => {
   const { type, remoteImpoUrl, localImpoFile } = formData.importData;
 
-  if ((type === 'remote' && !remoteImpoUrl)  || (type === 'local') && (localImpoFile.length === 0)) {
+  if ((type === 'remote' && !remoteImpoUrl) || (type === 'local') && (localImpoFile.length === 0)) {
     return;
   };
 
@@ -433,7 +458,8 @@ const formatSet = (data) => {
   // 更新或添加新键值对
   const newEntries = [
     { key: "windowPosition", value: { status: _.get(data, ["restoreWindowPositionAndSize", "value"], false), position: { width: 1000, height: 640 } } },
-    { key: "webdev", value: {
+    {
+      key: "webdev", value: {
         sync: false, data: {
           url: _.get(data, ["webdevUrl", "value"], "https://dav.jianguoyun.com/dav/"),
           username: _.get(data, ["webdevUsername", "value"], ""),
@@ -501,7 +527,7 @@ const commonDelImportData = (data) => {
     });
 
     // 处理设置, 兼容一键配置
-    if(_.has(data, "tbl_setting") && !_.isEmpty(data["tbl_setting"])) data['tbl_setting'] = formatSet(data['tbl_setting']);
+    if (_.has(data, "tbl_setting") && !_.isEmpty(data["tbl_setting"])) data['tbl_setting'] = formatSet(data['tbl_setting']);
 
     // 规范化 id 字段
     const newDataTypes = ['tbl_site', 'tbl_iptv', 'tbl_channel', 'tbl_analyze', 'tbl_drive', 'tbl_history', 'tbl_star', 'tbl_setting'];
@@ -553,7 +579,7 @@ const importFromRemote = async (url) => {
 const importFromLocal = (file) => {
   const reader = new FileReader();
   reader.readAsText(file);
-  reader.onload = async(resultFile) => {
+  reader.onload = async (resultFile) => {
     const pointsTxt = resultFile.target!.result;
     try {
       let json = JSON.parse(String(pointsTxt));
@@ -583,7 +609,7 @@ const requestMethod = (file) => {
 };
 
 // 导出
-const exportData = async() => {
+const exportData = async () => {
   if (!_.includes(_.values(active.export), true)) return;
 
   const activeList = _.keys(_.pickBy(active.export, _.identity));
@@ -628,7 +654,7 @@ const getThumbnailSize = () => {
 };
 
 // 清理缓存
-const clearData = async() => {
+const clearData = async () => {
   if (!_.some(active.clear)) return;
 
   try {
@@ -689,7 +715,7 @@ const clearData = async() => {
 }
 
 // 保存
-const saveWebdev = async() => {
+const saveWebdev = async () => {
   try {
     await updateSetting({ webdev: formData.webdev });
     MessagePlugin.success(t('pages.setting.data.success'));
@@ -699,7 +725,7 @@ const saveWebdev = async() => {
 };
 
 // 校验
-const checkWebdevEvent = async() => {
+const checkWebdevEvent = async () => {
   const { url, username, password } = formData.webdev.data;
   const res = await initializeWebdavClient(url, username, password);
   if (res) {
@@ -710,7 +736,7 @@ const checkWebdevEvent = async() => {
 }
 
 // 覆盖远端
-const rsyncRemoteEvent = async() => {
+const rsyncRemoteEvent = async () => {
   const { url, username, password } = formData.webdev.data;
   const res = await rsyncRemote(url, username, password);
   if (res) {
@@ -721,7 +747,7 @@ const rsyncRemoteEvent = async() => {
 }
 
 // 覆盖本地
-const rsyncLocalEvent = async() => {
+const rsyncLocalEvent = async () => {
   const { url, username, password } = formData.webdev.data;
   const res = await rsyncLocal(url, username, password);
   if (res) {
@@ -735,6 +761,7 @@ const rsyncLocalEvent = async() => {
 <style lang="less" scoped>
 .data-dialog-container {
   max-height: 430px;
+
   .data-item {
     .separator {
       border: 0.1rem solid var(--td-brand-color);
@@ -742,6 +769,7 @@ const rsyncLocalEvent = async() => {
       border-radius: var(--td-radius-default);
       display: inline-block;
     }
+
     .title {
       color: var(--td-brand-color);
       margin-left: 5px;
@@ -749,37 +777,46 @@ const rsyncLocalEvent = async() => {
       text-align: left;
       font-weight: 500;
     }
+
     .content {
       font-size: 12px;
     }
+
     .config {
       .input-item {
         margin-bottom: var(--td-comp-margin-s);
       }
+
       :deep(.t-collapse-panel__content) {
         padding: var(--td-pop-padding-m);
       }
+
       :deep(.t-form__controls-content .t-input) {
         background: aquamarine !important;
       }
+
       .input-item,
       :deep(.t-upload__dragger) {
         width: 100%;
       }
     }
+
     .action {
       .action-item {
         margin-top: var(--td-comp-margin-s);
         display: flex;
         justify-content: space-between;
+
         .btn-2 {
           width: 49%;
         }
+
         .btn-3 {
           width: 33%;
         }
       }
     }
+
     .sync-switch {
       .sync-switch-text {
         margin-right: var(--td-comp-margin-xs);

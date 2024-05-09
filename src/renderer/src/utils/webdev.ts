@@ -1,4 +1,4 @@
-import { createClient } from "webdav";
+import { createClient } from 'webdav';
 import { exportDb, initDb } from '@/api/setting';
 
 let clientWebdev: ReturnType<typeof createClient> | undefined = undefined;
@@ -14,10 +14,8 @@ const isWebdevConfigValid = (url: string, username: string, password: string): b
 const initializeWebdavClient = async (url: string, username: string, password: string): Promise<boolean> => {
   try {
     if (!isWebdevConfigValid(url, username, password)) return false;
-    
-    clientWebdev = await createClient(
-      url, { username, password }
-    );
+
+    clientWebdev = await createClient(url, { username, password });
 
     const remoteDirectoryExists = await clientWebdev.exists('/zyplayer');
     if (!remoteDirectoryExists) {
@@ -36,29 +34,25 @@ const rsyncRemote = async (url: string, username: string, password: string): Pro
     if (!clientWebdev) {
       const status = await initializeWebdavClient(url, username, password);
       if (!status) return false;
-    };
+    }
     const dbExportResult = await exportDb(['all']);
     const formattedJson = JSON.stringify(dbExportResult);
-    await clientWebdev!.putFileContents(
-      '/zyplayer/config.json',
-      formattedJson,
-      { overwrite: false }
-    );
+    await clientWebdev!.putFileContents('/zyplayer/config.json', formattedJson, { overwrite: false });
     console.info(`[webdev][sync][success]`);
     return true;
   } catch (err) {
     console.error(`[webdev][sync][error]${err}`);
     return false;
-  };
-}
+  }
+};
 
 const rsyncLocal = async (url: string, username: string, password: string): Promise<boolean> => {
   try {
     if (!clientWebdev) {
       const status = await initializeWebdavClient(url, username, password);
       if (!status) return false;
-    };
-    const str = await clientWebdev!.getFileContents("/zyplayer/config.json", { format: "text" })  as unknown as string;
+    }
+    const str = (await clientWebdev!.getFileContents('/zyplayer/config.json', { format: 'text' })) as unknown as string;
     const formattedJson = JSON.parse(str);
     await initDb(formattedJson);
     console.info(`[webdev][sync][success]`);
@@ -66,26 +60,22 @@ const rsyncLocal = async (url: string, username: string, password: string): Prom
   } catch (err) {
     console.error(`[webdev][sync][error]${err}`);
     return false;
-  };
-}
+  }
+};
 
 const autoSync = async (url: string, username: string, password: string): void => {
   try {
     if (!clientWebdev) {
       const status = await initializeWebdavClient(url, username, password);
       if (!status) return;
-    };
+    }
     const dbExportResult = await exportDb(['all']);
     const formattedJson = JSON.stringify(dbExportResult);
-    await clientWebdev!.putFileContents(
-      '/zyplayer/config.json',
-      formattedJson,
-      { overwrite: false }
-    );
+    await clientWebdev!.putFileContents('/zyplayer/config.json', formattedJson, { overwrite: false });
     console.info(`[webdev][sync][success]`);
   } catch (err) {
     console.error(`[webdev][sync][error]${err}`);
-  };
-}
+  }
+};
 
 export { autoSync, initializeWebdavClient, rsyncLocal, rsyncRemote };

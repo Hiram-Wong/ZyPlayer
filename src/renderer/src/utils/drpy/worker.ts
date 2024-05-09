@@ -6,12 +6,24 @@
  * @date 2023-03-24T18:21:29+08:00
  */
 
-import { init, home, homeVod, category, detail, play, search, proxy, getConsoleHistory, clearConsoleHistory, keepUnUse } from './drpy3';
+import {
+  init,
+  home,
+  homeVod,
+  category,
+  detail,
+  play,
+  search,
+  proxy,
+  getConsoleHistory,
+  clearConsoleHistory,
+  keepUnUse,
+} from './drpy3';
 
 const initUtils = () => {
   console.log(`[worker][prevent tree-shake] init t3 not use module`);
   keepUnUse.useful();
-}
+};
 
 if (!import.meta.env.DEV) initUtils(); // 防止tree-shake
 

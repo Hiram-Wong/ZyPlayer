@@ -23,7 +23,7 @@ const doWork = (data) => {
       reject(new Error('Worker job run 15s, timed out'));
     }, 15000);
   });
-}
+};
 
 const terminateWork = () => {
   return new Promise((resolve, reject) => {
@@ -33,12 +33,12 @@ const terminateWork = () => {
       worker = new Worker();
       resolve({
         msg: 'Worker terminated successfully.',
-        code: 200
+        code: 200,
       });
     } else {
       reject({
         msg: new Error('Worker is not defined or already terminated.'),
-        code: 500
+        code: 500,
       });
     }
   });

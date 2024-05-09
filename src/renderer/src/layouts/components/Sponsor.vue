@@ -39,11 +39,13 @@ import { GiftIcon } from 'tdesign-icons-vue-next';
     color: #cc9a45;
     line-height: 16px;
   }
+
   .qrcode-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: 4px;
+
     .qrcode-arrow {
       width: 0;
       height: 0;
@@ -51,6 +53,7 @@ import { GiftIcon } from 'tdesign-icons-vue-next';
       border-right: 4px solid transparent;
       border-top: 6px solid #d9ac63;
     }
+
     .qrcode_bg {
       width: 128px;
       height: 128px;
@@ -64,18 +67,21 @@ import { GiftIcon } from 'tdesign-icons-vue-next';
       border-radius: 8px;
       text-align: center;
       margin: 0 auto;
+
       .qrcode {
         width: 100%;
         height: 100%;
         border-radius: 5px;
       }
     }
+
     .scan_tips {
       margin-top: 2px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: row;
+
       img {
         background-size: 100%;
         display: inline-block;
@@ -83,6 +89,7 @@ import { GiftIcon } from 'tdesign-icons-vue-next';
         margin-right: 2px;
         width: 16px;
       }
+
       .pay_desc {
         font-size: 12px;
         font-weight: 700;

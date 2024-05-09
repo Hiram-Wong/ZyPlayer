@@ -8,10 +8,11 @@
         </t-select>
       </template>
       <template #append>
-        <search-icon size="large" @click="searchEvent(searchValue)" style="cursor: pointer;"/>
+        <search-icon size="large" @click="searchEvent(searchValue)" style="cursor: pointer;" />
       </template>
       <t-popup placement="bottom-right" :visible="isVisible.popup" :on-visible-change="popupVisibleEvent">
-        <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" :on-focus="focusEvent" v-model="searchValue" :on-enter="searchEvent"/>
+        <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" :on-focus="focusEvent"
+          v-model="searchValue" :on-enter="searchEvent" />
         <template #content>
           <div class="search-content">
             <div class="history" v-show="searchList.length > 0">
@@ -22,12 +23,15 @@
                 </div>
               </div>
               <div class="history-content">
-                <t-tag class="nav-item" shape="round" variant="outline" v-for="(item, index) in searchList" :key="index" @click="searchEvent(item.title)">{{ item.title }}</t-tag>
+                <t-tag class="nav-item" shape="round" variant="outline" v-for="(item, index) in searchList" :key="index"
+                  @click="searchEvent(item.title)">{{ item.title }}</t-tag>
               </div>
             </div>
             <div class="hot">
               <div class="hot-nav">
-                <span :class="['nav-item', item.key === active.flag ? 'nav-item-active' : '']" v-for="item in hotConfig.hotOption" :key="item.key" @click="changeHotSource(item.key)">{{ item.name }}</span>
+                <span :class="['nav-item', item.key === active.flag ? 'nav-item-active' : '']"
+                  v-for="item in hotConfig.hotOption" :key="item.key" @click="changeHotSource(item.key)">{{ item.name
+                  }}</span>
               </div>
               <div class="hot-content">
                 <template v-for="i in 5" :key="i">
@@ -35,12 +39,8 @@
                 </template>
                 <div v-if="!isVisible.load">
                   <div v-if="hotConfig.hotData.length !== 0" class="hot-data">
-                    <div
-                      v-for="(item, index) in hotConfig.hotData"
-                      :key="item.vod_id"
-                      class="rax-view-v2 hot-item"
-                      @click="searchEvent(item.vod_name)"
-                    >
+                    <div v-for="(item, index) in hotConfig.hotData" :key="item.vod_id" class="rax-view-v2 hot-item"
+                      @click="searchEvent(item.vod_name)">
                       <div class="normal-view" :class="[index in [0, 1, 2] ? `color-${index + 1}` : '']">
                         <div class="normal-index">{{ index + 1 }}</div>
                         <div class="normal-title no-warp">{{ item.vod_name }}</div>
@@ -146,10 +146,10 @@ const hotTypeMappings = {
 };
 
 // 获取设置配置
-const getSetConfig = async()=>{
+const getSetConfig = async () => {
   const res = await fetchSettingDetail('defaultHot');
   const hotType = res.value;
-  
+
   hotConfig.hotType = hotType;
   if (hotType in hotTypeMappings) {
     const { hotUpdateTime, hotSource } = hotTypeMappings[hotType];
@@ -181,7 +181,7 @@ const getHotList = async (retryCount = 1) => {
     const dateFormat = hotConfig.hotType === 'enlightent' ? date.format('YYYY/MM/DD') : date.format('YYYY-MM-DD');
 
     let queryHotList;
-    switch(hotConfig.hotType) {
+    switch (hotConfig.hotType) {
       case 'kylive':
         queryHotList = await kyLiveHot(dateFormat, 2, hotConfig.hotSource);
         break;
@@ -210,7 +210,7 @@ const getHotList = async (retryCount = 1) => {
 // 搜索资源
 const searchEvent = async (item) => {
   searchValue.value = item;
-  if (item && _.findIndex(searchList.value, {title: item}) === -1) {
+  if (item && _.findIndex(searchList.value, { title: item }) === -1) {
     const doc = {
       date: moment().unix(),
       title: item,
@@ -225,7 +225,7 @@ const searchEvent = async (item) => {
     };
     addHistory(doc);
   }
-  
+
   if (active.type === 'film') {
     router.push({
       name: 'FilmIndex',
@@ -270,16 +270,20 @@ hotReloadeventBus.on(() => {
   width: 465px;
   padding: 15px;
   font-weight: 500;
+
   .history {
     margin-bottom: 10px;
+
     .history-nav {
       display: flex;
       justify-content: space-between;
       margin-bottom: 10px;
+
       .history-title {
         font-weight: 700;
       }
     }
+
     .history-content {
       .nav-item {
         font-weight: 500;
@@ -289,36 +293,44 @@ hotReloadeventBus.on(() => {
       }
     }
   }
+
   .hot {
     .hot-nav {
       margin-bottom: 10px;
+
       .nav-item {
         margin-right: 10px;
         cursor: pointer;
       }
+
       .nav-item-active {
         font-size: 1.2em;
         font-weight: 700;
         color: var(--td-brand-color-active);
       }
     }
+
     .hot-content {
       .hot-data {
         display: flex;
         flex-direction: row;
         align-items: flex-start;
         flex-wrap: wrap;
+
         .rax-view-v2 {
           width: 50%;
         }
+
         .hot-item {
           .normal-view {
             display: flex;
             padding-left: 5px;
             cursor: pointer;
+
             .normal-index {
               flex: 0.15;
             }
+
             .normal-title {
               flex: 0.8;
               word-break: break-all;
@@ -326,19 +338,24 @@ hotReloadeventBus.on(() => {
               text-overflow: ellipsis;
               overflow: hidden;
             }
+
             .normal-tip {
               font-weight: 700;
             }
           }
+
           .color-1 {
             color: #f7534f;
           }
+
           .color-2 {
             color: #fa7b32;
           }
+
           .color-3 {
             color: #ffc63f;
           }
+
           &:hover {
             border-radius: 5px;
             background-color: var(--td-bg-color-component-hover);
@@ -354,6 +371,7 @@ hotReloadeventBus.on(() => {
   background: var(--td-bg-content-input);
   height: 32px;
 }
+
 :deep(.t-input-adornment__append) {
   height: 32px;
   background: var(--td-bg-content-input);
@@ -363,22 +381,26 @@ hotReloadeventBus.on(() => {
   align-items: center;
   padding-right: 6px;
 }
+
 .search-select {
   :deep(.t-input) {
     border-style: none;
   }
+
   :deep(.t-input--focused) {
     border-style: none;
     box-shadow: none;
   }
 }
+
 .search-input {
   :deep(.t-input) {
     height: 32px;
     border-style: none;
     background: var(--td-bg-content-input);
     box-shadow: none;
-    &.t-is-focused .t-input__prefix > .t-icon {
+
+    &.t-is-focused .t-input__prefix>.t-icon {
       color: var(--td-text-color-placeholder);
     }
   }
@@ -403,8 +425,10 @@ hotReloadeventBus.on(() => {
   text-align: center;
   box-sizing: border-box;
   padding: var(--td-comp-paddingTB-xxl) 0;
+
   .desc {
     margin-top: var(--td-comp-margin-xl);
+
     p {
       margin: 0;
       font-size: var(--td-font-size-title-small);

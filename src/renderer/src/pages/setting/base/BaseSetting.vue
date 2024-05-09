@@ -15,18 +15,9 @@
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.bossKey')" name="shortcutKey">
         <t-space align="center">
-          <t-input
-            ref="shortcutInputRef"
-            v-model="formatShortcut"
-            class="shortcut-content"
-            :placeholder="placeholderShortcut"
-            :status="statusShortcut"
-            :tips="tipShortcut"
-            :style="{ width: '255px' }"
-            @keydown="getShortKeys"
-            @focus="focusShortcut"
-            @blur="blurShortcut"
-          >
+          <t-input ref="shortcutInputRef" v-model="formatShortcut" class="shortcut-content"
+            :placeholder="placeholderShortcut" :status="statusShortcut" :tips="tipShortcut" :style="{ width: '255px' }"
+            @keydown="getShortKeys" @focus="focusShortcut" @blur="blurShortcut">
             <template #suffix>
               <div @click.stop="cancelShortcut">
                 <close-icon />
@@ -58,12 +49,8 @@
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.viewCasual')" name="viewCasual">
         <t-space align="center">
-          <t-input
-            v-model="formData.defaultViewCasual"
-            class="viewCasual-content"
-            :placeholder="t('pages.setting.placeholder.general')"
-            :style="{ width: '255px' }"
-          >
+          <t-input v-model="formData.defaultViewCasual" class="viewCasual-content"
+            :placeholder="t('pages.setting.placeholder.general')" :style="{ width: '255px' }">
           </t-input>
           <!-- <span class="title" @click="reset('viewCasual')">{{ $t('pages.setting.base.reset') }}</span> -->
         </t-space>
@@ -76,24 +63,16 @@
               <span class="title" @click="checkIpv6">{{ $t('pages.setting.base.check') }}</span>
               <t-radio v-model="formData.iptvStatus" allow-uncheck>{{ $t('pages.setting.base.delay') }}</t-radio>
               <t-radio v-model="formData.iptvThumbnail" allow-uncheck>{{ $t('pages.setting.base.thumbnail') }}</t-radio>
-              <span class="title" @click="isVisible.iptvThumbnail=true">{{ $t('pages.setting.base.info') }}</span>
+              <span class="title" @click="isVisible.iptvThumbnail = true">{{ $t('pages.setting.base.info') }}</span>
             </t-space>
             <t-space align="center">
-              <t-input
-                v-model="formData.defaultIptvEpg"
-                :label="$t('pages.setting.base.defaultEpg')"
-                :placeholder="$t('pages.setting.placeholder.epgTip')"
-                :style="{ width: '255px' }"
-              />
+              <t-input v-model="formData.defaultIptvEpg" :label="$t('pages.setting.base.defaultEpg')"
+                :placeholder="$t('pages.setting.placeholder.epgTip')" :style="{ width: '255px' }" />
               <span class="title" @click="reset('epg')">{{ $t('pages.setting.base.reset') }}</span>
             </t-space>
             <t-space align="center">
-              <t-input
-                v-model="formData.defaultIptvLogo"
-                :label="$t('pages.setting.base.globalLogo')"
-                :placeholder="$t('pages.setting.placeholder.logoTip')"
-                :style="{ width: '255px' }"
-              />
+              <t-input v-model="formData.defaultIptvLogo" :label="$t('pages.setting.base.globalLogo')"
+                :placeholder="$t('pages.setting.placeholder.logoTip')" :style="{ width: '255px' }" />
               <span class="title" @click="reset('logo')">{{ $t('pages.setting.base.reset') }}</span>
             </t-space>
           </t-space>
@@ -103,22 +82,15 @@
         <div class="player">
           <t-space direction="vertical">
             <t-space align="center">
-              <t-select
-                v-model="formData.playerMode.type"
-                :options="PLAYER_OPTIONS"
-                :placeholder="$t('pages.setting.placeholder.general')"
-                :style="{ width: '255px' }"
-              />
+              <t-select v-model="formData.playerMode.type" :options="PLAYER_OPTIONS"
+                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '255px' }" />
               <span class="title" @click="snifferEvent">{{ $t('pages.setting.base.sniffer') }}</span>
-              <span class="title" v-if="formData.playerMode.type === 'xgplayer'" @click="barrageEvent">{{ $t('pages.setting.base.barrage') }}</span>
+              <span class="title" v-if="formData.playerMode.type === 'xgplayer'" @click="barrageEvent">{{
+                $t('pages.setting.base.barrage') }}</span>
             </t-space>
             <t-space align="center" v-if="formData.playerMode.type === 'custom'">
-              <t-input
-                v-model="formData.playerMode.external"
-                :label="$t('pages.setting.base.command')"
-                :placeholder="$t('pages.setting.placeholder.general')"
-                :style="{ width: '255px' }"
-              />
+              <t-input v-model="formData.playerMode.external" :label="$t('pages.setting.base.command')"
+                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '255px' }" />
               <span class="title" @click="isVisible.customPlayer = true">{{ $t('pages.setting.base.info') }}</span>
             </t-space>
           </t-space>
@@ -126,7 +98,8 @@
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.security')" name="security">
         <t-space>
-          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">{{ $t('pages.setting.base.proxy') }}</span>
+          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">{{ $t('pages.setting.base.proxy')
+            }}</span>
           <span class="title" @click="uaEvnet">{{ $t('pages.setting.base.ua') }}</span>
         </t-space>
 
@@ -150,15 +123,17 @@
           <span class="title" @click="resetOriginal">{{ $t('pages.setting.base.restoreFactory') }}</span>
           <span class="title" @click="dataMange">{{ $t('pages.setting.base.dataMange') }}</span>
           <span class="title" @click="isVisible.update = true">{{ $t('pages.setting.base.checkUpdate') }}</span>
-          <span class="title" @click="isVisible.disclaimer=true">{{ $t('pages.setting.base.disclaimer') }}</span>
+          <span class="title" @click="isVisible.disclaimer = true">{{ $t('pages.setting.base.disclaimer') }}</span>
         </t-space>
 
         <dialog-custom-player v-model:visible="isVisible.customPlayer" />
-        <dialog-barrage-view v-model:visible="isVisible.barrage" :barrage="barrageDialogData" @receive-data="flushDialogData"/>
-        <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData"/>
+        <dialog-barrage-view v-model:visible="isVisible.barrage" :barrage="barrageDialogData"
+          @receive-data="flushDialogData" />
+        <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData" />
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-thumbnail-view v-model:visible="isVisible.iptvThumbnail" />
-        <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData" @receive-data="flushDialogData"/>
+        <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="snifferDialogData"
+          @receive-data="flushDialogData" />
         <dialog-disclaimer-view v-model:visible="isVisible.disclaimer" />
       </t-form-item>
     </t-form>
@@ -208,9 +183,9 @@ const isVisible = reactive({
 });
 
 const uaDialogData = ref({ data: '', type: 'ua' });
-const webdevDialogData = ref({ webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }} });
-const snifferDialogData = ref({ data: { type: '', url: ''}, type:'snifferMode' });
-const barrageDialogData = ref({ url: '', key: '', support: [], start: '', mode: '', color: '', content: ''});
+const webdevDialogData = ref({ webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } } });
+const snifferDialogData = ref({ data: { type: '', url: '' }, type: 'snifferMode' });
+const barrageDialogData = ref({ url: '', key: '', support: [], start: '', mode: '', color: '', content: '' });
 
 const MODE_OPTIONS = computed(() => {
   return [
@@ -273,7 +248,7 @@ const formData = ref({
   analyzeFlag: [
     'youku', 'qq',
     'iqiyi', 'qiyi',
-    'letv',  'sohu',
+    'letv', 'sohu',
     'tudou', 'pptv',
     'mgtv'
   ],
@@ -305,7 +280,7 @@ const formData = ref({
   hardwareAcceleration: true,
   ua: '',
   communitySubscribe: '',
-  webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }},
+  webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } },
   windowPosition: { status: false, position: { width: 1000, height: 640 } }
 });
 
@@ -317,7 +292,7 @@ const filmEmitReload = useEventBus('film-reload');
 const hotEmitReload = useEventBus('hot-reload');
 const iptvEmitReload = useEventBus('iptv-reload');
 
-watch(theme, (newValue,_) => {
+watch(theme, (newValue, _) => {
   formData.value.theme = newValue;
 })
 
@@ -373,8 +348,8 @@ watch(formData,
       updateSetting(newValue)
     }
   }, {
-    deep: true
-  }
+  deep: true
+}
 );
 
 onMounted(() => {
@@ -610,9 +585,9 @@ const reset = (type: string) => {
     formData.value.defaultIptvEpg = 'https://epg.112114.eu.org/';
   } else if (type === 'logo') {
     formData.value.defaultIptvLogo = 'https://epg.112114.eu.org/logo/';
-  } else if(type === 'danmuku') {
+  } else if (type === 'danmuku') {
     formData.value.barrage.url = 'https://dm.bbj.icu/dm?ac=dm';
-  } else if(type === 'viewCasual') {
+  } else if (type === 'viewCasual') {
     formData.value.defaultViewCasual = 'http://api.yujn.cn/api/zzxjj.php';
   }
 };
@@ -671,7 +646,7 @@ const barrageEvent = () => {
 
 const dataMange = () => {
   let { webdev } = formData.value;
-  webdev = webdev ? webdev : { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" }};
+  webdev = webdev ? webdev : { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } };
   webdevDialogData.value = {
     webdev
   };
@@ -696,7 +671,7 @@ const checkIpv6 = async () => {
     if (ip.match(ipv4Regex)) formData.value.iptvSkipIpv6 = true;
     if (ip.match(ipv6Regex)) formData.value.iptvSkipIpv6 = false;
     MessagePlugin.success(`${t('pages.setting.message.networkAddress')}: ${ip}`);
-  } catch(err) {
+  } catch (err) {
     MessagePlugin.error(`${t('pages.setting.message.networkCheckError')}: ${err}`);
     console.log(err);
   };
@@ -714,9 +689,11 @@ eventBus.on(() => {
   height: 100%;
   padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-xxl);
   overflow-y: auto;
+
   :deep(.t-radio-group.t-size-m .t-radio-button) {
     height: auto;
   }
+
   :deep(.t-form__label) {
     label {
       font-weight: 500;
@@ -728,31 +705,37 @@ eventBus.on(() => {
     cursor: pointer;
     font-weight: 500;
   }
+
   .setting-layout-drawer {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-right: 35px;
     box-sizing: content-box;
+
     .t-radio-button {
       display: inline-flex;
       max-height: 78px;
       padding: 0;
       border-radius: var(--td-radius-default);
       border: 2px solid transparent;
+
       > :deep(.t-radio-button__label) {
         display: inline-flex;
         position: relative;
+
         .mode-img,
         .layout-img {
           border-radius: 9px;
         }
       }
     }
+
     .t-is-checked {
       border-radius: 10px;
       border: 2px solid var(--td-brand-color);
     }
+
     .t-form__controls-content {
       justify-content: end;
     }

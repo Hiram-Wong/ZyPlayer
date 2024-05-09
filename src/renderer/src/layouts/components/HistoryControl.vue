@@ -49,12 +49,14 @@ const gotoRefresh = () => {
   height: 100%;
   width: 100px;
   border-radius: 50px;
+
   .nav-item {
     color: rgba(132, 133, 141, 0.8);
     cursor: pointer;
     text-align: center;
     display: flex;
     align-items: center;
+
     &:hover {
       color: var(--td-primary-color);
     }

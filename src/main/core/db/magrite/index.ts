@@ -1,7 +1,7 @@
 import db from '../index';
 import logger from '../../logger';
 import { update3_3_1_to3_3_2, update3_3_3_to3_3_4, update3_3_4_to3_3_5 } from './data';
-import { app } from "electron";
+import { app } from 'electron';
 
 /**
  * 判断版本
@@ -9,7 +9,7 @@ import { app } from "electron";
  * @param versionB '3.3.4'
  * @returns 1:大 -1小 0相等
  */
-const compareVersion = (versionA:string, versionB:string) => {
+const compareVersion = (versionA: string, versionB: string) => {
   const partsA = versionA.split('.').map(Number);
   const partsB = versionB.split('.').map(Number);
 
@@ -24,7 +24,7 @@ const compareVersion = (versionA:string, versionB:string) => {
   }
 
   return 0;
-}
+};
 
 const magrite = () => {
   const currentVersion = db.get('tbl_setting').find({ key: 'version' }).value()?.value ?? '';
@@ -38,6 +38,6 @@ const magrite = () => {
   }
 
   logger.info(`[db][magrite]magrite completed`);
-}
+};
 
 export default magrite;

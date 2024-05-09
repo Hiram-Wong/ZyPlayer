@@ -1,5 +1,6 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.edit')" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.edit')" :width="650" placement="center"
+    :footer="false">
     <template #body>
       <t-form :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
         <t-form-item :label="$t('pages.setting.iptv.name')" name="name">
@@ -15,25 +16,12 @@
               </t-radio-group>
             </t-space>
             <t-space>
-              <t-input
-                v-if="formData.type !== 'batches'"
-                v-model="formData.url"
-                class="input-item"
+              <t-input v-if="formData.type !== 'batches'" v-model="formData.url" class="input-item"
                 :class="formData.type === 'local' ? 'input-item-split' : ''"
-                :placeholder="$t('pages.setting.placeholder.general')"
-              />
-              <t-upload
-                v-if="formData.type === 'local'"
-                class="upload-item"
-                v-model="file"
-                theme="file"
-                accept="audio/mpegurl;text/plain"
-                auto-upload
-                :max="1"
-                :allow-upload-duplicate-file="true"
-                :show-upload-progress="false"
-                :request-method="requestMethod"
-              >
+                :placeholder="$t('pages.setting.placeholder.general')" />
+              <t-upload v-if="formData.type === 'local'" class="upload-item" v-model="file" theme="file"
+                accept="audio/mpegurl;text/plain" auto-upload :max="1" :allow-upload-duplicate-file="true"
+                :show-upload-progress="false" :request-method="requestMethod">
                 <t-button theme="primary" style="width: 110px;">
                   <template #icon>
                     <cloud-upload-icon />
@@ -41,13 +29,8 @@
                   {{ $t('pages.setting.iptv.upload') }}
                 </t-button>
               </t-upload>
-              <t-textarea
-                v-if="formData.type === 'batches'"
-                v-model="formData.url"
-                class="input-item input-textarea"
-                :placeholder="$t('pages.setting.placeholder.manualTip')"
-                :autosize="{ minRows: 7, maxRows: 7 }"
-              />
+              <t-textarea v-if="formData.type === 'batches'" v-model="formData.url" class="input-item input-textarea"
+                :placeholder="$t('pages.setting.placeholder.manualTip')" :autosize="{ minRows: 7, maxRows: 7 }" />
             </t-space>
           </t-space>
         </t-form-item>
@@ -87,7 +70,7 @@ const props = defineProps({
 const file = ref([]);
 const formVisible = ref(false);
 const formData = ref(props.data);
-const onSubmit = async() => {
+const onSubmit = async () => {
   try {
     await updateIptvItem(formData.value.id, formData.value);
     MessagePlugin.success('修改成功');

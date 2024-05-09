@@ -7,47 +7,46 @@ export function fetchStarList(page, limit) {
     method: 'get',
     params: {
       page,
-      limit
-    }
-  })
+      limit,
+    },
+  });
 }
 
 export function clearStarList() {
   return request({
     url: '/v1/star/clear',
-    method: 'delete'
-  })
+    method: 'delete',
+  });
 }
 
 export function delStar(id) {
   return request({
     url: `/v1/star/${id}`,
     method: 'delete',
-    params: {
-    }
-  })
+    params: {},
+  });
 }
 
 export function updateStar(id, doc) {
   return request({
     url: `/v1/star/${id}`,
     method: 'put',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 export function detailStar(doc) {
   return request({
     url: `/v1/star/detail`,
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }
 
 export function addStar(doc) {
   return request({
     url: `/v1/star`,
     method: 'post',
-    data: doc
-  })
+    data: doc,
+  });
 }

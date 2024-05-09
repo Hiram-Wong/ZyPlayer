@@ -1,13 +1,9 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center"
+    :footer="false">
     <template #body>
       <div class="dialog-container-padding">
-        <t-form
-          :data="formData"
-          :rules="rulesSingle"
-          :label-width="60"
-          @submit="onSubmit"
-        >
+        <t-form :data="formData" :rules="rulesSingle" :label-width="60" @submit="onSubmit">
           <t-form-item :label="$t('pages.setting.site.name')" name="name">
             <t-input v-model="formData.name" :placeholder="$t('pages.setting.placeholder.general')" />
           </t-form-item>
@@ -25,7 +21,8 @@
             </t-radio-group>
           </t-form-item>
           <t-form-item :label="$t('pages.setting.site.api')" name="api">
-            <t-input v-if="formData.type !==5" v-model="formData.api" :placeholder="$t('pages.setting.placeholder.general')" />
+            <t-input v-if="formData.type !== 5" v-model="formData.api"
+              :placeholder="$t('pages.setting.placeholder.general')" />
             <t-textarea v-else v-model="formData.api" :placeholder="$t('pages.setting.placeholder.general')" />
           </t-form-item>
           <t-form-item :label="$t('pages.setting.site.search')" name="search">
@@ -48,20 +45,10 @@
             <t-input v-model="formData.ext" :placeholder="$t('pages.setting.placeholder.general')" />
           </t-form-item>
           <t-form-item :label="$t('pages.setting.site.group')" name="group">
-            <t-select
-              v-model="formData.group"
-              creatable
-              filterable
-              :placeholder="$t('pages.setting.placeholder.groupTip')"
-              @create="createOptions"
-            >
-              <t-option
-                v-for="item in siteGroup"
-                :key="item.value"
-                :value="item.value"
-                :label="item.label"
-                class="select-options"
-              />
+            <t-select v-model="formData.group" creatable filterable
+              :placeholder="$t('pages.setting.placeholder.groupTip')" @create="createOptions">
+              <t-option v-for="item in siteGroup" :key="item.value" :value="item.value" :label="item.label"
+                class="select-options" />
             </t-select>
           </t-form-item>
           <t-form-item :label="$t('pages.setting.site.category')" name="category">
@@ -69,8 +56,8 @@
           </t-form-item>
           <div class="optios">
             <t-form-item style="float: right">
-            <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
-            <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
+              <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+              <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
             </t-form-item>
           </div>
         </t-form>
@@ -112,7 +99,7 @@ const formData = reactive({
   ext: '',
   categories: ''
 });
-const onSubmit = async() => {
+const onSubmit = async () => {
   try {
     if (!formData.group) formData.group = '默认';
     const res = await addSiteItem(formData);

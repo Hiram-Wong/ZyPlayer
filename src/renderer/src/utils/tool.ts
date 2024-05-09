@@ -1,5 +1,5 @@
 import axios from 'axios';
-import JSON5 from "json5";
+import JSON5 from 'json5';
 import ip from 'ip';
 
 axios.defaults.withCredentials = true; //让ajax携带cookie
@@ -7,9 +7,9 @@ axios.defaults.withCredentials = true; //让ajax携带cookie
 const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) => {
   try {
     const customHeaders = {
-      'Cookie': 'custom-cookie',
+      Cookie: 'custom-cookie',
       'User-Agent': 'custom-ua',
-      'Referer': 'custom-referer',
+      Referer: 'custom-referer',
     };
 
     for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
@@ -23,8 +23,8 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
       method,
       url,
       data: method !== 'GET' ? body : undefined,
-      headers: headers || undefined
-    })
+      headers: headers || undefined,
+    });
 
     let responseData;
     try {
@@ -37,14 +37,14 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
   } catch (err) {
     throw err;
   }
-}
+};
 
 // 判断媒体类型
 const checkMediaType = async (url: string): Promise<string | null> => {
   const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi', 'magnet'];
 
   if (url.startsWith('http') || url.startsWith('magnet')) {
-    const fileType = supportedFormats.find(format => url.includes(format));
+    const fileType = supportedFormats.find((format) => url.includes(format));
     if (fileType) {
       return fileType;
     } else {
@@ -56,7 +56,7 @@ const checkMediaType = async (url: string): Promise<string | null> => {
   }
 };
 
-const getMeadiaType = async(url: string): Promise<string> => {
+const getMeadiaType = async (url: string): Promise<string> => {
   let mediaType: string = 'unknown';
   try {
     const res = await axios.head(url);
@@ -91,20 +91,20 @@ const getMeadiaType = async(url: string): Promise<string> => {
     console.log(`媒体播放类型：${mediaType}`);
     return mediaType;
   }
-}
+};
 
-const checkUrlIpv6 = async(url: string) => {
+const checkUrlIpv6 = async (url: string) => {
   let hostname = new URL(url).hostname;
   if (ip.isV4Format(hostname)) {
-    return "IPv4";
+    return 'IPv4';
   } else if (ip.isV6Format(hostname)) {
-    return "IPv6";
+    return 'IPv6';
   } else {
-    return "Unknown";
+    return 'Unknown';
   }
-}
+};
 
-const checkLiveM3U8 = async(url: string): Promise<boolean> =>{
+const checkLiveM3U8 = async (url: string): Promise<boolean> => {
   try {
     const res = await axios.get(url);
     const m3u8Content = res.data;
@@ -121,7 +121,7 @@ const checkLiveM3U8 = async(url: string): Promise<boolean> =>{
   } catch (err) {
     return false;
   }
-}
+};
 
 const copyToClipboardApi = async (text: string): Promise<boolean> => {
   try {
@@ -135,6 +135,6 @@ const copyToClipboardApi = async (text: string): Promise<boolean> => {
 // 深拷贝辅助函数
 const dictDeepClone = (obj: any): any => {
   return JSON.parse(JSON.stringify(obj));
-}
+};
 
-export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8, copyToClipboardApi, dictDeepClone }
+export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8, copyToClipboardApi, dictDeepClone };

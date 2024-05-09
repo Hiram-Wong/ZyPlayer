@@ -8,15 +8,4 @@ import star from './star';
 import site from './site';
 import db from './db';
 
-export {
-  history,
-  setting,
-  star,
-  site,
-  iptv,
-  channel,
-  analyze,
-  drive,
-  db
-};
-  
+export { history, setting, star, site, iptv, channel, analyze, drive, db };

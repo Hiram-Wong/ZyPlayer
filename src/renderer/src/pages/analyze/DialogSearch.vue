@@ -1,12 +1,6 @@
 <template>
-  <t-dialog
-    v-model:visible="formVisible"
-    placement="center"
-    :footer="false"
-    :close-btn="false"
-    width="620px"
-    @close="closeDialog"
-  >
+  <t-dialog v-model:visible="formVisible" placement="center" :footer="false" :close-btn="false" width="620px"
+    @close="closeDialog">
     <template #body>
       <div class="icon-wrapper close-btn" @click="closeDialog">
         <span class="close-icon icon">
@@ -21,27 +15,18 @@
               {{ searchTag }}
             </t-tag>
             <div class="input-wrapper">
-              <input
-                ref="searchInputRef"
-                v-model="searchText"
-                type="text"
-                class="input"
-                :placeholder="$t('pages.analyze.search.input')"
-                @keyup.enter="searchEvent"
-                @keyup.delete="deleteEvent"
-              />
+              <input ref="searchInputRef" v-model="searchText" type="text" class="input"
+                :placeholder="$t('pages.analyze.search.input')" @keyup.enter="searchEvent"
+                @keyup.delete="deleteEvent" />
             </div>
-            <span v-if="isVisible.filter || searchText" class="clear" @click="clearSearchEvent">{{ $t('pages.analyze.search.clear') }}</span>
+            <span v-if="isVisible.filter || searchText" class="clear" @click="clearSearchEvent">{{
+              $t('pages.analyze.search.clear') }}</span>
           </div>
         </div>
         <div class="search-modal-body">
           <ul v-if="!isVisible.filter" class="search-filter-list">
-            <li
-              v-for="(item, index) in VIDEOSITES"
-              :key="index"
-              class="search-filter-list-item"
-              @click="selectFilterSearchEvent(item)"
-            >
+            <li v-for="(item, index) in VIDEOSITES" :key="index" class="search-filter-list-item"
+              @click="selectFilterSearchEvent(item)">
               <div class="icon" v-html="item.img"></div>
               <span class="text">{{ $t(`pages.analyze.search.${item.id}`) }}</span>
             </li>
@@ -192,6 +177,7 @@ const closeDialog = () => {
     background-color: var(--td-bg-color-component-hover);
   }
 }
+
 .icon-wrapper {
   height: 24px;
   width: 24px;
@@ -221,18 +207,22 @@ const closeDialog = () => {
   padding-left: 24px;
   display: flex;
   align-items: center;
+
   .search-input-wrapper {
     display: flex;
     align-items: center;
     position: relative;
     width: 100%;
     height: 28px;
+
     .search-filter-tag {
       margin-right: 8px;
     }
+
     .input-wrapper {
       position: relative;
       flex-grow: 1;
+
       .input {
         outline: none;
         border: none;
@@ -247,6 +237,7 @@ const closeDialog = () => {
         color: var(--td-text-color-primary);
       }
     }
+
     .clear {
       height: 28px;
       padding: 0 8px;
@@ -260,9 +251,11 @@ const closeDialog = () => {
       margin-right: 12px;
       transition: background-color 0.3s ease;
       user-select: none;
+
       &:hover {
         background-color: var(--td-bg-color-component-hover);
       }
+
       &::after {
         content: '';
         position: absolute;
@@ -279,10 +272,12 @@ const closeDialog = () => {
 
 .search-modal-body {
   position: relative;
-  max-height: max(456px,100vh - 330px);
+  max-height: max(456px, 100vh - 330px);
   overflow-y: auto;
+
   .search-filter-list {
     padding: 0 12px 8px;
+
     .search-filter-list-item {
       display: flex;
       align-items: center;
@@ -290,21 +285,25 @@ const closeDialog = () => {
       height: 40px;
       cursor: pointer;
       border-radius: 5px;
+
       .icon {
         font-size: 20px;
         margin-right: 12px;
       }
+
       .text {
         font-size: 14px;
         line-height: 1.5;
         font-weight: 500;
         color: var(--td-text-color-primary);
       }
+
       &:hover {
         background-color: var(--td-bg-color-component-hover);
       }
     }
   }
+
   .search-footer {
     position: sticky;
     bottom: 0;
@@ -314,6 +313,7 @@ const closeDialog = () => {
     flex-shrink: 0;
     border-top: 1px solid var(--divider_tertiary);
     border-radius: 0 0 10px 10px;
+
     .wrapper {
       display: flex;
       align-items: center;
@@ -323,27 +323,33 @@ const closeDialog = () => {
       border-radius: 5px;
       transition: background-color 0.3s ease;
       cursor: pointer;
+
       .icon {
         font-size: 24px;
         margin-right: 16px;
         flex-shrink: 0;
         color: var(--td-text-color-primary);
       }
+
       .content {
         flex-grow: 1;
         color: var(--td-text-color-primary);
+
         .text {
           word-break: break-all;
+
           .keywords {
             font-weight: 600;
           }
         }
       }
+
       .shortcut {
         flex-shrink: 0;
         pointer-events: none;
         margin-left: 12px;
       }
+
       &:hover {
         background-color: var(--td-bg-color-component-hover);
       }
@@ -367,14 +373,17 @@ const closeDialog = () => {
   padding-right: 16px;
   font-size: 12px;
   line-height: 1.6;
+
   .content {
     display: flex;
     align-items: center;
+
     .search-filter-icon {
       margin-right: 8px;
       font-size: 16px;
       line-height: 0;
     }
+
     .search-tag {
       margin-left: 8px;
     }
