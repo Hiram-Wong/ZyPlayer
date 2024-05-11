@@ -270,6 +270,7 @@ import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
 import { pdfh, pdfa } from '@/utils/drpy/drpyInject';
 import { createDependencyProposals } from '@/utils/drpy/drpy_suggestions/drpy_suggestions';
+import drpyObjectInner from '@/utils/drpy/drpy_suggestions/drpy_object_inner.ts?raw';
 
 const remote = window.require('@electron/remote');
 const router = useRouter();
@@ -591,6 +592,7 @@ const initEditor = () => {
         };
       }
     });
+    monaco.languages.typescript.javascriptDefaults.addExtraLib(drpyObjectInner);
     const logBox = document.getElementById('logBox');
     log = monaco.editor.create(logBox as HTMLElement, {
       theme: config.theme,
