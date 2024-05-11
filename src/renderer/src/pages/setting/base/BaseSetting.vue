@@ -85,8 +85,7 @@
               <t-select v-model="formData.playerMode.type" :options="PLAYER_OPTIONS"
                 :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '255px' }" />
               <span class="title" @click="snifferEvent">{{ $t('pages.setting.base.sniffer') }}</span>
-              <span class="title" v-if="formData.playerMode.type === 'xgplayer'" @click="barrageEvent">{{
-                $t('pages.setting.base.barrage') }}</span>
+              <span class="title" @click="barrageEvent">{{ $t('pages.setting.base.barrage') }}</span>
             </t-space>
             <t-space align="center" v-if="formData.playerMode.type === 'custom'">
               <t-input v-model="formData.playerMode.external" :label="$t('pages.setting.base.command')"
@@ -200,9 +199,10 @@ const PLAYER_OPTIONS = computed(() => {
     { label: t('pages.setting.base.xgplayer'), value: 'xgplayer' },
     // { label: t('pages.setting.base.veplayer'), value: 'veplayer' },
     { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
-    // { label: '腾讯播放器', value: 'tcplayer' },
-    // { label: '阿里播放器', value: 'aliplayer' },
-    // { label: '艺术播放器', value: 'artplayer' },
+    // { label: t('pages.setting.base.tcplayer'), value: 'tcplayer' },
+    // { label: t('pages.setting.base.aliplayer'), value: 'aliplayer' },
+    { label: t('pages.setting.base.artplayer'), value: 'artplayer' },
+    { label: t('pages.setting.base.nplayer'), value: 'nplayer' },
     // { label: 'iina(mac本地)', value: 'iina' },
     // { label: 'potplayer(win本地)', value: 'potplayer' },
     // { label: 'vlc(系统通用)', value: 'vlc' },

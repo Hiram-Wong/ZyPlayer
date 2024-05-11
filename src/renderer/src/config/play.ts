@@ -2,7 +2,6 @@ export default {
   type: 'film',
   setting: {
     playerMode: {
-      // type: 'xgplayer',
       type: 'dplayer',
       external: ''
     },
@@ -11,6 +10,7 @@ export default {
       url: ''
     },
     skipStartEnd: true,
+    preloadNext: true,
     barrage: {
       url: '',
       key: '',

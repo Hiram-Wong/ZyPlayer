@@ -117,7 +117,11 @@ export default {
     barrage: '弹幕',
     veplayer: '火山播放器',
     xgplayer: '西瓜播放器',
+    tcplayer: '腾讯播放器',
+    aliplayer: '阿里播放器',
+    artplayer: '艺术播放器',
     dplayer: '呆呆播放器',
+    nplayer: '玩家播放器',
     custom: '自定义(调用系统)',
     command: '系统命令',
     sniffer: '嗅探',
@@ -327,7 +331,8 @@ export default {
       search: '搜索',
       play: '播放',
       proxy: '代理',
-      player: '播放器'
+      player: '播放器',
+      sniffer: '嗅探'
     },
     select: {
       log: '日志',

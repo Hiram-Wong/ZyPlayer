@@ -36,9 +36,19 @@ export default {
     official: '解析流程处理完成,数据来源于:{0}',
     sniiferError: '嗅探失败,请换源',
     noDefaultAnalyze: '未配置默认解析,自行选择解析线路',
-    noRecommendSearch: '该源未找到相关推荐,不执行本次切换'
+    noRecommendSearch: '该源未找到相关推荐,不执行本次切换',
+    next: '请稍候,正在切换下集'
   },
   placeholder: {
     analyze: '解析接口'
+  },
+  setting: {
+    title: '设置',
+    autoSkip: '自动跳过片头片尾',
+    autoNext: '预加载下一集',
+    skipStart: '开始',
+    skipEnd: '结束',
+    skipSeconds: '秒',
+    tip: '开关全局生效'
   }
 };

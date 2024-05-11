@@ -115,9 +115,13 @@ export default {
     thumbnail: 'Thumbnail',
     player: 'Player',
     barrage: 'Barrage',
-    xgplayer: 'xgplayer',
-    veplayer: 'veplayer',
-    dplayer: 'dplayer',
+    xgplayer: 'XgPlayer',
+    veplayer: 'VePlayer',
+    aliplayer: 'AliPlayer',
+    tcplayer: 'TcPlayer',
+    artplayer: 'ArtPlayer',
+    dplayer: 'DPlayer',
+    nplayer: 'NPlayer',
     custom: 'custom(call system)',
     command: 'Command',
     sniffer: 'Sniffer',
@@ -327,7 +331,8 @@ export default {
       search: 'Search',
       play: 'Play',
       proxy: 'Proxy',
-      player: 'Player'
+      player: 'Player',
+      sniffer: 'Sniffer'
     },
     select: {
       log: 'Log',

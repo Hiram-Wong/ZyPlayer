@@ -1,0 +1,32 @@
+.art-danmuku-emitter .art-danmuku-send {
+  background: linear-gradient(254deg, #08cc7e, #0ccc4c) !important;
+}
+
+.art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-played {
+  background: linear-gradient(270deg, #00e038, #32ccff) !important;
+}
+
+.art-control-volume .art-volume-panel .art-volume-inner .art-volume-slider .art-volume-handle .art-volume-loaded {
+  background-image: linear-gradient(90deg, #00e038, #32ccff) !important;
+}
+
+.art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-indicator:hover {
+  background: #fff !important;
+  box-shadow: 0 0 15px 0 #00d157;
+}
+
+.art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-indicator {
+  background: #fff !important;
+  box-shadow: 0 0 15px 0 #00d157;
+  height: 13px !important;
+  width: 13px !important;
+}
+
+.art-danmuku-emitter .art-danmuku-left .art-danmuku-style .art-danmuku-style-panel .art-danmuku-style-panel-inner .art-danmuku-style-panel-modes .art-danmuku-style-panel-mode.art-current {
+  background-color: #00e038 !important;
+  border: 1px solid #00e038 !important;
+}
+
+.art-danmuku-emitter {
+  opacity: 0 !important;
+}

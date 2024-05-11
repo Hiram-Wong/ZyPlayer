@@ -36,9 +36,19 @@ export default {
     sniiferError: 'Sniffing failed, please change the source',
     official: 'Analyze completed, data is derived from {0}',
     noDefaultAnalyze: 'Not set default, Choose your own analysis line',
-    noRecommendSearch: 'No recommendation found for this source,  Switch is not performed'
+    noRecommendSearch: 'No recommendation found for this source,  Switch is not performed',
+    next: 'One moment, Switching next'
   },
   placeholder: {
     analyze: 'AnalyzeApi'
+  },
+  setting: {
+    title: 'Setting',
+    autoSkip: 'Automatically skip start and end',
+    autoNext: 'Preload next episode',
+    skipStart: 'Start',
+    skipEnd: 'End',
+    skipSeconds: 'S',
+    tip: 'The switch takes effect globally.'
   }
 }
