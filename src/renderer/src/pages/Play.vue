@@ -18,33 +18,36 @@
             <div class="popup item" @click="isSettingVisible = true">
               <setting-icon size="1.3em" />
             </div>
-            <t-dialog v-model:visible="isSettingVisible" header="设置" placement="center" :footer="false" width="508">
+            <t-dialog v-model:visible="isSettingVisible" :header="$t('pages.player.setting.title')" placement="center"
+              :footer="false" width="508">
               <div class="setting-warp">
                 <div class="setting-item-warp">
-                  <span>自动跳过片头片尾</span>
-                  <t-switch v-model="set.skipStartEnd" @change="updateLocalPlayer">
-                    <template #label="slotProps">{{ slotProps.value ? '开' : '关' }}</template>
-                  </t-switch>
+                  <span>{{ $t('pages.player.setting.autoSkip') }}</span>
+                  <t-switch v-model="set.skipStartEnd" @change="updateLocalPlayer" />
                 </div>
                 <div v-if="set.skipStartEnd" class="setting-item-warp">
                   <div class="skip-time-in-start">
                     <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right"
                       @click="skipTimeInEndChange">
-                      <template #label>开头: </template>
-                      <template #suffix> 秒</template>
+                      <template #label>{{ $t('pages.player.setting.skipStart') }}</template>
+                      <template #suffix>{{ $t('pages.player.setting.skipSeconds') }}</template>
                     </t-input-number>
                   </div>
                   <div class="skip-time-in-end">
                     <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right"
                       @click="skipTimeInEndChange">
-                      <template #label>结尾: </template>
-                      <template #suffix> 秒</template>
+                      <template #label>{{ $t('pages.player.setting.skipEnd') }}</template>
+                      <template #suffix>{{ $t('pages.player.setting.skipSeconds') }}</template>
                     </t-input-number>
                   </div>
                 </div>
+                <div class="setting-item-warp">
+                  <span>{{ $t('pages.player.setting.autoNext') }}</span>
+                  <t-switch v-model="set.preloadNext" />
+                </div>
 
                 <div class="tip-warp">
-                  <span>开关全局生效，跳过时间仅资源生效</span>
+                  <span>{{ $t('pages.player.setting.tip') }}</span>
                 </div>
               </div>
             </t-dialog>
@@ -64,8 +67,7 @@
         <div class="container-player" :class='["subject", isVisible.aside ? "subject-ext" : ""]'>
           <div class="player-panel">
             <div class="player-media">
-              <div v-show="player.xgplayer" id="xgplayer" ref="xgpayerRef" class="xgplayer player"></div>
-              <div v-show="player.dplayer" id="dplayer" ref="dplayerRef" class="dplayer player"></div>
+              <div id="mse" class="player"></div>
             </div>
           </div>
         </div>
@@ -320,14 +322,9 @@
 </template>
 
 <script setup lang="tsx">
-import '@/style/player/veplayer.css';
 import 'v3-infinite-loading/lib/style.css';
-import 'xgplayer/es/plugins/danmu/index.css';
+import '@/style/player/index.less';
 
-import DPlayer from 'dplayer';
-import flvjs from 'flv.js';
-import Hls from 'hls.js';
-import WebTorrent from './play/js/webtorrent';
 import _ from 'lodash';
 import moment from 'moment';
 import {
@@ -352,25 +349,20 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onMounted, ref, reactive } from 'vue';
-import Player, { Events, SimplePlayer } from 'xgplayer';
-import Danmu from 'xgplayer/es/plugins/danmu';
-import LivePreset from 'xgplayer/es/presets/live';
-import FlvPlugin from 'xgplayer-flv';
-import HlsPlugin from 'xgplayer-hls';
-import Mp4Plugin from 'xgplayer-mp4';
+import { computed, onMounted, ref, reactive, shallowRef, toRaw } from 'vue';
 
 import { setDefault } from '@/api/setting';
 import { fetchChannelList } from '@/api/iptv';
 
-import { getConfig, checkMediaType, checkUrlIpv6, checkLiveM3U8 } from '@/utils/tool';
+import { checkUrlIpv6 } from '@/utils/tool';
+import { playerBarrage, playerCreate, playerDestroy, playerNext, playerSeek, playerPause, playerTimeUpdate, offPlayerTimeUpdate } from '@/utils/common/player';
 import {
-  VIP_LIST,
   fetchBingeData,
   putBingeData,
   fetchHistoryData,
   putHistoryData,
   fetchAnalyzeData,
+  fetchBarrageData,
   playHelper,
   reverseOrderHelper,
   fetchDoubanRecommendHelper,
@@ -380,7 +372,7 @@ import {
   formatContent,
   formatSeason,
   formatReverseOrder
-} from '@/utils/film_common';
+} from '@/utils/common/film';
 import { __jsEvalReturn } from '@/utils/alist_open';
 import { fetchChannelEpg } from '@/utils/channel';
 import { usePlayStore } from '@/store';
@@ -408,98 +400,35 @@ const data = computed(() => {
 const set = computed(() => {
   return store.getSetting;
 });
+const snifferAnalyze = computed(() => {
+  const analyzeSource = active.analyzeId
+    ? _.find(dataAnalyze.value.active, { id: active.analyzeId })
+    : dataAnalyze.value.default;
+
+  const data = {
+    flag: dataAnalyze.value.flag,
+    name: analyzeSource.name,
+    url: analyzeSource.url,
+    type: analyzeSource.type,
+  };
+  return data;
+});
 const info = ref(data.value.info) as any;
 const ext = ref(data.value.ext) as any;
 
 const downloadDialogData = ref({ season: '', current: '' });
-const dplayerRef = ref(null); // 呆呆播放器dom节点
 
-const commonConfig = {
-  url: '',
-  autoplay: true,
-  pip: true,
-  cssFullscreen: false,
-  startTime: 0,
-  playbackRate: {
-    list: [
-      2,
-      1.5,
-      1.25,
-      {
-        rate: 1,
-        iconText: {
-          zh: '倍速',
-        },
-      },
-      0.75,
-      0.5,
-    ],
-    index: 7,
-  },
-  time: {
-    index: 0
-  },
-  icons: {
-    play: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-icon-play"><path d="M14.121 8.299a2 2 0 010 3.402l-7.94 4.91c-1.332.825-3.051-.133-3.051-1.7V5.09c0-1.567 1.72-2.525 3.052-1.701l7.939 4.911z" fill="#fff"></path></svg>`,
-    pause: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-icon-pause"><rect x="5.313" y="3.75" width="3.125" height="12.5" rx=".625" fill="#fff"></rect><rect x="11.563" y="3.75" width="3.125" height="12.5" rx=".625" fill="#fff"></rect></svg>`,
-    playNext: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-play-next"><path d="M11.626 6.457L3.452 1.334C1.937.384.042 1.571.042 3.471v11.057c0 1.9 1.894 3.087 3.41 2.137l8.174-5.123c1.875-1.174 1.875-3.91 0-5.085zM16.5 1c-.825 0-1.5.675-1.5 1.5v13c0 .825.675 1.5 1.5 1.5s1.5-.675 1.5-1.5v-13c0-.825-.675-1.5-1.5-1.5z"></path></svg>`,
-    fullscreen: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-get-fullscreen"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.778 2h4.444v1.778H3.778v4.444H2V3.778C2 2.796 2.796 2 3.778 2zM2 11.778v4.444C2 17.204 2.796 18 3.778 18h4.444v-1.778H4.823l2.313-2.313a.9.9 0 00-1.272-1.273l-2.086 2.086v-2.944H2zm14.222 0v4.444h-4.444V18h4.444c.982 0 1.778-.796 1.778-1.778v-4.444h-1.778zM18 8.222V3.778C18 2.796 17.204 2 16.222 2h-4.444v1.778h2.945l-2.587 2.586a.9.9 0 101.273 1.273l2.813-2.813v3.398H18z" fill="#fff"></path></svg>`,
-    exitFullscreen: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-exit-fullscreen"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.892 2h4.445v1.778H3.892v4.444H2.114V3.778C2.114 2.796 2.91 2 3.892 2zm4.445 16v-4.444c0-.982-.796-1.778-1.778-1.778H2.114v1.778h2.944L2.264 16.35a.9.9 0 001.272 1.273l2.988-2.987a.918.918 0 00.035-.037V18h1.778zm8-6.222v4.444h-4.445V18h4.445c.981 0 1.777-.796 1.777-1.778v-4.444h-1.777zM11.892 2v4.445c0 .981.796 1.777 1.778 1.777h4.444V6.445H15.17l2.568-2.568a.9.9 0 10-1.273-1.273L13.67 5.4V2h-1.778z" fill="#fff"></path></svg>`,
-    volumeSmall: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-volume-small"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.867 2.5h.55c.44 0 .799.34.83.771l.003.062v13.334c0 .44-.34.799-.771.83l-.062.003h-.55a.833.833 0 01-.444-.128l-.064-.045-4.867-3.744a.831.831 0 01-.322-.59l-.003-.07V7.077c0-.235.099-.458.271-.615l.054-.045L9.36 2.673a.832.832 0 01.43-.17l.078-.003h.55-.55zM2.5 6.667c.23 0 .417.186.417.416v5.834c0 .23-.187.416-.417.416h-.833a.417.417 0 01-.417-.416V7.083c0-.23.187-.416.417-.416H2.5zm11.768.46A4.153 4.153 0 0115.417 10c0 1.12-.442 2.137-1.162 2.886a.388.388 0 01-.555-.007l-.577-.578c-.176-.176-.156-.467.009-.655A2.49 2.49 0 0013.75 10a2.49 2.49 0 00-.61-1.636c-.163-.188-.182-.477-.006-.653l.578-.578a.388.388 0 01.556-.006z" fill="#fff"></path></svg>`,
-    volumeLarge: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-volume"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.867 2.5h.55c.44 0 .799.34.83.771l.003.062v13.334c0 .44-.34.799-.771.83l-.062.003h-.55a.833.833 0 01-.444-.128l-.064-.045-4.867-3.744a.831.831 0 01-.322-.59l-.003-.07V7.077c0-.235.099-.458.271-.615l.054-.045L9.36 2.673a.832.832 0 01.43-.17l.078-.003h.55-.55zm6.767 2.278A7.474 7.474 0 0118.75 10a7.477 7.477 0 01-2.128 5.234.4.4 0 01-.57-.004l-.587-.586a.442.442 0 01.005-.617A5.812 5.812 0 0017.083 10c0-1.557-.61-2.97-1.603-4.017a.442.442 0 01-.003-.615l.586-.586a.4.4 0 01.57-.004zM2.5 6.667c.23 0 .417.186.417.416v5.834c0 .23-.187.416-.417.416h-.833a.417.417 0 01-.417-.416V7.083c0-.23.187-.416.417-.416H2.5zm11.768.46A4.153 4.153 0 0115.417 10c0 1.12-.442 2.137-1.162 2.886a.388.388 0 01-.555-.007l-.577-.578c-.176-.176-.156-.467.009-.655A2.49 2.49 0 0013.75 10a2.49 2.49 0 00-.61-1.636c-.163-.188-.182-.477-.006-.653l.578-.578a.388.388 0 01.556-.006z" fill="#fff"></path></svg>`,
-    volumeMuted: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-volume-mute"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.045 2.5h.55c.44 0 .8.34.831.771l.003.062v13.334c0 .44-.34.799-.771.83l-.063.003h-.55a.833.833 0 01-.443-.128l-.065-.045-4.866-3.744a.831.831 0 01-.323-.59l-.003-.07V7.077c0-.235.1-.458.272-.615l.054-.045 4.866-3.744a.832.832 0 01.43-.17l.078-.003h.55-.55zM2.68 6.667c.23 0 .416.186.416.416v5.834c0 .23-.186.416-.416.416h-.834a.417.417 0 01-.416-.416V7.083c0-.23.186-.416.416-.416h.834zm10.467.294a.417.417 0 01.59 0l1.767 1.768L17.27 6.96a.417.417 0 01.589 0l.59.59a.417.417 0 010 .589L16.68 9.908l1.768 1.767c.15.15.162.387.035.55l-.035.04-.589.589a.417.417 0 01-.59 0l-1.767-1.768-1.768 1.768a.417.417 0 01-.59 0l-.588-.59a.417.417 0 010-.589l1.767-1.768-1.767-1.767a.417.417 0 01-.035-.55l.035-.04.589-.589z" fill="#fff"></path></svg>`,
-    pipIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-get-pip">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M16.5 4.3H3.5C3.38954 4.3 3.3 4.38954 3.3 4.5V15.5C3.3 15.6105 3.38954 15.7 3.5 15.7H8.50005L8.50006 17.5H3.5C2.39543 17.5 1.5 16.6046 1.5 15.5V4.5C1.5 3.39543 2.39543 2.5 3.5 2.5H16.5C17.6046 2.5 18.5 3.39543 18.5 4.5V8.5H16.7V4.5C16.7 4.38954 16.6105 4.3 16.5 4.3ZM12 11.5C11.4477 11.5 11 11.9477 11 12.5L11 16.5C11 17.0523 11.4478 17.5 12 17.5H17.5C18.0523 17.5 18.5 17.0523 18.5 16.5L18.5 12.5C18.5 11.9477 18.0523 11.5 17.5 11.5H12Z" fill="white"></path>
-    </svg>`,
-    pipIconExit: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" class="xg-exit-pip">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M16.5 4.3H3.5C3.38954 4.3 3.3 4.38954 3.3 4.5V15.5C3.3 15.6105 3.38954 15.7 3.5 15.7H8.50005L8.50006 17.5H3.5C2.39543 17.5 1.5 16.6046 1.5 15.5V4.5C1.5 3.39543 2.39543 2.5 3.5 2.5H16.5C17.6046 2.5 18.5 3.39543 18.5 4.5V8.5H16.7V4.5C16.7 4.38954 16.6105 4.3 16.5 4.3ZM12 11.5C11.4477 11.5 11 11.9477 11 12.5L11 16.5C11 17.0523 11.4478 17.5 12 17.5H17.5C18.0523 17.5 18.5 17.0523 18.5 16.5L18.5 12.5C18.5 11.9477 18.0523 11.5 17.5 11.5H12Z" fill="white"></path>
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M9.4998 7.7C9.77595 7.7 9.9998 7.47614 9.9998 7.2V6.5C9.9998 6.22386 9.77595 6 9.4998 6H5.5402L5.52754 6.00016H5.5C5.22386 6.00016 5 6.22401 5 6.50016V10.4598C5 10.7359 5.22386 10.9598 5.5 10.9598H6.2C6.47614 10.9598 6.7 10.7359 6.7 10.4598V8.83005L8.76983 10.9386C8.96327 11.1357 9.27984 11.1386 9.47691 10.9451L9.97645 10.4548C10.1735 10.2613 10.1764 9.94476 9.983 9.7477L7.97289 7.7H9.4998Z" fill="white"></path>
-    </svg>`,
-    openDanmu: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="-2,-2,28,28" fill="none" class="xg-open-danmu"><path d="M15.3468 7C15.6522 7 15.905 7.22505 15.9484 7.51835L15.955 7.60823L15.9549 8.01653L16.2911 8.01726C16.5965 8.01726 16.8493 8.24231 16.8928 8.5356L16.8994 8.62548V12.463C16.8994 12.7989 16.6271 13.0713 16.2911 13.0713L14.4101 13.0707V13.7582L16.2047 13.7588C16.5406 13.7588 16.8129 14.0311 16.8129 14.367C16.8129 14.6724 16.5878 14.9252 16.2946 14.9687L16.2047 14.9753L14.4101 14.9748L14.4104 15.9871C14.4104 16.323 14.1381 16.5953 13.8022 16.5953C13.4968 16.5953 13.244 16.3703 13.2006 16.077L13.194 15.9871L13.1935 14.9748L11.3133 14.9753C10.9773 14.9753 10.705 14.703 10.705 14.367C10.705 14.0617 10.9301 13.8089 11.2234 13.7654L11.3133 13.7588L13.1935 13.7582V13.0707L11.3133 13.0713C11.0079 13.0713 10.7551 12.8462 10.7116 12.5529L10.705 12.463V8.62548C10.705 8.28957 10.9773 8.01726 11.3133 8.01726L11.9315 8.01653L11.932 7.60823C11.932 7.27231 12.2043 7 12.5402 7C12.8456 7 13.0984 7.22505 13.1419 7.51835L13.1485 7.60823L13.1481 8.01653H14.7383L14.7386 7.60823C14.7386 7.27231 15.0109 7 15.3468 7ZM9.40777 7.41055C9.71315 7.41055 9.96596 7.6356 10.0094 7.9289L10.016 8.01878V10.5173C10.016 10.8227 9.79095 11.0755 9.49765 11.119L9.40777 11.1256L7.68831 11.1255V12.2097L9.40777 12.21C9.71315 12.21 9.96596 12.4351 10.0094 12.7284L10.016 12.8183V15.2084C10.016 15.3812 9.94252 15.5458 9.81391 15.6612C9.32173 16.1027 8.42975 16.2805 7.08088 16.2805C6.74497 16.2805 6.47266 16.0082 6.47266 15.6723C6.47266 15.3364 6.74497 15.064 7.08088 15.064C7.86129 15.064 8.42395 14.9934 8.74634 14.8859L8.79911 14.8661V13.4263L7.08088 13.4265C6.77551 13.4265 6.52269 13.2014 6.47925 12.9081L6.47266 12.8183V10.5173C6.47266 10.212 6.69771 9.95916 6.991 9.91571L7.08088 9.90912L8.79911 9.90891V8.62646L7.08088 8.627C6.77551 8.627 6.52269 8.40195 6.47925 8.10866L6.47266 8.01878C6.47266 7.7134 6.69771 7.46059 6.991 7.41715L7.08088 7.41055H9.40777ZM13.1935 11.1524H11.9199L11.9207 11.8539L13.1935 11.8532V11.1524ZM15.6819 11.1524H14.4101V11.8532L15.6827 11.8539L15.6819 11.1524ZM13.1935 9.23227L11.9207 9.233L11.9199 9.93574H13.1935V9.23227ZM15.6827 9.233L14.4101 9.23227V9.93574H15.6819L15.6827 9.233Z" fill="#fff"></path><path d="M17.8763 16.4209H22.7763C24.5804 16.4209 26.043 17.8834 26.043 19.6876C26.043 21.4917 24.5804 22.9542 22.7763 22.9542H17.8763C16.0722 22.9542 14.6096 21.4917 14.6096 19.6876C14.6096 17.8834 16.0722 16.4209 17.8763 16.4209Z" fill="#14A3FF"></path><path d="M19.9201 19.6874C19.9201 21.2661 21.1997 22.5458 22.7784 22.5458C24.3571 22.5458 25.6367 21.2661 25.6367 19.6874C25.6367 18.1088 24.3571 16.8291 22.7784 16.8291C21.1997 16.8291 19.9201 18.1088 19.9201 19.6874Z" fill="#fff"></path><path d="M11.375 21H4.375C2.92525 21 1.75 19.8247 1.75 18.375V5.25C1.75 3.80025 2.92525 2.625 4.375 2.625H19.125C20.5747 2.625 21.75 3.80025 21.75 5.25V13.125" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"></path></svg>`,
-    closeDanmu: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="-2,-2,28,28" fill="none" class="xg-colose-danmu"><path d="M15.3468 7C15.6522 7 15.905 7.22505 15.9484 7.51835L15.955 7.60823L15.9549 8.01653L16.2911 8.01726C16.5965 8.01726 16.8493 8.24231 16.8928 8.5356L16.8994 8.62548V12.463C16.8994 12.7989 16.6271 13.0713 16.2911 13.0713L14.4101 13.0707V13.7582L16.2047 13.7588C16.5406 13.7588 16.8129 14.0311 16.8129 14.367C16.8129 14.6724 16.5878 14.9252 16.2946 14.9687L16.2047 14.9753L14.4101 14.9748L14.4104 15.9871C14.4104 16.323 14.1381 16.5953 13.8022 16.5953C13.4968 16.5953 13.244 16.3703 13.2006 16.077L13.194 15.9871L13.1935 14.9748L11.3133 14.9753C10.9773 14.9753 10.705 14.703 10.705 14.367C10.705 14.0617 10.9301 13.8089 11.2234 13.7654L11.3133 13.7588L13.1935 13.7582V13.0707L11.3133 13.0713C11.0079 13.0713 10.7551 12.8462 10.7116 12.5529L10.705 12.463V8.62548C10.705 8.28957 10.9773 8.01726 11.3133 8.01726L11.9315 8.01653L11.932 7.60823C11.932 7.27231 12.2043 7 12.5402 7C12.8456 7 13.0984 7.22505 13.1419 7.51835L13.1485 7.60823L13.1481 8.01653H14.7383L14.7386 7.60823C14.7386 7.27231 15.0109 7 15.3468 7ZM9.40777 7.41055C9.71315 7.41055 9.96596 7.6356 10.0094 7.9289L10.016 8.01878V10.5173C10.016 10.8227 9.79095 11.0755 9.49765 11.119L9.40777 11.1256L7.68831 11.1255V12.2097L9.40777 12.21C9.71315 12.21 9.96596 12.4351 10.0094 12.7284L10.016 12.8183V15.2084C10.016 15.3812 9.94252 15.5458 9.81391 15.6612C9.32173 16.1027 8.42975 16.2805 7.08088 16.2805C6.74497 16.2805 6.47266 16.0082 6.47266 15.6723C6.47266 15.3364 6.74497 15.064 7.08088 15.064C7.86129 15.064 8.42395 14.9934 8.74634 14.8859L8.79911 14.8661V13.4263L7.08088 13.4265C6.77551 13.4265 6.52269 13.2014 6.47925 12.9081L6.47266 12.8183V10.5173C6.47266 10.212 6.69771 9.95916 6.991 9.91571L7.08088 9.90912L8.79911 9.90891V8.62646L7.08088 8.627C6.77551 8.627 6.52269 8.40195 6.47925 8.10866L6.47266 8.01878C6.47266 7.7134 6.69771 7.46059 6.991 7.41715L7.08088 7.41055H9.40777ZM13.1935 11.1524H11.9199L11.9207 11.8539L13.1935 11.8532V11.1524ZM15.6819 11.1524H14.4101V11.8532L15.6827 11.8539L15.6819 11.1524ZM13.1935 9.23227L11.9207 9.233L11.9199 9.93574H13.1935V9.23227ZM15.6827 9.233L14.4101 9.23227V9.93574H15.6819L15.6827 9.233Z" fill="#fff"></path><path d="M17.8763 16.4209H22.7763C24.5804 16.4209 26.043 17.8834 26.043 19.6876C26.043 21.4917 24.5804 22.9542 22.7763 22.9542H17.8763C16.0722 22.9542 14.6096 21.4917 14.6096 19.6876C14.6096 17.8834 16.0722 16.4209 17.8763 16.4209Z" fill="#707070"></path><path d="M15.0236 19.6874C15.0236 21.2661 16.3032 22.5458 17.8819 22.5458C19.4606 22.5458 20.7402 21.2661 20.7402 19.6874C20.7402 18.1088 19.4606 16.8291 17.8819 16.8291C16.3032 16.8291 15.0236 18.1088 15.0236 19.6874Z" fill="#fff"></path><path d="M11.375 21H4.375C2.92525 21 1.75 19.8247 1.75 18.375V5.25C1.75 3.80025 2.92525 2.625 4.375 2.625H19.125C20.5747 2.625 21.75 3.80025 21.75 5.25V13.125" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"></path></svg>`
-  },
-  width: 'auto',
-  height: 'calc(100vh - 56px)'
-}; // 西瓜、火山公共部分
-
-const playerConfig = ref({
-  veplayer: {
-    ...commonConfig,
-    id: 'xgplayer',
-    streamType: 'hls',
-    enableMenu: true,
-  },
-  xgplayer: {
-    ...commonConfig,
-    id: 'xgplayer',
-    enableContextmenu: true,
-    danmu: {
-      panel: false,
-      comments: [],
-      area: { start: 0, end: 0.3 },
-      defaultOff: true //开启此项后弹幕不会初始化，默认初始化弹幕
-    },
-    plugins: []
-  },
-  dplayer: {
-    container: dplayerRef,
-    autoplay: true,
-    screenshot: false,
-    video: {}
-  }
-}) as any;
-
-const player = ref({
-  veplayer: null,
-  xgplayer: null,
-  dplayer: null
-}) as any;
+// const player = shallowRef(null); // 重要, proxy对象art播放器报错
+var player = null; // 重要, proxy对象art播放器报错
 
 const tmp = reactive({
   skipTime: 0,
   url: "",
-  sourceUrl: ""
-});
+  sourceUrl: "",
+  preloadNext: "",
+  preloadLoading: false,
+  playerHeaders: {}
+}) as any;
 
 const active = reactive({
   iptvNav: 'epg',
@@ -512,25 +441,9 @@ const active = reactive({
 });
 const recommend = ref([]) as any; // 推荐
 const season = ref(); // 选集
-const xgpayerRef = ref(null); // 西瓜播放器dom节点
 const isSettingVisible = ref(false);
 
-const dataHistory = ref({
-  id: null,
-  date: moment().unix(),
-  type: 'film',
-  // relateId: ext.value["site"]["id"] || null,
-  siteSource: active.flimSource,
-  playEnd: false,
-  videoId: info.value["vod_id"],
-  videoImage: info.value["vod_pic"],
-  videoName: info.value["vod_name"],
-  videoIndex: active.filmIndex,
-  watchTime: 0,
-  duration: null,
-  skipTimeInStart: 30,
-  skipTimeInEnd: 30,
-}) as any; // 历史
+const dataHistory = ref({}) as any; // 历史
 const dataBinge = ref({}) as any;
 
 const driveDataList = ref({});
@@ -603,176 +516,50 @@ onMounted(() => {
   minMaxEvent();
 });
 
-const loadDanmu = async (resUrl: string) => {
-  try {
-    const startTime = new Date().getTime();
-    const { url, key, support, start, mode, color, content } = set.value.barrage;
-
-    if (!(url && key && support && start && mode && color)) return [];
-    if (!_.some(support, source => source === active.flimSource)) return [];
-
-    const sourceUrl = formatIndex(active.filmIndex).url;
-    if (sourceUrl.startsWith('http')) {
-      const { hostname } = new URL(sourceUrl);
-      if (VIP_LIST.some((item) => hostname.includes(item))) resUrl = sourceUrl;
-    };
-
-    const configRes = await getConfig(`${url}${resUrl}`);
-
-    if (!configRes[key] || configRes[key].length === 0) return [];
-
-    const danmuku = configRes.danmuku;
-    const comments = Array.from(danmuku, (item: any, index: number) => ({
-      duration: 5000,
-      id: String(index + 1),
-      start: item[start] * 1000,
-      txt: item[content],
-      mode: ['left', 'right'].includes(item[mode]) ? 'scroll' : item[mode],
-      color: true,
-      style: {
-        color: item[color]
-      }
-    }));
-
-    const endTime = new Date().getTime();
-    console.log(`[play][danmu]Time-consuming:${endTime - startTime}`)
-
-    return comments || [];
-  } catch (err) {
-    console.log(`[play][danmu][error]${err}`);
-    return [];
-  }
-};
-
 // 加载播放器
 const createPlayer = async (url: string, videoType: string = '') => {
   tmp.url = url;
   const { playerMode } = set.value;
 
-  if (!videoType) {
-    const meadiaType = await checkMediaType(url);
-    if (meadiaType !== 'unknown' && meadiaType !== 'error') {
-      videoType = meadiaType!;
-    };
+  const containers = {
+    xgplayer: 'mse',
+    artplayer: '#mse',
+    dplayer: document.getElementById('mse'),
+    nplayer: '#mse',
+  };
+  player = await playerCreate(url, type.value, containers[playerMode.type], playerMode.type, videoType) as any;
+  if (tmp.skipTime) playerSeek(player, playerMode.type, tmp.skipTime);
+
+  if (type.value === 'film') {
+    await timerUpdatePlayProcess(); // 更新播放进度
+
+    // 弹幕
+    const options = set.value.barrage;
+    const danmuList = await fetchBarrage();
+    if (danmuList.length > 0) {
+      if (playerMode.type === 'dplayer') {
+        playerBarrage(player, playerMode.type, tmp.sourceUrl, options);
+      } else {
+        playerBarrage(player, playerMode.type, danmuList, options);
+      };
+    }
   };
 
-  let isLive = false;
-  if (type.value === 'iptv') {
-    isLive = await checkLiveM3U8(info.value["url"]);
-  };
+  setSystemMediaInfo(); // 设置系统媒体信息
 
-  if (playerMode.type === 'xgplayer') {
-    if (tmp.skipTime) playerConfig.value.xgplayer.startTime = tmp.skipTime;
-    playerConfig.value.xgplayer.danmu.comments = await loadDanmu(url);
-    if (isLive) {
-      SimplePlayer.defaultPreset = LivePreset;
-      playerConfig.value.xgplayer.isLive = true;
-    };
-    switch (videoType) {
-      case 'mp4':
-        playerConfig.value.xgplayer.plugins = [Mp4Plugin, Danmu];
-        break;
-      case 'mkv':
-        playerConfig.value.xgplayer.plugins = [Mp4Plugin, Danmu];
-        break;
-      case 'flv':
-        playerConfig.value.xgplayer.plugins = [FlvPlugin, Danmu];
-        break;
-      case 'm3u8':
-        playerConfig.value.xgplayer.plugins = [HlsPlugin, Danmu];
-        break;
-      default:
-        playerConfig.value.xgplayer.plugins = [HlsPlugin, Danmu];
-        break;
-    };
-    playerConfig.value.xgplayer.url = url;
-    if (isLive) player.value.xgplayer = new SimplePlayer({ ...playerConfig.value.xgplayer });
-    else player.value.xgplayer = new Player({ ...playerConfig.value.xgplayer });
-    console.log(`[player][xgplayer]load:${videoType}`);
-  } else if (playerMode.type === 'dplayer') {
-    let config;
-    if (isLive) playerConfig.value.dplayer.live = true;
-    switch (videoType) {
-      case 'mp4':
-        config = { url };
-        break;
-      case 'flv':
-        config = {
-          url,
-          type: 'customFlv',
-          customType: {
-            customFlv: (video, _) => {
-              const flvPlayer = flvjs.createPlayer({
-                type: 'flv',
-                url: video.src,
-              });
-              flvPlayer.attachMediaElement(video);
-              flvPlayer.load();
-            },
-          },
-        };
-        break;
-      case 'm3u8':
-        config = {
-          url,
-          type: 'customHls',
-          customType: {
-            customHls: (video, _) => {
-              const hls = new Hls();
-              hls.loadSource(video.src);
-              hls.attachMedia(video);
-            },
-          },
-        }
-        break;
-      case 'magnet':
-        config = {
-          url,
-          type: 'customWebTorrent',
-          customType: {
-            customWebTorrent: function (video, player) {
-              player.container.classList.add('dplayer-loading');
-              const client = new WebTorrent();
-              const torrentId = video.src;
-              client.add(torrentId, (torrent) => {
-                const file = torrent.files.find((file) => file.name.endsWith('.mp4') || file.name.endsWith('.mkv'));
-                file.renderTo(
-                  video,
-                  {
-                    autoplay: player.options.autoplay,
-                  },
-                  () => {
-                    player.container.classList.remove('dplayer-loading');
-                  }
-                );
-              });
-            },
-          },
-        }
-        break;
-      default:
-        config = {
-          url,
-          type: 'customHls',
-          customType: {
-            customHls: (video, _) => {
-              const hls = new Hls();
-              hls.loadSource(video.src);
-              hls.attachMedia(video);
-            },
-          },
-        }
-        break;
-    };
-    playerConfig.value.dplayer.video = { ...config };
-    player.value.dplayer = new DPlayer({ ...playerConfig.value.dplayer });
-    if (tmp.skipTime) player.value.dplayer.seek(tmp.skipTime);
-    console.log(`[player][dplayer]load:${videoType}`);
+  // setTimeout(()=>{
+  //   offPlayerTimeUpdate(player, playerMode.type);
+  // }, 6000)
+};
+
+// 摧毁播放器
+const destroyPlayer = () => {
+  if (player) {
+    const { playerMode } = set.value;
+
+    playerDestroy(player, playerMode.type)
+    player = null;
   }
-
-  if (type.value === 'film') await timerUpdatePlayProcess();
-
-  setSystemMediaInfo();
 };
 
 // 设置系统媒体信息
@@ -836,9 +623,11 @@ const switchAnalyzeEvent = (id: string) => {
 // 获取历史
 const fetchHistory = async (): Promise<void> => {
   const response = await fetchHistoryData(ext.value.site.id, info.value.vod_id);
-  dataHistory.value = response;
   if (response.siteSource) active.flimSource = response.siteSource;
   if (response.videoIndex) active.filmIndex = response.videoIndex;
+  if (!response.siteSource) response.siteSource = active.flimSource;
+  if (!response.videoIndex) response.videoIndex = active.filmIndex;
+  dataHistory.value = response;
   const { skipTimeInStart, skipTimeInEnd } = response;
   skipConfig.value = { skipTimeInStart, skipTimeInEnd };
 };
@@ -863,19 +652,6 @@ const putHistory = async (): Promise<void> => {
 
   const response = await putHistoryData(dataHistory.value?.id, doc);
   dataHistory.value = response;
-};
-
-// 摧毁播放器
-const destroyPlayer = () => {
-  if (player.value.xgplayer) {
-    player.value.xgplayer.destroy();
-    player.value.xgplayer = null;
-  };
-
-  if (player.value.dplayer) {
-    player.value.dplayer.destroy();
-    player.value.dplayer = null;
-  };
 };
 
 // 初始化film
@@ -911,25 +687,14 @@ const initFilmPlayer = async (isFirst) => {
   let { url } = formatIndex(active.filmIndex);
   url = decodeURIComponent(url);
 
-  tmp.url = url;
-  tmp.sourceUrl = url;
+  tmp.url = tmp.sourceUrl = url;
 
-
-  const analyzeSource = active.analyzeId
-    ? _.find(dataAnalyze.value.active, { id: active.analyzeId })
-    : dataAnalyze.value.default;
-
-  const analyze = {
-    flag: dataAnalyze.value.flag,
-    url: analyzeSource.url,
-    type: analyzeSource.type,
-  };
-
+  const analyze = snifferAnalyze.value;
   MessagePlugin.info(t('pages.player.message.play'));
   const response = await playHelper(snifferMode, url, site, analyze, active.flimSource);
   isVisible.official = response!.isOfficial;
   if (isVisible.official) {
-    if (analyzeSource?.name) MessagePlugin.info(t('pages.player.message.official', [analyzeSource.name]));
+    if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
     else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
   }
   createPlayer(response!.url, response!.mediaType!);
@@ -953,7 +718,6 @@ const initPlayer = async (isFirst = false) => {
       break;
   };
 };
-
 
 // 获取播放源及剧集
 const getDetailInfo = async (): Promise<void> => {
@@ -987,7 +751,32 @@ const changeEvent = async (item) => {
   };
 
   await putHistory();
-  await initPlayer(true);
+
+  if (tmp.preloadNext?.url && set.value.preloadNext) {
+    const { playerMode } = set.value;
+
+    await offPlayerTimeUpdate(player, playerMode.type);
+    await playerNext(player, playerMode.type, tmp.preloadNext);
+    // if (skipConfig.value.skipTimeInStart) await playerSeek(player, playerMode.type, skipConfig.value.skipTimeInStart); 无法解决进度条问题
+    tmp.preloadLoading = false;
+    tmp.preloadNext = {};
+    setSystemMediaInfo(); // 更新系统媒体信息
+    setTimeout(async () => {
+      await timerUpdatePlayProcess();
+    }, 1500);
+  } else {
+    await destroyPlayer();
+    await initPlayer(true);
+  }
+};
+
+// 提前获取下一集链接
+const preloadNext = async (url: string) => {
+  const { snifferMode } = set.value;
+  const { site } = ext.value;
+  const analyze = snifferAnalyze.value;
+  const response = await playHelper(snifferMode, url, site, analyze, active.flimSource);
+  tmp.preloadNext = { ...response };
 };
 
 // 获取豆瓣影片推荐
@@ -998,30 +787,26 @@ const fetchRecommend = async () => {
 
 // 定时更新播放进度
 const timerUpdatePlayProcess = () => {
-  const autoPlayNext = () => {
-    const { playerMode } = set.value;
-    const { siteSource } = dataHistory.value;
-    const index = season.value[siteSource].indexOf(active.filmIndex);
+  const { playerMode } = set.value;
+  const { siteSource } = dataHistory.value;
 
+  const index = season.value[siteSource].indexOf(active.filmIndex);
+
+  const autoPlayNext = async () => {
     VIDEO_PROCESS_DOC.playEnd = true;
     VIDEO_PROCESS_DOC.duration = 0;
 
     if (season.value[siteSource].length === index + 1) {  // 最后一集
       putHistory();
-      if (playerMode.type === 'xgplayer') {
-        player.value.xgplayer.pause();
-      } else if (playerMode.type === 'dplayer') {
-        player.value.dplayer.pause();
-      };
       return;
     };
 
     console.log('[player][progress] autoPlayNext');
-    changeEvent(season.value[siteSource][index + 1]);
-    MessagePlugin.info('请稍候,正在切换下集');
+    await changeEvent(season.value[siteSource][index + 1]);
+    MessagePlugin.info(t('pages.player.message.next'));
   };
 
-  const onTimeUpdate = (currentTime: number, duration: number) => {
+  const onTimeUpdate = async (currentTime: number, duration: number) => {
     VIDEO_PROCESS_DOC.watchTime = currentTime;
     VIDEO_PROCESS_DOC.duration = duration;
 
@@ -1029,26 +814,35 @@ const timerUpdatePlayProcess = () => {
     if (watchTime >= duration && duration !== 0) autoPlayNext();
     else putHistory();
 
-    // console.log(
-    //   `[player] timeUpdate - currentTime:${currentTime}; watchTime:${watchTime}; duration:${duration}; percentage:${Math.trunc(
-    //     (currentTime / duration) * 100,
-    //   )}%`,
-    // );
+    // 预加载下一步链接 提前30秒预加载
+    if (watchTime + 30 >= duration && duration !== 0) {
+      if (season.value[siteSource].length !== index + 1 && !tmp.preloadLoading) {
+        try {
+          tmp.preloadLoading = true;
+          const preloadUrl = formatIndex(season.value[siteSource][index + 1]).url;
+          await preloadNext(preloadUrl);
+        } catch (err) { };
+      };
+    };
+
+    console.log(
+      `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc(
+        (currentTime / duration) * 100,
+      )}%`,
+    );
   };
 
-  if (set.value.playerMode.type === 'xgplayer') {
-    player.value.xgplayer.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
-      onTimeUpdate(currentTime, duration);
-    });
-  } else if (set.value.playerMode.type === 'dplayer') {
-    player.value.dplayer.on('timeupdate', () => {
-      if (player.value.dplayer?.video) {
-        const duration = player.value.dplayer.video.duration || 0; // 会获取到NaN
-        const currentTime = player.value.dplayer.video.currentTime;
-        onTimeUpdate(currentTime, duration);
-      };
-    });
-  }
+  playerTimeUpdate(player, playerMode.type, ({ currentTime, duration }) => {
+    onTimeUpdate(currentTime, duration);
+  });
+};
+
+// 获取弹幕
+const fetchBarrage = async () => {
+  const options = set.value.barrage;
+  const { flimSource, filmIndex } = active;
+  const response = await fetchBarrageData(tmp.sourceUrl, options, { flimSource, filmIndex });
+  return response || [];
 };
 
 // 获取收藏
@@ -1190,9 +984,9 @@ const downloadEvent = () => {
 // 初始化iptv
 const initIptvPlayer = async () => {
   if (data.value.ext["epg"]) getEpgList(ext.value["epg"], info.value["name"], moment().format('YYYY-MM-DD'));
-  tmp.url = info.value["url"];
+  const url = info.value["url"];
 
-  createPlayer(tmp.url);
+  createPlayer(url);
 };
 
 // 电子节目单播放状态
@@ -1289,8 +1083,8 @@ const changeChannelEvent = async (item) => {
     data: { info: item, ext: ext.value }
   });
   info.value = item;
-  tmp.url = info.value["url"];
-  createPlayer(tmp.url);
+  const url = info.value["url"];
+  createPlayer(url);
 };
 
 // 生成台标
@@ -1305,8 +1099,8 @@ const generateLogo = (item) => {
 // 初始化网盘
 const initCloudPlayer = async () => {
   driveDataList.value = ext.value["files"];
-  tmp.url = info.value["url"];
-  createPlayer(tmp.url);
+  const url = info.value["url"];
+  createPlayer(url);
 };
 
 const spiderInit = async () => {
@@ -1334,9 +1128,8 @@ const changeDriveEvent = async (item) => {
     },
   });
   info.value = res;
-  tmp.url = info.value["url"];
-  createPlayer(tmp.url);
-  // await initPlayer();
+  const url = info.value["url"];
+  createPlayer(url);
 };
 
 // electron窗口置顶
@@ -1495,6 +1288,7 @@ const openMainWinEvent = (): void => {
           .player {
             width: 100%;
             height: calc(100vh - 56px);
+            position: relative;
           }
         }
       }
@@ -2067,5 +1861,10 @@ const openMainWinEvent = (): void => {
 
 .active {
   color: var(--td-brand-color);
+}
+
+:deep(.t-input) {
+  background-color: var(--td-bg-content-input) !important;
+  border-color: transparent !important;
 }
 </style>
