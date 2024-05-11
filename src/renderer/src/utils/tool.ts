@@ -40,19 +40,19 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
 };
 
 // 判断媒体类型
-const checkMediaType = async (url: string): Promise<string | null> => {
+const checkMediaType = async (url: string): Promise<string> => {
   const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi', 'magnet'];
 
   if (url.startsWith('http') || url.startsWith('magnet')) {
-    const fileType = supportedFormats.find((format) => url.includes(format));
+    const fileType: any = supportedFormats.find((format) => url.includes(format));
     if (fileType) {
       return fileType;
     } else {
-      const getMediaType = await getMeadiaType(url);
+      const getMediaType: any = await getMeadiaType(url);
       return getMediaType;
     }
   } else {
-    return null; // 如果 URL 不以 http 开头，返回 null
+    return ''; // 如果 URL 不以 http 开头，返回 null
   }
 };
 

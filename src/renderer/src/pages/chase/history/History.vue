@@ -72,7 +72,7 @@ import { usePlayStore } from '@/store';
 import { delHistory, fetchHistoryList } from '@/api/history';
 import { fetchSiteList } from '@/api/site';
 import { fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
-import { formatIndex } from '@/utils/film_common';
+import { formatIndex } from '@/utils/common/film';
 
 import DetailView from '../../film/Detail.vue';
 

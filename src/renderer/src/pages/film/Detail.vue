@@ -137,7 +137,7 @@ import {
   formatContent,
   formatSeason,
   formatReverseOrder
-} from '@/utils/film_common';
+} from '@/utils/common/film';
 
 const props = defineProps({
   visible: {

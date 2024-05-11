@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
 import jsonpath from 'jsonpath';
@@ -565,6 +566,33 @@ const formatReverseOrder = (action: 'positive' | 'negative', current: number, to
   return 1;
 };
 
+const fetchBarrageData = async (realUrl: string, options, active): Promise<any> => {
+  console.log('[film_common][fetchBarrageData][start]获取弹幕流程开启');
+  let data: any = [];
+  try {
+    const { url, key, support, start, mode, color, content } = options;
+
+    if (!(url && key && support && start && mode && color && content)) return;
+    if (!_.some(support, (source) => source === active.flimSource)) return;
+
+    const sourceUrl = formatIndex(active.filmIndex).url;
+    if (sourceUrl.startsWith('http')) {
+      const { hostname } = new URL(sourceUrl);
+      if (VIP_LIST.some((item) => hostname.includes(item))) realUrl = sourceUrl;
+    }
+
+    const configRes = await getConfig(`${url}${realUrl}`);
+    if (!configRes[key] || configRes[key].length === 0) return;
+
+    data = configRes.danmuku;
+  } catch (err) {
+    console.log(`[film_common][fetchBarrageData][error]`, err);
+  } finally {
+    console.log(`[film_common][fetchBarrageData][end]获取弹幕流程结束`);
+    return data;
+  }
+};
+
 export {
   VIP_LIST,
   fetchBingeData,
@@ -572,6 +600,7 @@ export {
   fetchHistoryData,
   putHistoryData,
   fetchAnalyzeData,
+  fetchBarrageData,
   playHelper,
   reverseOrderHelper,
   fetchDoubanRecommendHelper,
