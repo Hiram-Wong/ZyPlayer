@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CommonNav: typeof import('./src/components/common-nav/index.vue')['default']
+    Player: typeof import('./src/components/player/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SharePopup: typeof import('./src/components/share-popup/index.vue')['default']
@@ -15,8 +16,6 @@ declare module 'vue' {
     TAside: typeof import('tdesign-vue-next')['Aside']
     TBackTop: typeof import('tdesign-vue-next')['BackTop']
     TBadge: typeof import('tdesign-vue-next')['Badge']
-    TBreadcrumb: typeof import('tdesign-vue-next')['Breadcrumb']
-    TBreadcrumbItem: typeof import('tdesign-vue-next')['BreadcrumbItem']
     TButton: typeof import('tdesign-vue-next')['Button']
     TCol: typeof import('tdesign-vue-next')['Col']
     TCollapse: typeof import('tdesign-vue-next')['Collapse']
