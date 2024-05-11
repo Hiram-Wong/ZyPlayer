@@ -74,6 +74,7 @@ var rule = {
   filterable:1,
   filter:'',
   filter_url:'',
+  filter_def:{},
   headers:{
       'User-Agent':'MOBILE_UA',
   },
@@ -82,7 +83,7 @@ var rule = {
   cate_exclude:'',
   play_parse:true,
   lazy:\\$js.toString(()=>{
-    input = {parse:0,url:input,js:''};
+    input = {parse:1,url:input,js:''};
   }),
   double:true,
   推荐:'列表1;列表2;标题;图片;描述;链接;详情',
@@ -93,7 +94,7 @@ var rule = {
     desc:'主要信息;年代;地区;演员;导演',
     content:'简介',
     tabs:'',
-    lists:'',
+    lists:'xx:eq(#id)&&a',
     tab_text:'body&&Text',
     list_text:'body&&Text',
     list_url:'a&&href'
@@ -506,6 +507,65 @@ const Function = [
     detail: '获取链接的host',
     documentation: 'getHome(url)',
   },
+  {
+    label: 'NODERSA.sign',
+    insertText: 'NODERSA.sign($1,$2,{})',
+    detail: 'rsa加签',
+    documentation: `
+NODERSA.sign("1", pkcs1_private, {
+    outputEncoding: "base64",
+    options: {environment: "browser", encryptionScheme: 'pkcs1', signingScheme: "pkcs1-sha256"},
+})
+    `.trim(),
+  },
+  {
+    label: 'NODERSA.verify',
+    insertText: 'NODERSA.sign($1,$2,$3,{})',
+    detail: 'rsa验签',
+    documentation: `
+NODERSA.verify("1", "Oulx2QrgeipKYBtqEDqFb2s/+ndk2cGQxO4CkhU7iBM1vyNmmvqubpsmeoUuN3waGrYZLknSEdwBkfv0tUMpFQ==", pkcs1_private, {
+  options: {environment: "browser", encryptionScheme: 'pkcs1', signingScheme: "pkcs1-sha256"},
+})
+    `.trim(),
+  },
+  {
+    label: 'NODERSA.encryptRSAWithPublicKey',
+    insertText: 'NODERSA.encryptRSAWithPublicKey($1,$2,{})',
+    detail: 'rsa公钥加密',
+    documentation: `
+NODERSA.encryptRSAWithPublicKey(data, pkcs1_public, {
+  // PublicFormat: "pkcs1-public-pem",
+  outputEncoding: "base64",
+  options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+})
+    `.trim(),
+  },
+  {
+    label: 'NODERSA.decryptRSAWithPrivateKey',
+    insertText: 'NODERSA.decryptRSAWithPrivateKey($1,$2,{})',
+    detail: 'rsa私钥解密',
+    documentation: `
+NODERSA.decryptRSAWithPrivateKey(encryptedWithPublic, pkcs1_private, {
+  // PublicFormat: "pkcs1-private",
+  // outEncoding: "hex"
+  options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+})
+    `.trim(),
+  },
+  {
+    label: 'NODERSA.NodeRSA',
+    insertText: 'NODERSA.NodeRSA({$1})',
+    detail: 'rsa测试',
+    documentation: `
+let key = new NODERSA.NodeRSA({b: 1024});
+key.setOptions({encryptionScheme: 'pkcs1'})
+let text = \`你好drpy node-ras\`;
+let encrypted = key.encrypt(text, 'base64');
+console.log('encrypted: ', encrypted);
+const decrypted = key.decrypt(encrypted, 'utf8');
+console.log('decrypted: ', decrypted);
+        `.trim(),
+  },
 ];
 
 /**
@@ -746,4 +806,4 @@ const createDependencyProposals = (range: object, monaco: any) => {
   return suggestions;
 };
 
-export { createDependencyProposals };
+export {createDependencyProposals};
