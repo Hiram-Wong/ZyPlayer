@@ -22,11 +22,10 @@
 import CryptoJS from 'crypto-js';
 import pako from 'pako';
 import JSEncrypt from 'wxmp-rsa';
-import NODERSA from './node-rsa';
-
-import cheerio from './cheerio.min';
+import NODERSA from './utils/node-rsa';
+import cheerio from './utils/cheerio.min';
 import { getMubans } from './template';
-import gbkTool from './gbk';
+import gbkTool from './utils/gbk';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve } from './drpyInject';
 
 let consoleHistory: string[] = [];
