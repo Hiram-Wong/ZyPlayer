@@ -54,6 +54,9 @@ const puppeteerInElectron = async (
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
     snifferWindow = new BrowserWindow({ show: false }); // 创建无界面窗口
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
+    snifferWindow.webContents.setWindowOpenHandler(() => {
+      return { action: 'deny' };
+    }); // 禁止新窗口打开
 
     const page = await pie.getPage(browser, snifferWindow); // 获取页面
     const pageRecord = { page, browser, timestamp: Date.now() / 1000, timerId: null };
