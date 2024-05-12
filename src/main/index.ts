@@ -298,7 +298,8 @@ app.whenReady().then(async () => {
       requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
     if (isLocalhostRef(requestHeaders['Referer'])) {
       delete requestHeaders['Referer'];
-    }
+    };
+    delete requestHeaders['custom-referer'];
 
     if (requestHeaders['custom-redirect'] === 'manual') {
       delete requestHeaders['custom-redirect'];
