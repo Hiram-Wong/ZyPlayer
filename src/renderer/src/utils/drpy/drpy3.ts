@@ -1489,6 +1489,21 @@ const $require = (url) => {
  * @returns {string|string|DocumentFragment|*}
  */
 const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) => {
+  // 还原请求头 方便 重写改
+  if (obj.headers) {
+    const customHeaders = {
+      'custom-cookie': 'Cookie',
+      'custom-ua': 'User-Agent',
+      'custom-referer': 'Referer',
+    };
+
+    for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
+      if (obj.headers.hasOwnProperty(originalHeader)) {
+        obj.headers[customHeader] = obj.headers[originalHeader];
+        delete obj.headers[originalHeader];
+      }
+    }
+  }
   if (typeof obj === 'undefined' || !obj) {
     if (!fetch_params || !fetch_params.headers) {
       const headers = {
