@@ -354,7 +354,7 @@ import { computed, onMounted, ref, reactive, shallowRef, toRaw } from 'vue';
 import { setDefault } from '@/api/setting';
 import { fetchChannelList } from '@/api/iptv';
 
-import { checkUrlIpv6 } from '@/utils/tool';
+import { checkUrlIpv6, getLocalStorage } from '@/utils/tool';
 import { playerBarrage, playerCreate, playerDestroy, playerNext, playerSeek, playerPause, playerTimeUpdate, offPlayerTimeUpdate } from '@/utils/common/player';
 import {
   fetchBingeData,
@@ -526,6 +526,7 @@ const createPlayer = async (url: string, videoType: string = '') => {
     artplayer: '#mse',
     dplayer: document.getElementById('mse'),
     nplayer: '#mse',
+    ckplayer: '#mse',
   };
   player = await playerCreate(url, type.value, containers[playerMode.type], playerMode.type, videoType) as any;
   if (tmp.skipTime) playerSeek(player, playerMode.type, tmp.skipTime);
@@ -548,7 +549,7 @@ const createPlayer = async (url: string, videoType: string = '') => {
   setSystemMediaInfo(); // 设置系统媒体信息
 
   // setTimeout(()=>{
-  //   offPlayerTimeUpdate(player, playerMode.type);
+  //  offPlayerTimeUpdate(player, playerMode.type);
   // }, 6000)
 };
 
@@ -825,11 +826,7 @@ const timerUpdatePlayProcess = () => {
       };
     };
 
-    console.log(
-      `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc(
-        (currentTime / duration) * 100,
-      )}%`,
-    );
+    if (getLocalStorage('player:process')) console.log(`[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`);
   };
 
   playerTimeUpdate(player, playerMode.type, ({ currentTime, duration }) => {
