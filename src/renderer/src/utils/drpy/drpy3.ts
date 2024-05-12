@@ -1,14 +1,14 @@
 /*!
  * @module drpy3
  * @brief T3数据处理核心库
- * @version 3.1.4
+ * @version 3.1.5
  *
  * @original-author hjdhnx
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  *
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-28T17:12:25+08:00
- * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取, 并采取措施防止 Tree-Shaking 删除关键代码
+ * @modification-date 2023-05-12T19:15:25+08:00
+ * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取, 自定义请求头用于前端被自动丢失\底层拦截, 并采取措施防止 Tree-Shaking 删除关键代码
  *
  * **防止 Tree-Shake 说明**:
  * - 为了确保 `drpy3.ts` 中的函数和变量不被 Tree Shaking, 已采取以下措施：
@@ -1490,7 +1490,7 @@ const $require = (url) => {
  */
 const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) => {
   // 还原请求头 方便 重写改
-  if (obj.headers) {
+  if (obj?.headers) {
     const customHeaders = {
       'custom-cookie': 'Cookie',
       'custom-ua': 'User-Agent',
