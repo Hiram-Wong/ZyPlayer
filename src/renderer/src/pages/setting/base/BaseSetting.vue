@@ -31,7 +31,8 @@
         <div class="timeout">
           <t-space align="center">
             <t-input-number v-model="formData.timeout" theme="column" class="timeout-content"
-              :placeholder="t('pages.setting.placeholder.general')" :style="{ width: '255px' }" :min="1000" :max="1000 * 60" />
+              :placeholder="t('pages.setting.placeholder.general')" :style="{ width: '255px' }" :min="1000"
+              :max="1000 * 60" />
             <span class="title" @click="reset('timeout')">{{ $t('pages.setting.base.reset') }}</span>
           </t-space>
         </div>
@@ -346,7 +347,7 @@ watch(formData,
     storeSetting.updateConfig({
       mode: formData.value.theme,
       webdev: formData.value.webdev,
-      timeout: formData.value.timeout
+      timeout: formData.value.timeout < 1000 ? 1000 : formData.value.timeout
     });
     storePlayer.updateConfig({
       setting: {
