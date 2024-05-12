@@ -184,8 +184,8 @@ const fetchAnalyzeData = async (): Promise<{ default: any; flag: any[]; active: 
  * @returns
  */
 const playHelper = async (snifferMode, url: string, site, analyze, flimSource) => {
+  console.log(`[film_common][playHelper][before_start]准备处理地址:${url}`);
   console.log(`[film_common][playHelper][start]播放处理流程开始`);
-  console.log(`[film_common][playHelper][url]${url}`);
 
   let data: { url: string; mediaType: string | null; isOfficial: boolean } = {
     url: '',
@@ -301,7 +301,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
 
     const snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
     data.url = await sniffer(snifferMode.type, snifferPlayUrl);
-    data.mediaType = 'm3u8';
+    data.mediaType = (await checkMediaType(data.url)) || 'm3u8';
     data.isOfficial = isOfficial;
 
     console.log(`[film_common][playHelper][return]`, data);
