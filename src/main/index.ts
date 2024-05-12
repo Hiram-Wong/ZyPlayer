@@ -303,9 +303,6 @@ app.whenReady().then(async () => {
 
     if (requestHeaders['custom-redirect'] === 'manual') {
       delete requestHeaders['custom-redirect'];
-      logger.info(requestHeaders);
-      logger.info(url);
-
       reqIdRedirect[`${id}`] = headers;
     }
 
