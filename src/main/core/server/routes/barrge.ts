@@ -1,4 +1,3 @@
-import badWords from 'bad-words';
 import { FastifyReply, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import _ from 'lodash';
 import axios from 'axios';
@@ -53,11 +52,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         }
         const response = await axios(`${url}${id}`);
         const text: any = response.data;
-        const filter = new badWords();
-        const cleanedData = text[key].map((item: any) => {
-          const cleanedContent = filter.isProfane(item[content]) ? filter.clean(item[content]) : item[content];
-          return { ...item, [content]: cleanedContent };
-        });
+        const cleanedData = text;
 
         // { time: 230.523, type: "right", color: "#fff", author: "618c713c", text: "键盘妹子挺好看？" }
         data.data = cleanedData.map((item: any) => [

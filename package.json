@@ -72,7 +72,6 @@
     "artplayer-plugin-danmuku": "^5.0.1",
     "axios": "^1.6.8",
     "axios-retry": "^4.1.0",
-    "bad-words": "^3.0.4",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.11",

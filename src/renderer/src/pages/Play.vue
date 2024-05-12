@@ -355,7 +355,7 @@ import { setDefault } from '@/api/setting';
 import { fetchChannelList } from '@/api/iptv';
 
 import { checkUrlIpv6, getLocalStorage } from '@/utils/tool';
-import { playerBarrage, playerCreate, playerDestroy, playerNext, playerSeek, playerPause, playerTimeUpdate, offPlayerTimeUpdate } from '@/utils/common/player';
+import { playerBarrage, playerCreate, playerDestroy, playerNext, playerSeek, playerPause, playerTimeUpdate, offPlayerTimeUpdate, offPlayerBarrage } from '@/utils/common/player';
 import {
   fetchBingeData,
   putBingeData,
@@ -427,6 +427,8 @@ const tmp = reactive({
   sourceUrl: "",
   preloadNext: "",
   preloadLoading: false,
+  preloadBarrage: [],
+  preloadSourceUrl: '',
   playerHeaders: {}
 }) as any;
 
@@ -536,21 +538,24 @@ const createPlayer = async (url: string, videoType: string = '') => {
 
     // 弹幕
     const options = set.value.barrage;
-    const danmuList = await fetchBarrage();
+    const { flimSource, filmIndex } = active;
+    const danmuList = await fetchBarrage(tmp.sourceUrl, options, { flimSource, filmIndex });
     if (danmuList.length > 0) {
       if (playerMode.type === 'dplayer') {
-        playerBarrage(player, playerMode.type, tmp.sourceUrl, options);
+        playerBarrage(player, playerMode.type, tmp.sourceUrl, options, tmp.sourceUrl);
       } else {
-        playerBarrage(player, playerMode.type, danmuList, options);
+        playerBarrage(player, playerMode.type, danmuList, options, tmp.sourceUrl);
       };
     }
   };
 
   setSystemMediaInfo(); // 设置系统媒体信息
 
-  // setTimeout(()=>{
+  // setTimeout(() => {
+  //  console.log('setTimeout')
   //  offPlayerTimeUpdate(player, playerMode.type);
-  // }, 6000)
+  //  offPlayerBarrage(player, playerMode.type);
+  // }, 6000);
 };
 
 // 摧毁播放器
@@ -758,9 +763,21 @@ const changeEvent = async (item) => {
 
     await offPlayerTimeUpdate(player, playerMode.type);
     await playerNext(player, playerMode.type, tmp.preloadNext);
+    if (tmp.preloadBarrage.length > 0) {
+      await offPlayerBarrage(player, playerMode.type);
+      const options = set.value.barrage;
+      if (playerMode.type === 'dplayer') {
+        playerBarrage(player, playerMode.type, tmp.preloadSourceUrl, options, tmp.preloadSourceUrl);
+      } else {
+        playerBarrage(player, playerMode.type, tmp.preloadBarrage, options, tmp.preloadSourceUrl);
+      };
+      tmp.preloadBarrage = [];
+    };
     // if (skipConfig.value.skipTimeInStart) await playerSeek(player, playerMode.type, skipConfig.value.skipTimeInStart); 无法解决进度条问题
     tmp.preloadLoading = false;
     tmp.preloadNext = {};
+    tmp.sourceUrl = tmp.preloadSourceUrl;
+    tmp.preloadSourceUrl = '';
     setSystemMediaInfo(); // 更新系统媒体信息
     setTimeout(async () => {
       await timerUpdatePlayProcess();
@@ -772,12 +789,22 @@ const changeEvent = async (item) => {
 };
 
 // 提前获取下一集链接
-const preloadNext = async (url: string) => {
+const preloadNext = async (item: string) => {
+  const url = formatIndex(item).url;
+
+  tmp.preloadSourceUrl = url;
+
   const { snifferMode } = set.value;
   const { site } = ext.value;
+  const { flimSource } = active;
   const analyze = snifferAnalyze.value;
-  const response = await playHelper(snifferMode, url, site, analyze, active.flimSource);
+  const response = await playHelper(snifferMode, url, site, analyze, flimSource);
   tmp.preloadNext = { ...response };
+
+  if (response?.url) { // 预加载弹幕
+    const options = set.value.barrage;
+    tmp.preloadBarrage = await fetchBarrage(tmp.sourceUrl, options, { flimSource, filmIndex:item });
+  };
 };
 
 // 获取豆瓣影片推荐
@@ -820,8 +847,7 @@ const timerUpdatePlayProcess = () => {
       if (season.value[siteSource].length !== index + 1 && !tmp.preloadLoading) {
         try {
           tmp.preloadLoading = true;
-          const preloadUrl = formatIndex(season.value[siteSource][index + 1]).url;
-          await preloadNext(preloadUrl);
+          await preloadNext(season.value[siteSource][index + 1]);
         } catch (err) { };
       };
     };
@@ -835,10 +861,8 @@ const timerUpdatePlayProcess = () => {
 };
 
 // 获取弹幕
-const fetchBarrage = async () => {
-  const options = set.value.barrage;
-  const { flimSource, filmIndex } = active;
-  const response = await fetchBarrageData(tmp.sourceUrl, options, { flimSource, filmIndex });
+const fetchBarrage = async (url: string, options: any, active: any) => {
+  const response = await fetchBarrageData(url, options, active);
   return response || [];
 };
 

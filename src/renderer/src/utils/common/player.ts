@@ -1,9 +1,10 @@
+import { nanoid } from 'nanoid';
+
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
 import DPlayer from 'dplayer';
 import NPlayer, { EVENT as NPlayerEvent, Icon as NPlayerIcon } from 'nplayer';
 import nplayerDanmaku from '@nplayer/danmaku';
-import badWords from 'bad-words';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
 import WebTorrent from './components/webtorrent';
@@ -126,6 +127,18 @@ const publicElementDeal = {
         );
     },
   },
+};
+
+const publicBarrageSend = (url: string, options: any) => {
+  const okd = new FormData();
+  okd.append('player', options.id);
+  okd.append('text', options.text);
+  okd.append('time', options.time);
+  okd.append('color', options.color);
+  okd.append('type', options.type);
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.send(okd);
 };
 
 const publicListener = {
@@ -385,9 +398,20 @@ let playerConfig: any = {
 // 播放器公共部分
 const playerMethod = {
   xgplayer: {
-    barrge: (player: XgPlayer, comments: any) => {
+    barrge: (player: XgPlayer, comments: any, url: string, id: string) => {
       player.plugins.danmu.updateComments(comments, true);
-      // player.getPlugin('danmu').updateComments(comments, true);
+      // player.getPlugin('danmu').updateComments(comments, true); // 效果一样
+      // player.plugins.danmu.sendComment({
+      //   duration: 5000, //弹幕持续显示时间,毫秒(最低为5000毫秒)
+      //   id: nanoid(), //弹幕id，需唯一
+      //   start: player.currentTime * 1000, //弹幕出现时间，毫秒
+      //   color: true, //该条弹幕为彩色弹幕，默认false
+      //   txt: '', //弹幕文字内容
+      //   style: {
+      //     //弹幕自定义样式
+      //     color: '#FFFFFF',
+      //   },
+      // }); // 应插件内实现
     },
     create: (options: any): XgPlayer => {
       const plugins = options.plugins;
@@ -457,6 +481,10 @@ const playerMethod = {
         duration: player.duration || 0,
       };
     },
+    offBarrage: (player: XgPlayer) => {
+      // player.offAll();
+      // 无该事件
+    },
     onTimeupdate: (player: XgPlayer) => {
       player.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
         return { currentTime, duration };
@@ -477,7 +505,7 @@ const playerMethod = {
     },
   },
   dplayer: {
-    barrge: (player: DPlayer, comments: any) => {
+    barrge: (player: DPlayer, comments: any, url: string, id: string) => {
       const video = player.options.video;
       let danmaku: any = player.options.danmaku;
       danmaku.id = comments;
@@ -537,6 +565,9 @@ const playerMethod = {
         }
       });
     },
+    offBarrage: (player: DPlayer) => {
+      // 弹幕组件会直接提交后端
+    },
     offTimeupdate: (player: CustomDPlayer) => {
       player.off('timeupdate');
     },
@@ -548,11 +579,27 @@ const playerMethod = {
     },
   },
   artplayer: {
-    barrge: (player: Artplayer, comments: any) => {
+    barrge: (player: Artplayer, comments: any, url: string, id: string) => {
       player.plugins.artplayerPluginDanmuku.config({
         danmuku: comments,
       });
       player.plugins.artplayerPluginDanmuku.load();
+      // @ts-ignore
+      player.on('artplayerPluginDanmuku:emit', (danmu: any) => {
+        const options = {
+          player: id,
+          text: danmu.text,
+          time: danmu.time,
+          color: danmu.color,
+          type: danmu.mode == 1 ? '5' : '0',
+        };
+        publicBarrageSend(url, options);
+        // player.plugins.artplayerPluginDanmuku.emit({
+        //   text: danmu.text,
+        //   color: danmu.color,
+        //   border: true,
+        // }); // 会重复显示
+      });
     },
     create: (options: any): Artplayer => {
       Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -600,6 +647,10 @@ const playerMethod = {
         };
       });
     },
+    offBarrage: (player: Artplayer) => {
+      // @ts-ignore
+      player.off('artplayerPluginDanmuku:emit');
+    },
     offTimeupdate: (player: Artplayer) => {
       player.off('video:timeupdate');
     },
@@ -611,8 +662,18 @@ const playerMethod = {
     },
   },
   nplayer: {
-    barrge: (player: NPlayer, comments: any) => {
+    barrge: (player: NPlayer, comments: any, url: string, id: string) => {
       player.danmaku.resetItems(comments);
+      player.on('DanmakuSend', (danmu) => {
+        const options = {
+          player: id,
+          text: danmu.text,
+          time: danmu.time,
+          color: danmu.color,
+          type: danmu.type,
+        };
+        publicBarrageSend(url, options);
+      });
     },
     create: (options: any): NPlayer => {
       NPlayerIcon.register('play', publicElementDeal.nplayer.createIcon(publicIcons.play));
@@ -758,6 +819,9 @@ const playerMethod = {
           duration: player.duration || 0,
         };
       });
+    },
+    offBarrage: (player: NPlayer) => {
+      player.off('DanmakuSend');
     },
     offTimeupdate: (player: NPlayer) => {
       player.off(NPlayerEvent.TIME_UPDATE);
@@ -940,7 +1004,7 @@ const offPlayerTimeUpdate = (player, playerMode) => {
 };
 
 // 弹幕加载
-const playerBarrage = (player: any, playerMode: string, data: any, options: any) => {
+const playerBarrage = (player: any, playerMode: string, data: any, options: any, id: string) => {
   const barrges = {
     xgplayer: playerMethod.xgplayer.barrge,
     artplayer: playerMethod.artplayer.barrge,
@@ -949,16 +1013,12 @@ const playerBarrage = (player: any, playerMode: string, data: any, options: any)
   };
   const barrge = barrges[playerMode];
 
-  const { start, mode, color, content } = options;
+  const { start, mode, color, content, url } = options;
   let comments: any = [];
   let cleanedData: any = [];
 
   if (playerMode !== 'dplayer') {
-    const filter = new badWords();
-    cleanedData = data.map((item: any) => {
-      const cleanedContent = filter.isProfane(item[content]) ? filter.clean(item[content]) : item[content];
-      return { ...item, [content]: cleanedContent };
-    });
+    cleanedData = data;
   }
 
   switch (playerMode) {
@@ -999,7 +1059,20 @@ const playerBarrage = (player: any, playerMode: string, data: any, options: any)
       break;
   }
 
-  barrge(player, comments);
+  barrge(player, comments, url, id);
+};
+
+// 取消弹幕监听
+const offPlayerBarrage = (player, playerMode) => {
+  const offBarrages = {
+    xgplayer: playerMethod.xgplayer.offBarrage,
+    artplayer: playerMethod.artplayer.offBarrage,
+    dplayer: playerMethod.dplayer.offBarrage,
+    nplayer: playerMethod.nplayer.offBarrage,
+  };
+  const offBarrage = offBarrages[playerMode];
+  console.log(111)
+  offBarrage(player);
 };
 
 export {
@@ -1010,5 +1083,6 @@ export {
   playerSeek,
   playerPause,
   playerTimeUpdate,
+  offPlayerBarrage,
   offPlayerTimeUpdate,
 };
