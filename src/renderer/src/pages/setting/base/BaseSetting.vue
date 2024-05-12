@@ -31,7 +31,7 @@
         <div class="timeout">
           <t-space align="center">
             <t-input-number v-model="formData.timeout" theme="column" class="timeout-content"
-              :placeholder="t('pages.setting.placeholder.general')" :style="{ width: '255px' }" :min="0" :max="1000 * 60" />
+              :placeholder="t('pages.setting.placeholder.general')" :style="{ width: '255px' }" :min="1000" :max="1000 * 60" />
             <span class="title" @click="reset('timeout')">{{ $t('pages.setting.base.reset') }}</span>
           </t-space>
         </div>
@@ -219,7 +219,7 @@ const PLAYER_OPTIONS = computed(() => {
   ]
 });
 
-const shortcutInputRef = ref(null);
+const shortcutInputRef = ref(null) as Ref<HTMLInputElement | null>;
 const placeholderShortcut = ref(t('pages.setting.placeholder.shortcutKeyTip'));
 const statusShortcut = ref('default');
 const tipShortcut = ref('');
@@ -565,7 +565,7 @@ const isLegalShortcut = (item) => {
     statusShortcut.value = 'default';
     tipShortcut.value = '';
     console.log(formData.value.recordShortcut);
-    shortcutInputRef.value.blur();
+    shortcutInputRef.value!.blur();
     window.electron.ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
   } else {
     tipShortcut.value = t('pages.setting.placeholder.shortcutKeyNonCompliance');
@@ -588,7 +588,7 @@ const reset = (type: string) => {
   if (type === 'shortcut') {
     if (platform === 'darwin') formData.value.recordShortcut = 'Shift+Command+Z';
     else formData.value.recordShortcut = 'Shift+Alt+Z';
-    shortcutInputRef.value.blur();
+    shortcutInputRef.value!.blur();
     tipShortcut.value = '';
     placeholderShortcut.value = t('pages.setting.placeholder.shortcutKeyTip');
     window.electron.ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
@@ -601,7 +601,7 @@ const reset = (type: string) => {
   } else if (type === 'viewCasual') {
     formData.value.defaultViewCasual = 'http://api.yujn.cn/api/zzxjj.php';
   } else if (type === 'timeout') {
-    formData.value.timeout = 5;
+    formData.value.timeout = 5000;
   }
 };
 

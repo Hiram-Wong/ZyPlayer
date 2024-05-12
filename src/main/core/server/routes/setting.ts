@@ -75,6 +75,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const playerMode = await setting.find({ key: 'playerMode' }).value;
       const webdev = await setting.find({ key: 'webdev' }).value;
       const barrage = await setting.find({ key: 'barrage' }).value;
+      const timeout = await setting.find({ key: 'timeout' }).value;
 
       const res = {
         agreementMask,
@@ -83,6 +84,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         playerMode,
         webdev,
         barrage,
+        timeout,
       };
       reply.code(200).send(res);
     } catch (err) {

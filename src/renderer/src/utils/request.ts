@@ -8,7 +8,6 @@ const baseURL = String(
 const service: AxiosInstance = axios.create({
   baseURL,
   withCredentials: true,
-  // timeout: TIMEOUT,
 });
 
 service.interceptors.request.use((config: AxiosRequestConfig) => {
@@ -31,8 +30,8 @@ service.interceptors.response.use(
 );
 
 const request = async (config: AxiosRequestConfig) => {
-  if (config?.timeout) {
-    const TIMEOUT = getPinia('setting', 'timeout') || 5;
+  if (!config?.timeout) {
+    const TIMEOUT = getPinia('setting', 'timeout') || 5000;
     config.timeout = TIMEOUT;
   }
   const { data } = await service.request(config);
@@ -40,8 +39,8 @@ const request = async (config: AxiosRequestConfig) => {
 };
 
 const requestComplete = async (config: AxiosRequestConfig) => {
-  if (config?.timeout) {
-    const TIMEOUT = getPinia('setting', 'timeout') || 5;
+  if (!config?.timeout) {
+    const TIMEOUT = getPinia('setting', 'timeout') || 5000;
     config.timeout = TIMEOUT;
   }
   const { status, data, headers } = await service.request(config);
