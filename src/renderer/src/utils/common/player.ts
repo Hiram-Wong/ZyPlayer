@@ -762,7 +762,7 @@ const playerMethod = {
     offTimeupdate: (player: NPlayer) => {
       player.off(NPlayerEvent.TIME_UPDATE);
     },
-    toggle: (player: Artplayer) => {
+    toggle: (player: NPlayer) => {
       player.toggle();
     },
     volume: (player: NPlayer, volume: number) => {
@@ -951,12 +951,15 @@ const playerBarrage = (player: any, playerMode: string, data: any, options: any)
 
   const { start, mode, color, content } = options;
   let comments: any = [];
+  let cleanedData: any = [];
 
-  const filter = new badWords();
-  const cleanedData = data.map((item: any) => {
-    const cleanedContent = filter.isProfane(item[content]) ? filter.clean(item[content]) : item[content];
-    return { ...item, [content]: cleanedContent };
-  });
+  if (playerMode !== 'dplayer') {
+    const filter = new badWords();
+    cleanedData = data.map((item: any) => {
+      const cleanedContent = filter.isProfane(item[content]) ? filter.clean(item[content]) : item[content];
+      return { ...item, [content]: cleanedContent };
+    });
+  }
 
   switch (playerMode) {
     case 'xgplayer':
@@ -971,7 +974,7 @@ const playerBarrage = (player: any, playerMode: string, data: any, options: any)
       }));
       break;
     case 'dplayer':
-      comments = cleanedData;
+      comments = data;
       break;
     case 'artplayer':
       comments = cleanedData.map((item: any) => ({
