@@ -123,6 +123,7 @@ export default {
     artplayer: '艺术播放器',
     dplayer: '呆呆播放器',
     nplayer: '玩家播放器',
+    ckplayer: '超酷播放器',
     custom: '自定义(调用系统)',
     command: '系统命令',
     sniffer: '嗅探',

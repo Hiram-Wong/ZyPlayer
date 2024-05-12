@@ -123,6 +123,7 @@ export default {
     artplayer: 'ArtPlayer',
     dplayer: 'DPlayer',
     nplayer: 'NPlayer',
+    ckplayer: 'CkPlayer',
     custom: 'custom(call system)',
     command: 'Command',
     sniffer: 'Sniffer',

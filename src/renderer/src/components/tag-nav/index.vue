@@ -22,7 +22,7 @@ const props = defineProps<{
 watch(
   () => props.active,
   (val) => {
-    tagFlag.value = val;
+    tagFlag.value = val || '';
   },
 );
 
