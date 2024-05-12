@@ -97,6 +97,7 @@ export default {
     dark: '深色',
     auto: '跟随系统',
     bossKey: '老板键',
+    timeout: '超时',
     hotRecommend: '热榜',
     kylive: '酷云数据',
     enlightent: '云合数据',

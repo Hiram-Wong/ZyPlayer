@@ -46,10 +46,11 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, skipStartEnd, playerMode, webdev, barrage } = await setup();
+  const { agreementMask, theme, skipStartEnd, playerMode, webdev, barrage, timeout } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
   storeSetting.updateConfig({ webdev: webdev });
+  storeSetting.updateConfig({ timeout: timeout || 5000 });
   isVisible.dialogDisclaimer = !agreementMask;
 
   const init = {

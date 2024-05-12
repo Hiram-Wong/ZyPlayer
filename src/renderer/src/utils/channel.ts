@@ -1,8 +1,7 @@
-import axios from 'axios';
 import { nanoid } from 'nanoid';
 import _ from 'lodash';
 
-axios.defaults.withCredentials = true; //让ajax携带cookie
+import request from '@/utils/request';
 
 let controller = new AbortController();
 
@@ -58,8 +57,11 @@ const parseChannel = async (type: 'local' | 'remote' | 'url', path: string) => {
         fileContent = res;
       });
     } else if (type === 'remote') {
-      const response = await axios.get(path);
-      fileContent = response.data;
+      const response = await request({
+        url: path,
+        method: 'GET',
+      });
+      fileContent = response;
     } else {
       fileContent = path;
     }
@@ -96,7 +98,10 @@ const parseChannel = async (type: 'local' | 'remote' | 'url', path: string) => {
 const checkChannel = async (url: string) => {
   try {
     const startTime: Date = new Date(); // 记录开始请求的时间
-    await axios.get(url, { timeout: 3000 }); // 3s超时
+    await request({
+      url,
+      method: 'GET',
+    });
     const endTime: Date = new Date(); // 记录接收到响应的时间
     const delay: number = endTime.getTime() - startTime.getTime(); // 计算延迟
     return delay;
@@ -121,13 +126,15 @@ const stopCheckChannel = () => {
  */
 const fetchChannelEpg = async (url: string, tvg_name: string, date: string) => {
   try {
-    const res = await axios.get(url, {
+    const response = await request({
+      url,
+      method: 'GET',
       params: {
         ch: tvg_name,
         date: date,
       },
     });
-    const epgData = res.data.epg_data;
+    const epgData = response.epg_data;
     return epgData;
   } catch (err) {
     throw err;

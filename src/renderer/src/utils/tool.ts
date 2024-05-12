@@ -1,8 +1,8 @@
-import axios from 'axios';
 import JSON5 from 'json5';
 import ip from 'ip';
 
-axios.defaults.withCredentials = true; //让ajax携带cookie
+import request, { requestComplete } from '@/utils/request';
+import { usePlayStore, useSettingStore } from '@/store';
 
 const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) => {
   try {
@@ -19,21 +19,21 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
       }
     }
 
-    const response = await axios({
-      method,
+    const response = await request({
       url,
+      method,
       data: method !== 'GET' ? body : undefined,
       headers: headers || undefined,
     });
 
-    let responseData;
+    let res;
     try {
-      responseData = JSON5.parse(response.data);
+      res = JSON5.parse(response);
     } catch (parseError) {
-      responseData = response.data;
+      res = response;
     }
 
-    return responseData || false;
+    return res || false;
   } catch (err) {
     throw err;
   }
@@ -59,9 +59,12 @@ const checkMediaType = async (url: string): Promise<string> => {
 const getMeadiaType = async (url: string): Promise<string> => {
   let mediaType: string = 'unknown';
   try {
-    const res = await axios.head(url);
-    if (res.status === 200) {
-      const contentType = res.headers['content-type'];
+    const response = await requestComplete({
+      url,
+      method: 'HEAD',
+    });
+    if (response.status === 200) {
+      const contentType = response.headers['content-type'];
       const supportedFormats: Record<string, string> = {
         'video/mp4': 'mp4',
         'video/x-flv': 'flv',
@@ -106,15 +109,17 @@ const checkUrlIpv6 = async (url: string) => {
 
 const checkLiveM3U8 = async (url: string): Promise<boolean> => {
   try {
-    const res = await axios.get(url);
-    const m3u8Content = res.data;
+    const response = await request({
+      url,
+      method: 'GET',
+    });
 
     const isLiveStream = !(
-      m3u8Content.indexOf('#EXT-X-ENDLIST') !== -1 ||
-      (m3u8Content.indexOf('#EXT-X-PLAYLIST-TYPE') !== -1 &&
-        m3u8Content.match(/#EXT-X-PLAYLIST-TYPE:(.*)/)[1].toUpperCase() === 'VOD') ||
-      (m3u8Content.indexOf('#EXT-X-MEDIA-SEQUENCE') !== -1 &&
-        parseInt(m3u8Content.match(/#EXT-X-MEDIA-SEQUENCE:(\d+)/)[1]) === 0)
+      response.indexOf('#EXT-X-ENDLIST') !== -1 ||
+      (response.indexOf('#EXT-X-PLAYLIST-TYPE') !== -1 &&
+        response.match(/#EXT-X-PLAYLIST-TYPE:(.*)/)[1].toUpperCase() === 'VOD') ||
+      (response.indexOf('#EXT-X-MEDIA-SEQUENCE') !== -1 &&
+        parseInt(response.match(/#EXT-X-MEDIA-SEQUENCE:(\d+)/)[1]) === 0)
     );
 
     return isLiveStream;
@@ -137,4 +142,43 @@ const dictDeepClone = (obj: any): any => {
   return JSON.parse(JSON.stringify(obj));
 };
 
-export { getConfig, getMeadiaType, checkMediaType, checkUrlIpv6, checkLiveM3U8, copyToClipboardApi, dictDeepClone };
+// 读取localStorage
+const getLocalStorage = (key: string): any => {
+  const value = localStorage.getItem(key);
+  if (value) {
+    return JSON.parse(value);
+  }
+  return null;
+};
+
+// 存储localStorage
+const setLocalStorage = (key: string, value: any): void => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+// 读取pinia
+const getPinia = (store: string, key: string): any => {
+  switch (store) {
+    case 'setting':
+      const storeSetting = useSettingStore();
+      return storeSetting[key] || null;
+    case 'play':
+      const storePlay = usePlayStore();
+      return storePlay[key] || null;
+    default:
+      return null;
+  }
+};
+
+export {
+  getConfig,
+  getMeadiaType,
+  checkMediaType,
+  checkUrlIpv6,
+  checkLiveM3U8,
+  copyToClipboardApi,
+  dictDeepClone,
+  getLocalStorage,
+  setLocalStorage,
+  getPinia,
+};

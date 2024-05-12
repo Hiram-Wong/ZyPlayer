@@ -1,5 +1,5 @@
 [
-  { "key": "version", "value": "3.3.4" },
+  { "key": "version", "value": "3.3.5" },
   { "key": "theme", "value": "auto" },
   { "key": "lang", "value": "zh_CN" },
   { "key": "defaultHot", "value": "kylive" },
@@ -49,6 +49,10 @@
       "type": "pie",
       "url": ""
     }
+  },
+  {
+    "key": "timeout",
+    "value": 5000
   },
   {
     "key": "webdev",

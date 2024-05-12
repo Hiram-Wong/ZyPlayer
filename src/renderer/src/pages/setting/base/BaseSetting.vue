@@ -27,6 +27,15 @@
           <span class="title" @click="reset('shortcut')">{{ $t('pages.setting.base.reset') }}</span>
         </t-space>
       </t-form-item>
+      <t-form-item :label="$t('pages.setting.base.timeout')" name="timeout">
+        <div class="timeout">
+          <t-space align="center">
+            <t-input-number v-model="formData.timeout" theme="column" class="timeout-content"
+              :placeholder="t('pages.setting.placeholder.general')" :style="{ width: '255px' }" :min="0" :max="1000 * 60" />
+            <span class="title" @click="reset('timeout')">{{ $t('pages.setting.base.reset') }}</span>
+          </t-space>
+        </div>
+      </t-form-item>
       <t-form-item :label="$t('pages.setting.base.hotRecommend')" name="hotRecommend">
         <div class="hot-recommend">
           <t-radio-group v-model="formData.defaultHot">
@@ -239,6 +248,7 @@ const formData = ref({
   defaultSearchType: 'site',
   defaultIptvEpg: 'http://diyp.112114.xyz/',
   defaultIptvLogo: 'https://epg.112114.eu.org/logo/',
+  timeout: 5000,
   iptvSkipIpv6: true,
   iptvThumbnail: false,
   iptvStatus: false,
@@ -335,7 +345,8 @@ watch(formData,
   (newValue, _) => {
     storeSetting.updateConfig({
       mode: formData.value.theme,
-      webdev: formData.value.webdev
+      webdev: formData.value.webdev,
+      timeout: formData.value.timeout
     });
     storePlayer.updateConfig({
       setting: {
@@ -589,6 +600,8 @@ const reset = (type: string) => {
     formData.value.barrage.url = 'https://dm.bbj.icu/dm?ac=dm';
   } else if (type === 'viewCasual') {
     formData.value.defaultViewCasual = 'http://api.yujn.cn/api/zzxjj.php';
+  } else if (type === 'timeout') {
+    formData.value.timeout = 5;
   }
 };
 

@@ -97,6 +97,7 @@ export default {
     dark: 'Dark',
     auto: 'Auto',
     bossKey: 'BossKey',
+    timeout: 'Timeout',
     hotRecommend: 'HotList',
     kylive: 'KyLive',
     enlightent: 'Enlightent',

@@ -360,7 +360,7 @@ const easyConfig = async () => {
         if (oldLives && !Array.isArray(oldLives)) {
           oldLives = [oldLives]
         }
-        let iptv = [];
+        let iptv: any = [];
         console.log(oldLives);
         if (oldLives && oldLives.length > 0 && oldLives[0].channels) {
           oldLives.forEach(live => {
@@ -472,6 +472,7 @@ const formatSet = (data) => {
     { key: "barrage", value: { url: "", key: "danmuku", support: ["qq", "qiyi", "youku", "mgtv"], start: "0", mode: "1", color: "2", content: "4" } },
     { key: "playerMode", value: { type: _.get(data, ["broadcasterType", "value"], 'xgplayer'), external: _.get(data, ["externalPlayer", "value"], '') } },
     { key: "snifferMode", value: { type: _.get(data, ["snifferType", "value"], "pie"), url: "" } },
+    { key: "timeout", value: 5000 },
     { key: "version", value: pkgVersion },
     // ... 其他新键值对
   ];
@@ -663,7 +664,7 @@ const clearData = async () => {
     const formatActive = _.difference(activeList, activeToRemove);
     await clearDb(formatActive);
 
-    const actions = {
+    const actions: any = {
       'site': async () => {
         await setDefault('defaultSite', null);
         filmEmitReload.emit('film-reload');

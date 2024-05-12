@@ -1,7 +1,8 @@
-import axios from 'axios';
 import { nanoid } from 'nanoid';
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
+
+import request from '@/utils/request';
 
 const { getCurrentWindow } = require('@electron/remote');
 const win = getCurrentWindow();
@@ -193,9 +194,12 @@ const snifferIframe = async (
 const snifferCustom = async (url: string): Promise<string> => {
   let data: string = '';
   try {
-    const res = await axios.get(url);
-    if (res.data.code === 200) {
-      data = res.data.url;
+    const response = await request({
+      url,
+      method: 'GET',
+    });
+    if (response.code === 200) {
+      data = response.url;
       console.log(`[detail][sniffer][custom][return]: custom嗅探流程返回链接:${data}`);
     } else {
       console.log(`[detail][sniffer][custom][error]: custom嗅探流程错误:${res}`);
@@ -211,7 +215,7 @@ const snifferCustom = async (url: string): Promise<string> => {
 // 嗅探
 const sniffer = async (type: string, url: string): Promise<string> => {
   let data: string = '';
-  let query: object = getQuery(url, '');
+  let query: any = getQuery(url, '');
   console.log(`[detail][sniffer][query]`, query);
   let script = query.script;
   if (script) script = Base64.parse(script).toString(Utf8);

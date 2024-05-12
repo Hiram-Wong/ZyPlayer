@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { XMLParser } from 'fast-xml-parser';
 import _ from 'lodash';
 import Base64 from 'crypto-js/enc-base64';
@@ -8,8 +7,7 @@ import { DOMParser } from '@xmldom/xmldom';
 
 import { doWork as t3Work, terminateWork as t3WorkTerminate } from './drpy';
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
-
-axios.defaults.withCredentials = true; //让ajax携带cookie
+import request from '@/utils/request';
 
 // 初始化对象xml转json https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/docs/v4/1.GettingStarted.md
 const xmlOptions = {
@@ -130,8 +128,8 @@ const t3RuleTerminate = async () => {
 
 const catvodRuleInit = async (site) => {
   const url = buildUrl(site.api, `/init`);
-  const res = await axios({
-    method: 'post',
+  const res = await request({
+    method: 'POST',
     url,
     data: site.ext ? JSON.parse(site.ext) : {},
   });
@@ -174,13 +172,20 @@ const fetchClassify = async (site) => {
       url = buildUrl(site.api, `/home`);
     }
 
-    let res;
-    if (site.type !== 8) res = await axios.get(url, { timeout: 3000 });
-    else res = await axios.post(url, { timeout: 3000 });
+    let response;
+    if (site.type !== 8) {
+      response = await request({
+        url,
+        method: 'GET',
+      });
+    } else {
+      response = await request({
+        url,
+        method: 'POST',
+      });
+    }
 
-    let json;
-    if (site.type === 0) json = parser.parse(res.data);
-    else json = res.data;
+    const json = site.type === 0 ? parser.parse(response) : response;
 
     const jsondata = json.rss || json;
 
@@ -262,8 +267,11 @@ const fetchClassify = async (site) => {
         filters[key] = cmsFilterData;
       }
     } else if (site.type === 2) {
-      const resClass = await axios.get(site.api);
-      const jsonClass = resClass.data;
+      const resClass = await request({
+        url: site.api,
+        method: 'GET',
+      });
+      const jsonClass = resClass;
       const jsondataClass = jsonClass?.rss === undefined ? jsonClass : jsonClass.rss;
       classData = jsondataClass.class;
       page = jsondata.page;
@@ -281,9 +289,12 @@ const fetchClassify = async (site) => {
       filters = {};
 
       if (site.type === 4) {
-        const { data } = await axios.get(removeTrailingSlash(site.api), { timeout: 3000 });
-        limit = data.data.limit;
-        total = data.data.total;
+        const response = await request({
+          url: removeTrailingSlash(site.api),
+          method: 'GET',
+        });
+        limit = response.limit;
+        total = response.total;
       }
 
       classData.forEach((classItem) => {
@@ -310,13 +321,15 @@ const fetchClassify = async (site) => {
 
       classData = jsondata.class;
       if (classData) {
-        const category_url = buildUrl(site.api, `&extend=${site.ext}&ac=videolist&t=${classData[0].type_id}&pg=1`);
-        const category_res = await axios.get(category_url);
-        const category_json = category_res.data;
-        page = category_json.page;
-        pagecount = category_json.pagecount;
-        limit = parseInt(category_json.limit);
-        total = category_json.total;
+        const url = buildUrl(site.api, `&extend=${site.ext}&ac=videolist&t=${classData[0].type_id}&pg=1`);
+        const response = await request({
+          url,
+          method: 'GET',
+        });
+        page = response.page;
+        pagecount = response.pagecount;
+        limit = parseInt(response.limit);
+        total = response.total;
       }
       filters = jsondata?.filters === undefined ? [] : jsondata.filters;
     } else if (site.type === 8) {
@@ -456,13 +469,21 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
       }
     }
 
-    let res;
-    if (site.type !== 8) res = await axios.get(url);
-    else res = await axios.post(url, postData);
+    let response;
+    if (site.type !== 8) {
+      response = await request({
+        url,
+        method: 'GET',
+      });
+    } else {
+      response = await request({
+        url,
+        method: 'POST',
+        data: postData,
+      });
+    }
 
-    let json;
-    if (site.type === 0) json = parser.parse(res.data);
-    else json = res.data;
+    const json = site.type === 0 ? JSON.parse(response) : response;
 
     const jsondata = json.rss || json;
     let videoList = jsondata.list || jsondata.data || [];
@@ -506,17 +527,20 @@ const fetchHot = async (site, h) => {
       url = buildUrl(site.api, `?ac=hot&h=${h}`);
     }
 
-    const { data } = await axios.get(url);
-    let json = data;
-    if (site.type === 0) json = parser.parse(data);
+    const response = await request({
+      url,
+      method: 'GET',
+    });
+
+    const json = site.type === 0 ? parser.parse(response) : response;
     const jsondata = json.rss || json;
     let videoList = jsondata.list || [];
     if (site.type === 0) {
       videoList = convertHotList(jsondata.list.video);
     } else if (site.type === 2) {
-      videoList = data.list;
+      videoList = response.list;
     } else if (site.type === 3) {
-      videoList = data.list.flatMap((typeObj) => typeObj.vlist);
+      videoList = response.list.flatMap((typeObj) => typeObj.vlist);
     }
 
     let hotList: any = [];
@@ -587,12 +611,21 @@ const fetchSearch = async (site, wd) => {
       };
     } else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
 
-    let res;
-    if (site.type !== 8) res = await axios.get(url, { timeout: 3000 });
-    else res = await axios.post(url, postData, { timeout: 3000 });
+    let response;
+    if (site.type !== 8) {
+      response = await request({
+        url,
+        method: 'GET',
+      });
+    } else {
+      response = await request({
+        url,
+        method: 'POST',
+        data: postData,
+      });
+    }
 
-    let json = res.data;
-    if (site.type === 0) json = parser.parse(res.data);
+    const json = site.type === 0 ? parser.parse(response) : response;
 
     if (site.type === 5) {
       const searchnamePat = reptileApiFormat(site.api, 'searchname');
@@ -646,10 +679,12 @@ const fetchSearchFirstDetail = async (site, wd) => {
     let url;
     if (site.type === 3) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
     else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
-    const { data } = await axios.get(url);
+    const response = await request({
+      url,
+      method: 'GET',
+    });
 
-    let json = data;
-    if (site.type === 0) json = parser.parse(data);
+    const json = site.type === 0 ? parser.parse(response) : response;
 
     const jsondata = json?.rss === undefined ? json : json.rss;
     if (!jsondata) return null;
@@ -750,13 +785,21 @@ const fetchDetail = async (site, id) => {
       url = buildUrl(site.api, `?ac=detail&ids=${id}`);
     }
 
-    let res;
-    if (site.type !== 8) res = await axios.get(url);
-    else res = await axios.post(url, postData);
+    let response;
+    if (site.type !== 8) {
+      response = await request({
+        url,
+        method: 'GET',
+      });
+    } else {
+      response = await request({
+        url,
+        method: 'POST',
+        data: postData,
+      });
+    }
 
-    let json;
-    if (site.type === 0) json = parser.parse(res.data);
-    else json = res.data;
+    const json = site.type === 0 ? parser.parse(response) : response;
 
     if (site.type === 5) {
       const detaillistPat = reptileApiFormat(site.api, 'detaillist');
@@ -809,11 +852,11 @@ const fetchDetail = async (site, id) => {
 const fetchHipyPlayUrl = async (site, flag, play) => {
   try {
     const url = buildUrl(site.api, `?extend=${site.ext}&flag=${flag}&play=${play}`);
-    const { data } = await axios.get(url);
-    return data;
-    // let playUrl = data;
-    // if (data?.url) playUrl = data.url;
-    // return playUrl;
+    const response = await request({
+      url,
+      method: 'GET',
+    });
+    return response;
   } catch (err) {
     throw err;
   }
@@ -845,8 +888,12 @@ const fetchT3PlayUrl = async (flag: string, id: string, flags: string[] = []) =>
 const fetchCatvodPlayUrl = async (site, flag: string, id: string) => {
   try {
     const url = buildUrl(site.api, `/play`);
-    const res = await axios.post(url, { flag, id });
-    return res.data;
+    const response = await request({
+      url,
+      method: 'POST',
+      data: { flag, id },
+    });
+    return response;
   } catch (err) {
     throw err;
   }
@@ -870,8 +917,11 @@ const fetchDrpyPlayUrl = async (site, url) => {
     if (port) parsueUrl = `${protocol}//${hostname}:${port}/web/302redirect?url=${encodeURIComponent(url)}`;
     else parsueUrl = `${protocol}//${hostname}/web/302redirect?url=${encodeURIComponent(url)}`;
 
-    const res = await axios.get(parsueUrl);
-    return res.data;
+    const response = await request({
+      url: parsueUrl,
+      method: 'GET',
+    });
+    return response;
   } catch (err) {
     throw err;
   }
@@ -885,16 +935,19 @@ const fetchDrpyPlayUrl = async (site, url) => {
 const extractPlayerUrl = async (url) => {
   const hostname = new URL(url).hostname;
   try {
-    const response = await axios.get(url);
+    const response = await request({
+      url,
+      method: 'GET',
+    });
     let urlPlay;
     // 全局提取完整地址
-    const urlGlobal = response.data.match(/(https?:\/\/[^\s]+\.m3u8)/);
+    const urlGlobal = response.match(/(https?:\/\/[^\s]+\.m3u8)/);
     if (urlGlobal) {
       urlPlay = urlGlobal[0];
       return urlPlay;
     }
     // 局部提取地址 提取参数拼接域名
-    const urlParm = response.data.match(/\/(.*?)(\.m3u8)/);
+    const urlParm = response.match(/\/(.*?)(\.m3u8)/);
     if (urlParm) urlPlay = hostname + urlParm[0];
     return urlPlay;
   } catch (err) {
@@ -913,13 +966,15 @@ const fetchDoubanSearch = async (name: string, year: string) => {
     let data = {};
     const url = `https://m.douban.com/rexxar/api/v2/search/subjects?q=${encodeURIComponent(name.trim())}`;
 
-    const response = await axios.get(url, {
+    const response = await request({
+      url,
+      method: 'GET',
       headers: {
         'custom-referer': 'https://movie.douban.com',
       },
     });
-    if (response.status === 200 && response.data.subjects.items.length > 0) {
-      for (const subject of response.data.subjects.items) {
+    if (response?.subjects && response.subjects.items.length > 0) {
+      for (const subject of response.subjects.items) {
         const item = subject.target;
         if (
           (item.title === name && item.year === year && subject.target_type === 'movie') ||
@@ -935,7 +990,6 @@ const fetchDoubanSearch = async (name: string, year: string) => {
         }
       }
     }
-    console.log(data);
     return data;
   } catch (err) {
     console.error(`[cms][fetchDoubanSearch][error]`, err);
@@ -955,26 +1009,28 @@ const fetchDoubanDetail = async (id: string, type: string) => {
     if (id && type) {
       const url = `https://m.douban.com/rexxar/api/v2/${type}/${id}`;
 
-      const response = await axios.get(url, {
+      const response = await request({
+        url,
+        method: 'GET',
         headers: {
           'custom-referer': 'https://movie.douban.com',
         },
       });
-      if (response.status === 200 && response.data) {
-        const item = response.data;
+
+      if (response) {
         data = {
-          type_name: item.genres.json(','),
-          vod_douban_id: item.id,
-          vod_douban_type: item.target_type,
-          vod_lang: item.languages.json(','),
-          vod_score: item.rating.value,
-          vod_name: item.title,
-          vod_year: item.year,
-          vod_pic: item.pic?.normal || item.pic?.large,
-          vod_blurb: item.intro,
-          vod_content: item.intro,
-          vod_director: item.directors.map((item) => item.name).join(','),
-          vod_actor: item.actors.map((item) => item.name).join(','),
+          type_name: response.genres.json(','),
+          vod_douban_id: response.id,
+          vod_douban_type: response.target_type,
+          vod_lang: response.languages.json(','),
+          vod_score: response.rating.value,
+          vod_name: response.title,
+          vod_year: response.year,
+          vod_pic: response.pic?.normal || response.pic?.large,
+          vod_blurb: response.intro,
+          vod_content: response.intro,
+          vod_director: response.directors.map((item) => item.name).join(','),
+          vod_actor: response.actors.map((item) => item.name).join(','),
         };
       }
     }
@@ -1028,14 +1084,16 @@ const fetchDoubanRecommend = async (id, type, name, year) => {
 
     if (id && type) {
       const url = `https://m.douban.com/rexxar/api/v2/${type}/${id}/recommendations`;
-      const response = await axios.get(url, {
+      const response = await request({
+        url,
+        method: 'GET',
         headers: {
           'custom-referer': 'https://movie.douban.com',
         },
       });
 
       return (
-        response.data.map((item) => ({
+        response.map((item) => ({
           vod_douban_id: item.id,
           vod_douban_type: item.id,
           vod_pic: item.pic.large || item.pic.normal,

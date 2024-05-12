@@ -1,4 +1,5 @@
 import Worker from '@/utils/drpy/worker?worker';
+import { getPinia } from '@/utils/tool';
 
 let worker: Worker = new Worker();
 let timer: any = null;
@@ -17,11 +18,12 @@ const doWork = (data) => {
 
     worker.postMessage(data);
 
+    const TIMEOUT = getPinia('setting', 'timeout') || 5000;
     timer = setTimeout(async () => {
       worker.terminate();
       worker = new Worker();
       reject(new Error('Worker job run 15s, timed out'));
-    }, 15000);
+    }, TIMEOUT * 2);
   });
 };
 
