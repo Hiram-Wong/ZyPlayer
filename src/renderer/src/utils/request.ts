@@ -31,7 +31,7 @@ service.interceptors.response.use(
 
 const request = async (config: AxiosRequestConfig) => {
   if (!config?.timeout) {
-    const TIMEOUT = getPinia('setting', 'timeout') || 5000;
+    const TIMEOUT = getPinia('setting', 'timeout') < 1000 ? 1000 : getPinia('setting', 'timeout');
     config.timeout = TIMEOUT;
   }
   const { data } = await service.request(config);
@@ -40,7 +40,7 @@ const request = async (config: AxiosRequestConfig) => {
 
 const requestComplete = async (config: AxiosRequestConfig) => {
   if (!config?.timeout) {
-    const TIMEOUT = getPinia('setting', 'timeout') || 5000;
+    const TIMEOUT = getPinia('setting', 'timeout') < 1000 ? 1000 : getPinia('setting', 'timeout');
     config.timeout = TIMEOUT;
   }
   const { status, data, headers } = await service.request(config);
