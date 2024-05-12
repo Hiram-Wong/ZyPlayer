@@ -26,7 +26,7 @@ export default {
     tencent: '腾讯视频',
     sohu: '搜狐视频',
     mgtv: '芒果tv',
-    pptv: 'pp视频',
+    pptv: '聚力网',
     letv: '乐视视频',
   },
   message: {
