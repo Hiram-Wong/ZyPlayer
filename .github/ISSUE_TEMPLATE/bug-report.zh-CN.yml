@@ -31,7 +31,7 @@ body:
       required: true
 
   - type: textarea
-    id: reproduceSteps
+    id: errorMessage
     attributes:
       label: 报错信息
       description: F12, 重新复现后, 复制控制台报错信息。
@@ -50,7 +50,7 @@ body:
       placeholder: 请填写
 
   - type: input
-    id: systemArrch
+    id: systemInfo
     attributes:
       label: 系统信息
       placeholder: MacOS(11.2.3)系统 M1芯片 arm64架构
