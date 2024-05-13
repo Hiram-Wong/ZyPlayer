@@ -337,7 +337,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
     console.error(`[film_common][playHelper][error]`, err);
   } finally {
     console.log(`[film_common][playHelper][end]播放处理流程结束`);
-    if (adFlag && data.url && !data.url.startsWith('http://127.0.0.1')) {
+    if (adFlag && data.url && !data.url.startsWith('http://127.0.0.1') && data.mediaType.includes('m3u8')) {
       // const response = await removeAd(data.url, data.mediaType!, data.headers);
       // if (response.code === 200) data.url = response?.url;
       data.url = `http://127.0.0.1:9978/api/v1/lab/removeAd?url=${data.url}`;
