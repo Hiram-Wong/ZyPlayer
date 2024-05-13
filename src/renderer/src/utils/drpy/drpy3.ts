@@ -91,7 +91,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta11 202400512`;
+const VERSION = `${vercode} 3.9.50beta12 202400514`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -926,10 +926,12 @@ const fixAdM3u8 = (m3u8_text: string, m3u8_url: string, ad_remove: string) => {
 /**
  *  智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
  * @param m3u8_url m3u8播放地址
+ * @param headers 自定义访问m3u8的请求头,可以不传
  * @returns {string}
  */
-const fixAdM3u8Ai = (m3u8_url: string) => {
+const fixAdM3u8Ai = (m3u8_url: string, headers:object=null) => {
   let ts = new Date().getTime();
+  let option = headers ? {headers:headers}:{};
 
   function b(s1, s2) {
     let i = 0;
@@ -947,7 +949,7 @@ const fixAdM3u8Ai = (m3u8_url: string) => {
   }
 
   //log('播放的地址：' + m3u8_url);
-  let m3u8 = request(m3u8_url);
+  let m3u8 = request(m3u8_url, option);
   //log('m3u8处理前:' + m3u8);
   m3u8 = m3u8
     .trim()
@@ -965,7 +967,7 @@ const fixAdM3u8Ai = (m3u8_url: string) => {
   if (last_url.includes('.m3u8') && last_url !== m3u8_url) {
     m3u8_url = urljoin2(m3u8_url, last_url);
     log('嵌套的m3u8_url:' + m3u8_url);
-    m3u8 = request(m3u8_url);
+    m3u8 = request(m3u8_url, option);
   }
   //log('----处理有广告的地址----');
   let s = m3u8
