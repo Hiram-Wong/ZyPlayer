@@ -45,7 +45,10 @@
                   <span>{{ $t('pages.player.setting.autoNext') }}</span>
                   <t-switch v-model="set.preloadNext" />
                 </div>
-
+                <div class="setting-item-warp">
+                  <span>{{ $t('pages.player.setting.skipAd') }}</span>
+                  <t-switch v-model="set.skipAd" />
+                </div>
                 <div class="tip-warp">
                   <span>{{ $t('pages.player.setting.tip') }}</span>
                 </div>
@@ -688,7 +691,7 @@ const initFilmPlayer = async (isFirst) => {
   }
 
   // 解析直链
-  const { snifferMode } = set.value;
+  const { snifferMode, skipAd } = set.value;
 
   let { url } = formatIndex(active.filmIndex);
   url = decodeURIComponent(url);
@@ -697,7 +700,8 @@ const initFilmPlayer = async (isFirst) => {
 
   const analyze = snifferAnalyze.value;
   MessagePlugin.info(t('pages.player.message.play'));
-  const response = await playHelper(snifferMode, url, site, analyze, active.flimSource);
+  console.log(skipAd)
+  const response = await playHelper(snifferMode, url, site, analyze, active.flimSource, skipAd);
   isVisible.official = response!.isOfficial;
   if (isVisible.official) {
     if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
@@ -794,11 +798,11 @@ const preloadNext = async (item: string) => {
 
   tmp.preloadSourceUrl = url;
 
-  const { snifferMode } = set.value;
+  const { snifferMode, skipAd } = set.value;
   const { site } = ext.value;
   const { flimSource } = active;
   const analyze = snifferAnalyze.value;
-  const response = await playHelper(snifferMode, url, site, analyze, flimSource);
+  const response = await playHelper(snifferMode, url, site, analyze, flimSource, skipAd);
   tmp.preloadNext = { ...response };
 
   if (response?.url) { // 预加载弹幕
