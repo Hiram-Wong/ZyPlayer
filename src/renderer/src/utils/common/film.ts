@@ -4,10 +4,12 @@ import Utf8 from 'crypto-js/enc-utf8';
 import jsonpath from 'jsonpath';
 import PQueue from 'p-queue';
 
-import { updateHistory, detailHistory, addHistory } from '@/api/history';
-import { detailStar, addStar, delStar, updateStar } from '@/api/star';
 import { fetchAnalyzePlay } from '@/api/analyze';
+import { updateHistory, detailHistory, addHistory } from '@/api/history';
+import { setStream } from '@/api/lab';
 import { setT3Proxy } from '@/api/proxy';
+import { detailStar, addStar, delStar, updateStar } from '@/api/star';
+
 import {
   fetchDrpyPlayUrl,
   fetchHipyPlayUrl,
@@ -166,6 +168,27 @@ const fetchAnalyzeData = async (): Promise<{ default: any; flag: any[]; active: 
   }
 };
 
+// Ad
+const removeAd = async (url: string, type: string) => {
+  console.log('[film_common][removeAd][start]开始移除广告流程');
+  let data = {
+    url,
+    msg: 'fail',
+    code: 500,
+  };
+  try {
+    if (type === 'm3u8') {
+      data = await setStream(url, type);
+    }
+    console.log(`[film_common][removeAd][return]`, data);
+  } catch (err) {
+    console.error(`[film_common][removeAd][error]`, err);
+  } finally {
+    console.log('[film_common][removeAd][end]移除广告流程结束');
+    return data;
+  }
+};
+
 /**
  * playHelper
  *
@@ -183,7 +206,7 @@ const fetchAnalyzeData = async (): Promise<{ default: any; flag: any[]; active: 
  * @param flimSource 当前选中线路
  * @returns
  */
-const playHelper = async (snifferMode, url: string, site, analyze, flimSource) => {
+const playHelper = async (snifferMode, url: string, site, analyze, flimSource, adFlag = false) => {
   console.log(`[film_common][playHelper][before_start]准备处理地址:${url}`);
   console.log(`[film_common][playHelper][start]播放处理流程开始`);
 
@@ -309,6 +332,10 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource) =
     console.error(`[film_common][playHelper][error]`, err);
   } finally {
     console.log(`[film_common][playHelper][end]播放处理流程结束`);
+    if (adFlag) {
+      const response = await removeAd(data.url, data.mediaType!);
+      if (response.code === 200) data.url = response?.url;
+    };
     return data;
   }
 };

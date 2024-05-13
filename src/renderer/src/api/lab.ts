@@ -24,3 +24,21 @@ export function delDebugSource() {
     method: 'delete',
   });
 }
+
+export function fetchStream(url) {
+  return request({
+    url: `/v1/lab/removeAd/${url}`,
+    method: 'GET',
+  });
+}
+
+export function setStream(url, type) {
+  return request({
+    url: `/v1/lab/removeAd`,
+    params: {
+      url,
+      type,
+    },
+    method: 'GET',
+  });
+}

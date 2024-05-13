@@ -44,11 +44,12 @@ export default {
   },
   setting: {
     title: 'Setting',
-    autoSkip: 'Automatically skip start and end',
+    autoSkip: 'Skip start and end',
     autoNext: 'Preload next episode',
     skipStart: 'Start',
     skipEnd: 'End',
     skipSeconds: 'S',
+    skipAd: 'Skip ads',
     tip: 'The switch takes effect globally.'
   }
 }
