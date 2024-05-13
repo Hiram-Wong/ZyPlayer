@@ -11,6 +11,7 @@ export default {
     },
     skipStartEnd: true,
     preloadNext: true,
+    skipAd: false,
     barrage: {
       url: '',
       key: '',

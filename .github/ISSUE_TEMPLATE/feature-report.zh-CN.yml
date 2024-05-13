@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         # 欢迎你的参与
-        zyplayer 的 Issue 列表接受 bug 报告或是新功能请求。
+        Issue 列表接受 bug 报告或是新功能请求。
 
         在发布一个 Issue 前，请确保：
         - 在 [旧Issue列表](https://github.com/Hiram-Wong/ZyPlayer/issues?q=is%3Aissue) 中搜索过你的问题。（你的问题可能已有人提出，也可能已在最新版本中被修正）
@@ -25,6 +25,7 @@ body:
     id: functionalExpectations
     attributes:
       label: 你建议的方案是什么
+      description: 请详尽说明这个需求的实现的方案。例如相关Electron API。
       placeholder: 请填写
     validations:
       required: true

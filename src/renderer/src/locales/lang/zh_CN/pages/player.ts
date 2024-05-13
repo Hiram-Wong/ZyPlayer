@@ -44,11 +44,12 @@ export default {
   },
   setting: {
     title: '设置',
-    autoSkip: '自动跳过片头片尾',
+    autoSkip: '跳片头片尾',
     autoNext: '预加载下一集',
     skipStart: '开始',
     skipEnd: '结束',
     skipSeconds: '秒',
+    skipAd: '跳广告',
     tip: '开关全局生效'
   }
 };

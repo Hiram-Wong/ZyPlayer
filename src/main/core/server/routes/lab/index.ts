@@ -2,7 +2,10 @@ import { FastifyReply, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import _ from 'lodash';
 import { nanoid } from 'nanoid';
 
-import { site, setting } from '../../db/service';
+import { fixAdM3u8Ai } from './ad';
+import { site, setting } from '../../../db/service';
+import logger from '../../../logger';
+
 
 const API_VERSION = 'api/v1';
 
@@ -98,6 +101,75 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         await req.server.db.delete('/debug-edit-source');
 
         reply.code(200).send(res);
+      } catch (err) {
+        reply.code(500).send(err);
+      }
+    },
+  );
+  fastify.get(
+    `/${API_VERSION}/lab/removeAd`,
+    async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
+      try {
+        const { url, type } = req.query;
+
+        let data = {
+          code: 500,
+          msg: 'fail',
+          url,
+        };
+
+        if (type !== 'm3u8') {
+          data.msg = 'fail';
+          data.code = 500;
+        } else {
+          // 逻辑处理
+          const content = await fixAdM3u8Ai(url);
+          // 结果处理
+          if (content.indexOf('.ts') > -1) {
+            const id = nanoid();
+            // @ts-ignore
+            await req.server.db.push(`/ad/${id}`, content);
+            data.code = 200;
+            data.url = `http://127.0.0.1:9978/api/v1/lab/stream/${id}.m3u8`;
+            data.msg = 'success';
+          } else {
+            data.code = 500;
+            data.msg = 'fail';
+          }
+        }
+
+        reply.code(200).send(data);
+      } catch (err) {
+        reply.code(500).send(err);
+      }
+    },
+  );
+  fastify.get(
+    `/${API_VERSION}/lab/stream/:id.m3u8`,
+    async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
+      try {
+        let data = '';
+        let id = '';
+        let code = 200;
+        try {
+          // @ts-ignore
+          id = req.params.id;
+        } catch (err) {
+          code = 500;
+        }
+
+        try {
+          // @ts-ignore
+          const db = await req.server.db.getData(`/ad/${id}`);
+          logger.info(db)
+
+          data = db;
+        } catch (err) {
+          logger.info(err)
+          code = 500;
+        }
+
+        reply.code(code).header('Content-Type', 'application/vnd.apple.mpegurl').send(data);
       } catch (err) {
         reply.code(500).send(err);
       }
