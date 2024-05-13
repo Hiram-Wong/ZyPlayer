@@ -43,7 +43,7 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
 const checkMediaType = async (url: string): Promise<string> => {
   const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi', 'magnet'];
 
-  if (url.startsWith('http') || url.startsWith('magnet')) {
+  if (url && (url.startsWith('http') || url.startsWith('magnet'))) {
     const fileType: any = supportedFormats.find((format) => url.includes(format));
     if (fileType) {
       return fileType;

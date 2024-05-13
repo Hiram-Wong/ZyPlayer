@@ -191,8 +191,9 @@ const snifferIframe = async (
   return data;
 };
 
-const snifferCustom = async (url: string): Promise<string> => {
+const snifferCustom = async (url: string): Promise<{ headers: object; data: string }> => {
   let data: string = '';
+  let headers: object = null;
   try {
     const response = await request({
       url,
@@ -200,6 +201,7 @@ const snifferCustom = async (url: string): Promise<string> => {
     });
     if (response.code === 200) {
       data = response.url;
+      headers = response.headers;
       console.log(`[detail][sniffer][custom][return]: custom嗅探流程返回链接:${data}`);
     } else {
       console.log(`[detail][sniffer][custom][error]: custom嗅探流程错误:${res}`);
@@ -208,13 +210,14 @@ const snifferCustom = async (url: string): Promise<string> => {
     console.log(`[detail][sniffer][custom][error]: custom嗅探流程错误:${err}`);
   } finally {
     console.log(`[detail][sniffer][custom][end]: custom嗅探流程结束`);
-    return data;
+    return { data, headers };
   }
 };
 
 // 嗅探
-const sniffer = async (type: string, url: string): Promise<string> => {
+const sniffer = async (type: string, url: string): Promise<{ headers: object; data: string }> => {
   let data: string = '';
+  let headers: object = null;
   let query: any = getQuery(url, '');
   console.log(`[detail][sniffer][query]`, query);
   let script = query.script;
@@ -227,9 +230,11 @@ const sniffer = async (type: string, url: string): Promise<string> => {
   } else if (type === 'pie') {
     data = await snifferPie(realUrl!, script!, customRegex!);
   } else if (type === 'custom') {
-    data = await snifferCustom(url);
+    let _obj = await snifferCustom(url);
+    data = _obj.data;
+    headers = _obj.headers;
   }
-  return data;
+  return { data, headers };
 };
 
 export default sniffer;

@@ -20,7 +20,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         try {
           // @ts-ignore
           db = await req.server.db.getData('/debug-edit-source');
-        } catch (error) {}
+        } catch (error) {
+        }
 
         if (action === 'all') {
           res = db?.text || '';
@@ -46,7 +47,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         try {
           // @ts-ignore
           db = await req.server.db.getData('/debug-edit-source');
-        } catch (error) {}
+        } catch (error) {
+        }
         const { oldSiteId: dbOldSiteId, debugSiteId: dbDebugSiteId } = db;
 
         if (dbDebugSiteId) {
@@ -87,7 +89,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         try {
           // @ts-ignore
           db = await req.server.db.getData('/debug-edit-source');
-        } catch (error) {}
+        } catch (error) {
+        }
 
         const { oldSiteId: dbOldSiteId, debugSiteId: dbDebugSiteId } = db;
 
@@ -110,35 +113,52 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     `/${API_VERSION}/lab/removeAd`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
       try {
-        const { url, type } = req.query;
+        const { url, type, headers } = req.query;
+        let _headers = null;
+        if (headers) {
+          try {
+            _headers = JSON.parse(headers);
+          } catch (e) {
+          }
+        }
 
         let data = {
           code: 500,
           msg: 'fail',
-          url,
+          url: url,
+          headers: _headers,
+          type: type,
+          content: null,
         };
 
-        if (type !== 'm3u8') {
+        if (!type || !type.includes('.m3u8')) {
           data.msg = 'fail';
           data.code = 500;
         } else {
           // 逻辑处理
-          const content = await fixAdM3u8Ai(url);
+          const content = await fixAdM3u8Ai(url, _headers);
           // 结果处理
           if (content.indexOf('.ts') > -1) {
-            const id = nanoid();
-            // @ts-ignore
-            await req.server.db.push(`/ad/${id}`, content);
+            // const id = nanoid();
+            // // @ts-ignore
+            // await req.server.db.push(`/ad/${id}`, content);
             data.code = 200;
-            data.url = `http://127.0.0.1:9978/api/v1/lab/stream/${id}.m3u8`;
+            // data.url = `http://127.0.0.1:9978/api/v1/lab/stream/${id}.m3u8`;
             data.msg = 'success';
+            data.content = content;
           } else {
             data.code = 500;
             data.msg = 'fail';
           }
         }
-
-        reply.code(200).send(data);
+        if (data.content) {
+          reply.code(data.code).header('Content-Type', 'application/vnd.apple.mpegurl').send(data.content);
+        } else if (url && url.startsWith('http')) {
+          reply.redirect(302, url);
+        } else {
+          reply.code(200).send(data);
+        }
+        // reply.code(200).send(data);
       } catch (err) {
         reply.code(500).send(err);
       }
@@ -161,11 +181,11 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         try {
           // @ts-ignore
           const db = await req.server.db.getData(`/ad/${id}`);
-          logger.info(db)
+          logger.info(db);
 
           data = db;
         } catch (err) {
-          logger.info(err)
+          logger.info(err);
           code = 500;
         }
 

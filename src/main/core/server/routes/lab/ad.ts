@@ -2,7 +2,7 @@ import axios from 'axios';
 import logger from '../../../logger';
 
 if (typeof Array.prototype.toReversed !== 'function') {
-  Array.prototype.toReversed = function () {
+  Array.prototype.toReversed = function() {
     const clonedList = this.slice();
     // 倒序新数组
     const reversedList = clonedList.reverse();
@@ -34,10 +34,12 @@ const urljoin = (fromPath, nowPath) => {
 /**
  *  智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
  * @param m3u8_url m3u8播放地址
+ * @param headers 自定义访问m3u8的请求头,可以不传
  * @returns {string}
  */
-const fixAdM3u8Ai = async(m3u8_url: string) => {
+const fixAdM3u8Ai = async (m3u8_url: string, headers: object = null) => {
   let ts = new Date().getTime();
+  let option = headers ? { headers: headers } : {};
 
   function b(s1, s2) {
     let i = 0;
@@ -55,7 +57,7 @@ const fixAdM3u8Ai = async(m3u8_url: string) => {
   }
 
   //log('播放的地址：' + m3u8_url);
-  const m3u8_response = await axios.get(m3u8_url);
+  const m3u8_response = await axios.get(m3u8_url, option);
   let m3u8 = m3u8_response.data;
   //log('m3u8处理前:' + m3u8);
   m3u8 = m3u8
@@ -74,7 +76,7 @@ const fixAdM3u8Ai = async(m3u8_url: string) => {
   if (last_url.includes('.m3u8') && last_url !== m3u8_url) {
     m3u8_url = urljoin(m3u8_url, last_url);
     logger.info('嵌套的m3u8_url:' + m3u8_url);
-    const m3u8_nest_response = await axios.get(m3u8_url);
+    const m3u8_nest_response = await axios.get(m3u8_url, option);
     m3u8 = m3u8_nest_response.data;
   }
   //log('----处理有广告的地址----');

@@ -169,7 +169,7 @@ const fetchAnalyzeData = async (): Promise<{ default: any; flag: any[]; active: 
 };
 
 // Ad
-const removeAd = async (url: string, type: string) => {
+const removeAd = async (url: string, type: string, headers: object = null) => {
   console.log('[film_common][removeAd][start]开始移除广告流程');
   let data = {
     url,
@@ -178,7 +178,7 @@ const removeAd = async (url: string, type: string) => {
   };
   try {
     if (type === 'm3u8') {
-      data = await setStream(url, type);
+      data = await setStream(url, '.m3u8', headers);
     }
     console.log(`[film_common][removeAd][return]`, data);
   } catch (err) {
@@ -204,16 +204,18 @@ const removeAd = async (url: string, type: string) => {
  * @param site 源信息
  * @param analyze 解析 url type flag
  * @param flimSource 当前选中线路
+ * @param adFlag 是否去广告
  * @returns
  */
 const playHelper = async (snifferMode, url: string, site, analyze, flimSource, adFlag = false) => {
   console.log(`[film_common][playHelper][before_start]准备处理地址:${url}`);
   console.log(`[film_common][playHelper][start]播放处理流程开始`);
 
-  let data: { url: string; mediaType: string | null; isOfficial: boolean } = {
+  let data: { url: string; mediaType: string; isOfficial: boolean; headers: object } = {
     url: '',
     mediaType: '',
     isOfficial: false,
+    headers: null,
   };
 
   try {
@@ -221,13 +223,14 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
     let script: string = '';
     let extra: string = '';
     let isOfficial: boolean = false;
+    let headers: object = null;
     let parse = true;
     let playData: any = { playUrl: url, script: '', extra: '', parse: parse };
 
     // 解析播放
     const jxPlay = async (url: string, analyze: any, snifferMode: any): Promise<any> => {
       let playerUrl = url;
-      const urlObj = url.startsWith('http') ? new URL(url) : null;
+      const urlObj = url && url.startsWith('http') ? new URL(url) : null;
       const hostname = urlObj?.hostname;
 
       // 官方解析条件
@@ -308,7 +311,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
     if (playerUrl) {
       const mediaType = await checkMediaType(playerUrl);
       if (mediaType !== 'unknown' && mediaType !== 'error') {
-        data = { url: playerUrl, mediaType, isOfficial };
+        data = { url: playerUrl, mediaType, isOfficial, headers };
         return;
       }
     }
@@ -323,7 +326,9 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
         : '';
 
     const snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
-    data.url = await sniffer(snifferMode.type, snifferPlayUrl);
+    let snifferResult = await sniffer(snifferMode.type, snifferPlayUrl);
+    data.url = snifferResult.data;
+    data.headers = snifferResult.headers;
     data.mediaType = (await checkMediaType(data.url)) || 'm3u8';
     data.isOfficial = isOfficial;
 
@@ -332,10 +337,16 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
     console.error(`[film_common][playHelper][error]`, err);
   } finally {
     console.log(`[film_common][playHelper][end]播放处理流程结束`);
-    if (adFlag) {
-      const response = await removeAd(data.url, data.mediaType!);
-      if (response.code === 200) data.url = response?.url;
-    };
+    if (adFlag && data.url && !data.url.startsWith('http://127.0.0.1')) {
+      // const response = await removeAd(data.url, data.mediaType!, data.headers);
+      // if (response.code === 200) data.url = response?.url;
+      data.url = `http://127.0.0.1:9978/api/v1/lab/removeAd?url=${data.url}`;
+      if (data.headers && Object.keys(data.headers).length > 0) {
+        data.url += '&headers=' + JSON.stringify(data.headers);
+      }
+      data.url += '&type=.m3u8';
+      console.log(`本地代理去广告链接: ${data.url}`);
+    }
     return data;
   }
 };
@@ -517,7 +528,7 @@ const fetchJxWebPlayUrlHelper = async (type: string, url: string): Promise<strin
   let data: string = '';
   try {
     const res = await sniffer(type, url);
-    data = res;
+    data = res.data;
     console.log(`[film_common][fetchJxWebPlayUrlHelper][return]`, data);
   } catch (err) {
     console.log(`[film_common][fetchJxWebPlayUrlHelper][error]`, err);
