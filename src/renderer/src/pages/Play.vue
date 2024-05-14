@@ -421,8 +421,7 @@ const ext = ref(data.value.ext) as any;
 
 const downloadDialogData = ref({ season: '', current: '' });
 
-// const player = shallowRef(null); // 重要, proxy对象art播放器报错
-var player = null; // 重要, proxy对象art播放器报错
+const player = shallowRef(null); // 重要, proxy对象art播放器报错
 
 const tmp = reactive({
   skipTime: 0,
@@ -533,8 +532,8 @@ const createPlayer = async (url: string, videoType: string = '') => {
     nplayer: '#mse',
     ckplayer: '#mse',
   };
-  player = await playerCreate(url, type.value, containers[playerMode.type], playerMode.type, videoType) as any;
-  if (tmp.skipTime) playerSeek(player, playerMode.type, tmp.skipTime);
+  player.value = await playerCreate(url, type.value, containers[playerMode.type], playerMode.type, videoType) as any;
+  if (tmp.skipTime) playerSeek(player.value, playerMode.type, tmp.skipTime);
 
   if (type.value === 'film') {
     await timerUpdatePlayProcess(); // 更新播放进度
@@ -545,9 +544,9 @@ const createPlayer = async (url: string, videoType: string = '') => {
     const danmuList = await fetchBarrage(tmp.sourceUrl, options, { flimSource, filmIndex });
     if (danmuList.length > 0) {
       if (playerMode.type === 'dplayer') {
-        playerBarrage(player, playerMode.type, tmp.sourceUrl, options, tmp.sourceUrl);
+        playerBarrage(player.value, playerMode.type, tmp.sourceUrl, options, tmp.sourceUrl);
       } else {
-        playerBarrage(player, playerMode.type, danmuList, options, tmp.sourceUrl);
+        playerBarrage(player.value, playerMode.type, danmuList, options, tmp.sourceUrl);
       };
     }
   };
@@ -556,18 +555,18 @@ const createPlayer = async (url: string, videoType: string = '') => {
 
   // setTimeout(() => {
   //  console.log('setTimeout')
-  //  offPlayerTimeUpdate(player, playerMode.type);
-  //  offPlayerBarrage(player, playerMode.type);
+  //  offPlayerTimeUpdate(player.value, playerMode.type);
+  //  offPlayerBarrage(player.value, playerMode.type);
   // }, 6000);
 };
 
 // 摧毁播放器
 const destroyPlayer = () => {
-  if (player) {
+  if (player.value) {
     const { playerMode } = set.value;
 
-    playerDestroy(player, playerMode.type)
-    player = null;
+    playerDestroy(player.value, playerMode.type)
+    player.value = null;
   }
 };
 
@@ -700,7 +699,6 @@ const initFilmPlayer = async (isFirst) => {
 
   const analyze = snifferAnalyze.value;
   MessagePlugin.info(t('pages.player.message.play'));
-  console.log(skipAd)
   const response = await playHelper(snifferMode, url, site, analyze, active.flimSource, skipAd);
   isVisible.official = response!.isOfficial;
   if (isVisible.official) {
@@ -765,19 +763,24 @@ const changeEvent = async (item) => {
   if (tmp.preloadNext?.url && set.value.preloadNext) {
     const { playerMode } = set.value;
 
-    await offPlayerTimeUpdate(player, playerMode.type);
-    await playerNext(player, playerMode.type, tmp.preloadNext);
+    await offPlayerTimeUpdate(player.value, playerMode.type);
+    await playerNext(player.value, playerMode.type, tmp.preloadNext);
     if (tmp.preloadBarrage.length > 0) {
-      await offPlayerBarrage(player, playerMode.type);
+      await offPlayerBarrage(player.value, playerMode.type);
       const options = set.value.barrage;
       if (playerMode.type === 'dplayer') {
-        playerBarrage(player, playerMode.type, tmp.preloadSourceUrl, options, tmp.preloadSourceUrl);
+        playerBarrage(player.value, playerMode.type, tmp.preloadSourceUrl, options, tmp.preloadSourceUrl);
       } else {
-        playerBarrage(player, playerMode.type, tmp.preloadBarrage, options, tmp.preloadSourceUrl);
+        playerBarrage(player.value, playerMode.type, tmp.preloadBarrage, options, tmp.preloadSourceUrl);
       };
       tmp.preloadBarrage = [];
     };
-    // if (skipConfig.value.skipTimeInStart) await playerSeek(player, playerMode.type, skipConfig.value.skipTimeInStart); 无法解决进度条问题
+    console.log(skipConfig.value.skipTimeInStart)
+    console.log(set.value.skipStartEnd)
+    if (set.value.skipStartEnd) {
+      console.log(11111)
+      await playerSeek(player.value, playerMode.type, skipConfig.value.skipTimeInStart);
+    }
     tmp.preloadLoading = false;
     tmp.preloadNext = {};
     tmp.sourceUrl = tmp.preloadSourceUrl;
@@ -807,7 +810,7 @@ const preloadNext = async (item: string) => {
 
   if (response?.url) { // 预加载弹幕
     const options = set.value.barrage;
-    tmp.preloadBarrage = await fetchBarrage(tmp.sourceUrl, options, { flimSource, filmIndex:item });
+    tmp.preloadBarrage = await fetchBarrage(tmp.sourceUrl, options, { flimSource, filmIndex: item });
   };
 };
 
@@ -859,7 +862,7 @@ const timerUpdatePlayProcess = () => {
     if (getLocalStorage('player:process')) console.log(`[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`);
   };
 
-  playerTimeUpdate(player, playerMode.type, ({ currentTime, duration }) => {
+  playerTimeUpdate(player.value, playerMode.type, ({ currentTime, duration }) => {
     onTimeUpdate(currentTime, duration);
   });
 };
