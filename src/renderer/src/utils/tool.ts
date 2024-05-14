@@ -170,6 +170,65 @@ const getPinia = (store: string, key: string): any => {
   }
 };
 
+const loadExternalResource = (url: string, type: 'css' | 'js' | 'font') => {
+  // 检查资源是否已存在
+  const isResourceLoaded = () => {
+    const selector = type === 'js' ? `script[src="${url}"]` : `link[href="${url}"]`;
+    return document.querySelectorAll(selector).length > 0;
+  };
+
+  // 如果资源已加载，则直接返回
+  if (isResourceLoaded()) {
+    console.log(`[tool][loadExternalResource]Resource already loaded:${url}`);
+    return Promise.resolve(url); // 如果已加载，直接返回成功的Promise
+  }
+
+  return new Promise((resolve, reject) => {
+    const createTag = () => {
+      let tag;
+      switch (type) {
+        case 'css':
+        case 'font':
+          tag = document.createElement('link');
+          tag.rel = type === 'css' ? 'stylesheet' : 'preload';
+          tag.as = type === 'font' ? 'font' : '';
+          break;
+        case 'js':
+          tag = document.createElement('script');
+          break;
+        default:
+          reject(new Error(`Unsupported resource type: ${type}`));
+          return null;
+      }
+      return tag;
+    };
+
+    const tag = createTag();
+    if (!tag) return; // 如果类型不支持，前面已reject，这里直接返回
+
+    // 设置资源URL
+    if (type === 'js') {
+      tag.src = url;
+    } else {
+      tag.href = url;
+    }
+
+    // 加载完成的回调
+    const onLoadOrError = (success) => {
+      const action = success ? 'loaded' : 'failed';
+      console.log(`[tool][loadExternalResource]Resource ${action}:`, url);
+      (success ? resolve : reject)(url);
+    };
+
+    // 事件监听
+    tag.onload = () => onLoadOrError(true);
+    tag.onerror = () => onLoadOrError(false);
+
+    // 插入文档
+    document.head.appendChild(tag);
+  });
+};
+
 export {
   getConfig,
   getMeadiaType,
@@ -181,4 +240,5 @@ export {
   getLocalStorage,
   setLocalStorage,
   getPinia,
+  loadExternalResource,
 };
