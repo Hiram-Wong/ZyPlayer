@@ -1,5 +1,3 @@
-import { nanoid } from 'nanoid';
-
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
 import DPlayer from 'dplayer';
