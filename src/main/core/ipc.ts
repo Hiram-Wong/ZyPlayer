@@ -159,6 +159,10 @@ const ipcListen = () => {
     return path;
   });
 
+  ipcMain.handle('path-join', (event, fromPath, toPath) => {
+    return join(fromPath, toPath);
+  });
+
   // 重启app
   ipcMain.on('relaunch-app', () => {
     app.relaunch();
