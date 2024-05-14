@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <title>火山引擎VePlayer</title>
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <link rel="stylesheet" href="//lf-unpkg.volccdn.com/obj/vcloudfe/sdk/@volcengine/veplayer/1.8.4//index.min.css" />
+    <script src="//lf-unpkg.volccdn.com/obj/vcloudfe/sdk/@volcengine/veplayer/1.8.4//index.min.js"></script>
+  </head>
+  <body>
+    <div id="mse"></div>
+    <script>
+      const playerSdk = new VePlayer({
+        id: 'mse',
+        lang: 'zh',
+        vodLogOpts: {
+          vtype: 'MP4',
+          tag: '普通视频',
+          line_app_id: 348293,
+          line_user_id: 'veplayer_web_demo',
+        },
+        useSoftDecoding: true,
+        streamType: 'hls',
+        url: 'https://zy.catni.cn/test/index.m3u8',
+        width: 600,
+        height: 400,
+        autoplay: true,
+        loop: true,
+        fluid: true,
+      });
+    </script>
+  </body>
+</html>
