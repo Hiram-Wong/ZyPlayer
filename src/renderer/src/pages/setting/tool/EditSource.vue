@@ -660,8 +660,9 @@ const exportFileEvent = async () => {
     await window.electron.ipcRenderer.send('tmpdir-manage', 'init', 'file/js');
 
     const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
-    const defaultPath = `${userDataPath}/file/js/${title}.js`
-    console.log(`[EditSource][exportFileEvent]peth:${defaultPath}`);
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/js/${title}.js`);
+    // const defaultPath = `${userDataPath}/file/js/${title}.js`;
+    console.log(`[EditSource][exportFileEvent]path:${defaultPath}`);
 
     const { canceled, filePath } = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
       defaultPath,
