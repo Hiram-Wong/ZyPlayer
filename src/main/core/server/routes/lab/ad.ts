@@ -2,7 +2,7 @@ import axios from 'axios';
 import logger from '../../../logger';
 
 if (typeof Array.prototype.toReversed !== 'function') {
-  Array.prototype.toReversed = function() {
+  Array.prototype.toReversed = function () {
     const clonedList = this.slice();
     // 倒序新数组
     const reversedList = clonedList.reverse();
@@ -37,9 +37,9 @@ const urljoin = (fromPath, nowPath) => {
  * @param headers 自定义访问m3u8的请求头,可以不传
  * @returns {string}
  */
-const fixAdM3u8Ai = async (m3u8_url: string, headers: object = null) => {
+const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
   let ts = new Date().getTime();
-  let option = headers ? { headers: headers } : {};
+  let option = headers ? { headers } : {};
 
   function b(s1, s2) {
     let i = 0;
