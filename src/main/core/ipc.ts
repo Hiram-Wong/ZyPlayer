@@ -76,12 +76,7 @@ const ipcListen = () => {
   };
 
   ipcMain.on('tmpdir-manage', (event, action, trails) => {
-    let formatPath;
-    if (is.dev) {
-      formatPath = join(process.cwd(), trails);
-    } else {
-      formatPath = join(app.getPath('userData'), trails);
-    }
+    let formatPath = join(app.getPath('userData'), trails);
     if (action === 'rmdir' || action === 'mkdir' || action === 'init') tmpDir(formatPath);
     if (action === 'size') event.reply('tmpdir-manage-size', getFolderSize(formatPath));
   });
@@ -157,6 +152,11 @@ const ipcListen = () => {
     // 查看目录是否存在，如果不存在，就创建一个
     if (create) fs.ensureDirSync(path);
     shell.openPath(path);
+  });
+
+  ipcMain.handle('read-path', async (_, type) => {
+    const path = app.getPath(type);
+    return path;
   });
 
   // 重启app
