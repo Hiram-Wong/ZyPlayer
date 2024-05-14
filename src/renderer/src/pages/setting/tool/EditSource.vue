@@ -273,6 +273,9 @@ import { createDependencyProposals } from '@/utils/drpy/drpy_suggestions/drpy_su
 import drpyObjectInner from '@/utils/drpy/drpy_suggestions/drpy_object_inner.ts?raw';
 
 const remote = window.require('@electron/remote');
+const { app } = remote.require('electron');
+const { join } = remote.require('path');
+const fse = remote.require('fs-extra');
 const router = useRouter();
 const emitReload = useEventBus<string>('film-reload');
 const storeSetting = useSettingStore();
@@ -649,15 +652,31 @@ const exportFileEvent = async () => {
 
   try {
     let title = 'source.js'
-    const regex = /title:\s*'([^']+)'/i; // 匹配"title": 后紧跟着双引号内的任何非双引号字符
-    const matchResult = regex.exec(str);
-    if (matchResult) {
-      title = `${matchResult[1]}.js`; // 匹配到的title值
-    };
+    // const regex = /title:\s*'([^']+)'/i; // 匹配"title": 后紧跟着双引号内的任何非双引号字符
+    // const matchResult = regex.exec(str);
+    // if (matchResult) {
+    //   title = `${matchResult[1]}.js`; // 匹配到的title值
+    // };
+
+    try {
+      title = str.match(/title:(.*?),/)[1].replace(/['|"]/g,'').trim();
+    }catch (e) {
+      console.log(`匹配导出文件名发生了错误:${e.message}`)
+    }
+    // console.log(window.electron.process.env.APPDATA);
+    // const app = remote.require('electron').app;
+    // const { join } = remote.require('path');
+    // const dataPath = path.join(window.electron.process.env.APPDATA,window.electron.process.env.npm_package_name);
+    const dataPath = app.getPath('userData');
+    const BASE_PATH = join(dataPath, 'file/js'); // 文件路径
+    // 如果路径存在则创建
+    fse.ensureDirSync(BASE_PATH)
+    console.log(BASE_PATH);
+    title = join(BASE_PATH,title);
 
     const saveDialogResult = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
       defaultPath: title,
-      filters: [{ name: 'JavaScript Files', extensions: ['js'] }],
+      filters: [{ name: 'JavaScript Files', extensions: ['js']},{ name: 'ALL', extensions: ['*'] }],
     });
 
     if (!saveDialogResult.canceled) {
