@@ -273,9 +273,6 @@ import { createDependencyProposals } from '@/utils/drpy/drpy_suggestions/drpy_su
 import drpyObjectInner from '@/utils/drpy/drpy_suggestions/drpy_object_inner.ts?raw';
 
 const remote = window.require('@electron/remote');
-const { app } = remote.require('electron');
-const { join } = remote.require('path');
-const fse = remote.require('fs-extra');
 const router = useRouter();
 const emitReload = useEventBus<string>('film-reload');
 const storeSetting = useSettingStore();
@@ -583,7 +580,7 @@ const initEditor = () => {
           range.endColumn
         );
         return {
-          suggestions: createDependencyProposals(monacoRange, monaco).map(proposal => ({
+          suggestions: createDependencyProposals(monacoRange, monaco).map((proposal: any) => ({
             label: proposal.label,
             detail: proposal.detail,
             kind: proposal.kind || monaco.languages.CompletionItemKind.Function, // 确保指定了一个有效的kind
@@ -647,48 +644,39 @@ const importFileEvent = async () => {
 };
 
 const exportFileEvent = async () => {
-  const str = editor ? editor.getValue() : '';
-  if (!str.trim()) return;
+  const content = editor?.getValue() || '';
+  if (!content.trim()) return;
+
+  let title = '';
 
   try {
-    let title = 'source.js'
-    // const regex = /title:\s*'([^']+)'/i; // 匹配"title": 后紧跟着双引号内的任何非双引号字符
-    // const matchResult = regex.exec(str);
-    // if (matchResult) {
-    //   title = `${matchResult[1]}.js`; // 匹配到的title值
-    // };
+    title = content.match(/title:(.*?),/)?.[1].replace(/['"]/g, '').trim() || 'source';
+  } catch (error) {
+    console.error('[EditSource][exportFileEvent][error] 文件名匹配错误', error);
+    title = 'source';
+  };
 
-    try {
-      title = str.match(/title:(.*?),/)[1].replace(/['|"]/g,'').trim();
-    }catch (e) {
-      console.log(`匹配导出文件名发生了错误:${e.message}`)
-    }
-    // console.log(window.electron.process.env.APPDATA);
-    // const app = remote.require('electron').app;
-    // const { join } = remote.require('path');
-    // const dataPath = path.join(window.electron.process.env.APPDATA,window.electron.process.env.npm_package_name);
-    const dataPath = app.getPath('userData');
-    const BASE_PATH = join(dataPath, 'file/js'); // 文件路径
-    // 如果路径存在则创建
-    fse.ensureDirSync(BASE_PATH)
-    console.log(BASE_PATH);
-    title = join(BASE_PATH,title);
+  try {
+    await window.electron.ipcRenderer.send('tmpdir-manage', 'init', 'file/js');
 
-    const saveDialogResult = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
-      defaultPath: title,
-      filters: [{ name: 'JavaScript Files', extensions: ['js']},{ name: 'ALL', extensions: ['*'] }],
+    const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
+    const defaultPath = `${userDataPath}/file/js/${title}.js`
+    console.log(`[EditSource][exportFileEvent]peth:${defaultPath}`);
+
+    const { canceled, filePath } = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+      defaultPath,
+      filters: [{ name: 'JavaScript Files', extensions: ['js'] }, { name: 'All Files', extensions: ['*'] }],
     });
 
-    if (!saveDialogResult.canceled) {
-      const { filePath } = saveDialogResult;
+    if (!canceled) {
       const fs = remote.require('fs').promises;
-      await fs.writeFile(filePath, str, 'utf-8');
+      await fs.writeFile(filePath, content, 'utf-8');
       MessagePlugin.success(t('pages.setting.data.success'));
     }
   } catch (err) {
     console.log(`[setting][editSource][exportFileEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  }
+  };
 };
 
 const debugEvent = async () => {
