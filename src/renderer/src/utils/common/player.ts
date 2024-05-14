@@ -507,9 +507,10 @@ const playerMethod = {
       const video = player.options.video;
       let danmaku: any = player.options.danmaku;
       danmaku.id = comments;
-      const time = player.video.currentTime;
+      const { currentTime, playbackRate } = player.video;
       player.switchVideo({ ...video }, { ...danmaku });
-      if (time) player.seek(time);
+      if (currentTime) player.seek(currentTime);
+      if (playbackRate !== 1) player.speed(playbackRate);
     },
     create: (options: any): CustomDPlayer => {
       const player = new CustomDPlayer({ ...options });
@@ -537,8 +538,10 @@ const playerMethod = {
     },
     playNext: (player: DPlayer, options: any) => {
       const danmaku: any = player.options.danmaku;
+      const { playbackRate } = player.video;
       player.switchVideo({ ...options }, { ...danmaku });
       player.danmaku.clear();
+      if (playbackRate !== 1) player.speed(playbackRate);
       player.play();
     },
     seek: (player: DPlayer, time: number) => {
@@ -1069,7 +1072,7 @@ const offPlayerBarrage = (player, playerMode) => {
     nplayer: playerMethod.nplayer.offBarrage,
   };
   const offBarrage = offBarrages[playerMode];
-  console.log(111)
+  console.log(111);
   offBarrage(player);
 };
 
