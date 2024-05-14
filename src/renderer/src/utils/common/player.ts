@@ -471,7 +471,9 @@ const playerMethod = {
       player.plugins.danmu.clear();
     },
     seek: (player: XgPlayer, time: number) => {
-      player.seek(time);
+      player.once(Events.LOADED_DATA, () => {
+        player.seek(time);
+      });
     },
     time: (player: XgPlayer) => {
       return {
