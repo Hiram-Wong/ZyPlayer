@@ -52,7 +52,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         }
         const response = await axios(`${url}${id}`);
         const text: any = response.data;
-        const cleanedData = text;
+        const cleanedData = text[key];
 
         // { time: 230.523, type: "right", color: "#fff", author: "618c713c", text: "键盘妹子挺好看？" }
         data.data = cleanedData.map((item: any) => [
