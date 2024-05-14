@@ -1,5 +1,6 @@
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
+import dashjs from 'dashjs';
 import DPlayer from 'dplayer';
 import NPlayer, { EVENT as NPlayerEvent, Icon as NPlayerIcon } from 'nplayer';
 import nplayerDanmaku from '@nplayer/danmaku';
@@ -17,6 +18,16 @@ import HlsPlugin from 'xgplayer-hls.js';
 import Mp4Plugin from 'xgplayer-mp4';
 
 import { checkMediaType, checkLiveM3U8 } from '@/utils/tool';
+
+const publicOptions = {
+  hls: {},
+  flv: {
+    mediaDataSource: {},
+    config: {},
+  },
+  webtorrent: {},
+  dash: {},
+};
 
 class CustomDPlayer extends DPlayer {
   constructor(options) {
@@ -140,11 +151,7 @@ const publicBarrageSend = (url: string, options: any) => {
 };
 
 const publicListener = {
-  xgplayer: {
-    timeupdate: (currentTime, duration, callback) => {
-      callback({ currentTime, duration });
-    },
-  },
+  xgplayer: {},
   artplayer: {},
   dplayer: {},
   nplayer: {},
@@ -153,31 +160,61 @@ const publicListener = {
 // 流公共部分参数
 const publicStream = {
   create: {
-    customHls: (video: HTMLVideoElement, url: string): Hls => {
-      const hls = new Hls();
-      hls.loadSource(url);
-      hls.attachMedia(video);
-      return hls;
+    customHls: (video: HTMLVideoElement, url: string): Hls | null => {
+      if (Hls.isSupported()) {
+        const options = publicOptions.hls || {};
+        const hls = new Hls(options);
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        return hls;
+      } else {
+        console.log('Hls is not supported.');
+        return null;
+      }
     },
-    customFlv: (video: HTMLVideoElement, url: string) => {
-      const flv = flvjs.createPlayer({
-        type: 'flv',
-        url: url,
-      });
-      flv.attachMediaElement(video);
-      flv.load();
-      return flv;
+    customFlv: (video: HTMLVideoElement, url: string): any => {
+      if (flvjs.isSupported()) {
+        const flvPlayer = flvjs.createPlayer(
+          Object.assign(publicOptions.flv.mediaDataSource || {}, {
+            type: 'flv',
+            url: url,
+          }),
+          publicOptions.flv.config || {},
+        );
+        flvPlayer.attachMediaElement(video);
+        flvPlayer.load();
+        return flvPlayer;
+      } else {
+        console.log('flvjs is not supported.');
+        return null;
+      }
     },
     customTorrent: (video: HTMLVideoElement, url: string) => {
-      const client = new WebTorrent();
-      const torrentId = url;
-      client.add(torrentId, (torrent) => {
-        const file = torrent.files.find((file) => file.name.endsWith('.mp4') || file.name.endsWith('.mkv'));
-        file.renderTo(video, {
-          autoplay: true,
+      if (WebTorrent.WEBRTC_SUPPORT) {
+        const options = publicOptions.webtorrent;
+        const client = new WebTorrent(options);
+        const torrentId = url;
+        video.src = '';
+        video.preload = 'metadata';
+        client.add(torrentId, (torrent) => {
+          const file = torrent.files.find((file) => file.name.endsWith('.mp4') || file.name.endsWith('.mkv'));
+          file.renderTo(video, {
+            autoplay: true,
+            controls: false,
+          });
         });
-      });
-      return client;
+        return client;
+      } else {
+        console.log('Webtorrent is not supported.');
+        return null;
+      }
+    },
+    customDash: (video: HTMLVideoElement, url: string) => {
+      const dashjsPlayer = dashjs.MediaPlayer().create();
+      dashjsPlayer.initialize(video, url, true);
+      const options = publicOptions.dash;
+      dashjsPlayer.updateSettings(options);
+      return dashjsPlayer;
     },
   },
   switch: {
@@ -231,6 +268,25 @@ const publicStream = {
         });
       });
       return client;
+    },
+  },
+  destroy: {
+    customHls: (player: any) => {
+      player.hls.destroy();
+      delete player.hls;
+    },
+    customFlv: (player: any) => {
+      player.flv.destroy();
+      delete player.flv;
+    },
+    customDash: (player: any) => {
+      player.mpd.destroy();
+      delete player.mpd;
+    },
+    customTorrent: (player: any) => {
+      // player.torrent.remove(player.video.src);
+      player.torrent.destroy();
+      delete player.torrent;
     },
   },
 };
@@ -308,20 +364,46 @@ let playerConfig: any = {
       url: '',
       type: '',
       customType: {
-        customHls: (video: HTMLVideoElement, _: DPlayer) => {
-          publicStream.create.customHls(video, video.src);
+        customHls: (video: HTMLVideoElement, dp: DPlayer) => {
+          const hls = publicStream.create.customHls(video, video.src);
+          dp.hls = hls;
+          dp.on('destroy', () => {
+            hls!.destroy();
+            delete dp.hls;
+          });
         },
-        customFlv: (video: HTMLVideoElement, _: DPlayer) => {
-          publicStream.create.customFlv(video, video.src);
+        customFlv: (video: HTMLVideoElement, dp: DPlayer) => {
+          if (dp.flv) dp.flv.destroy();
+          const flv = publicStream.create.customFlv(video, video.src);
+          dp.flv = flv;
+          dp.on('destroy', () => {
+            flv.destroy();
+            delete dp.flv;
+          });
         },
-        customWebTorrent: (video: HTMLVideoElement, _: DPlayer) => {
-          publicStream.create.customTorrent(video, video.src);
+        customDash: (video: HTMLVideoElement, dp: DPlayer) => {
+          if (dp.mpd) dp.mpd.destroy();
+          const mpd = publicStream.create.customDash(video, video.src);
+          dp.mpd = mpd;
+          dp.on('destroy', () => {
+            mpd.destroy();
+            delete dp.mpd;
+          });
+        },
+        customWebTorrent: (video: HTMLVideoElement, dp: DPlayer) => {
+          if (dp.torrent) dp.torrent.destroy();
+          const torrent = publicStream.create.customTorrent(video, video.src);
+          dp.torrent = torrent;
+          dp.on('destroy', () => {
+            // torrent.remove(video.src);
+            torrent.destroy();
+          });
         },
       },
     },
     danmaku: {
       id: '', //必填，视频id, 用于下面api请求时使用
-      api: 'http://127.0.0.1:9978/api/v1/barrge/', //必填，叫后台提供
+      api: 'http://127.0.0.1:9978/api/v1/barrge/', //必填,后台提供
       addition: [], //可选，额外的弹幕
       user: 'ZyPlayer', //弹幕作者
       bottom: '15%',
@@ -360,22 +442,48 @@ let playerConfig: any = {
     },
     customType: {
       customHls: (video: HTMLVideoElement, url: string, art: Artplayer) => {
+        art.loading.show = true;
         if (art.hls) art.hls.destroy();
         const hls = publicStream.create.customHls(video, url);
         art.hls = hls;
-        art.on('destroy', () => hls.destroy());
+        art.on('destroy', () => {
+          hls!.destroy();
+          delete art.hls;
+        });
+        art.loading.show = false;
       },
       customFlv: (video: HTMLVideoElement, url: string, art: Artplayer) => {
+        art.loading.show = true;
         if (art.flv) art.flv.destroy();
         const flv = publicStream.create.customFlv(video, url);
         art.flv = flv;
-        art.on('destroy', () => flv.destroy());
+        art.on('destroy', () => {
+          flv.destroy();
+          delete art.flv;
+        });
+        art.loading.show = false;
+      },
+      customDash: (video: HTMLVideoElement, url: string, art: Artplayer) => {
+        art.loading.show = true;
+        if (art.mpd) art.mpd.destroy();
+        const mpd = publicStream.create.customDash(video, url);
+        art.mpd = mpd;
+        art.on('destroy', () => {
+          mpd.destroy();
+          delete art.mpd;
+        });
+        art.loading.show = false;
       },
       customWebTorrent: (video: HTMLVideoElement, url: string, art: Artplayer) => {
-        if (art.torrent) art.torrent.destroy();
         art.loading.show = true;
+        if (art.torrent) art.torrent.destroy();
         const torrent = publicStream.create.customTorrent(video, url);
-        art.flv = torrent;
+        art.torrent = torrent;
+        art.on('destroy', () => {
+          // torrent.remove(url);
+          torrent.destroy();
+          delete art.torrent;
+        });
         art.loading.show = false;
       },
     },
@@ -701,7 +809,13 @@ const playerMethod = {
           if (player.hls) player.hls.destroy();
           const hls = publicStream.create.customHls(player.video, options.src);
           player.hls = hls;
-          player.on('destroy', () => hls.destroy());
+          player.on('destroy', () => hls!.destroy());
+          break;
+        case 'customDash':
+          if (player.mpd) player.mpd.destroy();
+          const mpd = publicStream.create.customDash(player.video, options.src);
+          player.mpd = mpd;
+          player.on('destroy', () => mpd.destroy());
           break;
         case 'customWebTorrent':
           if (player.torrent) player.torrent.destroy();
@@ -738,65 +852,26 @@ const playerMethod = {
       player.play();
     },
     playNext: (player: any, options: any) => {
+      player.pause();
+      if (player?.hls) publicStream.destroy.customHls(player);
+      if (player?.flv) publicStream.destroy.customFlv(player);
+      if (player?.mpd) publicStream.destroy.customDash(player);
+      if (player?.torrent) publicStream.destroy.customTorrent(player);
+
       switch (options.type) {
         case 'customMp4':
           break;
-        case 'customFlv':
-          let flv;
-          if (player?.flv) {
-            flv = publicStream.switch.customFlv(player.video, player.flv, options.url);
-          } else {
-            if (player.hls) {
-              player.hls.destroy();
-              player.hls = null;
-            }
-            if (player.torrent) {
-              player.torrent.destroy();
-              player.torrent = null;
-            }
-
-            flv = publicStream.create.customFlv(player.video, options.url);
-            player.on('destroy', () => flv.destroy());
-          }
-          player.flv = flv;
-          break;
         case 'customHls':
-          let hls;
-          if (player?.hls) {
-            hls = publicStream.switch.customHls(player.video, player.hls, options.url);
-          } else {
-            if (player.flv) {
-              player.flv.destroy();
-              player.flv = null;
-            }
-            if (player.torrent) {
-              player.torrent.destroy();
-              player.torrent = null;
-            }
-
-            hls = publicStream.create.customHls(player.video, options.url);
-            player.on('destroy', () => hls.destroy());
-          }
-          player.hls = hls;
+          player.hls = publicStream.create.customHls(player.video, options.url);
+          break;
+        case 'customFlv':
+          player.flv = publicStream.create.customFlv(player.video, options.url);
+          break;
+        case 'customDash':
+          player.mpd = publicStream.create.customDash(player.video, options.url);
           break;
         case 'customWebTorrent':
-          let torrent;
-          if (player?.torrent) {
-            torrent = publicStream.switch.customHls(player.video, player.torrent, options.url);
-          } else {
-            if (player.flv) {
-              player.flv.destroy();
-              player.flv = null;
-            }
-            if (player.hls) {
-              player.hls.destroy();
-              player.hls = null;
-            }
-
-            torrent = publicStream.create.customTorrent(player.video, options.src);
-            player.on('destroy', () => torrent.destroy());
-          }
-          player.torrent = torrent;
+          player.torrent = publicStream.create.customTorrent(player.video, options.url);
           break;
         default:
           break;
@@ -847,6 +922,8 @@ const mapVideoTypeToPlayerType = (videoType: string): string | undefined => {
       return 'customFlv';
     case 'm3u8':
       return 'customHls';
+    case 'mpd':
+      return 'customDash';
     case 'magnet':
       return 'customWebTorrent';
     default:
@@ -1074,7 +1151,6 @@ const offPlayerBarrage = (player, playerMode) => {
     nplayer: playerMethod.nplayer.offBarrage,
   };
   const offBarrage = offBarrages[playerMode];
-  console.log(111);
   offBarrage(player);
 };
 
