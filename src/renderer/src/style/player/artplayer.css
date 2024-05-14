@@ -30,3 +30,7 @@
 .art-danmuku-emitter {
   opacity: 0 !important;
 }
+
+.art-icon-switchOn .icon path {
+  fill: #00d157 !important;
+}
