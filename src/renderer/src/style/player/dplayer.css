@@ -1,0 +1,176 @@
+.dplayer-controller {
+  padding: 0 10px !important;
+}
+
+.dplayer-controller .dplayer-bar-wrap {
+  width: calc(100% - 20px) !important;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-full:hover .dplayer-full-in-icon {
+  display: none !important;
+}
+
+.dplayer-controller .dplayer-bar-wrap .dplayer-bar .dplayer-played {
+  background: linear-gradient(270deg, #00e038, #32ccff) !important;
+}
+
+.dplayer-controller .dplayer-bar-wrap .dplayer-bar .dplayer-played .dplayer-thumb {
+  background: #fff !important;
+  box-shadow: 0 0 15px 0 #00d157;
+  height: 13px !important;
+  width: 13px !important;
+}
+
+.dplayer-controller
+  .dplayer-icons
+  .dplayer-volume
+  .dplayer-volume-bar-wrap
+  .dplayer-volume-bar
+  .dplayer-volume-bar-inner {
+  background-image: linear-gradient(90deg, #00e038, #32ccff) !important;
+}
+
+.dplayer-controller
+  .dplayer-icons
+  .dplayer-volume
+  .dplayer-volume-bar-wrap
+  .dplayer-volume-bar
+  .dplayer-volume-bar-inner
+  .dplayer-thumb {
+  background: #fff !important;
+  box-shadow: 0 0 15px 0 #00d157;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-box {
+  border-radius: 8px !important;
+  background-color: rgba(17, 18, 20, 0.8) !important;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-item:hover,
+.dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-speed-item:hover {
+  background: hsla(0, 0%, 100%, 0.04) !important;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-item:hover,
+.dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-speed-item:hover span {
+  color: #00d157 !important;
+}
+
+.dplayer-controller
+  .dplayer-icons
+  .dplayer-setting
+  .dplayer-setting-danmaku
+  .dplayer-danmaku-bar-wrap
+  .dplayer-danmaku-bar
+  .dplayer-danmaku-bar-inner {
+  background: linear-gradient(90deg, #00e038, #32ccff) !important;
+}
+
+.dplayer-controller
+  .dplayer-icons
+  .dplayer-setting
+  .dplayer-setting-danmaku
+  .dplayer-danmaku-bar-wrap
+  .dplayer-danmaku-bar
+  .dplayer-danmaku-bar-inner
+  .dplayer-thumb {
+  background: #fff !important;
+  box-shadow: 0 0 15px 0 #00d157;
+}
+
+.dplayer-comment {
+  opacity: 0 !important;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-toggle input:checked + label:before {
+  background: #00d157 !important;
+}
+
+.dplayer-danmaku .dplayer-danmaku-right.dplayer-danmaku-move {
+  will-change: transform;
+  -webkit-animation-name: 'danmaku';
+  animation-name: 'danmaku';
+  -webkit-animation-timing-function: linear;
+  animation-timing-function: linear;
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
+}
+
+.dplayer-icons-left {
+  left: 10px !important;
+}
+
+.dplayer-icons-right {
+  right: 10px !important;
+}
+
+.dplayer-full-icon {
+  margin-right: -10px !important;
+}
+
+.dplayer-play-icon {
+  margin-left: -10px !important;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-icon {
+  position: relative;
+  box-sizing: border-box;
+  height: 40px;
+  margin-left: -5px;
+  margin-right: -5px;
+  cursor: pointer;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-icon .dplayer-icon-content {
+  position: relative;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  opacity: 1 !important;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-icon .dplayer-icon-content svg {
+  display: block;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-time,
+.dplayer-controller .dplayer-icons .dplayer-live-badge {
+  min-width: 40px;
+  font-size: 14px;
+  font-family: PingFangSC-Semibold;
+  color: #fff;
+  text-align: center;
+  display: inline-block;
+  line-height: 40px;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-time > :last-child {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.dplayer-menu {
+  padding: 14px 0;
+  font-size: 14px;
+  color: #ddd;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background-color: rgba(26, 26, 26, 0.96);
+  border-radius: 5px;
+  z-index: 9999;
+}
+
+.dplayer-info-panel {
+  position: absolute;
+  top: 5px !important;
+  left: 5px !important;
+  background: rgba(26, 26, 26, 0.92) !important;
+  border-radius: 5px !important;
+  z-index: 9999;
+}
+
+.dplayer-controller .dplayer-bar-wrap .dplayer-bar,
+.dplayer-controller .dplayer-bar-wrap .dplayer-bar .dplayer-loaded,
+.dplayer-controller .dplayer-bar-wrap .dplayer-bar .dplayer-played {
+  border-radius: 10px;
+}
