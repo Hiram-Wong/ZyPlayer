@@ -1495,6 +1495,9 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
   if (obj?.headers) {
     const customHeaders = {
       'custom-cookie': 'Cookie',
+      'custom-origin': 'Origin',
+      'custom-host': 'Host',
+      'custom-connection': 'Connection',
       'custom-ua': 'User-Agent',
       'custom-referer': 'Referer',
     };

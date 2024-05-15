@@ -270,33 +270,59 @@ app.whenReady().then(async () => {
     const isLocalhostRef = (headerValue) =>
       `${headerValue}`.includes('//localhost') || `${headerValue}`.includes('//127.0.0.1');
 
+    // 设置或清除请求头
+    const setOrRemoveHeader = (headerName: string, value: string) => {
+      if (value) {
+        requestHeaders[headerName] = value;
+      } else {
+        delete requestHeaders[headerName];
+      }
+    };
+
+    // 处理请求头
+    const processHeaders = (headerName: string, customHeaderName: string) => {
+      const customHeaderValue = requestHeaders[customHeaderName] || headers[headerName];
+      setOrRemoveHeader(headerName, customHeaderValue);
+      delete requestHeaders[customHeaderName];
+    };
+
     // 不处理本地地址
     if (isLocalhostRef(url)) {
       callback({ requestHeaders });
       return;
     }
 
-    const origin = new URL(url).origin;
     const headers = reqIdMethod[details.id] || {};
 
     // 设置或清除可能的本地Origin
-    if (requestHeaders['Origin'] === origin) delete requestHeaders['Origin'];
-    if (isLocalhostRef(requestHeaders['Origin'])) {
+    const origin = requestHeaders['custom-origin'] || headers?.['Origin'];
+    if (origin && !isLocalhostRef(origin)) {
+      if (requestHeaders['Origin'] === new URL(url).origin) {
+        delete requestHeaders['Origin'];
+      } else requestHeaders['Origin'] = origin;
+    } else {
       delete requestHeaders['Origin'];
     }
+    delete requestHeaders['custom-origin'];
 
     // 设置或清除 User-Agent
-    requestHeaders['User-Agent'] = requestHeaders['custom-ua'] || headers['User-Agent'] || uaState;
+    setOrRemoveHeader('User-Agent', requestHeaders['custom-ua'] || headers['User-Agent'] || uaState);
     delete requestHeaders['custom-ua'];
 
+    // 处理 Host
+    processHeaders('Host', 'custom-host');
+
+    // 处理 Connection
+    processHeaders('Connection', 'custom-connection');
+
     // 处理 Cookie
-    requestHeaders['Cookie'] = requestHeaders['custom-cookie'] || headers['Cookie'];
-    delete requestHeaders['custom-cookie'];
+    processHeaders('Cookie', 'custom-cookie');
 
     // 设置或清除可能的本地 Referer
-    if (requestHeaders['custom-referer'] || headers?.['Referer'])
-      requestHeaders['Referer'] = requestHeaders['custom-referer'] || headers?.['Referer'];
-    if (isLocalhostRef(requestHeaders['Referer'])) {
+    const referer = requestHeaders['custom-referer'] || headers?.['Referer'];
+    if (referer && !isLocalhostRef(referer)) {
+      requestHeaders['Referer'] = referer;
+    } else {
       delete requestHeaders['Referer'];
     };
     delete requestHeaders['custom-referer'];

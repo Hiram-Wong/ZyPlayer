@@ -73,6 +73,9 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
 
   const customHeaders = {
     Cookie: 'custom-cookie',
+    Origin: 'custom-origin',
+    Host: 'custom-host',
+    Connection: 'custom-connection',
     'User-Agent': 'custom-ua',
     Referer: 'custom-referer',
     Redirect: 'custom-redirect',
