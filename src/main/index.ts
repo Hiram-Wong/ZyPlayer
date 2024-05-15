@@ -250,7 +250,7 @@ app.whenReady().then(async () => {
     if (
       !url.includes('//localhost') &&
       !url.includes('//127.0.0.1') &&
-      ['Referer', 'Cookie', 'User-Agent'].some((str) => url.includes(str))
+      ['Referer', 'Cookie', 'User-Agent', 'Origin', 'Host', 'Connection'].some((str) => url.includes(str))
     ) {
       reqIdMethod[`${id}`] = headers;
 
@@ -267,6 +267,7 @@ app.whenReady().then(async () => {
 
   defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders, url, id } = details;
+    const headers = reqIdMethod[details.id] || {};
     const isLocalhostRef = (headerValue) =>
       `${headerValue}`.includes('//localhost') || `${headerValue}`.includes('//127.0.0.1');
 
@@ -281,9 +282,10 @@ app.whenReady().then(async () => {
 
     // 处理请求头
     const processHeaders = (headerName: string, customHeaderName: string) => {
-      const customHeaderValue = requestHeaders[customHeaderName] || headers[headerName];
+      const customHeaderValue =
+        headers?.[headerName] || requestHeaders?.[customHeaderName] || requestHeaders?.[headerName] || '';
       setOrRemoveHeader(headerName, customHeaderValue);
-      delete requestHeaders[customHeaderName];
+      if (requestHeaders[customHeaderName]) delete requestHeaders[customHeaderName];
     };
 
     // 不处理本地地址
@@ -292,10 +294,8 @@ app.whenReady().then(async () => {
       return;
     }
 
-    const headers = reqIdMethod[details.id] || {};
-
     // 设置或清除可能的本地Origin
-    const origin = requestHeaders['custom-origin'] || headers?.['Origin'];
+    const origin = headers?.['Origin'] || requestHeaders['custom-origin'] || requestHeaders['Origin'];
     if (origin && !isLocalhostRef(origin)) {
       if (requestHeaders['Origin'] === new URL(url).origin) {
         delete requestHeaders['Origin'];
@@ -303,11 +303,11 @@ app.whenReady().then(async () => {
     } else {
       delete requestHeaders['Origin'];
     }
-    delete requestHeaders['custom-origin'];
+    if (requestHeaders['custom-origin']) delete requestHeaders['custom-origin'];
 
     // 设置或清除 User-Agent
-    setOrRemoveHeader('User-Agent', requestHeaders['custom-ua'] || headers['User-Agent'] || uaState);
-    delete requestHeaders['custom-ua'];
+    setOrRemoveHeader('User-Agent', headers?.['User-Agent'] || requestHeaders['custom-ua'] || uaState);
+    if (requestHeaders['custom-ua']) delete requestHeaders['custom-ua'];
 
     // 处理 Host
     processHeaders('Host', 'custom-host');
@@ -319,13 +319,13 @@ app.whenReady().then(async () => {
     processHeaders('Cookie', 'custom-cookie');
 
     // 设置或清除可能的本地 Referer
-    const referer = requestHeaders['custom-referer'] || headers?.['Referer'];
+    const referer = headers?.['Referer'] || requestHeaders['custom-referer'] || requestHeaders['Referer'];
     if (referer && !isLocalhostRef(referer)) {
       requestHeaders['Referer'] = referer;
     } else {
       delete requestHeaders['Referer'];
-    };
-    delete requestHeaders['custom-referer'];
+    }
+    if (requestHeaders['custom-referer']) delete requestHeaders['custom-referer'];
 
     if (requestHeaders['custom-redirect'] === 'manual') {
       delete requestHeaders['custom-redirect'];
