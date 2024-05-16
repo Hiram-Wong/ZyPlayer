@@ -1,15 +1,20 @@
 <template>
   <div class="tag-nav">
     <t-tabs v-model="tagFlag" @change="handleItemClick(tagFlag)">
-      <t-tab-panel v-for="item in listData" :key="item.type_id" :value="item.type_id" :label="item.type_name"
-        class="bar" />
+      <t-tab-panel
+        v-for="(item, index) in uniqueList"
+        :key="'type_' + item.type_id + '_index_' + index"
+        :value="item.type_id"
+        :label="item.type_name"
+        class="bar"
+      />
     </t-tabs>
   </div>
 </template>
 
 <script setup lang="ts">
 import _ from 'lodash';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
   active: any;
@@ -26,17 +31,10 @@ watch(
   },
 );
 
-watch(
-  () => props.list,
-  (val) => {
-    listData.value = val;
-  },
-);
-
 const emit = defineEmits(['changeKey']);
 
 const tagFlag = ref(props.active);
-const listData = ref(props.list);
+const uniqueList = computed(() => _.uniqBy(props.list, 'type_id'));
 
 const handleItemClick = (key: string | number) => {
   emit('changeKey', key);
