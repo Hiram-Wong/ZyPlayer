@@ -16,6 +16,34 @@ if (typeof Object.assign != 'function') {
 const getMubans = () => {
   const mubanDict = {
     // 模板字典
+    mx: {
+      title: '',
+      host: '',
+      url: '/vodshow/fyclass--------fypage---/',
+      searchUrl: '/vodsearch/**----------fypage---/',
+      class_parse: '.top_nav li;a&&Text;a&&href;.*/(.*?)/',
+      searchable: 2,
+      quickSearch: 0,
+      filterable: 0,
+      headers: {
+        'User-Agent': 'MOBILE_UA',
+      },
+      play_parse: true,
+      lazy: '',
+      limit: 6,
+      推荐: '.cbox_list;*;*;*;*;*',
+      double: true,
+      一级: 'ul.vodlist li;a&&title;a&&data-original;.pic_text&&Text;a&&href',
+      二级: {
+        title: 'h2&&Text;.detail_list&&ul:eq(1)&&li&&a:eq(2)&&Text',
+        img: '.vodlist_thumb&&data-original',
+        desc: '.content_detail&&li:eq(1)&&Text;.detail_list&&ul:eq(1)&&li&&a&&Text;.detail_list&&ul:eq(1)&&li&&a:eq(1)&&Text;.detail_list&&ul:eq(1)&&li:eq(2)&&Text;.detail_list&&ul:eq(1)&&li:eq(3)&&Text',
+        content: '.content_desc&&span&&Text',
+        tabs: '.play_source_tab&&a',
+        lists: '.content_playlist:eq(#id) li',
+      },
+      搜索: '*',
+    },
     mxpro: {
       title: '',
       host: '',
@@ -279,7 +307,7 @@ const getMubans = () => {
       searchUrl: '/index.php/ajax/suggest?mid=1&wd=**&limit=50',
       searchable: 2,
       quickSearch: 0,
-      headers: { 'User-Agent': 'MOBILE_UA' },
+      headers: {'User-Agent': 'MOBILE_UA'},
       url: '/index.php/api/vod#type=fyclass&page=fypage',
       filterable: 0, // 是否启用分类筛选,
       filter_url: '',
@@ -310,7 +338,7 @@ const getMubans = () => {
       detailUrl: '/api.php/provide/vod/?ac=detail&ids=fyid',
       searchUrl: '/api.php/provide/vod/?wd=**&pg=fypage',
       url: '/api.php/provide/vod/?ac=detail&pg=fypage&t=fyclass',
-      headers: { 'User-Agent': 'MOBILE_UA' },
+      headers: {'User-Agent': 'MOBILE_UA'},
       timeout: 5000,
       // class_name: '电影&电视剧&综艺&动漫',
       // class_url: '1&2&3&4',
@@ -347,4 +375,4 @@ const getMubans = () => {
   return JSON.parse(JSON.stringify(mubanDict));
 };
 
-export { getMubans };
+export {getMubans};

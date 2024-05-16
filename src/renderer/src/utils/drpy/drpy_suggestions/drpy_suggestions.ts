@@ -168,6 +168,19 @@ var rule = {
     documentation: `var rule = {};`,
   },
   {
+    label: '$Object',
+    insertText: `
+Object.assign(muban.mxone5.二级,{
+    //tabs: '.module-tab-item',
+    lists: '.module-row-one:eq(#id)&&a.module-row-text',
+    list_text:'h4&&Text',
+    list_url:'a&&data-clipboard-text',
+});
+    `.trim(),
+    detail: '继承模板前修改模板的二级属性',
+    documentation: `Object.assign(muban.xx模板.xx属性,{})`,
+  },
+  {
     label: '$ruleTemplate',
     insertText: `
 var rule = {
@@ -630,6 +643,47 @@ const Keyword = [
     documentation:
       "headers:{ 'User-Agent': PC_UA, 'Referer': '', 'content-type': 'application/x-www-form-urlencoded', 'Cookie': ''}",
   },
+  {
+    label: 'tab_exclude',
+    insertText:
+      "tab_exclude:'排序',",
+    detail: '二级线路名称排除',
+    documentation:
+      "tab_exclude:'排序|榜单|猜你喜欢'",
+  },
+  {
+    label: 'cate_exclude',
+    insertText:
+      "cate_exclude:'今日更新|热榜',",
+    detail: '一级分类名称排除',
+    documentation:
+      "cate_exclude:'今日更新|热榜'",
+  },
+  {
+    label: 'tab_rename',
+    insertText:
+      "tab_rename: {'道长在线': '在线播放'},",
+    detail: '一级分类名称排除',
+    documentation:
+      "tab_rename: {'道长在线': '在线播放'}",
+  },
+  {
+    label: 'tab_order',
+    insertText:
+      "tab_order:['超清', '蓝光', '极速蓝光'],",
+    detail: '二级线路排序',
+    documentation:
+      "tab_order:['超清', '蓝光', '极速蓝光']'",
+  },
+  {
+    label: 'tab_remove',
+    insertText:
+      "tab_remove:['wjm3u8','ikm3u8','sdm3u8','M3U8','jinyingm3u8','fsm3u8','ukm3u8'],",
+    detail: '移除二级对应线路名相关的数据',
+    documentation:
+      "tab_remove:['wjm3u8','ikm3u8','sdm3u8','M3U8','jinyingm3u8','fsm3u8','ukm3u8']'",
+  },
+
 ];
 
 /**
