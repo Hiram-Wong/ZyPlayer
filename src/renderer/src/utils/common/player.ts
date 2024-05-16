@@ -3,7 +3,7 @@
  * @brief 多播放器集成方案
  * @author HiramWong <admin@catni.cn>
  * @update 2024-05-15
- * @version 0.0.4
+ * @version 0.0.5
  *
  * **ChangeLog说明**:
  * - 2024.5.12:
