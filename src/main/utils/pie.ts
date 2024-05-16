@@ -42,11 +42,14 @@ const isVideoUrl = (reqUrl) => {
 const puppeteerInElectron = async (
   url: string,
   script: string = '',
+  init_script: string = '',
   customRegex: string,
   ua: string | null = null,
 ): Promise<PieResponse> => {
   logger.info(`[sniffer] sniffer url: ${url}`);
   logger.info(`[sniffer] sniffer ua: ${ua}`);
+  logger.info(`[sniffer] sniffer init_script: ${init_script}`);
+  // logger.info(`[sniffer] sniffer script: ${script}`);
 
   const pageId = nanoid(); // 生成page页面id
 
@@ -63,6 +66,13 @@ const puppeteerInElectron = async (
     pageStore[pageId] = pageRecord; // 存储页面
 
     if (ua) await page.setUserAgent(ua); // 设置ua
+    if (init_script && init_script.trim()) {
+      try {
+        await page.evaluateOnNewDocument(init_script);
+      } catch (e) {
+        logger.info(`[pie]执行初始化页面脚本发生错误:${e.message}`);
+      }
+    }
     await page.setRequestInterception(true); // 开启请求拦截
 
     return new Promise(async (resolve, reject) => {
@@ -128,7 +138,7 @@ const puppeteerInElectron = async (
 
       if (script.trim()) {
         try {
-          logger.info(`[sniffer] sniffer script: ${script}`);
+          logger.info(`[sniffer] sniffer script in js_code: ${script}`);
           const js_code = `
             (function() {
               var scriptTimer;
@@ -145,7 +155,7 @@ const puppeteerInElectron = async (
               }, 200);
             })();
           `;
-          await page.evaluateOnNewDocument((script = js_code));
+          await page.evaluateOnNewDocument(js_code);
           await page.evaluate(js_code);
         } catch (err) {
           logger.info(`[pie][error]run script: ${err}`);

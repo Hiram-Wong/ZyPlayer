@@ -326,6 +326,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
         : '';
 
     const snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
+    // console.log(`snifferPlayUrl: ${snifferPlayUrl}`);
     let snifferResult = await sniffer(snifferMode.type, snifferPlayUrl);
     data.url = snifferResult.data;
     data.headers = snifferResult.headers;
@@ -426,7 +427,7 @@ const fetchHipyPlayUrlHelper = async (
     const playRes = await fetchHipyPlayUrl(site, flag, url);
     data = {
       playUrl: playRes.url,
-      script: playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '',
+      script: playRes.js ? encodeURIComponent(Base64.stringify(Utf8.parse(playRes.js))) : '',
       extra: playRes.parse_extra || '',
       parse: Boolean(playRes.parse),
     };
@@ -460,7 +461,7 @@ const fetchT3PlayUrlHelper = async (
 
     data = {
       playUrl: playRes.url,
-      script: playRes.js ? Base64.stringify(Utf8.parse(playRes.js)) : '',
+      script: playRes.js ? encodeURIComponent(Base64.stringify(Utf8.parse(playRes.js))) : '',
       extra: playRes.parse_extra || '',
       parse: Boolean(playRes.parse),
     };
