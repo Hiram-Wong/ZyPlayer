@@ -1,3 +1,32 @@
+/*!
+ * @module player
+ * @brief 多播放器集成方案
+ * @author HiramWong <admin@catni.cn>
+ * @update 2024-05-15
+ * @version 0.0.4
+ *
+ * **ChangeLog说明**:
+ * - 2024.5.12:
+ *   - 初步实现方法集成[xgplayer|nplayer|dplayer|artplayer]
+ * - 2024.5.13:
+ *   - 除xgplayer外增加弹幕发送逻辑
+ *   - 优化xgplayer兼容性-xgplayer-flv.js替代xgplayer-flv, xgplayer-hls.js替代xgplayer-hls
+ * - 2024.5.14:
+ *   - 优化公共流逻辑-先检测环境是否支持
+ *   - 修复seek方法xgplayer进度跳转失败
+ *   - 修复playerNext方法nplayer会退出全屏
+ * - 2024.5.15:
+ *   - 修复取消监听事件导致组件内监听事件失效-提取为公共方法[时间变动|弹幕发送]
+ *   - 修复自定义dplayer的off传入func匹配错误
+ * - 2024.5.16:
+ *   - 扩展dplayer画中画功能、控制栏弹幕开关
+ *   - 调整dplayer参数unlimited为false-解决阻塞主进程问题
+ *   - 修复触发playerNext方法在触发playerBarrage方法切换失败-没有赋值dp.options.video.src导致地址一直不变
+ *
+ *
+ * ---
+ */
+
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
 import dashjs from 'dashjs';
@@ -44,7 +73,7 @@ class CustomDPlayer extends DPlayer {
    * @returns {CustomDPlayer} 返回当前实例，支持链式调用。
    */
   off(name: string, callback: Function | undefined = undefined) {
-    // @ts-ignore 获取或初始化events.events对象，用于存储事件监听器
+    // @ts-ignore 获取或初始化events.events对象, 用于存储事件监听器
     const e = this.events.events || (this.events.events = {});
     // 获取特定事件名称下的所有监听器
     const evts = e[name];
@@ -55,8 +84,8 @@ class CustomDPlayer extends DPlayer {
     if (evts && callback) {
       // 遍历当前事件名称下的所有监听器
       for (let i = 0, len = evts.length; i < len; i += 1) {
-        // 如果当前监听器的函数与要移除的函数不匹配（考虑直接引用和_.once包裹的情况）
-        if (evts[i].fn !== callback && evts[i].fn._ !== callback) {
+        // 如果当前监听器的函数与要移除的函数不匹配[考虑直接引用和_.once包裹的情况]
+        if (evts[i] !== callback) {
           liveEvents.push(evts[i]); // 保留该监听器
         }
       }
@@ -135,6 +164,10 @@ const publicElementDeal = {
           svgToReplace,
         );
     },
+    add: (el: string, newEle: string) => {
+      const controlSetting = document.querySelector(el);
+      controlSetting.insertAdjacentHTML('afterend', newEle);
+    },
   },
 };
 
@@ -151,10 +184,8 @@ const publicBarrageSend = (url: string, options: any) => {
 };
 
 const publicListener = {
-  xgplayer: {},
-  artplayer: {},
-  dplayer: {},
-  nplayer: {},
+  timeUpdate: null as any,
+  sendDanmu: null as any,
 };
 
 // 流公共部分参数
@@ -407,7 +438,7 @@ let playerConfig: any = {
       addition: [], //可选，额外的弹幕
       user: 'ZyPlayer', //弹幕作者
       bottom: '15%',
-      unlimited: true,
+      unlimited: false,
     },
   },
   artplayer: {
@@ -600,9 +631,7 @@ const playerMethod = {
     },
     offTimeupdate: (player: XgPlayer) => {
       // player.offAll();
-      // @ts-ignore
-      player._events.timeupdate = [];
-      // player.off(Events.TIME_UPDATE, () => {}); // 不生效
+      player.off(Events.TIME_UPDATE, publicListener.timeUpdate);
     },
     toggle: (player: XgPlayer) => {
       if (player.paused) player.play();
@@ -623,11 +652,67 @@ const playerMethod = {
       if (playbackRate !== 1) player.speed(playbackRate);
     },
     create: (options: any): CustomDPlayer => {
-      const player = new CustomDPlayer({ ...options });
+      const player: any = new CustomDPlayer({ ...options });
       // 元素替换，原生太丑
       publicElementDeal.dplayer.replace('.dplayer-comment-icon', publicIcons.danmu);
       publicElementDeal.dplayer.replace('.dplayer-setting-icon', publicIcons.setting);
       publicElementDeal.dplayer.replace('.dplayer-full-icon', publicIcons.fullscreen);
+      publicElementDeal.dplayer.add(
+        '.dplayer-setting',
+        `
+        <button
+          class="dplayer-icon dplayer-pip-icon"
+          data-balloon="画中画"
+          data-balloon-pos="up"
+          style="padding: 7px 8px"
+        >
+          ${publicIcons.pipIcon}
+        </button>
+      `,
+      );
+
+      publicElementDeal.dplayer.add(
+        '.dplayer-setting',
+        `
+        <div class="dplayer-subtitle-btn">
+          <button class="dplayer-icon dplayer-subtitle-icon" data-balloon="${player.template.showDanmakuToggle.checked ? '显示弹幕' : '关闭弹幕'}" data-balloon-pos="up">
+            <span class="dplayer-icon-content" style="">
+              ${player.template.showDanmakuToggle.checked ? publicIcons.openDanmu : publicIcons.closeDanmu}
+            </span>
+          </button>
+        </div>
+      `,
+      );
+
+      // 画中画事件处理
+      const handlePipClick = () => {
+        const videoElement: HTMLVideoElement = document.querySelector('.dplayer-video');
+
+        try {
+          videoElement !== document.pictureInPictureElement
+            ? videoElement.requestPictureInPicture()
+            : document.exitPictureInPicture();
+        } catch (error) {
+          console.error('画中画功能异常:', error);
+        }
+      };
+
+      // 弹幕事件处理
+      const handleDanmuClick = () => {
+        let showDanmaku: any = document.querySelector('.dplayer-setting-showdan');
+        (player.template.showDanmakuToggle.checked = !player.template.showDanmakuToggle.checked),
+          player.template.showDanmakuToggle.checked
+            ? ((showDanmaku = !0),
+              player.danmaku.show(),
+              publicElementDeal.dplayer.replace('.dplayer-subtitle-icon', publicIcons.openDanmu))
+            : ((showDanmaku = !1),
+              player.danmaku.hide(),
+              publicElementDeal.dplayer.replace('.dplayer-subtitle-icon', publicIcons.closeDanmu)),
+          player.user.set('danmaku', showDanmaku ? 1 : 0);
+      };
+
+      document.querySelector('.dplayer-pip-icon')?.addEventListener('click', handlePipClick); // 画中画图标点击事件
+      document.querySelector('.dplayer-subtitle-icon')?.addEventListener('click', handleDanmuClick); // 弹幕图标点击事件
 
       return player;
     },
@@ -647,9 +732,9 @@ const playerMethod = {
       player.play();
     },
     playNext: (player: DPlayer, options: any) => {
-      const danmaku: any = player.options.danmaku;
       const { playbackRate } = player.video;
-      player.switchVideo({ ...options }, { ...danmaku });
+      player.switchVideo({ ...options });
+      player.options.video.url = options.url;
       player.danmaku.clear();
       if (playbackRate !== 1) player.speed(playbackRate);
       player.play();
@@ -680,7 +765,7 @@ const playerMethod = {
       // 弹幕组件会直接提交后端
     },
     offTimeupdate: (player: CustomDPlayer) => {
-      player.off('timeupdate');
+      player.off('timeupdate', publicListener.timeUpdate);
     },
     toggle: (player: DPlayer) => {
       player.toggle();
@@ -695,8 +780,7 @@ const playerMethod = {
         danmuku: comments,
       });
       player.plugins.artplayerPluginDanmuku.load();
-      // @ts-ignore
-      player.on('artplayerPluginDanmuku:emit', (danmu: any) => {
+      publicListener.sendDanmu = (danmu: any) => {
         const options = {
           player: id,
           text: danmu.text,
@@ -705,12 +789,9 @@ const playerMethod = {
           type: danmu.mode == 1 ? '5' : '0',
         };
         publicBarrageSend(url, options);
-        // player.plugins.artplayerPluginDanmuku.emit({
-        //   text: danmu.text,
-        //   color: danmu.color,
-        //   border: true,
-        // }); // 会重复显示
-      });
+      };
+      // @ts-ignore
+      player.on('artplayerPluginDanmuku:emit', publicListener.sendDanmu);
     },
     create: (options: any): Artplayer => {
       Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -732,8 +813,8 @@ const playerMethod = {
       player.play();
     },
     playNext: (player: Artplayer, options: any) => {
-      player.switch = options.url;
-      // player.switchUrl(options.url);
+      // player.switch = options.url;
+      player.switchUrl(options.url);
       player.plugins.artplayerPluginDanmuku.config({
         danmuku: [],
       });
@@ -760,10 +841,10 @@ const playerMethod = {
     },
     offBarrage: (player: Artplayer) => {
       // @ts-ignore
-      player.off('artplayerPluginDanmuku:emit');
+      player.off('artplayerPluginDanmuku:emit', publicListener.sendDanmu!);
     },
     offTimeupdate: (player: Artplayer) => {
-      player.off('video:timeupdate');
+      player.off('video:timeupdate', publicListener.timeUpdate!);
     },
     toggle: (player: Artplayer) => {
       player.toggle();
@@ -775,7 +856,7 @@ const playerMethod = {
   nplayer: {
     barrge: (player: NPlayer, comments: any, url: string, id: string) => {
       player.danmaku.resetItems(comments);
-      player.on('DanmakuSend', (danmu) => {
+      publicListener.sendDanmu = (danmu: any) => {
         const options = {
           player: id,
           text: danmu.text,
@@ -784,7 +865,8 @@ const playerMethod = {
           type: danmu.type,
         };
         publicBarrageSend(url, options);
-      });
+      };
+      player.on('DanmakuSend', publicListener.sendDanmu);
     },
     create: (options: any): NPlayer => {
       NPlayerIcon.register('play', publicElementDeal.nplayer.createIcon(publicIcons.play));
@@ -852,7 +934,6 @@ const playerMethod = {
       player.play();
     },
     playNext: (player: any, options: any) => {
-      player.pause();
       if (player?.hls) publicStream.destroy.customHls(player);
       if (player?.flv) publicStream.destroy.customFlv(player);
       if (player?.mpd) publicStream.destroy.customDash(player);
@@ -876,7 +957,6 @@ const playerMethod = {
         default:
           break;
       }
-
       player.danmaku.clearScreen();
     },
     seek: (player: NPlayer, time: number) => {
@@ -899,10 +979,10 @@ const playerMethod = {
       });
     },
     offBarrage: (player: NPlayer) => {
-      player.off('DanmakuSend');
+      player.off('DanmakuSend', publicListener.sendDanmu!);
     },
     offTimeupdate: (player: NPlayer) => {
-      player.off(NPlayerEvent.TIME_UPDATE);
+      player.off(NPlayerEvent.TIME_UPDATE, publicListener.timeUpdate!);
     },
     toggle: (player: NPlayer) => {
       player.toggle();
@@ -1037,35 +1117,37 @@ const playerNext = (player: any, playerMode: string, options: any) => {
 const playerTimeUpdate = (player: any, playerMode: string, callback: any) => {
   switch (playerMode) {
     case 'xgplayer':
-      player.on(Events.TIME_UPDATE, ({ currentTime, duration }) => {
-        callback({ currentTime, duration });
-      });
+      publicListener.timeUpdate = ({ currentTime, duration }) => callback({ currentTime, duration });
+      player.on(Events.TIME_UPDATE, publicListener.timeUpdate);
       break;
     case 'dplayer':
-      player.on('timeupdate', () => {
+      publicListener.timeUpdate = () => {
         if (player?.video) {
           callback({
             currentTime: player.video.currentTime || 0,
             duration: player.video.duration || 0,
           });
         }
-      });
+      };
+      player.on('timeupdate', publicListener.timeUpdate);
       break;
     case 'artplayer':
-      player.on('video:timeupdate', () => {
+      publicListener.timeUpdate = () => {
         callback({
           currentTime: player.video.currentTime || 0,
           duration: player.video.duration || 0,
         });
-      });
+      };
+      player.on('video:timeupdate', publicListener.timeUpdate);
       break;
     case 'nplayer':
-      player.on(NPlayerEvent.TIME_UPDATE, () => {
+      publicListener.timeUpdate = () => {
         callback({
           currentTime: player.currentTime || 0,
           duration: player.duration || 0,
         });
-      });
+      };
+      player.on(NPlayerEvent.TIME_UPDATE, publicListener.timeUpdate);
       break;
   }
 };
@@ -1081,6 +1163,7 @@ const offPlayerTimeUpdate = (player, playerMode) => {
   const offTimeUpdate = offTimeUpdates[playerMode];
 
   offTimeUpdate(player);
+  publicListener.timeUpdate = null;
 };
 
 // 弹幕加载
@@ -1134,9 +1217,11 @@ const playerBarrage = (player: any, playerMode: string, data: any, options: any,
         isMe: false,
         force: true,
       }));
-      const newUnsortItems = [];
-      comments = comments.concat(newUnsortItems).sort((a, b) => a.time - b.time);
       break;
+  }
+
+  if (playerMode !== 'dplayer') {
+    comments = comments.concat([]).sort((a, b) => a.time - b.time);
   }
 
   barrge(player, comments, url, id);
@@ -1152,6 +1237,7 @@ const offPlayerBarrage = (player, playerMode) => {
   };
   const offBarrage = offBarrages[playerMode];
   offBarrage(player);
+  publicListener.sendDanmu = null;
 };
 
 export {

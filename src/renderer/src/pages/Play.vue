@@ -554,10 +554,11 @@ const createPlayer = async (url: string, videoType: string = '') => {
   setSystemMediaInfo(); // 设置系统媒体信息
 
   // setTimeout(() => {
-    // console.log('setTimeout')
-    // playerPause(player.value, playerMode.type);
-    // offPlayerTimeUpdate(player.value, playerMode.type);
-    // offPlayerBarrage(player.value, playerMode.type);
+  // console.log('setTimeout')
+  // playerPause(player.value, playerMode.type);
+  // offPlayerTimeUpdate(player.value, playerMode.type);
+  // offPlayerBarrage(player.value, playerMode.type);
+  // playerNext(player.value, playerMode.type, {url: 'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8',type:'m3u8'});
   // }, 6000);  // 测试用例
 };
 
@@ -776,11 +777,9 @@ const changeEvent = async (item) => {
       };
       tmp.preloadBarrage = [];
     };
-    console.log(skipConfig.value.skipTimeInStart)
-    console.log(set.value.skipStartEnd)
     if (set.value.skipStartEnd) {
       await playerSeek(player.value, playerMode.type, skipConfig.value.skipTimeInStart);
-    }
+    };
     setSystemMediaInfo(); // 更新系统媒体信息
     setTimeout(async () => {
       await timerUpdatePlayProcess();
