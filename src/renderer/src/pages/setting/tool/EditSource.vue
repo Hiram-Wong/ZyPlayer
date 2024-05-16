@@ -657,7 +657,7 @@ const exportFileEvent = async () => {
   };
 
   try {
-    await window.electron.ipcRenderer.send('tmpdir-manage', 'init', 'file/js');
+    await window.electron.ipcRenderer.send('tmpdir-manage', 'make', 'file/js');
 
     const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
     const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/js/${title}.js`);
