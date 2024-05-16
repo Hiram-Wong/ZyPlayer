@@ -352,7 +352,7 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onMounted, ref, reactive, shallowRef, toRaw } from 'vue';
+import { computed, onMounted, ref, reactive, shallowRef } from 'vue';
 
 import { setDefault } from '@/api/setting';
 import { fetchChannelList } from '@/api/iptv';
@@ -554,10 +554,11 @@ const createPlayer = async (url: string, videoType: string = '') => {
   setSystemMediaInfo(); // 设置系统媒体信息
 
   // setTimeout(() => {
-  //  console.log('setTimeout')
-  //  offPlayerTimeUpdate(player.value, playerMode.type);
-  //  offPlayerBarrage(player.value, playerMode.type);
-  // }, 6000);
+    // console.log('setTimeout')
+    // playerPause(player.value, playerMode.type);
+    // offPlayerTimeUpdate(player.value, playerMode.type);
+    // offPlayerBarrage(player.value, playerMode.type);
+  // }, 6000);  // 测试用例
 };
 
 // 摧毁播放器
@@ -778,13 +779,8 @@ const changeEvent = async (item) => {
     console.log(skipConfig.value.skipTimeInStart)
     console.log(set.value.skipStartEnd)
     if (set.value.skipStartEnd) {
-      console.log(11111)
       await playerSeek(player.value, playerMode.type, skipConfig.value.skipTimeInStart);
     }
-    tmp.preloadLoading = false;
-    tmp.preloadNext = {};
-    tmp.sourceUrl = tmp.preloadSourceUrl;
-    tmp.preloadSourceUrl = '';
     setSystemMediaInfo(); // 更新系统媒体信息
     setTimeout(async () => {
       await timerUpdatePlayProcess();
@@ -793,6 +789,11 @@ const changeEvent = async (item) => {
     await destroyPlayer();
     await initPlayer(true);
   }
+
+  tmp.preloadLoading = false;
+  tmp.preloadNext = {};
+  tmp.sourceUrl = tmp.preloadSourceUrl;
+  tmp.preloadSourceUrl = '';
 };
 
 // 提前获取下一集链接
