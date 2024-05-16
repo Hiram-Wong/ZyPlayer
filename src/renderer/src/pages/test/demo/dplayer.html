@@ -9,21 +9,54 @@
 </html>
 
 <script>
-  var dp = new DPlayer({
-    container: document.getElementById('mse'),
-    video: {
-      url: 'https://voddemo-play.volcvod.com/10501b001bdd43ae89d7c0fc3d6792b5/main.m3u8?a=0&auth_key=1773925042-f0489f7ac9a14d92b96bbfb7b39a7a0d-0-4e57d65b22e9aefe63ba1c519218e9fe&br=966&bt=966&cd=0%7C0%7C0&ch=0&cr=0&cs=0&cv=1&dr=0&ds=4&er=0&l=2023032020544973DCCFE21CF4C02E38B1&lr=&mime_type=video_mp4&net=0&pl=0&qs=0&rc=amg6c2o0aTg6ZTQzNGRnM0ApOmZkZzg1PGVoNzhkOzxlZ2dfZy9gMHFrYTBgLS1kYy9zcy00L2JfL19eYF42Ly0vYi06Yw%3D%3D&vl=&vr=',
-      type: 'hls',
-    },
-    danmaku: {
-      id: 'http://www.iqiyi.com/v_26ii8c3keck.html', //必填，视频id, 用于下面api请求时使用
-      api: 'http://127.0.0.1:9978/api/v1/barrge/', //必填，叫后台提供
-      addition: [], //可选，额外的弹幕
-      user: 'ZyPlayer', //弹幕作者
-      bottom: '15%',
-      unlimited: false,
-      maximun: 100,
-      speedRate: 2
-    },
-  })
+  const publicStream = {
+    create: {
+      customHls: (video, url) => {
+        if (Hls.isSupported()) {
+          const hls = new Hls({});
+          hls.loadSource(url);
+          hls.attachMedia(video);
+          return hls;
+        } else {
+          console.log('Hls is not supported.');
+          return null;
+        }
+      },
+    }
+  }
+    var dp = new DPlayer({
+      container: document.getElementById('mse'),
+      video: {
+        url: 'https://voddemo-play.volcvod.com/10501b001bdd43ae89d7c0fc3d6792b5/main.m3u8?a=0&auth_key=1773925042-f0489f7ac9a14d92b96bbfb7b39a7a0d-0-4e57d65b22e9aefe63ba1c519218e9fe&br=966&bt=966&cd=0%7C0%7C0&ch=0&cr=0&cs=0&cv=1&dr=0&ds=4&er=0&l=2023032020544973DCCFE21CF4C02E38B1&lr=&mime_type=video_mp4&net=0&pl=0&qs=0&rc=amg6c2o0aTg6ZTQzNGRnM0ApOmZkZzg1PGVoNzhkOzxlZ2dfZy9gMHFrYTBgLS1kYy9zcy00L2JfL19eYF42Ly0vYi06Yw%3D%3D&vl=&vr=',
+        type: 'customHls',
+        customType: {
+          customHls: (video, dp) => {
+            const hls = publicStream.create.customHls(video, video.src);
+            dp.hls = hls;
+            dp.on('destroy', () => {
+              hls.destroy();
+              delete dp.hls;
+            });
+          },
+        }
+      },
+      danmaku: {
+        id: 'http://www.iqiyi.com/v_1qjg1dfm3no.html', //必填，视频id, 用于下面api请求时使用
+        api: 'http://127.0.0.1:9978/api/v1/barrge/', //必填，后台提供
+        addition: [], //可选，额外的弹幕
+        user: 'ZyPlayer', //弹幕作者
+        bottom: '15%',
+        unlimited: false,
+        maximun: 100,
+        speedRate: 2,
+      },
+    });
+    // setTimeout(() => {
+    //   dp.switchVideo({
+    //     url: 'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8',
+    //     type: 'customHls',
+    //   });
+    //   console.log(dp)
+    //   console.log(dp.options)
+    // }, 5000);
 </script>

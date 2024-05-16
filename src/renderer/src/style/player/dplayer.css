@@ -80,6 +80,7 @@
 
 .dplayer-comment {
   opacity: 0 !important;
+  display: none !important;
 }
 
 .dplayer-controller .dplayer-icons .dplayer-toggle input:checked + label:before {
@@ -173,4 +174,12 @@
 .dplayer-controller .dplayer-bar-wrap .dplayer-bar .dplayer-loaded,
 .dplayer-controller .dplayer-bar-wrap .dplayer-bar .dplayer-played {
   border-radius: 10px;
+}
+
+.dplayer-setting-showdan, .dplayer-setting-danunlimit {
+  display: none;
+}
+
+.dplayer-menu .dplayer-menu-item a {
+  text-decoration: none;
 }

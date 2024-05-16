@@ -55,13 +55,14 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         const cleanedData = text[key];
 
         // { time: 230.523, type: "right", color: "#fff", author: "618c713c", text: "键盘妹子挺好看？" }
-        data.data = cleanedData.map((item: any) => [
+        const comments = cleanedData.map((item: any) => [
           parseFloat(item[start]),
           item[mode] === 'bottom' ? 2 : item[mode] === 'top' ? 1 : 0,
           item[color],
           nanoid(),
           item[content],
         ]);
+        data.data = comments.concat([]).sort((a, b) => a.time - b.time);
         reply.code(200).send(data);
       } catch (err) {
         reply.code(500).send(err);
