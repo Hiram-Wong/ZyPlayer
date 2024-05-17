@@ -351,6 +351,8 @@ export default {
       rule: 'Rule',
       f12: 'F12',
       clear: 'Clean',
+      reset: 'Reset',
+      format: 'Format',
       play: 'Play',
       copy: 'Copy',
       upload: 'Upload',

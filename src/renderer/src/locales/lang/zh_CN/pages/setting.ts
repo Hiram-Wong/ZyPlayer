@@ -350,6 +350,8 @@ export default {
       rule: '规则',
       f12: 'F12',
       clear: '清理日志',
+      reset: '重置',
+      format: '格式化',
       copy: '复制',
       play: '播放',
       upload: '上传',
