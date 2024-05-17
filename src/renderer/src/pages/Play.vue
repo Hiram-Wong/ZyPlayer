@@ -530,7 +530,6 @@ const createPlayer = async (url: string, videoType: string = '') => {
     artplayer: '#mse',
     dplayer: document.getElementById('mse'),
     nplayer: '#mse',
-    ckplayer: '#mse',
   };
   player.value = await playerCreate(url, type.value, containers[playerMode.type], playerMode.type, videoType) as any;
   if (tmp.skipTime) playerSeek(player.value, playerMode.type, tmp.skipTime);

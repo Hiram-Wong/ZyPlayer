@@ -1158,7 +1158,6 @@ const sourceEvent = () => {
       const formattedHtml: any = jsBeautify.html(html, {
         preserve_newlines: false
       });
-      console.log(formattedHtml)
       log?.setValue(formattedHtml);
     };
 
