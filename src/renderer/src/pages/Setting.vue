@@ -21,35 +21,34 @@
     </common-nav>
     <div class="content">
       <div class="container">
-        <base-view class="container-item" v-show="settingSet.select === 'configBase'" />
-        <site-view class="container-item" v-show="settingSet.select === 'siteSource'" />
-        <iptv-view class="container-item" v-show="settingSet.select === 'iptvSource'" />
-        <analyze-view class="container-item" v-show="settingSet.select === 'analyzeSource'" />
-        <drive-view class="container-item" v-show="settingSet.select === 'driveSource'" />
-        <edit-source-view class="container-item" v-show="settingSet.select === 'editSource'" />
+        <keep-alive>
+          <component :is="currentComponent"></component>
+        </keep-alive>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue';
+import { computed, defineAsyncComponent, reactive, shallowRef, watch } from 'vue';
 
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 
-import analyzeView from './setting/analyze/AnalyzeSetting.vue';
-import baseView from './setting/base/BaseSetting.vue';
-import iptvView from './setting/iptv/IptvSetting.vue';
-import siteView from './setting/site/SiteSetting.vue';
-import driveView from './setting/drive/DriveSetting.vue';
-import editSourceView from './setting/tool/EditSource.vue';
 import CommonNav from '../components/common-nav/index.vue';
 
+// 异步加载组件，也可以直接导入组件
+const componentMap = {
+  'configBase': defineAsyncComponent(() => import('./setting/base/BaseSetting.vue')),
+  'siteSource': defineAsyncComponent(() => import('./setting/site/SiteSetting.vue')),
+  'iptvSource': defineAsyncComponent(() => import('./setting/iptv/IptvSetting.vue')),
+  'analyzeSource': defineAsyncComponent(() => import('./setting/analyze/AnalyzeSetting.vue')),
+  'driveSource': defineAsyncComponent(() => import('./setting/drive/DriveSetting.vue')),
+  'editSource': defineAsyncComponent(() => import('./setting/tool/EditSource.vue')),
+};
+
 const storeSetting = useSettingStore();
-const sysConfigSwitch = computed(() => {
-  return storeSetting.sysConfigSwitch;
-});
+const currentComponent = shallowRef(componentMap['configBase']);
 
 const settingNav = computed(() => {
   return [
@@ -80,20 +79,28 @@ const settingSet = reactive({
   list: settingNav
 });
 
+// 初始化选中的组件
 if (storeSetting.sysConfigSwitch) {
   settingSet.select = storeSetting.sysConfigSwitch;
+  currentComponent.value = componentMap[storeSetting.sysConfigSwitch];
+}
+
+// 监听sysConfigSwitch的变化
+watch(
+  () => storeSetting.sysConfigSwitch,
+  newValue => {
+    currentComponent.value = componentMap[newValue];
+    settingSet.select = newValue;
+  }
+);
+
+const changeComponent = (key: string) => {
+  currentComponent.value = componentMap[key];
+  storeSetting.updateConfig({ sysConfigSwitch: key });
 };
 
-watch(() => settingSet.select, (newValue) => {
-  storeSetting.updateConfig({ sysConfigSwitch: newValue });
-});
-
-watch(() => sysConfigSwitch.value, (newValue) => {
-  settingSet.select = newValue;
-});
-
-const changeClassEvent = (item) => {
-  settingSet.select = item;
+const changeClassEvent = (item: string) => {
+  changeComponent(item);
 };
 </script>
 
