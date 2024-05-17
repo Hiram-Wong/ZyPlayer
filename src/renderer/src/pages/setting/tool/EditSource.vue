@@ -1481,6 +1481,7 @@ const sourceEvent = () => {
         top: 0;
         bottom: 0;
         border-radius: var(--td-radius-default);
+        padding: var(--td-comp-paddingTB-xs) 0 var(--td-comp-paddingTB-m);
 
         :deep(.jv-container) {
           background-color: var(--td-bg-content-input) !important;
