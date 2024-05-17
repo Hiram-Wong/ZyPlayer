@@ -72,7 +72,7 @@
                   :header="$t('pages.setting.editSource.dialog.request.title')"
                   :cancel-btn="$t('pages.setting.editSource.dialog.request.cancel')" show-in-attached-element
                   @confirm="isVisible.reqParam = false" @cancel="reqCancel()">
-                  <div> class="dialog-item"
+                  <div class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.dialog.request.reqHeader') }}</p>
                     <t-textarea v-model="form.req.header" placeholder='{ "User-Agent": "Mozilla/5.0 zyplayer" }' />
                   </div>
