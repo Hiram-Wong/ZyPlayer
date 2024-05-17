@@ -169,7 +169,7 @@ const fetchAnalyzeData = async (): Promise<{ default: any; flag: any[]; active: 
 };
 
 // Ad
-const removeAd = async (url: string, type: string, headers: object = null) => {
+const removeAd = async (url: string, type: string, headers: object | null = null) => {
   console.log('[film_common][removeAd][start]开始移除广告流程');
   let data = {
     url,
@@ -178,7 +178,7 @@ const removeAd = async (url: string, type: string, headers: object = null) => {
   };
   try {
     if (type === 'm3u8') {
-      data = await setStream(url, '.m3u8', headers);
+      data = await setStream(url, '.m3u8', headers ? headers : null);
     }
     console.log(`[film_common][removeAd][return]`, data);
   } catch (err) {
@@ -211,7 +211,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
   console.log(`[film_common][playHelper][before_start]准备处理地址:${url}`);
   console.log(`[film_common][playHelper][start]播放处理流程开始`);
 
-  let data: { url: string; mediaType: string; isOfficial: boolean; headers: object } = {
+  let data: { url: string; mediaType: string; isOfficial: boolean; headers: object | null } = {
     url: '',
     mediaType: '',
     isOfficial: false,
@@ -223,7 +223,7 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
     let script: string = '';
     let extra: string = '';
     let isOfficial: boolean = false;
-    let headers: object = null;
+    let headers: object | null = null;
     let parse = true;
     let playData: any = { playUrl: url, script: '', extra: '', parse: parse };
 

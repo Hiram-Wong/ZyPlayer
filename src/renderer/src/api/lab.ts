@@ -32,7 +32,7 @@ export function fetchStream(url) {
   });
 }
 
-export function setStream(url, type, headers: object = null) {
+export function setStream(url, type, headers: object | null = null) {
   return request({
     url: `/v1/lab/removeAd`,
     params: {
