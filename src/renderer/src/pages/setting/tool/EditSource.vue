@@ -63,21 +63,21 @@
                   <div class="input-container">
                     <t-input v-model="form.req.url" :placeholder="$t('pages.setting.placeholder.general')"
                       class="input" />
-                    <div class="method" @click="showReqParamDialog()">
+                    <div class="method" @click="showDialog('reqParam')">
                       <transform-icon />
                     </div>
                   </div>
                 </t-input-adornment>
-                <t-dialog v-model:visible="isVisible.reqParam"
+                <t-dialog v-model:visible="isVisible.reqParam" placement="center"
                   :header="$t('pages.setting.editSource.dialog.request.title')"
                   :cancel-btn="$t('pages.setting.editSource.dialog.request.cancel')" show-in-attached-element
                   @confirm="isVisible.reqParam = false" @cancel="reqCancel()">
-                  <div>
-                    <p>{{ $t('pages.setting.editSource.reqHeaderTitle') }}</p>
+                  <div> class="dialog-item"
+                    <p>{{ $t('pages.setting.editSource.dialog.request.reqHeader') }}</p>
                     <t-textarea v-model="form.req.header" placeholder='{ "User-Agent": "Mozilla/5.0 zyplayer" }' />
                   </div>
-                  <div v-if="form.req.method !== 'GET'">
-                    <p>{{ $t('pages.setting.editSource.reqBodyTitle') }}</p>
+                  <div v-if="form.req.method !== 'GET'" class="dialog-item">
+                    <p>{{ $t('pages.setting.editSource.dialog.request.reqBody') }}</p>
                     <t-select v-model="form.req.contentType" class="contentType" style="margin-bottom: 5px;">
                       <t-option v-for="item in reqContentTypes" :key="item.label" :value="item.value"
                         :label="item.label" />
@@ -106,6 +106,47 @@
                 </template>
                 <t-input v-model="form.rule.pdfh" :placeholder="$t('pages.setting.placeholder.pdfhTip')" />
               </t-input-adornment>
+            </div>
+            <div class="code-op-item">
+              <div class="item sniffer">
+                <t-input-adornment :prepend="$t('pages.setting.editSource.rule.url')">
+                  <template #append>
+                    <t-button class="button w-btn" theme="default" @click="actionSniffer()">{{
+                      $t('pages.setting.editSource.action.sniffer') }}</t-button>
+                  </template>
+                  <div class="input-container">
+                    <t-input v-model="form.sniffer.url" :placeholder="$t('pages.setting.placeholder.general')"
+                      class="input" />
+                    <div class="method" @click="showDialog('snifferParam')">
+                      <transform-icon />
+                    </div>
+                  </div>
+                </t-input-adornment>
+                <t-dialog v-model:visible="isVisible.snifferParam" placement="center"
+                  :header="$t('pages.setting.editSource.dialog.sniffer.title')"
+                  :cancel-btn="$t('pages.setting.editSource.dialog.sniffer.cancel')" show-in-attached-element
+                  @confirm="isVisible.snifferParam = false" @cancel="snifferCancel()">
+                  <!-- <div class="dialog-item">
+                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.ua') }}</p>
+                    <t-input v-model="form.sniffer.ua" :placeholder="$t('pages.setting.placeholder.general')" />
+                  </div> -->
+                  <div class="dialog-item">
+                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.auxiliaryRegex') }}</p>
+                    <t-input v-model="form.sniffer.auxiliaryRegex"
+                      :placeholder="$t('pages.setting.placeholder.general')" />
+                  </div>
+                  <!-- <div class="dialog-item">
+                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.initScript') }}</p>
+                    <t-textarea v-model="form.sniffer.initScript"
+                      :placeholder="$t('pages.setting.placeholder.general')" />
+                  </div> -->
+                  <data class="dialog-item">
+                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.runScript') }}</p>
+                    <t-textarea v-model="form.sniffer.runScript"
+                      :placeholder="$t('pages.setting.placeholder.general')" />
+                  </data>
+                </t-dialog>
+              </div>
             </div>
           </div>
           <t-collapse>
@@ -165,46 +206,48 @@
               $t('pages.setting.editSource.action.home') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.category.t" label="t" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33-30%" />
-            <t-input v-model="form.category.f" label="f" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33-40%" />
-            <t-input-number theme="column" :min="0" v-model="form.category.pg" label="pg"
+            <t-input v-model="form.category.t" :label="$t('pages.setting.editSource.rule.t')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-30%" />
+            <t-input v-model="form.category.f" :label="$t('pages.setting.editSource.rule.f')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-40%" />
+            <t-input-number theme="column" :min="0" v-model="form.category.pg"
+              :label="$t('pages.setting.editSource.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-33-30%" />
             <t-button class="button w-btn" theme="default" @click="actionList()">{{
               $t('pages.setting.editSource.action.list') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.detail.ids" label="ids" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-100%" />
+            <t-input v-model="form.detail.ids" :label="$t('pages.setting.editSource.rule.ids')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
             <t-button class="button w-btn" theme="default" @click="actionDetail()">{{
               $t('pages.setting.editSource.action.detail') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.search.wd" label="wd" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-70%" />
-            <t-input-number theme="column" :min="0" v-model="form.search.pg" label="pg"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-30%" />
+            <t-input v-model="form.search.wd" :label="$t('pages.setting.editSource.rule.wd')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-70%" />
+            <t-input-number theme="column" :min="0" v-model="form.search.pg"
+              :label="$t('pages.setting.editSource.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-50-30%" />
             <t-button class="button w-btn" theme="default" @click="actionSearch()">{{
               $t('pages.setting.editSource.action.search') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.play.flag" label="flag" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-30%" />
-            <t-input v-model="form.play.play" label="play" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-70%" />
+            <t-input v-model="form.play.flag" :label="$t('pages.setting.editSource.rule.flag')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-30%" />
+            <t-input v-model="form.play.play" :label="$t('pages.setting.editSource.rule.play')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-70%" />
             <t-button class="button w-btn" theme="default" @click="actionPlay()">{{
               $t('pages.setting.editSource.action.play') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.proxy.url" label="url" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-100%" />
+            <t-input v-model="form.proxy.url" :label="$t('pages.setting.editSource.rule.url')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
             <t-button class="button w-btn" theme="default" @click="actionProxy()">{{
               $t('pages.setting.editSource.action.proxy') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.player.url" label="url" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-100%" />
+            <t-input v-model="form.player.url" :label="$t('pages.setting.editSource.rule.url')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
             <t-button class="button w-btn" theme="default" @click="actionPlayer()">{{
               $t('pages.setting.editSource.action.player') }}</t-button>
           </div>
@@ -246,6 +289,8 @@
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
+import Base64 from 'crypto-js/enc-base64';
+import Utf8 from 'crypto-js/enc-utf8';
 import moment from 'moment';
 import * as monaco from 'monaco-editor';
 import JSON5 from "json5";
@@ -261,13 +306,14 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import dialogPlayerView from './components/DialogPlayer.vue';
 
 import { t } from '@/locales';
-import { useSettingStore } from '@/store';
+import { useSettingStore, usePlayStore } from '@/store';
 
 import { setT3Proxy } from '@/api/proxy';
 import { fetchDebugSource, setDebugSource, delDebugSource } from '@/api/lab';
 import { getConfig, copyToClipboardApi } from '@/utils/tool';
 import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
+import sniffer from '@/utils/sniffer';
 import { pdfh, pdfa } from '@/utils/drpy/drpyInject';
 import { createDependencyProposals } from '@/utils/drpy/drpy_suggestions/drpy_suggestions';
 import drpyObjectInner from '@/utils/drpy/drpy_suggestions/drpy_object_inner.ts?raw';
@@ -276,6 +322,7 @@ const remote = window.require('@electron/remote');
 const router = useRouter();
 const emitReload = useEventBus<string>('film-reload');
 const storeSetting = useSettingStore();
+const storePlayer = usePlayStore();
 
 const systemTheme = computed(() => {
   return storeSetting.displayMode;
@@ -342,7 +389,14 @@ let form = ref({
   },
   init: {
     auto: false
-  }
+  },
+  sniffer: {
+    url: '',
+    initScript: '',
+    runScript: '',
+    ua: '',
+    auxiliaryRegex: ''
+  },
 });
 
 const tmp = reactive({
@@ -354,7 +408,8 @@ const isVisible = reactive({
   template: false,
   player: false,
   help: false,
-  reqParam: false
+  reqParam: false,
+  snifferParam: false
 });
 
 const formDialog = reactive({
@@ -682,9 +737,9 @@ const exportFileEvent = async () => {
 
 const debugEvent = async () => {
   try {
-    const { url, rule, category, detail, search, play, proxy, player, content, init } = form.value;
+    const { rule, category, detail, search, play, proxy, player, content, init, sniffer, req } = form.value;
     const doc = {
-      url, rule, category, detail, search, play, proxy, player, init,
+      rule, category, detail, search, play, proxy, player, init, sniffer, req,
       content: content.edit
     };
 
@@ -703,10 +758,9 @@ const debugEvent = async () => {
 const cacheEvent = async () => {
   try {
     const res = await fetchDebugSource('all');
-    const { url, rule, category, detail, search, play, proxy, player, content, init } = res;
+    const { rule, category, detail, search, play, proxy, player, content, init, sniffer, req, } = res;
     if (editor) editor.setValue(content);
     Object.assign(form.value, {
-      url,
       rule,
       category,
       detail,
@@ -714,7 +768,9 @@ const cacheEvent = async () => {
       play,
       proxy,
       player,
-      init
+      init,
+      sniffer,
+      req,
     });
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
@@ -967,6 +1023,25 @@ const actionPlayer = async (url = "") => {
   isVisible.player = true;
 };
 
+const actionSniffer = async () => {
+  try {
+    const { snifferMode } = storePlayer.setting;
+    const { url, runScript, initScript, auxiliaryRegex, ua } = form.value.sniffer;
+    const snifferApi =
+      snifferMode.type === 'custom' && /^http/.test(snifferMode.url)
+        ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
+        : '';
+    const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript ? Base64.stringify(Utf8.parse(runScript)) : ''}&custom_regex=${auxiliaryRegex}`;
+    const response: any = await sniffer(snifferMode.type, snifferPlayUrl);
+    form.value.content.debug = response;
+    changeNav('debug', 'sniffer');
+    MessagePlugin.success(`${t('pages.setting.data.success')}`);
+  } catch (err) {
+    console.error('Error parsing header or body:', err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+  }
+};
+
 const getSource = async () => {
   let { url, method, header, body, contentType } = form.value.req;
   header = header ? header : '{}';
@@ -1001,8 +1076,8 @@ const getSource = async () => {
   }
 };
 
-const showReqParamDialog = () => {
-  isVisible.reqParam = true;
+const showDialog = (key: string) => {
+  isVisible[key] = true;
 };
 
 const reqCancel = () => {
@@ -1010,6 +1085,14 @@ const reqCancel = () => {
   form.value.req.header = '';
   form.value.req.body = '';
   form.value.req.contentType = 'application/json';
+};
+
+const snifferCancel = () => {
+  nextTick(() => (isVisible.snifferParam = true));
+  form.value.sniffer.ua = '';
+  form.value.sniffer.initScript = '';
+  form.value.sniffer.runScript = '';
+  form.value.sniffer.auxiliaryRegex = '';
 };
 
 const showTemplateDialog = () => {
@@ -1219,38 +1302,6 @@ const proxyEvent = async () => {
           .code-op-item {
             display: flex;
             grid-gap: var(--td-comp-margin-s);
-
-            :deep(.t-input-adornment) {
-              width: 100%;
-
-              .input-container {
-                width: inherit;
-                background-color: var(--td-bg-content-input) !important;
-                display: flex;
-                flex-direction: row;
-                flex-wrap: nowrap;
-                align-items: center;
-                justify-content: space-between;
-
-                .method {
-                  margin-right: 5px;
-                  width: 24px;
-                  height: 24px;
-                  border-radius: var(--td-radius-default);
-                  background-color: var(--td-bg-color-component);
-                  display: flex;
-                  flex-direction: row;
-                  align-content: center;
-                  align-items: center;
-                  justify-content: center;
-                  cursor: pointer;
-                }
-
-                .contentType {
-                  margin-bottom: 5px;
-                }
-              }
-            }
           }
 
           .item {
@@ -1258,7 +1309,8 @@ const proxyEvent = async () => {
             grid-gap: var(--td-comp-margin-s);
           }
 
-          .source {
+          .source,
+          .sniffer {
             display: flex;
             grid-gap: var(--td-comp-margin-s);
             flex: 1;
@@ -1480,6 +1532,39 @@ const proxyEvent = async () => {
 
     .toolbar-item {
       margin-right: var(--td-comp-margin-xs);
+    }
+  }
+}
+
+
+:deep(.t-input-adornment) {
+  width: 100%;
+
+  .input-container {
+    width: inherit;
+    background-color: var(--td-bg-content-input) !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+
+    .method {
+      margin-right: 5px;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--td-radius-default);
+      background-color: var(--td-bg-color-component);
+      display: flex;
+      flex-direction: row;
+      align-content: center;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .contentType {
+      margin-bottom: 5px;
     }
   }
 }
