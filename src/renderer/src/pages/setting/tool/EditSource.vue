@@ -274,6 +274,11 @@
                 <t-radio-button value="play">{{ $t('pages.setting.editSource.select.play') }}</t-radio-button>
                 <t-radio-button value="copy">{{ $t('pages.setting.editSource.select.copy') }}</t-radio-button>
               </t-radio-group>
+              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.source"
+                @change="sourceEvent()" v-if="form.nav === 'source'">
+                <t-radio-button value="format">{{ $t('pages.setting.editSource.select.format') }}</t-radio-button>
+                <t-radio-button value="reset">{{ $t('pages.setting.editSource.select.reset') }}</t-radio-button>
+              </t-radio-group>
             </div>
           </div>
           <div class="text">
@@ -293,6 +298,7 @@ import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
 import moment from 'moment';
 import * as monaco from 'monaco-editor';
+import jsBeautify from 'js-beautify';
 import JSON5 from "json5";
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -381,7 +387,8 @@ let form = ref({
   action: '',
   clickType: {
     log: '',
-    proxy: ''
+    proxy: '',
+    source: ''
   },
   lastEditTime: {
     edit: 0,
@@ -1134,10 +1141,34 @@ const proxyEvent = async () => {
 
     MessagePlugin.info(`${t('pages.setting.data.success')}`);
   } catch (err) {
-    console.log(`[editSource][proxy][err]${err}`)
+    console.log(`[editSource][proxyEvent][err]${err}`)
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   } finally {
     form.value.clickType.proxy = "";
+  };
+};
+
+const sourceEvent = () => {
+  try {
+    const type = form.value.clickType.source;
+    const html = form.value.content.source;
+    if (type === 'reset') {
+      log?.setValue(html);
+    } else if (type === 'format') {
+      const formattedHtml: any = jsBeautify.html(html, {
+        preserve_newlines: false
+      });
+      console.log(formattedHtml)
+      log?.setValue(formattedHtml);
+    };
+
+    MessagePlugin.info(`${t('pages.setting.data.success')}`);
+  } catch (err) {
+    console.log(`[editSource][sourceEvent][err]${err}`)
+    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
+
+  } finally {
+    form.value.clickType.source = "";
   };
 };
 </script>
