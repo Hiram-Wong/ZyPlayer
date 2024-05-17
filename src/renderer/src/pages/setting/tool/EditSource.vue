@@ -758,7 +758,7 @@ const debugEvent = async () => {
 const cacheEvent = async () => {
   try {
     const res = await fetchDebugSource('all');
-    const { rule, category, detail, search, play, proxy, player, content, init, sniffer, req, } = res;
+    const { rule, category, detail, search, play, proxy, player, content, init, sniffer, req } = res;
     if (editor) editor.setValue(content);
     Object.assign(form.value, {
       rule,
