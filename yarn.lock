@@ -1966,26 +1966,26 @@
   resolved "https://registry.npmmirror.com/@vitejs/plugin-vue/-/plugin-vue-5.0.4.tgz#508d6a0f2440f86945835d903fcc0d95d1bb8a37"
   integrity sha512-WS3hevEszI6CEVEx28F8RjTX97k3KsrcY6kvTg7+Whm5y3oYvcqzVeGCU3hxSAn4uY2CLCkeokkGKpoctccilQ==
 
-"@volar/language-core@2.2.2", "@volar/language-core@~2.2.2":
-  version "2.2.2"
-  resolved "https://registry.npmmirror.com/@volar/language-core/-/language-core-2.2.2.tgz#3c0e745a6d279e6f1872ad3de406683e2e92002b"
-  integrity sha512-GuvEL4JdxbnLVhPLICncCGT+tVW4cIz9GxXNeDofNnJ4iNTKhr5suGVsA1GLOne9PbraSjn8PlLt+pvLxuRVeQ==
+"@volar/language-core@2.2.4", "@volar/language-core@~2.2.4":
+  version "2.2.4"
+  resolved "https://registry.npmmirror.com/@volar/language-core/-/language-core-2.2.4.tgz#50a9194732988610d6b0d8d8732a07235e6464c8"
+  integrity sha512-7As47GndxGxsqqYnbreLrfB5NDUeQioPM2LJKUuB4/34c0NpEJ2byVl3c9KYdjIdiEstWZ9JLtLKNTaPWb5jtA==
   dependencies:
-    "@volar/source-map" "2.2.2"
+    "@volar/source-map" "2.2.4"
 
-"@volar/source-map@2.2.2":
-  version "2.2.2"
-  resolved "https://registry.npmmirror.com/@volar/source-map/-/source-map-2.2.2.tgz#ec25e8366297b1e9bbd3abcb1636330010d59d59"
-  integrity sha512-vUwvZuSW6iN4JI9QRinh9EjFasx1TUtnaWMKwgWx08xz1PyYuNkLlWlrZXBZ5GGBhML0u230M/7X+AHY2h9yKg==
+"@volar/source-map@2.2.4":
+  version "2.2.4"
+  resolved "https://registry.npmmirror.com/@volar/source-map/-/source-map-2.2.4.tgz#15e50e2fc98e76e61711b6cc5d45872814a3e482"
+  integrity sha512-m92FLpR9vB1YEZfiZ+bfgpLrToL/DNkOrorWVep3pffHrwwI4Tx2oIQN+sqHJfKkiT5N3J1owC+8crhAEinfjg==
   dependencies:
     muggle-string "^0.4.0"
 
-"@volar/typescript@~2.2.2":
-  version "2.2.2"
-  resolved "https://registry.npmmirror.com/@volar/typescript/-/typescript-2.2.2.tgz#b133919b5d1ef99f882916ddb62297766500843c"
-  integrity sha512-WcwOREz7+uOrpjUrKhOMaOKKmyPdtqF95HWX7SE0d9hhBB1KkfahxhaAex5U9Bn43LfINHlycLoYCNEtfeKm0g==
+"@volar/typescript@~2.2.4":
+  version "2.2.4"
+  resolved "https://registry.npmmirror.com/@volar/typescript/-/typescript-2.2.4.tgz#8f283d8e9769fed03d9e632a159152e2b3295af0"
+  integrity sha512-uAQC53tgEbHO62G8NXMfmBrJAlP2QJ9WxVEEQqqK3I6VSy8frL5LbH3hAWODxiwMWixv74wJLWlKbWXOgdIoRQ==
   dependencies:
-    "@volar/language-core" "2.2.2"
+    "@volar/language-core" "2.2.4"
     path-browserify "^1.0.1"
 
 "@vue/babel-helper-vue-transform-on@1.2.2":
@@ -2085,12 +2085,12 @@
     "@typescript-eslint/parser" "^7.1.1"
     vue-eslint-parser "^9.3.1"
 
-"@vue/language-core@2.0.17":
-  version "2.0.17"
-  resolved "https://registry.npmmirror.com/@vue/language-core/-/language-core-2.0.17.tgz#25ba5c7f4450790cc6cfaccf9805a6b91ada1bd7"
-  integrity sha512-tHw2J6G9yL4kn3jN5MftOHEq86Y6qnuohBQ1OHkJ73fAv3OYgwDI1cfX7ds0OEJEycOMG64BA3ql5bDgDa41zw==
+"@vue/language-core@2.0.19":
+  version "2.0.19"
+  resolved "https://registry.npmmirror.com/@vue/language-core/-/language-core-2.0.19.tgz#d55f9c1e92690c77ffd599688ba36c2b50c4303b"
+  integrity sha512-A9EGOnvb51jOvnCYoRLnMP+CcoPlbZVxI9gZXE/y2GksRWM6j/PrLEIC++pnosWTN08tFpJgxhSS//E9v/Sg+Q==
   dependencies:
-    "@volar/language-core" "~2.2.2"
+    "@volar/language-core" "~2.2.4"
     "@vue/compiler-dom" "^3.4.0"
     "@vue/shared" "^3.4.0"
     computeds "^0.0.1"
@@ -3035,11 +3035,6 @@ copy-to-clipboard@^3.3.3:
   dependencies:
     toggle-selection "^1.0.6"
 
-core-js@^3.26.1:
-  version "3.37.1"
-  resolved "https://registry.npmmirror.com/core-js/-/core-js-3.37.1.tgz#d21751ddb756518ac5a00e4d66499df981a62db9"
-  integrity sha512-Xn6qmxrQZyB0FFY8E3bgRXei3lWDJHhvI+u0q9TKIYM49G8pAr0FgnnrFRAmsbptZL1yxRADVXn+x5AGsbBfyw==
-
 core-util-is@1.0.2:
   version "1.0.2"
   resolved "https://registry.npmmirror.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
@@ -3155,11 +3150,6 @@ csstype@^3.1.3:
   resolved "https://registry.npmmirror.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
 
-custom-event-polyfill@^1.0.7:
-  version "1.0.7"
-  resolved "https://registry.npmmirror.com/custom-event-polyfill/-/custom-event-polyfill-1.0.7.tgz#9bc993ddda937c1a30ccd335614c6c58c4f87aee"
-  integrity sha512-TDDkd5DkaZxZFM8p+1I3yAlvM3rSr1wbrOliG4yJiwinMZN8z/iGL7BTlDkrJcYTmgUSb4ywVCc3ZaUtOtC76w==
-
 d@1, d@^1.0.1, d@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npmmirror.com/d/-/d-1.0.2.tgz#2aefd554b81981e7dccf72d6842ae725cb17e5de"
@@ -3201,7 +3191,12 @@ data-uri-to-buffer@^6.0.2:
   resolved "https://registry.npmmirror.com/data-uri-to-buffer/-/data-uri-to-buffer-6.0.2.tgz#8a58bb67384b261a38ef18bea1810cb01badd28b"
   integrity sha512-7hvf7/GW8e86rW0ptuwS3OcBGDjIi6SZva7hCyWC0yYry2cOPmLIjXAUHI6DK2HsnwJd9ifmt57i8eV2n4YNpw==
 
-dayjs@^1.11.11, dayjs@^1.11.9:
+dayjs@1.11.10:
+  version "1.11.10"
+  resolved "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.10.tgz#68acea85317a6e164457d6d6947564029a6a16a0"
+  integrity sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==
+
+dayjs@^1.11.11:
   version "1.11.11"
   resolved "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.11.tgz#dfe0e9d54c5f8b68ccf8ca5f72ac603e7e5ed59e"
   integrity sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==
@@ -3316,10 +3311,10 @@ devtools-protocol@0.0.1249869:
   resolved "https://registry.npmmirror.com/devtools-protocol/-/devtools-protocol-0.0.1249869.tgz#000c3cf1afc189a18db98135a50d4a8f95a47d29"
   integrity sha512-Ctp4hInA0BEavlUoRy9mhGq0i+JSo/AwVyX2EFgZmV1kYB+Zq+EMBAn52QWu6FbRr10hRb6pBl420upbp4++vg==
 
-devtools-protocol@0.0.1273771:
-  version "0.0.1273771"
-  resolved "https://registry.npmmirror.com/devtools-protocol/-/devtools-protocol-0.0.1273771.tgz#46aeb5db41417e2c2ad3d8367c598c975290b1a5"
-  integrity sha512-QDbb27xcTVReQQW/GHJsdQqGKwYBE7re7gxehj467kKP2DKuYBUj6i2k5LRiAC66J1yZG/9gsxooz/s9pcm0Og==
+devtools-protocol@0.0.1286932:
+  version "0.0.1286932"
+  resolved "https://registry.npmmirror.com/devtools-protocol/-/devtools-protocol-0.0.1286932.tgz#2303707034426fe0b39012713d4b7339f7dbc815"
+  integrity sha512-wu58HMQll9voDjR4NlPyoDEw1syfzaBNHymMMZ/QOXiHRNluOnDgu9hp1yHOKYoMlxCh4lSSiugLITe6Fvu1eA==
 
 dir-compare@^3.0.0:
   version "3.3.0"
@@ -5230,11 +5225,6 @@ linkify-it@^5.0.0:
   dependencies:
     uc.micro "^2.0.0"
 
-loadjs@^4.2.0:
-  version "4.3.0"
-  resolved "https://registry.npmmirror.com/loadjs/-/loadjs-4.3.0.tgz#38c578cbb2e08835aa4407bd4ac6507dd1f7ed10"
-  integrity sha512-vNX4ZZLJBeDEOBvdr2v/F+0aN5oMuPu7JTqrMwp+DtgK+AryOlpy6Xtm2/HpNr+azEa828oQjOtWsB6iDtSfSQ==
-
 local-pkg@^0.5.0:
   version "0.5.0"
   resolved "https://registry.npmmirror.com/local-pkg/-/local-pkg-0.5.0.tgz#093d25a346bae59a99f80e75f6e9d36d7e8c925c"
@@ -5800,7 +5790,7 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-openai@^4.33.0:
+openai@^4.33.0, openai@^4.47.1:
   version "4.47.1"
   resolved "https://registry.npmmirror.com/openai/-/openai-4.47.1.tgz#1d23c7a8eb3d7bcdc69709cd905f4c9af0181dba"
   integrity sha512-WWSxhC/69ZhYWxH/OBsLEirIjUcfpQ5+ihkXKp06hmeYXgBBIUCa9IptMzYx6NdkiOCsSGYCnTIsxaic3AjRCQ==
@@ -6131,17 +6121,6 @@ plist@^3.0.4, plist@^3.0.5:
     base64-js "^1.5.1"
     xmlbuilder "^15.1.1"
 
-plyr@^3.7.8:
-  version "3.7.8"
-  resolved "https://registry.npmmirror.com/plyr/-/plyr-3.7.8.tgz#b79bccc23687705b5d9a283b2a88c124bf7471ed"
-  integrity sha512-yG/EHDobwbB/uP+4Bm6eUpJ93f8xxHjjk2dYcD1Oqpe1EcuQl5tzzw9Oq+uVAzd2lkM11qZfydSiyIpiB8pgdA==
-  dependencies:
-    core-js "^3.26.1"
-    custom-event-polyfill "^1.0.7"
-    loadjs "^4.2.0"
-    rangetouch "^2.0.1"
-    url-polyfill "^1.1.12"
-
 postcss-resolve-nested-selector@^0.1.1:
   version "0.1.1"
   resolved "https://registry.npmmirror.com/postcss-resolve-nested-selector/-/postcss-resolve-nested-selector-0.1.1.tgz#29ccbc7c37dedfac304e9fff0bf1596b3f6a0e4e"
@@ -6346,15 +6325,15 @@ puppeteer-core@22.5.0:
     devtools-protocol "0.0.1249869"
     ws "8.16.0"
 
-puppeteer-core@^22.8.0:
-  version "22.8.2"
-  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-22.8.2.tgz#ef40d7de4f17b28b2c34144170d2bf02a520aaff"
-  integrity sha512-Gg9jUdJeF+UDbYPhwD602ky1LeS+AXDksl6sludrti1b7Sv/U4ZGY1LFyejarkIBCSHiPWL9SngXKCNcdZWBgQ==
+puppeteer-core@^22.9.0:
+  version "22.9.0"
+  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-22.9.0.tgz#df7ef6c285f4eed938911322184f9cd21d892b39"
+  integrity sha512-Q2SYVZ1SIE7jCd/Pp+1/mNLFtdJfGvAF+CqOTDG8HcCNCiBvoXfopXfOfMHQ/FueXhGfJW/I6DartWv6QzpNGg==
   dependencies:
     "@puppeteer/browsers" "2.2.3"
     chromium-bidi "0.5.19"
     debug "4.3.4"
-    devtools-protocol "0.0.1273771"
+    devtools-protocol "0.0.1286932"
     ws "8.17.0"
 
 puppeteer-in-electron@^3.0.5:
@@ -6422,11 +6401,6 @@ quick-lru@^5.1.1:
   version "5.1.1"
   resolved "https://registry.npmmirror.com/quick-lru/-/quick-lru-5.1.1.tgz#366493e6b3e42a3a6885e2e99d18f80fb7a8c932"
   integrity sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==
-
-rangetouch@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.npmmirror.com/rangetouch/-/rangetouch-2.0.1.tgz#c01105110fd3afca2adcb1a580692837d883cb70"
-  integrity sha512-sln+pNSc8NGaHoLzwNBssFSf/rSYkqeBXzX1AtJlkJiUaVSJSbRAWJk+4omsXkN+EJalzkZhWQ3th1m0FpR5xA==
 
 read-config-file@6.3.2:
   version "6.3.2"
@@ -7209,10 +7183,10 @@ tdesign-icons-vue-next@^0.2.0, tdesign-icons-vue-next@^0.2.2:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.9.4:
-  version "1.9.4"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.9.4.tgz#21a9c117ffec607f1d2f060c5de53e724f4dfdb1"
-  integrity sha512-mbm2mGzM8WKCkxhFnJa9xyAhaXoP7i/TlJrIFe45BqI8cF3EMHuI6+Bb+8c6V320FSLpmlhChishIC8rGPcWYA==
+tdesign-vue-next@^1.9.5:
+  version "1.9.5"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.9.5.tgz#d29a7ac5b108c834cb08415514245a49bda5c13a"
+  integrity sha512-QMPLb3/+qEw84pzhq/wZ6WlpJP2E4GiG09Pmg7E4bA0+eMadS67QPbkmUTK1O764EubkVPugUf3+PyOpy171jg==
   dependencies:
     "@babel/runtime" "^7.22.6"
     "@popperjs/core" "^2.11.8"
@@ -7220,7 +7194,7 @@ tdesign-vue-next@^1.9.4:
     "@types/sortablejs" "^1.15.1"
     "@types/tinycolor2" "^1.4.3"
     "@types/validator" "^13.7.17"
-    dayjs "^1.11.9"
+    dayjs "1.11.10"
     lodash "^4.17.21"
     mitt "^3.0.1"
     sortablejs "^1.15.0"
@@ -7521,11 +7495,6 @@ url-parse@^1.5.10:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
 
-url-polyfill@^1.1.12:
-  version "1.1.12"
-  resolved "https://registry.npmmirror.com/url-polyfill/-/url-polyfill-1.1.12.tgz#6cdaa17f6b022841b3aec0bf8dbd87ac0cd33331"
-  integrity sha512-mYFmBHCapZjtcNHW0MDq9967t+z4Dmg5CJ0KqysK3+ZbyoNOWQHksGCTWwDhxGXllkWlOc10Xfko6v4a3ucM6A==
-
 url@^0.11.3:
   version "0.11.3"
   resolved "https://registry.npmmirror.com/url/-/url-0.11.3.tgz#6f495f4b935de40ce4a0a52faee8954244f3d3ad"
@@ -7643,13 +7612,13 @@ vue-template-compiler@^2.7.14:
     de-indent "^1.0.2"
     he "^1.2.0"
 
-vue-tsc@^2.0.17:
-  version "2.0.17"
-  resolved "https://registry.npmmirror.com/vue-tsc/-/vue-tsc-2.0.17.tgz#bd1c7704c454169b3fcb893421226be99ccae4bf"
-  integrity sha512-RRZsiCBD1hvATQb321xV+SkRDKsK5hgFQ4WXy5wuYsyyjz8xAK4DjxHkpH7PFoJKUbZTbeW8KzhejzXZS49Tzw==
+vue-tsc@^2.0.19:
+  version "2.0.19"
+  resolved "https://registry.npmmirror.com/vue-tsc/-/vue-tsc-2.0.19.tgz#db0158a36b7e3773d31855fad5185554bbc7584f"
+  integrity sha512-JWay5Zt2/871iodGF72cELIbcAoPyhJxq56mPPh+M2K7IwI688FMrFKc/+DvB05wDWEuCPexQJ6L10zSwzzapg==
   dependencies:
-    "@volar/typescript" "~2.2.2"
-    "@vue/language-core" "2.0.17"
+    "@volar/typescript" "~2.2.4"
+    "@vue/language-core" "2.0.19"
     semver "^7.5.4"
 
 vue@^3.4.27:
