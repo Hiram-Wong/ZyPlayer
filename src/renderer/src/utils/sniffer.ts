@@ -193,7 +193,7 @@ const snifferIframe = async (
 
 const snifferCustom = async (url: string): Promise<{ headers: object; data: string }> => {
   let data: string = '';
-  let headers: object = null;
+  let headers: object | null = null;
   try {
     const response = await request({
       url,
@@ -204,20 +204,21 @@ const snifferCustom = async (url: string): Promise<{ headers: object; data: stri
       headers = response.headers;
       console.log(`[detail][sniffer][custom][return]: custom嗅探流程返回链接:${data}`);
     } else {
-      console.log(`[detail][sniffer][custom][error]: custom嗅探流程错误:${res}`);
+      const err = response.msg;
+      console.log(`[detail][sniffer][custom][error]: custom嗅探流程错误:${err}`);
     }
   } catch (err) {
     console.log(`[detail][sniffer][custom][error]: custom嗅探流程错误:${err}`);
   } finally {
     console.log(`[detail][sniffer][custom][end]: custom嗅探流程结束`);
-    return { data, headers };
+    return { data, headers: headers! };
   }
 };
 
 // 嗅探
 const sniffer = async (type: string, url: string): Promise<{ headers: object; data: string }> => {
   let data: string = '';
-  let headers: object = null;
+  let headers: object | null = null;
   let query: any = getQuery(url, '');
   console.log(`[detail][sniffer][query]`, query);
   let script = query.script;
@@ -234,7 +235,7 @@ const sniffer = async (type: string, url: string): Promise<{ headers: object; da
     data = _obj.data;
     headers = _obj.headers;
   }
-  return { data, headers };
+  return { data, headers: headers! };
 };
 
 export default sniffer;
