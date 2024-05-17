@@ -6,7 +6,8 @@ export default {
     paramsPath: 'path',
     paramsPasswd: 'password',
     params: '{\n\t"path": { "password": "password" }\n}',
-    manualTip: 'Example of M3U:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\nExample of genre\nChannel,https://channel-url',
+    manualTip:
+      'Example of M3U:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\nExample of genre\nChannel,https://channel-url',
     groupTip: 'Please select a group',
     categoryTip: 'Please enter the content, separated by commas',
     shortcutKeyTip: 'Click this to set',
@@ -15,7 +16,7 @@ export default {
     epgTip: 'Only support dipy',
     logoTip: 'Source logo is invalid',
     pdfaTip: 'List rules (e.g. body&&li)',
-    pdfhTip: 'Node rules (e.g. body&&a,0&&href)'
+    pdfhTip: 'Node rules (e.g. body&&a,0&&href)',
   },
   dialog: {
     cancel: 'Cancel',
@@ -25,7 +26,7 @@ export default {
     flag: 'Flag',
     splitTip: 'Please use half-width state for separator ","',
     restoreFactoryHeader: 'Eestore Factory',
-    restoreFactoryBody: 'Are you sure to restore the factory? Return to the initial state after leaving the factory.'
+    restoreFactoryBody: 'Are you sure to restore the factory? Return to the initial state after leaving the factory.',
   },
   nav: {
     configBase: 'BaseSetting',
@@ -33,7 +34,7 @@ export default {
     iptvSource: 'IptvSetting',
     analyzeSource: 'AnalyzeSetting',
     driveSource: 'DriveSetting',
-    editSource: 'EditSource'
+    editSource: 'EditSource',
   },
   table: {
     default: 'Default',
@@ -44,24 +45,24 @@ export default {
     site: {
       close: 'close',
       together: 'together',
-      local: 'lcoal'
+      local: 'lcoal',
     },
     iptv: {
       remote: 'Remote',
       local: 'Local',
-      manual: 'Manual'
+      manual: 'Manual',
     },
     analyze: {
       web: 'Web',
-      json: 'Json'
-    }
+      json: 'Json',
+    },
   },
   header: {
     add: 'Add',
     delete: 'Delete',
     check: 'Check',
     flag: 'Flag',
-    search: 'Search Resource'
+    search: 'Search Resource',
   },
   site: {
     name: 'name',
@@ -71,25 +72,25 @@ export default {
     playUrl: 'playUrl',
     ext: 'ext',
     group: 'group',
-    category: 'category'
+    category: 'category',
   },
   iptv: {
     name: 'name',
     config: 'type',
     api: 'api',
     epg: 'epg',
-    upload: 'Upload'
+    upload: 'Upload',
   },
   analyze: {
     name: 'name',
     type: 'type',
-    api: 'api'
+    api: 'api',
   },
   drive: {
     name: 'name',
     server: 'api',
     startPage: 'start',
-    params: 'params'
+    params: 'params',
   },
   base: {
     theme: 'Theme',
@@ -139,7 +140,7 @@ export default {
     restoreFactory: 'RestoreFactory',
     dataMange: 'DataMange',
     checkUpdate: 'CheckUpdate',
-    disclaimer: 'Disclaimer'
+    disclaimer: 'Disclaimer',
   },
   message: {
     reboot: 'Reset successfully, application will be restarted',
@@ -148,17 +149,17 @@ export default {
     windowPositionOn: 'WindowPosition turn on',
     windowPositionOff: 'WindowPosition turn off',
     networkAddress: 'Network address',
-    networkCheckError: 'Network status detection failed'
+    networkCheckError: 'Network status detection failed',
   },
   ad: {
     title: 'Better on Hipy',
     desc: 'New Start, New Begin',
-    open: 'open'
+    open: 'open',
   },
   ua: {
     title: 'User-Agent',
     topTip: 'Emulate User Agent',
-    bottomTip: "recommend chrome, empty use system default"
+    bottomTip: 'recommend chrome, empty use system default',
   },
   barrage: {
     title: 'Barrage',
@@ -171,12 +172,13 @@ export default {
     mode: 'Mode',
     content: 'Text',
     param: 'Parameter mapping',
-    tip: 'Mapping Field position of the return, starting 0'
+    tip: 'Mapping Field position of the return, starting 0',
   },
   data: {
     title: 'DataMange',
     config: 'Config',
-    configTip: 'The data is stored in the database and exported as a JSON file for ease of migration. The import overwrites the original data',
+    configTip:
+      'The data is stored in the database and exported as a JSON file for ease of migration. The import overwrites the original data',
     success: 'Success',
     fail: 'Fail',
     easyConfig: {
@@ -199,7 +201,7 @@ export default {
       address: 'url',
       dropTip: 'Due to compatibility problems, the old data import will discard historical and collection data',
       import: 'Import',
-      importTip: 'Original data will be cleared'
+      importTip: 'Original data will be cleared',
     },
     configExport: {
       title: 'ConfigExport',
@@ -214,7 +216,7 @@ export default {
       star: 'star',
       setting: 'setting',
       export: 'Export',
-      exportTip: 'Selected data will be export'
+      exportTip: 'Selected data will be export',
     },
     clearData: {
       title: 'ClearData',
@@ -228,10 +230,10 @@ export default {
       thumbnail: 'thumbnail',
       star: 'star',
       clear: 'Clear',
-      clearTip: 'Selected data will be deleted'
+      clearTip: 'Selected data will be deleted',
     },
     syncDisk: 'SyncDisk',
-    content1: "Because not collected data, you can choose sync service save data",
+    content1: 'Because not collected data, you can choose sync service save data',
     content2: 'Built-in webdav as sync service, recommend jianguo cloud',
     content3: 'If switch AutoSync on, Sync every 5 minutes',
     webdev: {
@@ -246,11 +248,11 @@ export default {
     syncToCloud: 'SyncToCloud',
     syncToCloudTip: 'Cloud data will be overwritten',
     syncToLocal: 'SyncToLocal',
-    syncToLocalTip: 'Local data will be cleared'
+    syncToLocalTip: 'Local data will be cleared',
   },
   thumbanilFfmpeg: {
     haveFfmpeg: 'FFmpeg module installed detected',
-    noFfmpeg: 'No FFmpeg module was detected'
+    noFfmpeg: 'No FFmpeg module was detected',
   },
   sniffer: {
     title: 'Sniffing Scheme',
@@ -258,20 +260,20 @@ export default {
       sign: 'PuppeteerInElectron',
       name: 'Intercept&Modify req',
       mainAbility: 'Sniff ability',
-      secondaryAbility: 'Support unload page'
+      secondaryAbility: 'Support unload page',
     },
     iframe: {
       sign: 'Browser native interface',
       name: 'Low resource',
       mainAbility: 'Compliant',
-      secondaryAbility: 'Loaded page only'
+      secondaryAbility: 'Loaded page only',
     },
     other: {
       sign: 'Third-party interface',
       name: 'Good performance',
       mainAbility: 'Expert',
-      secondaryAbility: ''
-    }
+      secondaryAbility: '',
+    },
   },
   update: {
     title: 'Check updates',
@@ -283,7 +285,7 @@ export default {
     install: 'install',
     download: 'download',
     downloading: 'downloading',
-    downloaded: 'The download of the installation package is complete'
+    downloaded: 'The download of the installation package is complete',
   },
   editSource: {
     import: 'Import',
@@ -296,8 +298,6 @@ export default {
     title: 'Source Tool [Hjdhnx United]',
     template: 'Template',
     templateTip: 'select one default template to edit',
-    reqHeaderTitle: 'Request Header',
-    reqBodyTitle: 'Request Body',
     run: 'Run',
     fileManage: 'File',
     placeholder: {
@@ -307,7 +307,15 @@ export default {
     rule: {
       pdfa: 'Pdfa',
       pdfh: 'Pdfh',
-      try: 'Try'
+      try: 'Try',
+      url: 'Url',
+      wd: 'Wd',
+      pg: 'Pg',
+      t: 'T',
+      f: 'F',
+      ids: 'Ids',
+      flag: 'Flag',
+      play: 'Play',
     },
     bar: {
       title: 'Edit Params',
@@ -317,7 +325,7 @@ export default {
       wordWrap: 'wordWrap',
       disable: 'disable',
       enable: 'enable',
-      autoInit: 'autoInit'
+      autoInit: 'autoInit',
     },
     action: {
       init: 'Init',
@@ -334,7 +342,7 @@ export default {
       play: 'Play',
       proxy: 'Proxy',
       player: 'Player',
-      sniffer: 'Sniffer'
+      sniffer: 'Sniffer',
     },
     select: {
       log: 'Log',
@@ -345,7 +353,7 @@ export default {
       clear: 'Clean',
       play: 'Play',
       copy: 'Copy',
-      upload: 'Upload'
+      upload: 'Upload',
     },
     message: {
       openDevTools: 'Currently logs can only be viewed via Developer Tools -> Console',
@@ -363,12 +371,22 @@ export default {
     },
     dialog: {
       player: {
-        title: 'PlayTest'
+        title: 'PlayTest',
       },
       request: {
         title: 'RequestParameters',
-        cancel: 'Reset'
-      }
-    }
-  }
-}
+        cancel: 'Reset',
+        reqHeader: 'Request Header',
+        reqBody: 'Request Body',
+      },
+      sniffer: {
+        title: 'SnifferParameters',
+        ua: 'User-Agent',
+        auxiliaryRegex: 'auxiliaryRegex',
+        initScript: 'InitScript',
+        runScript: 'RunScript',
+        cancel: 'Reset',
+      },
+    },
+  },
+};

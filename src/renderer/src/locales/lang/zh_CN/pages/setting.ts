@@ -6,7 +6,8 @@ export default {
     paramsPath: '路径',
     paramsPasswd: '密码',
     params: `{\n\t"路径": { "password": "密码" }\n}`,
-    manualTip: 'M3u格式示例:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\ngenre格式示例\nChannel,https://channel-url',
+    manualTip:
+      'M3u格式示例:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\ngenre格式示例\nChannel,https://channel-url',
     groupTip: '请选择分组',
     categoryTip: '请输入内容, 逗号分隔',
     shortcutKeyTip: '点击去设置',
@@ -15,7 +16,7 @@ export default {
     epgTip: '仅支持dipy',
     logoTip: '源台标失效',
     pdfaTip: '列表规则(如 body&&li)',
-    pdfhTip: '节点规则(如 body&&a,0&&href)'
+    pdfhTip: '节点规则(如 body&&a,0&&href)',
   },
   dialog: {
     cancel: '取消',
@@ -25,7 +26,7 @@ export default {
     flag: '标识',
     splitTip: '分隔符请使用半角状态","',
     restoreFactoryHeader: '恢复出厂',
-    restoreFactoryBody: '你确定要恢复出厂吗? 确认后恢复到初始状态。'
+    restoreFactoryBody: '你确定要恢复出厂吗? 确认后恢复到初始状态。',
   },
   nav: {
     configBase: '基础配置',
@@ -33,7 +34,7 @@ export default {
     iptvSource: '电视配置',
     analyzeSource: '解析配置',
     driveSource: '网盘配置',
-    editSource: '写源工具'
+    editSource: '写源工具',
   },
   table: {
     default: '默认',
@@ -44,24 +45,24 @@ export default {
     site: {
       close: '关闭',
       together: '聚合',
-      local: '本地'
+      local: '本地',
     },
     iptv: {
       remote: '远程',
       local: '本地',
-      manual: '手动'
+      manual: '手动',
     },
     analyze: {
       web: 'Web',
-      json: 'Json'
-    }
+      json: 'Json',
+    },
   },
   header: {
     add: '添加',
     delete: '删除',
     check: '检测',
     flag: '标识',
-    search: '搜索资源'
+    search: '搜索资源',
   },
   site: {
     name: '名称',
@@ -71,25 +72,25 @@ export default {
     playUrl: '解析',
     ext: '扩展',
     group: '分组',
-    category: '类别'
+    category: '类别',
   },
   iptv: {
     name: '名称',
     config: '配置',
     api: 'api',
     epg: '节目单',
-    upload: '点我上传'
+    upload: '点我上传',
   },
   analyze: {
     name: '名称',
     type: '类型',
-    api: '接口'
+    api: '接口',
   },
   drive: {
     name: '名称',
     server: '接口',
     startPage: '起始页',
-    params: '加密'
+    params: '加密',
   },
   base: {
     theme: '主题',
@@ -139,7 +140,7 @@ export default {
     restoreFactory: '恢复出厂',
     dataMange: '数据管理',
     checkUpdate: '检查更新',
-    disclaimer: '用户协议'
+    disclaimer: '用户协议',
   },
   message: {
     reboot: '重置成功，应用程序将重新启动',
@@ -148,17 +149,17 @@ export default {
     windowPositionOn: '打开窗口位置',
     windowPositionOff: '关闭窗口位置',
     networkAddress: '网络地址',
-    networkCheckError: '网络状态检测失败'
+    networkCheckError: '网络状态检测失败',
   },
   ad: {
     title: '与Hipy更配哦',
     desc: '新起点, 新开始',
-    open: '查看'
+    open: '查看',
   },
   ua: {
     title: 'User-Agent',
     topTip: '模拟用户代理',
-    bottomTip: "推荐chrome, 空使用系统默认"
+    bottomTip: '推荐chrome, 空使用系统默认',
   },
   barrage: {
     title: '弹幕',
@@ -171,7 +172,7 @@ export default {
     mode: '模式',
     content: '内容',
     param: '参数映射',
-    tip: '每个字段对应弹幕返回的位置, 从0开始'
+    tip: '每个字段对应弹幕返回的位置, 从0开始',
   },
   data: {
     title: '数据管理',
@@ -199,7 +200,7 @@ export default {
       address: '地址',
       dropTip: '由于兼容性问题, 3.3.2前旧数据导入将丢弃历史和收集数据',
       import: '导入',
-      importTip: '原始数据将被清除, 确认导入吗'
+      importTip: '原始数据将被清除, 确认导入吗',
     },
     configExport: {
       title: '配置导出',
@@ -214,7 +215,7 @@ export default {
       star: '收藏',
       setting: '配置',
       export: '导出',
-      exportTip: '选中数据将被导出,确认操作吗'
+      exportTip: '选中数据将被导出,确认操作吗',
     },
     clearData: {
       title: '清空数据',
@@ -228,7 +229,7 @@ export default {
       thumbnail: '缩略图',
       star: '收藏',
       clear: '清空',
-      clearTip: '选中数据将被删除,确认操作吗'
+      clearTip: '选中数据将被删除,确认操作吗',
     },
     syncDisk: '同步盘',
     content1: '因不收集用户的数据, 可以选择同步盘作为配置文件保存服务',
@@ -246,11 +247,11 @@ export default {
     syncToCloud: '同步数据到帐号',
     syncToCloudTip: '云端数据将被覆盖,确认操作吗',
     syncToLocal: '云数据覆盖本地',
-    syncToLocalTip: '本地数据将被清除,确认操作吗'
+    syncToLocalTip: '本地数据将被清除,确认操作吗',
   },
   thumbanilFfmpeg: {
     haveFfmpeg: '检测到ffmpeg模块已安装',
-    noFfmpeg: '未检测到ffmpeg模块'
+    noFfmpeg: '未检测到ffmpeg模块',
   },
   sniffer: {
     title: '嗅探方案',
@@ -258,20 +259,20 @@ export default {
       sign: 'PuppeteerInElectron',
       name: '拦截和修改请求',
       mainAbility: '嗅探能力强',
-      secondaryAbility: '支持未加载页面'
+      secondaryAbility: '支持未加载页面',
     },
     iframe: {
       sign: '浏览器原生接口',
       name: '资源占用低',
       mainAbility: '兼容性好',
-      secondaryAbility: '仅限已加载页面'
+      secondaryAbility: '仅限已加载页面',
     },
     other: {
       sign: '第三方接口',
       name: '不受本机性能影响',
       mainAbility: '更专业更好',
-      secondaryAbility: ''
-    }
+      secondaryAbility: '',
+    },
   },
   update: {
     title: '检查更新',
@@ -283,7 +284,7 @@ export default {
     install: '安装',
     download: '下载',
     downloading: '下载中',
-    downloaded: '安装包下载完成'
+    downloaded: '安装包下载完成',
   },
   editSource: {
     import: '导入',
@@ -296,8 +297,6 @@ export default {
     title: '写源工具 [道长联名]',
     template: '模板',
     templateTip: '选择一个要编辑的默认模板',
-    reqHeaderTitle: '请求头',
-    reqBodyTitle: '请求体',
     run: '运行',
     fileManage: '文件',
     placeholder: {
@@ -307,7 +306,15 @@ export default {
     rule: {
       pdfa: '列表',
       pdfh: '节点',
-      try: '执行'
+      try: '执行',
+      url: '地址',
+      wd: '关键词',
+      pg: '页',
+      t: '类',
+      f: '过滤',
+      ids: '标识',
+      flag: '线路',
+      play: '选集'
     },
     bar: {
       title: '编辑器参数',
@@ -317,14 +324,14 @@ export default {
       wordWrap: '换行',
       disable: '禁用',
       enable: '启用',
-      autoInit: '自动初始化'
+      autoInit: '自动初始化',
     },
     action: {
       init: '初始化',
       initStatus: '当前状态',
       initManual: '手动',
       initAuto: '自动',
-      source: '源代码',
+      source: '源码',
       obtain: '获取',
       classify: '分类',
       home: '首页',
@@ -334,18 +341,18 @@ export default {
       play: '播放',
       proxy: '代理',
       player: '播放器',
-      sniffer: '嗅探'
+      sniffer: '嗅探',
     },
     select: {
       log: '日志',
       debug: '调试',
-      source: '源代码',
+      source: '源码',
       rule: '规则',
       f12: 'F12',
       clear: '清理日志',
       copy: '复制',
       play: '播放',
-      upload: '上传'
+      upload: '上传',
     },
     message: {
       openDevTools: '目前只能通过开发者工具->控制台查看日志',
@@ -363,12 +370,22 @@ export default {
     },
     dialog: {
       player: {
-        title: '播放测试'
+        title: '播放测试',
       },
       request: {
         title: '请求参数',
-        cancel: '重置'
-      }
-    }
-  }
-}
+        reqHeader: '请求头',
+        reqBody: '请求体',
+        cancel: '重置',
+      },
+      sniffer: {
+        title: '嗅探参数',
+        ua: '用户代理',
+        auxiliaryRegex: '辅助规则',
+        initScript: '初始化脚本',
+        runScript: '执行脚本',
+        cancel: '重置',
+      },
+    },
+  },
+};
