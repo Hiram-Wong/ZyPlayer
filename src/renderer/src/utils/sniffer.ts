@@ -50,13 +50,13 @@ const getQuery = (url: string, paramName: string) => {
   }
 };
 
-const snifferPie = async (url: string, script: string,init_script:string,customRegex: string): Promise<string> => {
+const snifferPie = async (url: string, run_script: string, init_script: string, customRegex: string): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
   // console.log(`[detail][sniffer][pie][init_script]: ${init_script}`);
   let data: string = '';
 
   try {
-    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url, script,init_script, customRegex);
+    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url, run_script, init_script, customRegex);
 
     if (res.code === 200) {
       data = res.data.url;
@@ -109,7 +109,7 @@ const removeIframe = (iframeId: string): void => {
 
 const snifferIframe = async (
   url: string,
-  script: string,
+  run_script: string,
   init_script: string,
   customRegex: string,
   totalTime: number = 15000,

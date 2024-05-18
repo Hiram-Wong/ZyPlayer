@@ -41,7 +41,7 @@ const isVideoUrl = (reqUrl) => {
 
 const puppeteerInElectron = async (
   url: string,
-  script: string = '',
+  run_script: string = '',
   init_script: string = '',
   customRegex: string,
   ua: string | null = null,
@@ -49,7 +49,7 @@ const puppeteerInElectron = async (
   logger.info(`[sniffer] sniffer url: ${url}`);
   logger.info(`[sniffer] sniffer ua: ${ua}`);
   logger.info(`[sniffer] sniffer init_script: ${init_script}`);
-  // logger.info(`[sniffer] sniffer script: ${script}`);
+  // logger.info(`[sniffer] sniffer run_script: ${run_script}`);
 
   const pageId = nanoid(); // 生成page页面id
 
@@ -128,7 +128,7 @@ const puppeteerInElectron = async (
         pageStore[pageId].timerId = setTimeout(async () => {
           await cleanup(pageId);
           logger.info(`[pie]id: ${pageId} sniffer timeout`);
-          reject(handleResponse(500, 'fail', new Error('fail', { cause: 'sniffer timeout' })));
+          reject(handleResponse(500, 'fail', new Error('sniffer timeout')));
         }, 15000);
       } else {
         logger.info('--------has timerId------');
@@ -136,9 +136,9 @@ const puppeteerInElectron = async (
 
       await page.goto(url, { waitUntil: 'domcontentloaded' }).catch((err) => logger.error(err));
 
-      if (script.trim()) {
+      if (run_script.trim()) {
         try {
-          logger.info(`[sniffer] sniffer script in js_code: ${script}`);
+          logger.info(`[sniffer] sniffer run_script in js_code: ${run_script}`);
           const js_code = `
             (function() {
               var scriptTimer;
@@ -147,7 +147,7 @@ const puppeteerInElectron = async (
                 if (location.href !== 'about:blank') {
                   scriptCounter += 1;
                   console.log('---第' + scriptCounter + '次执行script[' + location.href + ']---');
-                  ${script}
+                  ${run_script}
                   clearInterval(scriptTimer);
                   scriptCounter = 0;
                   console.log('---执行script成功---');

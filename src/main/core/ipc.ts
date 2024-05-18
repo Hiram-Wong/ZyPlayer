@@ -1,11 +1,11 @@
-import {electronApp, is, platform} from '@electron-toolkit/utils';
-import {exec} from 'child_process';
-import {app, globalShortcut, ipcMain, shell} from 'electron';
+import { electronApp, is, platform } from '@electron-toolkit/utils';
+import { exec } from 'child_process';
+import { app, globalShortcut, ipcMain, shell } from 'electron';
 import fs from 'fs-extra';
-import {join} from 'path';
+import { join } from 'path';
 
 import logger from './logger';
-import {setting} from './db/service';
+import { setting } from './db/service';
 import puppeteerInElectron from '../utils/pie';
 
 const tmpDir = async (path: string) => {
@@ -83,7 +83,7 @@ const ipcListen = () => {
   });
 
   ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
-    let uaState: any = setting.find({key: 'ua'}).value;
+    let uaState: any = setting.find({ key: 'ua' }).value;
     const formatPath = is.dev
       ? join(process.cwd(), 'thumbnail', `${key}.jpg`)
       : join(app.getPath('userData'), 'thumbnail', `${key}.jpg`);
@@ -121,7 +121,7 @@ const ipcListen = () => {
 
   ipcMain.handle('ffmpeg-installed-check', async () => {
     try {
-      const {stdout} = await exec('ffmpeg -version');
+      const { stdout } = await exec('ffmpeg -version');
       logger.info(`[ipcMain] FFmpeg is installed. ${stdout}`);
       return true;
     } catch (err) {
@@ -130,9 +130,9 @@ const ipcListen = () => {
     }
   });
 
-  ipcMain.handle('sniffer-media', async (_, url, script, init_script, customRegex) => {
-    const ua = setting.find({key: 'ua'}).value;
-    const res = await puppeteerInElectron(url, script, init_script,customRegex, ua);
+  ipcMain.handle('sniffer-media', async (_, url, run_script, init_script, customRegex) => {
+    const ua = setting.find({ key: 'ua' }).value;
+    const res = await puppeteerInElectron(url, run_script, init_script, customRegex, ua);
     return res;
   });
 
@@ -176,4 +176,4 @@ const ipcListen = () => {
   });
 };
 
-export {ipcListen, tmpDir};
+export { ipcListen, tmpDir };
