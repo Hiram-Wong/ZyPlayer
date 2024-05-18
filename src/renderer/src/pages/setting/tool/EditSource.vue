@@ -135,11 +135,11 @@
                     <t-input v-model="form.sniffer.auxiliaryRegex"
                       :placeholder="$t('pages.setting.placeholder.general')" />
                   </div>
-                  <!-- <div class="dialog-item">
+                  <div class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.dialog.sniffer.initScript') }}</p>
                     <t-textarea v-model="form.sniffer.initScript"
                       :placeholder="$t('pages.setting.placeholder.general')" />
-                  </div> -->
+                  </div>
                   <data class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.dialog.sniffer.runScript') }}</p>
                     <t-textarea v-model="form.sniffer.runScript"
@@ -1038,7 +1038,7 @@ const actionSniffer = async () => {
       snifferMode.type === 'custom' && /^http/.test(snifferMode.url)
         ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
         : '';
-    const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript ? Base64.stringify(Utf8.parse(runScript)) : ''}&custom_regex=${auxiliaryRegex}`;
+    const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript ? Base64.parse(decodeURIComponent(runScript)).toString(Utf8) : ''}&init_script=${initScript ? Base64.parse(decodeURIComponent(initScript)).toString(Utf8) : ''}&custom_regex=${auxiliaryRegex}`;
     const response: any = await sniffer(snifferMode.type, snifferPlayUrl);
     form.value.content.debug = response;
     changeNav('debug', 'sniffer');
