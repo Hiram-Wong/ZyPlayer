@@ -1,5 +1,5 @@
 if (typeof Object.assign != 'function') {
-  Object.assign = function () {
+  Object.assign = function() {
     const target = arguments[0];
     for (let i = 1; i < arguments.length; i++) {
       const source = arguments[i];
@@ -166,18 +166,37 @@ const getMubans = () => {
     默认: {
       title: '',
       host: '',
-      url: '/vodshow/fyclass--------fypage---.html',
-      searchUrl: '/vodsearch/-------------.html?wd=**',
-      searchable: 2, // 是否启用全局搜索
-      quickSearch: 0, // 是否启用快速搜索
-      filterable: 0, // 是否启用分类筛选
+      url: '',
+      searchUrl: '',
+      searchable: 2,
+      quickSearch: 0,
+      filterable: 1,
+      filter: '',
+      filter_url: '',
+      filter_def: {},
       headers: {
         'User-Agent': 'MOBILE_UA',
       },
+      timeout: 5000,
+      class_parse: '#side-menu li;a&&Text;a&&href;/(.*?)\.html',
+      cate_exclude: '',
       play_parse: true,
-      lazy: '',
-      limit: 6,
-      double: true, // 推荐内容是否双层定位
+      lazy: `js:input = {parse: 1, url: input, js: ''}`,
+      double: true,
+      推荐: '列表1;列表2;标题;图片;描述;链接;详情',
+      一级: '列表;标题;图片;描述;链接;详情',
+      二级: {
+        title: 'vod_name;vod_type',
+        img: '图片链接',
+        desc: '主要信息;年代;地区;演员;导演',
+        content: '简介',
+        tabs: '',
+        lists: 'xx:eq(#id)&&a',
+        tab_text: 'body&&Text',
+        list_text: 'body&&Text',
+        list_url: 'a&&href',
+      },
+      搜索: '列表;标题;图片;描述;链接;详情',
     },
     vfed: {
       title: '',
@@ -307,7 +326,7 @@ const getMubans = () => {
       searchUrl: '/index.php/ajax/suggest?mid=1&wd=**&limit=50',
       searchable: 2,
       quickSearch: 0,
-      headers: {'User-Agent': 'MOBILE_UA'},
+      headers: { 'User-Agent': 'MOBILE_UA' },
       url: '/index.php/api/vod#type=fyclass&page=fypage',
       filterable: 0, // 是否启用分类筛选,
       filter_url: '',
@@ -338,7 +357,7 @@ const getMubans = () => {
       detailUrl: '/api.php/provide/vod/?ac=detail&ids=fyid',
       searchUrl: '/api.php/provide/vod/?wd=**&pg=fypage',
       url: '/api.php/provide/vod/?ac=detail&pg=fypage&t=fyclass',
-      headers: {'User-Agent': 'MOBILE_UA'},
+      headers: { 'User-Agent': 'MOBILE_UA' },
       timeout: 5000,
       // class_name: '电影&电视剧&综艺&动漫',
       // class_url: '1&2&3&4',
@@ -375,4 +394,4 @@ const getMubans = () => {
   return JSON.parse(JSON.stringify(mubanDict));
 };
 
-export {getMubans};
+export { getMubans };
