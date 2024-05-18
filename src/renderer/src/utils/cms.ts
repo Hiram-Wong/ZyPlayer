@@ -483,7 +483,7 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
       });
     }
 
-    const json = site.type === 0 ? JSON.parse(response) : response;
+    const json = site.type === 0 ? parser.parse(response) : response;
 
     const jsondata = json.rss || json;
     let videoList = jsondata.list || jsondata.data || [];
