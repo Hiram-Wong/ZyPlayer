@@ -73,6 +73,12 @@
                   :cancel-btn="$t('pages.setting.editSource.dialog.request.cancel')" show-in-attached-element
                   @confirm="isVisible.reqParam = false" @cancel="reqCancel()">
                   <div class="dialog-item">
+                    <p>{{ $t('pages.setting.editSource.dialog.request.reqEncode') }}</p>
+                    <t-select v-model="form.req.encode">
+                      <t-option v-for="item in reqEncode" :key="item.value" :value="item.value" :label="item.label" />
+                    </t-select>
+                  </div>
+                  <div class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.dialog.request.reqHeader') }}</p>
                     <t-textarea v-model="form.req.header" placeholder='{ "User-Agent": "Mozilla/5.0 zyplayer" }' />
                   </div>
@@ -316,7 +322,7 @@ import { useSettingStore, usePlayStore } from '@/store';
 
 import { setT3Proxy } from '@/api/proxy';
 import { fetchDebugSource, setDebugSource, delDebugSource } from '@/api/lab';
-import { getConfig, copyToClipboardApi } from '@/utils/tool';
+import { getHtml, copyToClipboardApi } from '@/utils/tool';
 import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
 import sniffer from '@/utils/sniffer';
@@ -354,6 +360,7 @@ let form = ref({
   nav: 'debug',
   req: {
     method: 'GET',
+    encode: 'UTF-8',
     header: '',
     body: '',
     url: '',
@@ -487,6 +494,19 @@ const reqMethods = [
     label: 'HEAD',
     value: 'HEAD',
   }
+];
+
+const reqEncode = [
+  {
+    label: 'UTF-8',
+    value: 'UTF-8',
+  }, {
+    label: 'GB2312',
+    value: 'GB2312',
+  }, {
+    label: 'GBK',
+    value: 'GBK',
+  },
 ];
 
 const reqContentTypes = [
@@ -1050,7 +1070,7 @@ const actionSniffer = async () => {
 };
 
 const getSource = async () => {
-  let { url, method, header, body, contentType } = form.value.req;
+  let { url, method, encode, header, body, contentType } = form.value.req;
   header = header ? header : '{}';
   body = body ? body : '{}';
 
@@ -1072,7 +1092,7 @@ const getSource = async () => {
       }
     }
 
-    const response = await getConfig(url, method, parsedHeader, parsedBody);
+    const response = await getHtml(url, method, encode, parsedHeader, parsedBody);
 
     form.value.content.source = response;
     changeNav('source', 'html');
@@ -1159,6 +1179,9 @@ const sourceEvent = () => {
         preserve_newlines: false
       });
       log?.setValue(formattedHtml);
+    } else if (type === 'gbk') {
+      const content = utf8ToGbk(html);
+      log?.setValue(content);
     };
 
     MessagePlugin.info(`${t('pages.setting.data.success')}`);

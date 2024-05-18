@@ -383,6 +383,7 @@ export default {
       },
       request: {
         title: '请求参数',
+        reqEncode: '响应编码',
         reqHeader: '请求头',
         reqBody: '请求体',
         cancel: '重置',

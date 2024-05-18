@@ -384,9 +384,10 @@ export default {
       },
       request: {
         title: 'RequestParameters',
-        cancel: 'Reset',
+        reqEncode: 'Response Encode',
         reqHeader: 'Request Header',
         reqBody: 'Request Body',
+        cancel: 'Reset',
       },
       sniffer: {
         title: 'SnifferParameters',

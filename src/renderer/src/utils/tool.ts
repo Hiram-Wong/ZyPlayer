@@ -1,3 +1,4 @@
+import iconv from 'iconv-lite';
 import JSON5 from 'json5';
 import ip from 'ip';
 
@@ -8,8 +9,12 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
   try {
     const customHeaders = {
       Cookie: 'custom-cookie',
+      Origin: 'custom-origin',
+      Host: 'custom-host',
+      Connection: 'custom-connection',
       'User-Agent': 'custom-ua',
       Referer: 'custom-referer',
+      Redirect: 'custom-redirect',
     };
 
     for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
@@ -33,7 +38,41 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
       res = response;
     }
 
-    return res || false;
+    return res || '';
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getHtml = async (url: string, method = 'GET', encode = 'UTF-8', headers = {}, body = {}) => {
+  try {
+    const customHeaders = {
+      Cookie: 'custom-cookie',
+      Origin: 'custom-origin',
+      Host: 'custom-host',
+      Connection: 'custom-connection',
+      'User-Agent': 'custom-ua',
+      Referer: 'custom-referer',
+      Redirect: 'custom-redirect',
+    };
+
+    for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
+      if (headers.hasOwnProperty(originalHeader)) {
+        headers[customHeader] = headers[originalHeader];
+        delete headers[originalHeader];
+      }
+    }
+
+    const response = await request({
+      url,
+      method,
+      responseType: 'arraybuffer',
+      data: method !== 'GET' ? body : undefined,
+      headers: headers || undefined,
+    });
+
+    const res = iconv.decode(Buffer.from(response), encode); // 假设后端编码为GBK
+    return res || '';
   } catch (err) {
     throw err;
   }
@@ -231,6 +270,7 @@ const loadExternalResource = (url: string, type: 'css' | 'js' | 'font') => {
 
 export {
   getConfig,
+  getHtml,
   getMeadiaType,
   checkMediaType,
   checkUrlIpv6,
