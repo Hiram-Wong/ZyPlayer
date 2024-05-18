@@ -27,7 +27,6 @@
     "value": ""
   },
   { "key": "softSolution", "value": false },
-  { "key": "skipStartEnd", "value": false },
   { "key": "agreementMask", "value": false },
   { "key": "recordShortcut", "value": "" },
   { "key": "selfBoot", "value": false },

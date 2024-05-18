@@ -71,7 +71,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     try {
       const agreementMask = await setting.find({ key: 'agreementMask' }).value;
       const theme = await setting.find({ key: 'theme' }).value;
-      const skipStartEnd = await setting.find({ key: 'skipStartEnd' }).value;
       const playerMode = await setting.find({ key: 'playerMode' }).value;
       const webdev = await setting.find({ key: 'webdev' }).value;
       const barrage = await setting.find({ key: 'barrage' }).value;
@@ -80,7 +79,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const res = {
         agreementMask,
         theme,
-        skipStartEnd,
         playerMode,
         webdev,
         barrage,

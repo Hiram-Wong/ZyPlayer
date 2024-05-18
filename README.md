@@ -242,7 +242,7 @@ sudo xattr -cr /Applications/zyplayer.app
       },  // [3.3.4版本启用]
       "softSolution": false, // 是否使用软解 预留
       "communitySubscribe": "", // 社区地址 预留
-      "skipStartEnd": false, // 是否跳过首尾空白
+      "skipStartEnd": false, // [3.3.5版本弃用, pinia存储]是否跳过首尾空白
       "agreementMask": true, // 是否同意协议
       "recordShortcut": "Shift+Command+Z", // 录制快捷键
       "snifferType" : "pie",  // [3.3.4版本弃用,使用snifferMode参数]嗅探模式 pie iframe

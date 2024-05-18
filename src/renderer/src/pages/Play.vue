@@ -19,23 +19,23 @@
               <setting-icon size="1.3em" />
             </div>
             <t-dialog v-model:visible="isSettingVisible" :header="$t('pages.player.setting.title')" placement="center"
-              :footer="false" width="508">
+              width="508" :footer=false>
               <div class="setting-warp">
                 <div class="setting-item-warp">
                   <span>{{ $t('pages.player.setting.autoSkip') }}</span>
-                  <t-switch v-model="set.skipStartEnd" @change="updateLocalPlayer" />
+                  <t-switch v-model="set.skipStartEnd" />
                 </div>
                 <div v-if="set.skipStartEnd" class="setting-item-warp">
                   <div class="skip-time-in-start">
                     <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right"
-                      @click="skipTimeInEndChange">
+                      @change="skipTimeInEndChange">
                       <template #label>{{ $t('pages.player.setting.skipStart') }}</template>
                       <template #suffix>{{ $t('pages.player.setting.skipSeconds') }}</template>
                     </t-input-number>
                   </div>
                   <div class="skip-time-in-end">
                     <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right"
-                      @click="skipTimeInEndChange">
+                      @change="skipTimeInEndChange">
                       <template #label>{{ $t('pages.player.setting.skipEnd') }}</template>
                       <template #suffix>{{ $t('pages.player.setting.skipSeconds') }}</template>
                     </t-input-number>
@@ -354,9 +354,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
 import { computed, onMounted, ref, reactive, shallowRef } from 'vue';
 
-import { setDefault } from '@/api/setting';
 import { fetchChannelList } from '@/api/iptv';
-
 import { checkUrlIpv6, getLocalStorage } from '@/utils/tool';
 import { playerBarrage, playerCreate, playerDestroy, playerNext, playerSeek, playerPause, playerTimeUpdate, offPlayerTimeUpdate, offPlayerBarrage } from '@/utils/common/player';
 import {
@@ -967,16 +965,6 @@ const recommendEvent = async (item) => {
 // 更新历史跳过参数
 const skipTimeInEndChange = () => {
   putHistory();
-};
-
-// 更新跳过开关全局存储
-const updateLocalPlayer = async (item) => {
-  await store.updateConfig({
-    // @ts-ignore
-    setting: { skipStartEnd: item },
-  });
-
-  await setDefault("skipStartEnd", item);
 };
 
 // 分享
