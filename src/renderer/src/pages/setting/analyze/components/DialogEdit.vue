@@ -32,6 +32,7 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
 
+import { t } from '@/locales';
 import { updateAnalyzeItem } from '@/api/analyze';
 
 const props = defineProps({
@@ -84,9 +85,9 @@ watch(
 
 // 表单校验
 const rules = {
-  name: [{ required: true, message: '请输入接口名称', type: 'error' }],
-  type: [{ required: true, message: '请选择类型', type: 'error' }],
-  url: [{ required: true, message: '请输入Api接口url', type: 'error' }],
+  name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  type: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  url: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 </script>
 <style lang="less" scoped></style>

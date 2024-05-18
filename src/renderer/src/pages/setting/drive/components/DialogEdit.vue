@@ -43,8 +43,8 @@
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, ref, watch } from 'vue';
-import { t } from '@/locales';
 
+import { t } from '@/locales';
 import { updateDriveItem } from '@/api/drive';
 
 const props = defineProps({
@@ -98,8 +98,8 @@ watch(
   },
 );
 const rules = {
-  name: [{ required: true, message: '请输入内容', type: 'error' }],
-  server: [{ required: true, message: '请输入内容', type: 'error' }],
+  name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  server: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 </script>
 <style lang="less" scoped>

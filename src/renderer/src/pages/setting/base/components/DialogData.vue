@@ -496,7 +496,7 @@ const formatSet = (data) => {
     'webdevUrl', 'webdevUsername', 'webdevPassword',
     'broadcasterType', 'externalPlayer', 'snifferType',
     'restoreWindowPositionAndSize', 'analyzeSupport', 'analyzeQuickSearchType',
-    'pauseWhenMinimize'
+    'pauseWhenMinimize', 'skipStartEnd'
   ];
   keysToRemove.forEach((key) => {
     const index = _.findIndex(data, { key });

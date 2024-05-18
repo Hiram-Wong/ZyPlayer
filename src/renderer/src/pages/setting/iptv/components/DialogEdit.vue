@@ -53,6 +53,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { CloudUploadIcon } from 'tdesign-icons-vue-next';
 import { ref, watch } from 'vue';
 
+import { t } from '@/locales';
 import { updateIptvItem } from '@/api/iptv';
 
 const props = defineProps({
@@ -103,8 +104,8 @@ watch(
   },
 );
 const rules = {
-  name: [{ required: true, message: '请输入内容', type: 'error' }],
-  url: [{ required: true, message: '请输入内容', type: 'error' }],
+  name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  url: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 
 const requestMethod = (file) => {

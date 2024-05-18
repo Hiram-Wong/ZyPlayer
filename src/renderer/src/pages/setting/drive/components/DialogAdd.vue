@@ -2,7 +2,7 @@
   <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center"
     :footer="false">
     <template #body>
-      <t-form :data="formData" :rules="rulesSingle" :label-width="60" @submit="onSubmit">
+      <t-form :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
         <t-form-item :label="$t('pages.setting.drive.name')" name="name">
           <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
@@ -44,8 +44,8 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, ref, reactive, watch } from 'vue';
 
-import { addDriveItem } from '@/api/drive';
 import { t } from '@/locales';
+import { addDriveItem } from '@/api/drive';
 
 const props = defineProps({
   visible: {
@@ -92,9 +92,9 @@ watch(
     formVisible.value = val;
   },
 );
-const rulesSingle = {
-  name: [{ required: true, message: '请输入内容', type: 'error' }],
-  server: [{ required: true, message: '请输入内容', type: 'error' }],
+const rules = {
+  name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  server: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 </script>
 <style lang="less" scoped>

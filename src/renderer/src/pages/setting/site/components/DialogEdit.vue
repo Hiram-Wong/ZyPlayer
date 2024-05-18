@@ -70,6 +70,7 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
 
+import { t } from '@/locales';
 import { updateSiteItem } from '@/api/site';
 
 const props = defineProps({
@@ -141,11 +142,11 @@ const createOptions = (val) => {
 };
 
 const rules = {
-  name: [{ required: true, message: '请输入源站名', type: 'error' }],
-  api: [{ required: true, message: '请输入接口', type: 'error' }],
-  type: [{ required: true, message: '请选择类型', type: 'error' }],
-  search: [{ required: true, message: '请选择搜索', type: 'error' }],
-  filter: [{ required: true, message: '请选择筛选', type: 'error' }],
+  name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  api: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  type: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  search: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  filter: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 </script>
 

@@ -2,7 +2,7 @@
   <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dialog.add')" :width="650" placement="center"
     :footer="false">
     <template #body>
-      <t-form :data="formData" :rules="rulesSingle" :label-width="60" @submit="onSubmit">
+      <t-form :data="formData" :rules="rules" :label-width="60" @submit="onSubmit">
         <t-form-item :label="$t('pages.setting.iptv.name')" name="name">
           <t-input v-model="formData.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
@@ -53,6 +53,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { CloudUploadIcon } from 'tdesign-icons-vue-next';
 import { ref, reactive, watch } from 'vue';
 
+import { t } from '@/locales';
 import { addIptvItem } from '@/api/iptv';
 
 const props = defineProps({
@@ -95,9 +96,9 @@ watch(
     formVisible.value = val;
   },
 );
-const rulesSingle = {
-  name: [{ required: true, message: '请输入直播源名', type: 'error' }],
-  url: [{ required: true, message: '请输入直播源订阅url', type: 'error' }],
+const rules = {
+  name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  url: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 const requestMethod = (file) => {
   return new Promise((resolve) => {
