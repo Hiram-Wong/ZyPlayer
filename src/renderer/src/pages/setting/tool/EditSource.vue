@@ -1117,6 +1117,7 @@ const reqCancel = () => {
   nextTick(() => (isVisible.reqParam = true));
   form.value.req.header = '';
   form.value.req.body = '';
+  form.value.req.encode = 'UTF-8';
   form.value.req.contentType = 'application/json';
 };
 
@@ -1185,9 +1186,6 @@ const sourceEvent = () => {
         preserve_newlines: false
       });
       log?.setValue(formattedHtml);
-    } else if (type === 'gbk') {
-      const content = utf8ToGbk(html);
-      log?.setValue(content);
     };
 
     MessagePlugin.info(`${t('pages.setting.data.success')}`);
