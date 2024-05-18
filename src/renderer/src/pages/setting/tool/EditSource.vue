@@ -500,12 +500,18 @@ const reqEncode = [
   {
     label: 'UTF-8',
     value: 'UTF-8',
-  }, {
+  },
+  {
     label: 'GB2312',
     value: 'GB2312',
-  }, {
+  },
+  {
     label: 'GBK',
     value: 'GBK',
+  },
+  {
+    label: 'GB18030',
+    value: 'GB18030',
   },
 ];
 
