@@ -40,15 +40,14 @@ const props = defineProps({
   }
 });
 const formVisible = ref(false);
-
 const formData = reactive({
   name: '',
   url: '',
   type: 0,
   isActive: true,
 });
-
 const emit = defineEmits(['update:visible', 'refreshTableData']);
+
 watch(
   () => formVisible.value,
   (val) => {
@@ -62,14 +61,15 @@ watch(
   },
 );
 
-const onSubmit = async () => {
-  try {
+const onSubmit = async ({ validateResult, firstError }) => {
+  if (validateResult === true) {
     const res = await addAnalyzeItem(formData);
-    MessagePlugin.success('添加成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
     if (res) emit('refreshTableData');
     formVisible.value = false;
-  } catch (error) {
-    MessagePlugin.error(`添加失败: ${error}`);
+  } else {
+    console.log('Validate Errors: ', firstError, validateResult);
+    MessagePlugin.warning(`${t('pages.setting.form.fail')}: ${firstError}`);
   }
 };
 
@@ -77,7 +77,6 @@ const onClickCloseBtn = () => {
   formVisible.value = false;
 };
 
-// 表单校验
 const rules = {
   name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   type: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],

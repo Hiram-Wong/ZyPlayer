@@ -66,20 +66,8 @@ const formData = reactive({
   params: null,
   isActive: true
 });
-const onSubmit = async () => {
-  try {
-    const res = await addDriveItem(formData);
-    MessagePlugin.success('添加成功');
-    if (res) emit('refreshTableData');
-    formVisible.value = false;
-  } catch (error) {
-    MessagePlugin.error(`添加失败: ${error}`);
-  }
-};
-const onClickCloseBtn = () => {
-  formVisible.value = false;
-};
 const emit = defineEmits(['update:visible', 'refreshTableData']);
+
 watch(
   () => formVisible.value,
   (val) => {
@@ -92,6 +80,23 @@ watch(
     formVisible.value = val;
   },
 );
+
+const onSubmit = async ({ validateResult, firstError }) => {
+  if (validateResult === true) {
+    const res = await addDriveItem(formData);
+    MessagePlugin.success(t('pages.setting.form.success'));
+    if (res) emit('refreshTableData');
+    formVisible.value = false;
+  } else {
+    console.log('Validate Errors: ', firstError, validateResult);
+    MessagePlugin.warning(`${t('pages.setting.form.fail')}: ${firstError}`);
+  }
+};
+
+const onClickCloseBtn = () => {
+  formVisible.value = false;
+};
+
 const rules = {
   name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   server: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],

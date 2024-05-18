@@ -94,22 +94,8 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = ref(props.data);
 const formGroup = ref(props.group);
-
-const onSubmit = async () => {
-  try {
-    await updateSiteItem(formData.value.id, formData.value)
-    MessagePlugin.success('修改成功');
-    formVisible.value = false;
-  } catch (err) {
-    console.log('Errors: ', err);
-    MessagePlugin.error(`修改失败, 错误信息:${err}`);
-  }
-};
-
-const onClickCloseBtn = () => {
-  formVisible.value = false;
-};
 const emit = defineEmits(['update:visible', 'refreshTableData']);
+
 watch(
   () => formVisible.value,
   (val) => {
@@ -135,6 +121,22 @@ watch(
     formGroup.value = val;
   },
 );
+
+const onSubmit = async ({ validateResult, firstError }) => {
+  if (validateResult === true) {
+    const res = await updateSiteItem(formData.value.id, formData.value)
+    MessagePlugin.success(t('pages.setting.form.success'));
+    if (res) emit('refreshTableData');
+    formVisible.value = false;
+  } else {
+    console.log('Validate Errors: ', firstError, validateResult);
+    MessagePlugin.warning(`${t('pages.setting.form.fail')}: ${firstError}`);
+  }
+};
+
+const onClickCloseBtn = () => {
+  formVisible.value = false;
+};
 
 const createOptions = (val) => {
   const targetIndex = formGroup.value.findIndex((obj) => obj.label === val);

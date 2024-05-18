@@ -18,6 +18,10 @@ export default {
     pdfaTip: '列表规则(如 body&&li)',
     pdfhTip: '节点规则(如 body&&a,0&&href)',
   },
+  form: {
+    success: '成功',
+    fail: '失败'
+  },
   dialog: {
     cancel: '取消',
     confirm: '确定',
@@ -27,6 +31,9 @@ export default {
     splitTip: '分隔符请使用半角状态","',
     restoreFactoryHeader: '恢复出厂',
     restoreFactoryBody: '你确定要恢复出厂吗? 确认后恢复到初始状态。',
+    rule: {
+      message: '必填'
+    }
   },
   nav: {
     configBase: '基础配置',

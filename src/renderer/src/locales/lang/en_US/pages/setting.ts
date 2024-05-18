@@ -18,6 +18,10 @@ export default {
     pdfaTip: 'List rules (e.g. body&&li)',
     pdfhTip: 'Node rules (e.g. body&&a,0&&href)',
   },
+  form: {
+    success: 'Success',
+    fail: 'Fail'
+  },
   dialog: {
     cancel: 'Cancel',
     confirm: 'OK',
@@ -27,6 +31,9 @@ export default {
     splitTip: 'Please use half-width state for separator ","',
     restoreFactoryHeader: 'Eestore Factory',
     restoreFactoryBody: 'Are you sure to restore the factory? Return to the initial state after leaving the factory.',
+    rule: {
+      message: 'Require',
+    }
   },
   nav: {
     configBase: 'BaseSetting',

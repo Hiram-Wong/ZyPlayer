@@ -85,9 +85,7 @@ const props = defineProps({
     },
   },
 });
-
 const siteGroup = ref(props.group);
-
 const formVisible = ref(false);
 const formData = reactive({
   name: '',
@@ -100,21 +98,8 @@ const formData = reactive({
   ext: '',
   categories: ''
 });
-const onSubmit = async () => {
-  try {
-    if (!formData.group) formData.group = '默认';
-    const res = await addSiteItem(formData);
-    MessagePlugin.success('添加成功');
-    if (res) emit('refreshTableData');
-    formVisible.value = false;
-  } catch (error) {
-    MessagePlugin.error(`添加失败: ${error}`);
-  }
-};
-const onClickCloseBtn = () => {
-  formVisible.value = false;
-};
 const emit = defineEmits(['update:visible', 'refreshTableData']);
+
 watch(
   () => formVisible.value,
   (val) => {
@@ -136,17 +121,34 @@ watch(
   },
 );
 
+const onSubmit = async ({ validateResult, firstError }) => {
+  if (validateResult === true) {
+    if (!formData.group) formData.group = '默认';
+    const res = await addSiteItem(formData);
+    MessagePlugin.success(t('pages.setting.form.success'));
+    if (res) emit('refreshTableData');
+    formVisible.value = false;
+  } else {
+    console.log('Validate Errors: ', firstError, validateResult);
+    MessagePlugin.warning(`${t('pages.setting.form.fail')}: ${firstError}`);
+  }
+};
+
+const onClickCloseBtn = () => {
+  formVisible.value = false;
+};
+
+const createOptions = (val) => {
+  const targetIndex = siteGroup.value.findIndex((obj) => obj.label === val);
+  if (targetIndex === -1) siteGroup.value.push({ value: val, label: val });
+};
+
 const rules = {
   name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   api: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   type: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   search: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   filter: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
-};
-
-const createOptions = (val) => {
-  const targetIndex = siteGroup.value.findIndex((obj) => obj.label === val);
-  if (targetIndex === -1) siteGroup.value.push({ value: val, label: val });
 };
 </script>
 
