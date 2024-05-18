@@ -15,12 +15,12 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: "recursive"
 
-      - name: Install Node.js 18
-        uses: actions/setup-node@v2
+      - name: Install Node.js 18.x
+        uses: actions/setup-node@v4
         with:
           node-version: 18.18.0
           cache: 'yarn'
@@ -35,37 +35,37 @@ jobs:
           # If the commit is tagged with a version (e.g. "v1.0.0"),
           # release the app after building
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-      
+
       - name: Upload Artifact (macOS)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zyplayer-mac
           path: ./dist/*-mac-*.dmg
           if-no-files-found: ignore
 
       - name: Upload Artifact (Windows)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zyplayer-win
           path: ./dist/*-win-*.exe
           if-no-files-found: ignore
 
       - name: Upload Artifact (Linux AppImage)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zyplayer-linux-appimage
           path: ./dist/*.AppImage
           if-no-files-found: ignore
 
       - name: Upload Artifact (Linux deb)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zyplayer-linux-deb
           path: ./dist/*.deb
           if-no-files-found: ignore
 
       - name: Upload Artifact (Linux rpm)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zyplayer-linux-rpm
           path: ./dist/*.rpm
