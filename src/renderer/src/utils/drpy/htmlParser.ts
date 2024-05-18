@@ -16,7 +16,7 @@ import jsonpath from 'jsonpath';
 import urlJoin from 'url';
 
 const PARSE_CACHE = true; // 解析缓存
-const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|^body$|^#'; // 不自动加eq下标索引
+const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|:not|:even|:odd|:has|:contains|:matches|:empty|^body$|^#'; // 不自动加eq下标索引
 const URLJOIN_ATTR = '(url|src|href|-original|-src|-play|-url|style)$'; // 需要自动urljoin的属性
 const SPECIAL_URL = '^(ftp|magnet|thunder|ws):'; // 过滤特殊链接,不走urlJoin
 
@@ -102,7 +102,8 @@ class Jsoup {
       }
       try {
         nparse_index = parseInt(nparse_pos.split('(')[1].split(')')[0]);
-      } catch {}
+      } catch {
+      }
     } else if (this.contains(nparse, '--')) {
       nparse_rule = nparse.split('--')[0];
       excludes = nparse.split('--').slice(1);
@@ -241,24 +242,39 @@ class Jsoup {
           ret = (ret as cheerio.Cheerio)?.html() || '';
           break;
         default:
-          ret = (ret as cheerio.Cheerio)?.attr(option) || '';
-          if (this.contains(option.toLowerCase(), 'style') && this.contains(ret, 'url(')) {
-            try {
-              ret = ret.match(/url\((.*?)\)/)![1];
-              // 2023/07/28新增 style取内部链接自动去除首尾单双引号
-              ret = ret.replace(/^['"]|['"]$/g, '');
-            } catch {}
-          }
-          if (ret && baseUrl) {
-            const needAdd = this.test(URLJOIN_ATTR, option) && !this.test(SPECIAL_URL, ret);
-            if (needAdd) {
-              if (ret.includes('http')) {
-                ret = ret.slice(ret.indexOf('http'));
-              } else {
-                ret = new URL(ret, baseUrl).toString();
+          // 保留原来的ret
+          let original_ret = (ret as cheerio.Cheerio)?.clone();
+          let options = option.split('||');
+          let opt_index = 0;
+          for (let opt of options) {
+            // console.log(`opt_index:${opt_index},opt:${opt}`);
+            opt_index += 1;
+            ret = original_ret?.attr(opt) || '';
+            // console.log('ret:', ret);
+            if (this.contains(opt.toLowerCase(), 'style') && this.contains(ret, 'url(')) {
+              try {
+                ret = ret.match(/url\((.*?)\)/)![1];
+                // 2023/07/28新增 style取内部链接自动去除首尾单双引号
+                ret = ret.replace(/^['"]|['"]$/g, '');
+              } catch {
               }
             }
+            if (ret && baseUrl) {
+              const needAdd = this.test(URLJOIN_ATTR, opt) && !this.test(SPECIAL_URL, ret);
+              if (needAdd) {
+                if (ret.includes('http')) {
+                  ret = ret.slice(ret.indexOf('http'));
+                } else {
+                  ret = urlJoin.resolve(baseUrl, ret);
+                }
+              }
+            }
+            if (ret) {
+              break;
+            }
+
           }
+
       }
     } else {
       ret = `${ret}`;
