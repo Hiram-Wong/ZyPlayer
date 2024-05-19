@@ -58,6 +58,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
             console.log('path_dir:', path_dir);
             try {
               response = await eval(content + '\nmain()');
+              await fs.writeFile(path.replace('index.js','index.json'), response, 'utf-8');
             } catch (e) {
               response = `发生了错误:${e.message}}`;
             }
