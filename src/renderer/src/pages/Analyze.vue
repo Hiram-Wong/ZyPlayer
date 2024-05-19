@@ -33,15 +33,14 @@
               </div>
             </div>
           </div>
-          <iframe v-if="iframeUrl" class="webview" :src="iframeUrl" allowtransparency="true" frameborder="0"
-            scrolling="no" allowfullscreen="true" webkit-playsinline playsinline
-            sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
-          <!-- <webview class="webview" v-if="iframeUrl" :src="iframeUrl" disablewebsecurity allowfullscreen/> -->
+          <div class="player-content">
+            <player ref="playerRef" />
+          </div>
         </div>
         <div class="analyze-setting">
           <div class="analyze-setting-group">
             <t-input v-model="analysisUrl" class="input-url" :placeholder="$t('pages.analyze.inputUrl')" size="large"
-              @change="formatUrlEvent" />
+              @change="formatUrlEvent" @enter="analysisEvent" />
             <div class="analyze-bottom-group">
               <div class="popover" @click="isVisible.search = true">
                 <app-icon size="1.3rem" class="popover-icon" />
@@ -66,7 +65,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { Share1Icon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, shallowRef } from 'vue';
 
 import { t } from '@/locales';
 
@@ -79,10 +78,18 @@ import DialogIframemView from './analyze/DialogIframe.vue';
 import DialogSearchView from './analyze/DialogSearch.vue';
 import SharePopup from '../components/share-popup/index.vue';
 import CommonNav from '../components/common-nav/index.vue';
+import Player from '../components/player/index.vue';
+import { fetchJxJsonPlayUrlHelper } from '@/utils/common/film';
 
 const urlTitle = ref(''); // 播放地址的标题
 const analysisUrl = ref(null); // 输入需要解析地址
 const iframeUrl = ref(''); // 解析接口+需解析的地址
+
+const playerRef = ref(null) as any;
+const player = shallowRef({
+  type: 'iframe',
+  player: ''
+});
 
 const shareData = ref({
   name: '',
@@ -98,14 +105,15 @@ const platformData = ref({
 const analyzeConfig = ref({
   default: {
     id: '',
-    name: ''
+    name: '',
+    type: 0
   },
   data: []
-})
+});
 
 const active = ref({
   nav: '',
-})
+});
 
 const isVisible = reactive({
   platform: false,
@@ -140,13 +148,13 @@ const formatUrlMethod = (url) => {
 };
 
 // 解析函数公共方法
-const getVideoInfo = async (url, title) => {
+const getVideoInfo = async (url: string, title: string) => {
   if (!active.value.nav || !analysisUrl.value) {
     MessagePlugin.error(t('pages.analyze.message.empty'));
     return;
   }
 
-  const api = _.find(analyzeConfig.value.data, { id: active.value.nav });
+  const api: any = _.find(analyzeConfig.value.data, { id: active.value.nav });
   if (!api) {
     MessagePlugin.error(t('pages.analyze.message.invalidApi'));
     return;
@@ -169,8 +177,11 @@ const getVideoInfo = async (url, title) => {
     addHistory(doc);
   }
 
-  const iframeurl = `${api?.url}${url}`;
-  iframeUrl.value = iframeurl;
+  const playUrl = api.type === 1 ? await fetchJxJsonPlayUrlHelper(api.url, url) : `${api?.url}${url}`;
+
+  iframeUrl.value = playUrl || '';
+
+  player.value = await playerRef.value!.createPlayer(api.type === 0 ? 'iframe' : 'player', iframeUrl.value);
 };
 
 // input 变化
@@ -182,8 +193,8 @@ const formatUrlEvent = (url) => {
 // 直接解析
 const analysisEvent = async () => {
   const url = analysisUrl.value;
-  const res = await getUrlTitle(url);
-  await getVideoInfo(url, res);
+  const res = await getUrlTitle(url!);
+  await getVideoInfo(url!, res);
 };
 
 // 平台回调解析
@@ -223,11 +234,13 @@ const openCurrentUrl = () => {
 const clearWebview = () => {
   iframeUrl.value = '';
   urlTitle.value = '';
+  playerRef.value!.destroyPlayer(player.value!.type, player.value!.player);
+  player.value = { type: 'iframe', player: '' };
 }
 
 // 监听设置默认源变更
 const eventBus = useEventBus('analyze-reload');
-eventBus.on(async () => {
+eventBus.on(() => {
   getSetting();
 });
 
@@ -235,7 +248,7 @@ eventBus.on(async () => {
 const shareEvent = () => {
   isVisible.share = true;
 
-  const provider = _.find(analyzeConfig.value.data, { id: active.value.nav });
+  const provider: any = _.find(analyzeConfig.value.data, { id: active.value.nav });
 
   shareData.value = {
     name: urlTitle.value,
@@ -316,7 +329,7 @@ const changeDefaultEvent = async (id) => {
           width: 100%;
           border-radius: var(--td-radius-large);
           position: absolute;
-          background: var(--td-bg-color-page) url(../assets/bg-player.jpg) center center;
+          background: var(--td-bg-color-page) url(@/assets/bg-player.jpg) center center;
         }
 
         .head-info-section {
@@ -419,11 +432,11 @@ const changeDefaultEvent = async (id) => {
           }
         }
 
-        .webview {
-          position: relative;
-          z-index: 3;
+        .player-content {
           height: calc(100% - 60px);
           width: 100%;
+          position: relative;
+          z-index: 3;
         }
       }
 

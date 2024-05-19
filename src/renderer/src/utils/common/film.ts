@@ -634,6 +634,7 @@ const fetchBarrageData = async (realUrl: string, options, active): Promise<any> 
 
 export {
   VIP_LIST,
+  fetchJxJsonPlayUrlHelper,
   fetchBingeData,
   putBingeData,
   fetchHistoryData,
