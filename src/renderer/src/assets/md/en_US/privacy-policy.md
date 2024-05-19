@@ -18,12 +18,15 @@
 
 9. We know that your privacy is invaluable. Therefore, this software never collects any user data. Except for the necessary WebDev backup (this process is strictly managed by a professional third party), all information is strictly stored locally to ensure that your data is only under your control. This software does not share any information about you with any third party.
 
-10. The act of appreciation is purely voluntary and aims to express support and gratitude to the authors or contributors of open source software, not the transaction of purchasing goods or services. The appreciator should clearly understand that the appreciation payment does not enjoy the guarantee of any goods or services, nor does it constitute any form of contractual relationship.
 
-11. You are responsible for all operations and results when using this software. This software is not responsible for any content you obtain through the use of this software, including but not limited to the accuracy, copyright compliance, integrity, security and availability of media resources. We shall not be liable for any loss, damage or legal disputes caused by the use of this software.
+10. Data is shared with the OpenAI server when AI features are used. AI generated content for reference only, does not guarantee its accuracy, integrity or applicability, does not represent our views. Users should self-validate AI-generated content and take the risk of using it. Important decisions need to be independently verified or consulted by a professional. To continue to use means to agree to the above disclaimer.
 
-12. When using this software, you must abide by the relevant laws and regulations of your country/region, and prohibit the use of this software for any activities that violate laws and regulations, including but not limited to the production, uploading, dissemination and storage of any illegal, infringing, obscene, defamation, malware and other content. If you violate relevant laws and regulations, you need to bear your own legal responsibility.
+11. The act of appreciation is purely voluntary and aims to express support and gratitude to the authors or contributors of open source software, not the transaction of purchasing goods or services. The appreciator should clearly understand that the appreciation payment does not enjoy the guarantee of any goods or services, nor does it constitute any form of contractual relationship.
 
-13. This disclaimer applies to all users of this software. The software reserves the right to modify and update this statement at any time, and notify users in the form of Github Readme, software updates, etc. Please check and abide by the latest disclaimer regularly.
+12. You are responsible for all operations and results when using this software. This software is not responsible for any content you obtain through the use of this software, including but not limited to the accuracy, copyright compliance, integrity, security and availability of media resources. We shall not be liable for any loss, damage or legal disputes caused by the use of this software.
+
+13. When using this software, you must abide by the relevant laws and regulations of your country/region, and prohibit the use of this software for any activities that violate laws and regulations, including but not limited to the production, uploading, dissemination and storage of any illegal, infringing, obscene, defamation, malware and other content. If you violate relevant laws and regulations, you need to bear your own legal responsibility.
+
+14. This disclaimer applies to all users of this software. The software reserves the right to modify and update this statement at any time, and notify users in the form of Github Readme, software updates, etc. Please check and abide by the latest disclaimer regularly.
 
 > Please read and understand all the contents of this disclaimer carefully before using the software, thank you for your understanding and support!
