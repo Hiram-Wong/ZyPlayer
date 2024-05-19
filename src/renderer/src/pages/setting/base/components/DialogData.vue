@@ -473,6 +473,13 @@ const formatSet = (data) => {
     { key: "playerMode", value: { type: _.get(data, ["broadcasterType", "value"], 'xgplayer'), external: _.get(data, ["externalPlayer", "value"], '') } },
     { key: "snifferMode", value: { type: _.get(data, ["snifferType", "value"], "pie"), url: "" } },
     { key: "timeout", value: 5000 },
+    {
+      key: "ai", value: {
+        server: "",
+        key: "",
+        model: ""
+      }
+    },
     { key: "version", value: pkgVersion },
     // ... 其他新键值对
   ];
