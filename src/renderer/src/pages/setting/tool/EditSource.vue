@@ -1075,12 +1075,15 @@ const actionPlayer = async (url = "") => {
 const actionSniffer = async () => {
   try {
     const { snifferMode } = storePlayer.setting;
-    const { url, runScript, initScript, auxiliaryRegex, ua } = form.value.sniffer;
+    let { url, runScript, initScript, auxiliaryRegex, ua } = form.value.sniffer;
     const snifferApi =
       snifferMode.type === 'custom' && /^http/.test(snifferMode.url)
         ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
         : '';
-    const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript ? Base64.parse(decodeURIComponent(runScript)).toString(Utf8) : ''}&init_script=${initScript ? Base64.parse(decodeURIComponent(initScript)).toString(Utf8) : ''}&custom_regex=${auxiliaryRegex}`;
+
+    if (runScript.trim()) runScript = Base64.stringify(Utf8.parse(runScript));
+    if (initScript.trim()) initScript = Base64.stringify(Utf8.parse(initScript));
+    const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript}&init_script=${initScript}&custom_regex=${auxiliaryRegex}`;
     const response: any = await sniffer(snifferMode.type, snifferPlayUrl);
     form.value.content.debug = response;
     changeNav('debug', 'sniffer');
