@@ -83,6 +83,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import JSON5 from "json5";
 
 import { t } from '@/locales';
 import { fetchAiAnswer } from '@/api/lab';
@@ -188,11 +189,14 @@ const AiAnswerEvent = async () => {
       type: formData.value.aiType,
       codeSnippet: formData.value.codeSnippet,
       demand: formData.value.demand,
-    }
-    console.log(doc)
+    };
     const response = await fetchAiAnswer(doc);
     if (response.code === 200) {
-      formData.value.result = response.data;
+      let content = response.data;
+      try {
+        content = JSON5.stringify(content);
+      } catch (e) {}
+      formData.value.result = content;
       MessagePlugin.success(t('pages.setting.data.success'));
     } else {
       MessagePlugin.error(`${t('pages.setting.data.fail')}:${response.message}`);
