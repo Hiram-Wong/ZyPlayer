@@ -735,6 +735,8 @@ const getDetailInfo = async (): Promise<void> => {
 
   info.value.fullList = formattedSeason;
   season.value = formattedSeason;
+  if (isVisible.reverseOrder) season.value = formattedSeason;
+  else season.value = reverseOrderHelper('negative',formattedSeason);
 };
 
 // 切换选集
@@ -821,20 +823,27 @@ const fetchRecommend = async () => {
 const timerUpdatePlayProcess = () => {
   const { playerMode } = set.value;
   const { siteSource } = dataHistory.value;
+  let index = 0;
 
-  const index = season.value[siteSource].indexOf(active.filmIndex);
+  const isLast = () => {
+    if (isVisible.reverseOrder) {
+      return season.value[siteSource].length === index + 1;
+    } else {
+      return index === 0;
+    }
+  }
 
   const autoPlayNext = async () => {
     VIDEO_PROCESS_DOC.playEnd = true;
     VIDEO_PROCESS_DOC.duration = 0;
 
-    if (season.value[siteSource].length === index + 1) {  // 最后一集
+    if (isLast()) {  // 最后一集
       putHistory();
       return;
     };
 
     console.log('[player][progress] autoPlayNext');
-    await changeEvent(season.value[siteSource][index + 1]);
+    await changeEvent(isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1]);
     MessagePlugin.info(t('pages.player.message.next'));
   };
 
@@ -848,10 +857,10 @@ const timerUpdatePlayProcess = () => {
 
     // 预加载下一步链接 提前30秒预加载
     if (watchTime + 30 >= duration && duration !== 0) {
-      if (season.value[siteSource].length !== index + 1 && !tmp.preloadLoading) {
+      if (!isLast() && !tmp.preloadLoading) {
         try {
           tmp.preloadLoading = true;
-          await preloadNext(season.value[siteSource][index + 1]);
+          await preloadNext(isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1]);
         } catch (err) { };
       };
     };
@@ -860,6 +869,7 @@ const timerUpdatePlayProcess = () => {
   };
 
   playerTimeUpdate(player.value, playerMode.type, ({ currentTime, duration }) => {
+    index = season.value[siteSource].indexOf(active.filmIndex);
     onTimeUpdate(currentTime, duration);
   });
 };
