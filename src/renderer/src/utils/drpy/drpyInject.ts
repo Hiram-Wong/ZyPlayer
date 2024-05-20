@@ -49,10 +49,14 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   }
 
   if (body && Object.keys(data).length === 0) {
-    body.split('&').forEach((param) => {
-      const [key, value] = param.split('=');
-      data[key] = value;
-    });
+    if(body.includes('&')) {
+      body.split('&').forEach((param) => {
+        const [key, value] = param.split('=');
+        data[key] = value;
+      });
+    }else{
+      data = body
+    }
   } else if (!body && Object.keys(data).length !== 0 && method !== 'GET') {
     const contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type');
     const contentType = 'application/json';
@@ -99,7 +103,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     const requestOptions: any = {
       method,
       headers,
-      body: typeof data === 'string' ? data : JSON.stringify(data),
+      body: typeof data === 'string' ? decodeURIComponent(data) : JSON.stringify(data),
       credentials: 'include',
     };
     r = syncFetch(_url, requestOptions);
