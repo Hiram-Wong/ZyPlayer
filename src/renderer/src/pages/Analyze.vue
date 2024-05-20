@@ -154,6 +154,8 @@ const getVideoInfo = async (url: string, title: string) => {
     return;
   }
 
+  if (player.value) await clearWebview();
+
   const api: any = _.find(analyzeConfig.value.data, { id: active.value.nav });
   if (!api) {
     MessagePlugin.error(t('pages.analyze.message.invalidApi'));
@@ -180,7 +182,6 @@ const getVideoInfo = async (url: string, title: string) => {
   const playUrl = api.type === 1 ? await fetchJxJsonPlayUrlHelper(api.url, url) : `${api?.url}${url}`;
 
   iframeUrl.value = playUrl || '';
-
   player.value = await playerRef.value!.createPlayer(api.type === 0 ? 'iframe' : 'player', iframeUrl.value);
 };
 
