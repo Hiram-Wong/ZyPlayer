@@ -1659,6 +1659,18 @@ const $require = (url) => {
 };
 
 /**
+ * 将obj所有key变小写
+ * @param obj
+ */
+function keysToLowerCase(obj) {
+  return Object.keys(obj).reduce((result, key) => {
+    const newKey = key.toLowerCase();
+    result[newKey] = obj[key]; // 如果值也是对象，可以递归调用本函数
+    return result;
+  }, {});
+}
+
+/**
  * 海阔网页请求函数完整封装
  * @param url 请求链接
  * @param obj 请求对象 {headers:{},method:'',timeout:5000,body:'',withHeaders:false}
@@ -1666,24 +1678,6 @@ const $require = (url) => {
  * @returns {string|string|DocumentFragment|*}
  */
 const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) => {
-  // 还原请求头 方便 重写改
-  if (obj?.headers) {
-    const customHeaders = {
-      'custom-cookie': 'Cookie',
-      'custom-origin': 'Origin',
-      'custom-host': 'Host',
-      'custom-connection': 'Connection',
-      'custom-ua': 'User-Agent',
-      'custom-referer': 'Referer',
-    };
-
-    for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
-      if (obj.headers.hasOwnProperty(originalHeader)) {
-        obj.headers[customHeader] = obj.headers[originalHeader];
-        delete obj.headers[originalHeader];
-      }
-    }
-  }
   if (typeof obj === 'undefined' || !obj) {
     if (!fetch_params || !fetch_params.headers) {
       const headers = {
@@ -1735,6 +1729,27 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
   if (obj.redirect === false) {
     obj.redirect = 0;
   }
+  // 还原请求头 方便 重写改
+  if (obj?.headers) {
+    const customHeaders = {
+      'custom-cookie': 'Cookie',
+      'custom-origin': 'Origin',
+      'custom-host': 'Host',
+      'custom-connection': 'Connection',
+      'custom-ua': 'User-Agent',
+      'custom-referer': 'Referer',
+    };
+    obj.headers = keysToLowerCase(obj.headers);
+
+    for (const [customHeader,originalHeader] of Object.entries(customHeaders)) {
+      let originalHeaderKey = originalHeader.toLowerCase();
+      if (obj.headers.hasOwnProperty(customHeader)) {
+        obj.headers[originalHeaderKey] = obj.headers[customHeader];
+        delete obj.headers[customHeader];
+      }
+    }
+  }
+
   console.log(`[t3][request]headers:${JSON.stringify(obj.headers)}`);
   console.log(`[t3][request]url:${url}| method:${obj.method || 'GET'}| body:${obj.body || ''}`);
   const res = req(url, obj);
