@@ -61,9 +61,181 @@ const init_test = () => {
     rkey: RKEY,
     rule: rule,
   };
+  // ocr_demo_test();
+  // rsa_demo_test();
   console.log(test_data);
   return test_data;
 };
+
+/**
+ * 验证码ocr识别的测试案例
+ */
+function ocr_demo_test(){
+  // 这张图片为4113的验证码
+  let img_base64 = `iVBORw0KGgoAAAANSUhEUgAAAIAAAAAoBAMAAADEX+97AAAAG1BMVEXz+/4thQTa7N6QwIFFkyNeokKozqDB3b93sWHFR+MEAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABN0lEQVRIie2TQU+DQBCFt9vScvQpxR4xrcSjJCZ67JDGXsX+AdR4B3vpsSYm/m2HXaRLmuySepR3Gdidb/btDAjRq5dT96eCMlfBuzi1QLZUoZy2yz5sOvI+9iomaPEZ6nWnEtxqIyiM1RcAy44GNDhBXUjot/VVNweV1ah68FqWRyjKIOqAcyYF6rGcmpYnHzGt3fycNoMw0d3/THFu7hFSJ/8OXO6iTM8/KSg09obAzIHLO250LgQ0txOZSfgrV4Exdw98uGycJ0ErAeExZGhOmFHV9zHO6qVSj0MpLq7xZON56o++MjlsEgfVhbQWWME+xQX7J4V6zfi9A1Ly9rP1BvEXp+BbVJ/M77n+wfOIDVp51pZ4iBxvmj9AGrtvry6emwfKnVkW+ZRKd5ZNMvob36vXP9YPDmQki8QiCFAAAAAASUVORK5CYII=`;
+  // 更换api-可以通过这个代码换掉默认的ocr接口
+  OcrApi.api = OCR_API;
+  let code = OcrApi.classification(img_base64);
+  log('测试验证码图片的ocr识别结果为:'+code);
+}
+
+/**
+ * rsa加解密的全方位测试案例
+ */
+function rsa_demo_test() {
+  let t1 = new Date().getTime();
+  let pkcs1_public = `
+-----BEGIN RSA PUBLIC KEY-----
+MEgCQQCrI0pQ/ERRpJ3Ou190XJedFq846nDYP52rOtXyDxlFK5D3p6JJu2RwsKwy
+lsQ9xY0xYPpRZUZKMEeR7e9gmRNLAgMBAAE=
+-----END RSA PUBLIC KEY-----
+`.trim();
+
+  let pkcs1_public_pem = `
+MEgCQQCrI0pQ/ERRpJ3Ou190XJedFq846nDYP52rOtXyDxlFK5D3p6JJu2RwsKwy
+lsQ9xY0xYPpRZUZKMEeR7e9gmRNLAgMBAAE=
+`.trim();
+
+  let pkcs8_public = `
+-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKsjSlD8RFGknc67X3Rcl50WrzjqcNg/
+nas61fIPGUUrkPenokm7ZHCwrDKWxD3FjTFg+lFlRkowR5Ht72CZE0sCAwEAAQ==
+-----END PUBLIC KEY-----`.trim();
+
+  let pkcs8_public_pem = `
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKsjSlD8RFGknc67X3Rcl50WrzjqcNg/
+nas61fIPGUUrkPenokm7ZHCwrDKWxD3FjTFg+lFlRkowR5Ht72CZE0sCAwEAAQ==
+`.trim();
+
+  let pkcs1_private = `
+-----BEGIN RSA PRIVATE KEY-----
+MIIBOAIBAAJBAKsjSlD8RFGknc67X3Rcl50WrzjqcNg/nas61fIPGUUrkPenokm7
+ZHCwrDKWxD3FjTFg+lFlRkowR5Ht72CZE0sCAwEAAQI/b6OV1z65UokQaMvSeRXt
+0Yv6wiYtduQI9qpq5nzy/ytaqsbBfClNTi/HifKPKxlRouWFkc518EQI8LBxoarJ
+AiEA4DaONMplV8PQNa3TKn2F+SDEvLOCjdL0kHKdN90Ti28CIQDDZnTBaHgZwZbA
+hS7Bbf5yvwjWMhO6Y7l04/Qm7R+35QIgPuQuqXIoUSD080mp1N5WyRW++atksIF+
+5lGv9e6GP/MCICnj8y/rl6Pd7tXDN6zcSeqLrfdNsREKhB3dKOCXgW9JAiAFYtFS
+EJNBXVRTK42SNsZ2hJ/9xLwOwnH2epT8Q43s3Q==
+-----END RSA PRIVATE KEY-----
+`.trim()
+
+  let pkcs8_private = `
+-----BEGIN PRIVATE KEY-----
+MIIBUgIBADANBgkqhkiG9w0BAQEFAASCATwwggE4AgEAAkEAqyNKUPxEUaSdzrtf
+dFyXnRavOOpw2D+dqzrV8g8ZRSuQ96eiSbtkcLCsMpbEPcWNMWD6UWVGSjBHke3v
+YJkTSwIDAQABAj9vo5XXPrlSiRBoy9J5Fe3Ri/rCJi125Aj2qmrmfPL/K1qqxsF8
+KU1OL8eJ8o8rGVGi5YWRznXwRAjwsHGhqskCIQDgNo40ymVXw9A1rdMqfYX5IMS8
+s4KN0vSQcp033ROLbwIhAMNmdMFoeBnBlsCFLsFt/nK/CNYyE7pjuXTj9CbtH7fl
+AiA+5C6pcihRIPTzSanU3lbJFb75q2SwgX7mUa/17oY/8wIgKePzL+uXo93u1cM3
+rNxJ6out902xEQqEHd0o4JeBb0kCIAVi0VIQk0FdVFMrjZI2xnaEn/3EvA7CcfZ6
+lPxDjezd
+-----END PRIVATE KEY-----
+`.trim()
+
+  let data = `
+NodeRsa
+这是node-rsa 现在修改集成在drpy里使用`.trim();
+
+  let encryptedWithPublic = NODERSA.encryptRSAWithPublicKey(data, pkcs1_public, {
+    // PublicFormat: "pkcs1-public-pem",
+    outputEncoding: "base64",
+    options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+  });
+  console.log("公钥加密");
+  console.log(encryptedWithPublic);
+
+
+  let decryptedWithPrivate = NODERSA.decryptRSAWithPrivateKey(encryptedWithPublic, pkcs1_private, {
+    // PublicFormat: "pkcs1-private",
+    // outEncoding: "hex"
+    options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+  });
+  console.log("私钥解密");
+  console.log(decryptedWithPrivate);
+
+
+// https://www.btool.cn/rsa-sign
+  let pkcs1_sha256_sign = NODERSA.sign("1", pkcs1_private, {
+    outputEncoding: "base64",
+    options: {environment: "browser", encryptionScheme: 'pkcs1', signingScheme: "pkcs1-sha256"},
+  });
+  console.log("pkcs1_sha256_sign");
+  console.log(pkcs1_sha256_sign);
+
+  let pkcs1_sha256_sign_verify = NODERSA.verify("1", "Oulx2QrgeipKYBtqEDqFb2s/+ndk2cGQxO4CkhU7iBM1vyNmmvqubpsmeoUuN3waGrYZLknSEdwBkfv0tUMpFQ==", pkcs1_private, {
+    options: {environment: "browser", encryptionScheme: 'pkcs1', signingScheme: "pkcs1-sha256"},
+  });
+  console.log("pkcs1_sha256_sign_verify");
+  console.log(pkcs1_sha256_sign_verify);
+
+  let pkcs1_oaep_sha256 = NODERSA.encryptRSAWithPublicKey(data, `-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEA5KOq1gRNyllLNWKQy8sGpZE3Q1ULLSmzZw+eaAhj9lvqn7IsT1du
+SYn08FfoOA2qMwtz+1O2l1mgzNoSVCyVpVabnTG+C9XKeZXAnJHd8aYA7l7Sxhdm
+kte+iymYZ0ZBPzijo8938iugtVvqi9UgDmnY3u/NlQDqiL5BGqSxSTd/Sgmy3zD8
+PYzEa3wD9vehQ5fZZ45vKIq8GNVh2Z8+IGO85FF1OsN7+b2yGJa/FmDDNn0+HP+m
+PfI+kYBqEVpo0Ztbc3UdxgFwGC8O1n8AQyriwHnSOtIiuBH62J/7qyC/3LEAApRb
+Dd9YszqzmODjQUddZKHmvc638VW+azc0EwIDAQAB
+-----END RSA PUBLIC KEY-----
+`, {
+    outputEncoding: "base64",
+    options: {
+      environment: "browser", encryptionScheme: {
+        scheme: "pkcs1_oaep",
+        hash: "sha256",
+      },
+    }
+    // options: { environment: "browser", encryptionScheme: 'pkcs1' },
+  });
+  console.log("pkcs1_oaep_sha256");
+  console.log(pkcs1_oaep_sha256);
+
+  decryptedWithPrivate = NODERSA.decryptRSAWithPrivateKey("kSZesAAyYh2hdsQnYMdGqb6gKAzTauBKouvBzWcc4+F8RvGd0nwO6mVkUMVilPgUuNxjEauHayHiY8gI3Py45UI3+km0rSGyHrS6dHiHgCkMejXHieglYzAB0IxX3Jkm4z/66bdB/D+GFy0oct5fGCMI1UHPjEAYOsazJDa8lBFNbjiWFeb/qiZtIx3vGM7KYPAZzyRf/zPbbQ8zy9xOmRuOl5nnIxgo0Okp3KO/RIPO4GZOSBA8f2lx1UtNwwrXAMpcNavtoqHVcjJ/9lcotXYQFrn5b299pSIRf2gVm8ZJ31SK6Z8cc14nKtvgnmsgClDzIXJ1o1RcDK+knVAySg==", `-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA5KOq1gRNyllLNWKQy8sGpZE3Q1ULLSmzZw+eaAhj9lvqn7Is
+T1duSYn08FfoOA2qMwtz+1O2l1mgzNoSVCyVpVabnTG+C9XKeZXAnJHd8aYA7l7S
+xhdmkte+iymYZ0ZBPzijo8938iugtVvqi9UgDmnY3u/NlQDqiL5BGqSxSTd/Sgmy
+3zD8PYzEa3wD9vehQ5fZZ45vKIq8GNVh2Z8+IGO85FF1OsN7+b2yGJa/FmDDNn0+
+HP+mPfI+kYBqEVpo0Ztbc3UdxgFwGC8O1n8AQyriwHnSOtIiuBH62J/7qyC/3LEA
+ApRbDd9YszqzmODjQUddZKHmvc638VW+azc0EwIDAQABAoIBADZ/QGgUzInvsLp/
+zO2WbfYm39o/uhNAvk9RbLt1TIZbMFhyOpeKynHi3Swwd9xsfWX/U9zS/lGi/m31
+iKrhmaW4OA1G3vqpMcK7TBbFufYwUEaA+ZJX344euH8pIfdzyneMQ4z3Far2dS7l
+QsmjuilVV2kEFadveXewiYoVOWCu00w6bN8wy2SIHlQn+kIL6HQhWz12iKKflIKu
+eGRdzLHsKmBt6WbY1Wuhx7HU0fAKdlBDPxCHNlI+kybUYE9o5C2vJiaVM5wqJBgZ
+8Dz8kt1QbLJ910JoLXkLVQ8uC8NJKQwFtqQjTGPnEq0+wbgz6Ij599rKZkwW/xq9
+l6KoUiECgYEA6Ah42tVdkNW047f03xVYXFH96RgorHRS36mR8Y+ONUq1fwKidovC
+WjwVujt4OPf3l1W6iyn/F6cu/bsmvPrSc3HTN0B1V31QK4OjgetxQ2PSbTldH02J
+NPzkt+v+cPxXpx/P5mgt7Weefw5txU547KubGrHUV5rBKFtIx9pj16MCgYEA/EF0
+o19+D24DZAPwlDS5VbEd7FStnwY4oQ5PqbuNOSbSJLMWU0AqzXcRokp8UTyCZ0X3
+ATkS1REq97kShCuR+npTR6a6DlY7sdpPI1SMLNajgB2tkx0EOzX+PfNIbHUd4jpJ
+I0ZMAHv/OOtkzQHDaeTWBTrzsWm6/nTiykfduNECgYEA46AMD4HpPECqKAs66e5i
+tI6q7JSKskObWVdcmQEfnSAhVOwcvPb2Ptda6UuV8S0xcwDi88rLOUUFUFzc79+P
+vTkY38cYVi/VChsluDpk7ptqv0PbGu5Rf+3n4pZdEjI7OvR2W64wAAn67uIUxc7p
+yiO/ET0K9rYWb6S9jXGtKMkCgYEA2kPAqoO7zZoBMQ7/oR0lp/HC1HRIbiqx4RlC
+8Lgpb+QZPEwA6zPAVVvLVENi4d+bbcRp/xLlKpraNNJcJSSWAMbLPFoU7sbKjA87
+HnTPfRSTEA2d3Ibk3F7Rh8TzS3Ti0JZiJjVzGZAwu41iAMifzwaD8K6boUy80eNN
+QH2CaaECgYBUsLYvC/MiYg3w+LGOONuQongoVUXjGqnw2bjVa9RK7lwRdXPUqJ51
+MpVO98IkoLvGSI/0sGNP3GKNhC+eMGjJAVwFyEuOn+JsmMv9Y9uStIVi5tIHIhKw
+m7mp8il0kaftHdSxTbspG3tZ2fjIiFIZkLEOmRpd7ogWumgOajzUdA==
+-----END RSA PRIVATE KEY-----`, {
+    // PublicFormat: "pkcs1-private",
+    // outEncoding: "hex"
+    options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+  });
+  console.log('decryptedWithPrivate');
+  console.log(decryptedWithPrivate);
+
+
+  (() => {
+    let key = new NODERSA.NodeRSA({b: 1024});
+    key.setOptions({encryptionScheme: 'pkcs1'})
+    let text = `你好drpy node-ras`;
+    let encrypted = key.encrypt(text, 'base64');
+    console.log('encrypted: ', encrypted);
+    const decrypted = key.decrypt(encrypted, 'utf8');
+    console.log('decrypted: ', decrypted);
+  })();
+  let t2 = new Date().getTime();
+  console.log('rsa_demo_test 测试耗时:'+(t2-t1)+'毫秒');
+}
 
 /**
  * 执行预处理代码
@@ -91,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta12 202400514`;
+const VERSION = `${vercode} 3.9.50beta13 202400521`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -121,11 +293,8 @@ const RULE_CK = 'cookie'; // 源cookie的key值
 const CATE_EXCLUDE = '首页|留言|APP|下载|资讯|新闻|动态';
 const TAB_EXCLUDE = '猜你|喜欢|下载|剧情|热播';
 const OCR_RETRY = 3; // ocr验证重试次数
-// const OCR_API = 'http://dm.mudery.com:10000';//ocr在线识别接口
-// const OCR_API = 'http://192.168.3.239:5705/parse/ocr';//ocr在线识别接口
-// const OCR_API = 'http://cms.nokia.press/parse/ocr';//ocr在线识别接口
-// const OCR_API = 'http://cms.nokia.press:5707/parse/ocr';//ocr在线识别接口
-const OCR_API = 'http://drpy.nokia.press:8028/ocr/drpy/text'; //ocr在线识别接口
+// const OCR_API = 'http://drpy.nokia.press:8028/ocr/drpy/text';//ocr在线识别接口
+const OCR_API = 'https://api.nn.ci/ocr/b64/text';//ocr在线识别接口
 if (typeof MY_URL === 'undefined') {
   var MY_URL; // 全局注入变量,pd函数需要
 }
@@ -1345,19 +1514,25 @@ const dealJson = (html: string) => {
  */
 var OcrApi = {
   api: OCR_API,
-  classification: (img) => {
-    let code: any = '';
-
+  classification: function (img) { // img是byte类型,这里不方便搞啊
+    let code = '';
     try {
-      console.log('[t3]通过drpy_ocr验证码接口过验证...');
-      let html = request(OCR_API, { data: { img: img }, headers: { 'User-Agent': PC_UA }, method: 'POST' }, true);
+      // let html = request(this.api,{data:{img:img},headers:{'User-Agent':PC_UA},'method':'POST'},true);
+      // html = JSON.parse(html);
+      // code = html.url||'';
+      log('通过drpy_ocr验证码接口过验证...');
+      let html = '';
+      if(this.api.endsWith('drpy/text')) {
+        html = request(this.api, {data: {img: img}, headers: {'User-Agent': PC_UA}, 'method': 'POST'}, true);
+      }else{
+        html = post(this.api,{body:img});
+      }
       code = html || '';
     } catch (e) {
-      console.log('[t3]OCR识别验证码发生错误', e);
+      log(`OCR识别验证码发生错误:${e.message}`)
     }
-
-    return code;
-  },
+    return code
+  }
 };
 
 /**
@@ -1484,6 +1659,18 @@ const $require = (url) => {
 };
 
 /**
+ * 将obj所有key变小写
+ * @param obj
+ */
+function keysToLowerCase(obj) {
+  return Object.keys(obj).reduce((result, key) => {
+    const newKey = key.toLowerCase();
+    result[newKey] = obj[key]; // 如果值也是对象，可以递归调用本函数
+    return result;
+  }, {});
+}
+
+/**
  * 海阔网页请求函数完整封装
  * @param url 请求链接
  * @param obj 请求对象 {headers:{},method:'',timeout:5000,body:'',withHeaders:false}
@@ -1491,24 +1678,6 @@ const $require = (url) => {
  * @returns {string|string|DocumentFragment|*}
  */
 const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) => {
-  // 还原请求头 方便 重写改
-  if (obj?.headers) {
-    const customHeaders = {
-      'custom-cookie': 'Cookie',
-      'custom-origin': 'Origin',
-      'custom-host': 'Host',
-      'custom-connection': 'Connection',
-      'custom-ua': 'User-Agent',
-      'custom-referer': 'Referer',
-    };
-
-    for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
-      if (obj.headers.hasOwnProperty(originalHeader)) {
-        obj.headers[customHeader] = obj.headers[originalHeader];
-        delete obj.headers[originalHeader];
-      }
-    }
-  }
   if (typeof obj === 'undefined' || !obj) {
     if (!fetch_params || !fetch_params.headers) {
       const headers = {
@@ -1560,6 +1729,27 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
   if (obj.redirect === false) {
     obj.redirect = 0;
   }
+  // 还原请求头 方便 重写改
+  if (obj?.headers) {
+    const customHeaders = {
+      'custom-cookie': 'Cookie',
+      'custom-origin': 'Origin',
+      'custom-host': 'Host',
+      'custom-connection': 'Connection',
+      'custom-ua': 'User-Agent',
+      'custom-referer': 'Referer',
+    };
+    obj.headers = keysToLowerCase(obj.headers);
+
+    for (const [customHeader,originalHeader] of Object.entries(customHeaders)) {
+      let originalHeaderKey = originalHeader.toLowerCase();
+      if (obj.headers.hasOwnProperty(customHeader)) {
+        obj.headers[originalHeaderKey] = obj.headers[customHeader];
+        delete obj.headers[customHeader];
+      }
+    }
+  }
+
   console.log(`[t3][request]headers:${JSON.stringify(obj.headers)}`);
   console.log(`[t3][request]url:${url}| method:${obj.method || 'GET'}| body:${obj.body || ''}`);
   const res = req(url, obj);
@@ -3111,6 +3301,8 @@ const keepUnUse = {
       RSA, // encryption and decryption
       clearItem, // cache
       $js, // $工具
+      ocr_demo_test, // ocr测试
+      rsa_demo_test, // rsa测试
     };
     let temp = _;
     temp.stringify({});

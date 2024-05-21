@@ -33,6 +33,18 @@ interface Response {
   headers?: { [key: string]: string };
 }
 
+/**
+ * 将obj所有key变小写
+ * @param obj
+ */
+function keysToLowerCase(obj) {
+  return Object.keys(obj).reduce((result, key) => {
+    const newKey = key.toLowerCase();
+    result[newKey] = obj[key]; // 如果值也是对象，可以递归调用本函数
+    return result;
+  }, {});
+}
+
 const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0): Response => {
   const method: HttpMethod = (_object.method || 'GET').toUpperCase() as HttpMethod;
   // const timeout: number = _object.timeout || 5000;
@@ -40,7 +52,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   const body: string = _object.body || '';
   const bufferType: number = _object.buffer || 0;
   let data: any = _object.data || {};
-  const headers = _object.headers || {};
+  let headers = _object.headers || {};
   const emptyResult: Response = { content: '', body: '', headers: {} };
 
   if (_object.hasOwnProperty('redirect')) {
@@ -49,10 +61,14 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   }
 
   if (body && Object.keys(data).length === 0) {
-    body.split('&').forEach((param) => {
-      const [key, value] = param.split('=');
-      data[key] = value;
-    });
+    if(body.includes('&')) {
+      body.split('&').forEach((param) => {
+        const [key, value] = param.split('=');
+        data[key] = value;
+      });
+    }else{
+      data = body
+    }
   } else if (!body && Object.keys(data).length !== 0 && method !== 'GET') {
     const contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type');
     const contentType = 'application/json';
@@ -80,11 +96,13 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     Referer: 'custom-referer',
     Redirect: 'custom-redirect',
   };
+  headers = keysToLowerCase(headers);
 
   for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
-    if (headers.hasOwnProperty(originalHeader)) {
-      headers[customHeader] = headers[originalHeader];
-      delete headers[originalHeader];
+    let originalHeaderKey = originalHeader.toLowerCase();
+    if (headers.hasOwnProperty(originalHeaderKey)) {
+      headers[customHeader] = headers[originalHeaderKey];
+      delete headers[originalHeaderKey];
     }
   }
 
@@ -96,10 +114,18 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       headers,
     });
   } else {
+    let req_body = '';
+    if(typeof (data) === 'string'){
+      req_body = decodeURIComponent(data);
+    }else if(typeof (data) === 'object' && headers['content-type'] && headers['content-type'].includes('application/json')){
+      req_body = JSON.stringify(data);
+    }else{
+      req_body = new URLSearchParams(data).toString();
+    }
     const requestOptions: any = {
       method,
       headers,
-      body: typeof data === 'string' ? data : JSON.stringify(data),
+      body: req_body,
       credentials: 'include',
     };
     r = syncFetch(_url, requestOptions);

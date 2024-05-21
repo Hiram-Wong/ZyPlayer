@@ -300,7 +300,7 @@ var rule = {
 const Function = [
   {
     label: 'getProxyUrl',
-    insertText: "getProxyUrl()+'&url='",
+    insertText: 'getProxyUrl()+\'&url=\'',
     detail: '获取本地代理链接',
     documentation: 'getProxyUrl()',
   },
@@ -339,6 +339,18 @@ const Function = [
     insertText: 'RSA.decode($1,"$2",null)',
     detail: 'rsa解密',
     documentation: `RSA.decode(data, key, option)`,
+  },
+  {
+    label: 'rsa_demo_test',
+    insertText: 'rsa_demo_test()',
+    detail: 'rsa测试案例',
+    documentation: `rsa_demo_test()`,
+  },
+  {
+    label: 'ocr_demo_test',
+    insertText: 'ocr_demo_test()',
+    detail: 'ocr识别验证码测试案例',
+    documentation: `ocr_demo_test()`,
   },
   {
     label: 'fixAdM3u8',
@@ -638,50 +650,50 @@ const Keyword = [
   {
     label: 'headers',
     insertText:
-      "headers:{ 'User-Agent': PC_UA, 'Referer': '', 'content-type': 'application/x-www-form-urlencoded', 'Cookie': ''}",
+      'headers:{ \'User-Agent\': PC_UA, \'Referer\': \'\', \'content-type\': \'application/x-www-form-urlencoded\', \'Cookie\': \'\'}',
     detail: '常用headers参数',
     documentation:
-      "headers:{ 'User-Agent': PC_UA, 'Referer': '', 'content-type': 'application/x-www-form-urlencoded', 'Cookie': ''}",
+      'headers:{ \'User-Agent\': PC_UA, \'Referer\': \'\', \'content-type\': \'application/x-www-form-urlencoded\', \'Cookie\': \'\'}',
   },
   {
     label: 'tab_exclude',
     insertText:
-      "tab_exclude:'排序',",
+      'tab_exclude:\'排序\',',
     detail: '二级线路名称排除',
     documentation:
-      "tab_exclude:'排序|榜单|猜你喜欢'",
+      'tab_exclude:\'排序|榜单|猜你喜欢\'',
   },
   {
     label: 'cate_exclude',
     insertText:
-      "cate_exclude:'今日更新|热榜',",
+      'cate_exclude:\'今日更新|热榜\',',
     detail: '一级分类名称排除',
     documentation:
-      "cate_exclude:'今日更新|热榜'",
+      'cate_exclude:\'今日更新|热榜\'',
   },
   {
     label: 'tab_rename',
     insertText:
-      "tab_rename: {'道长在线': '在线播放'},",
+      'tab_rename: {\'道长在线\': \'在线播放\'},',
     detail: '一级分类名称排除',
     documentation:
-      "tab_rename: {'道长在线': '在线播放'}",
+      'tab_rename: {\'道长在线\': \'在线播放\'}',
   },
   {
     label: 'tab_order',
     insertText:
-      "tab_order:['超清', '蓝光', '极速蓝光'],",
+      'tab_order:[\'超清\', \'蓝光\', \'极速蓝光\'],',
     detail: '二级线路排序',
     documentation:
-      "tab_order:['超清', '蓝光', '极速蓝光']'",
+      'tab_order:[\'超清\', \'蓝光\', \'极速蓝光\']\'',
   },
   {
     label: 'tab_remove',
     insertText:
-      "tab_remove:['wjm3u8','ikm3u8','sdm3u8','M3U8','jinyingm3u8','fsm3u8','ukm3u8'],",
+      'tab_remove:[\'wjm3u8\',\'ikm3u8\',\'sdm3u8\',\'M3U8\',\'jinyingm3u8\',\'fsm3u8\',\'ukm3u8\'],',
     detail: '移除二级对应线路名相关的数据',
     documentation:
-      "tab_remove:['wjm3u8','ikm3u8','sdm3u8','M3U8','jinyingm3u8','fsm3u8','ukm3u8']'",
+      'tab_remove:[\'wjm3u8\',\'ikm3u8\',\'sdm3u8\',\'M3U8\',\'jinyingm3u8\',\'fsm3u8\',\'ukm3u8\']\'',
   },
 
 ];
@@ -718,7 +730,7 @@ const Variable = [
     label: 'TYPE',
     insertText: 'TYPE',
     detail: '标识js的执行环境，是主页。一级还是搜索等',
-    documentation: "if(TYPE == 'home')",
+    documentation: 'if(TYPE == \'home\')',
   },
   {
     label: 'input',
@@ -860,4 +872,4 @@ const createDependencyProposals = (range: object, monaco: any) => {
   return suggestions;
 };
 
-export {createDependencyProposals};
+export { createDependencyProposals };
