@@ -402,7 +402,9 @@ app.whenReady().then(async () => {
     }
 
     if (cookieHeader) {
-      const updatedCookieHeader = cookieHeader.map((cookie) => `${cookie}; SameSite=None; Secure`);
+      // 取消自动携带cookie的拦截问题
+      // const updatedCookieHeader = cookieHeader.map((cookie) => `${cookie}; SameSite=None; Secure`);
+      const updatedCookieHeader = cookieHeader.map((cookie) => `${cookie}`);
       delete responseHeaders!['Set-Cookie'];
       responseHeaders!['custom-set-cookie'] = cookieHeader;
       responseHeaders!['set-cookie'] = updatedCookieHeader;
