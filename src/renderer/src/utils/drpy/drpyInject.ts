@@ -150,10 +150,17 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   } else if (_js_type === 1) {
     let content;
     if (bufferType === 2) {
-      const uint8Array = new Uint8Array(r.arrayBuffer()); // 将 ArrayBuffer 转换为一个 Uint8Array
-      const buffer = Buffer.from(uint8Array); // 使用 Buffer.from 将 Uint8Array 转换为 Buffer
-      const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
-      content = base64String;
+      const blob = r.blob();
+      // @ts-ignore
+      const reader = new FileReaderSync();
+      content = reader.readAsDataURL(blob);
+      if(content.includes('base64,')){
+        content = content.split('base64,')[1];
+      }
+      // const uint8Array = new Uint8Array(r.arrayBuffer()); // 将 ArrayBuffer 转换为一个 Uint8Array
+      // const buffer = Buffer.from(uint8Array); // 使用 Buffer.from 将 Uint8Array 转换为 Buffer
+      // const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
+      // content = base64String;
     } else content = r.text();
     return { content, headers: formatHeaders } || emptyResult;
   } else {
