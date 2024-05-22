@@ -126,7 +126,8 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       method,
       headers,
       body: req_body,
-      credentials: 'include',
+      credentials: 'omit', // 禁止自动带cookie
+      // credentials: 'include',
     };
     r = syncFetch(_url, requestOptions);
   }
