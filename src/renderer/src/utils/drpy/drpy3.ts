@@ -263,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta15 202400523`;
+const VERSION = `${vercode} 3.9.50beta16 202400523`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -566,35 +566,34 @@ if (!String.prototype.includes) {
     }
   };
 }
+// @ts-ignore
 if (!Array.prototype.includes) {
   Object.defineProperty(Array.prototype, 'includes', {
     value: function (searchElement, fromIndex) {
-      if (this == null) {
-        //this是空或者未定义，抛出错误
+
+      if (this == null) {//this是空或者未定义，抛出错误
         throw new TypeError('"this" is null or not defined');
       }
 
-      var o = Object(this); //将this转变成对象
-      var len = o.length >>> 0; //无符号右移0位，获取对象length属性，如果未定义就会变成0
+      var o = Object(this);//将this转变成对象
+      var len = o.length >>> 0;//无符号右移0位，获取对象length属性，如果未定义就会变成0
 
-      if (len === 0) {
-        //length为0直接返回false未找到目标值
+      if (len === 0) {//length为0直接返回false未找到目标值
         return false;
       }
 
-      var n = fromIndex | 0; //查找起始索引
-      var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0); //计算正确起始索引，因为有可能是负值
+      var n = fromIndex | 0;//查找起始索引
+      var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);//计算正确起始索引，因为有可能是负值
 
-      while (k < len) {
-        //从起始索引处开始循环
-        if (o[k] === searchElement) {
-          //如果某一位置与寻找目标相等，返回true，找到了
+      while (k < len) {//从起始索引处开始循环
+        if (o[k] === searchElement) {//如果某一位置与寻找目标相等，返回true，找到了
           return true;
         }
         k++;
       }
-      return false; //未找到，返回false
+      return false;//未找到，返回false
     },
+    enumerable:false
   });
 }
 if (typeof String.prototype.startsWith !== 'function') {
@@ -608,81 +607,87 @@ if (typeof String.prototype.endsWith !== 'function') {
   };
 }
 Object.defineProperty(Object.prototype, 'myValues', {
-  value: function () {
-    if (this == null) {
-      throw new TypeError('Cannot convert undefined or null to object');
+  value: function(obj){
+    if(obj ==null) {
+      throw new TypeError("Cannot convert undefined or null to object");
     }
-
-    const res: string[] = [];
-
-    for (const key in this) {
-      if (Object.prototype.hasOwnProperty.call(this, key)) {
-        res.push(this[key]);
+    var res=[]
+    for(var k in obj){
+      if(obj.hasOwnProperty(k)){//需判断是否是本身的属性
+        res.push(obj[k]);
       }
     }
-
     return res;
   },
-  configurable: true,
-  enumerable: false,
-  writable: true,
+  enumerable:false
 });
-if (!Object.prototype.hasOwnProperty('values')) {
+// @ts-ignore
+if (typeof Object.prototype.values != 'function') {
   Object.defineProperty(Object.prototype, 'values', {
-    value: function () {
-      if (this == null) {
-        throw new TypeError('Cannot convert undefined or null to object');
+    value: function(obj){
+      if(obj ==null) {
+        throw new TypeError("Cannot convert undefined or null to object");
       }
-
-      const values: string[] = [];
-
-      for (const key in this) {
-        if (Object.prototype.hasOwnProperty.call(this, key)) {
-          values.push(this[key]);
+      var res=[]
+      for(var k in obj){
+        if(obj.hasOwnProperty(k)){//需判断是否是本身的属性
+          res.push(obj[k]);
         }
       }
-
-      return values;
+      return res;
     },
-    configurable: true,
-    enumerable: false,
-    writable: true,
+    enumerable:false
   });
 }
-if (typeof Array.prototype.join !== 'function') {
-  Array.prototype.join = function (emoji) {
-    emoji = emoji || '';
-    let self = this;
-    let str = '';
-    let i = 0;
-    if (!Array.isArray(self)) throw String(self) + 'is not Array';
-    if (self.length === 0) return '';
-    if (self.length === 1) return String(self[0]);
-    i = 1;
-    str = this[0];
-    for (; i < self.length; i++) {
-      str += String(emoji) + String(self[i]);
-    }
-    return str;
-  };
+if (typeof Array.prototype.join != 'function') {
+  Object.defineProperty(Array.prototype, 'join', {
+    value: function (emoji) {
+      // emoji = emoji||',';
+      emoji = emoji||'';
+      let self = this;
+      let str = "";
+      let i = 0;
+      if (!Array.isArray(self)) {throw String(self)+'is not Array'}
+      if(self.length===0){return ''}
+      if (self.length === 1){return String(self[0])}
+      i = 1;
+      str = this[0];
+      for (; i < self.length; i++) {
+        str += String(emoji)+String(self[i]);
+      }
+      return str;
+    },
+    enumerable:false
+  });
 }
-if (typeof Array.prototype.toReversed !== 'function') {
-  Array.prototype.toReversed = function () {
-    const clonedList = this.slice();
-    // 倒序新数组
-    const reversedList = clonedList.reverse();
-    return reversedList;
-  };
-}
-
 // @ts-ignore
-String.prototype.rstrip = function (chars: string) {
-  const regex = new RegExp(chars + '$');
-  return this.replace(regex, '');
-};
+if (typeof Array.prototype.toReversed != 'function') {
+  Object.defineProperty(Array.prototype, 'toReversed', {
+    value: function () {
+      const clonedList = this.slice();
+      // 倒序新数组
+      const reversedList = clonedList.reverse();
+      return reversedList;
+    },
+    enumerable:false
+  });
+}
 
-Array.prototype['append'] = Array.prototype.push;
-String.prototype['strip'] = String.prototype.trim;
+Object.defineProperty(Array.prototype, 'append', {
+  value: Array.prototype.push,
+  enumerable:false
+});
+Object.defineProperty(String.prototype, 'strip', {
+  value: String.prototype.trim,
+  enumerable:false
+});
+Object.defineProperty(String.prototype, 'rstrip', {
+  value: function (chars) {
+    let regex = new RegExp(chars + "$");
+    return this.replace(regex, "");
+  },
+  enumerable:false
+});
 
 const isGenuine = (vipUrl: string) => {
   let flag = new RegExp(
