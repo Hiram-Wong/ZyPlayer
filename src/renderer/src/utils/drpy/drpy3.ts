@@ -3336,6 +3336,7 @@ const keepUnUse = {
       $js, // $工具
       ocr_demo_test, // ocr测试
       rsa_demo_test, // rsa测试
+      reqCookie, // cookie获取
     };
     let temp = _;
     temp.stringify({});
