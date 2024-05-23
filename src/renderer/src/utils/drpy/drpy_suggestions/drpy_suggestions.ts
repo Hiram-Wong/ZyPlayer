@@ -521,6 +521,21 @@ const Function = [
     documentation: 'post(url,object)',
   },
   {
+    label: 'reqCookie',
+    insertText: 'reqCookie($1,{})',
+    detail: '获取网页cookie',
+    documentation: `
+/**
+ * 快捷获取特殊地址cookie|一般用作搜索过验证
+ * 用法 let {cookie,html} = reqCookie(url);
+ * @param url 能返回cookie的地址
+ * @param obj 常规请求参数
+ * @param all_cookie 返回全部cookie.默认false只返回第一个,一般是PhpSessionId
+ * @returns {{cookie: string, html: (*|string|DocumentFragment)}}
+ */
+    `.trim(),
+  },
+  {
     label: 'dealJson',
     insertText: 'dealJson($1)',
     detail: '处理返回的json数据',
@@ -646,6 +661,13 @@ const Keyword = [
     detail: '应用注入的电脑UA',
     documentation:
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36',
+  },
+  {
+    label: 'toBase64',
+    insertText: 'toBase64:true,',
+    detail: '获取response的base64编码',
+    documentation:
+      'reqCookie(url,{toBase64:true}',
   },
   {
     label: 'headers',
@@ -872,4 +894,4 @@ const createDependencyProposals = (range: object, monaco: any) => {
   return suggestions;
 };
 
-export { createDependencyProposals };
+export {createDependencyProposals};
