@@ -1565,11 +1565,12 @@ const verifyCode = (url) => {
       let img = json.body;
       let code = OcrApi.classification(img);
       console.log(`[t3]第${cnt + 1}次验证码识别结果: ${code}`);
-      // let submit_url = `${host}/index.php/ajax/verify_check?type=search&verify=${code}`;
-      let submit_url = `${host}/index.php/ajax/verify_check`;
-      let submit_body = `type=search&verify=${code}`;
+      let submit_url = `${host}/index.php/ajax/verify_check?type=search&verify=${code}`;
+      // let submit_url = `${host}/index.php/ajax/verify_check`;
+      // let submit_body = `type=search&verify=${code}`;
 
-      let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST',body:submit_body });
+      let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST'});
+      // let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST',body:submit_body });
       html = JSON.parse(html);
 
       if (html.msg === 'ok') {
