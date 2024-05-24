@@ -263,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta17 202400524`;
+const VERSION = `${vercode} 3.9.50beta18 202400524`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -1555,7 +1555,7 @@ const verifyCode = (url) => {
       let yzm_url = `${host}/index.php/verify/index.html`;
       console.log(`[t3]验证码链接: ${yzm_url}`);
       let hhtml = request(yzm_url, { withHeaders: true, toBase64: true }, true);
-      let json = JSON.parse(JSON.stringify(hhtml));
+      let json = JSON.parse(hhtml);
 
       if (!cookie) {
         let setCk = Object.keys(json).find((it) => it.toLowerCase() === 'set-cookie');
@@ -1565,9 +1565,11 @@ const verifyCode = (url) => {
       let img = json.body;
       let code = OcrApi.classification(img);
       console.log(`[t3]第${cnt + 1}次验证码识别结果: ${code}`);
-      let submit_url = `${host}/index.php/ajax/verify_check?type=search&verify=${code}`;
+      // let submit_url = `${host}/index.php/ajax/verify_check?type=search&verify=${code}`;
+      let submit_url = `${host}/index.php/ajax/verify_check`;
+      let submit_body = `type=search&verify=${code}`;
 
-      let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST' });
+      let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST',body:submit_body });
       html = JSON.parse(html);
 
       if (html.msg === 'ok') {
