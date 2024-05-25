@@ -35,7 +35,7 @@ import NPlayer, { EVENT as NPlayerEvent, Icon as NPlayerIcon } from 'nplayer';
 import nplayerDanmaku from '@nplayer/danmaku';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
-import WebTorrent from './components/webtorrent';
+import WebTorrent from './playerModule/components/modules/webtorrent';
 
 import XgPlayer, { Events, SimplePlayer } from 'xgplayer';
 import Danmu from 'xgplayer/es/plugins/danmu';
@@ -166,7 +166,7 @@ const publicElementDeal = {
     },
     add: (el: string, newEle: string) => {
       const controlSetting = document.querySelector(el);
-      controlSetting.insertAdjacentHTML('afterend', newEle);
+      controlSetting!.insertAdjacentHTML('afterend', newEle);
     },
   },
 };
@@ -686,11 +686,11 @@ const playerMethod = {
 
       // 画中画事件处理
       const handlePipClick = () => {
-        const videoElement: HTMLVideoElement = document.querySelector('.dplayer-video');
+        const videoElement: HTMLVideoElement | null = document.querySelector('.dplayer-video');
 
         try {
           videoElement !== document.pictureInPictureElement
-            ? videoElement.requestPictureInPicture()
+            ? videoElement!.requestPictureInPicture()
             : document.exitPictureInPicture();
         } catch (error) {
           console.error('画中画功能异常:', error);
