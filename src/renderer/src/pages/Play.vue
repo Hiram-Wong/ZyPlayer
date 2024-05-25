@@ -699,12 +699,14 @@ const initFilmPlayer = async (isFirst) => {
   const analyze = snifferAnalyze.value;
   MessagePlugin.info(t('pages.player.message.play'));
   const response = await playHelper(snifferMode, url, site, analyze, active.flimSource, skipAd);
-  isVisible.official = response!.isOfficial;
-  if (isVisible.official) {
-    if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
-    else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
-  }
-  createPlayer(response!.url, response!.mediaType!);
+  if (response?.url) {
+    isVisible.official = response!.isOfficial;
+    if (isVisible.official) {
+      if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
+      else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
+    }
+    createPlayer(response!.url, response!.mediaType!);
+  } else MessagePlugin.error(t('pages.player.message.sniiferError'));
 };
 
 // 初始化播放器
