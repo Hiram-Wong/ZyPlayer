@@ -1225,8 +1225,6 @@ const openMainWinEvent = (): void => {
     padding: 10px 15px;
 
     .left {
-      transition: 0.15s linear;
-
       .open-main-win {
         display: flex;
         flex-direction: row;
@@ -1236,16 +1234,17 @@ const openMainWinEvent = (): void => {
         border-radius: var(--td-radius-medium);
         background-color: var(--td-bg-content-input);
         padding: 2px 10px;
+        transition: 0.15s linear;
         cursor: pointer;
 
         .tip-gotomain {
           display: inline-block;
           margin-left: 5px;
         }
-      }
 
-      :hover {
-        background-color: var(--td-bg-content-active);
+        &:hover {
+          background-color: var(--td-bg-content-active);
+        }
       }
     }
 
@@ -1318,7 +1317,7 @@ const openMainWinEvent = (): void => {
 
             .player {
               width: 100%;
-              height: calc(100vh - 56px);
+              height: 100%;
               position: relative;
             }
           }
@@ -1898,5 +1897,74 @@ const openMainWinEvent = (): void => {
 :deep(.t-input) {
   background-color: var(--td-bg-content-input) !important;
   border-color: transparent !important;
+}
+
+@media only screen and (max-width: 640px) {
+  .container {
+    -webkit-app-region: drag;
+  }
+
+  .container:hover>.container-header {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.15s linear 0s, visibility 0s linear 0s;
+  }
+
+  .container-header {
+    background: linear-gradient(360deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .8)) !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s linear 3s, visibility 0s linear 3s;
+
+    .left {
+      .open-main-win {
+        background-color: transparent !important;
+        color: #f3f3f3;
+        width: auto !important;
+
+        .tip-gotomain {
+          display: none !important;
+        }
+
+        &:hover {
+          background-color: transparent !important;
+          color: #fbfbfb;
+        }
+      }
+    }
+
+    .spacer {
+      color: #fbfbfb;
+    }
+
+    .right {
+      color: #fbfbfb;
+
+      .system-functions {
+        .setting {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .container-main {
+    height: 100% !important;
+
+    .player {
+      .dock-show {
+        display: none !important;
+      }
+    }
+
+    .aside {
+      display: none !important;
+    }
+  }
 }
 </style>

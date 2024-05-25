@@ -460,9 +460,9 @@ ipcMain.on('openPlayWindow', (_, arg) => {
   if (playWindow) playWindow.destroy();
   playWindow = new BrowserWindow({
     width: 875,
-    minWidth: 875,
+    minWidth: 480,
     height: 550,
-    minHeight: 550,
+    minHeight: 280,
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
