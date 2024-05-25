@@ -97,7 +97,8 @@ var rule = {
     lists:'xx:eq(#id)&&a',
     tab_text:'body&&Text',
     list_text:'body&&Text',
-    list_url:'a&&href'
+    list_url:'a&&href',
+    list_url_prefix: '',
   },
   搜索:'列表;标题;图片;描述;链接;详情',
 }
@@ -244,7 +245,8 @@ var rule = {
       lists:'',
       tab_text:'body&&Text',
       list_text:'body&&Text',
-      list_url:'a&&href'
+      list_url:'a&&href',
+      list_url_prefix: '',
     },
     搜索:'列表;标题;图片;描述;链接;详情',
     proxy_rule:\`js:
@@ -716,6 +718,14 @@ const Keyword = [
     detail: '移除二级对应线路名相关的数据',
     documentation:
       'tab_remove:[\'wjm3u8\',\'ikm3u8\',\'sdm3u8\',\'M3U8\',\'jinyingm3u8\',\'fsm3u8\',\'ukm3u8\']\'',
+  },
+  {
+    label: 'list_url_prefix',
+    insertText:
+      'list_url_prefix: \'push://\',',
+    detail: '二级选集链接前缀',
+    documentation:
+      '网盘类链接加push://自动推送至壳子处理',
   },
 
 ];

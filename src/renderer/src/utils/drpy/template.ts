@@ -195,6 +195,7 @@ const getMubans = () => {
         tab_text: 'body&&Text',
         list_text: 'body&&Text',
         list_url: 'a&&href',
+        list_url_prefix: '',
       },
       搜索: '列表;标题;图片;描述;链接;详情',
     },

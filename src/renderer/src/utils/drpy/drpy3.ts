@@ -263,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta18 202400524`;
+const VERSION = `${vercode} 3.9.50beta18 202400525`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -2688,6 +2688,7 @@ const detailParse = (detailObj) => {
       } else {
         let list_text = p.list_text || 'body&&Text';
         let list_url = p.list_url || 'a&&href';
+        let list_url_prefix = p.list_url_prefix || '';
         let is_tab_js = p.tabs.trim().startsWith('js:');
         for (let i = 0; i < playFrom.length; i++) {
           let tab_name = playFrom[i];
@@ -2704,6 +2705,9 @@ const detailParse = (detailObj) => {
           if (typeof pdfl === 'function') {
             // @ts-ignore
             new_vod_list = pdfl(html, p1, list_text, list_url, MY_URL);
+            if(list_url_prefix){
+              new_vod_list = new_vod_list.map(it=>it.split('$')[0]+'$'+list_url_prefix+it.split('$').slice(1).join('$'));
+            }
           } else {
             let vodList = [];
             try {
@@ -2711,7 +2715,7 @@ const detailParse = (detailObj) => {
             } catch (e) {}
             for (let i = 0; i < vodList.length; i++) {
               let it = vodList[i];
-              new_vod_list.push(_pdfh(it, list_text).trim() + '$' + _pd(it, list_url, MY_URL));
+              new_vod_list.push(_pdfh(it, list_text).trim() + '$' + list_url_prefix + _pd(it, list_url, MY_URL));
             }
           }
           if (new_vod_list.length > 0) {
@@ -2848,7 +2852,7 @@ const playParse = (playObj) => {
   var flag = MY_FLAG; // 注入播放线路名称给免嗅js
 
   const common_play = {
-    parse: 1,
+    parse: SPECIAL_URL.test(input) || /^(push:)/.test(input) ? 0: 1,
     url: input,
     flag: flag,
     jx: tellIsJx(input),

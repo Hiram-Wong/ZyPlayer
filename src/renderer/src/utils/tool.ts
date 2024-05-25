@@ -5,6 +5,18 @@ import ip from 'ip';
 import request, { requestComplete } from '@/utils/request';
 import { usePlayStore, useSettingStore } from '@/store';
 
+/**
+ * 将obj所有key变小写
+ * @param obj
+ */
+function keysToLowerCase(obj) {
+  return Object.keys(obj).reduce((result, key) => {
+    const newKey = key.toLowerCase();
+    result[newKey] = obj[key]; // 如果值也是对象，可以递归调用本函数
+    return result;
+  }, {});
+}
+
 const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) => {
   try {
     const customHeaders = {
@@ -16,11 +28,13 @@ const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) =
       Referer: 'custom-referer',
       Redirect: 'custom-redirect',
     };
+    headers = keysToLowerCase(headers);
 
     for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
-      if (headers.hasOwnProperty(originalHeader)) {
-        headers[customHeader] = headers[originalHeader];
-        delete headers[originalHeader];
+      let originalHeaderKey = originalHeader.toLowerCase();
+      if (headers.hasOwnProperty(originalHeaderKey)) {
+        headers[customHeader] = headers[originalHeaderKey];
+        delete headers[originalHeaderKey];
       }
     }
 
@@ -55,11 +69,13 @@ const getHtml = async (url: string, method = 'GET', encode = 'UTF-8', headers = 
       Referer: 'custom-referer',
       Redirect: 'custom-redirect',
     };
+    headers = keysToLowerCase(headers);
 
     for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
-      if (headers.hasOwnProperty(originalHeader)) {
-        headers[customHeader] = headers[originalHeader];
-        delete headers[originalHeader];
+      let originalHeaderKey = originalHeader.toLowerCase();
+      if (headers.hasOwnProperty(originalHeaderKey)) {
+        headers[customHeader] = headers[originalHeaderKey];
+        delete headers[originalHeaderKey];
       }
     }
 
