@@ -59,7 +59,7 @@ const publicConfigVeXg = {
     volumeColor: publicColor.theme, // 音量颜色
   },
   width: 'auto',
-  height: 'calc(100vh - 56px)',
+  height: '100%',
 };
 
 // 播放器配置

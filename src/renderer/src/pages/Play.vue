@@ -736,7 +736,7 @@ const getDetailInfo = async (): Promise<void> => {
   info.value.fullList = formattedSeason;
   season.value = formattedSeason;
   if (isVisible.reverseOrder) season.value = formattedSeason;
-  else season.value = reverseOrderHelper('negative',formattedSeason);
+  else season.value = reverseOrderHelper('negative', formattedSeason);
 };
 
 // 切换选集
@@ -1310,10 +1310,15 @@ const openMainWinEvent = (): void => {
           height: 100%;
           background: var(--td-bg-color-page) url(@/assets/bg-player.jpg) center center;
 
-          .player {
+          .player-media {
             width: 100%;
-            height: calc(100vh - 56px);
-            position: relative;
+            height: 100%;
+
+            .player {
+              width: 100%;
+              height: calc(100vh - 56px);
+              position: relative;
+            }
           }
         }
       }
