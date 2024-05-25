@@ -97,7 +97,8 @@ var rule = {
     lists:'xx:eq(#id)&&a',
     tab_text:'body&&Text',
     list_text:'body&&Text',
-    list_url:'a&&href'
+    list_url:'a&&href',
+    list_url_prefix: '',
   },
   搜索:'列表;标题;图片;描述;链接;详情',
 }
@@ -244,7 +245,8 @@ var rule = {
       lists:'',
       tab_text:'body&&Text',
       list_text:'body&&Text',
-      list_url:'a&&href'
+      list_url:'a&&href',
+      list_url_prefix: '',
     },
     搜索:'列表;标题;图片;描述;链接;详情',
     proxy_rule:\`js:
@@ -521,6 +523,21 @@ const Function = [
     documentation: 'post(url,object)',
   },
   {
+    label: 'reqCookie',
+    insertText: 'reqCookie($1,{})',
+    detail: '获取网页cookie',
+    documentation: `
+/**
+ * 快捷获取特殊地址cookie|一般用作搜索过验证
+ * 用法 let {cookie,html} = reqCookie(url);
+ * @param url 能返回cookie的地址
+ * @param obj 常规请求参数
+ * @param all_cookie 返回全部cookie.默认false只返回第一个,一般是PhpSessionId
+ * @returns {{cookie: string, html: (*|string|DocumentFragment)}}
+ */
+    `.trim(),
+  },
+  {
     label: 'dealJson',
     insertText: 'dealJson($1)',
     detail: '处理返回的json数据',
@@ -648,6 +665,13 @@ const Keyword = [
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36',
   },
   {
+    label: 'toBase64',
+    insertText: 'toBase64:true,',
+    detail: '获取response的base64编码',
+    documentation:
+      'reqCookie(url,{toBase64:true}',
+  },
+  {
     label: 'headers',
     insertText:
       'headers:{ \'User-Agent\': PC_UA, \'Referer\': \'\', \'content-type\': \'application/x-www-form-urlencoded\', \'Cookie\': \'\'}',
@@ -694,6 +718,14 @@ const Keyword = [
     detail: '移除二级对应线路名相关的数据',
     documentation:
       'tab_remove:[\'wjm3u8\',\'ikm3u8\',\'sdm3u8\',\'M3U8\',\'jinyingm3u8\',\'fsm3u8\',\'ukm3u8\']\'',
+  },
+  {
+    label: 'list_url_prefix',
+    insertText:
+      'list_url_prefix: \'push://\',',
+    detail: '二级选集链接前缀',
+    documentation:
+      '网盘类链接加push://自动推送至壳子处理',
   },
 
 ];
@@ -872,4 +904,4 @@ const createDependencyProposals = (range: object, monaco: any) => {
   return suggestions;
 };
 
-export { createDependencyProposals };
+export {createDependencyProposals};

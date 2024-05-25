@@ -263,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta13 202400521`;
+const VERSION = `${vercode} 3.9.50beta18 202400525`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -566,35 +566,34 @@ if (!String.prototype.includes) {
     }
   };
 }
+// @ts-ignore
 if (!Array.prototype.includes) {
   Object.defineProperty(Array.prototype, 'includes', {
     value: function (searchElement, fromIndex) {
-      if (this == null) {
-        //this是空或者未定义，抛出错误
+
+      if (this == null) {//this是空或者未定义，抛出错误
         throw new TypeError('"this" is null or not defined');
       }
 
-      var o = Object(this); //将this转变成对象
-      var len = o.length >>> 0; //无符号右移0位，获取对象length属性，如果未定义就会变成0
+      var o = Object(this);//将this转变成对象
+      var len = o.length >>> 0;//无符号右移0位，获取对象length属性，如果未定义就会变成0
 
-      if (len === 0) {
-        //length为0直接返回false未找到目标值
+      if (len === 0) {//length为0直接返回false未找到目标值
         return false;
       }
 
-      var n = fromIndex | 0; //查找起始索引
-      var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0); //计算正确起始索引，因为有可能是负值
+      var n = fromIndex | 0;//查找起始索引
+      var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);//计算正确起始索引，因为有可能是负值
 
-      while (k < len) {
-        //从起始索引处开始循环
-        if (o[k] === searchElement) {
-          //如果某一位置与寻找目标相等，返回true，找到了
+      while (k < len) {//从起始索引处开始循环
+        if (o[k] === searchElement) {//如果某一位置与寻找目标相等，返回true，找到了
           return true;
         }
         k++;
       }
-      return false; //未找到，返回false
+      return false;//未找到，返回false
     },
+    enumerable:false
   });
 }
 if (typeof String.prototype.startsWith !== 'function') {
@@ -608,81 +607,87 @@ if (typeof String.prototype.endsWith !== 'function') {
   };
 }
 Object.defineProperty(Object.prototype, 'myValues', {
-  value: function () {
-    if (this == null) {
-      throw new TypeError('Cannot convert undefined or null to object');
+  value: function(obj){
+    if(obj ==null) {
+      throw new TypeError("Cannot convert undefined or null to object");
     }
-
-    const res: string[] = [];
-
-    for (const key in this) {
-      if (Object.prototype.hasOwnProperty.call(this, key)) {
-        res.push(this[key]);
+    var res=[]
+    for(var k in obj){
+      if(obj.hasOwnProperty(k)){//需判断是否是本身的属性
+        res.push(obj[k]);
       }
     }
-
     return res;
   },
-  configurable: true,
-  enumerable: false,
-  writable: true,
+  enumerable:false
 });
-if (!Object.prototype.hasOwnProperty('values')) {
+// @ts-ignore
+if (typeof Object.prototype.values != 'function') {
   Object.defineProperty(Object.prototype, 'values', {
-    value: function () {
-      if (this == null) {
-        throw new TypeError('Cannot convert undefined or null to object');
+    value: function(obj){
+      if(obj ==null) {
+        throw new TypeError("Cannot convert undefined or null to object");
       }
-
-      const values: string[] = [];
-
-      for (const key in this) {
-        if (Object.prototype.hasOwnProperty.call(this, key)) {
-          values.push(this[key]);
+      var res=[]
+      for(var k in obj){
+        if(obj.hasOwnProperty(k)){//需判断是否是本身的属性
+          res.push(obj[k]);
         }
       }
-
-      return values;
+      return res;
     },
-    configurable: true,
-    enumerable: false,
-    writable: true,
+    enumerable:false
   });
 }
-if (typeof Array.prototype.join !== 'function') {
-  Array.prototype.join = function (emoji) {
-    emoji = emoji || '';
-    let self = this;
-    let str = '';
-    let i = 0;
-    if (!Array.isArray(self)) throw String(self) + 'is not Array';
-    if (self.length === 0) return '';
-    if (self.length === 1) return String(self[0]);
-    i = 1;
-    str = this[0];
-    for (; i < self.length; i++) {
-      str += String(emoji) + String(self[i]);
-    }
-    return str;
-  };
+if (typeof Array.prototype.join != 'function') {
+  Object.defineProperty(Array.prototype, 'join', {
+    value: function (emoji) {
+      // emoji = emoji||',';
+      emoji = emoji||'';
+      let self = this;
+      let str = "";
+      let i = 0;
+      if (!Array.isArray(self)) {throw String(self)+'is not Array'}
+      if(self.length===0){return ''}
+      if (self.length === 1){return String(self[0])}
+      i = 1;
+      str = this[0];
+      for (; i < self.length; i++) {
+        str += String(emoji)+String(self[i]);
+      }
+      return str;
+    },
+    enumerable:false
+  });
 }
-if (typeof Array.prototype.toReversed !== 'function') {
-  Array.prototype.toReversed = function () {
-    const clonedList = this.slice();
-    // 倒序新数组
-    const reversedList = clonedList.reverse();
-    return reversedList;
-  };
-}
-
 // @ts-ignore
-String.prototype.rstrip = function (chars: string) {
-  const regex = new RegExp(chars + '$');
-  return this.replace(regex, '');
-};
+if (typeof Array.prototype.toReversed != 'function') {
+  Object.defineProperty(Array.prototype, 'toReversed', {
+    value: function () {
+      const clonedList = this.slice();
+      // 倒序新数组
+      const reversedList = clonedList.reverse();
+      return reversedList;
+    },
+    enumerable:false
+  });
+}
 
-Array.prototype['append'] = Array.prototype.push;
-String.prototype['strip'] = String.prototype.trim;
+Object.defineProperty(Array.prototype, 'append', {
+  value: Array.prototype.push,
+  enumerable:false
+});
+Object.defineProperty(String.prototype, 'strip', {
+  value: String.prototype.trim,
+  enumerable:false
+});
+Object.defineProperty(String.prototype, 'rstrip', {
+  value: function (chars) {
+    let regex = new RegExp(chars + "$");
+    return this.replace(regex, "");
+  },
+  enumerable:false
+});
 
 const isGenuine = (vipUrl: string) => {
   let flag = new RegExp(
@@ -1550,7 +1555,7 @@ const verifyCode = (url) => {
       let yzm_url = `${host}/index.php/verify/index.html`;
       console.log(`[t3]验证码链接: ${yzm_url}`);
       let hhtml = request(yzm_url, { withHeaders: true, toBase64: true }, true);
-      let json = JSON.parse(JSON.stringify(hhtml));
+      let json = JSON.parse(hhtml);
 
       if (!cookie) {
         let setCk = Object.keys(json).find((it) => it.toLowerCase() === 'set-cookie');
@@ -1561,8 +1566,11 @@ const verifyCode = (url) => {
       let code = OcrApi.classification(img);
       console.log(`[t3]第${cnt + 1}次验证码识别结果: ${code}`);
       let submit_url = `${host}/index.php/ajax/verify_check?type=search&verify=${code}`;
+      // let submit_url = `${host}/index.php/ajax/verify_check`;
+      // let submit_body = `type=search&verify=${code}`;
 
-      let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST' });
+      let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST'});
+      // let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST',body:submit_body });
       html = JSON.parse(html);
 
       if (html.msg === 'ok') {
@@ -1769,10 +1777,37 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
  * @param obj 对象
  * @returns {string|DocumentFragment|*}
  */
-const post = (url: string, obj) => {
+const post = (url: string, obj:object={}) => {
   obj.method = 'POST';
   return request(url, obj);
 };
+
+/**
+ * 快捷获取特殊地址cookie|一般用作搜索过验证
+ * 用法 let {cookie,html} = reqCookie(url);
+ * @param url 能返回cookie的地址
+ * @param obj 常规请求参数
+ * @param all_cookie 返回全部cookie.默认false只返回第一个,一般是PhpSessionId
+ * @returns {{cookie: string, html: (*|string|DocumentFragment)}}
+ */
+const reqCookie = (url:string, obj:object={}, all_cookie:boolean=false) => {
+  obj.withHeaders = true;
+  let html = request(url, obj);
+  let json = JSON.parse(html);
+  let setCk = Object.keys(json).find(it=>it.toLowerCase()==='set-cookie');
+  let cookie = setCk?json[setCk]:'';
+  if(Array.isArray(cookie)){
+    cookie = cookie.join(';')
+  }
+  if(!all_cookie) {
+    cookie = cookie.split(';')[0];
+  }
+  html = json.body;
+  return {
+    cookie,
+    html
+  }
+}
 
 fetch = request;
 print = (data: any = '') => {
@@ -2653,6 +2688,7 @@ const detailParse = (detailObj) => {
       } else {
         let list_text = p.list_text || 'body&&Text';
         let list_url = p.list_url || 'a&&href';
+        let list_url_prefix = p.list_url_prefix || '';
         let is_tab_js = p.tabs.trim().startsWith('js:');
         for (let i = 0; i < playFrom.length; i++) {
           let tab_name = playFrom[i];
@@ -2669,6 +2705,9 @@ const detailParse = (detailObj) => {
           if (typeof pdfl === 'function') {
             // @ts-ignore
             new_vod_list = pdfl(html, p1, list_text, list_url, MY_URL);
+            if(list_url_prefix){
+              new_vod_list = new_vod_list.map(it=>it.split('$')[0]+'$'+list_url_prefix+it.split('$').slice(1).join('$'));
+            }
           } else {
             let vodList = [];
             try {
@@ -2676,7 +2715,7 @@ const detailParse = (detailObj) => {
             } catch (e) {}
             for (let i = 0; i < vodList.length; i++) {
               let it = vodList[i];
-              new_vod_list.push(_pdfh(it, list_text).trim() + '$' + _pd(it, list_url, MY_URL));
+              new_vod_list.push(_pdfh(it, list_text).trim() + '$' + list_url_prefix + _pd(it, list_url, MY_URL));
             }
           }
           if (new_vod_list.length > 0) {
@@ -2813,7 +2852,7 @@ const playParse = (playObj) => {
   var flag = MY_FLAG; // 注入播放线路名称给免嗅js
 
   const common_play = {
-    parse: 1,
+    parse: SPECIAL_URL.test(input) || /^(push:)/.test(input) ? 0: 1,
     url: input,
     flag: flag,
     jx: tellIsJx(input),
@@ -3000,10 +3039,16 @@ const init = (ext) => {
     rule['play_json'] = rule.hasOwnProperty('play_json') ? rule['play_json'] : [];
     rule['pagecount'] = rule.hasOwnProperty('pagecount') ? rule['pagecount'] : {};
     rule['proxy_rule'] = rule.hasOwnProperty('proxy_rule') ? rule['proxy_rule'] : '';
+    if(!rule.hasOwnProperty('sniffer')){ // 默认关闭辅助嗅探
+      rule['sniffer'] = false;
+    }
     rule['sniffer'] = rule.hasOwnProperty('sniffer') ? rule['sniffer'] : '';
     rule['sniffer'] = !!(rule['sniffer'] && rule['sniffer'] !== '0' && rule['sniffer'] !== 'false');
 
     rule['isVideo'] = rule.hasOwnProperty('isVideo') ? rule['isVideo'] : '';
+    if(rule['sniffer'] && !rule['isVideo']){ // 默认辅助嗅探自动增强嗅探规则
+      rule['isVideo'] = 'http((?!http).){12,}?\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)\\?.*|http((?!http).){12,}\\.(m3u8|mp4|flv|avi|mkv|rm|wmv|mpg|m4a|mp3)|http((?!http).)*?video/tos*|http((?!http).)*?obj/tos*';
+    }
 
     rule['tab_remove'] = rule.hasOwnProperty('tab_remove') ? rule['tab_remove'] : [];
     rule['tab_order'] = rule.hasOwnProperty('tab_order') ? rule['tab_order'] : [];
@@ -3303,6 +3348,7 @@ const keepUnUse = {
       $js, // $工具
       ocr_demo_test, // ocr测试
       rsa_demo_test, // rsa测试
+      reqCookie, // cookie获取
     };
     let temp = _;
     temp.stringify({});
