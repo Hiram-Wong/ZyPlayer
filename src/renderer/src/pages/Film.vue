@@ -93,14 +93,14 @@ const storePlayer = usePlayStore();
 
 const renderError = () => {
   return (
-    <div class="renderIcon" style="height: '100%'">
+    <div class="renderIcon" style="height: 100%">
       <img src={lazyImg} style="height: 100%; object-fit: cover;" />
     </div>
   );
 };
 const renderLoading = () => {
   return (
-    <div class="renderIcon" style="height: '100%'">
+    <div class="renderIcon" style="height: 100%">
       <img src={lazyImg} style="height: 100%; object-fit: cover;" />
     </div>
   );
@@ -546,7 +546,6 @@ const getSearchList = async () => {
     console.log(`[film] load data length: ${length}`);
     isVisible.t3Work = false;
     isVisible.catvod = false;
-    console.log(isVisible)
     return length;
   }
 };
