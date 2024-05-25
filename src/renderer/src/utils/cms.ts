@@ -98,7 +98,7 @@ const t3RuleInit = async (site) => {
       await t3Work({ type: 'init', data: site.ext });
       data = {
         code: 200,
-        msg: 'sucess',
+        msg: 'success',
       };
     } catch (err) {
       data.msg = err as string;
@@ -122,7 +122,7 @@ const t3RuleProxy = async (url: string): Promise<any[]> => {
 
 const t3RuleTerminate = async () => {
   const res: any = await t3WorkTerminate();
-  if (res.code === 200) return 'sucess';
+  if (res.code === 200) return 'success';
   else return 'fail';
 };
 

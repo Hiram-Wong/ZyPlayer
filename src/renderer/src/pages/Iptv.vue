@@ -15,7 +15,7 @@
               @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
               <div class="card-main">
                 <div v-show="iptvConfig.ext.status" class="card-tag">
-                  <span v-if="item.status && item.status < 500" class="status-item sucess">{{ item.status }}ms</span>
+                  <span v-if="item.status && item.status < 500" class="status-item success">{{ item.status }}ms</span>
                   <span v-else class="status-item error">{{ item.status ? `${item.status}ms` : $t('pages.iptv.delay')
                     }}</span>
                 </div>
@@ -387,7 +387,7 @@ const changeDefaultIptvEvent = async (id: string) => {
     await addChannel(docs);
     await setDefault('defaultIptv', id);
 
-    MessagePlugin.success(t('pages.iptv.message.setSucess'));
+    MessagePlugin.success(t('pages.iptv.message.setSuccess'));
     infiniteId.value++;
     pagination.value.pageIndex = 0;
   } catch (err) {
@@ -443,7 +443,7 @@ const copyToClipboard = async (content, successMessage, errorMessage) => {
   }
 };
 const copyChannelEvent = async () => {
-  const successMessage = t('pages.iptv.message.copySucess');
+  const successMessage = t('pages.iptv.message.setSuccess');
   const errorMessage = t('pages.iptv.message.copyFail');
   await copyToClipboard(channelItem.value.url, successMessage, errorMessage);
 
@@ -574,7 +574,7 @@ const generateLogo = (item) => {
                 color: var(--td-error-color);
               }
 
-              .sucess {
+              .success {
                 color: var(--td-success-color);
               }
             }

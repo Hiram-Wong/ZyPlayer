@@ -12,9 +12,9 @@ export default {
     delChannel: 'Delete Channel'
   },
   message: {
-    setSucess: 'Setup sucess',
+    setSuccess: 'Setup success',
     setFail: 'Setup failure, error message',
-    copySucess: 'Copy success, quickly share to friends',
+    copySuccess: 'Copy success, quickly share to friends',
     copyFail: "Current environment does't support copy. Please copy link manually"
   }
 }

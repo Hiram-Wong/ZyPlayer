@@ -12,9 +12,9 @@ export default {
     delChannel: '删除频道'
   },
   message: {
-    setSucess: '设置成功',
+    setSuccess: '设置成功',
     setFail: '设置失败, 错误信息',
-    copySucess: '复制成功，快分享给好友吧',
+    copySuccess: '复制成功，快分享给好友吧',
     copyFail: '当前环境不支持一键复制，请手动复制链接'
   }
 }
