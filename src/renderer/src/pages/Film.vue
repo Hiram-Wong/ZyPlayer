@@ -29,7 +29,7 @@
         </div>
         <div class="content-wrapper" id="back-top">
           <t-row :gutter="[16, 16]">
-            <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in filmData.list" :key="item.id" class="card"
+            <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in filmData.list" :key="item.vod_id" class="card"
               @click="playEvent(item)">
               <div class="card-main">
                 <div v-if="item.vod_remarks || item.vod_remark" class="card-tag card-tag-orange">
