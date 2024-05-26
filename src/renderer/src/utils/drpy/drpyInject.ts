@@ -52,7 +52,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   const withHeaders: boolean = _object.withHeaders || false;
   const body: string = _object.body || '';
   const bufferType: number = _object.buffer || 0;
-  const encoding: string = _object.encoding || 'utf-8';
+  let encoding: string = _object.encoding || 'utf-8';
   let data: any = _object.data || {};
   let headers = _object.headers || {};
   const emptyResult: Response = { content: '', body: '', headers: {} };
@@ -99,6 +99,10 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     Redirect: 'custom-redirect',
   };
   headers = keysToLowerCase(headers);
+  // 从content-type拿到正确的网页编码
+  if(headers['content-type'] && /charset=(.*)/i.test(headers['content-type'])){
+    encoding = headers['content-type'].match(/charset=(.*)/i)[1].split(';')[0].trim();
+  }
 
   for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
     let originalHeaderKey = originalHeader.toLowerCase();
@@ -143,18 +147,20 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     }
   }
 
+  const blob = r.blob();
+  // @ts-ignore
+  const reader = new FileReaderSync();
+
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: r.text(encoding), headers: formatHeaders } || emptyResult;
+      return { body: reader.readAsText(blob,encoding), headers: formatHeaders } || emptyResult;
     } else {
-      return r.text(encoding) || '';
+      return reader.readAsText(blob,encoding) || '';
     }
   } else if (_js_type === 1) {
     let content;
     if (bufferType === 2) {
-      const blob = r.blob();
-      // @ts-ignore
-      const reader = new FileReaderSync();
+
       content = reader.readAsDataURL(blob);
       if(content.includes('base64,')){
         content = content.split('base64,')[1];
@@ -164,7 +170,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       // const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
       // content = base64String;
     } else {
-      content = r.text(encoding);
+      content = reader.readAsText(blob,encoding);
     }
     return { content, headers: formatHeaders } || emptyResult;
   } else {

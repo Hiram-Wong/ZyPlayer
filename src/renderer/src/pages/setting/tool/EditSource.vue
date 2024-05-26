@@ -1119,7 +1119,7 @@ const getSource = async () => {
     let parseHeaderKeys: string[];
     parseHeaderKeys = Object.keys(parsedHeader).map(it=>it.toLowerCase());
     if(!parseHeaderKeys.includes('accept')){
-      parsedHeader['accept'] = '*';
+      parsedHeader['accept'] = '*/*';
     }
 
     const response = await getHtml(url, method, encode, parsedHeader, parsedBody);
