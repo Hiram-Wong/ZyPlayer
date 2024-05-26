@@ -24,6 +24,7 @@ interface RequestOptions {
   headers?: { [key: string]: string };
   withHeaders?: boolean;
   buffer?: number;
+  encoding?: string;
   redirect?: 0 | 1 | true | false;
 }
 
@@ -51,6 +52,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   const withHeaders: boolean = _object.withHeaders || false;
   const body: string = _object.body || '';
   const bufferType: number = _object.buffer || 0;
+  const encoding: string = _object.encoding || 'utf-8';
   let data: any = _object.data || {};
   let headers = _object.headers || {};
   const emptyResult: Response = { content: '', body: '', headers: {} };
@@ -143,9 +145,9 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
 
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: r.text(), headers: formatHeaders } || emptyResult;
+      return { body: r.text(encoding), headers: formatHeaders } || emptyResult;
     } else {
-      return r.text() || '';
+      return r.text(encoding) || '';
     }
   } else if (_js_type === 1) {
     let content;
@@ -161,7 +163,9 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       // const buffer = Buffer.from(uint8Array); // 使用 Buffer.from 将 Uint8Array 转换为 Buffer
       // const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
       // content = base64String;
-    } else content = r.text();
+    } else {
+      content = r.text(encoding);
+    }
     return { content, headers: formatHeaders } || emptyResult;
   } else {
     return emptyResult;

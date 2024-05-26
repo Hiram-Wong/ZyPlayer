@@ -263,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta18 202400525`;
+const VERSION = `${vercode} 3.9.50beta19 202400526`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -2959,11 +2959,15 @@ const isVideoParse = (isVideoObj) => {
  */
 const init = (ext) => {
   console.log('[t3]init');
+  // init前重置rule和fetch_params
+  rule = {};
+  rule_fetch_params = {};
+  fetch_params = null;
   try {
     let muban = getMubans();
     if (typeof ext == 'object') rule = ext;
     else if (typeof ext == 'string') {
-      if (ext.startsWith('http')) {
+      if (ext.startsWith('http') || ext.startsWith('file://')) {
         let query = getQuery(ext); // 获取链接传参
         let js: any = request(ext, { method: 'GET' });
         if (js) eval(js.replace('var rule', 'rule'));
