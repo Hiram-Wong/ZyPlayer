@@ -589,15 +589,21 @@ const playEvent = async (item) => {
     if (_.has(item, 'relateSite')) {
       const relateSite = item.relateSite;
       site = relateSite;
-      if (relateSite.type === 7) {
+      try {
+        if (relateSite.type === 7) {
+          await t3RuleTerminate();  // 搜索加载和详情同时触发会冲突, 优先详情, 会阻断搜索加载
+          const res = await t3RuleInit(relateSite);
+          if (res.code === 200) isVisible.t3Work = true;
+        } else if (relateSite.type === 8) {
+          const content = await catvodRuleInit(relateSite);
+          if (typeof content === 'object') isVisible.catvod = true;
+        };
+      } catch (err) {
+        console.log(`[film][playEvent][error]`, err)
+      } finally {
         isVisible.t3Work = false;
-        const res = await t3RuleInit(relateSite);
-        if (res.code === 200) isVisible.t3Work = true;
-      } else if (relateSite.type === 8) {
         isVisible.catvod = false;
-        const content = await catvodRuleInit(relateSite);
-        if (typeof content === 'object') isVisible.catvod = true;
-      };
+      }
     }
 
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
