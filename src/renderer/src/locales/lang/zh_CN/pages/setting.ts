@@ -400,7 +400,7 @@ export default {
       },
       ai: {
         title: 'Ai-创想无限',
-        declare: '服务生成的所有内容均由人工智能模型生成，其生成内容的准确性和完整性无法保证，不代表我们的态度或观点',
+        declare: '服务容由人工智能模型生成，其内容的准确性和完整性无法保证，不代表软件的态度或观点。',
         parms: 'openAI参数',
         server: '服务器',
         key: '密钥',
@@ -411,11 +411,14 @@ export default {
         cssSelector: 'css选择器',
         qa: '问答',
         save: '保存',
+        copy: '复制',
         codeSnippet: '代码片段',
         demand: '需求',
         result: '结果',
         instructionLibrary: '指令库',
-        fetch: 'AI解答'
+        fetch: '发送',
+        fetchTip: '输入一些需求...',
+        codeSnippetTip: '输入html代码片段'
       }
     },
   },

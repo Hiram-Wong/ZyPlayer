@@ -8,10 +8,8 @@
           <t-collapse>
             <t-collapse-panel :header="$t('pages.setting.editSource.dialog.ai.parms')">
               <template #headerRightContent>
-                <t-space size="small">
-                  <t-button size="small" shape="round" @click.stop="saveAi">{{
-                    $t('pages.setting.editSource.dialog.ai.save') }}</t-button>
-                </t-space>
+                <t-button size="small" shape="round" @click.stop="saveAi">{{
+                  $t('pages.setting.editSource.dialog.ai.save') }}</t-button>
               </template>
               <div class="fetch-key-content">
                 <t-space>
@@ -61,19 +59,25 @@
           </t-radio-group>
         </div>
         <div class="ai-item codeSnippet" v-if="formData.aiType !== 'qa'">
-          <span class="ai-label">{{ $t('pages.setting.editSource.dialog.ai.codeSnippet') }}</span>
-          <t-textarea v-model="formData.codeSnippet"></t-textarea>
+          <!-- <span class="ai-label">{{ $t('pages.setting.editSource.dialog.ai.codeSnippet') }}</span> -->
+          <t-textarea v-model="formData.codeSnippet" :autosize="{ minRows: 1, maxRows: 5 }"
+            :placeholder="$t('pages.setting.editSource.dialog.ai.codeSnippetTip')"></t-textarea>
         </div>
         <div class="ai-item demand">
-          <span class="ai-label">{{ $t('pages.setting.editSource.dialog.ai.demand') }}</span>
-          <t-textarea v-model="formData.demand"></t-textarea>
+          <t-textarea v-model="formData.demand" class="textarea" :autosize="{ minRows: 1, maxRows: 5 }"
+            :placeholder="$t('pages.setting.editSource.dialog.ai.fetchTip')"></t-textarea>
+          <t-button :loading="isVisible.loading" size="small" shape="round" class="send" @click="AiAnswerEvent()">
+            {{ $t('pages.setting.editSource.dialog.ai.fetch') }}
+          </t-button>
         </div>
-        <t-button block :loading="isVisible.loading" @click="AiAnswerEvent()">{{
-          $t('pages.setting.editSource.dialog.ai.fetch')
-        }}</t-button>
-        <div class="ai-item result">
-          <span class="ai-label">{{ $t('pages.setting.editSource.dialog.ai.result') }}</span>
-          <t-textarea v-model="formData.result"></t-textarea>
+        <div class="ai-item result" v-if="formData.result && !isVisible.loading">
+          <t-card :title="$t('pages.setting.editSource.dialog.ai.result')">
+            <div ref="contentElm" v-html="formData.contentHtml" class="chat-msg-content pa-3"></div>
+            <template #actions>
+              <t-button size="small" shape="round" @click.stop="copyAiAnswer">{{
+                $t('pages.setting.editSource.dialog.ai.copy') }}</t-button>
+            </template>
+          </t-card>
         </div>
       </div>
     </template>
@@ -81,13 +85,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, nextTick } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import JSON5 from "json5";
+import hljs from "highlight.js";
+import MarkdownIt from 'markdown-it';
+import mathjax3 from 'markdown-it-mathjax3';
 
 import { t } from '@/locales';
 import { fetchAiAnswer } from '@/api/lab';
 import { fetchSettingDetail, updateSetting } from '@/api/setting';
+import { copyToClipboardApi } from '@/utils/tool';
+
+import 'highlight.js/styles/panda-syntax-dark.css';
 
 const props = defineProps({
   visible: {
@@ -95,6 +105,7 @@ const props = defineProps({
     default: false,
   }
 });
+
 const formVisible = ref(false);
 const models = [
   {
@@ -147,7 +158,8 @@ const formData = ref({
   },
   codeSnippet: '',
   demand: '',
-  result: ''
+  result: '',
+  contentHtml: ''
 })
 const isVisible = reactive({
   loading: false
@@ -167,6 +179,15 @@ watch(
     if (val) fetchAi();
   },
 );
+
+const md = new MarkdownIt({
+  linkify: true,
+  highlight: function (code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return `<pre class="hljs-code-container my-3"><div class="hljs-code-header d-flex align-center justify-space-between bg-grey-darken-3 pa-1"></div><code class="hljs language-${language}">${hljs.highlight(code, { language: language, ignoreIllegals: true }).value}</code></pre>`;
+  },
+});
+md.use(mathjax3);
 
 const fetchAi = async () => {
   const res = await fetchSettingDetail('ai');
@@ -194,9 +215,14 @@ const AiAnswerEvent = async () => {
     if (response.code === 200) {
       let content = response.data;
       try {
-        content = JSON5.stringify(content);
-      } catch (e) {}
+        const toObj = JSON5.parse(JSON5.stringify(content));
+        if (toObj && typeof toObj === 'object') {
+          content = JSON5.stringify(content);
+        }
+      } catch (e) { }
       formData.value.result = content;
+      formData.value.contentHtml = md.render(content);
+      await nextTick();
       MessagePlugin.success(t('pages.setting.data.success'));
     } else {
       MessagePlugin.error(`${t('pages.setting.data.fail')}:${response.message}`);
@@ -208,6 +234,14 @@ const AiAnswerEvent = async () => {
   }
 }
 
+const copyAiAnswer = async () => {
+  try {
+    await copyToClipboardApi(formData.value.result);
+    MessagePlugin.success(t('pages.setting.data.success'));
+  } catch (err) {
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+  };
+}
 </script>
 
 <style lang="less" scoped>
@@ -262,6 +296,22 @@ const AiAnswerEvent = async () => {
     margin-bottom: var(--td-comp-margin-xs);
   }
 
+  .demand {
+    position: relative;
+
+    .textarea {
+      :deep(textarea) {
+        padding: calc(calc(var(--td-comp-size-m) - var(--td-line-height-body-medium)) / 2) calc(var(--td-comp-paddingLR-l) + 29px) calc(calc(var(--td-comp-size-m) - var(--td-line-height-body-medium)) / 2) var(--td-comp-paddingLR-s) !important;
+      }
+    }
+
+    .send {
+      position: absolute;
+      right: calc(var(--td-comp-paddingLR-l) + 1px);
+      bottom: 6px;
+    }
+  }
+
   .instructionLibrary {
     display: flex;
     flex-direction: row;
@@ -278,5 +328,23 @@ const AiAnswerEvent = async () => {
 
 .fetch-key-content {
   padding: 0 var(--td-comp-paddingLR-l);
+}
+
+.hljs-code-container {
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+:deep(.t-card--bordered) {
+  border-color: transparent;
+  background-color: var(--td-bg-content-input);
+}
+
+:deep(.t-card__header) {
+  padding: var(--td-comp-paddingTB-l) var(--td-comp-paddingLR-l) var(--td-comp-paddingTB-xs);
+}
+
+:deep(.t-card__body) {
+  padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-l) var(--td-comp-paddingTB-l);
 }
 </style>
