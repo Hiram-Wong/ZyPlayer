@@ -60,7 +60,6 @@ const createPlayer = async (type: string, url: string) => {
 };
 
 const destroyPlayer = async (type: string, player: any) => {
-  console.log(type, player)
   if (!player && !type) return;
 
   formData.value.url = '';

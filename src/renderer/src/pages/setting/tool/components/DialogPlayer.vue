@@ -2,20 +2,15 @@
   <t-dialog v-model:visible="formVisible" :closeOnOverlayClick="false" :width="650"
     :header="$t('pages.setting.editSource.dialog.player.title')" placement="center" :footer="false">
     <template #body>
-      <div id="previewMse" ref="dpRef"></div>
+      <player ref="playerRef" class="player"/>
     </template>
   </t-dialog>
 </template>
 
 <script setup lang="ts">
-import '@/style/player/veplayer.css';
+import { ref, reactive, shallowRef, watch } from 'vue';
 
-import { ref, reactive, watch } from 'vue';
-import DPlayer from 'dplayer';
-import flvjs from 'flv.js';
-import Hls from 'hls.js';
-
-import { checkMediaType } from '@/utils/tool';
+import Player from '@/components/player/index.vue';
 
 const props = defineProps({
   visible: {
@@ -28,21 +23,16 @@ const props = defineProps({
   }
 });
 const formVisible = ref(false);
-const dpRef = ref();
 const formData = reactive({
   url: '',
   isActive: true,
 });
 
-const playerConfig = reactive({
-  dp: {
-    container: dpRef,
-    autoplay: true,
-    video: {}
-  }
+const playerRef = ref(null) as any;
+const player = shallowRef({
+  type: 'player',
+  player: ''
 });
-
-const dpPlayer = ref();
 
 const emit = defineEmits(['update:visible']);
 watch(
@@ -53,9 +43,8 @@ watch(
     if (val) {
       setupPlayer(formData.url);
     } else {
-      if (dpPlayer.value) {
-        dpPlayer.value.destroy();
-        dpPlayer.value = null;
+      if (player.value.player) {
+        destroyPlayer();
       };
     };
   }
@@ -73,59 +62,20 @@ watch(
   },
 );
 
-const setupPlayer = async (url) => {
-  const videoType = await checkMediaType(url);
+const setupPlayer = async (url: string) => {
+  player.value = await playerRef.value!.createPlayer('player', url);
+};
 
-  switch (videoType) {
-    case 'mp4':
-      playerConfig.dp.video = { url };
-      break;
-    case 'flv':
-      playerConfig.dp.video = {
-        url,
-        type: 'customFlv',
-        customType: {
-          customFlv: (video, player) => {
-            const flvPlayer = flvjs.createPlayer({
-              type: 'flv',
-              url: video.src,
-            });
-            flvPlayer.attachMediaElement(video);
-            flvPlayer.load();
-          }
-        }
-      };
-      break;
-    case 'm3u8':
-      playerConfig.dp.video = {
-        url,
-        type: 'customHls',
-        customType: {
-          customHls: (video, player) => {
-            const hls = new Hls();
-            hls.loadSource(video.src);
-            hls.attachMedia(video);
-          }
-        }
-      };
-      break;
-    default:
-      playerConfig.dp.video = {
-        url,
-        type: 'customHls',
-        customType: {
-          customHls: (video, player) => {
-            const hls = new Hls();
-            hls.loadSource(video.src);
-            hls.attachMedia(video);
-          }
-        }
-      };
-      break;
-  }
-
-  dpPlayer.value = new DPlayer({ ...playerConfig.dp });
+const destroyPlayer = async () => {
+  playerRef.value!.destroyPlayer(player.value!.type, player.value!.player);
 };
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.player {
+  border-radius: var(--td-radius-large);
+  overflow: hidden;
+  width: 100%;
+  height: 320px;
+}
+</style>
