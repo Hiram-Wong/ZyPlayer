@@ -727,6 +727,17 @@ const Keyword = [
     documentation:
       '网盘类链接加push://自动推送至壳子处理',
   },
+  {
+    label: 'search_url',
+    insertText:`
+searchUrl: '/index.php/ajax/suggest?mid=1&wd=**',
+detailUrl: '/detail/fyid.html',
+搜索: 'json:list;name;pic;en;id',
+    `.trim(),
+    detail: '快速联想搜索',
+    documentation:
+      '处理一些开了搜索验证的网站',
+  },
 
 ];
 
