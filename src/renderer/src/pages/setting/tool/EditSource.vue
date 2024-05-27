@@ -744,7 +744,10 @@ const importFileEvent = async () => {
 
 const exportFileEvent = async () => {
   const content = editor?.getValue() || '';
-  if (!content.trim()) return;
+  if (!content.trim()) {
+    MessagePlugin.warning(t('pages.setting.editSource.message.initNoData'));
+    return;
+  }
 
   let title = '';
 
@@ -787,7 +790,10 @@ const debugEvent = async () => {
       content: content.edit
     };
 
-    if (content.edit) {
+    if (!content.edit) {
+      MessagePlugin.warning(t('pages.setting.editSource.message.initNoData'));
+      return;
+    } else {
       const res = await setDebugSource(doc);
       if (res) MessagePlugin.success(t('pages.setting.data.success'));
       emitReload.emit('film-reload');
@@ -1117,8 +1123,8 @@ const getSource = async () => {
       }
     }
     let parseHeaderKeys: string[];
-    parseHeaderKeys = Object.keys(parsedHeader).map(it=>it.toLowerCase());
-    if(!parseHeaderKeys.includes('accept')){
+    parseHeaderKeys = Object.keys(parsedHeader).map(it => it.toLowerCase());
+    if (!parseHeaderKeys.includes('accept')) {
       parsedHeader['accept'] = '*/*';
     }
 
