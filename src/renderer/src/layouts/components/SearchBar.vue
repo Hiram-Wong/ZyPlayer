@@ -73,7 +73,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { kyLiveHot, enlightentHot } from '@/utils/hot';
+import { doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
 import { fetchHistoryList, clearHistorySearchList, addHistory } from '@/api/history';
 import { fetchSettingDetail } from '@/api/setting';
 
@@ -131,6 +131,10 @@ const clearSearchHistory = async () => {
 
 // 热播映射
 const hotTypeMappings = {
+  douban: {
+    hotUpdateTime: () => moment().format('YYYY/MM/DD'),
+    hotSource: 'tv_hot',
+  },
   enlightent: {
     hotUpdateTime: () => moment().format('YYYY/MM/DD'),
     hotSource: 'tv',
@@ -187,6 +191,9 @@ const getHotList = async (retryCount = 1) => {
         break;
       case 'enlightent':
         queryHotList = await enlightentHot(dateFormat, 'allHot', hotConfig.hotSource, 1);
+        break;
+      case 'douban':
+        queryHotList = await doubanHot(hotConfig.hotSource, 20, 0);
         break;
     }
 

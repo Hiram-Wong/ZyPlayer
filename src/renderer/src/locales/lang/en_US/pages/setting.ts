@@ -107,6 +107,8 @@ export default {
     bossKey: 'BossKey',
     timeout: 'Timeout',
     hotRecommend: 'HotList',
+    douban: 'DouBan',
+    local: 'DefaultSite',
     kylive: 'KyLive',
     enlightent: 'Enlightent',
     reset: 'Reset',

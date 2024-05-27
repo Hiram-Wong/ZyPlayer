@@ -42,6 +42,7 @@
           <t-radio-group v-model="formData.defaultHot">
             <t-radio value="kylive">{{ $t('pages.setting.base.kylive') }}</t-radio>
             <t-radio value="enlightent">{{ $t('pages.setting.base.enlightent') }}</t-radio>
+            <t-radio value="douban">{{ $t('pages.setting.base.douban') }}</t-radio>
           </t-radio-group>
         </div>
       </t-form-item>

@@ -3,22 +3,49 @@ import qs from 'qs';
 
 import request from '@/utils/request';
 
-const doubanHot = async (type, tag, limit = 20, start = 0) => {
-  const url = `https://movie.douban.com/j/search_subjects?type=${type}&tag=${encodeURI(
-    tag,
-  )}&page_limit=${limit}&page_start=${start}`;
+const doubanHot = async (type, limit = 20, start = 0) => {
   try {
+    let data: any = [];
+    const url = `https://m.douban.com/rexxar/api/v2/subject_collection/${type}/items?start=${limit * start}&count=${limit}`;
+
     const response = await request({
       url,
       method: 'GET',
+      headers: {
+        'custom-referer': 'https://movie.douban.com',
+      },
     });
-    return response.subjects.map((item) => ({
-      vod_id: item.id,
-      vod_name: item.title,
-      vod_remarks: item.episodes_info,
-      vod_pic: item.cover,
-    }));
+    if (response?.subject_collection_items && response.subject_collection_items.length > 0) {
+      for (const subject of response.subject_collection_items) {
+        const item = subject;
+        if (type === 'tv_hot' || type === 'tv_variety_show') {
+          data.push({
+            vod_douban_id: item.id,
+            vod_douban_type: item.type,
+            vod_score: item.rating.value,
+            vod_name: item.title,
+            vod_pic: item.pic.large || item.pic.normal,
+            vod_year: item.year,
+            vod_id: item.id,
+            vod_hot: item.rating.count,
+          });
+        } else if (type === 'movie_hot_gaia' || type === 'movie_showing') {
+          data.push({
+            vod_douban_id: item.id,
+            vod_douban_type: item.type,
+            vod_score: item?.rating?.value || 0.0,
+            vod_name: item.title,
+            vod_pic: item?.cover?.url,
+            vod_year: item.year,
+            vod_id: item.id,
+            vod_hot: item?.rating?.value || 0,
+          });
+        }
+      }
+    }
+    return data;
   } catch (err) {
+    console.error('Error making API request:', err);
     throw err;
   }
 };

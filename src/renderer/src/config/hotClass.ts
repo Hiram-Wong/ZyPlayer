@@ -78,5 +78,26 @@ export default {
 			}
 		]
 	},
+  douban: {
+		name: '豆瓣数据',
+		url: 'https://www.enlightent.cn/sixiang/rank-list/',
+		data: [
+			{
+				key: 'tv_hot',
+				name: '热播新剧',
+			},
+			{
+				key: 'tv_variety_show',
+				name: '热播综艺',
+			},
+			{
+				key: 'movie_hot_gaia',
+				name: '豆瓣热播',
+			},
+			{
+				key: 'movie_showing',
+				name: '影院热映',
+			}
+		]
+	},
 };
-  
