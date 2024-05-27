@@ -41,6 +41,7 @@ const doubanHot = async (type, limit = 20, start = 0) => {
             vod_hot: item?.rating?.value || 0,
           });
         }
+        data.sort((a, b) => b.vod_hot - a.vod_hot);
       }
     }
     return data;
