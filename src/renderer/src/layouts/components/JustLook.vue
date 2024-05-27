@@ -51,7 +51,7 @@ const fetchDataAndSetPlayerConfig = async () => {
   const res = await fetchSettingDetail('defaultViewCasual');
 
   if (!res.value) {
-    MessagePlugin.info(t('pages.justlook.message.noData'));
+    MessagePlugin.warning(t('pages.justlook.message.noData'));
     return;
   }
 
