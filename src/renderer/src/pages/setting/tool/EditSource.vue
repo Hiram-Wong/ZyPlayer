@@ -422,11 +422,13 @@ let form = ref({
   },
 });
 
-const tmp = reactive({
-  file: t('pages.setting.editSource.fileManage'),
-  run: t('pages.setting.editSource.run'),
-  help: t('pages.setting.editSource.help'),
-});
+const tmp = computed(() => {
+  return {
+    file: t('pages.setting.editSource.fileManage'),
+    run: t('pages.setting.editSource.run'),
+    help: t('pages.setting.editSource.help'),
+  }
+})
 
 const isVisible = reactive({
   template: false,
