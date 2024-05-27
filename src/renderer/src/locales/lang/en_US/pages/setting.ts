@@ -49,6 +49,7 @@ export default {
     check: 'Check',
     delete: 'Delete',
     deleteTip: 'Are you sure to delete it',
+    noData: 'NoData',
     site: {
       close: 'close',
       together: 'together',
@@ -66,6 +67,8 @@ export default {
   },
   header: {
     add: 'Add',
+    enable: 'Enable',
+    disable: 'Disable',
     delete: 'Delete',
     check: 'Check',
     flag: 'Flag',

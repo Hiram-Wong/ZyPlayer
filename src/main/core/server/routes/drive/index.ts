@@ -46,6 +46,32 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       }
     },
   );
+  fastify.put(
+    `/${API_VERSION}/drive/status/:status/:id`,
+    async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
+      try {
+        const { status, id } = req.params;
+        const validStatuses = ['enable', 'disable'];
+
+        if (!validStatuses.includes(status)) {
+          throw new Error('Invalid status value. Must be "enable" or "disable".');
+        }
+
+        const idList = id.split(',');
+
+        await Promise.all(
+          idList.map(async itemId => {
+            const currentData = await drive.get(itemId);
+            const updatedData = { ...currentData, isActive: status === 'enable' };
+            await drive.update(itemId, updatedData);
+          }),
+        );
+        reply.code(200);
+      } catch (err) {
+        reply.code(500).send(err);
+      }
+    },
+  );
   fastify.get(`/${API_VERSION}/drive/list`, async (_, reply: FastifyReply) => {
     try {
       const data = await drive.all();

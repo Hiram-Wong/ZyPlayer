@@ -8,7 +8,15 @@
               <add-icon />
               <span>{{ $t('pages.setting.header.add') }}</span>
             </div>
-            <div class="item" @click="removeAllEvent">
+            <div class="item" @click="handleAllDataEvent('enable')">
+              <check-icon />
+              <span>{{ $t('pages.setting.header.enable') }}</span>
+            </div>
+            <div class="item" @click="handleAllDataEvent('disable')">
+              <poweroff-icon />
+              <span>{{ $t('pages.setting.header.disable') }}</span>
+            </div>
+            <div class="item" @click="handleAllDataEvent('delete')">
               <remove-icon />
               <span>{{ $t('pages.setting.header.delete') }}</span>
             </div>
@@ -64,17 +72,19 @@
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
-import { AddIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, CheckIcon, PoweroffIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive, watch } from 'vue';
 
-import { fetchIptvPage, updateIptvItem, delIptvItem, addChannel, clearChannel } from '@/api/iptv';
+import { t } from '@/locales';
+import { fetchIptvPage, updateIptvItem, updateIptvStatus, delIptvItem, addChannel, clearChannel } from '@/api/iptv';
 import { setDefault } from '@/api/setting';
 import { parseChannel } from '@/utils/channel';
 
+import { COLUMNS } from './constants';
+
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
-import { COLUMNS } from './constants';
 
 // Define item form data & dialog status
 const isVisible = reactive({
@@ -170,26 +180,34 @@ const removeEvent = (row) => {
   try {
     delIptvItem(row.id);
     refreshEvent();
-    MessagePlugin.success('删除成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`删除源失败, 错误信息:${err}`);
+    console.log('[setting][iptv][removeEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
 };
 
-const removeAllEvent = () => {
+const handleAllDataEvent = (type) => {
   try {
     const { select } = iptvTableConfig.value;
     if (select.length === 0) {
-      MessagePlugin.warning('请先选择数据');
+      MessagePlugin.warning(t('pages.setting.message.noSelectData'));
       return;
     }
-    delIptvItem(select);
+    if (type === 'enable') {
+      updateIptvStatus('enable', select);
+    } else if (type === 'disable') {
+      updateIptvStatus('disable', select);
+    } else if (type === 'delete') {
+      delIptvItem(select);
+    }
     refreshEvent();
-    MessagePlugin.success('批量删除成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
+    console.log('[setting][iptv][handleAllDataEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
-};
+}
 
 const defaultEvent = async (row) => {
   const { id, url, type } = row;
@@ -201,10 +219,11 @@ const defaultEvent = async (row) => {
     const docs = await parseChannel(type, url);
     await addChannel(docs);
 
-    MessagePlugin.success('设置成功');
     emitReload.emit('iptv-reload');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`设置失败, 错误信息:${err}`);
+    console.log('[setting][iptv][defaultEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
 };
 </script>

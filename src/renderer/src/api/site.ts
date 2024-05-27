@@ -104,6 +104,13 @@ export function updateSiteItem(id, doc) {
   });
 }
 
+export function updateSiteStatus(type, id) {
+  return request({
+    url: `/v1/site/status/${type}/${id}`,
+    method: 'put',
+  });
+}
+
 export function delSiteItem(id) {
   return request({
     url: `/v1/site/${id}`,

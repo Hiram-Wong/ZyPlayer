@@ -8,7 +8,15 @@
               <add-icon />
               <span>{{ $t('pages.setting.header.add') }}</span>
             </div>
-            <div class="item" @click="removeAllEvent">
+            <div class="item" @click="handleAllDataEvent('enable')">
+              <check-icon />
+              <span>{{ $t('pages.setting.header.enable') }}</span>
+            </div>
+            <div class="item" @click="handleAllDataEvent('disable')">
+              <poweroff-icon />
+              <span>{{ $t('pages.setting.header.disable') }}</span>
+            </div>
+            <div class="item" @click="handleAllDataEvent('delete')">
               <remove-icon />
               <span>{{ $t('pages.setting.header.delete') }}</span>
             </div>
@@ -68,18 +76,20 @@
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
-import { AddIcon, DiscountIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import _ from 'lodash';
+import { AddIcon, CheckIcon, DiscountIcon, PoweroffIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive, watch } from 'vue';
-import _ from 'lodash';
 
-import { fetchAnalyzePage, updateAnalyzeItem, delAnalyzeItem } from '@/api/analyze';
+import { t } from '@/locales';
+import { fetchAnalyzePage, updateAnalyzeItem, updateAnalyzeStatus, delAnalyzeItem } from '@/api/analyze';
 import { setDefault } from '@/api/setting';
+
+import { COLUMNS } from './constants';
 
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
 import DialogFlagView from './components/DialogFlag.vue';
-import { COLUMNS } from './constants';
 
 // Define item form data & dialog status
 const isVisible = reactive({
@@ -185,37 +195,44 @@ const removeEvent = async (row) => {
   try {
     delAnalyzeItem(row.id);
     refreshEvent();
-    MessagePlugin.success('删除成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`删除源失败, 错误信息:${err}`);
+    console.log('[setting][analyze][removeEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
 };
 
-// 批量删除
-const removeAllEvent = () => {
+const handleAllDataEvent = (type) => {
   try {
     const { select } = analyzeTableConfig.value;
     if (select.length === 0) {
-      MessagePlugin.warning('请先选择数据');
+      MessagePlugin.warning(t('pages.setting.message.noSelectData'));
       return;
     }
-    delAnalyzeItem(select);
+    if (type === 'enable') {
+      updateAnalyzeStatus('enable', select);
+    } else if (type === 'disable') {
+      updateAnalyzeStatus('disable', select);
+    } else if (type === 'delete') {
+      delAnalyzeItem(select);
+    }
     refreshEvent();
-    MessagePlugin.success('批量删除成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
+    console.log('[setting][analyze][handleAllDataEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
-};
+}
 
-// 设置默认接口
 const defaultEvent = async (row) => {
   try {
     await setDefault("defaultAnalyze", row.id);
     analyzeTableConfig.value.default = row.id;
     emitReload.emit('analyze-reload');
-    MessagePlugin.success('设置成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`设置默认源失败, 错误信息:${err}`);
+    console.log('[setting][analyze][defaultEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
 };
 </script>

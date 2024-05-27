@@ -40,6 +40,13 @@ export function updateDriveItem(id, doc) {
   });
 }
 
+export function updateDriveStatus(type, id) {
+  return request({
+    url: `/v1/drive/status/${type}/${id}`,
+    method: 'put',
+  });
+}
+
 // drive删除
 export function delDriveItem(id) {
   return request({

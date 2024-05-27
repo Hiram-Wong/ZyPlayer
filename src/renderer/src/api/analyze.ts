@@ -51,6 +51,13 @@ export function updateAnalyzeItem(id, doc) {
   });
 }
 
+export function updateAnalyzeStatus(type, id) {
+  return request({
+    url: `/v1/analyze/status/${type}/${id}`,
+    method: 'put',
+  });
+}
+
 // analyze删除
 export function delAnalyzeItem(id) {
   return request({

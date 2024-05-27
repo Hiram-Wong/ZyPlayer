@@ -8,7 +8,15 @@
               <add-icon />
               <span>{{ $t('pages.setting.header.add') }}</span>
             </div>
-            <div class="item" @click="removeAllEvent">
+            <div class="item" @click="handleAllDataEvent('enable')">
+              <check-icon />
+              <span>{{ $t('pages.setting.header.enable') }}</span>
+            </div>
+            <div class="item" @click="handleAllDataEvent('disable')">
+              <poweroff-icon />
+              <span>{{ $t('pages.setting.header.disable') }}</span>
+            </div>
+            <div class="item" @click="handleAllDataEvent('delete')">
               <remove-icon />
               <span>{{ $t('pages.setting.header.delete') }}</span>
             </div>
@@ -43,7 +51,7 @@
       </template>
       <template #resource="{ row }">
         <span v-if="row.resource">{{ row.resource }}</span>
-        <span v-else>无数据</span>
+        <span v-else>{{ $t('pages.setting.table.noData') }}</span>
       </template>
       <template #search="{ row }">
         <t-tag v-if="row.search === 0" shape="round" theme="danger" variant="light-outline">{{
@@ -74,19 +82,21 @@
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
-import { AddIcon, RefreshIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import _ from 'lodash';
 import PQueue from 'p-queue';
+import { AddIcon, CheckIcon, PoweroffIcon, RefreshIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref, reactive, watch } from 'vue';
-import _ from 'lodash';
 
-import { fetchSitePage, fetchSiteGroup, updateSiteItem, delSiteItem } from '@/api/site';
+import { t } from '@/locales';
 import { setDefault } from '@/api/setting';
+import { fetchSitePage, fetchSiteGroup, updateSiteItem, updateSiteStatus, delSiteItem } from '@/api/site';
 import { checkValid } from '@/utils/cms';
+
+import { COLUMNS } from './constants';
 
 import DialogAddView from './components/DialogAdd.vue';
 import DialogEditView from './components/DialogEdit.vue';
-import { COLUMNS } from './constants';
 
 // Define item form data & dialog status
 const isVisible = reactive({
@@ -175,7 +185,7 @@ const refreshEvent = (page = false) => {
 
 // op
 const checkAllSite = async () => {
-  let checkData = [];
+  let checkData: any = [];
   const { select, data } = siteTableConfig.value;
   if (select.length === 0) {
     checkData = [...data]
@@ -189,9 +199,10 @@ const checkAllSite = async () => {
   try {
     await Promise.all(checkData.map(item => queue.add(() => checkSingleEvent(item, true))));
     emitReload.emit('film-reload');
-    MessagePlugin.success('状态批量检测完成, 并设置状态');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`状态批量检测失败, 错误信息:${err}`);
+    console.log('[setting][site][checkAllSite][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
 };
 
@@ -202,7 +213,7 @@ const checkSingleEvent = async (row, all = false) => {
   row.resource = resource;
   if (!all) {
     emitReload.emit('film-reload');
-    MessagePlugin.success('源站检测完成,自动重置状态!');
+    MessagePlugin.success(t('pages.setting.form.success'));
   }
   return status;
 };
@@ -233,35 +244,44 @@ const removeEvent = async (row) => {
   try {
     delSiteItem(row.id);
     refreshEvent();
-    MessagePlugin.success('删除成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`删除源失败, 错误信息:${err}`);
+    console.log('[setting][site][removeEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
 };
 
-const removeAllEvent = () => {
+const handleAllDataEvent = (type) => {
   try {
     const { select } = siteTableConfig.value;
     if (select.length === 0) {
-      MessagePlugin.warning('请先选择数据');
+      MessagePlugin.warning(t('pages.setting.message.noSelectData'));
       return;
     }
-    delSiteItem(select);
+    if (type === 'enable') {
+      updateSiteStatus('enable', select);
+    } else if (type === 'disable') {
+      updateSiteStatus('disable', select);
+    } else if (type === 'delete') {
+      delSiteItem(select);
+    }
     refreshEvent();
-    MessagePlugin.success('批量删除成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`批量删除源失败, 错误信息:${err}`);
+    console.log('[setting][site][handleAllDataEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
-};
+}
 
 const defaultEvent = async (row) => {
   try {
     await setDefault("defaultSite", row.id);
     siteTableConfig.value.default = row.id;
     emitReload.emit('film-reload');
-    MessagePlugin.success('设置成功');
+    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    MessagePlugin.error(`设置默认源失败, 错误信息:${err}`);
+    console.log('[setting][site][defaultEvent][error]', err);
+    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
   }
 };
 </script>

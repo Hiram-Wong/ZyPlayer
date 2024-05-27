@@ -20,7 +20,7 @@ export function fetchIptvActive() {
   });
 }
 
-// iptv分页ß
+// iptv分页
 export function fetchIptvPage(kw: string) {
   return request({
     url: `/v1/iptv/page`,
@@ -74,6 +74,13 @@ export function updateIptvItem(id, doc) {
     url: `/v1/iptv/${id}`,
     method: 'put',
     data: doc,
+  });
+}
+
+export function updateIptvStatus(type, id) {
+  return request({
+    url: `/v1/iptv/status/${type}/${id}`,
+    method: 'put',
   });
 }
 

@@ -49,6 +49,7 @@ export default {
     check: '检测',
     delete: '删除',
     deleteTip: '你确定要删除吗',
+    noData: '无数据',
     site: {
       close: '关闭',
       together: '聚合',
@@ -66,6 +67,8 @@ export default {
   },
   header: {
     add: '添加',
+    enable: '启用',
+    disable: '禁用',
     delete: '删除',
     check: '检测',
     flag: '标识',
@@ -159,6 +162,7 @@ export default {
     windowPositionOff: '关闭窗口位置',
     networkAddress: '网络地址',
     networkCheckError: '网络状态检测失败',
+    noSelectData: '请先选择数据',
   },
   ad: {
     title: '与Hipy更配哦',
