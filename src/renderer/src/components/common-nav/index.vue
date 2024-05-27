@@ -8,7 +8,8 @@
         <div class="nav-sub-tab-top">
           <ul class="nav-menu">
             <li class="nav-menu-item" :class="`${activeData}` === `${item.id}` ? 'is-active' : ''"
-              v-for="item in listData" :key="item.id" :value="item.id" @click="handleItemClick(item.id)">
+              v-for="item in listData" :key="item.id" :value="item.id" @click="handleItemClick(item.id)"
+              @contextmenu="conButtonClick(item, $event)">
               <div class="name-wrapper">
                 <span>{{ item.name }}</span>
               </div>
@@ -20,11 +21,29 @@
         </div>
       </div>
     </div>
+    <context-menu v-model:show="isVisible.contentMenu" :options="optionsComponent" v-if="contextMenuItems">
+      <template v-for="(menuItem, index) in contextMenuItems" :key="index">
+        <context-menu-item v-if="menuItem.type === 'item'" :label="menuItem.label" @click="menuItem.handler" />
+        <context-menu-separator v-if="menuItem.type === 'separator'" />
+        <context-menu-group v-if="menuItem.type === 'group'" :label="menuItem.label">
+          <template v-for="(subItem, subIndex) in menuItem.children" :key="subIndex">
+            <context-menu-item v-if="subItem.type === 'item'" :label="subItem.label" @click="subItem.handler" />
+            <context-menu-separator v-if="subItem.type === 'separator'" />
+          </template>
+        </context-menu-group>
+      </template>
+    </context-menu>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
+
+import { ContextMenu, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup } from '@imengyu/vue3-context-menu';
+import { computed, reactive, ref, watch } from 'vue';
+
+import { useSettingStore } from '@/store';
+const storeSetting = useSettingStore();
 
 const props = defineProps<{
   title: string;
@@ -33,10 +52,34 @@ const props = defineProps<{
     id: string | number;
     name: string;
   }>;
+  contextMenuItems?: Array<{
+    type: 'item' | 'separator' | 'group';
+    label?: string;
+    handler?: () => void;
+    children?: Array<{
+      type: 'item' | 'separator';
+      label?: string;
+      handler?: () => void;
+    }>;
+  }>;
 }>();
 
 const activeData = ref(props.active);
 const listData = ref(props.list);
+const contextMenuItems = ref(props.contextMenuItems);
+const isVisible = reactive({
+  contentMenu: false
+});
+const mode = computed(() => {
+  return storeSetting.displayMode;
+});
+const optionsComponent = ref({
+  zIndex: 15,
+  width: 160,
+  x: 500,
+  y: 200,
+  theme: mode.value === 'light' ? 'default' : 'mac dark',
+});
 
 watch(
   () => props.active,
@@ -52,7 +95,20 @@ watch(
   },
 );
 
-const emit = defineEmits(['changeKey']);
+watch(
+  () => props.contextMenuItems,
+  (val) => {
+    contextMenuItems.value = val;
+  },
+);
+
+const emit = defineEmits(['changeKey', 'contextMenu']);
+
+const conButtonClick = (item: any, { x, y }: any) => {
+  isVisible.contentMenu = true;
+  Object.assign(optionsComponent.value, { x, y });
+  emit('contextMenu', { ...item });
+};
 
 const handleItemClick = (key: string | number) => {
   console.log(`[nav] clicked key: ${key}`);
