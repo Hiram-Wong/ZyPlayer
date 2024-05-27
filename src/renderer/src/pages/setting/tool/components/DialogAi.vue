@@ -160,8 +160,8 @@ const models = [
 const formData = ref({
   aiType: 'qa',
   config: {
-    server: 'https://api.chatanywhere.tech',
-    key: 'sk-PSdjGmy6NLidwP3ng17PivJ6OXFRK960r4IiboatlG5r9vBL',
+    server: '',
+    key: '',
     model: 'gpt-3.5-turbo',
   },
   codeSnippet: '',
