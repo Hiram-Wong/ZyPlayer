@@ -1709,7 +1709,7 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
     if (!keys.includes('user-agent')) {
       headers['User-Agent'] = MOBILE_UA;
       // fetch_params 里存在ua则优先，否则才默认手机UA
-      if( typeof(fetch_params) === 'object' && fetch_params.headers){
+      if( typeof(fetch_params) === 'object' && fetch_params && fetch_params.headers){
         let fetch_headers = keysToLowerCase(fetch_params.headers);
         if(fetch_headers['user-agent']){
           headers['User-Agent'] = fetch_headers['user-agent'];
