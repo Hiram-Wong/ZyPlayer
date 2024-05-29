@@ -263,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta20 202400528`;
+const VERSION = `${vercode} 3.9.50beta21 202400529`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -967,7 +967,8 @@ const decodeStr = (input, encoding) => {
 
 // 封装的RSA加解密类
 const RSA = {
-  decode(data, key, option = { chunkSize: 117 }) {
+  decode(data, key, option) {
+    option = option || {};
     if (typeof JSEncrypt === 'function') {
       const chunkSize = option.chunkSize ?? 117; // 默认分段长度为117
       const privateKey = this.getPrivateKey(key);
@@ -977,7 +978,8 @@ const RSA = {
     }
     return false;
   },
-  encode(data, key, option = { chunkSize: 117 }) {
+  encode(data, key, option ) {
+    option = option || {};
     if (typeof JSEncrypt === 'function') {
       const chunkSize = option.chunkSize ?? 117; // 默认分段长度为117
       const publicKey = this.getPublicKey(key);
@@ -2961,6 +2963,50 @@ const isVideoParse = (isVideoObj) => {
 };
 
 /**
+ * 获取加密前的原始的js源文本
+ * @param js_code
+ */
+function getOriginalJs(js_code){
+  let current_match = /var rule|rule/;
+  if(current_match.test(js_code)){
+    return js_code
+  }
+  let rsa_private_key = 'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqin/jUpqM6+fgYP/oMqj9zcdHMM0mEZXLeTyixIJWP53lzJV2N2E3OP6BBpUmq2O1a9aLnTIbADBaTulTNiOnVGoNG58umBnupnbmmF8iARbDp2mTzdMMeEgLdrfXS6Y3VvazKYALP8EhEQykQVarexR78vRq7ltY3quXx7cgI0ROfZz5Sw3UOLQJ+VoWmwIxu9AMEZLVzFDQN93hzuzs3tNyHK6xspBGB7zGbwCg+TKi0JeqPDrXxYUpAz1cQ/MO+Da0WgvkXnvrry8NQROHejdLVOAslgr6vYthH9bKbsGyNY3H+P12kcxo9RAcVveONnZbcMyxjtF5dWblaernAgMBAAECggEAGdEHlSEPFmAr5PKqKrtoi6tYDHXdyHKHC5tZy4YV+Pp+a6gxxAiUJejx1hRqBcWSPYeKne35BM9dgn5JofgjI5SKzVsuGL6bxl3ayAOu+xXRHWM9f0t8NHoM5fdd0zC3g88dX3fb01geY2QSVtcxSJpEOpNH3twgZe6naT2pgiq1S4okpkpldJPo5GYWGKMCHSLnKGyhwS76gF8bTPLoay9Jxk70uv6BDUMlA4ICENjmsYtd3oirWwLwYMEJbSFMlyJvB7hjOjR/4RpT4FPnlSsIpuRtkCYXD4jdhxGlvpXREw97UF2wwnEUnfgiZJ2FT/MWmvGGoaV/CfboLsLZuQKBgQDTNZdJrs8dbijynHZuuRwvXvwC03GDpEJO6c1tbZ1s9wjRyOZjBbQFRjDgFeWs9/T1aNBLUrgsQL9c9nzgUziXjr1Nmu52I0Mwxi13Km/q3mT+aQfdgNdu6ojsI5apQQHnN/9yMhF6sNHg63YOpH+b+1bGRCtr1XubuLlumKKscwKBgQDOtQ2lQjMtwsqJmyiyRLiUOChtvQ5XI7B2mhKCGi8kZ+WEAbNQcmThPesVzW+puER6D4Ar4hgsh9gCeuTaOzbRfZ+RLn3Aksu2WJEzfs6UrGvm6DU1INn0z/tPYRAwPX7sxoZZGxqML/z+/yQdf2DREoPdClcDa2Lmf1KpHdB+vQKBgBXFCVHz7a8n4pqXG/HvrIMJdEpKRwH9lUQS/zSPPtGzaLpOzchZFyQQBwuh1imM6Te+VPHeldMh3VeUpGxux39/m+160adlnRBS7O7CdgSsZZZ/dusS06HAFNraFDZf1/VgJTk9BeYygX+AZYu+0tReBKSs9BjKSVJUqPBIVUQXAoGBAJcZ7J6oVMcXxHxwqoAeEhtvLcaCU9BJK36XQ/5M67ceJ72mjJC6/plUbNukMAMNyyi62gO6I9exearecRpB/OGIhjNXm99Ar59dAM9228X8gGfryLFMkWcO/fNZzb6lxXmJ6b2LPY3KqpMwqRLTAU/zy+ax30eFoWdDHYa4X6e1AoGAfa8asVGOJ8GL9dlWufEeFkDEDKO9ww5GdnpN+wqLwePWqeJhWCHad7bge6SnlylJp5aZXl1+YaBTtOskC4Whq9TP2J+dNIgxsaF5EFZQJr8Xv+lY9lu0CruYOh9nTNF9x3nubxJgaSid/7yRPfAGnsJRiknB5bsrCvgsFQFjJVs=';
+  let decode_content = '';
+  let decode_funcs = [
+    (text)=>{try {return ungzip(text)} catch (e) {return ''}},
+    (text)=>{try {return base64Decode(text)} catch (e) {return ''}},
+    (text)=>{try {return RSA.decode(text,rsa_private_key,null)} catch (e) {return ''}},
+  ]
+  let func_index = 0
+  while(!current_match.test(decode_content)){
+    decode_content = decode_funcs[func_index](js_code);
+    func_index ++;
+    if(func_index >= decode_funcs.length){
+      break;
+    }
+  }
+  return decode_content
+}
+
+/**
+ * 执行main函数
+ * 示例  function main(text){return gzip(text)}
+ * @param main_func_code
+ * @param arg
+ */
+function runMain(main_func_code, arg){
+  let mainFunc = function(arg){return ''};
+  try {
+    eval(main_func_code+'\nmainFunc=main;');
+    return mainFunc(arg);
+  }catch (e) {
+    log(`执行main_funct发生了错误:${e.message}`);
+    return ''
+  }
+}
+
+/**
  * js源预处理特定返回对象中的函数
  * @param ext
  */
@@ -2977,7 +3023,10 @@ const init = (ext) => {
       if (ext.startsWith('http') || ext.startsWith('file://')) {
         let query = getQuery(ext); // 获取链接传参
         let js: any = request(ext, { method: 'GET' });
-        if (js) eval(js.replace('var rule', 'rule'));
+        if (js){
+          js = getOriginalJs(js);
+          eval(js.replace('var rule', 'rule'));
+        }
         if (query['type'] === 'url' && query['params']) {
           // 指定type是链接并且传了params支持简写如 ./xx.json
           rule['params'] = urljoin(ext, query['params']);
@@ -2985,7 +3034,10 @@ const init = (ext) => {
           // 没指定type直接视为字符串
           rule['params'] = query['params'];
         }
-      } else eval(ext.replace('var rule', 'rule'));
+      }else {
+        ext = getOriginalJs(ext);
+        eval(ext.replace('var rule', 'rule'));
+      }
     }
     if (rule['模板'] && muban.hasOwnProperty(rule['模板'])) {
       console.log(`继承模板:${rule['模板']}`);
@@ -3346,6 +3398,7 @@ const keepUnUse = {
       proxy,
       sniffer,
       isVideo,
+      runMain,
       gzip,
       readFile,
       fixAdM3u8,
@@ -3367,6 +3420,7 @@ const keepUnUse = {
 };
 
 export {
+  runMain,
   init,
   home,
   homeVod,
