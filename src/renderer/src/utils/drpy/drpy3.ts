@@ -2967,7 +2967,7 @@ const isVideoParse = (isVideoObj) => {
  * @param js_code
  */
 function getOriginalJs(js_code){
-  let current_match = /var rule|rule/;
+  let current_match = /var rule|[\u4E00-\u9FA5]+|function|let |var |const |\(|\)|"|'/;
   if(current_match.test(js_code)){
     return js_code
   }
