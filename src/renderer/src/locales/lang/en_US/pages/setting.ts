@@ -426,6 +426,21 @@ export default {
         fetchTip: 'Enter someing...',
         codeSnippetTip: 'Enter html code snippet'
       },
+      tool: {
+        title: 'Tool',
+        unicode: 'UniCode',
+        base64: 'Base64',
+        gzip: 'GZip',
+        url: 'URL',
+        rsa: 'RSA',
+        uuid: 'UUID',
+        md5: 'MD5',
+        html: 'Html',
+        uuidInputNum: 'generateNum',
+        generate: 'generate',
+        encode: 'encode',
+        decode: 'decode',
+      }
     },
   },
 };
