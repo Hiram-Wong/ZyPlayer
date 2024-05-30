@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import HistoryControl from './HistoryControl.vue';
 import SearchBar from './SearchBar.vue';
-import PlayerShow from './PlayerShow.vue';
+import PlayerShow from './PlayShow.vue';
 import SystemConfig from './SystemConfig.vue';
 import SystemControl from './SystemControl.vue';
 import SystemSkin from './SystemSkin.vue';

@@ -1184,6 +1184,7 @@ const openMainWinEvent = (): void => {
   window.electron.ipcRenderer.send('showMainWin');
 };
 
+// 更新playShow状态
 window.electron.ipcRenderer.on('destroy-playerWindow', () => {
   store.updateConfig({
     status: false,

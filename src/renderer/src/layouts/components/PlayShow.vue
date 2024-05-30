@@ -2,11 +2,14 @@
   <div class="player-show">
     <div v-if="playerStutus.status" class="box-flex">
       <div class="mini-box" @click="focusPlayerWindowEvent">
+        <div class="mini-box-video" @click.stop="destroyPlayerWindowEvent">
+          <video-library-icon size="large" class="video" />
+        </div>
         <div class="mini-box-title-warp">
           <span class="mini-box-title">{{ playerStutus.title }}</span>
         </div>
         <div class="mini-box-close" @click.stop="destroyPlayerWindowEvent">
-          <close-icon size="smll" class="close" />
+          <close-icon size="large" class="close" />
         </div>
       </div>
     </div>
@@ -14,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { CloseIcon } from 'tdesign-icons-vue-next';
+import { CloseIcon, VideoLibraryIcon } from 'tdesign-icons-vue-next';
 import { computed } from 'vue';
 
 import { t } from '@/locales';
@@ -26,7 +29,7 @@ const playerStutus = computed(() => {
   return {
     status: playerStore.status,
     // @ts-ignore
-    title: playerStore.data.info.vod_name || t('pages.playShow.noPlayTitle')
+    title: playerStore.type === 'film' ? playerStore.data.info.vod_name : playerStore.data.info.name || t('pages.playShow.noPlayTitle')
   }
 });
 
@@ -44,30 +47,43 @@ const destroyPlayerWindowEvent = () => {
 
 <style lang="less" scoped>
 .player-show {
+  height: 100%;
+
   .box-flex {
+    height: 100%;
+
     .mini-box {
       border-radius: var(--td-radius-round);
-      height: 31px;
+      height: 100%;
       width: 140px;
       background-color: var(--td-bg-color-component);
       display: flex;
       align-items: center;
       cursor: pointer;
 
+      &-close,
+      &-video {
+        cursor: pointer;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        color: rgba(132, 133, 141, 0.8);
+      }
+
+      &-video {
+        margin-left: var(--td-comp-margin-s);
+      }
+
       &-close {
         margin-right: var(--td-comp-margin-s);
-        width: 15px;
-        display: flex;
-        justify-content: center;
-        color: var(--td-brand-color);
 
-        svg {
-          margin: 0 auto;
+        &:hover {
+          color: var(--td-primary-color);
         }
       }
 
       &-title-warp {
-        margin: 0 var(--td-comp-margin-xs) 0 var(--td-comp-margin-l);
+        margin: 0 var(--td-comp-margin-xs);
         overflow: hidden;
         width: 100%;
 
