@@ -59,7 +59,10 @@ export const useSettingStore = defineStore('setting', {
       }
     },
   },
-  persist: true, // 数据持久化
+  share: {
+    enable: true,
+  },
+  // persist: true, // 数据持久化
 });
 
 export function getSettingStore() {

@@ -115,7 +115,7 @@
     "p-queue": "^8.0.1",
     "pako": "^2.1.0",
     "pinia": "^2.1.7",
-    "pinia-plugin-persistedstate": "^3.2.1",
+    "pinia-shared-state": "^0.5.1",
     "prettier": "^3.2.5",
     "public-ip": "^6.0.2",
     "qrcode.vue": "^3.4.1",

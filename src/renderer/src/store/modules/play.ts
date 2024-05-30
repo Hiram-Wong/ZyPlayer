@@ -10,11 +10,13 @@ const state = {
 export type PlayState = typeof state;
 
 export const usePlayStore = defineStore('play', {
-  persist: true, // 数据持久化
   state: () => state,
   getters: {
     getType: (state) => {
       return state.type;
+    },
+    getStatus: (state) => {
+      return state.status;
     },
     getSetting: (state) => {
       return state.setting;
@@ -27,13 +29,13 @@ export const usePlayStore = defineStore('play', {
     updateConfig(payload: Partial<PlayState>) {
       for (const key in payload) {
         if (key === 'type') {
-          this.type = payload.type;
+          this.type = payload.type!;
         }
         if (key === 'status') {
-          this.status = payload.status;
+          this.status = payload.status!;
         }
         if (key === 'data') {
-          this.data = payload.data;
+          this.data = payload.data!;
         }
         if (key === 'setting') {
           this.setting = {
@@ -44,6 +46,10 @@ export const usePlayStore = defineStore('play', {
       }
     },
   },
+  share: {
+    enable: true,
+  },
+  // persist: true, // 数据持久化
 });
 
 export function getPlayStore() {
