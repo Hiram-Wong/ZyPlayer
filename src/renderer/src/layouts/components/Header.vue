@@ -2,7 +2,7 @@
   <div class="titlebar" @mousedown="handleMouseDown">
     <div class="left no-drag">
       <history-control />
-      <search-bar class="search" />
+      <search-bar class="search" @mousedown.stop @dblclick.stop />
     </div>
     <div class="right no-drag">
       <div class="system-functions">
