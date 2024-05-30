@@ -33,13 +33,10 @@
             <help-rectangle-icon />
             <t-select v-model="tmp.help" @change="fileEvent()">
               <t-option key="ai" :label="$t('pages.setting.editSource.ai')" value="ai" @click="aiEvent" />
+              <!-- <t-option key="tool" :label="$t('pages.setting.editSource.tool')" value="tool" @click.stop="toolEvent" /> -->
               <t-option key="doc" :label="$t('pages.setting.editSource.doc')" value="doc" @click="helpEvent" />
             </t-select>
           </div>
-          <!-- <div class="item" @click="helpEvent">
-            <help-rectangle-icon />
-            <span>{{ $t('pages.setting.editSource.help') }}</span>
-          </div> -->
 
           <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.template')"
             show-in-attached-element width="40%" @confirm="confirmTemplate()">
@@ -303,6 +300,7 @@
 
     <dialog-player-view v-model:visible="isVisible.player" :url="formDialog.player.url" />
     <dialog-ai-view v-model:visible="isVisible.ai" />
+    <!-- <dialog-tool-view v-model:visible="isVisible.tool" /> -->
   </div>
 </template>
 
@@ -325,6 +323,7 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 import dialogPlayerView from './components/DialogPlayer.vue';
 import dialogAiView from './components/DialogAi.vue';
+// import dialogToolView from './components/DialogTool.vue';
 
 import { t } from '@/locales';
 import { useSettingStore, usePlayStore } from '@/store';
@@ -436,7 +435,8 @@ const isVisible = reactive({
   help: false,
   reqParam: false,
   snifferParam: false,
-  ai: false
+  ai: false,
+  tool: false
 });
 
 const formDialog = reactive({
@@ -666,7 +666,7 @@ const initEditor = () => {
     editor.getModel()!.pushEOL(config.eol);
 
     monaco.languages.registerCompletionItemProvider('javascript', {
-      provideCompletionItems: (model, position, context, token) => {
+      provideCompletionItems: (model, position, _context, _token) => {
         const word = model.getWordUntilPosition(position);
         const range = {
           startLineNumber: position.lineNumber,
@@ -841,22 +841,24 @@ const deleteEvent = async () => {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   };
 };
-
 const fileEvent = async () => {
-  tmp.file = t('pages.setting.editSource.fileManage');
-  tmp.run = t('pages.setting.editSource.run');
-  tmp.help = t('pages.setting.editSource.help');
+  tmp.value.file = t('pages.setting.editSource.fileManage');
+  tmp.value.run = t('pages.setting.editSource.run');
+  tmp.value.help = t('pages.setting.editSource.help');
 };
-
 const serverEvent = async () => {
-  window.electron.ipcRenderer.send('open-path', 'file', true)
+  await window.electron.ipcRenderer.send('open-path', 'file', true);
 };
 
 const aiEvent = async () => {
   isVisible.ai = true;
 };
 
-const helpEvent = async () => {
+const toolEvent = async () => {
+  isVisible.tool = true;
+};
+
+const helpEvent = () => {
   window.electron.ipcRenderer.send('open-url', 'https://zy.catni.cn/edit-source.html')
 };
 
