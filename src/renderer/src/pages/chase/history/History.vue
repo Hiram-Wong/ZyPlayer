@@ -195,6 +195,7 @@ const playEvent = async (item) => {
     } else {
       const config = {
         type: 'film',
+        status: true,
         data: {
           info: item,
           ext: { site: site }

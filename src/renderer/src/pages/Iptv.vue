@@ -266,6 +266,7 @@ const playEvent = (item: { name: any }) => {
       const { epg, skipIpv6, logo } = iptvConfig.value.ext;
       storePlayer.updateConfig({
         type: 'iptv',
+        status: true,
         data: {
           info: item,
           ext: { epg, skipIpv6, logo },

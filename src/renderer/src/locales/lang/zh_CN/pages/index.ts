@@ -12,6 +12,7 @@ import md from './md';
 import justlook from './justlook';
 import share from './share';
 import contextMenu from './contextMenu';
+import playShow from './playShow';
 
 export default {
   player,
@@ -27,5 +28,6 @@ export default {
   md,
   justlook,
   share,
-  contextMenu
+  contextMenu,
+  playShow
 };

@@ -2,7 +2,8 @@
   <div class="titlebar" @mousedown="handleMouseDown">
     <div class="left no-drag">
       <history-control />
-      <search-bar class="search" />
+      <search-bar class="mg-left" />
+      <player-show class="mg-left" />
     </div>
     <div class="right no-drag">
       <div class="system-functions">
@@ -20,6 +21,7 @@
 <script setup lang="ts">
 import HistoryControl from './HistoryControl.vue';
 import SearchBar from './SearchBar.vue';
+import PlayerShow from './PlayerShow.vue';
 import SystemConfig from './SystemConfig.vue';
 import SystemControl from './SystemControl.vue';
 import SystemSkin from './SystemSkin.vue';
@@ -52,7 +54,7 @@ const handleMouseDown = (event) => {
     height: 100%;
     display: flex;
 
-    .search {
+    .mg-left {
       margin-left: 20px;
     }
   }

@@ -48,12 +48,6 @@ const ipcListen = () => {
     }
   });
 
-  ipcMain.on('reboot-app', () => {
-    logger.info(`[ipcMain] reboot-app`);
-    app.relaunch();
-    app.exit();
-  });
-
   const getFolderSize = (folderPath: string): number => {
     let totalSize = 0;
 
@@ -160,14 +154,16 @@ const ipcListen = () => {
     return path;
   });
 
-  ipcMain.handle('path-join', (event, fromPath, toPath) => {
+  ipcMain.handle('path-join', (_, fromPath, toPath) => {
     return join(fromPath, toPath);
   });
 
   // 重启app
-  ipcMain.on('relaunch-app', () => {
+  ipcMain.on('reboot-app', () => {
+    logger.info(`[ipcMain] reboot-app`);
     app.relaunch();
-    app.quit();
+    app.exit(); // 直接强制关闭
+    // app.quit(); // 生命周期, 有回调函数
   });
 
   // 关闭app

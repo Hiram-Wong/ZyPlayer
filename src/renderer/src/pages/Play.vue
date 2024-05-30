@@ -1183,6 +1183,12 @@ const minMaxEvent = (): void => {
 const openMainWinEvent = (): void => {
   window.electron.ipcRenderer.send('showMainWin');
 };
+
+window.electron.ipcRenderer.on('destroy-playerWindow', () => {
+  store.updateConfig({
+    status: false,
+  });
+});
 </script>
 
 <style lang="less" scoped>

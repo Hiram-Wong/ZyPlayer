@@ -1,5 +1,6 @@
 export default {
   type: 'film',
+  status: false,
   setting: {
     playerMode: {
       type: 'dplayer',

@@ -29,6 +29,9 @@ export const usePlayStore = defineStore('play', {
         if (key === 'type') {
           this.type = payload.type;
         }
+        if (key === 'status') {
+          this.status = payload.status;
+        }
         if (key === 'data') {
           this.data = payload.data;
         }

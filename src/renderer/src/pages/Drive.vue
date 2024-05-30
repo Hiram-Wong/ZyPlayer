@@ -235,6 +235,7 @@ const playEvent = (item, fullPath) => {
     } else {
       storePlayer.updateConfig({
         type: 'drive',
+        status: true,
         data: {
           info: {
             name: item.name,

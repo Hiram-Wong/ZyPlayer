@@ -527,6 +527,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
 
   // 关闭window时触发下列事件.
   playWindow.on('close', () => {
+    if (playWindow) playWindow.webContents.send('destroy-playerWindow');
     electronLocalshortcut.unregisterAll(playWindow!);
   });
 
@@ -569,4 +570,14 @@ ipcMain.on('update-ua', (_, status, value) => {
 ipcMain.on('update-windowPosition', (_, status) => {
   logger.info(`[ipcMain] storage-windowPosition: ${status}`);
   windowState.status = status;
+});
+
+ipcMain.on('manage-playerWindow', (_, action) => {
+  logger.info(`[ipcMain] playerWindow: action is ${action}`);
+  if (action === 'destroy') {
+    playWindow?.destroy();
+    playWindow = null;
+  } else if(action === 'focus') {
+    playWindow?.focus();
+  }
 });
