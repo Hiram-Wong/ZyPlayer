@@ -527,7 +527,7 @@ ipcMain.on('openPlayWindow', (_, arg) => {
 
   // 关闭window时触发下列事件.
   playWindow.on('close', () => {
-    if (playWindow) playWindow.webContents.send('destroy-playerWindow');
+    if (mainWindow) mainWindow.webContents.send('destroy-playerWindow');
     electronLocalshortcut.unregisterAll(playWindow!);
   });
 
