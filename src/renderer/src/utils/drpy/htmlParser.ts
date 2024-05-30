@@ -17,7 +17,7 @@ import urlJoin from 'url';
 
 const PARSE_CACHE = true; // 解析缓存
 const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|:not|:even|:odd|:has|:contains|:matches|:empty|^body$|^#'; // 不自动加eq下标索引
-const URLJOIN_ATTR = '(url|src|href|-original|-src|-play|-url|style)$'; // 需要自动urljoin的属性
+const URLJOIN_ATTR = '(url|src|href|-original|-src|-play|-url|style)$|^(data-|url-|src-)'; // 需要自动urljoin的属性
 const SPECIAL_URL = '^(ftp|magnet|thunder|ws):'; // 过滤特殊链接,不走urlJoin
 
 class Jsoup {
