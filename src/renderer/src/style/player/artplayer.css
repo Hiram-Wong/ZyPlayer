@@ -29,6 +29,7 @@
 
 .art-danmuku-emitter {
   opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .art-icon-switchOn .icon path {

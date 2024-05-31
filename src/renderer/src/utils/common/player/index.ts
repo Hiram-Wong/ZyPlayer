@@ -178,9 +178,12 @@ const playerNext = async (player: any, playerMode: string, options: any) => {
   const playerModule = await loadPlayerMethod(playerMode);
   const { playNext } = playerModule;
 
+  const { url, mediaType } = options;
+  const videoType = mediaType || (await checkMediaType(url)) || '';
+
   let data = {
-    url: options.url,
-    type: mapVideoTypeToPlayerType(options.mediaType),
+    url,
+    type: mapVideoTypeToPlayerType(videoType),
   };
 
   return playNext(player, data);

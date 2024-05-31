@@ -711,8 +711,6 @@ const initFilmPlayer = async (isFirst) => {
 
 // 初始化播放器
 const initPlayer = async (isFirst = false) => {
-  destroyPlayer();
-
   switch (type.value) {
     case 'iptv':
       await initIptvPlayer();
@@ -1111,7 +1109,12 @@ const changeChannelEvent = async (item) => {
   });
   info.value = item;
   const url = info.value["url"];
-  createPlayer(url);
+  if (player.value) {
+    const { playerMode } = set.value;
+    playerNext(player.value, playerMode.type, { url, mediaType: '' });
+  } else {
+    createPlayer(url);
+  }
 };
 
 // 生成台标
@@ -1156,7 +1159,12 @@ const changeDriveEvent = async (item) => {
   });
   info.value = res;
   const url = info.value["url"];
-  createPlayer(url);
+  if (player.value) {
+    const { playerMode } = set.value;
+    playerNext(player.value, playerMode.type, { url, mediaType: '' });
+  } else {
+    createPlayer(url);
+  }
 };
 
 // electron窗口置顶

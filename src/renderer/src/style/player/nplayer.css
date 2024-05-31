@@ -35,6 +35,7 @@
   height: 30px;
   border-radius: 5px;
   opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .nplayer_danmaku_send .nplayer_icon {
@@ -112,6 +113,10 @@
 
 .nplayer_checkbox:hover {
   color: #00e038 !important;
+}
+
+.nplayer_control_time-live:before {
+  background: #00d157 !important;
 }
 
 .xg-icon-setting,

@@ -80,6 +80,7 @@
 
 .dplayer-comment {
   opacity: 0 !important;
+  pointer-events: none !important;
   display: none !important;
 }
 
@@ -182,4 +183,8 @@
 
 .dplayer-menu .dplayer-menu-item a {
   text-decoration: none;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-live-dot {
+  background: #00d157 !important;
 }
