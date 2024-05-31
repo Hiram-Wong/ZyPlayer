@@ -97,10 +97,10 @@ const createMenu = () => {
           },
         },
         {
-          label: '访问官网',
+          label: '访问文档',
           click() {
-            logger.info('[menu] visit official website, url is http://zyplayer.fun/');
-            const url = 'http://zyplayer.fun/';
+            logger.info('[menu] visit doc website, url is http://zy.catni.cn');
+            const url = 'https://zy.catni.cn';
             shell.openExternal(url);
           },
         },
