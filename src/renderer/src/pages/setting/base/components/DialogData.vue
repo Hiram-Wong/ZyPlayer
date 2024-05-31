@@ -457,7 +457,13 @@ const formatSet = (data) => {
 
   // 更新或添加新键值对
   const newEntries = [
-    { key: "windowPosition", value: { status: _.get(data, ["restoreWindowPositionAndSize", "value"], false), position: { width: 1000, height: 640 } } },
+    {
+      key: "windowPosition", value: {
+        status: _.get(data, ["restoreWindowPositionAndSize", "value"], false),
+        position_main: { width: 1000, height: 640 },
+        position_play: { width: 875, height: 550 }
+      }
+    },
     {
       key: "webdev", value: {
         sync: false, data: {

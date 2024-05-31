@@ -1,5 +1,5 @@
 [
-  { "key": "version", "value": "3.3.5" },
+  { "key": "version", "value": "3.3.7" },
   { "key": "theme", "value": "auto" },
   { "key": "lang", "value": "zh_CN" },
   { "key": "defaultHot", "value": "kylive" },
@@ -72,9 +72,13 @@
     "key": "windowPosition",
     "value": {
       "status": false,
-      "position": {
+      "position_main": {
         "width": 1000,
         "height": 640
+      },
+      "position_play": {
+        "width": 875,
+        "height": 550
       }
     }
   },

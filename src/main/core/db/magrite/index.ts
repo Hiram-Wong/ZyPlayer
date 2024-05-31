@@ -1,6 +1,11 @@
 import db from '../index';
 import logger from '../../logger';
-import { update3_3_1_to3_3_2, update3_3_3_to3_3_4, update3_3_4_to3_3_5 } from './data';
+import {
+  update3_3_1_to3_3_2,
+  update3_3_3_to3_3_4,
+  update3_3_4_to3_3_5,
+  update3_3_6_to3_3_7,
+} from './data';
 import { app } from 'electron';
 
 /**
@@ -35,6 +40,7 @@ const magrite = () => {
     if (!currentVersion) update3_3_1_to3_3_2();
     if (compareVersion(currentVersion, '3.3.4') === 1) update3_3_3_to3_3_4();
     if (compareVersion(currentVersion, '3.3.5') === 1) update3_3_4_to3_3_5();
+    if (compareVersion(currentVersion, '3.3.7') === 1) update3_3_6_to3_3_7();
   }
 
   logger.info(`[db][magrite]magrite completed`);
