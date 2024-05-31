@@ -17,31 +17,41 @@ if (is.dev) {
   });
   autoUpdater.updateConfigPath = resolve(__dirname, '../../dev-app-update.yml');
 }
-autoUpdater.autoDownload = false; // 自动下载更新
-autoUpdater.autoInstallOnAppQuit = false; // 退出时自动安装更新
+
+autoUpdater.autoDownload = false; // 关闭自动下载
+autoUpdater.autoInstallOnAppQuit = false; // 关闭自动安装
 
 export default (win: BrowserWindow) => {
-  // fix download error when old version update file already exists
-  const downloadUpdate = () => {
-    autoUpdater.downloadUpdate().catch((e: any) => {
+  // 通用的IPC发送函数
+  const sendUpdateMessage = (channel: string, message?: any) => {
+    win.webContents.send(channel, message);
+  };
+
+  // 下载更新的函数，包含错误处理逻辑
+  const downloadUpdate = async () => {
+    try {
+      await autoUpdater.downloadUpdate();
+    } catch (e: any) {
       if (e.message && e.message.includes('file already exists') && e.path) {
         fs.emptyDirSync(e.path);
         logger.info('[update] error: old version file already exists');
         downloadUpdate();
       } else {
-        logger.error(`[update] error:${e}`);
-        win.webContents.send('update-error', e);
+        logger.error(`[update] error: ${e}`);
+        sendUpdateMessage('update-error', e);
       }
-    });
+    }
   };
 
   // 主进程监听检查更新事件
-  ipcMain.on('checkForUpdate', () => {
+  ipcMain.on('checkForUpdate', async () => {
     logger.info('checkForUpdate');
-    autoUpdater.checkForUpdates().catch((e: Error) => {
-      logger.error(`[update] error:${e}`);
-      win.webContents.send('update-error', e);
-    });
+    try {
+      await autoUpdater.checkForUpdates();
+    } catch (e: any) {
+      logger.error(`[update] error: ${e}`);
+      sendUpdateMessage('update-error', e);
+    }
   });
 
   // 主进程监听开始下载事件
@@ -56,39 +66,35 @@ export default (win: BrowserWindow) => {
     autoUpdater.quitAndInstall();
   });
 
-  // 开始检测是否有更新
+  // 监听各类更新事件并发送IPC消息
   autoUpdater.on('checking-for-update', () => {
     logger.info('[update] checking update');
-    win.webContents.send('checking-for-update');
+    sendUpdateMessage('checking-for-update');
   });
 
-  // 检测到有可用的更新
   autoUpdater.on('update-available', (info: any) => {
-    logger.info(`[update] available:${info}`);
-    win.webContents.send('update-available', info);
+    logger.info(`[update] available: ${info}`);
+    sendUpdateMessage('update-available', info);
   });
 
-  // 没有检测到有可用的更新
   autoUpdater.on('update-not-available', () => {
     logger.info('[update] not available');
-    win.webContents.send('update-not-available');
+    sendUpdateMessage('update-not-available');
   });
 
-  // 更新出错
   autoUpdater.on('error', (e: Error) => {
     logger.error(`[update] error: ${e}`);
-    win.webContents.send('error', e);
+    sendUpdateMessage('error', e);
   });
 
-  // 监听下载进度
   autoUpdater.on('download-progress', (progress: any) => {
-    logger.info(`[update] download progress:${progress.percent}/${Math.trunc(progress.percent)}`);
-    win.webContents.send('download-progress', Math.trunc(progress.percent));
+    const percent = Math.trunc(progress.percent);
+    logger.info(`[update] download progress: ${percent}%`);
+    sendUpdateMessage('download-progress', percent);
   });
 
-  // 下载完成
   autoUpdater.on('update-downloaded', () => {
     logger.info('[update] downloaded');
-    win.webContents.send('update-downloaded');
+    sendUpdateMessage('update-downloaded');
   });
 };
