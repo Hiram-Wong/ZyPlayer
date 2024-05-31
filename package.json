@@ -90,6 +90,7 @@
     "file-type": "^19.0.0",
     "fix-path": "^4.0.0",
     "flv.js": "^1.6.2",
+    "he": "^1.2.0",
     "highlight.js": "^11.9.0",
     "hls-parser": "^0.13.2",
     "hls.js": "^1.5.8",
