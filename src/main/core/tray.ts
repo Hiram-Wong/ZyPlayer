@@ -1,54 +1,31 @@
 import { platform } from '@electron-toolkit/utils';
-import { Tray, Menu, app, nativeImage, nativeTheme } from 'electron';
-import { join } from 'path';
+import { BrowserWindow, Tray, Menu, app, nativeImage } from 'electron';
+import path from 'path';
 import logger from './logger';
 
-/**
- * 创建系统托盘
- * @param {BrowserWindow} win - 程序窗口
- */
-const createSystemTray = (win) => {
-  // 设置顶部APP图标的操作和图标
-  const lightIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_light.png');
-  const darkIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_dark.png');
-  const colorIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'logo.png');
+const showOrHideAllWindows = () => {
+  const windows = BrowserWindow.getAllWindows();
+  if (windows.length === 0) return;
 
-  // 系统托盘
-  const icon = nativeImage.createFromPath(platform.isWindows ? colorIcon : darkIcon);
-  const trayIcon = icon.resize({ width: 16, height: 16 });
-  if (platform.isMacOS) trayIcon.setTemplateImage(true);
-  const mainTray = new Tray(trayIcon);
+  const anyVisible = windows.some(win => win.isVisible());
 
-  // 应用内菜单
-  Menu.setApplicationMenu(createTrayMenu(win));
-  mainTray.setToolTip('zyplayer');
-  // 左键事件
-  mainTray.on('click', () => {
+  windows.forEach(win => {
     if (!win.isDestroyed()) {
-      if (win.isVisible()) {
+      if (anyVisible) {
         win.hide();
       } else {
         win.show();
       }
     }
   });
-  // 托盘菜单
-  if (!platform.isMacOS) mainTray.setContextMenu(createTrayMenu(win));
 };
 
-// 生成右键菜单
-const createTrayMenu = (win) => {
+const createTrayMenu = () => {
   return Menu.buildFromTemplate([
     {
       label: '显示',
       click() {
-        if (!win.isDestroyed()) {
-          if (win.isVisible()) {
-            win.hide();
-          } else {
-            win.show();
-          }
-        }
+        showOrHideAllWindows();
       },
     },
     { type: 'separator' },
@@ -64,6 +41,38 @@ const createTrayMenu = (win) => {
       },
     },
   ]);
+};
+
+/**
+ * Create system tray
+ */
+const createSystemTray = () => {
+  const lightIcon = path.join(app.getAppPath(), 'resources', 'img/icons/', 'tray_light.png');
+  const darkIcon = path.join(app.getAppPath(), 'resources', 'img/icons/', 'tray_dark.png');
+  const colorIcon = path.join(app.getAppPath(), 'resources', 'img/icons/', 'logo.png');
+
+  // Create tray icon
+  const icon = nativeImage.createFromPath(platform.isWindows ? colorIcon : darkIcon);
+  const trayIcon = icon.resize({ width: 16, height: 16 });
+  if (platform.isMacOS) trayIcon.setTemplateImage(true);
+  const mainTray = new Tray(trayIcon);
+
+  if (!mainTray) {
+    logger.error('[tray] Failed to create tray');
+    return;
+  }
+
+  // Set application menu
+  Menu.setApplicationMenu(createTrayMenu());
+  mainTray.setToolTip('zyplayer');
+
+  // Left-click event
+  mainTray.on('click', () => {
+    showOrHideAllWindows();
+  });
+
+  // Tray menu
+  if (!platform.isMacOS) mainTray.setContextMenu(createTrayMenu());
 };
 
 logger.info('[tray] tray module initialized');
