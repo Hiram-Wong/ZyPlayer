@@ -10,13 +10,24 @@ import logger from './logger';
 
 import loadHtml from '../../../resources/html/load.html?asset';
 
-const winPool = {};
+let winPool = {};
 
 const createWin = (name, options) => {
   const args = Object.assign({}, options);
 
-  let win = new BrowserWindow(args);
-  winPool[name] = win.id;
+  let win: BrowserWindow;
+
+  if (winPool[name] && !getWin(name)?.isDestroyed()) {
+    win = getWin(name)!;
+    if (!win.isVisible()) win.show();
+    win.focus();
+    setTimeout(() => {
+      win.reload();
+    }, 0);
+  } else {
+    win = new BrowserWindow(args);
+    winPool[name] = win.id;
+  }
 
   return win;
 };
@@ -24,7 +35,9 @@ const createWin = (name, options) => {
 const getWin = (name: string) => {
   const id = winPool[name];
   logger.info(`[winManager][getWin]name:${name} id:${id}`);
-  return BrowserWindow.fromId(Number(id));
+
+  if (id) return BrowserWindow.fromId(Number(id));
+  else return null;
 };
 
 const getAllWin = () => {
@@ -77,6 +90,10 @@ const createMain = () => {
   mainWindow.on('close', () => {
     saveWindowState('main');
     electronLocalshortcut.unregisterAll(mainWindow!);
+  });
+
+  mainWindow.on('closed', () => {
+    delete winPool['main'];
   });
 
   mainWindow.on('ready-to-show', () => {
@@ -202,6 +219,7 @@ const createPlay = () => {
   });
 
   playWindow.on('closed', () => {
+    delete winPool['play'];
     const mainWindow = getWin('main');
     if (!mainWindow || mainWindow.isDestroyed()) {
       createMain();
@@ -236,6 +254,9 @@ const createLoad = () => {
 
   loadWindow.loadFile(loadHtml);
   loadWindow.on('ready-to-show', () => loadWindow!.show());
+  loadWindow.on('closed', () => {
+    delete winPool['load'];
+  });
 };
 
 const getWindowState = (name: string) => {
