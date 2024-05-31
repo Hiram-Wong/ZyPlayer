@@ -1,76 +1,274 @@
-import { app, BrowserWindow, BrowserWindowConstructorOptions } from 'electron';
-import path from 'path';
-import EventEmitter from 'events';
+import { is } from '@electron-toolkit/utils';
+import remote from '@electron/remote/main';
+import { app, BrowserWindow, shell } from 'electron';
+import electronLocalshortcut from 'electron-localshortcut';
+import { join } from 'path';
+import url from 'url';
 
-class WindowManager extends EventEmitter {
-  windows = new Set<BrowserWindow>();
+import { setting } from './db/service';
+import logger from './logger';
 
-  constructor() {
-    super();
-    app.on('browser-window-blur', this.emit.bind(this, 'blur'));
-    app.on('browser-window-focus', this.emit.bind(this, 'focus'));
+import loadHtml from '../../../resources/html/load.html?asset';
+
+const winPool = {};
+
+const createWin = (name, options) => {
+  const args = Object.assign({}, options);
+
+  let win = new BrowserWindow(args);
+  winPool[name] = win.id;
+
+  return win;
+};
+
+const getWin = (name: string) => {
+  const id = winPool[name];
+  logger.info(`[winManager][getWin]name:${name} id:${id}`);
+  return BrowserWindow.fromId(Number(id));
+};
+
+const getAllWin = () => {
+  return BrowserWindow.getAllWindows();
+};
+
+const closeAllWin = () => {
+  try {
+    for (let i in winPool) {
+      const win = getWin(i);
+      if (win && !win.isDestroyed()) {
+        getWin(i)!.close();
+      }
+    }
+    app.quit();
+  } catch (err) {
+    logger.error(`[winManger][error]${err}`);
+  }
+};
+
+const createMain = () => {
+  const db: any = getWindowState('main');
+  const mainWindow: BrowserWindow = createWin('main', {
+    width: db.status ? db.position.width : 1000,
+    height: db.status ? db.position.height : 640,
+    x: db.status ? db.position.x : null,
+    y: db.status ? db.position.y : null,
+    minWidth: 1000,
+    minHeight: 640,
+    titleBarStyle: 'hiddenInset',
+    show: false,
+    frame: false,
+    autoHideMenuBar: true,
+    title: 'zyplayer',
+    trafficLightPosition: { x: 12, y: 20 },
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      nodeIntegration: true,
+      contextIsolation: false,
+      webviewTag: true,
+      webSecurity: false,
+      spellcheck: false,
+      allowRunningInsecureContent: true,
+    },
+  });
+
+  remote.enable(mainWindow.webContents);
+
+  mainWindow.on('close', () => {
+    saveWindowState('main');
+    electronLocalshortcut.unregisterAll(mainWindow!);
+  });
+
+  mainWindow.on('ready-to-show', () => {
+    electronLocalshortcut.register(mainWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
+      if (mainWindow!.webContents.isDevToolsOpened()) {
+        mainWindow!.webContents.closeDevTools();
+      } else {
+        mainWindow!.webContents.openDevTools();
+      }
+    });
+
+    setTimeout(() => {
+      mainWindow!.show();
+      const loadWindow = getWin('load');
+      if (loadWindow && !loadWindow.isDestroyed()) {
+        loadWindow.hide();
+        loadWindow.destroy();
+      }
+    }, 1000);
+  });
+
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    mainWindow!.webContents.send('blockUrl', details.url);
+    if (['github.com'].some((url) => details.url.includes(url))) {
+      shell.openExternal(details.url);
+    }
+    return { action: 'deny' };
+  });
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+  } else {
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
-  get current() {
-    return BrowserWindow.getFocusedWindow() || this.create();
+  mainWindow.webContents.on('did-attach-webview', (_, wc) => {
+    wc.setWindowOpenHandler((details) => {
+      mainWindow!.webContents.send('blockUrl', details.url);
+      return { action: 'deny' };
+    });
+  });
+
+  if (is.dev) {
+    mainWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
+      logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+    });
+  }
+};
+
+const createPlay = () => {
+  const db: any = getWindowState('play');
+  const playWindow: BrowserWindow = createWin('play', {
+    width: db.status ? db.position.width : 875,
+    height: db.status ? db.position.height : 550,
+    x: db.status ? db.position.x : null,
+    y: db.status ? db.position.y : null,
+    minWidth: 480,
+    minHeight: 280,
+    titleBarStyle: 'hiddenInset',
+    show: false,
+    frame: false,
+    autoHideMenuBar: true,
+    title: 'zy-play',
+    trafficLightPosition: { x: 12, y: 20 },
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false,
+      spellcheck: false,
+      allowRunningInsecureContent: true,
+    },
+  });
+
+  playWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return { action: 'deny' };
+  });
+
+  if (is.dev) {
+    playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
+      logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+    });
   }
 
-  create(type = 'main', arg?: any): BrowserWindow {
-    const option: BrowserWindowConstructorOptions = {
-      backgroundColor: '#ececec',
-      webPreferences: {
-        nodeIntegration: true,
-      },
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    playWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/play`);
+  } else {
+    playWindow.loadURL(
+      url.format({
+        pathname: join(__dirname, '../renderer/index.html'),
+        protocol: 'file:',
+        slashes: true,
+        hash: 'play',
+      }),
+    );
+  }
+
+  playWindow.webContents.session.on('will-download', (event) => {
+    event.preventDefault();
+  });
+
+  playWindow.on('ready-to-show', () => {
+    electronLocalshortcut.register(playWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
+      const webContents = playWindow!.webContents;
+      if (webContents.isDevToolsOpened()) {
+        webContents.closeDevTools();
+      } else {
+        webContents.openDevTools();
+      }
+    });
+
+    playWindow!.show();
+  });
+
+  remote.enable(playWindow.webContents);
+
+  playWindow.on('close', () => {
+    saveWindowState('play');
+    if (playWindow) playWindow.webContents.send('destroy-playerWindow');
+    electronLocalshortcut.unregisterAll(playWindow!);
+  });
+
+  playWindow.on('closed', () => {
+    const mainWindow = getWin('main');
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      createMain();
+    } else {
+      mainWindow.show();
+    }
+  });
+
+  if (is.dev) {
+    playWindow!.webContents.on('console-message', (_, level, message, line, sourceId) => {
+      logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
+    });
+  }
+};
+
+const createLoad = () => {
+  const db: any = getWindowState('load');
+  const loadWindow: BrowserWindow = createWin('load', {
+    width: db.status ? db.position.width : 1000,
+    height: db.status ? db.position.height : 640,
+    x: db.status ? db.position.x : null,
+    y: db.status ? db.position.y : null,
+    minWidth: 1000,
+    minHeight: 640,
+    titleBarStyle: 'hiddenInset',
+    show: false,
+    frame: false,
+    autoHideMenuBar: true,
+    title: 'zy-load',
+    trafficLightPosition: { x: 12, y: 20 },
+  });
+
+  loadWindow.loadFile(loadHtml);
+  loadWindow.on('ready-to-show', () => loadWindow!.show());
+};
+
+const getWindowState = (name: string) => {
+  const db = setting.find({ key: 'windowPosition' }).value || {
+    status: false,
+    position_main: { width: 1000, height: 640 },
+    position_play: { width: 1000, height: 640 },
+  };
+  let data = {};
+  if (name === 'main' || name === 'load') {
+    data = {
+      status: db.status,
+      position: db.position_main,
     };
-    if (type === 'main') {
-      option.width = 960;
-      option.height = 600;
-      option.show = false;
-      option.minWidth = 840;
-      option.minHeight = 400;
-    } else if (type === 'patternManager') {
-      option.width = 600;
-      option.height = 300;
-      option.title = 'Manage Patterns';
-      option.resizable = true;
-      option.fullscreen = false;
-    }
-
-    let start: number;
-    const newWindow = new BrowserWindow(option);
-    if (!option.show) {
-      newWindow.once('ready-to-show', () => {
-        console.log('start time: ', Date.now() - start);
-        newWindow.show();
-      });
-    }
-
-    start = Date.now();
-    newWindow.loadFile(path.resolve(__dirname, `../renderer/${type}.html`), { query: { arg } });
-
-    this._register(newWindow);
-
-    return newWindow;
+  } else if (name === 'play') {
+    data = {
+      status: db.status,
+      position: db.position_play,
+    };
+  } else {
+    data = db;
   }
+  return data;
+};
 
-  _register(win: BrowserWindow): void {
-    this.windows.add(win);
-    win.on('closed', () => {
-      this.windows.delete(win);
-      if (!BrowserWindow.getFocusedWindow()) {
-        this.emit('blur');
-      }
-    });
-    this.emit('focus');
-  }
+const saveWindowState = (name: string) => {
+  const win = getWin(name);
+  const bounds = win!.getBounds();
+  let db = getWindowState('all');
+  db[`position_${name}`] = { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+  setting.update_data('windowPosition', {
+    value: db,
+  });
+};
 
-  dispatch(action: string, args: any) {
-    this.windows.forEach((win) => {
-      if (win && win.webContents) {
-        win.webContents.send('action', action, args);
-      }
-    });
-  }
-}
-
-export default new WindowManager();
+export { createLoad, createMain, createPlay, getWin };

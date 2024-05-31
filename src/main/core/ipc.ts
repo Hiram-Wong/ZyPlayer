@@ -1,12 +1,14 @@
 import { electronApp, is, platform } from '@electron-toolkit/utils';
 import { exec } from 'child_process';
-import { app, globalShortcut, ipcMain, shell } from 'electron';
+import { app, globalShortcut, ipcMain, nativeTheme, shell } from 'electron';
 import fs from 'fs-extra';
 import { join } from 'path';
 
 import logger from './logger';
 import { setting } from './db/service';
 import puppeteerInElectron from '../utils/pie';
+import { toggleWindowVisibility } from '../utils/tool';
+import { createMain, createPlay, getWin } from './winManger';
 
 const tmpDir = async (path: string) => {
   try {
@@ -169,6 +171,49 @@ const ipcListen = () => {
   // 关闭app
   ipcMain.on('quit-app', () => {
     app.quit();
+  });
+
+  ipcMain.on('openPlayWindow', (_, _arg) => {
+    createPlay();
+  });
+
+  ipcMain.on('showMainWin', () => {
+    logger.info(`[ipcMain] show main windows`);
+    const win = getWin('main');
+    if (!win || win.isDestroyed()) {
+      createMain();
+    } else {
+      win.show();
+    }
+  });
+
+  ipcMain.on('updateShortcut', (_, { shortcut }) => {
+    logger.info(`[ipcMain] storage-shortcuts: ${shortcut}`);
+    globalShortcut.unregisterAll();
+    logger.info(`[ipcMain] globalShortcut-install: ${shortcut}`);
+    globalShortcut.register(shortcut, () => {
+      toggleWindowVisibility();
+    });
+  });
+
+  ipcMain.on('manage-playerWindow', (_, action) => {
+    logger.info(`[ipcMain] playerWindow: action is ${action}`);
+    const win = getWin('play');
+    if (action === 'destroy') {
+      win?.destroy();
+    } else if (action === 'focus') {
+      win?.focus();
+    }
+  });
+
+  // 主题更新事件
+  nativeTheme.on('updated', () => {
+    const isDarkMode = nativeTheme.shouldUseDarkColors;
+    const mainWin = getWin('main');
+    const playWin = getWin('play');
+    if (mainWin) mainWin.webContents.send('system-theme-updated', `${isDarkMode ? 'dark' : 'light'}`);
+    if (playWin) playWin.webContents.send('system-theme-updated', `${isDarkMode ? 'dark' : 'light'}`);
+    logger.info(`[nativeTheme] System-theme-updated: ${isDarkMode ? 'dark' : 'light'} ; send to vue app`);
   });
 };
 

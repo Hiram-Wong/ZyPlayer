@@ -1,9 +1,11 @@
 import { is } from '@electron-toolkit/utils';
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import fs from 'fs-extra';
 import { resolve, join } from 'path';
+
 import logger from './logger';
+import { getWin } from './winManger';
 
 const updaterCacheDirName = 'zyplayer-updater';
 const updatePath = join(app.getAppPath(), updaterCacheDirName, 'pending');
@@ -21,10 +23,11 @@ if (is.dev) {
 autoUpdater.autoDownload = false; // 关闭自动下载
 autoUpdater.autoInstallOnAppQuit = false; // 关闭自动安装
 
-export default (win: BrowserWindow) => {
+export default () => {
   // 通用的IPC发送函数
   const sendUpdateMessage = (channel: string, message?: any) => {
-    win.webContents.send(channel, message);
+    const win = getWin('main');
+    if (win) win.webContents.send(channel, message);
   };
 
   // 下载更新的函数，包含错误处理逻辑

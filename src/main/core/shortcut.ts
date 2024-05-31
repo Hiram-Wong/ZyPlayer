@@ -1,10 +1,8 @@
 import { globalShortcut } from 'electron';
 
-/**
- * 注册全局快捷键
- * @param {BrowserWindow} win - 程序窗口
- */
-const createGlobalShortcut = (win) => {
+import { toggleWindowVisibility } from '../utils/tool';
+
+const createDevShortcut = (win) => {
   // 刷新程序
   globalShortcut.register('CmdOrCtrl+Shift+R', () => {
     if (win && win.isFocused()) win?.reload();
@@ -21,4 +19,18 @@ const createGlobalShortcut = (win) => {
   });
 };
 
-export default createGlobalShortcut;
+const createCustomShortcut = (shortcut, func) => {
+  if (!shortcut) return;
+  globalShortcut.register(shortcut, () => {
+    func();
+  });
+};
+
+const createBossShortcut = (shortcut) => {
+  if (!shortcut) return;
+  globalShortcut.register(shortcut, () => {
+    toggleWindowVisibility();
+  });
+};
+
+export { createCustomShortcut, createDevShortcut, createBossShortcut };
