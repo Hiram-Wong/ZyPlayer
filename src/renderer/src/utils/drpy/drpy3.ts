@@ -263,7 +263,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta21 202400529`;
+const VERSION = `${vercode} 3.9.50beta22 20240601`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -853,6 +853,20 @@ const urlencode = (str) => {
     .replace(/%20/g, '+');
 };
 
+/**
+ * url编码,同 encodeURI
+ * @param str
+ * @returns {string}
+ */
+function encodeUrl(str){
+  if(typeof(encodeURI) == 'function'){
+    return encodeURI(str)
+  }else{
+    str = (str + '').toString();
+    return encodeURIComponent(str).replace(/%2F/g, '/').replace(/%3F/g, '?').replace(/%3A/g, ':').replace(/%40/g, '@').replace(/%3D/g, '=').replace(/%3A/g, ':').replace(/%2C/g, ',').replace(/%2B/g, '+').replace(/%24/g, '$');
+  }
+}
+
 const base64Encode = (text: string) => {
   return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
 };
@@ -1248,8 +1262,6 @@ let VODS: any = []; // 一级或者搜索需要的数据列表
 let VOD: any = {}; // 二级的单个数据
 let TABS: any = []; // 二级的自定义线路列表 如: TABS=['道长在线','道长在线2']
 let LISTS: any = []; // 二级的自定义选集播放列表 如: LISTS=[['第1集$http://1.mp4','第2集$http://2.mp4'],['第3集$http://1.mp4','第4集$http://2.mp4']]
-globalThis.encodeUrl = urlencode;
-globalThis.urlencode = urlencode;
 
 /**
  * 获取链接的query请求转为js的object字典对象
@@ -2048,7 +2060,7 @@ const homeVodParse = (homeVodObj) => {
   if (!p || typeof p !== 'string') return '{}';
 
   p = p.trim();
-  let pp = rule['一级'].split(';');
+  let pp = rule['一级']?rule['一级'].split(';'):[];
 
   if (p.startsWith('js:')) {
     const TYPE = 'home';
@@ -2363,7 +2375,7 @@ const searchParse = (searchObj) => {
   if (!p || typeof p !== 'string') return '{}';
 
   p = p.trim();
-  let pp = rule['一级'].split(';');
+  let pp = rule['一级']?rule['一级'].split(';'):[];
   let url = searchObj.searchUrl.replaceAll('**', searchObj.wd);
 
   if (searchObj.pg === 1 && url.includes('[') && url.includes(']') && !url.includes('#')) {
@@ -3367,6 +3379,14 @@ const isVideo = (url: string) => {
   return result;
 };
 
+/**
+ * 获取规则
+ * @returns {{}}
+ */
+function getRule(key) {
+  return key ? rule[key]||'' : rule
+}
+
 // [重要]防止树摇
 const keepUnUse = {
   useful: (): void => {
@@ -3390,6 +3410,8 @@ const keepUnUse = {
       maoss,
       getProxyUrl,
       urljoin2,
+      urlencode,
+      encodeUrl,
       stringify,
       jsp,
       jq,
@@ -3420,6 +3442,7 @@ const keepUnUse = {
 };
 
 export {
+  getRule,
   runMain,
   init,
   home,
