@@ -10,7 +10,7 @@
         <t-form ref="form" :data="formData" @submit="onSubmit">
           <t-textarea v-model="formData.data" class="dns-input" :placeholder="$t('pages.setting.placeholder.general')"
             autofocus :autosize="{ minRows: 2, maxRows: 4 }" @change="changeUatextarea" />
-          <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeUaSelect">
+          <t-radio-group v-model="active.select" variant="default-filled" size="small" @change="changeUaSelect">
             <t-radio-button v-for="item in UA_LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
           </t-radio-group>
           <p class="tip bottom-tip">{{ $t('pages.setting.ua.bottomTip') }}</p>
@@ -50,9 +50,10 @@ const props = defineProps({
 const formVisible = ref(false);
 const formData = ref(props.data);
 
-const UA_LIST = reactive([...UA_CONFIG.ua]);
-
-const dnsSelect = ref('');
+const UA_LIST = [...UA_CONFIG.ua];
+const active = reactive({
+  select: ''
+});
 
 const emit = defineEmits(['update:visible', 'receiveDnsData']);
 
@@ -74,13 +75,13 @@ watch(
     formData.value = val;
 
     const index = _.findIndex(UA_LIST, ['ua', val.data]);
-    if (index > -1) dnsSelect.value = val.data;
+    if (index > -1) active.select = val.data;
   },
 );
 
 const changeUatextarea = (item) => {
   const index = _.findIndex(UA_LIST, ['ua', item]);
-  if (index === -1) dnsSelect.value = null;
+  if (index === -1) active.select = '';
 };
 
 const changeUaSelect = (item) => {
@@ -93,8 +94,6 @@ const onSubmit = async () => {
     data,
     type,
   });
-
-  window.electron.ipcRenderer.send('update-ua', !!data, data);
 
   formVisible.value = false;
 };

@@ -43,6 +43,7 @@
             <t-radio value="kylive">{{ $t('pages.setting.base.kylive') }}</t-radio>
             <t-radio value="enlightent">{{ $t('pages.setting.base.enlightent') }}</t-radio>
             <t-radio value="douban">{{ $t('pages.setting.base.douban') }}</t-radio>
+            <!-- <t-radio value="local">{{ $t('pages.setting.base.local') }}</t-radio> -->
           </t-radio-group>
         </div>
       </t-form-item>
@@ -625,7 +626,6 @@ const hardwareAccelerationEvnet = () => {
 // 退出保存主窗口大小及位置
 const windowPositionEvnet = () => {
   console.log('窗口位置', formData.value.windowPosition);
-  window.electron.ipcRenderer.send('update-windowPosition', formData.value.windowPosition.status);
   MessagePlugin.success(
     formData.value.windowPosition.status ? t('pages.setting.message.windowPositionOn') : t('pages.setting.message.windowPositionOff'),
   );
