@@ -133,9 +133,11 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const tacitly_id = await setting.find({ key: 'defaultSite' }).value;
       const tacitly = (await site.find({ id: tacitly_id })) || {};
       const search = await setting.find({ key: 'defaultSearchType' }).value;
+      const group = await site.group().data;
       const res = {
         data,
         search,
+        group,
         default: tacitly,
       };
       reply.code(200).send(res);

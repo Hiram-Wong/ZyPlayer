@@ -1,5 +1,5 @@
 export default {
-  type: 'film',
+  type: '',
   status: false,
   setting: {
     playerMode: {
