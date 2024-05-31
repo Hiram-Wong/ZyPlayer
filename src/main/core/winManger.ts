@@ -1,6 +1,6 @@
 import { is } from '@electron-toolkit/utils';
 import remote from '@electron/remote/main';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, nativeTheme, shell } from 'electron';
 import electronLocalshortcut from 'electron-localshortcut';
 import { join } from 'path';
 import url from 'url';
@@ -67,6 +67,7 @@ const createMain = () => {
     y: db.status ? db.position.y : null,
     minWidth: 1000,
     minHeight: 640,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000': '#fff',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
@@ -152,6 +153,7 @@ const createPlay = () => {
     y: db.status ? db.position.y : null,
     minWidth: 480,
     minHeight: 280,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000': '#fff',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
@@ -244,6 +246,7 @@ const createLoad = () => {
     y: db.status ? db.position.y : null,
     minWidth: 1000,
     minHeight: 640,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000': '#fff',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
