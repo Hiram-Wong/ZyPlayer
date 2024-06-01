@@ -186,6 +186,20 @@ const active = reactive({
   analyzeId: ''
 })
 
+const snifferAnalyze = computed(() => {
+  const analyzeSource = active.analyzeId
+    ? _.find(dataAnalyze.value.active, { id: active.analyzeId })
+    : dataAnalyze.value.default;
+
+  const data = {
+    flag: dataAnalyze.value.flag,
+    name: analyzeSource.name,
+    url: analyzeSource.url,
+    type: analyzeSource.type,
+  };
+  return data;
+});
+
 const emit = defineEmits(['update:visible']);
 
 const loadData = () => {
@@ -240,31 +254,31 @@ const fetchAnalyze = async (): Promise<void> => {
   if (response.default?.id) active.analyzeId = response.default?.id;
 };
 
+const filmPlayAndHandleResponse = async (snifferMode, url, site, analyze, flimSource, skipAd) => {
+  MessagePlugin.info(t('pages.player.message.play'));
+  const response = await playHelper(snifferMode, url, site, analyze, flimSource, skipAd);
+  isVisible.official = response!.isOfficial;
+
+  if (response?.url) {
+    if (isVisible.official) {
+      if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
+      else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
+    }
+  } else MessagePlugin.error(t('pages.player.message.sniiferError'));
+
+  return response;
+};
+
 // 调用本地播放器 + 历史
 const gotoPlay = async (item) => {
   let { url } = formatIndex(item);
   url = decodeURIComponent(url);
   active.filmIndex = item;
   const { snifferMode } = set.value;
+  const analyze = snifferAnalyze.value;
 
-  const analyzeSource = active.analyzeId
-    ? _.find(dataAnalyze.value.active, { id: active.analyzeId })
-    : dataAnalyze.value.default;
-
-  const analyze = {
-    flag: dataAnalyze.value.flag,
-    url: analyzeSource.url,
-    type: analyzeSource.type,
-  };
-
-  MessagePlugin.info(t('pages.player.message.play'));
-  const response = await playHelper(snifferMode, url, formData.value, analyze, active.flimSource);
-  isVisible.official = response!.isOfficial;
-  if (isVisible.official) {
-    if (analyzeSource?.name) MessagePlugin.info(t('pages.player.message.official', [analyzeSource.name]));
-    else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
-  }
-  callSysPlayer(response!.url);
+  const response = await filmPlayAndHandleResponse(snifferMode, url, formData.value, analyze, active.flimSource, false);
+  if (response?.url) callSysPlayer(response!.url);
 };
 
 // 切换解析接口

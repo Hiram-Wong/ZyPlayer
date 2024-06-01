@@ -634,10 +634,10 @@ const switchAnalyzeEvent = async (id: string) => {
 
     const analyze = snifferAnalyze.value;
     const response = await filmPlayAndHandleResponse(snifferMode, url, site, analyze, active.flimSource, skipAd);
-    if (response) {
+    if (response?.url) {
       if (player.value) {
         const { playerMode } = set.value;
-        playerNext(player.value, playerMode.type, { url: response!.url, mediaType: response!.mediaType! });
+        playerNext(player.value, playerMode.type, { url: response!.url, mediaType: response!.mediaType! || '' });
       } else {
         createPlayer(response!.url, response!.mediaType!);
       }
@@ -679,27 +679,19 @@ const putHistory = async (): Promise<void> => {
   dataHistory.value = response;
 };
 
-const filmHandleResponse = async (response, analyze) => {
-  if (response?.url) {
-    isVisible.official = response!.isOfficial;
-    if (isVisible.official) {
-      if (analyze?.name) {
-        MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
-      } else {
-        MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
-      }
-    }
-    return response;
-  } else {
-    MessagePlugin.error(t('pages.player.message.sniiferError'));
-    return null;
-  }
-};
-
 const filmPlayAndHandleResponse = async (snifferMode, url, site, analyze, flimSource, skipAd) => {
   MessagePlugin.info(t('pages.player.message.play'));
   const response = await playHelper(snifferMode, url, site, analyze, flimSource, skipAd);
-  return await filmHandleResponse(response, analyze);
+  isVisible.official = response!.isOfficial;
+
+  if (response?.url) {
+    if (isVisible.official) {
+      if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
+      else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
+    }
+  } else MessagePlugin.error(t('pages.player.message.sniiferError'));
+
+  return response;
 };
 
 // 初始化film
@@ -739,8 +731,8 @@ const initFilmPlayer = async (isFirst) => {
 
   const analyze = snifferAnalyze.value;
   const response = await filmPlayAndHandleResponse(snifferMode, url, site, analyze, active.flimSource, skipAd);
-  if (response) {
-    createPlayer(response!.url, response!.mediaType!);
+  if (response?.url) {
+    createPlayer(response!.url, response!.mediaType! || '');
   }
 };
 
