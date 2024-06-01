@@ -67,7 +67,7 @@ const createMain = () => {
     y: db.status ? db.position.y : null,
     minWidth: 1000,
     minHeight: 640,
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000': '#fff',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
@@ -153,7 +153,7 @@ const createPlay = () => {
     y: db.status ? db.position.y : null,
     minWidth: 480,
     minHeight: 280,
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000': '#fff',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
@@ -246,13 +246,16 @@ const createLoad = () => {
     y: db.status ? db.position.y : null,
     minWidth: 1000,
     minHeight: 640,
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000': '#fff',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
     autoHideMenuBar: true,
     title: 'zy-load',
     trafficLightPosition: { x: 12, y: 20 },
+    webPreferences: {
+      hardwareAcceleration: false,
+    },
   });
 
   loadWindow.loadFile(loadHtml);
