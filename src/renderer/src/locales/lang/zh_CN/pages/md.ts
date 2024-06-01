@@ -17,6 +17,7 @@ export default {
   privacyPolicy: {
     title: '用户协议与免责声明',
     content: privacyPolicyMD,
+    quitTip: '5秒后自动退出软件',
     confirm: "同意并继续",
     cancel: "不同意"
   },

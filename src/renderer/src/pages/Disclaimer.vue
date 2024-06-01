@@ -20,6 +20,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, ref, watch } from 'vue';
 import { MdPreview } from 'md-editor-v3';
 
+import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { setDefault } from '@/api/setting';
 
@@ -59,7 +60,7 @@ const updateAgreementMask = async (status) => {
 
 const cancelEvent = () => {
   updateAgreementMask(false);
-  MessagePlugin.warning({ content: '5秒后自动退出软件', duration: 5000 });
+  MessagePlugin.warning({ content: t('pages.md.privacyPolicy.quitTip'), duration: 5000 });
   setTimeout(() => {
     window.electron.ipcRenderer.send('quit-app');
   }, 5000);

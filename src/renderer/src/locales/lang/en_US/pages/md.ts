@@ -17,6 +17,7 @@ export default {
   privacyPolicy: {
     title: 'Disclaimer',
     content: privacyPolicyMD,
+    quitTip: 'Auto quit app after 5 seconds',
     confirm: "Aagree",
     cancel: "Disagree"
   },
