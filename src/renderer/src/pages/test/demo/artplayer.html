@@ -1,7 +1,7 @@
 <html>
   <head>
-    <script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/artplayer-plugin-danmuku/dist/artplayer-plugin-danmuku.js"></script>
+    <script src="https://unpkg.com/artplayer/dist/artplayer.js"></script>
+    <script src="https://unpkg.com/artplayer-plugin-danmuku/dist/artplayer-plugin-danmuku.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/8.0.0-beta.3/hls.min.js"></script>
   </head>
   <body>
@@ -71,77 +71,27 @@
       },
     },
   };
-
-  const playerMethod = {
-    xgplayer: {},
-    dplayer: {},
-    artplayer: {
-      barrge: (player, comments) => {
-        setTimeout(() => {
-          console.log(player.plugins);
-          player.plugins.artplayerPluginDanmuku.config({
-            danmuku: comments,
-          });
-          player.plugins.artplayerPluginDanmuku.load();
-        }, 2000);
-      },
-      create: (options) => {
-        Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
-        return new Artplayer({ ...options });
-      },
+  var art = new Artplayer({
+    container: '#mse',
+    url: 'https://2wor1fvjsf.senhewenhua.com/1/W05la29tb2Uga2lzc2F0ZW5dW09vbXVyby1rZSAtIERlYXIgU2lzdGVyc11bTW92aWVdWzEwODBwXVtKUFNDXS5tcDQ=.mp4',
+    autoplay: true,
+    playbackRate: true,
+    fullscreen: true,
+    pip: true,
+    setting: true,
+    flip: true,
+    hotkey: true,
+    isLive: false,
+    customType: {
+      customHls: playM3u8,
     },
-  };
+  });
 
-  const mapVideoTypeToPlayerType = (videoType) => {
-    switch (videoType) {
-      case 'mp4':
-        return 'customMp4';
-      case 'flv':
-        return 'customFlv';
-      case 'm3u8':
-        return 'customHls';
-      default:
-        return 'customHls';
-    }
-  };
-
-  const playerCreate = async (url, type, container, playerMode, videoType) => {
-    const isLive = type === 'iptv' ? true : false;
-
-    const creators = {
-      xgplayer: playerMethod.xgplayer.create,
-      artplayer: playerMethod.artplayer.create,
-      dplayer: playerMethod.dplayer.create,
-    };
-
-    let config = playerConfig[playerMode];
-    const creator = creators[playerMode];
-    if (playerMode === 'xgplayer') {
-    } else if (playerMode === 'artplayer') {
-      config.container = container;
-      config.url = url;
-      if (isLive) config.isLive = true;
-      config.type = mapVideoTypeToPlayerType(videoType);
-    } else if (playerMode === 'dplayer') {
-    }
-
-    return creator(config);
-  };
-  var art;
-  (async () => {
-    art = await playerCreate(
-      'https://voddemo-play.volcvod.com/10501b001bdd43ae89d7c0fc3d6792b5/main.m3u8?a=0&auth_key=1773925042-f0489f7ac9a14d92b96bbfb7b39a7a0d-0-4e57d65b22e9aefe63ba1c519218e9fe&br=966&bt=966&cd=0%7C0%7C0&ch=0&cr=0&cs=0&cv=1&dr=0&ds=4&er=0&l=2023032020544973DCCFE21CF4C02E38B1&lr=&mime_type=video_mp4&net=0&pl=0&qs=0&rc=amg6c2o0aTg6ZTQzNGRnM0ApOmZkZzg1PGVoNzhkOzxlZ2dfZy9gMHFrYTBgLS1kYy9zcy00L2JfL19eYF42Ly0vYi06Yw%3D%3D&vl=&vr=',
-      'film',
-      '#mse',
-      'artplayer',
-      'customHls',
-    );
-  })();
   setTimeout(() => {
-    console.log(art);
-
-    console.log(art.plugins);
-    art.switch = 'https://svipsvip.ffzy-online5.com/20240510/27106_98545e53/index.m3u8';
+    console.log('timeout');
+    art.switchUrl('https://2wor1fvjsf.senhewenhua.com/1/W05la29tb2Uga2lzc2F0ZW5dW09vbXVyby1rZSAtIERlYXIgU2lzdGVyc11bTW92aWVdWzEwODBwXVtKUFNDXS5tcDQ=.mp4?verify=1717229997-jPG4St88x87WlSAGaB3Wm8ys%2FoxVmL0jm2OPEUQfqaE%3D')
+    // art.switch =
+    //   'https://2wor1fvjsf.senhewenhua.com/1/W05la29tb2Uga2lzc2F0ZW5dW09vbXVyby1rZSAtIERlYXIgU2lzdGVyc11bTW92aWVdWzEwODBwXVtKUFNDXS5tcDQ=.mp4?verify=1717229997-jPG4St88x87WlSAGaB3Wm8ys%2FoxVmL0jm2OPEUQfqaE%3D';
     // playerMethod.artplayer.barrge(art, [
     //   {
     //     text: '111', // 弹幕文本
@@ -191,6 +141,5 @@
     //   ],
     // });
     // art.plugins.artplayerPluginDanmuku.load();
-  }, 3000);
-
+  }, 8000);
 </script>
