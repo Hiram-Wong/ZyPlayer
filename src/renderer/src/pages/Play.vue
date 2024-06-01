@@ -564,7 +564,7 @@ const destroyPlayer = () => {
   if (player.value) {
     const { playerMode } = set.value;
 
-    playerDestroy(player.value, playerMode.type)
+    playerDestroy(player.value, playerMode.type);
     player.value = null;
   }
 };
@@ -622,9 +622,27 @@ const fetchAnalyze = async (): Promise<void> => {
 };
 
 // 切换解析接口
-const switchAnalyzeEvent = (id: string) => {
+const switchAnalyzeEvent = async (id: string) => {
   active.analyzeId = id;
-  if (active.filmIndex) initPlayer(true);
+  if (active.filmIndex) {
+    const { site } = ext.value;
+    const { snifferMode, skipAd } = set.value;
+
+    let { url } = formatIndex(active.filmIndex);
+    url = decodeURIComponent(url);
+    tmp.url = tmp.sourceUrl = url;
+
+    const analyze = snifferAnalyze.value;
+    const response = await filmPlayAndHandleResponse(snifferMode, url, site, analyze, active.flimSource, skipAd);
+    if (response) {
+      if (player.value) {
+        const { playerMode } = set.value;
+        playerNext(player.value, playerMode.type, { url: response!.url, mediaType: response!.mediaType! });
+      } else {
+        createPlayer(response!.url, response!.mediaType!);
+      }
+    }
+  }
 };
 
 // 获取历史
@@ -659,6 +677,29 @@ const putHistory = async (): Promise<void> => {
 
   const response = await putHistoryData(dataHistory.value?.id, doc);
   dataHistory.value = response;
+};
+
+const filmHandleResponse = async (response, analyze) => {
+  if (response?.url) {
+    isVisible.official = response!.isOfficial;
+    if (isVisible.official) {
+      if (analyze?.name) {
+        MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
+      } else {
+        MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
+      }
+    }
+    return response;
+  } else {
+    MessagePlugin.error(t('pages.player.message.sniiferError'));
+    return null;
+  }
+};
+
+const filmPlayAndHandleResponse = async (snifferMode, url, site, analyze, flimSource, skipAd) => {
+  MessagePlugin.info(t('pages.player.message.play'));
+  const response = await playHelper(snifferMode, url, site, analyze, flimSource, skipAd);
+  return await filmHandleResponse(response, analyze);
 };
 
 // 初始化film
@@ -697,16 +738,10 @@ const initFilmPlayer = async (isFirst) => {
   tmp.url = tmp.sourceUrl = url;
 
   const analyze = snifferAnalyze.value;
-  MessagePlugin.info(t('pages.player.message.play'));
-  const response = await playHelper(snifferMode, url, site, analyze, active.flimSource, skipAd);
-  if (response?.url) {
-    isVisible.official = response!.isOfficial;
-    if (isVisible.official) {
-      if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
-      else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
-    }
+  const response = await filmPlayAndHandleResponse(snifferMode, url, site, analyze, active.flimSource, skipAd);
+  if (response) {
     createPlayer(response!.url, response!.mediaType!);
-  } else MessagePlugin.error(t('pages.player.message.sniiferError'));
+  }
 };
 
 // 初始化播放器
