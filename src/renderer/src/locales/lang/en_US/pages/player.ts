@@ -7,6 +7,7 @@ export default {
     like: 'like',
     download: 'download',
     share: 'share',
+    analyze: 'Analyze',
     anthology: 'Anthology',
     recommend: 'Recommend',
     actors: 'ActingStaff',

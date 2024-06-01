@@ -193,7 +193,7 @@
                   <div class="box-anthology-analyze" v-show="isVisible.official">
                     <t-dropdown placement="bottom" :max-height="250">
                       <t-button size="small" theme="default" variant="text" auto-width>
-                        <span>解析</span>
+                        <span>{{ $t('pages.player.film.analyze') }}</span>
                         <template #suffix>
                           <chevron-down-icon size="16" />
                         </template>

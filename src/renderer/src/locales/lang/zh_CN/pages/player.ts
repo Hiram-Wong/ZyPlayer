@@ -7,6 +7,7 @@ export default {
     like: '收藏',
     download: '下载',
     share: '分享',
+    analyze: '解析',
     anthology: '选集',
     recommend: '猜你喜欢',
     actors: '演职员',
