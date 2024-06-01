@@ -136,6 +136,10 @@ const barrge = (player: any, comments: any, _url: string, _id: string) => {
 };
 
 const create = (options: any): any => {
+  if (options.live) {
+    delete options?.danmaku;
+  }
+
   const player: any = new CustomDPlayer({ ...options });
   // 元素替换，原生太丑
   elementDeal.replace('.dplayer-comment-icon', publicIcons.danmu);
@@ -154,9 +158,10 @@ const create = (options: any): any => {
       </button>
     `,
   );
-  elementDeal.add(
-    '.dplayer-setting',
-    `
+  if (!options.live) {
+    elementDeal.add(
+      '.dplayer-setting',
+      `
       <div class="dplayer-subtitle-btn">
         <button class="dplayer-icon dplayer-subtitle-icon" data-balloon="${player.template.showDanmakuToggle.checked ? '显示弹幕' : '关闭弹幕'}" data-balloon-pos="up">
           <span class="dplayer-icon-content" style="">
@@ -165,7 +170,8 @@ const create = (options: any): any => {
         </button>
       </div>
     `,
-  );
+    );
+  };
 
   const handlePipClick = () => {
     const videoElement: HTMLVideoElement | null = document.querySelector('.dplayer-video');

@@ -75,7 +75,7 @@ const options = {
     area: { start: 0, end: 0.3 },
     defaultOff: true, //开启此项后弹幕不会初始化，默认初始化弹幕
   },
-  plugins: [Danmu],
+  plugins: [],
 };
 
 const barrge = (player: XgPlayer, comments: any, _url: string, _id: string) => {
@@ -116,6 +116,7 @@ const create = (options: any): XgPlayer => {
     SimplePlayer.defaultPreset = LivePreset;
     return new SimplePlayer({ ...options });
   } else {
+    options = [...plugins, Danmu];
     return new XgPlayer({ ...options });
   }
 };

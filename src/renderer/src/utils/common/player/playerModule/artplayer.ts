@@ -107,6 +107,10 @@ const barrge = (player: Artplayer, comments: any, url: string, id: string) => {
 };
 
 const create = (options: any): Artplayer => {
+  if (options.isLive) {
+    delete options?.plugins;
+  };
+
   Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
   return new Artplayer({ ...options });
 };

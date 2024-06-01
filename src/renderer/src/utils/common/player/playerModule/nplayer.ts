@@ -32,15 +32,55 @@ const elementDeal = {
   },
 };
 
+const pipControl = {
+  el: document.createElement('div'),
+  id: 'fullscreen',
+  pipIcon: publicIcons.pipIcon,
+  tooltip: '画中画' as any,
+  handlePip() {},
+
+  init(player, _: any, tooltip) {
+    const pipDom = document.createElement('div');
+    pipDom.className = 'nplayer_icon';
+    pipDom.innerHTML = `${this.pipIcon}`;
+
+    this.tooltip = tooltip;
+    this.tooltip.html = '画中画';
+    this.el.append(pipDom);
+
+    this.handlePip = () => {
+      if (!player.loaded) return;
+      if ((document as any).pictureInPictureElement !== player.video) {
+        (player.video as any).requestPictureInPicture();
+      } else {
+        (document as any).exitPictureInPicture();
+      }
+    };
+
+    this.el.addEventListener('click', this.handlePip);
+  },
+
+  dispose() {
+    this.el.removeEventListener('click', this.handlePip);
+  },
+};
+
 const options = {
   container: document.getElementById('nplayer'),
   src: '',
   live: false,
   videoProps: { autoplay: 'true' },
+  volumeVertical: true,
   bpControls: {
-    500: [['play', 'volume', 'time', 'spacer', 'settings', 'fullscreen'], ['progress']],
+    9999: [
+      ['play', 'volume', 'time', 'spacer', 'danmaku-settings', 'settings', pipControl, 'fullscreen'],
+      ['progress'],
+    ],
   },
-  controls: [['play', 'volume', 'time', 'spacer', 'settings', 'fullscreen'], ['progress']],
+  controls: [
+    ['play', 'volume', 'time', 'spacer', 'settings', 'danmaku-settings', pipControl, 'fullscreen'],
+    ['progress'],
+  ],
   plugins: [new nplayerDanmaku({ autoInsert: true })],
 };
 
@@ -68,10 +108,17 @@ const create = (options: any): NPlayer => {
   NPlayerIcon.register('enterFullscreen', elementDeal.createIcon(publicIcons.fullscreen));
   NPlayerIcon.register('exitFullscreen', elementDeal.createIcon(publicIcons.exitFullscreen));
 
+  if (options.live) {
+    options.bpControls = {
+      9999: [['play', 'volume', 'time', 'spacer', 'settings', pipControl, 'fullscreen'], []],
+    };
+    options.controls = [['play', 'volume', 'time', 'spacer', 'settings', pipControl, 'fullscreen'], []];
+    delete options?.plugins;
+  }
   const player: any = new NPlayer({ ...options });
+
   switch (options.type) {
     case 'customMp4':
-      // player.src = options.src;
       break;
     case 'customFlv':
       if (player.flv) player.flv.destroy();
