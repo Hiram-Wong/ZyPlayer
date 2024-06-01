@@ -88,13 +88,18 @@ const createMain = () => {
 
   remote.enable(mainWindow.webContents);
 
-  mainWindow.on('close', () => {
-    saveWindowState('main');
-    electronLocalshortcut.unregisterAll(mainWindow!);
-  });
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+  } else {
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+  }
 
-  mainWindow.on('closed', () => {
-    delete winPool['main'];
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    mainWindow!.webContents.send('blockUrl', details.url);
+    if (['github.com'].some((url) => details.url.includes(url))) {
+      shell.openExternal(details.url);
+    }
+    return { action: 'deny' };
   });
 
   mainWindow.on('ready-to-show', () => {
@@ -116,19 +121,14 @@ const createMain = () => {
     }, 1000);
   });
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    mainWindow!.webContents.send('blockUrl', details.url);
-    if (['github.com'].some((url) => details.url.includes(url))) {
-      shell.openExternal(details.url);
-    }
-    return { action: 'deny' };
+  mainWindow.on('close', () => {
+    saveWindowState('main');
+    electronLocalshortcut.unregisterAll(mainWindow!);
   });
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
-  }
+  mainWindow.on('closed', () => {
+    delete winPool['main'];
+  });
 
   mainWindow.webContents.on('did-attach-webview', (_, wc) => {
     wc.setWindowOpenHandler((details) => {
@@ -171,16 +171,7 @@ const createPlay = () => {
     },
   });
 
-  playWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url);
-    return { action: 'deny' };
-  });
-
-  if (is.dev) {
-    playWindow.webContents.on('console-message', (_, level, message, line, sourceId) => {
-      logger.info(`[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${message}`);
-    });
-  }
+  remote.enable(playWindow.webContents);
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     playWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/play`);
@@ -195,8 +186,9 @@ const createPlay = () => {
     );
   }
 
-  playWindow.webContents.session.on('will-download', (event) => {
-    event.preventDefault();
+  playWindow!.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return { action: 'deny' };
   });
 
   playWindow.on('ready-to-show', () => {
@@ -211,8 +203,6 @@ const createPlay = () => {
 
     playWindow!.show();
   });
-
-  remote.enable(playWindow.webContents);
 
   playWindow.on('close', () => {
     saveWindowState('play');
@@ -298,4 +288,4 @@ const saveWindowState = (name: string) => {
   });
 };
 
-export { createLoad, createMain, createPlay, getWin };
+export { closeAllWin, createLoad, createMain, createPlay, getAllWin, getWin };
