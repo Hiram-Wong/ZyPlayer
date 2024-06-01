@@ -79,7 +79,7 @@
     "dashjs": "^4.7.4",
     "dayjs": "^1.11.11",
     "dplayer": "^1.27.1",
-    "electron": "^19.1.9",
+    "electron": "^22.0.0",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.2.0",
     "eslint": "^9.3.0",

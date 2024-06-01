@@ -27,6 +27,7 @@ import { parseCustomUrl } from './utils/tool';
  */
 fixPath();
 logger.info(`[env] path:${process.env.PATH}`);
+logger.info(`[chrome] version:${process.versions.chrome}`);
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'; // 关闭安全警告
 app.commandLine.appendSwitch(
@@ -35,6 +36,7 @@ app.commandLine.appendSwitch(
 ); // 禁用OutOfBlinkCors
 app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 启用HEVC
 app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书错误
+app.commandLine.appendSwitch('disable-web-security');
 
 remote.initialize(); // 主进程初始化
 dbInit(); // 初始化数据库
@@ -61,7 +63,7 @@ app.whenReady().then(async () => {
     let { url, id } = details;
     const filters = ['devtools-detector.min.js', 'devtools-detector.js'];
     if (filters.some((filter) => url.includes(filter))) {
-      callback({ cancel: true, confirmed: false });
+      callback({ cancel: true });
       return;
     }
 
@@ -73,9 +75,9 @@ app.whenReady().then(async () => {
       ['Referer', 'Cookie', 'User-Agent', 'Origin', 'Host', 'Connection'].some((str) => url.includes(str))
     ) {
       reqIdMethod[`${id}`] = headers;
-      callback({ cancel: false, redirectURL, confirmed: false });
+      callback({ cancel: false, redirectURL });
     } else {
-      callback({ confirmed: false });
+      callback({});
     }
   });
 
