@@ -68,6 +68,18 @@ declare const OcrApi: {
  */
 declare function checkHtml(html: string, url: string, obj: object): any
 
+/**
+ * 获取规则
+ * @param key 获取规则对象的某个属性。不传则获取整个规则
+ */
+declare function getRule(key: string | null): any
+
+/**
+ * 执行一个含main函数的字符串并得到drpy任意结果
+ * @param main_func_code 带有main函数的字符串比如 function main(){return rule} 或者 function main(){return VERSION}
+ * @param arg 运行main函数的传参
+ */
+declare function runMain(main_func_code: string, arg: object | string): any
 
 /**
  * 首页分类解析，筛选暂未实现

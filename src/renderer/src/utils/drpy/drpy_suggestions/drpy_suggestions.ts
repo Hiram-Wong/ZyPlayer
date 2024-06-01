@@ -375,8 +375,14 @@ const Function = [
   {
     label: 'urlencode',
     insertText: 'urlencode(${1:input})',
-    detail: 'url编码',
-    documentation: 'urlencode(string)',
+    detail: 'url编码-常用于将base64编码转url编码',
+    documentation: 'urlencode(string)\n全部字符串都会被编码',
+  },
+  {
+    label: 'encodeUrl',
+    insertText: 'encodeUrl(${1:input})',
+    detail: 'url编码-同encodeURL',
+    documentation: 'encodeUrl(string)\n部分中文和特殊字符串才会被编码',
   },
   {
     label: 'encodeStr',
@@ -729,7 +735,7 @@ const Keyword = [
   },
   {
     label: 'search_url',
-    insertText:`
+    insertText: `
 searchUrl: '/index.php/ajax/suggest?mid=1&wd=**',
 detailUrl: '/detail/fyid.html',
 搜索: 'json:list;name;pic;en;id',
@@ -915,4 +921,4 @@ const createDependencyProposals = (range: object, monaco: any) => {
   return suggestions;
 };
 
-export {createDependencyProposals};
+export { createDependencyProposals };
