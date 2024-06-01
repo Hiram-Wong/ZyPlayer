@@ -270,7 +270,15 @@ sudo xattr -cr /Applications/zyplayer.app
         "position": {
           "width": 1000,
           "height": 640
-        }  // 窗口位置
+        },  // 窗口位置 [3.3.7版本弃用, 使用position_main｜position_play参数]
+        "position_main": {
+          "width": 1000,
+          "height": 640
+        }, // 窗口位置 [3.3.7版本启用] 记录主窗口位置
+        "position_play": {
+          "width": 875,
+          "height": 550
+        }, // 窗口位置 [3.3.7版本启用] 记录播放窗口位置
       },
       "timeout": 5000,  // [3.3.5版本启用] 用于调整全局请求超时事件, 单位毫秒
     }
