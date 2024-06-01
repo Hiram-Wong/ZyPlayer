@@ -10,9 +10,9 @@ Linux: 软件路径(一般可通过[whereis 软件名]查看路径)
 3. 常见播放器[每台电脑路径需根据实际路径更改]
 ```
 iina(Mac) open -a /Applications/IINA.app
-PotPlayer(Window) C:\Program Files (x86)\PotPlayer\PotPlayerMini64.exe
+PotPlayer(Window) "C:\Program Files (x86)\PotPlayer\PotPlayerMini64.exe"
 VLC(Linux) /usr/bin/vlc
 iina(Mac) open -a /Applications/IINA.app
 VLC(Mac) open -a /Applications/VLC.app
-VLC(Window) C:\Program Files (x86)\VideoLAN\VLC\vlc.exe
+VLC(Window) "C:\Program Files (x86)\VideoLAN\VLC\vlc.exe"
 ```

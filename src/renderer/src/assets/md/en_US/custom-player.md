@@ -10,9 +10,9 @@ Linux: Software path (generally the path can be viewed through [whereis software
 3. Common player [ each computer path needs to be changed according to the actual path ]
 ```
 iina(Mac) open -a /Applications/IINA.app
-PotPlayer(Window) C:\Program Files (x86)\PotPlayer\PotPlayerMini64.exe
+PotPlayer(Window) "C:\Program Files (x86)\PotPlayer\PotPlayerMini64.exe"
 VLC(Linux) /usr/bin/vlc
 iina(Mac) open -a /Applications/IINA.app
 VLC(Mac) open -a /Applications/VLC.app
-VLC(Window) C:\Program Files (x86)\VideoLAN\VLC\vlc.exe
+VLC(Window) "C:\Program Files (x86)\VideoLAN\VLC\vlc.exe"
 ```
