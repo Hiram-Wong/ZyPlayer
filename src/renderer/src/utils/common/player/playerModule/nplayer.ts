@@ -71,6 +71,7 @@ const create = (options: any): NPlayer => {
   const player: any = new NPlayer({ ...options });
   switch (options.type) {
     case 'customMp4':
+      // player.src = options.src;
       break;
     case 'customFlv':
       if (player.flv) player.flv.destroy();
@@ -135,6 +136,7 @@ const playNext = (player: any, options: any) => {
 
   switch (options.type) {
     case 'customMp4':
+      player.video.src = options.url;
       break;
     case 'customHls':
       player.hls = publicStream.create.customHls(player.video, options.url);

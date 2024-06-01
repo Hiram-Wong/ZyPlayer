@@ -2,8 +2,8 @@
  * @module multi-player
  * @brief 多播放器集成方案
  * @author HiramWong <admin@catni.cn>
- * @update 2024-05-25
- * @version 0.0.6
+ * @update 2024-06-01
+ * @version 0.0.7
  *
  * **ChangeLog说明**:
  * - 2024.5.12:
@@ -25,6 +25,8 @@
  * - 2024.5.25:
  *   - 动态异步加载依赖
  *   - 按播放器解耦
+ * - 2024.6.1:
+ *   - 修复playerNext方法nplayer类型为mp4不生效
  *
  *
  * ---
