@@ -4,7 +4,7 @@
       <div class="left no-drag"
         :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '60px' : '0' }">
         <div class="open-main-win" @click="openMainWinEvent">
-          <home-icon size="1.5em" />
+          <home-icon size="large" />
           <span class="tip-gotomain">{{ $t('pages.player.header.backMain') }}</span>
         </div>
       </div>
@@ -1270,6 +1270,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
       .open-main-win {
         display: flex;
         flex-direction: row;
+        justify-content: space-around;
         align-items: center;
         height: 32px;
         width: 120px;
