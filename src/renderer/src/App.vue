@@ -4,17 +4,21 @@
 </template>
 
 <script setup lang="ts">
+import { useLocalStorage } from '@vueuse/core';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
+import { localeConfigKey } from '@/locales/index';
+import { useLocale } from '@/locales/useLocale';
 import { usePlayStore, useSettingStore } from '@/store';
 import { setup } from '@/api/setting';
-import { autoSync } from '@/utils/webdev';
 import PLAY_CONFIG from '@/config/play';
+import { autoSync } from '@/utils/webdev';
 
 import DisclaimerView from '@/pages/Disclaimer.vue';
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
+const { changeLocale } = useLocale();
 
 const isVisible = reactive({
   dialogDisclaimer: false
@@ -23,14 +27,6 @@ const isVisible = reactive({
 const theme = computed(() => {
   return storeSetting.getStateMode;
 });
-
-watch(
-  () => storeSetting.displayMode,
-  (val) => {
-    const isDarkMode = val === 'dark';
-    document.documentElement.setAttribute('theme-mode', isDarkMode ? 'dark' : '');
-  }
-);
 
 const webdev = computed(() => {
   return storeSetting.webdev;
@@ -48,6 +44,19 @@ watch(
       }, 1000 * 5 * 60);
     }
   }, { deep: true }
+);
+watch(
+  () => storeSetting.displayMode,
+  (val) => {
+    const isDarkMode = val === 'dark';
+    document.documentElement.setAttribute('theme-mode', isDarkMode ? 'dark' : '');
+  }
+);
+watch(
+  () => useLocalStorage(localeConfigKey, 'zh_CN').value,
+  (val) => {
+    changeLocale(val);
+  }
 );
 
 onMounted(() => {
