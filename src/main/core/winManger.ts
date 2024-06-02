@@ -83,6 +83,7 @@ const createMain = () => {
       webSecurity: false,
       spellcheck: false,
       allowRunningInsecureContent: true,
+      backgroundThrottling: false,
     },
   });
 
@@ -168,6 +169,7 @@ const createPlay = () => {
       webSecurity: false,
       spellcheck: false,
       allowRunningInsecureContent: true,
+      backgroundThrottling: false,
     },
   });
 
