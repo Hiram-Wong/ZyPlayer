@@ -3509,6 +3509,11 @@ electron@^22.0.0:
     "@types/node" "^16.11.26"
     extract-zip "^2.0.1"
 
+eme-encryption-scheme-polyfill@^2.0.1, eme-encryption-scheme-polyfill@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.npmmirror.com/eme-encryption-scheme-polyfill/-/eme-encryption-scheme-polyfill-2.1.5.tgz#86338bdd3b13f04ba02fa36758501c7c6c122efe"
+  integrity sha512-z9BKXV4TCYjmar0wiZLObZ0J8HE13VIg7Zq/iyPWdbEfROtxVXEJalknWKtBR5XNezzy15/zWS964TGbcAWlPg==
+
 emoji-regex@^10.3.0:
   version "10.3.0"
   resolved "https://registry.npmmirror.com/emoji-regex/-/emoji-regex-10.3.0.tgz#76998b9268409eb3dae3de989254d456e70cfe23"
@@ -6645,6 +6650,20 @@ set-function-length@^1.2.1:
     gopd "^1.0.1"
     has-property-descriptors "^1.0.2"
 
+shaka-player@^2.4.0:
+  version "2.5.23"
+  resolved "https://registry.npmmirror.com/shaka-player/-/shaka-player-2.5.23.tgz#db92d1c6cf2314f0180a2cec11b0e2f2560336f5"
+  integrity sha512-3MC9k0OXJGw8AZ4n/ZNCZS2yDxx+3as5KgH6Tx4Q5TRboTBBCu6dYPI5vp1DxKeyU12MBN1Zcbs7AKzXv2EnCg==
+  dependencies:
+    eme-encryption-scheme-polyfill "^2.0.1"
+
+shaka-player@^4.9.0:
+  version "4.9.0"
+  resolved "https://registry.npmmirror.com/shaka-player/-/shaka-player-4.9.0.tgz#4955a707bcec79cddf81fcd33afaee2cf486c520"
+  integrity sha512-+Rch6kAKNbNJS/lOE0o9WIem6nLb97JHZ+fvQ0MijAYgbwcrVWeCyBt1fkyzoXRh3b2ZndfT146AJO58jECe4Q==
+  dependencies:
+    eme-encryption-scheme-polyfill "^2.1.5"
+
 shebang-command@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmmirror.com/shebang-command/-/shebang-command-2.0.0.tgz#ccd0af4f8835fbdc265b82461aaf0c36663f34ea"
@@ -7680,6 +7699,13 @@ wxmp-rsa@^2.1.0:
   resolved "https://registry.npmmirror.com/wxmp-rsa/-/wxmp-rsa-2.1.0.tgz#3c6603e1ded2587506ef273527a8d04aaa96da51"
   integrity sha512-VbWMJ+vf8t7G93sjkqjCn5yGy/Si3M8uD6OFebqjJWJ1R0WCyle7X6SNia7WWG6Qe1F2/OWxhbcSGA6ebUBwIA==
 
+xgplayer-dash@^3.0.18:
+  version "3.0.18"
+  resolved "https://registry.npmmirror.com/xgplayer-dash/-/xgplayer-dash-3.0.18.tgz#068cfe4ac1fb381843a2f570efad6985b3557bf4"
+  integrity sha512-LyQN/wrw705H6myfsFPZAic3c7n82fUd2HBjLTNy7/SuUVkT0y3IXXYTg9D1HHtrWH0ir8GXNU/76PvCSErNhg==
+  dependencies:
+    eventemitter3 "^4.0.7"
+
 xgplayer-flv.js@^3.0.18:
   version "3.0.18"
   resolved "https://registry.npmmirror.com/xgplayer-flv.js/-/xgplayer-flv.js-3.0.18.tgz#afffc7c5fb08bd0ddc5f858f5064da8317fcb430"
@@ -7737,6 +7763,13 @@ xgplayer-mp4@^3.0.18:
     xgplayer-mp4-loader "3.0.18"
     xgplayer-streaming-shared "3.0.18"
     xgplayer-transmuxer "3.0.18"
+
+xgplayer-shaka@^3.0.18:
+  version "3.0.18"
+  resolved "https://registry.npmmirror.com/xgplayer-shaka/-/xgplayer-shaka-3.0.18.tgz#33d4cc3803f475caad29dadf6ea22d7296f721a4"
+  integrity sha512-mpRWZeMr0CqHCRXqjx6ZERty5cmci0+wEVYI40fqlYy1JxazddUK9y14Xg9Zr4ebDn33Riz3Q/GJFQgfZZtxbQ==
+  dependencies:
+    shaka-player "^2.4.0"
 
 xgplayer-streaming-shared@3.0.18:
   version "3.0.18"

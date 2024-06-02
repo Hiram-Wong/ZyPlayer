@@ -100,7 +100,7 @@ const getHtml = async (url: string, method = 'GET', encode = 'UTF-8', headers = 
 
 // 判断媒体类型
 const checkMediaType = async (url: string): Promise<string> => {
-  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi', 'magnet'];
+  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi', 'magnet', 'mpd'];
 
   if (url && (url.startsWith('http') || url.startsWith('magnet'))) {
     const fileType: any = supportedFormats.find((format) => url.includes(format));
