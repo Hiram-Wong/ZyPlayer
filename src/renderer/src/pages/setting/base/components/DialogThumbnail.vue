@@ -7,8 +7,7 @@
         <div class="thumbnail">
           <div class="header">{{ $t('pages.md.thumbanilFfmpeg.title') }}</div>
           <div class="main-content">
-            <MdPreview editorId="privacy-policy" :modelValue="$t('pages.md.thumbanilFfmpeg.content')"
-              previewTheme="vuepress" :theme="theme" />
+            <div ref="contentElm" v-html="mdContent" class="content"></div>
           </div>
         </div>
       </template>
@@ -17,13 +16,12 @@
 </template>
 
 <script setup lang="ts">
+import hljs from "highlight.js";
+import MarkdownIt from 'markdown-it';
 import { computed, ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import 'md-editor-v3/lib/style.css';
-import { MdPreview } from 'md-editor-v3';
 
 import { t } from '@/locales';
-import { useSettingStore } from '@/store';
 
 const props = defineProps({
   visible: {
@@ -43,11 +41,14 @@ const props = defineProps({
 
 const formVisible = ref(false);
 const formData = ref(props.data);
-const storeSetting = useSettingStore();
-const theme = computed(() => {
-  return storeSetting.displayMode;
+const md = new MarkdownIt({
+  linkify: true,
+  highlight: function (code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return `<pre class="hljs-code-container my-3"><div class="hljs-code-header d-flex align-center justify-space-between bg-grey-darken-3 pa-1"></div><code class="hljs language-${language}">${hljs.highlight(code, { language: language, ignoreIllegals: true }).value}</code></pre>`;
+  },
 });
-
+const mdContent = computed(() => (md.render(t('pages.md.thumbanilFfmpeg.content'))));
 const emit = defineEmits(['update:visible', 'receiveClassData']);
 
 watch(
