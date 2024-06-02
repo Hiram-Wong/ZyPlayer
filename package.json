@@ -71,7 +71,7 @@
     "@vueuse/core": "10.10.0",
     "@xmldom/xmldom": "^0.8.10",
     "artplayer": "^5.1.4",
-    "artplayer-plugin-danmuku": "^5.1.0",
+    "artplayer-plugin-danmuku": "^5.1.1",
     "axios": "^1.7.2",
     "axios-retry": "^4.3.0",
     "cheerio": "^1.0.0-rc.12",
