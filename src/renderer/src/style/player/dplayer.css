@@ -44,6 +44,7 @@
 .dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-box {
   border-radius: 8px !important;
   background-color: rgba(17, 18, 20, 0.8) !important;
+  backdrop-filter: saturate(180%) blur(20px) !important;
 }
 
 .dplayer-controller .dplayer-icons .dplayer-setting .dplayer-setting-item:hover,

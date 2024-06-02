@@ -2,8 +2,8 @@
  * @module multi-player
  * @brief 多播放器集成方案
  * @author HiramWong <admin@catni.cn>
- * @update 2024-06-01
- * @version 0.0.7
+ * @update 2024-06-02
+ * @version 0.0.8
  *
  * **ChangeLog说明**:
  * - 2024.5.12:
@@ -33,6 +33,9 @@
  *   - 修复mpd无法播放问题-类型映射
  *   - 修复xgplayer初始化播放器失败-plugin赋值错误
  *   - 优化mpd播放-使用shaka库替代dash库[dash库经常卡死|反复请求同一分片]
+ *   - 修复artplayer弹幕库5.1版本-参数对齐
+ *   - 修复nplayer弹幕不滚动-BulletOption中type赋值错误
+ *   - 修复dplayer弹幕控制不生效-弹幕开关控制逻辑误删
  *
  *
  * ---
@@ -122,7 +125,7 @@ const playerBarrage = async (player: any, playerMode: string, data: any, options
         color: item[color],
         text: item[content],
         time: parseInt(item[start]),
-        type: ['left', 'right'].includes(item[mode]) ? 'scroll' : item[mode],
+        type: item[mode] === 'top' || item[mode] === 'bottom' ? item[mode] : 'scroll',
         isMe: false,
         force: true,
       }));

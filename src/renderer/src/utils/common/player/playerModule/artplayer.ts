@@ -25,7 +25,9 @@ const options = {
     artplayerPluginDanmuku({
       speed: 5,
       danmuku: [],
-      useWorker: true,
+      // useWorker: true, // 5.0.1 版本参数
+      synchronousPlayback: true, // 5.1.0 版本参数
+      emitter: false, // 5.1.0 版本参数
     }),
   ],
   icons: {
@@ -109,7 +111,7 @@ const barrge = (player: Artplayer, comments: any, url: string, id: string) => {
 const create = (options: any): Artplayer => {
   if (options.isLive) {
     delete options?.plugins;
-  };
+  }
 
   Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
   return new Artplayer({ ...options });

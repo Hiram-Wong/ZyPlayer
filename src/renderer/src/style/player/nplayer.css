@@ -45,7 +45,7 @@
 
 .nplayer_control_volume_bars {
   background: rgba(17, 18, 20, 0.8) !important;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 20px 1px;
+  backdrop-filter: saturate(180%) blur(20px) !important;
   border-radius: 8px;
   font-size: 14px;
   height: 130px;
@@ -136,6 +136,8 @@
 .nplayer_popover-active .nplayer_popover_panel {
   border-radius: 8px;
   background-color: rgba(17, 18, 20, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: none !important;
 }
 
 .nplayer_control_setting_item:hover,
@@ -157,8 +159,27 @@
   background: #00d157 !important;
 }
 
+.nplayer_tooltip_content {
+  background: rgba(17, 18, 20, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-radius: 8px;
+}
+
+.nplayer_danmaku_reset {
+  height: 28px;
+  line-height: 28px;
+  border-radius: 14px;
+  background-color: #2b2b2b;
+  text-align: center;
+  font-size: 12px;
+}
+
 .xg-icon-setting,
 .xg-icon-danmu {
+  fill: #fff;
+}
+
+svg.xgplayer-danmu-open-svg circle {
   fill: #fff;
 }
 

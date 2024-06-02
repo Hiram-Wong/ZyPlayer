@@ -171,6 +171,20 @@ const create = (options: any): any => {
       </div>
     `,
     );
+  }
+
+  // 弹幕事件处理
+  const handleDanmuClick = () => {
+    let showDanmaku: any = document.querySelector('.dplayer-setting-showdan');
+    (player.template.showDanmakuToggle.checked = !player.template.showDanmakuToggle.checked),
+      player.template.showDanmakuToggle.checked
+        ? ((showDanmaku = !0),
+          player.danmaku.show(),
+          elementDeal.replace('.dplayer-subtitle-icon', publicIcons.openDanmu))
+        : ((showDanmaku = !1),
+          player.danmaku.hide(),
+          elementDeal.replace('.dplayer-subtitle-icon', publicIcons.closeDanmu)),
+      player.user.set('danmaku', showDanmaku ? 1 : 0);
   };
 
   const handlePipClick = () => {
@@ -186,6 +200,8 @@ const create = (options: any): any => {
 
   const pipButton = document.querySelector('.dplayer-pip-icon');
   if (pipButton) pipButton.addEventListener('click', handlePipClick);
+  const danmuButton = document.querySelector('.dplayer-subtitle-icon');
+  if (danmuButton) danmuButton.addEventListener('click', handleDanmuClick);
   return player;
 };
 
