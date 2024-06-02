@@ -23,6 +23,15 @@ const isVisible = reactive({
 const theme = computed(() => {
   return storeSetting.getStateMode;
 });
+
+watch(
+  () => storeSetting.displayMode,
+  (val) => {
+    const isDarkMode = val === 'dark';
+    document.documentElement.setAttribute('theme-mode', isDarkMode ? 'dark' : '');
+  }
+);
+
 const webdev = computed(() => {
   return storeSetting.webdev;
 });
