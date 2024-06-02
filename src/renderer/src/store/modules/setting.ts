@@ -53,16 +53,13 @@ export const useSettingStore = defineStore('setting', {
         if (payload[key as TStateKey] !== undefined) {
           this[key as TStateKey] = payload[key as TStateKey];
         }
-        // if (key === 'mode') {
-        //   this.changeMode(payload[key]);
-        // }
+        if (key === 'mode') {
+          this.changeMode(payload[key]);
+        }
       }
     },
   },
-  share: {
-    enable: true,
-  },
-  // persist: true, // 数据持久化
+  persist: true, // 数据持久化
 });
 
 export function getSettingStore() {

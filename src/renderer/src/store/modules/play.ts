@@ -46,10 +46,7 @@ export const usePlayStore = defineStore('play', {
       }
     },
   },
-  share: {
-    enable: true,
-  },
-  // persist: true, // 数据持久化
+  persist: true, // 数据持久化
 });
 
 export function getPlayStore() {
