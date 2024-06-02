@@ -10,8 +10,8 @@ export default {
       type: 'pie',
       url: ''
     },
-    skipStartEnd: true,
-    preloadNext: true,
+    skipStartEnd: false,
+    preloadNext: false,
     skipAd: false,
     barrage: {
       url: '',
