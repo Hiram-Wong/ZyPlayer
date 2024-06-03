@@ -60,7 +60,7 @@
       </template>
     </t-table>
 
-    <dialog-add-view v-model:visible="isVisible.dialogAdd" @refresh-table-data="refreshEvent" />
+    <dialog-add-view v-model:visible="isVisible.dialogAdd" @add-table-data="tableAdd" />
     <dialog-edit-view v-model:visible="isVisible.dialogEdit" :data="formData" />
     <!-- <dialog-ali-auth-view v-model:visible="isVisible.dialogAliAuth" /> -->
   </div>
@@ -105,7 +105,9 @@ const driveTableConfig = ref({
   data: [],
   rawData: [],
   sort: {},
-  filter: {},
+  filter: {
+    type: [],
+  },
   select: [],
   default: ''
 })
@@ -113,7 +115,7 @@ const driveTableConfig = ref({
 const emitReload = useEventBus<string>('drive-reload');
 
 watch(
-  () => driveTableConfig.value.data,
+  () => driveTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
       emitReload.emit('drive-reload');
@@ -164,7 +166,7 @@ onMounted(() => {
 const refreshEvent = (page = false) => {
   getData();
   if (page) pagination.current = 1;
-  if (driveTableConfig.value.filter) driveTableConfig.value.filter = {};
+  if (driveTableConfig.value.filter) driveTableConfig.value.filter = { type: [] };
 };
 
 const editEvent = (row) => {
@@ -187,6 +189,20 @@ const tableUpdateIsActive = (select, isActiveValue: boolean) => {
   });
 };
 
+const tableAdd = (item) => {
+  let { filter = { type: [] }, data = [] as any, rawData = [] as any } = driveTableConfig.value;
+  const filterType: any = filter?.type || [];
+
+  const shouldFilter = filterType.length > 0 && !filterType.includes(item.type);
+
+  if (!shouldFilter) {
+    pagination.total += 1;
+    data = [...data, item];
+  }
+  rawData = [...rawData, item];
+  driveTableConfig.value = { ...driveTableConfig.value, data, rawData };
+};
+
 const tableDelete = (select) => {
   select.forEach((itemId) => {
     _.remove(driveTableConfig.value.data, (item: any) => item.id === itemId);
@@ -198,6 +214,7 @@ const removeEvent = (row) => {
   try {
     delDriveItem(row.id);
     tableDelete([row.id]);
+    pagination.total -= 1;
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][drive][removeEvent][error]', err);
@@ -221,6 +238,7 @@ const handleAllDataEvent = (type) => {
     } else if (type === 'delete') {
       delDriveItem(select);
       tableDelete(select);
+      pagination.total -= select.length;
     }
     refreshEvent();
     MessagePlugin.success(t('pages.setting.form.success'));

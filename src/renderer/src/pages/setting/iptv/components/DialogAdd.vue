@@ -70,7 +70,7 @@ const formData = reactive({
   type: 'remote',
   isActive: true
 });
-const emit = defineEmits(['update:visible', 'refreshTableData']);
+const emit = defineEmits(['update:visible', 'addTableData']);
 
 watch(
   () => formVisible.value,
@@ -89,7 +89,7 @@ const onSubmit = async ({ validateResult, firstError }) => {
   if (validateResult === true) {
     const res = await addIptvItem(formData);
     MessagePlugin.success(t('pages.setting.form.success'));
-    if (res) emit('refreshTableData');
+    if (res) emit('addTableData', res);
     formVisible.value = false;
   } else {
     console.log('Validate Errors: ', firstError, validateResult);

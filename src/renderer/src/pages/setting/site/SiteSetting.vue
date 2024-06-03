@@ -84,8 +84,7 @@
         </t-space>
       </template>
     </t-table>
-    <dialog-add-view v-model:visible="isVisible.dialogAdd" :group="siteTableConfig.group"
-      @refresh-table-data="refreshEvent" />
+    <dialog-add-view v-model:visible="isVisible.dialogAdd" :group="siteTableConfig.group" @add-table-data="tableAdd" />
     <dialog-edit-view v-model:visible="isVisible.dialogEdit" :data="formData" :group="siteTableConfig.group"
       @refresh-table-data="refreshEvent" />
   </div>
@@ -131,7 +130,9 @@ const siteTableConfig = ref({
   data: [],
   rawData: [],
   sort: {},
-  filter: {},
+  filter: {
+    type: [],
+  },
   select: [],
   default: '',
   group: []
@@ -146,7 +147,7 @@ const rehandleSelectChange = (val) => {
 const emitReload = useEventBus<string>('film-reload');
 
 watch(
-  () => siteTableConfig.value.data,
+  () => siteTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
       emitReload.emit('film-reload');
@@ -195,7 +196,7 @@ const refreshEvent = (page = false) => {
   getData();
   getGroup();
   if (page) pagination.current = 1;
-  if (siteTableConfig.value.filter) siteTableConfig.value.filter = {};
+  if (siteTableConfig.value.filter) siteTableConfig.value.filter = { type: [] };
 };
 
 // op
@@ -292,10 +293,25 @@ const tableDelete = (select) => {
   });
 };
 
+const tableAdd = (item) => {
+  let { filter = { type: [] }, data = [] as any, rawData = [] as any } = siteTableConfig.value;
+  const filterType: any = filter?.type || [];
+
+  const shouldFilter = filterType.length > 0 && !filterType.includes(item.type);
+
+  if (!shouldFilter) {
+    pagination.total += 1;
+    data = [...data, item];
+  }
+  rawData = [...rawData, item];
+  siteTableConfig.value = { ...siteTableConfig.value, data, rawData };
+};
+
 const removeEvent = async (row) => {
   try {
     delSiteItem(row.id);
     tableDelete([row.id]);
+    pagination.total -= 1;
     getGroup();
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
@@ -320,6 +336,7 @@ const handleAllDataEvent = async (type) => {
     } else if (type === 'delete') {
       delSiteItem(select);
       tableDelete(select);
+      pagination.total -= select.length;
     } else if (type === 'check') {
       MessagePlugin.info(t('pages.setting.message.checking'));
       await checkAllSite(select);

@@ -69,7 +69,7 @@
         </t-space>
       </template>
     </t-table>
-    <dialog-add-view v-model:visible="isVisible.dialogAdd" @refresh-table-data="refreshEvent" />
+    <dialog-add-view v-model:visible="isVisible.dialogAdd" @add-table-data="tableAdd" />
     <dialog-edit-view v-model:visible="isVisible.dialogEdit" :data="formData" />
     <dialog-flag-view v-model:visible="isVisible.dialogFlag" :data="analyzeTableConfig.flag" />
   </div>
@@ -115,7 +115,9 @@ const analyzeTableConfig = ref({
   data: [],
   rawData: [],
   sort: {},
-  filter: {},
+  filter: {
+    type: [],
+  },
   select: [],
   default: '',
   group: [],
@@ -125,7 +127,7 @@ const analyzeTableConfig = ref({
 const emitReload = useEventBus<string>('analyze-reload');
 
 watch(
-  () => analyzeTableConfig.value.data,
+  () => analyzeTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
       emitReload.emit('analyze-reload');
@@ -146,7 +148,7 @@ onMounted(() => {
 const refreshEvent = (page = false) => {
   getData();
   if (page) pagination.current = 1;
-  if (analyzeTableConfig.value.filter) analyzeTableConfig.value.filter = {};
+  if (analyzeTableConfig.value.filter) analyzeTableConfig.value.filter = { type: [] };
 };
 
 const rehandlePageChange = (curr) => {
@@ -236,11 +238,26 @@ const tableDelete = (select) => {
   });
 };
 
+const tableAdd = (item) => {
+  let { filter = { type: [] }, data = [] as any, rawData = [] as any } = analyzeTableConfig.value;
+  const filterType: any = filter?.type || [];
+
+  const shouldFilter = filterType.length > 0 && !filterType.includes(item.type);
+
+  if (!shouldFilter) {
+    pagination.total += 1;
+    data = [...data, item];
+  }
+  rawData = [...rawData, item];
+  analyzeTableConfig.value = { ...analyzeTableConfig.value, data, rawData };
+};
+
 // 删除
 const removeEvent = async (row) => {
   try {
     delAnalyzeItem(row.id);
     tableDelete([row.id]);
+    pagination.total -= 1;
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][analyze][removeEvent][error]', err);
@@ -264,6 +281,7 @@ const handleAllDataEvent = (type) => {
     } else if (type === 'delete') {
       delAnalyzeItem(select);
       tableDelete(select);
+      pagination.total -= select.length;
     }
 
     MessagePlugin.success(t('pages.setting.form.success'));

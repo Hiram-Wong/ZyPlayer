@@ -98,7 +98,7 @@ const formData = reactive({
   ext: '',
   categories: ''
 });
-const emit = defineEmits(['update:visible', 'refreshTableData']);
+const emit = defineEmits(['update:visible', 'addTableData']);
 
 watch(
   () => formVisible.value,
@@ -125,7 +125,7 @@ const onSubmit = async ({ validateResult, firstError }) => {
     if (!formData.group) formData.group = '默认';
     const res = await addSiteItem(formData);
     MessagePlugin.success(t('pages.setting.form.success'));
-    if (res) emit('refreshTableData');
+    if (res) emit('addTableData', res);
     formVisible.value = false;
   } else {
     console.log('Validate Errors: ', firstError, validateResult);

@@ -65,7 +65,7 @@
       </template>
     </t-table>
 
-    <dialog-add-view v-model:visible="isVisible.dialogAdd" @refresh-table-data="refreshEvent" />
+    <dialog-add-view v-model:visible="isVisible.dialogAdd"  @add-table-data="tableAdd" />
     <dialog-edit-view v-model:visible="isVisible.dialogEdit" :data="formData" />
   </div>
 </template>
@@ -108,7 +108,9 @@ const iptvTableConfig = ref({
   data: [],
   rawData: [],
   sort: {},
-  filter: {},
+  filter: {
+    type: [],
+  },
   select: [],
   default: ''
 })
@@ -116,7 +118,7 @@ const iptvTableConfig = ref({
 const emitReload = useEventBus<string>('iptv-reload');
 
 watch(
-  () => iptvTableConfig.value.data,
+  () => iptvTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
       emitReload.emit('iptv-reload');
@@ -193,7 +195,7 @@ onMounted(() => {
 const refreshEvent = (page = false) => {
   getData();
   if (page) pagination.current = 1;
-  if (iptvTableConfig.value.filter) iptvTableConfig.value.filter = {};
+  if (iptvTableConfig.value.filter) iptvTableConfig.value.filter = { type: [] };
 };
 
 const editEvent = (row) => {
@@ -223,10 +225,25 @@ const tableDelete = (select) => {
   });
 };
 
+const tableAdd = (item) => {
+  let { filter = { type: [] }, data = [] as any, rawData = [] as any } = iptvTableConfig.value;
+  const filterType: any = filter?.type || [];
+
+  const shouldFilter = filterType.length > 0 && !filterType.includes(item.type);
+
+  if (!shouldFilter) {
+    pagination.total += 1;
+    data = [...data, item];
+  }
+  rawData = [...rawData, item];
+  iptvTableConfig.value = { ...iptvTableConfig.value, data, rawData };
+};
+
 const removeEvent = (row) => {
   try {
     delIptvItem(row.id);
     tableDelete([row.id]);
+    pagination.total -= 1;
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][iptv][removeEvent][error]', err);
@@ -250,6 +267,7 @@ const handleAllDataEvent = (type) => {
     } else if (type === 'delete') {
       delIptvItem(select);
       tableDelete(select);
+      pagination.total -= select.length;
     }
 
     MessagePlugin.success(t('pages.setting.form.success'));
