@@ -1,8 +1,19 @@
 <template>
   <div class="common-nav">
     <div class="nav-sub">
-      <div class="nav-sub-tab nav-sub-tab-title">
-        <p class="title">{{ title }}</p>
+      <div class="nav-sub-tab nav-sub-tab-header">
+        <div class="header" v-if="!isVisible.search">
+          <p class="title">{{ title }}</p>
+          <data-search-icon size="large" class="icon" v-if="search" @click="isVisible.search = true" />
+        </div>
+        <div class="search" v-if="isVisible.search" ref="headerOutsideRef">
+          <t-input :placeholder="$t('pages.setting.placeholder.general')" clearable v-model="searchText"
+            @change="searchEvent">
+            <template #suffixIcon>
+              <search-icon :style="{ cursor: 'pointer' }" />
+            </template>
+          </t-input>
+        </div>
       </div>
       <div class="nav-sub-tab nav-sub-tab-content">
         <div class="nav-sub-tab-top">
@@ -40,13 +51,16 @@
 import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 
 import { ContextMenu, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup } from '@imengyu/vue3-context-menu';
+import { onClickOutside } from '@vueuse/core';
 import { computed, reactive, ref, watch } from 'vue';
+import { DataSearchIcon, SearchIcon } from 'tdesign-icons-vue-next';
 
 import { useSettingStore } from '@/store';
 const storeSetting = useSettingStore();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   title: string;
+  search?: boolean;
   active: any;
   list: Array<{
     id: string | number;
@@ -62,13 +76,18 @@ const props = defineProps<{
       handler?: () => void;
     }>;
   }>;
-}>();
+}>(), {
+  search: false
+});
 
 const activeData = ref(props.active);
 const listData = ref(props.list);
 const contextMenuItems = ref(props.contextMenuItems);
+const headerOutsideRef = ref(null);
+const searchText = ref('');
 const isVisible = reactive({
-  contentMenu: false
+  contentMenu: false,
+  search: false
 });
 const mode = computed(() => {
   return storeSetting.displayMode;
@@ -104,6 +123,10 @@ watch(
 
 const emit = defineEmits(['changeKey', 'contextMenu']);
 
+onClickOutside(headerOutsideRef, () => {
+  isVisible.search = false;
+})
+
 const conButtonClick = (item: any, { x, y }: any) => {
   isVisible.contentMenu = true;
   Object.assign(optionsComponent.value, { x, y });
@@ -113,6 +136,12 @@ const conButtonClick = (item: any, { x, y }: any) => {
 const handleItemClick = (key: string | number) => {
   console.log(`[nav] clicked key: ${key}`);
   emit('changeKey', key);
+};
+
+const searchEvent = () => {
+  listData.value = props.list.filter((item) => {
+    return item.name.includes(searchText.value);
+  });
 };
 </script>
 
@@ -125,13 +154,41 @@ const handleItemClick = (key: string | number) => {
     height: 100%;
     padding: var(--td-comp-paddingTB-xs) 0;
 
-    .nav-sub-tab-title {
-      margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-m) var(--td-comp-margin-m);
+    .nav-sub-tab-header {
+      margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-s) var(--td-comp-margin-m);
 
-      .title {
-        padding-left: var(--td-comp-paddingTB-s);
-        font-weight: 700;
-        font-size: 1.5em;
+      .header {
+        display: flex;
+        align-items: flex-end;
+        height: 32px;
+        transition: all 0.25s ease-in-out;
+
+        .title {
+          padding-left: var(--td-comp-paddingTB-s);
+          font-weight: 700;
+          font-size: 1.5em;
+        }
+
+        .icon {
+          margin-left: var(--td-comp-margin-xxs);
+          cursor: pointer;
+        }
+      }
+
+      .search {
+        transition: all 0.25s ease-in-out;
+
+        :deep(.t-input) {
+          background-color: var(--td-bg-content-input);
+          border: none;
+          outline: none;
+          width: 148px;
+        }
+
+        :deep(.t-input--focused) {
+          box-shadow: none;
+          color: none;
+        }
       }
     }
 
