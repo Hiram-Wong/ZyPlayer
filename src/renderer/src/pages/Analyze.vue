@@ -1,6 +1,6 @@
 <template>
   <div class="analyze view-container">
-    <common-nav :title="$t('pages.analyze.name')" :list="analyzeConfig.data" :active="active.nav"
+    <common-nav :title="$t('pages.analyze.name')" :list="analyzeConfig.data" :active="active.nav" search
       @change-key="changeDefaultEvent" />
     <div class="content">
       <div class="container">

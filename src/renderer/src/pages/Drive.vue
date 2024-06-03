@@ -1,6 +1,6 @@
 <template>
   <div class="drive-container">
-    <common-nav :title="$t('pages.drive.name')" :list="driveConfig.data" :active="active.nav"
+    <common-nav :title="$t('pages.drive.name')" :list="driveConfig.data" :active="active.nav" search
       @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">

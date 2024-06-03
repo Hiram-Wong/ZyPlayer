@@ -1,6 +1,6 @@
 <template>
   <div class="iptv view-container">
-    <common-nav :title="$t('pages.iptv.name')" :list="iptvConfig.data" :active="active.nav"
+    <common-nav :title="$t('pages.iptv.name')" :list="iptvConfig.data" :active="active.nav" search
       @change-key="changeDefaultIptvEvent" />
     <div class="content">
       <header class="header">

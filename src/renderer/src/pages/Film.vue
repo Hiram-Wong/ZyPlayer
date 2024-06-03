@@ -1,6 +1,6 @@
 <template>
   <div class="film view-container">
-    <common-nav :title="$t('pages.film.name')" :list="siteConfig.data" :active="active.nav"
+    <common-nav :title="$t('pages.film.name')" :list="siteConfig.data" :active="active.nav" search
       @change-key="changeSitesEvent" />
     <div class="content">
       <header class="header" v-if="classConfig.data.length > 0">
