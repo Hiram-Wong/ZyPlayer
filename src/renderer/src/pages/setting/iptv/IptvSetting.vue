@@ -35,8 +35,9 @@
       </t-row>
     </div>
     <t-table row-key="id" height="calc(100vh - 180px)" :data="iptvTableConfig.data" :sort="iptvTableConfig.sort"
-      :columns="COLUMNS" :hover="true" :pagination="pagination" @sort-change="rehandleSortChange"
-      @select-change="rehandleSelectChange" @page-change="rehandlePageChange">
+      :filter-value="iptvTableConfig.filter" :columns="COLUMNS" :hover="true" :pagination="pagination"
+      @sort-change="rehandleSortChange" @filter-change="rehandleFilterChange" @select-change="rehandleSelectChange"
+      @page-change="rehandlePageChange">
       <template #name="{ row }">
         <t-badge v-if="row.id === iptvTableConfig.default" size="small" :offset="[0, 3]" count="默" dot>{{ row.name
           }}</t-badge>
@@ -105,7 +106,9 @@ const pagination = reactive({
 
 const iptvTableConfig = ref({
   data: [],
+  rawData: [],
   sort: {},
+  filter: {},
   select: [],
   default: ''
 })
@@ -138,6 +141,30 @@ const rehandleSortChange = (sortVal, options) => {
   iptvTableConfig.value.data = options.currentDataSource;
 };
 
+
+const request = (filters) => {
+  const timer = setTimeout(() => {
+    clearTimeout(timer);
+    const newData = iptvTableConfig.value.rawData.filter((item: any) => {
+      let result = true;
+      if (result && filters.type && filters.type.length) {
+        result = filters.type.filter((item_one) => item.type === item_one).length > 0;
+      }
+      return result;
+    });
+    iptvTableConfig.value.data = newData;
+  }, 100);
+};
+
+const rehandleFilterChange = (filters, ctx) => {
+  console.log('filter-change', filters, ctx);
+  iptvTableConfig.value.filter = {
+    ...filters,
+    createTime: filters.type || [],
+  };
+  request(filters);
+};
+
 // Business Processing
 const getData = async () => {
   try {
@@ -147,6 +174,7 @@ const getData = async () => {
     }
     if (_.has(res, 'data') && res["data"]) {
       iptvTableConfig.value.data = res.data;
+      iptvTableConfig.value.rawData = res.data;
     }
     if (_.has(res, 'total') && res["total"]) {
       pagination.total = res.total;

@@ -1,9 +1,10 @@
+import { t } from '@/locales';
 import { PrimaryTableCol, TableRowData } from 'tdesign-vue-next';
 
 export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
   { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
   {
-    title: '名称',
+    title: t('pages.setting.table.header.name'),
     colKey: 'name',
     width: 200,
     align: 'left',
@@ -12,20 +13,21 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     sorter: (a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'),
   },
   {
-    title: '启始路径',
+    title: t('pages.setting.table.header.startPath'),
     colKey: 'startPage',
     width: 100,
     align: 'left',
     ellipsis: true,
   },
-  { title: '启用',
+  {
+    title: t('pages.setting.table.header.status'),
     colKey: 'isActive',
     width: 100,
     align: 'left',
     ellipsis: true,
   },
   {
-    title: '操作',
+    title: t('pages.setting.table.header.operate'),
     colKey: 'op',
     align: 'center',
     fixed: 'right',

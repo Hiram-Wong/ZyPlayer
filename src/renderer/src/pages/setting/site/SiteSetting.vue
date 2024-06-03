@@ -39,8 +39,9 @@
       </t-row>
     </div>
     <t-table row-key="id" height="calc(100vh - 180px)" :data="siteTableConfig.data" :sort="siteTableConfig.sort"
-      :columns="COLUMNS" :hover="true" :pagination="pagination" @sort-change="rehandleSortChange"
-      @select-change="rehandleSelectChange" @page-change="rehandlePageChange">
+      :filter-value="siteTableConfig.filter" :columns="COLUMNS" :hover="true" :pagination="pagination"
+      @sort-change="rehandleSortChange" @filter-change="rehandleFilterChange" @select-change="rehandleSelectChange"
+      @page-change="rehandlePageChange">
       <template #name="{ row }">
         <t-badge v-if="row.id === siteTableConfig.default" size="small" :offset="[0, 3]" count="默" dot>{{ row.name
           }}</t-badge>
@@ -118,7 +119,9 @@ const pagination = reactive({
 
 const siteTableConfig = ref({
   data: [],
+  rawData: [],
   sort: {},
+  filter: {},
   select: [],
   default: '',
   group: []
@@ -152,6 +155,7 @@ const getData = async () => {
     }
     if (_.has(res, 'data') && res["data"]) {
       siteTableConfig.value.data = res.data;
+      siteTableConfig.value.rawData = res.data;
     }
     if (_.has(res, 'total') && res["total"]) {
       pagination.total = res.total;
@@ -227,6 +231,29 @@ const rehandleSortChange = (sortVal, options) => {
   // sort.value 和 data.value 的赋值都是必须
   siteTableConfig.value.sort = sortVal;
   siteTableConfig.value.data = options.currentDataSource;
+};
+
+const request = (filters) => {
+  const timer = setTimeout(() => {
+    clearTimeout(timer);
+    const newData = siteTableConfig.value.rawData.filter((item: any) => {
+      let result = true;
+      if (result && filters.type && filters.type.length) {
+        result = filters.type.filter((item_one) => item.type === item_one).length > 0;
+      }
+      return result;
+    });
+    siteTableConfig.value.data = newData;
+  }, 100);
+};
+
+const rehandleFilterChange = (filters, ctx) => {
+  console.log('filter-change', filters, ctx);
+  siteTableConfig.value.filter = {
+    ...filters,
+    createTime: filters.type || [],
+  };
+  request(filters);
 };
 
 const editEvent = (row) => {
