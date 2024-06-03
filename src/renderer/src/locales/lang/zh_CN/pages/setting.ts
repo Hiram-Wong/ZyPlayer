@@ -20,7 +20,7 @@ export default {
   },
   form: {
     success: '成功',
-    fail: '失败'
+    fail: '失败',
   },
   dialog: {
     cancel: '取消',
@@ -32,8 +32,8 @@ export default {
     restoreFactoryHeader: '恢复出厂',
     restoreFactoryBody: '你确定要恢复出厂吗? 确认后恢复到初始状态。',
     rule: {
-      message: '必填'
-    }
+      message: '必填',
+    },
   },
   nav: {
     configBase: '基础配置',
@@ -63,6 +63,16 @@ export default {
     analyze: {
       web: 'Web',
       json: 'Json',
+    },
+    header: {
+      name: '名称',
+      resource: '资源数',
+      search: '搜索',
+      type: '类型',
+      group: '分组',
+      status: '状态',
+      startPath: '起始路径',
+      operate: '操作',
     },
   },
   header: {
@@ -163,6 +173,7 @@ export default {
     networkAddress: '网络地址',
     networkCheckError: '网络状态检测失败',
     noSelectData: '请先选择数据',
+    checking: '状态批量检测中, 请等待完成',
   },
   ad: {
     title: '与Hipy更配哦',
@@ -330,7 +341,7 @@ export default {
       f: '过滤',
       ids: '标识',
       flag: '线路',
-      play: '选集'
+      play: '选集',
     },
     bar: {
       title: '编辑器参数',
@@ -425,7 +436,7 @@ export default {
         instructionLibrary: '指令库',
         fetch: '发送',
         fetchTip: '输入一些需求...',
-        codeSnippetTip: '输入html代码片段'
+        codeSnippetTip: '输入html代码片段',
       },
       tool: {
         title: '工具',
@@ -441,7 +452,7 @@ export default {
         generate: '生成',
         encode: '编码',
         decode: '解码',
-      }
+      },
     },
   },
 };
