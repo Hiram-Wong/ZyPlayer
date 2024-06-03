@@ -153,6 +153,7 @@ const request = (filters) => {
       return result;
     });
     iptvTableConfig.value.data = newData;
+    pagination.current = 1;
     pagination.total = newData.length;
   }, 100);
 };
