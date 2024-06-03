@@ -21,7 +21,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
   { title: t('pages.setting.table.header.search'), align: 'left', colKey: 'search', width: 90 },
   {
     title: t('pages.setting.table.header.type'),
-    align: 'left',
+    align: 'center',
     colKey: 'type',
     filter: {
       type: 'multiple',
@@ -39,7 +39,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
       ],
       showConfirmAndReset: true,
     },
-    width: 90,
+    width: 130,
   },
   {
     title: t('pages.setting.table.header.group'),
