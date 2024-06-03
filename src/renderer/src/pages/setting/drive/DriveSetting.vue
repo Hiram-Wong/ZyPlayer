@@ -103,7 +103,9 @@ const pagination = reactive({
 
 const driveTableConfig = ref({
   data: [],
+  rawData: [],
   sort: {},
+  filter: {},
   select: [],
   default: ''
 })
@@ -145,6 +147,7 @@ const getData = async () => {
     }
     if (_.has(res, 'data') && res["data"]) {
       driveTableConfig.value.data = res.data;
+      driveTableConfig.value.rawData = res.data;
     }
     if (_.has(res, 'total') && res["total"]) {
       pagination.total = res.total;
@@ -161,6 +164,7 @@ onMounted(() => {
 const refreshEvent = (page = false) => {
   getData();
   if (page) pagination.current = 1;
+  if (driveTableConfig.value.filter) driveTableConfig.value.filter = {};
 };
 
 const editEvent = (row) => {
@@ -174,10 +178,26 @@ const switchStatus = (row) => {
   updateDriveItem(row.id, { isActive: row.isActive });
 };
 
+const tableUpdateIsActive = (select, isActiveValue: boolean) => {
+  select.forEach((itemId) => {
+    const item: any = _.find(driveTableConfig.value.data, { id: itemId });
+    const rawTtem: any = _.find(driveTableConfig.value.rawData, { id: itemId });
+    if (item) item.isActive = isActiveValue;
+    if (item) rawTtem.isActive = isActiveValue;
+  });
+};
+
+const tableDelete = (select) => {
+  select.forEach((itemId) => {
+    _.remove(driveTableConfig.value.data, (item: any) => item.id === itemId);
+    _.remove(driveTableConfig.value.rawData, (item: any) => item.id === itemId);
+  });
+};
+
 const removeEvent = (row) => {
   try {
     delDriveItem(row.id);
-    refreshEvent();
+    tableDelete([row.id]);
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][drive][removeEvent][error]', err);
@@ -194,10 +214,13 @@ const handleAllDataEvent = (type) => {
     }
     if (type === 'enable') {
       updateDriveStatus('enable', select);
+      tableUpdateIsActive(select, true);
     } else if (type === 'disable') {
       updateDriveStatus('disable', select);
+      tableUpdateIsActive(select, false);
     } else if (type === 'delete') {
       delDriveItem(select);
+      tableDelete(select);
     }
     refreshEvent();
     MessagePlugin.success(t('pages.setting.form.success'));

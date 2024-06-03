@@ -195,6 +195,7 @@ const refreshEvent = (page = false) => {
   getData();
   getGroup();
   if (page) pagination.current = 1;
+  if (siteTableConfig.value.filter) siteTableConfig.value.filter = {};
 };
 
 // op
@@ -273,10 +274,27 @@ const switchStatus = async (row) => {
   updateSiteItem(row.id, { isActive: row.isActive });
 };
 
+const tableUpdateIsActive = (select, isActiveValue: boolean) => {
+  select.forEach((itemId) => {
+    const item: any = _.find(siteTableConfig.value.data, { id: itemId });
+    const rawTtem: any = _.find(siteTableConfig.value.rawData, { id: itemId });
+    if (item) item.isActive = isActiveValue;
+    if (item) rawTtem.isActive = isActiveValue;
+  });
+};
+
+const tableDelete = (select) => {
+  select.forEach((itemId) => {
+    _.remove(siteTableConfig.value.data, (item: any) => item.id === itemId);
+    _.remove(siteTableConfig.value.rawData, (item: any) => item.id === itemId);
+  });
+};
+
 const removeEvent = async (row) => {
   try {
     delSiteItem(row.id);
-    refreshEvent();
+    tableDelete([row.id]);
+    getGroup();
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][site][removeEvent][error]', err);
@@ -293,15 +311,18 @@ const handleAllDataEvent = async (type) => {
     }
     if (type === 'enable') {
       updateSiteStatus('enable', select);
+      tableUpdateIsActive(select, true);
     } else if (type === 'disable') {
       updateSiteStatus('disable', select);
+      tableUpdateIsActive(select, false);
     } else if (type === 'delete') {
       delSiteItem(select);
+      tableDelete(select);
     } else if (type === 'check') {
       MessagePlugin.info(t('pages.setting.message.checking'));
       await checkAllSite(select);
     }
-    if (type !== 'check') refreshEvent();
+
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][site][handleAllDataEvent][error]', err);

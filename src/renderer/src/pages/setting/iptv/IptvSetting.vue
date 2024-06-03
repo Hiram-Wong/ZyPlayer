@@ -191,6 +191,7 @@ onMounted(() => {
 const refreshEvent = (page = false) => {
   getData();
   if (page) pagination.current = 1;
+  if (iptvTableConfig.value.filter) iptvTableConfig.value.filter = {};
 };
 
 const editEvent = (row) => {
@@ -204,10 +205,26 @@ const switchStatus = async (row) => {
   updateIptvItem(row.id, { isActive: row.isActive });
 };
 
+const tableUpdateIsActive = (select, isActiveValue: boolean) => {
+  select.forEach((itemId) => {
+    const item: any = _.find(iptvTableConfig.value.data, { id: itemId });
+    const rawTtem: any = _.find(iptvTableConfig.value.rawData, { id: itemId });
+    if (item) item.isActive = isActiveValue;
+    if (item) rawTtem.isActive = isActiveValue;
+  });
+};
+
+const tableDelete = (select) => {
+  select.forEach((itemId) => {
+    _.remove(iptvTableConfig.value.data, (item: any) => item.id === itemId);
+    _.remove(iptvTableConfig.value.rawData, (item: any) => item.id === itemId);
+  });
+};
+
 const removeEvent = (row) => {
   try {
     delIptvItem(row.id);
-    refreshEvent();
+    tableDelete([row.id]);
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][iptv][removeEvent][error]', err);
@@ -224,12 +241,15 @@ const handleAllDataEvent = (type) => {
     }
     if (type === 'enable') {
       updateIptvStatus('enable', select);
+      tableUpdateIsActive(select, true);
     } else if (type === 'disable') {
       updateIptvStatus('disable', select);
+      tableUpdateIsActive(select, false);
     } else if (type === 'delete') {
       delIptvItem(select);
+      tableDelete(select);
     }
-    refreshEvent();
+
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][iptv][handleAllDataEvent][error]', err);

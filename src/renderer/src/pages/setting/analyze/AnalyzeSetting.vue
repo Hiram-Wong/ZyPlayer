@@ -146,6 +146,7 @@ onMounted(() => {
 const refreshEvent = (page = false) => {
   getData();
   if (page) pagination.current = 1;
+  if (analyzeTableConfig.value.filter) analyzeTableConfig.value.filter = {};
 };
 
 const rehandlePageChange = (curr) => {
@@ -217,11 +218,27 @@ const switchStatus = (row) => {
   updateAnalyzeItem(row.id, { isActive: row.isActive });
 };
 
+const tableUpdateIsActive = (select, isActiveValue: boolean) => {
+  select.forEach((itemId) => {
+    const item: any = _.find(analyzeTableConfig.value.data, { id: itemId });
+    const rawTtem: any = _.find(analyzeTableConfig.value.rawData, { id: itemId });
+    if (item) item.isActive = isActiveValue;
+    if (item) rawTtem.isActive = isActiveValue;
+  });
+};
+
+const tableDelete = (select) => {
+  select.forEach((itemId) => {
+    _.remove(analyzeTableConfig.value.data, (item: any) => item.id === itemId);
+    _.remove(analyzeTableConfig.value.rawData, (item: any) => item.id === itemId);
+  });
+};
+
 // 删除
 const removeEvent = async (row) => {
   try {
     delAnalyzeItem(row.id);
-    refreshEvent();
+    tableDelete([row.id]);
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][analyze][removeEvent][error]', err);
@@ -238,12 +255,15 @@ const handleAllDataEvent = (type) => {
     }
     if (type === 'enable') {
       updateAnalyzeStatus('enable', select);
+      tableUpdateIsActive(select, true);
     } else if (type === 'disable') {
       updateAnalyzeStatus('disable', select);
+      tableUpdateIsActive(select, false);
     } else if (type === 'delete') {
       delAnalyzeItem(select);
+      tableDelete(select);
     }
-    refreshEvent();
+
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][analyze][handleAllDataEvent][error]', err);
