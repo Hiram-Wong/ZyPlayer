@@ -106,7 +106,6 @@ watch(
   () => props.visible,
   (val) => {
     formVisible.value = val;
-    if (!val) emit('refreshTableData');
   },
 );
 watch(
