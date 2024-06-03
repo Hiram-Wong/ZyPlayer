@@ -251,6 +251,7 @@ const request = (filters) => {
       return result;
     });
     siteTableConfig.value.data = newData;
+    pagination.total = newData.length;
   }, 100);
 };
 

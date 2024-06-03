@@ -171,6 +171,7 @@ const request = (filters) => {
       return result;
     });
     analyzeTableConfig.value.data = newData;
+    pagination.total = newData.length;
   }, 100);
 };
 
