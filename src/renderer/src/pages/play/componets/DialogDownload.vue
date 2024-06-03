@@ -1,44 +1,29 @@
 <template>
-  <t-dialog
-    v-model:visible="formVisible"
-    header="离线缓存"
-    width="508"
-    placement="center"
-    confirm-btn="复制下载链接"
-    :on-confirm="copyDownloadUrl"
-    :cancel-btn="null"
-  >
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.player.download.title')" width="508" placement="center"
+    :confirm-btn="$t('pages.player.download.copy')" :on-confirm="copyDownloadUrl" :cancel-btn="null">
     <template #body>
       <div class="download-warp">
         <div class="source-warp">
-          <t-select
-            v-model="downloadSource"
-            placeholder="请选下载源"
-            size="small"
-            style="width: 200px; display: inline-block"
-            @change="downloadSourceChange"
-          >
+          <t-select v-model="downloadSource" :placeholder="$t('pages.player.download.soureceSelect')" size="small"
+            style="width: 200px; display: inline-block" @change="downloadSourceChange">
             <t-option v-for="(_, key) in formData.season" :key="key" :value="key">{{ key }}</t-option>
           </t-select>
-          <t-button size="small" theme="default" @click="copyCurrentUrl">复制当前地址</t-button>
-          <!-- <div>仅支持后缀为m3u8、flv、mp4</div> -->
+          <t-button size="small" theme="default" @click="copyCurrentUrl">{{ $t('pages.player.download.copyCurrentUrl')
+            }}</t-button>
         </div>
         <div class="content-warp">
           <t-transfer v-model="downloadTarget" :data="downloadEpisodes">
             <template #title="props">
-              <div>{{ props.type === 'target' ? '需下载' : '待下载' }}</div>
+              <div>{{ props.type === 'target' ? $t('pages.player.download.statusAwaitDownload') :
+                $t('pages.player.download.statusRequireDownload') }}</div>
             </template>
           </t-transfer>
         </div>
         <div class="tip-warp">
-          <span>推荐使用开源下载器：</span>
-          <t-link
-            theme="primary"
-            underline
-            href="https://github.com/HeiSir2014/M3U8-Downloader/releases/"
-            target="_blank"
-          >
-            M3U8-Downloader
+          <span>{{ $t('pages.player.download.recommendDownloaderTip') }}</span>
+          <t-link theme="primary" underline href="https://github.com/HeiSir2014/M3U8-Downloader/releases/"
+            target="_blank">
+            {{ $t('pages.player.download.recommendDownloaderName') }}
           </t-link>
         </div>
       </div>
@@ -49,8 +34,11 @@
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core';
 import _ from 'lodash';
-import { reactive, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+
+import { t } from '@/locales';
+import { supportedFormats } from '@/utils/tool';
 
 const props = defineProps({
   visible: {
@@ -98,11 +86,10 @@ watch(
 
 // 检查复制的复制
 const checkDownloadUrl = (url) => {
-  const allowedExtensions = ['m3u8', 'flv', 'mp4'];
   const urlExtension = url.match(/\.([^.]+)$/)?.[1]; // 使用正则表达式提取文件扩展名
-  const isValid = urlExtension && allowedExtensions.includes(urlExtension); // 检查是否在允许的扩展名列表中
+  const isValid = urlExtension && supportedFormats.includes(urlExtension); // 检查是否在允许的扩展名列表中
 
-  if (!isValid) MessagePlugin.warning('注意: 当前选择非m3u8/flv/mp4播放源');
+  if (!isValid) MessagePlugin.warning(t('pages.player.download.copyCheck'));
 };
 
 // 复制到剪贴板
@@ -114,7 +101,7 @@ const copyToClipboard = (content, successMessage, errorMessage) => {
 
 // 复制下载地址列表
 const downloadSourceChange = () => {
-  const list = [];
+  const list: any = [];
   for (const item of formData.value.season[downloadSource.value]) {
     const [index, url] = item.split('$');
     list.push({
@@ -132,21 +119,21 @@ const copyDownloadUrl = () => {
 
   if (firstUrl) {
     const downloadUrl = downloadTarget.value.join('\n');
-    const successMessage = '复制成功，快到下载器里下载吧!';
-    const errorMessage = '复制失败，当前环境不支持一键复制!';
-    
+    const successMessage = t('pages.player.download.copySuccess');
+    const errorMessage = t('pages.player.download.copyFail');
+
     checkDownloadUrl(firstUrl);
     copyToClipboard(downloadUrl, successMessage, errorMessage);
     formVisible.value = false;
   } else {
-    MessagePlugin.warning('请先选择需要下载的内容!');
+    MessagePlugin.warning(t('pages.player.download.copyEmpty'));
   }
 };
 
 // 复制当前播放地址
 const copyCurrentUrl = () => {
-  const successMessage = '复制成功, 请使用第三方软件!';
-  const errorMessage = '当前环境不支持一键复制,请手动复制链接!';
+  const successMessage = t('pages.player.download.copySuccess');
+  const errorMessage = t('pages.player.download.copyError');
   copyToClipboard(formData.value.current, successMessage, errorMessage);
   checkDownloadUrl(formData.value.current);
 
@@ -168,6 +155,7 @@ const copyCurrentUrl = () => {
 
   .content-warp {
     margin: var(--td-comp-margin-s) 0;
+
     :deep(.t-button + .t-button) {
       margin-left: 0 !important;
     }
@@ -228,7 +216,7 @@ const copyCurrentUrl = () => {
     border: var(--td-size-1) solid transparent;
   }
 
-  &__list-header + :not(.t-transfer__list--with-search) {
+  &__list-header+ :not(.t-transfer__list--with-search) {
     border-top: 1px solid var(--td-border-level-1-color);
   }
 

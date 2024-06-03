@@ -12,7 +12,7 @@ export default {
     recommend: '猜你喜欢',
     actors: '演职员',
     director: '导演',
-    actor: '主演'
+    actor: '主演',
   },
   iptv: {
     epg: '节目',
@@ -38,10 +38,10 @@ export default {
     sniiferError: '嗅探失败,请换源',
     noDefaultAnalyze: '未配置默认解析,自行选择解析线路',
     noRecommendSearch: '该源未找到相关推荐,不执行本次切换',
-    next: '请稍候,正在切换下集'
+    next: '请稍候,正在切换下集',
   },
   placeholder: {
-    analyze: '解析接口'
+    analyze: '解析接口',
   },
   setting: {
     title: '设置',
@@ -51,6 +51,21 @@ export default {
     skipEnd: '结束',
     skipSeconds: '秒',
     skipAd: '跳广告',
-    tip: '开关全局生效'
-  }
+    tip: '开关全局生效',
+  },
+  download: {
+    title: '离线缓存',
+    copy: '复制链接',
+    copyCurrentUrl: '复制当前地址',
+    recommendedDownloaderName: 'M3U8-Downloader',
+    recommendedDownloaderTip: '推荐使用开源下载器',
+    statusAwaitDownload: '待下载',
+    statusRequireDownload: '需下载',
+    soureceSelect: '请选下载源',
+    copySuccess: '复制成功，快到下载器里下载吧',
+    copyFail: '复制失败，当前环境不支持一键复制',
+    copyEmpty: '请先选择需要下载的内容',
+    copyError: '当前环境不支持一键复制, 请手动复制链接',
+    copyCheck: '当前复制的内容可能需要嗅探',
+  },
 };

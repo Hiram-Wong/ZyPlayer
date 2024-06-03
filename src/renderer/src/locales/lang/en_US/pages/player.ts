@@ -12,19 +12,19 @@ export default {
     recommend: 'Recommend',
     actors: 'ActingStaff',
     director: 'Director',
-    actor: 'Actor'
+    actor: 'Actor',
   },
   iptv: {
     epg: 'EPG',
-    channel: 'Channel'
+    channel: 'Channel',
   },
   drive: {
-    anthology: 'Anthology'
+    anthology: 'Anthology',
   },
   status: {
     unplay: 'unplay',
     played: 'played',
-    playing: 'play'
+    playing: 'play',
   },
   infiniteLoading: {
     complete: 'load complete',
@@ -38,10 +38,10 @@ export default {
     official: 'Analyze completed, data is derived from {0}',
     noDefaultAnalyze: 'Not set default, Choose your own analysis line',
     noRecommendSearch: 'No recommendation found for this source,  Switch is not performed',
-    next: 'One moment, Switching next'
+    next: 'One moment, Switching next',
   },
   placeholder: {
-    analyze: 'AnalyzeApi'
+    analyze: 'AnalyzeApi',
   },
   setting: {
     title: 'Setting',
@@ -51,6 +51,21 @@ export default {
     skipEnd: 'End',
     skipSeconds: 'S',
     skipAd: 'Skip ads',
-    tip: 'The switch takes effect globally.'
-  }
-}
+    tip: 'The switch takes effect globally.',
+  },
+  download: {
+    title: 'Offline Cache',
+    copy: 'Copy Link',
+    copyCurrentUrl: 'Copy Current Link',
+    recommendDownloaderName: 'M3U8-Downloader',
+    recommendDownloaderTip: 'Recommend downloader',
+    statusAwaitDownload: 'To be',
+    statusRequireDownload: 'Need',
+    soureceSelect: 'Please select',
+    copySuccess: 'Copy success, quick download to the downloader',
+    copyFail: 'Copy failed, the current environment does not support one-click copying',
+    copyEmpty: 'Please select what you want to download first',
+    copyError: 'The current environment does not support one-click copy, please copy the link manually',
+    copyCheck: 'Currently copied content may require sniffing',
+  },
+};
