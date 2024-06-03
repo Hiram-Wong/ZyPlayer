@@ -142,7 +142,7 @@ const handleItemClick = (key: string | number) => {
 
 const searchEvent = () => {
   listData.value = props.list.filter((item) => {
-    return item.name.includes(searchText.value);
+    return item.name.toLowerCase().includes(searchText.value.toLowerCase());
   });
 };
 </script>
