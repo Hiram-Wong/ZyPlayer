@@ -20,7 +20,7 @@
               <remove-icon />
               <span>{{ $t('pages.setting.header.delete') }}</span>
             </div>
-            <div class="item" @click="checkAllSite">
+            <div class="item" @click="handleAllDataEvent('check')">
               <refresh-icon />
               <span>{{ $t('pages.setting.header.check') }}</span>
             </div>
@@ -61,6 +61,16 @@
           $t('pages.setting.table.site.together') }}</t-tag>
         <t-tag v-else-if="row.search === 2" theme="warning" shape="round" variant="light-outline">{{
           $t('pages.setting.table.site.local') }}</t-tag>
+      </template>
+      <template #type="{ row }">
+        <span v-if="row.type === 0">cms[xml]</span>
+        <span v-else-if="row.type === 1">cms[json]</span>
+        <span v-else-if="row.type === 2">drpy[js0]</span>
+        <span v-else-if="row.type === 6">hipy[t4]</span>
+        <span v-else-if="row.type === 7">js[t3]</span>
+        <span v-else-if="row.type === 8">catvod[nodejs]</span>
+        <span v-else-if="row.type === 3">app[v3]</span>
+        <span v-else-if="row.type === 4">app[v1]</span>
       </template>
       <template #op="slotProps">
         <t-space>
@@ -188,25 +198,21 @@ const refreshEvent = (page = false) => {
 };
 
 // op
-const checkAllSite = async () => {
-  let checkData: any = [];
-  const { select, data } = siteTableConfig.value;
-  if (select.length === 0) {
-    checkData = [...data]
-  } else {
+const checkAllSite = async (select) => {
+  try {
+    let checkData: any = [];
+    const { data } = siteTableConfig.value;
+
     select.forEach((item) => {
       const res = _.find(data, { id: item })
       checkData.push(res)
-    })
-  }
-  MessagePlugin.info('状态批量检测中, 请等待完成')
-  try {
+    });
+
     await Promise.all(checkData.map(item => queue.add(() => checkSingleEvent(item, true))));
     emitReload.emit('film-reload');
-    MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
-    console.log('[setting][site][checkAllSite][error]', err);
-    MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err}`);
+    console.error('[setting][site][checkAllSite][error]', err);
+    throw err;
   }
 };
 
@@ -278,7 +284,7 @@ const removeEvent = async (row) => {
   }
 };
 
-const handleAllDataEvent = (type) => {
+const handleAllDataEvent = async (type) => {
   try {
     const { select } = siteTableConfig.value;
     if (select.length === 0) {
@@ -291,8 +297,11 @@ const handleAllDataEvent = (type) => {
       updateSiteStatus('disable', select);
     } else if (type === 'delete') {
       delSiteItem(select);
+    } else if (type === 'check') {
+      MessagePlugin.info(t('pages.setting.message.checking'));
+      await checkAllSite(select);
     }
-    refreshEvent();
+    if (type !== 'check') refreshEvent();
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][site][handleAllDataEvent][error]', err);
