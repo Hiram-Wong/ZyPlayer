@@ -123,9 +123,11 @@ watch(
 
 const emit = defineEmits(['changeKey', 'contextMenu']);
 
-onClickOutside(headerOutsideRef, () => {
-  isVisible.search = false;
-})
+if (props.search) {
+  onClickOutside(headerOutsideRef, () => {
+    isVisible.search = false;
+  })
+}
 
 const conButtonClick = (item: any, { x, y }: any) => {
   isVisible.contentMenu = true;
