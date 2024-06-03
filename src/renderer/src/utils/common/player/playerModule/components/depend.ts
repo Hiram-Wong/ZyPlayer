@@ -1,4 +1,5 @@
 // import dashjs from 'dashjs';
+import MpegTs from 'mpegts.js';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
 import WebTorrent from './modules/webtorrent';
@@ -84,6 +85,22 @@ const publicStream = {
         return null;
       }
     },
+    customMpegts: (video: HTMLVideoElement, url: string): any => {
+      if (MpegTs.isSupported()) {
+        const playerMpegts = MpegTs.createPlayer({
+          type: 'mse', // could also be mpegts, m2ts, flv
+          isLive: false,
+          url,
+        });
+        playerMpegts.attachMediaElement(video);
+        playerMpegts.load();
+        playerMpegts.play();
+        return playerMpegts;
+      } else {
+        console.log('mpegts is not supported.');
+        return null;
+      }
+    },
   },
   switch: {
     customHls: (video: HTMLVideoElement, hls: any, url: string): Hls => {
@@ -145,6 +162,18 @@ const publicStream = {
       });
       return client;
     },
+    customMpegts: (video: HTMLVideoElement, mpegts: any, url: string) => {
+      mpegts.destroy();
+      const playerMpegts = MpegTs.createPlayer({
+        type: 'mse', // could also be mpegts, m2ts, flv
+        isLive: false,
+        url,
+      });
+      playerMpegts.attachMediaElement(video);
+      playerMpegts.load();
+      playerMpegts.play();
+      return playerMpegts;
+    },
   },
   destroy: {
     customHls: (player: any) => {
@@ -163,6 +192,9 @@ const publicStream = {
       // player.torrent.remove(player.video.src);
       player.torrent.destroy();
       delete player.torrent;
+    },
+    customMpegts: (player: any) => {
+      player.destroy();
     },
   },
 };

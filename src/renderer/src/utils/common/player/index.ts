@@ -36,7 +36,8 @@
  *   - 修复artplayer弹幕库5.1版本-参数对齐
  *   - 修复nplayer弹幕不滚动-BulletOption中type赋值错误
  *   - 修复dplayer弹幕控制不生效-弹幕开关控制逻辑误删
- *
+ * - 2024.6.3:
+ *   - 支持mp3|m4a音频-使用MPEG-TS库
  *
  * ---
  */
@@ -46,6 +47,9 @@ import { checkMediaType, checkLiveM3U8 } from '@/utils/tool';
 let playerModulesCache: { [key: string]: any } = {};
 
 const mapVideoTypeToPlayerType = (videoType: string): string | undefined => {
+  const audioTypes = ['mp3', 'm4a', 'wav', 'flac', 'aac', 'ogg', 'wma'];
+  if (audioTypes.includes(videoType)) return 'customMpegts';
+
   switch (videoType) {
     case 'mp4':
       return 'customMp4';

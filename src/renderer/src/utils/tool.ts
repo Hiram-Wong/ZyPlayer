@@ -98,10 +98,26 @@ const getHtml = async (url: string, method = 'GET', encode = 'UTF-8', headers = 
   }
 };
 
+const supportedFormats: string[] = [
+  'mp4',
+  'mkv',
+  'flv',
+  'm3u8',
+  'avi',
+  'magnet',
+  'mpd',
+  'mpd',
+  'mp3',
+  'm4a',
+  'wav',
+  'flac',
+  'aac',
+  'ogg',
+  'wma',
+];
+
 // 判断媒体类型
 const checkMediaType = async (url: string): Promise<string> => {
-  const supportedFormats: string[] = ['mp4', 'mkv', 'flv', 'm3u8', 'avi', 'magnet', 'mpd'];
-
   if (url && (url.startsWith('http') || url.startsWith('magnet'))) {
     const fileType: any = supportedFormats.find((format) => url.includes(format));
     if (fileType) {
@@ -127,6 +143,7 @@ const getMeadiaType = async (url: string): Promise<string> => {
       const supportedFormats: Record<string, string> = {
         'video/mp4': 'mp4',
         'video/x-flv': 'flv',
+        'video/ogg': 'ogx',
         'application/vnd.apple.mpegurl': 'm3u8',
         'application/x-mpegURL': 'm3u8',
         'application/octet-stream': 'm3u8',
@@ -136,6 +153,10 @@ const getMeadiaType = async (url: string): Promise<string> => {
         'video/quicktime': 'mov',
         'video/x-ms-wmv': 'wmv',
         'video/3gpp': '3gp',
+        'audio/mpeg': 'mp3',
+        'audio/wav': 'mav',
+        'audio/aac': 'aac',
+        'audio/ogg': 'oga',
       };
 
       for (const format in supportedFormats) {
@@ -338,6 +359,7 @@ const decodeHtml = (str: string) => {
 export {
   getConfig,
   getHtml,
+  supportedFormats,
   getMeadiaType,
   checkMediaType,
   checkUrlIpv6,
