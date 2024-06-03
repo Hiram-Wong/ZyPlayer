@@ -197,7 +197,7 @@ const searchEvent = () => {
       flex-direction: column;
       align-items: flex-start;
       justify-content: space-between;
-      height: calc(100% - 2 * var(--td-comp-margin-m) - 1.5em);
+      height: calc(100% - var(--td-comp-margin-s) - var(--td-comp-margin-m) - 32px);
 
       .nav-sub-tab-top {
         overflow: auto;
