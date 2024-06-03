@@ -193,7 +193,7 @@
               </div>
             </t-collapse-panel>
           </t-collapse>
-          <div class="code-box" id="codeBox"></div>
+          <div class="code-box" id="codeBox" @drop.prevent="handleDrop" @dragover.prevent></div>
         </div>
       </div>
       <div class="right">
@@ -600,6 +600,19 @@ const templates = computed(() => {
   const keysAsObjects = Object.keys(dictionary).map(key => ({ label: key, value: key }));
   return keysAsObjects;
 });
+
+const handleDrop = (e: DragEvent) => {
+  e.preventDefault();
+  const file = e.dataTransfer?.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (editor) editor.setValue(content);
+    };
+    reader.readAsText(file);
+  }
+};
 
 const changeLanguage = () => {
   if (editor) monaco.editor.setModelLanguage(editor.getModel()!, config.language);
