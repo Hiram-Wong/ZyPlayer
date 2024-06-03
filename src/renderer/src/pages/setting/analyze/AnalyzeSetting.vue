@@ -178,7 +178,7 @@ const rehandleFilterChange = (filters, ctx) => {
   console.log('filter-change', filters, ctx);
   analyzeTableConfig.value.filter = {
     ...filters,
-    createTime: filters.type || [],
+    type: filters.type || [],
   };
   request(filters);
 };

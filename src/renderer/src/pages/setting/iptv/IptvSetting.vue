@@ -160,7 +160,7 @@ const rehandleFilterChange = (filters, ctx) => {
   console.log('filter-change', filters, ctx);
   iptvTableConfig.value.filter = {
     ...filters,
-    createTime: filters.type || [],
+    type: filters.type || [],
   };
   request(filters);
 };
