@@ -884,7 +884,7 @@ const timerUpdatePlayProcess = () => {
 
     // 预加载下一步链接 提前30秒预加载
     if (watchTime + 30 >= duration && duration !== 0) {
-      if (!isLast() && !tmp.preloadLoading) {
+      if (!isLast() && !tmp.preloadLoading && set.value.preloadNext) {
         try {
           tmp.preloadLoading = true;
           await preloadNext(isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1]);
