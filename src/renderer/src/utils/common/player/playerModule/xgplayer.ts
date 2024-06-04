@@ -9,7 +9,6 @@ import Mp4Plugin from 'xgplayer-mp4';
 import ShakaPlugin from 'xgplayer-shaka';
 // import DashPlugin from 'xgplayer-dash';
 
-
 import { publicColor, publicIcons } from './components';
 
 const publicListener = {
@@ -122,7 +121,7 @@ const create = (options: any): XgPlayer => {
     SimplePlayer.defaultPreset = LivePreset;
     return new SimplePlayer({ ...options });
   } else {
-    options.plugins = [...plugins, Danmu];
+    options.plugins = [...options.plugins, Danmu];
     return new XgPlayer({ ...options });
   }
 };

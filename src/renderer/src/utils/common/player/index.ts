@@ -38,10 +38,14 @@
  *   - 修复dplayer弹幕控制不生效-弹幕开关控制逻辑误删
  * - 2024.6.3:
  *   - 支持mp3|m4a音频-使用MPEG-TS库
+ * - 2024.6.4:
+ *   - 修复西瓜播放器加载视频错误
+ *   - 修复多次创建播放器扩展插件会重复添加-默认参数使用深拷贝
  *
  * ---
  */
 
+import cloneDeep from 'lodash/cloneDeep';
 import { checkMediaType, checkLiveM3U8 } from '@/utils/tool';
 
 let playerModulesCache: { [key: string]: any } = {};
@@ -156,7 +160,7 @@ const playerCreate = async (
   const isLive = type === 'iptv' ? await checkLiveM3U8(url) : false;
   videoType = videoType || (await checkMediaType(url)) || '';
 
-  let config = options;
+  let config = cloneDeep(options);
   if (playerMode === 'xgplayer') {
     config.id = container;
     config.url = url;
