@@ -39,7 +39,7 @@
     "electron-updater": "^6.1.8",
     "fs-extra": "^11.2.0",
     "ip": "^2.0.1",
-    "puppeteer-core": "~20.0.0",
+    "puppeteer-core": "~21.3.8",
     "puppeteer-in-electron": "^3.0.5",
     "v8-compile-cache": "^2.4.0"
   },
@@ -79,7 +79,7 @@
     "dashjs": "^4.7.4",
     "dayjs": "^1.11.11",
     "dplayer": "^1.27.1",
-    "electron": "^22.0.0",
+    "electron": "~22.3.27",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.2.0",
     "eslint": "^9.4.0",
