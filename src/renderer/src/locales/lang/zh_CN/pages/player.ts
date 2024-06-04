@@ -9,6 +9,7 @@ export default {
     share: '分享',
     analyze: '解析',
     anthology: '选集',
+    line: '线路',
     recommend: '猜你喜欢',
     actors: '演职员',
     director: '导演',
