@@ -1,7 +1,7 @@
 import { is } from '@electron-toolkit/utils';
-import remote from '@electron/remote/main';
+import { enable as renoteEnable } from '@electron/remote/main';
 import { app, BrowserWindow, nativeTheme, shell } from 'electron';
-import electronLocalshortcut from 'electron-localshortcut';
+import { register as localshortcutRegister, unregisterAll as localshortcutUnregisterAll } from 'electron-localshortcut';
 import { join } from 'path';
 import url from 'url';
 
@@ -87,7 +87,7 @@ const createMain = () => {
     },
   });
 
-  remote.enable(mainWindow.webContents);
+  renoteEnable(mainWindow.webContents);
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
@@ -104,7 +104,7 @@ const createMain = () => {
   });
 
   mainWindow.on('ready-to-show', () => {
-    electronLocalshortcut.register(mainWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
+    localshortcutRegister(mainWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
       if (mainWindow!.webContents.isDevToolsOpened()) {
         mainWindow!.webContents.closeDevTools();
       } else {
@@ -124,7 +124,7 @@ const createMain = () => {
 
   mainWindow.on('close', () => {
     saveWindowState('main');
-    electronLocalshortcut.unregisterAll(mainWindow!);
+    localshortcutUnregisterAll(mainWindow!);
   });
 
   mainWindow.on('closed', () => {
@@ -173,7 +173,7 @@ const createPlay = () => {
     },
   });
 
-  remote.enable(playWindow.webContents);
+  renoteEnable(playWindow.webContents);
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     playWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/#/play`);
@@ -194,7 +194,7 @@ const createPlay = () => {
   });
 
   playWindow.on('ready-to-show', () => {
-    electronLocalshortcut.register(playWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
+    localshortcutRegister(playWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
       const webContents = playWindow!.webContents;
       if (webContents.isDevToolsOpened()) {
         webContents.closeDevTools();
@@ -209,7 +209,7 @@ const createPlay = () => {
   playWindow.on('close', () => {
     saveWindowState('play');
     if (playWindow) playWindow.webContents.send('destroy-playerWindow');
-    electronLocalshortcut.unregisterAll(playWindow!);
+    localshortcutUnregisterAll(playWindow!);
   });
 
   playWindow.on('closed', () => {

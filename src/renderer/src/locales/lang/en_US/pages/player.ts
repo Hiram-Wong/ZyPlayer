@@ -9,6 +9,7 @@ export default {
     share: 'share',
     analyze: 'Analyze',
     anthology: 'Anthology',
+    line: 'Line',
     recommend: 'Recommend',
     actors: 'ActingStaff',
     director: 'Director',

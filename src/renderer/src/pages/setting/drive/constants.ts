@@ -19,13 +19,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     align: 'left',
     ellipsis: true,
   },
-  {
-    title: t('pages.setting.table.header.status'),
-    colKey: 'isActive',
-    width: 100,
-    align: 'left',
-    ellipsis: true,
-  },
+  { title: t('pages.setting.table.header.status'), align: 'left', colKey: 'isActive', width: 80 },
   {
     title: t('pages.setting.table.header.operate'),
     colKey: 'op',

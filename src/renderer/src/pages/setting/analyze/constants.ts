@@ -28,7 +28,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     },
     width: 100,
   },
-  { title: t('pages.setting.table.header.status'), colKey: 'isActive', width: 100, align: 'left', ellipsis: true },
+  { title: t('pages.setting.table.header.status'), align: 'left', colKey: 'isActive', width: 80 },
   {
     align: 'center',
     fixed: 'right',

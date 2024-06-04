@@ -190,10 +190,26 @@
               <div class="box-anthology-header">
                 <div class="left">
                   <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
+                  <div class="box-anthology-line">
+                    <t-dropdown placement="bottom" :max-height="250">
+                      <t-button size="small" theme="default" variant="text" auto-width>
+                        <span class="title">{{ $t('pages.player.film.line') }}</span>
+                        <template #suffix>
+                          <chevron-down-icon size="16" />
+                        </template>
+                      </t-button>
+                      <t-dropdown-menu>
+                        <t-dropdown-item v-for="(_, key, index) in season" :key="index" :value="key"
+                          @click="(options) => switchLineEvent(options.value as string)">
+                          <span :class="[key as any === active.flimSource ? 'active' : '']">{{ key }}</span>
+                        </t-dropdown-item>
+                      </t-dropdown-menu>
+                    </t-dropdown>
+                  </div>
                   <div class="box-anthology-analyze" v-show="isVisible.official">
                     <t-dropdown placement="bottom" :max-height="250">
                       <t-button size="small" theme="default" variant="text" auto-width>
-                        <span>{{ $t('pages.player.film.analyze') }}</span>
+                        <span class="title">{{ $t('pages.player.film.analyze') }}</span>
                         <template #suffix>
                           <chevron-down-icon size="16" />
                         </template>
@@ -215,12 +231,27 @@
                 </div>
               </div>
               <div class="listbox">
-                <t-tabs v-model="active.flimSource" class="film-tabs">
+                <div class="tag-container">
+                  <div v-for="(item, index) in season?.[active.flimSource]" :key="item"
+                    :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
+                    @click="changeEvent(item)">
+                    <t-tooltip :content="formatName(item)">
+                      <div class="mainVideo_inner">
+                        {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index,
+                          season?.[active.flimSource]?.length)
+                        }}
+                        <div class="playing"></div>
+                      </div>
+                    </t-tooltip>
+                  </div>
+                </div>
+                <!-- <t-tabs v-model="active.flimSource" class="film-tabs">
                   <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key" :label="key">
                     <div class="tag-container">
-                      <div v-for="(item, index) in value" :key="item"
+                      <div v-for="(item, index) in season?.[active.flimSource]" :key="item"
                         :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
                         @click="changeEvent(item)">
+                        {{ index }} {{ item }}
                         <t-tooltip :content="formatName(item)">
                           <div class="mainVideo_inner">
                             {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index, value.length)
@@ -231,7 +262,7 @@
                       </div>
                     </div>
                   </t-tab-panel>
-                </t-tabs>
+                </t-tabs> -->
               </div>
               <div class="recommend" v-show="recommend.length != 0">
                 <div class="component-title">{{ $t('pages.player.film.recommend') }}</div>
@@ -621,6 +652,10 @@ const fetchAnalyze = async (): Promise<void> => {
   if (response.default?.id) active.analyzeId = response.default?.id;
 };
 
+const switchLineEvent = async (id: string) => {
+  active.flimSource = id;
+};
+
 // 切换解析接口
 const switchAnalyzeEvent = async (id: string) => {
   active.analyzeId = id;
@@ -884,7 +919,7 @@ const timerUpdatePlayProcess = () => {
 
     // 预加载下一步链接 提前30秒预加载
     if (watchTime + 30 >= duration && duration !== 0) {
-      if (!isLast() && !tmp.preloadLoading) {
+      if (!isLast() && !tmp.preloadLoading && set.value.preloadNext) {
         try {
           tmp.preloadLoading = true;
           await preloadNext(isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1]);
@@ -1640,7 +1675,8 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
                 font-weight: 600;
               }
 
-              .box-anthology-analyze {
+              .box-anthology-analyze,
+              .box-anthology-line {
                 :deep(.t-button) {
                   padding: 0;
                 }
@@ -1650,6 +1686,8 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
                 }
 
                 :deep(.t-button--variant-text) {
+                  color: var(--td-text-color-secondary);
+
                   .t-button__suffix {
                     margin-left: var(--td-comp-margin-xxs);
                   }
@@ -1757,7 +1795,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
             .component-title {
               font-size: 16px;
               line-height: 16px;
-              margin-top: 24px;
+              margin-top: 10px;
               margin-bottom: 12px;
               font-weight: 500;
               color: var(--td-text-color-primary);
