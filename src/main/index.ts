@@ -1,6 +1,5 @@
 import 'v8-compile-cache'; // 需第一个加载
-
-import remote from '@electron/remote/main';
+import { initialize as renoteInitialize } from '@electron/remote/main';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 
 import { app, BrowserWindow, globalShortcut, nativeTheme, session } from 'electron';
@@ -32,13 +31,13 @@ logger.info(`[chrome] version:${process.versions.chrome}`);
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'; // 关闭安全警告
 app.commandLine.appendSwitch(
   'disable-features',
-  'OutOfBlinkCors, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf',
-); // 禁用OutOfBlinkCors
-app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 启用HEVC
+  'OutOfBlinkCors, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process',
+); // 禁用
+app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 启用
 app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书错误
 app.commandLine.appendSwitch('disable-web-security');
 
-remote.initialize(); // 主进程初始化
+renoteInitialize(); // 主进程初始化
 dbInit(); // 初始化数据库
 initServer(); // 后端服务
 
