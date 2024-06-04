@@ -80,7 +80,8 @@ const puppeteerInElectron = async (
         if (pageId) {
           if (pageStore[pageId]) {
             if (pageStore[pageId]?.timerId) await clearTimeout(pageStore[pageId].timerId);
-            if (pageStore[pageId]?.page) await pageStore[pageId].page.close().catch((err) => logger.error(err));
+            if (pageStore[pageId]?.page)
+              await pageStore[pageId].page.close().catch((err) => logger.error(`[pie][close]${err}`));
             if (pageStore[pageId]?.browser) await pageStore[pageId].browser.disconnect();
             delete pageStore[pageId];
           }
@@ -88,10 +89,11 @@ const puppeteerInElectron = async (
       };
 
       page.on('request', async (req) => {
+        if (req.isInterceptResolutionHandled())
+          return req.abort().catch((err) => logger.error(`[pie][isInterceptResolutionHandled]${err}`)); // 已处理过的请求不再处理
+
         const reqUrl = req.url(); // 请求url
         // logger.info(`[reqUrl]:${reqUrl}`);
-        if (req.isInterceptResolutionHandled()) return req.abort().catch((err) => logger.error(err)); // 已处理过的请求不再处理
-
         const reqHeaders = req.headers(); // 请求头
         const { referer, 'user-agent': userAgent } = reqHeaders;
         const headers = {};
@@ -100,38 +102,36 @@ const puppeteerInElectron = async (
 
         if (customRegex && reqUrl.match(new RegExp(customRegex, 'gi'))) {
           logger.info(`[pie]正则匹配:${reqUrl}`);
-          page.removeAllListeners("request");
+          page.removeAllListeners('request');
           await cleanup(pageId);
-          req.abort().catch((e) => logger.error(e));
+          req.abort().catch((err) => logger.error(`[pie][RegExp]${err}`));
           return resolve(handleResponse(200, 'success', { url: reqUrl, header: headers }));
         }
 
         if (isVideoUrl(reqUrl)) {
           logger.info(`[pie]后缀名匹配:${reqUrl}`);
-          page.removeAllListeners("request");
+          page.removeAllListeners('request');
           await cleanup(pageId);
-          req.abort().catch((e) => logger.error(e));
+          req.abort().catch((err) => logger.error(`[pie][isVideoUrl]${err}`));
           return resolve(handleResponse(200, 'success', { url: reqUrl, header: headers }));
         }
 
         if (req.method().toLowerCase() === 'head') {
-          // logger.info(`[pie][head]:${reqUrl}`);
-          return req.abort().catch((err) => logger.error(err));
-        }
-        //
-        if (/\.(png|jpg|jpeg|ttf)$/.test(reqUrl) && ["stylesheet", "image", "font"].includes(req.resourceType())) {
-          // logger.info(`[pie][font]:${reqUrl}`);
-          return req.abort().catch((err) => logger.error(err));
+          return req.abort().catch((err) => logger.error(`[pie][method]${err}`));
         }
 
-        return req.continue().catch((err) => logger.error(err));
+        if (/\.(png|jpg|jpeg|ttf)$/.test(reqUrl) && ['stylesheet', 'image', 'font'].includes(req.resourceType())) {
+          return req.abort().catch((err) => logger.error(`[pie][resourceType]${err}`));
+        }
+
+        req.continue().catch((err) => logger.error(`[pie][continue]${err}`));
       });
 
       // 设置超时
       if (!pageStore[pageId].timerId) {
         logger.info('--------!timerId---------');
         pageStore[pageId].timerId = setTimeout(async () => {
-          page.removeAllListeners("request");
+          page.removeAllListeners('request');
           await cleanup(pageId);
           logger.info(`[pie]id: ${pageId} sniffer timeout`);
           reject(handleResponse(500, 'fail', new Error('sniffer timeout')));
