@@ -91,17 +91,20 @@ lsQ9xY0xYPpRZUZKMEeR7e9gmRNLAgMBAAE=
 -----END RSA PUBLIC KEY-----
 `.trim();
 
+  // @ts-ignore
   let pkcs1_public_pem = `
 MEgCQQCrI0pQ/ERRpJ3Ou190XJedFq846nDYP52rOtXyDxlFK5D3p6JJu2RwsKwy
 lsQ9xY0xYPpRZUZKMEeR7e9gmRNLAgMBAAE=
 `.trim();
 
+  // @ts-ignore
   let pkcs8_public = `
 -----BEGIN PUBLIC KEY-----
 MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKsjSlD8RFGknc67X3Rcl50WrzjqcNg/
 nas61fIPGUUrkPenokm7ZHCwrDKWxD3FjTFg+lFlRkowR5Ht72CZE0sCAwEAAQ==
 -----END PUBLIC KEY-----`.trim();
 
+  // @ts-ignore
   let pkcs8_public_pem = `
 MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKsjSlD8RFGknc67X3Rcl50WrzjqcNg/
 nas61fIPGUUrkPenokm7ZHCwrDKWxD3FjTFg+lFlRkowR5Ht72CZE0sCAwEAAQ==
@@ -119,6 +122,7 @@ EJNBXVRTK42SNsZ2hJ/9xLwOwnH2epT8Q43s3Q==
 -----END RSA PRIVATE KEY-----
 `.trim()
 
+  // @ts-ignore
   let pkcs8_private = `
 -----BEGIN PRIVATE KEY-----
 MIIBUgIBADANBgkqhkiG9w0BAQEFAASCATwwggE4AgEAAkEAqyNKUPxEUaSdzrtf
@@ -263,7 +267,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta24 20240601`;
+const VERSION = `${vercode} 3.9.50beta25 20240604`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -291,7 +295,7 @@ const IOS_UA =
 const RULE_CK = 'cookie'; // 源cookie的key值
 // const KEY = typeof(key)!=='undefined'&&key?key:'drpy_' + (rule.title || rule.host); // 源的唯一标识
 const CATE_EXCLUDE = '首页|留言|APP|下载|资讯|新闻|动态';
-const TAB_EXCLUDE = '猜你|喜欢|下载|剧情|热播';
+const TAB_EXCLUDE = '猜你|喜欢|下载|剧情|榜|评论';
 const OCR_RETRY = 3; // ocr验证重试次数
 // const OCR_API = 'http://drpy.nokia.press:8028/ocr/drpy/text';//ocr在线识别接口
 const OCR_API = 'https://api.nn.ci/ocr/b64/text';//ocr在线识别接口
@@ -614,6 +618,7 @@ Object.defineProperty(Object.prototype, 'myValues', {
     var res=[]
     for(var k in obj){
       if(obj.hasOwnProperty(k)){//需判断是否是本身的属性
+        // @ts-ignore
         res.push(obj[k]);
       }
     }
@@ -631,6 +636,7 @@ if (typeof Object.prototype.values != 'function') {
       var res=[]
       for(var k in obj){
         if(obj.hasOwnProperty(k)){//需判断是否是本身的属性
+          // @ts-ignore
           res.push(obj[k]);
         }
       }
@@ -984,6 +990,7 @@ const RSA = {
   decode(data, key, option) {
     option = option || {};
     if (typeof JSEncrypt === 'function') {
+      // @ts-ignore
       const chunkSize = option.chunkSize ?? 117; // 默认分段长度为117
       const privateKey = this.getPrivateKey(key);
       const decryptor = new JSEncrypt();
@@ -995,6 +1002,7 @@ const RSA = {
   encode(data, key, option ) {
     option = option || {};
     if (typeof JSEncrypt === 'function') {
+      // @ts-ignore
       const chunkSize = option.chunkSize ?? 117; // 默认分段长度为117
       const publicKey = this.getPublicKey(key);
       const encryptor = new JSEncrypt();
@@ -1113,13 +1121,14 @@ const fixAdM3u8 = (m3u8_text: string, m3u8_url: string, ad_remove: string) => {
   return m3u8_text;
 };
 
+
 /**
  *  智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
  * @param m3u8_url m3u8播放地址
  * @param headers 自定义访问m3u8的请求头,可以不传
  * @returns {string}
  */
-const fixAdM3u8Ai = (m3u8_url: string, headers:object=null) => {
+const fixAdM3u8Ai = (m3u8_url: string, headers:object|null=null) => {
   let ts = new Date().getTime();
   let option = headers ? {headers:headers}:{};
 
@@ -1494,7 +1503,7 @@ const jq = parseTags.jq;
  * @returns {string}
  */
 const readFile = (filePath) => {
-  // filePath = filePath || './uri.min.js';
+  filePath = filePath || './uri.min.js';
   // var fd = os.open(filePath);
   // var buffer = new ArrayBuffer(1024);
   // var len = os.read(fd, buffer, 0, 1024);
@@ -1548,6 +1557,7 @@ var OcrApi = {
       }
       code = html || '';
     } catch (e) {
+      // @ts-ignore
       log(`OCR识别验证码发生错误:${e.message}`)
     }
     return code
@@ -1799,6 +1809,7 @@ const request = (url: string, obj: any = undefined, ocr_flag: boolean = false) =
  * @returns {string|DocumentFragment|*}
  */
 const post = (url: string, obj:object={}) => {
+  // @ts-ignore
   obj.method = 'POST';
   return request(url, obj);
 };
@@ -1812,6 +1823,7 @@ const post = (url: string, obj:object={}) => {
  * @returns {{cookie: string, html: (*|string|DocumentFragment)}}
  */
 const reqCookie = (url:string, obj:object={}, all_cookie:boolean=false) => {
+  // @ts-ignore
   obj.withHeaders = true;
   let html = request(url, obj);
   let json = JSON.parse(html);
@@ -3027,21 +3039,24 @@ function getOriginalJs(js_code){
  * @param arg
  */
 function runMain(main_func_code, arg){
+  // @ts-ignore
   let mainFunc = function(arg){return ''};
   try {
     eval(main_func_code+'\nmainFunc=main;');
     return mainFunc(arg);
   }catch (e) {
+    // @ts-ignore
     log(`执行main_funct发生了错误:${e.message}`);
     return ''
   }
 }
 
+// @ts-ignore
 /**
  * js源预处理特定返回对象中的函数
  * @param ext
  */
-const init = (ext) => {
+const init = (ext:string|object) => {
   console.log('[t3]init');
   // init前重置rule和fetch_params
   rule = {};
@@ -3071,6 +3086,7 @@ const init = (ext) => {
         ext = getOriginalJs(ext);
         // eval(ext.replace('var rule', 'rule'));
         // eval("(function(){'use strict';"+ext.replace('var rule', 'rule')+"})()");
+        // @ts-ignore
         eval("(function(){"+ext.replace('var rule', 'rule')+"})()");
       }
     }
@@ -3098,6 +3114,7 @@ const init = (ext) => {
         console.log(`[t3][publish]执行${rule['hostJs']}获取host发生错误:${e}`);
       }
     }
+    rule['类型'] = rule['类型'] || '影视'; // 影视|听书|漫画|小说
     rule['url'] = rule['url'] || '';
     rule['double'] = rule['double'] || false;
     rule['homeUrl'] = rule['homeUrl'] || '';
@@ -3186,6 +3203,11 @@ const init = (ext) => {
     return init_test();
   } catch (e) {
     console.info('[t3][init]init_test发生错误:', e);
+    return {
+      version: VERSION,
+      rkey: RKEY,
+      rule: {},
+    }
   }
 };
 

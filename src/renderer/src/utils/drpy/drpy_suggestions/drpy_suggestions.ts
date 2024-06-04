@@ -65,6 +65,7 @@ const Snippet = [
     label: '$rule',
     insertText: `
 var rule = {
+  类型:'影视',//影视|听书|漫画|小说
   title:'',
   host:'',
   url:'',
@@ -110,6 +111,7 @@ var rule = {
     label: '$ruleJs',
     insertText: `
 var rule = {
+  类型:'影视',//影视|听书|漫画|小说
   title:'',
   host:'',
   url:'',
@@ -182,9 +184,19 @@ Object.assign(muban.mxone5.二级,{
     documentation: `Object.assign(muban.xx模板.xx属性,{})`,
   },
   {
+    label: '$getOriginalJs',
+    insertText: `
+let a = \`\`.trim();
+console.log(getOriginalJs(a));
+    `.trim(),
+    detail: '获取加密前的js源代码',
+    documentation: `getOriginalJs(js_code)`,
+  },
+  {
     label: '$ruleTemplate',
     insertText: `
 var rule = {
+    类型:'影视',//影视|听书|漫画|小说
     title:'规则标题',
     编码:'utf-8',
     搜索编码:'utf-8',
@@ -878,43 +890,51 @@ const Variable = [
 const createDependencyProposals = (range: object, monaco: any) => {
   let suggestions = [];
   // 代码片段
+  // @ts-ignore
   let suggestions_27 = Snippet.map((it) => {
     Object.assign(it, {
       kind: monaco.languages.CompletionItemKind.Snippet,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: range,
     });
+    // @ts-ignore
     suggestions.push(it);
     return it;
   });
   // 函数
+  // @ts-ignore
   let suggestions_1 = Function.map((it) => {
     Object.assign(it, {
       kind: monaco.languages.CompletionItemKind.Function,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: range,
     });
+    // @ts-ignore
     suggestions.push(it);
     return it;
   });
   // 关键词
+  // @ts-ignore
   let suggestions_17 = Keyword.map((it) => {
     Object.assign(it, {
       kind: monaco.languages.CompletionItemKind.Keyword,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.None,
       range: range,
     });
+    // @ts-ignore
     suggestions.push(it);
     return it;
   });
 
   // 变量
+  // @ts-ignore
   let suggestions_4 = Variable.map((it) => {
     Object.assign(it, {
       kind: monaco.languages.CompletionItemKind.Variable,
       insertTextRules: monaco.languages.CompletionItemInsertTextRule.None,
       range: range,
     });
+    // @ts-ignore
     suggestions.push(it);
     return it;
   });
