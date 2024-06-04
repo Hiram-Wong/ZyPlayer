@@ -164,6 +164,7 @@ const getMubans = () => {
         'ul.stui-vodlist__media&&li;a&&title;.lazyload&&data-original;.text-muted&&Text;a&&href;.text-muted:eq(-1)&&Text',
     },
     默认: {
+      类型:'影视',//影视|听书|漫画|小说
       title: '',
       host: '',
       url: '',

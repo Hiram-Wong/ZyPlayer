@@ -101,6 +101,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   headers = keysToLowerCase(headers);
   // 从content-type拿到正确的网页编码
   if(headers['content-type'] && /charset=(.*)/i.test(headers['content-type'])){
+    // @ts-ignore
     encoding = headers['content-type'].match(/charset=(.*)/i)[1].split(';')[0].trim();
   }
 

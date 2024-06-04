@@ -173,6 +173,7 @@ class Jsoup {
     return res;
   }
 
+  // @ts-ignore
   pdfl(html: string, parse: string, list_text: string, list_url: string, url_key: string): string[] {
     if (!html || !parse) return [];
     parse = this.parseHikerToJq(parse, false);
@@ -280,6 +281,7 @@ class Jsoup {
       ret = `${ret}`;
     }
 
+    // @ts-ignore
     return ret;
   }
 
