@@ -985,6 +985,11 @@ const decodeStr = (input, encoding) => {
   return input;
 };
 
+function getCryptoJS() {
+  // return request('https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/crypto-hiker.js');
+  return 'console.log("CryptoJS已装载");'
+}
+
 // 封装的RSA加解密类
 const RSA = {
   decode(data, key, option) {
