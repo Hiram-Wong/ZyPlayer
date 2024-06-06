@@ -1,68 +1,70 @@
 <template>
   <div class="search-bar">
-    <t-input-adornment style="height: 30px">
-      <template #prepend>
-        <t-select autoWidth v-model="active.type" class="search-select">
-          <t-option key="film" :label="$t('pages.search.film')" value="film" />
-          <t-option key="iptv" :label="$t('pages.search.iptv')" value="iptv" />
-        </t-select>
-      </template>
-      <template #append>
-        <search-icon size="large" @click="searchEvent(searchValue)" style="cursor: pointer;" />
-      </template>
-      <t-popup placement="bottom-right" :visible="isVisible.popup" :on-visible-change="popupVisibleEvent">
-        <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" :on-focus="focusEvent"
-          v-model="searchValue" :on-enter="searchEvent" />
-        <template #content>
-          <div class="search-content">
-            <div class="history" v-show="searchList.length > 0">
-              <div class="history-nav">
-                <div class="history-title">{{ $t('pages.search.searchHistory') }}</div>
-                <div class="history-clear" @click.stop="clearSearchHistory">
-                  <delete-icon />
-                </div>
-              </div>
-              <div class="history-content">
-                <t-tag class="nav-item" shape="round" variant="outline" v-for="(item, index) in searchList" :key="index"
-                  @click="searchEvent(item.title)">{{ item.title }}</t-tag>
+    <t-popup placement="bottom-right" :visible="isVisible.popup" :on-visible-change="popupVisibleEvent">
+      <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" clearable :on-focus="focusEvent"
+        v-model="searchValue" :on-enter="searchEvent">
+        <template #label>
+          <t-select auto-width v-model="active.filmGroupType" class="search-select" v-if="route.name === 'FilmIndex'"
+            @click.stop>
+            <t-option key="site" :label="$t('pages.search.site')" value="site" />
+            <t-option key="group" :label="$t('pages.search.group')" value="group" />
+            <t-option key="all" :label="$t('pages.search.all')" value="all" />
+          </t-select>
+        </template>
+        <template #suffixIcon>
+          <search-icon @click="searchEvent(searchValue)" style="cursor: pointer;" />
+        </template>
+      </t-input>
+      <template #content v-if="route.name === 'FilmIndex'">
+        <div class="search-content">
+          <div class="history" v-show="searchList.length > 0">
+            <div class="history-nav">
+              <div class="history-title">{{ $t('pages.search.searchHistory') }}</div>
+              <div class="history-clear" @click.stop="clearSearchHistory">
+                <delete-icon />
               </div>
             </div>
-            <div class="hot">
-              <div class="hot-nav">
-                <span :class="['nav-item', item.key === active.flag ? 'nav-item-active' : '']"
-                  v-for="item in hotConfig.hotOption" :key="item.key" @click="changeHotSource(item.key)">{{ item.name
-                  }}</span>
-              </div>
-              <div class="hot-content">
-                <template v-for="i in 5" :key="i">
-                  <t-skeleton theme="text" :loading="isVisible.load" class="news-skeleton" />
-                </template>
-                <div v-if="!isVisible.load">
-                  <div v-if="hotConfig.hotData.length !== 0" class="hot-data">
-                    <div v-for="(item, index) in hotConfig.hotData" :key="item.vod_id" class="rax-view-v2 hot-item"
-                      @click="searchEvent(item.vod_name)">
-                      <div class="normal-view" :class="[index in [0, 1, 2] ? `color-${index + 1}` : '']">
-                        <div class="normal-index">{{ index + 1 }}</div>
-                        <div class="normal-title no-warp">{{ item.vod_name }}</div>
-                        <div class="normal-tip">{{ item.vod_hot }}</div>
-                      </div>
+            <div class="history-content">
+              <t-tag class="nav-item" shape="round" variant="outline" v-for="(item, index) in searchList" :key="index"
+                @click="searchEvent(item.title)">{{ item.title }}</t-tag>
+            </div>
+          </div>
+          <div class="hot">
+            <div class="hot-nav">
+              <span :class="['nav-item', item.key === active.flag ? 'nav-item-active' : '']"
+                v-for="item in hotConfig.hotOption" :key="item.key" @click="changeHotSource(item.key)">{{ item.name
+                }}</span>
+            </div>
+            <div class="hot-content">
+              <template v-for="i in 5" :key="i">
+                <t-skeleton theme="text" :loading="isVisible.load" class="news-skeleton" />
+              </template>
+              <div v-if="!isVisible.load">
+                <div v-if="hotConfig.hotData.length !== 0" class="hot-data">
+                  <div v-for="(item, index) in hotConfig.hotData" :key="item.vod_id" class="rax-view-v2 hot-item"
+                    @click="searchEvent(item.vod_name)">
+                    <div class="normal-view" :class="[index in [0, 1, 2] ? `color-${index + 1}` : '']">
+                      <div class="normal-index">{{ index + 1 }}</div>
+                      <div class="normal-title no-warp">{{ item.vod_name }}</div>
+                      <div class="normal-tip">{{ item.vod_hot }}</div>
                     </div>
                   </div>
-                  <div v-else class="empty">
-                    <div class="image" style="width: 200px" v-html="emptyImage"></div>
-                    <div class="desc">
-                      <p>{{ $t('pages.search.hotNoData') }}</p>
-                    </div>
+                </div>
+                <div v-else class="empty">
+                  <div class="image" style="width: 200px" v-html="emptyImage"></div>
+                  <div class="desc">
+                    <p>{{ $t('pages.search.hotNoData') }}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </template>
-      </t-popup>
-    </t-input-adornment>
+        </div>
+      </template>
+    </t-popup>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
@@ -71,7 +73,7 @@ import moment from 'moment';
 import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, reactive } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import { doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
 import { fetchHistoryList, clearHistorySearchList, addHistory } from '@/api/history';
@@ -80,7 +82,7 @@ import { fetchSettingDetail } from '@/api/setting';
 import CONFIG from '@/config/hotClass';
 import emptyImage from '@/assets/empty.svg?raw';
 
-const router = useRouter();
+const route = useRoute();
 
 const hotReloadeventBus = useEventBus<string>('hot-reload');
 const filmSearchEmitReload = useEventBus<string>('film-search');
@@ -92,7 +94,8 @@ const isVisible = reactive({
 });
 
 const active = reactive({
-  type: 'film',
+  type: 'group',
+  filmGroupType: 'group',
   flag: ''
 });
 
@@ -112,9 +115,11 @@ const hotConfig = reactive({
 }) as any;
 
 const focusEvent = async () => {
-  getSearchHistory();
-  getSetConfig();
-  isVisible.popup = true;
+  if (route.name === 'FilmIndex') {
+    getSearchHistory();
+    getSetConfig();
+    isVisible.popup = true;
+  }
 };
 
 // 获取搜索历史
@@ -217,32 +222,25 @@ const getHotList = async (retryCount = 1) => {
 // 搜索资源
 const searchEvent = async (item) => {
   searchValue.value = item;
-  if (item && _.findIndex(searchList.value, { title: item }) === -1) {
-    const doc = {
-      date: moment().unix(),
-      title: item,
-      type: 'search'
-    };
-    const searchListSize = _.size(searchList.value);
-    if (searchListSize <= 5) {
-      searchList.value.unshift(doc);
-    } else {
-      searchList.value.unshift(doc);
-      searchList.value.pop();
-    };
-    addHistory(doc);
-  }
-
-  if (active.type === 'film') {
-    router.push({
-      name: 'FilmIndex',
-    });
-    filmSearchEmitReload.emit(searchValue.value);
-  } else {
-    router.push({
-      name: 'IptvIndex',
-    });
-    channelSearchEmitReload.emit(searchValue.value);
+  if (route.name === 'FilmIndex') {
+    if (item && _.findIndex(searchList.value, { title: item }) === -1) {
+      const doc = {
+        date: moment().unix(),
+        title: item,
+        type: 'search'
+      };
+      const searchListSize = _.size(searchList.value);
+      if (searchListSize <= 5) {
+        searchList.value.unshift(doc);
+      } else {
+        searchList.value.unshift(doc);
+        searchList.value.pop();
+      };
+      addHistory(doc);
+    }
+    filmSearchEmitReload.emit(item, active.filmGroupType || '');
+  } else if (route.name === 'IptvIndex') {
+    channelSearchEmitReload.emit(item);
   };
 
   isVisible.popup = false;
@@ -373,22 +371,6 @@ hotReloadeventBus.on(() => {
   }
 }
 
-:deep(.t-input-adornment__prepend) {
-  border-radius: 50px 0 0 50px;
-  background: var(--td-bg-content-input);
-  height: 32px;
-}
-
-:deep(.t-input-adornment__append) {
-  height: 32px;
-  background: var(--td-bg-content-input);
-  border-radius: 0 50px 50px 0;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  padding-right: 6px;
-}
-
 .search-select {
   :deep(.t-input) {
     border-style: none;
@@ -401,9 +383,22 @@ hotReloadeventBus.on(() => {
 }
 
 .search-input {
+  height: 32px;
+  width: 200px;
+
+  :deep(.t-input__prefix) {
+    .t-input--suffix {
+      padding: 0;
+    }
+
+    .t-input__suffix:not(:empty) {
+      margin-left: var(--td-comp-margin-xxs);
+    }
+  }
+
   :deep(.t-input) {
-    height: 32px;
-    border-style: none;
+    border-color: transparent;
+    border-radius: 50px;
     background: var(--td-bg-content-input);
     box-shadow: none;
 

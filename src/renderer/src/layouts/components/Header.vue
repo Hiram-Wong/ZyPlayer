@@ -2,7 +2,7 @@
   <div class="titlebar" @mousedown="handleMouseDown">
     <div class="left no-drag">
       <history-control />
-      <search-bar class="mg-left" />
+      <search-bar class="mg-left" v-if="route.name === 'FilmIndex' || route.name === 'IptvIndex'" />
       <player-show class="mg-left" />
     </div>
     <div class="right no-drag">
@@ -19,6 +19,8 @@
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router';
+
 import HistoryControl from './HistoryControl.vue';
 import SearchBar from './SearchBar.vue';
 import PlayerShow from './PlayShow.vue';
@@ -30,6 +32,7 @@ import Language from './Language.vue';
 import JustLook from './JustLook.vue'
 
 const { platform } = window.electron.process;
+const route = useRoute();
 
 const handleMouseDown = (event) => {
   if (event.detail === 2) {

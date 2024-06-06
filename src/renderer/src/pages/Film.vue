@@ -639,8 +639,12 @@ const playEvent = async (item) => {
 const filmReloadeventBus = useEventBus<string>('film-reload');
 const filmSearcheventBus = useEventBus<string>('film-search');
 
-filmSearcheventBus.on((kw: string) => {
+filmSearcheventBus.on((kw: string, groupType: 'local' | 'group' | 'all') => {
   searchTxt.value = kw;
+  if (siteConfig.value.search === groupType) {
+    siteConfig.value.search = groupType;
+    siteConfig.value.searchGroup = searchGroup(groupType);
+  };
   searchEvent();
 });
 
