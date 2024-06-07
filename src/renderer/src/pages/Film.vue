@@ -641,7 +641,7 @@ const filmSearcheventBus = useEventBus<string>('film-search');
 
 filmSearcheventBus.on((kw: string, groupType: 'local' | 'group' | 'all') => {
   searchTxt.value = kw;
-  if (siteConfig.value.search === groupType) {
+  if (siteConfig.value.search !== groupType) {
     siteConfig.value.search = groupType;
     siteConfig.value.searchGroup = searchGroup(groupType);
   };
