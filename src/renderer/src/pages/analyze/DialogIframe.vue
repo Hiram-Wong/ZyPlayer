@@ -174,7 +174,7 @@ const clearIframe = () => {
           height: 40px;
           border-radius: 0 40px 40px 0;
           color: var(--td-text-color-primary);
-          background: var(--td-bg-aside);
+          background: var(--td-bg-content-active-2);
 
           .icon {
             position: absolute;
