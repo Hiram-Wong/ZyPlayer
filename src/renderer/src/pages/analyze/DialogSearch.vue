@@ -363,7 +363,7 @@ const closeDialog = () => {
   height: 40px;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--td-bg-color-page);
+  background-color: var(--td-bg-content-input);
   box-shadow: var(--td-shadow-1);
   border-radius: 10px;
   padding-left: 24px;

@@ -181,7 +181,7 @@ const searchEvent = () => {
         transition: all 0.25s ease-in-out;
 
         :deep(.t-input) {
-          background-color: var(--td-bg-content-input);
+          background-color: var(--td-bg-content-input-2);
           border: none;
           outline: none;
           width: 148px;
@@ -232,12 +232,12 @@ const searchEvent = () => {
             }
 
             &:hover {
-              background-color: var(--td-bg-content-hover);
+              background-color: var(--td-bg-content-hover-2);
             }
           }
 
           .is-active {
-            background-color: var(--td-bg-content-active);
+            background-color: var(--td-bg-content-active-2);
           }
         }
       }

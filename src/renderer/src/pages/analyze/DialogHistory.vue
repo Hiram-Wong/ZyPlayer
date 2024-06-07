@@ -4,11 +4,7 @@
     <div v-for="item in historyList" :key="item.id" @click="historyPlayEvent(item)">
       <div class="history-item">
         <div class="date">{{ formatDate(item.date) }}</div>
-        <t-popup placement="bottom" :content="item.videoName" :overlay-style="{ maxWidth: '290px' }"
-          :overlay-inner-style="{
-            background: 'var(--td-bg-color-page)',
-            boxShadow: '0 15px 30px rgba(0,0,0,.2)',
-          }">
+        <t-popup placement="bottom" :content="item.videoName" :overlay-style="{ maxWidth: '290px' }">
           <div class="title">{{ item.videoName }}</div>
         </t-popup>
         <div class="clear" @click.stop="histroyDeleteEvent(item.id)">
@@ -75,7 +71,7 @@ watch(
 );
 
 const infiniteId = ref(+new Date());
-const historyList = ref([]);
+const historyList = ref<any>([]);
 const pagination = ref({
   pageIndex: 0,
   pageSize: 32,
@@ -122,7 +118,7 @@ const getHistoryList = async () => {
   const { pageIndex, pageSize } = pagination.value;
   const res = await fetchHistoryList(pageIndex, pageSize, 'analyze');
   const { data, total } = res;
-  historyList.value = _.unionWith(historyList.value, data, _.isEqual);
+  historyList.value = _.unionWith(historyList.value, data, _.isEqual) as any;
 
   pagination.value.count = total;
   pagination.value.pageIndex++;
@@ -160,7 +156,7 @@ const formatDate = (timestamp) => {
 
     &:hover {
       border-radius: var(--td-radius-medium);
-      background-color: rgba(132, 133, 141, 0.16);
+      background-color: var(--td-bg-content-active-2);
     }
   }
 

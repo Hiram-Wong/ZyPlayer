@@ -48,7 +48,7 @@ const handleMouseDown = (event) => {
   display: flex;
   justify-content: space-between;
   height: 32px;
-  margin: var(--td-comp-margin-m) var(--td-comp-margin-xs);
+  margin: var(--td-comp-margin-m) var(--td-comp-margin-xs) var(--td-comp-margin-m) 0;
 
   .no-drag {
     -webkit-app-region: no-drag;

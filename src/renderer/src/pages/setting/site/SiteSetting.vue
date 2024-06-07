@@ -383,7 +383,7 @@ const defaultEvent = async (row) => {
       display: flex;
       height: var(--td-comp-size-m);
       padding: 0 var(--td-comp-paddingLR-xs);
-      background-color: var(--td-bg-content-input);
+      background-color: var(--td-bg-content-input-2);
       border-radius: var(--td-radius-default);
       align-items: center;
       border-radius: var(--td-radius-medium);
@@ -401,30 +401,9 @@ const defaultEvent = async (row) => {
         &:hover {
           transition: all 0.2s ease 0s;
           color: var(--td-text-color-primary);
-          background-color: var(--td-bg-color-container-hover);
         }
       }
     }
-  }
-
-  :deep(.t-table) {
-    background-color: var(--td-bg-color-container);
-
-    tr {
-      background-color: var(--td-bg-color-container);
-
-      &:hover {
-        background-color: var(--td-bg-color-container-hover);
-      }
-    }
-  }
-
-  :deep(.t-table__header--fixed):not(.t-table__header--multiple)>tr>th {
-    background-color: var(--td-bg-color-container) !important;
-  }
-
-  :deep(.t-table__pagination) {
-    background-color: var(--td-bg-color-container) !important;
   }
 }
 </style>

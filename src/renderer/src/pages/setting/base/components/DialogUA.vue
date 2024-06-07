@@ -103,4 +103,8 @@ const onClickCloseBtn = () => {
 };
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+:deep(.t-radio-group) {
+  margin-bottom: 0 !important;
+}
+</style>

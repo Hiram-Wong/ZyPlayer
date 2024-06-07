@@ -95,4 +95,8 @@ const onClickCloseBtn = () => {
 };
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+:deep(.t-tag--default) {
+  background-color: var(--td-bg-content-active-2);
+}
+</style>
