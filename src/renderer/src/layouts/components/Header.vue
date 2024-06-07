@@ -2,7 +2,8 @@
   <div class="titlebar" @mousedown="handleMouseDown">
     <div class="left no-drag">
       <history-control />
-      <search-bar class="mg-left" v-if="route.name === 'FilmIndex' || route.name === 'IptvIndex'" />
+      <search-bar class="mg-left"
+        v-if="route.name === 'FilmIndex' || route.name === 'IptvIndex' || route.name === 'AnalyzeIndex'" />
       <player-show class="mg-left" />
     </div>
     <div class="right no-drag">

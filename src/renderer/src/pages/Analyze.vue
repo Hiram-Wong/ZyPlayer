@@ -240,9 +240,14 @@ const clearWebview = () => {
 }
 
 // 监听设置默认源变更
-const eventBus = useEventBus('analyze-reload');
-eventBus.on(() => {
+const analyzeReloadeventBus = useEventBus<string>('analyze-reload');
+const analyzeSearcheventBus = useEventBus<string>('analyze-search');
+analyzeReloadeventBus.on(() => {
   getSetting();
+});
+
+analyzeSearcheventBus.on((kw: string) => {
+  if (kw) openPlatform({ name: kw, url: `https://so.360kan.com/?kw=${kw}` });
 });
 
 // 分享
