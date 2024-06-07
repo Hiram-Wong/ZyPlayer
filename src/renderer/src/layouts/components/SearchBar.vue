@@ -72,7 +72,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
@@ -114,6 +114,10 @@ const hotConfig = reactive({
   hotOption: [] || {},
 }) as any;
 
+onMounted(async () => {
+  await getFilmSearhConfig();
+});
+
 const focusEvent = async () => {
   if (route.name === 'FilmIndex') {
     getSearchHistory();
@@ -152,6 +156,11 @@ const hotTypeMappings = {
     hotUpdateTime: () => moment().format('YYYY-MM-DD'),
     hotSource: 0,
   },
+};
+
+const getFilmSearhConfig = async () => {
+  const res = await fetchSettingDetail('defaultSearchType');
+  active.filmGroupType = res?.value || 'group';
 };
 
 // 获取设置配置
