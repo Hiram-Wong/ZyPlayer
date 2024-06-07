@@ -202,7 +202,7 @@ const searchEvent = () => {
       height: calc(100% - var(--td-comp-margin-s) - var(--td-comp-margin-m) - 32px);
 
       .nav-sub-tab-top {
-        overflow: auto;
+        overflow-y: scroll;
         width: 100%;
         padding-left: var(--td-comp-paddingTB-s);
 
