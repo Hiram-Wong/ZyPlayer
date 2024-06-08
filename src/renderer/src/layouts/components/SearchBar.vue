@@ -4,8 +4,8 @@
       <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" clearable :on-focus="focusEvent"
         v-model="searchValue" :on-enter="searchEvent">
         <template #label>
-          <t-select auto-width v-model="active.filmGroupType" class="search-select" v-if="route.name === 'FilmIndex'"
-            @click.stop>
+          <t-select auto-width v-model="active.filmGroupType" class="search-select"
+            v-if="activeRouteName === 'FilmIndex'" @click.stop>
             <t-option key="site" :label="$t('pages.search.site')" value="site" />
             <t-option key="group" :label="$t('pages.search.group')" value="group" />
             <t-option key="all" :label="$t('pages.search.all')" value="all" />
@@ -15,7 +15,7 @@
           <search-icon @click="searchEvent(searchValue)" style="cursor: pointer;" />
         </template>
       </t-input>
-      <template #content v-if="route.name === 'FilmIndex'">
+      <template #content v-if="activeRouteName === 'FilmIndex' || activeRouteName === 'AnalyzeIndex'">
         <div class="search-content">
           <div class="history" v-show="searchList.length > 0">
             <div class="history-nav">
@@ -72,7 +72,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { ref, reactive } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
@@ -87,22 +87,17 @@ const route = useRoute();
 const hotReloadeventBus = useEventBus<string>('hot-reload');
 const filmSearchEmitReload = useEventBus<string>('film-search');
 const channelSearchEmitReload = useEventBus<string>('channel-search');
+const analyzeSearchEmitReload = useEventBus<string>('analyze-search');
 
 const isVisible = reactive({
   load: true,
   popup: false
 });
-
 const active = reactive({
   type: 'group',
-  filmGroupType: 'group',
+  filmGroupType: 'site',
   flag: ''
 });
-
-const searchList = ref([]) as any;
-
-const searchValue = ref('');
-
 const hotConfig = reactive({
   hotType: '',
   hotName: '',
@@ -113,9 +108,23 @@ const hotConfig = reactive({
   hotData: [],
   hotOption: [] || {},
 }) as any;
+const searchList = ref([]) as any;
+const searchValue = ref('');
+const activeRouteName = computed(() => route.name);
+
+watch(
+  () => activeRouteName.value, async (newVal) => {
+    if (newVal === 'FilmIndex') await getFilmSearhConfig();
+    searchValue.value = '';
+  }
+);
+
+onMounted(async () => {
+  if (activeRouteName.value === 'FilmIndex') await getFilmSearhConfig();
+});
 
 const focusEvent = async () => {
-  if (route.name === 'FilmIndex') {
+  if (activeRouteName.value === 'FilmIndex' || activeRouteName.value === 'AnalyzeIndex') {
     getSearchHistory();
     getSetConfig();
     isVisible.popup = true;
@@ -152,6 +161,11 @@ const hotTypeMappings = {
     hotUpdateTime: () => moment().format('YYYY-MM-DD'),
     hotSource: 0,
   },
+};
+
+const getFilmSearhConfig = async () => {
+  const res = await fetchSettingDetail('defaultSearchType');
+  active.filmGroupType = res?.value || 'group';
 };
 
 // 获取设置配置
@@ -222,7 +236,7 @@ const getHotList = async (retryCount = 1) => {
 // 搜索资源
 const searchEvent = async (item) => {
   searchValue.value = item;
-  if (route.name === 'FilmIndex') {
+  if (activeRouteName.value === 'FilmIndex' || activeRouteName.value === 'AnalyzeIndex') {
     if (item && _.findIndex(searchList.value, { title: item }) === -1) {
       const doc = {
         date: moment().unix(),
@@ -238,10 +252,18 @@ const searchEvent = async (item) => {
       };
       addHistory(doc);
     }
-    filmSearchEmitReload.emit(item, active.filmGroupType || '');
-  } else if (route.name === 'IptvIndex') {
-    channelSearchEmitReload.emit(item);
-  };
+  }
+  switch (activeRouteName.value) {
+    case 'FilmIndex':
+      filmSearchEmitReload.emit(item, active.filmGroupType || 'site');
+      break;
+    case 'IptvIndex':
+      channelSearchEmitReload.emit(item);
+      break;
+    case 'AnalyzeIndex':
+      analyzeSearchEmitReload.emit(item);
+      break;
+  }
 
   isVisible.popup = false;
 };
@@ -399,7 +421,7 @@ hotReloadeventBus.on(() => {
   :deep(.t-input) {
     border-color: transparent;
     border-radius: 50px;
-    background: var(--td-bg-content-input);
+    background: var(--td-bg-content-input-1);
     box-shadow: none;
 
     &.t-is-focused .t-input__prefix>.t-icon {

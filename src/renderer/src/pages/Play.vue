@@ -1310,7 +1310,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
         height: 32px;
         width: 120px;
         border-radius: var(--td-radius-medium);
-        background-color: var(--td-bg-content-input);
+        background-color: var(--td-bg-content-active-1);
         padding: 2px 10px;
         transition: 0.15s linear;
         cursor: pointer;
@@ -1321,7 +1321,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
         }
 
         &:hover {
-          background-color: var(--td-bg-content-active);
+          background-color: var(--td-bg-content-hover-1);
         }
       }
     }
@@ -1387,7 +1387,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
           position: relative;
           width: 100%;
           height: 100%;
-          background: var(--td-bg-color-page) url(@/assets/bg-player.jpg) center center;
+          background: url(@/assets/bg-player.jpg) center center;
 
           .player-media {
             width: 100%;
@@ -1449,7 +1449,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
       width: 300px;
       height: 100%;
       position: relative;
-      background: var(--td-bg-color-container);
+      background: var(--td-bg-container);
       border-radius: var(--td-radius-medium);
       padding: 10px 10px 0;
       box-sizing: border-box;
@@ -1536,11 +1536,15 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
                 }
 
                 &:hover {
-                  background-color: var(--td-bg-content-active);
+                  background-color: var(--td-bg-content-hover-2);
                   border-radius: var(--td-radius-medium);
                 }
               }
             }
+          }
+
+          :deep(.t-tab-panel) {
+            background-color: var(--td-bg-container);
           }
 
           .channel-wrap,
@@ -1752,7 +1756,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
                   right: 1px;
                   bottom: 1px;
                   border-radius: 8px;
-                  background-color: var(--td-bg-color-container);
+                  background-color: var(--td-bg-container);
                   z-index: 2;
                 }
 

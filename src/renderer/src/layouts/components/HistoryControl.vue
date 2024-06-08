@@ -45,7 +45,7 @@ const gotoRefresh = () => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: var(--td-bg-content-input);
+  background: var(--td-bg-content-input-1);
   height: 100%;
   width: 100px;
   border-radius: 50px;

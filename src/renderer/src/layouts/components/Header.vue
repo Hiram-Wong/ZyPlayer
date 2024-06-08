@@ -2,7 +2,8 @@
   <div class="titlebar" @mousedown="handleMouseDown">
     <div class="left no-drag">
       <history-control />
-      <search-bar class="mg-left" v-if="route.name === 'FilmIndex' || route.name === 'IptvIndex'" />
+      <search-bar class="mg-left"
+        v-if="route.name === 'FilmIndex' || route.name === 'IptvIndex' || route.name === 'AnalyzeIndex'" />
       <player-show class="mg-left" />
     </div>
     <div class="right no-drag">
@@ -47,7 +48,7 @@ const handleMouseDown = (event) => {
   display: flex;
   justify-content: space-between;
   height: 32px;
-  margin: var(--td-comp-margin-m) var(--td-comp-margin-xs);
+  margin: var(--td-comp-margin-m) var(--td-comp-margin-xs) var(--td-comp-margin-m) 0;
 
   .no-drag {
     -webkit-app-region: no-drag;

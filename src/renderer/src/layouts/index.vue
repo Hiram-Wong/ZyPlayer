@@ -40,7 +40,6 @@ const sideMenu = computed(() => {
 
 <style lang="less" scoped>
 .t-layout {
-  background: var(--td-bg-aside);
   overflow-x: hidden;
 }
 </style>

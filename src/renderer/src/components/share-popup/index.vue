@@ -176,7 +176,7 @@ const copyShareUrl = async () => {
     width: 100%;
     text-align: right;
     vertical-align: middle;
-    background: var(--td-bg-content-input);
+    background: var(--td-bg-content-input-2);
     height: 32px;
     border-radius: var(--td-radius-round);
 

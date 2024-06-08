@@ -87,7 +87,7 @@ defineExpose({
     position: relative;
     width: 100%;
     height: 100%;
-    background: var(--td-bg-color-page) url(@/assets/bg-player.jpg) center center;
+    background: url(@/assets/bg-player.jpg) center center;
 
     .player {
       width: 100%;

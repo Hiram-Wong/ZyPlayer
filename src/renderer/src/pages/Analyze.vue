@@ -240,9 +240,14 @@ const clearWebview = () => {
 }
 
 // 监听设置默认源变更
-const eventBus = useEventBus('analyze-reload');
-eventBus.on(() => {
+const analyzeReloadeventBus = useEventBus<string>('analyze-reload');
+const analyzeSearcheventBus = useEventBus<string>('analyze-search');
+analyzeReloadeventBus.on(() => {
   getSetting();
+});
+
+analyzeSearcheventBus.on((kw: string) => {
+  if (kw) openPlatform({ name: kw, url: `https://so.360kan.com/?kw=${kw}` });
 });
 
 // 分享
@@ -330,7 +335,7 @@ const changeDefaultEvent = async (id) => {
           width: 100%;
           border-radius: var(--td-radius-large);
           position: absolute;
-          background: var(--td-bg-color-page) url(@/assets/bg-player.jpg) center center;
+          background: url(@/assets/bg-player.jpg) center center;
         }
 
         .head-info-section {
@@ -449,12 +454,12 @@ const changeDefaultEvent = async (id) => {
           height: 40px;
           padding: 0;
           border-radius: 20px;
-          background-color: var(--td-bg-content-input);
+          background-color: var(--td-bg-content-input-2);
           display: flex;
 
           :deep(.t-input) {
             border-radius: 20px;
-            background-color: var(--td-bg-content-input);
+            background-color: var(--td-bg-content-input-2);
             border: none;
             outline: none;
           }
@@ -507,52 +512,6 @@ const changeDefaultEvent = async (id) => {
               font-weight: 500;
               line-height: 40px;
               text-align: center;
-            }
-          }
-        }
-      }
-    }
-
-    .analyze-flex {
-      .mini-box {
-        border-radius: var(--td-radius-round);
-        height: 31px;
-        width: 140px;
-        background-color: var(--td-bg-color-component);
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-
-        &-close {
-          margin-right: var(--td-comp-margin-s);
-          width: 15px;
-          display: flex;
-          justify-content: center;
-          color: var(--td-brand-color);
-
-          svg {
-            margin: 0 auto;
-          }
-        }
-
-        &-title-warp {
-          margin: 0 var(--td-comp-margin-xs) 0 var(--td-comp-margin-l);
-          overflow: hidden;
-          width: 100%;
-
-          .mini-box-title {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 10s linear infinite;
-          }
-
-          @keyframes marquee {
-            0% {
-              transform: translateX(100%);
-            }
-
-            100% {
-              transform: translateX(-100%);
             }
           }
         }

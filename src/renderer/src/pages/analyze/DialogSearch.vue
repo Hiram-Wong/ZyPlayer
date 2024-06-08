@@ -81,7 +81,7 @@ const isVisible = reactive({
 const formVisible = ref(false); // 控制dialog
 const searchText = ref('');
 const searchTag = ref('');
-const searchInputRef = ref(null);
+const searchInputRef = ref<HTMLInputElement | null>(null);
 const VIDEOSITES = { ...PLATFORM_CONFIG.site }; // 视频网站列表
 
 watch(
@@ -133,28 +133,25 @@ const clearSearchEvent = () => {
 
 // 聚焦 input
 const focusSearchInput = () => {
-  searchInputRef.value.focus();
-  searchInputRef.value.select();
-  nextTick(() => {
-    searchInputRef.value.scrollIntoViewIfNeeded();
-  });
+  searchInputRef.value?.focus();
+  searchInputRef.value?.select();
 };
 
 // 手动选择搜索源
 const selectFilterSearchEvent = (item) => {
   isVisible.filter = true;
-  searchText.value = '';
   searchTag.value = `${t(`pages.analyze.search.${item.id}`)}@`;
   focusSearchInput();
+  if (searchText.value) searchEvent();
 };
 
 // 搜索
 const searchEvent = () => {
-  let searchDomain = 'https://so.360kan.com/?kw=';
+  let searchDomain: string | undefined = 'https://so.360kan.com/?kw=';
   if (searchTag.value) {
     const searchTagSplite = searchTag.value.split('@')[0];
     const item = _.find(VIDEOSITES, { name: searchTagSplite }) || _.find(VIDEOSITES, { id: searchTagSplite });
-    searchDomain = { ...item }.search;
+    searchDomain = item?.search;
   }
   const searchUrl = `${searchDomain}${searchText.value}`;
   console.log(`[analyze][search]${searchUrl}`);
@@ -366,7 +363,7 @@ const closeDialog = () => {
   height: 40px;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--td-bg-color-page);
+  background-color: var(--td-bg-container);
   box-shadow: var(--td-shadow-1);
   border-radius: 10px;
   padding-left: 24px;
