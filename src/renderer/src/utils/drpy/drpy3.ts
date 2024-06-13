@@ -267,7 +267,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta28 20240610`;
+const VERSION = `${vercode} 3.9.50beta29 20240613`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -1993,7 +1993,7 @@ const homeParse = (homeObj) => {
       if (is_json) {
         try {
           let cms_cate_url = homeObj.MY_URL.replace('ac=detail', 'ac=list');
-          let html = getHtml(cms_cate_url);
+          let html = homeObj.home_html || getHtml(cms_cate_url);
           if (html) {
             if (cms_cate_url === homeObj.MY_URL) {
               homeHtmlCache = html;
@@ -2009,7 +2009,7 @@ const homeParse = (homeObj) => {
       } else if (p.length >= 3 && !is_json) {
         // 可以不写正则
         try {
-          let html = getHtml(homeObj.MY_URL);
+          let html = homeObj.home_html || getHtml(homeObj.MY_URL);
           if (html) {
             homeHtmlCache = html;
             let list = _pdfa(html, p0);
@@ -2021,7 +2021,7 @@ const homeParse = (homeObj) => {
                     return;
                   }
                   let url = _pd(it, p[2]);
-                  if (p.length > 3 && p[3]) {
+                  if (p.length > 3 && p[3] && !homeObj.home_html) {
                     let exp = new RegExp(p[3]);
                     url = url.match(exp)[1];
                   }
@@ -3190,6 +3190,53 @@ const init = (ext: string | object) => {
         // @ts-ignore
         eval("(function(){" + ext.replace('var rule', 'rule') + "})()");
       }
+    } else {
+      console.log(`规则加载失败,不支持的规则类型:${typeof ext}`);
+      return
+    }
+    rule['host'] = (rule['host'] || '').rstrip('/');
+    HOST = rule['host'];
+    if (rule['hostJs']) {
+      console.log(`[t3][publish]检测到hostJs,准备执行...`);
+      try {
+        eval(rule['hostJs']);
+        rule['host'] = HOST.rstrip('/');
+        console.log(`[t3][publish]最新域名为${rule['host']}`);
+      } catch (e) {
+        console.log(`[t3][publish]执行${rule['hostJs']}获取host发生错误:${e}`);
+      }
+    }
+    if (rule['模板'] === '自动') {
+      try {
+        let host_headers = rule['headers'] || {};
+        let host_html = getCode(HOST, {headers: host_headers});
+        let match_muban = '';
+        let muban_keys = Object.keys(muban).filter(it => !/默认|短视2/.test(it));
+        for (let muban_key of muban_keys) {
+          try {
+            let host_data = home({}, host_html, muban[muban_key].class_parse);
+            if (host_data.class && host_data.class.length > 0) {
+              match_muban = muban_key;
+              console.log(`自动匹配模板:【${muban_key}】`);
+              break;
+            }
+          } catch (e) {
+            // @ts-ignore
+            console.log(`自动匹配模板:【${muban_key}】错误:${e.message}`);
+          }
+        }
+        if (match_muban) {
+          muban['自动'] = muban[match_muban];
+          if (rule['模板修改'] && rule['模板修改'].startsWith('js:')) {
+            // 模板修改:$js.toString(()=>{ muban.自动.class_parse = ''});
+            eval(rule['模板修改'].replace('js:', '').trim());
+          }
+        } else {
+          delete rule['模板']
+        }
+      } catch (e) {
+        delete rule['模板']
+      }
     }
     if (rule['模板'] && muban.hasOwnProperty(rule['模板'])) {
       console.log(`继承模板:${rule['模板']}`);
@@ -3203,18 +3250,7 @@ const init = (ext: string | object) => {
 
     rule['cate_exclude'] = rule_cate_excludes.join('|');
     rule['tab_exclude'] = rule_tab_excludes.join('|');
-    rule['host'] = (rule['host'] || '').rstrip('/');
-    HOST = rule['host'];
-    if (rule['hostJs']) {
-      console.log(`[t3][publish]检测到hostJs,准备执行...`);
-      try {
-        eval(rule['hostJs']);
-        rule['host'] = HOST.rstrip('/');
-        console.log(`[t3][publish]最新域名为${rule['host']}`);
-      } catch (e) {
-        console.log(`[t3][publish]执行${rule['hostJs']}获取host发生错误:${e}`);
-      }
-    }
+
     rule['类型'] = rule['类型'] || '影视'; // 影视|听书|漫画|小说
     rule['url'] = rule['url'] || '';
     rule['double'] = rule['double'] || false;
@@ -3317,9 +3353,14 @@ let homeHtmlCache: any = undefined;
 /**
  * js源获取首页分类和筛选特定返回对象中的函数
  * @param filter 筛选条件字典对象
+ * @param home_html 指定了源码。无需内部再请求
+ * @param class_parse 自动匹配传入的模板的动态分类
  * @returns {string}
  */
-const home = () => {
+const home = (filter: object = {}, home_html: string = '', class_parse: string = '') => {
+  filter = filter || {};
+  home_html = home_html || '';
+  class_parse = class_parse || '';
   if (typeof rule['filter'] === 'string' && rule['filter'].trim().length > 0) {
     try {
       let filter_json = ungzip(rule['filter'].trim());
@@ -3334,8 +3375,9 @@ const home = () => {
     MY_URL: rule['homeUrl'],
     class_name: rule['class_name'] || '',
     class_url: rule['class_url'] || '',
-    class_parse: rule['class_parse'] || '',
+    class_parse: class_parse || rule['class_parse'] || '',
     cate_exclude: rule['cate_exclude'],
+    home_html: home_html,
   };
 
   console.log('[t3]home');
