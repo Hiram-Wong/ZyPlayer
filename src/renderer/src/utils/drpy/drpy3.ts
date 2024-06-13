@@ -3211,7 +3211,7 @@ const init = (ext: string | object) => {
         let host_headers = rule['headers'] || {};
         let host_html = getCode(HOST, {headers: host_headers});
         let match_muban = '';
-        let muban_keys = Object.keys(muban).filter(it => !/默认|短视2/.test(it));
+        let muban_keys = Object.keys(muban).filter(it => !/默认|短视2|采集1/.test(it));
         for (let muban_key of muban_keys) {
           try {
             let host_data = home({}, host_html, muban[muban_key].class_parse);
