@@ -7,4 +7,5 @@ export {}
 declare global {
   const MessagePlugin: typeof import('tdesign-vue-next')['MessagePlugin']
   const TCPlayer: typeof import('tdesign-vue-next')['CPlayer']
+  const TIMEOUT: typeof import('tdesign-vue-next')['IMEOUT']
 }

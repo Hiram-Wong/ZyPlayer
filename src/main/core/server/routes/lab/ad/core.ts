@@ -1,5 +1,5 @@
 import axios from 'axios';
-import logger from '../../../logger';
+import logger from '../../../../logger';
 
 if (typeof Array.prototype.toReversed !== 'function') {
   Array.prototype.toReversed = function () {

@@ -29,10 +29,17 @@
               <t-option key="file" :label="$t('pages.setting.editSource.file')" value="file" @click="serverEvent" />
             </t-select>
           </div>
-          <div class="item" @click="helpEvent">
+          <div class="item item-pad-select">
+            <help-rectangle-icon />
+            <t-select v-model="tmp.help" @change="fileEvent()">
+              <t-option key="ai" :label="$t('pages.setting.editSource.ai')" value="ai" @click="aiEvent" />
+              <t-option key="doc" :label="$t('pages.setting.editSource.doc')" value="doc" @click="helpEvent" />
+            </t-select>
+          </div>
+          <!-- <div class="item" @click="helpEvent">
             <help-rectangle-icon />
             <span>{{ $t('pages.setting.editSource.help') }}</span>
-          </div>
+          </div> -->
 
           <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.template')"
             show-in-attached-element width="40%" @confirm="confirmTemplate()">
@@ -156,7 +163,7 @@
             </div>
           </div>
           <t-collapse>
-            <t-collapse-panel :header="t('pages.setting.editSource.bar.title')">
+            <t-collapse-panel :header="$t('pages.setting.editSource.bar.title')">
               <div class="code-bar">
                 <div class="item theme">
                   <span class="codebox-label">{{ $t('pages.setting.editSource.bar.theme') }}</span>
@@ -295,6 +302,7 @@
     </div>
 
     <dialog-player-view v-model:visible="isVisible.player" :url="formDialog.player.url" />
+    <dialog-ai-view v-model:visible="isVisible.ai" />
   </div>
 </template>
 
@@ -316,6 +324,7 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 import dialogPlayerView from './components/DialogPlayer.vue';
+import dialogAiView from './components/DialogAi.vue';
 
 import { t } from '@/locales';
 import { useSettingStore, usePlayStore } from '@/store';
@@ -415,7 +424,8 @@ let form = ref({
 
 const tmp = reactive({
   file: t('pages.setting.editSource.fileManage'),
-  run: t('pages.setting.editSource.run')
+  run: t('pages.setting.editSource.run'),
+  help: t('pages.setting.editSource.help'),
 });
 
 const isVisible = reactive({
@@ -423,7 +433,8 @@ const isVisible = reactive({
   player: false,
   help: false,
   reqParam: false,
-  snifferParam: false
+  snifferParam: false,
+  ai: false
 });
 
 const formDialog = reactive({
@@ -826,10 +837,15 @@ const deleteEvent = async () => {
 const fileEvent = async () => {
   tmp.file = t('pages.setting.editSource.fileManage');
   tmp.run = t('pages.setting.editSource.run');
+  tmp.help = t('pages.setting.editSource.help');
 };
 
 const serverEvent = async () => {
   window.electron.ipcRenderer.send('open-path', 'file', true)
+};
+
+const aiEvent = async () => {
+  isVisible.ai = true;
 };
 
 const helpEvent = async () => {
@@ -1059,12 +1075,15 @@ const actionPlayer = async (url = "") => {
 const actionSniffer = async () => {
   try {
     const { snifferMode } = storePlayer.setting;
-    const { url, runScript, initScript, auxiliaryRegex, ua } = form.value.sniffer;
+    let { url, runScript, initScript, auxiliaryRegex, ua } = form.value.sniffer;
     const snifferApi =
       snifferMode.type === 'custom' && /^http/.test(snifferMode.url)
         ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
         : '';
-    const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript ? Base64.parse(decodeURIComponent(runScript)).toString(Utf8) : ''}&init_script=${initScript ? Base64.parse(decodeURIComponent(initScript)).toString(Utf8) : ''}&custom_regex=${auxiliaryRegex}`;
+
+    if (runScript.trim()) runScript = Base64.stringify(Utf8.parse(runScript));
+    if (initScript.trim()) initScript = Base64.stringify(Utf8.parse(initScript));
+    const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript}&init_script=${initScript}&custom_regex=${auxiliaryRegex}`;
     const response: any = await sniffer(snifferMode.type, snifferPlayUrl);
     form.value.content.debug = response;
     changeNav('debug', 'sniffer');

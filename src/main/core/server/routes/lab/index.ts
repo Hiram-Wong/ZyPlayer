@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { nanoid } from 'nanoid';
 
 import { fixAdM3u8Ai } from './ad';
+import { createOpenAI } from './ai';
 import { site, setting } from '../../../db/service';
 
 const API_VERSION = 'api/v1';
@@ -138,6 +139,56 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         } else {
           reply.code(200).send(data);
         }
+      } catch (err) {
+        reply.code(500).send(err);
+      }
+    },
+  );
+  fastify.post(
+    `/${API_VERSION}/lab/ai`,
+    async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
+      let data: any = {
+        code: 500,
+        msg: 'fail',
+        data: '',
+      };
+      try {
+        const ai = await setting.find({ key: 'ai' }).value;
+        if (!ai.key && !ai.server && !ai.model) {
+          data.data = 'not config openai parms';
+          reply.code(200).send(data);
+          return;
+        }
+        const config = {
+          clientOptions: {
+            apiKey: ai.key,
+            baseURL: ai.server,
+          },
+          defaultModel: { chatModel: ai.model },
+        };
+        const crawlOpenAIApp = createOpenAI(config);
+
+        // @ts-ignore
+        const { type, codeSnippet, demand } = req.body;
+
+        switch (type) {
+          case 'filter':
+            data.data = (await crawlOpenAIApp.parseElements(codeSnippet, demand)).filters;
+            data.code = 200;
+            data.msg = 'success';
+            break;
+          case 'cssSelector':
+            data.data = (await crawlOpenAIApp.getElementSelectors(codeSnippet, demand)).selectors;
+            data.code = 200;
+            data.msg = 'success';
+            break;
+          case 'qa':
+            data.data = await crawlOpenAIApp.help(demand);
+            data.code = 200;
+            data.msg = 'success';
+            break;
+        }
+        reply.code(200).send(data);
       } catch (err) {
         reply.code(500).send(err);
       }

@@ -50,7 +50,7 @@ const props = defineProps({
 
 const formVisible = ref(false);
 const platformData = ref(props.data);
-const webviewRef = ref(null);
+const webviewRef = ref<any>(null);
 
 const emit = defineEmits(['update:visible', 'platformPlay']);
 
@@ -92,8 +92,8 @@ const closeEvent = () => {
 
 // 解析播放
 const analysisEvent = () => {
-  const webviewCurrentUrl = webviewRef.value.getURL();
-  const webviewCurrentTitle = webviewRef.value.getTitle();
+  const webviewCurrentUrl = webviewRef.value!.getURL();
+  const webviewCurrentTitle = webviewRef.value!.getTitle();
   console.log(webviewCurrentUrl, webviewCurrentTitle);
   emit('platformPlay', webviewCurrentUrl, webviewCurrentTitle);
   clearIframe();
@@ -103,17 +103,17 @@ const analysisEvent = () => {
 
 // 后退
 const backEvent = () => {
-  if (webviewRef.value.canGoBack()) webviewRef.value.goBack();
+  if (webviewRef.value!.canGoBack()) webviewRef.value!.goBack();
 };
 
 // 前进
 const forwardEvent = () => {
-  if (webviewRef.value.canGoForward()) webviewRef.value.goForward();
+  if (webviewRef.value!.canGoForward()) webviewRef.value!.goForward();
 };
 
 // 刷新
 const refreshEvent = () => {
-  webviewRef.value.reload();
+  webviewRef.value!.reload();
 };
 
 // 设置src为空

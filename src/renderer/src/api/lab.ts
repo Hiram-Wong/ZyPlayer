@@ -43,3 +43,11 @@ export function setStream(url, type, headers: object | null = null) {
     method: 'GET',
   });
 }
+
+export function fetchAiAnswer(docs) {
+  return request({
+    url: '/v1/lab/ai',
+    method: 'post',
+    data: docs,
+  });
+}

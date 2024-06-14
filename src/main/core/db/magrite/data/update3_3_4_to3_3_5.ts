@@ -15,8 +15,23 @@ const update3_3_4_to3_3_5 = () => {
 
   if (db.get('tbl_setting').find({ key: 'timeout' }).value()?.value) {
     db.get('tbl_setting').remove({ key: 'timeout' }).write();
-  };
+  }
   db.get('tbl_setting').insert({ key: 'timeout', value: 5000 }).write();
+
+  if (db.get('tbl_setting').find({ key: 'ai' }).value()?.value) {
+    db.get('tbl_setting').remove({ key: 'ai' }).write();
+  }
+  db.get('tbl_setting')
+    .insert({
+      key: 'ai',
+      value: {
+        server: '',
+        key: '',
+        model: '',
+      },
+    })
+    .write();
+
   db.get('tbl_setting').find({ key: 'version' }).assign({ key: 'version', value: '3.3.5' }).write();
 
   logger.info('[db][magrite][update3_3_4_to3_3_5]completed');
