@@ -1,11 +1,11 @@
-import { XMLParser } from 'fast-xml-parser';
+import {XMLParser} from 'fast-xml-parser';
 import _ from 'lodash';
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
 import xpath from 'xpath';
-import { DOMParser } from '@xmldom/xmldom';
+import {DOMParser} from '@xmldom/xmldom';
 
-import { doWork as t3Work, terminateWork as t3WorkTerminate } from './drpy';
+import {doWork as t3Work, terminateWork as t3WorkTerminate} from './drpy';
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 import request from '@/utils/request';
 
@@ -95,7 +95,7 @@ const t3RuleInit = async (site) => {
 
   if (_.has(site, 'ext')) {
     try {
-      await t3Work({ type: 'init', data: site.ext });
+      await t3Work({type: 'init', data: site.ext});
       data = {
         code: 200,
         msg: 'success',
@@ -116,7 +116,7 @@ const t3RuleProxy = async (url: string): Promise<any[]> => {
   const formatUrl = new URL(url);
   const params = Object.fromEntries(formatUrl.searchParams.entries());
 
-  const result: any = await t3Work({ type: 'proxy', data: params });
+  const result: any = await t3Work({type: 'proxy', data: params});
   return (result?.data ?? []) as any[];
 };
 
@@ -158,7 +158,7 @@ const fetchClassify = async (site) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `&extend=${site.ext}&filter=true`);
     } else if (site.type === 7) {
-      const content: any = await t3Work({ type: 'home' });
+      const content: any = await t3Work({type: 'home'});
       const res = {
         page: 1,
         pagecount: 9999,
@@ -304,9 +304,9 @@ const fetchClassify = async (site) => {
             const value = classItem.type_extend[key];
             if (!_.isEmpty(value) && !['star', 'state', 'version', 'director'].includes(key)) {
               const valueList = value.split(',').map((item) => item.trim());
-              const options = valueList.map((value) => ({ n: value === '全部' ? '全部' : value, v: value }));
-              const name = (_.find(CLASS_FILTER_CONFIG, { key }) || {}).desc;
-              result.push({ key, name, value: [{ n: '全部', v: '' }, ...options] });
+              const options = valueList.map((value) => ({n: value === '全部' ? '全部' : value, v: value}));
+              const name = (_.find(CLASS_FILTER_CONFIG, {key}) || {}).desc;
+              result.push({key, name, value: [{n: '全部', v: ''}, ...options]});
             }
           }
           filters[classItem.type_id] = result;
@@ -403,18 +403,18 @@ const checkValid = async (site) => {
 const convertVideoList = (videoItems) => {
   return videoItems.map(
     ({
-      id: vod_id,
-      tid: type_id,
-      type: type_name,
-      pic: vod_pic,
-      note: vod_remark,
-      name: vod_name,
-      des: vod_content,
-      year: vod_year,
-      area: vod_area,
-      director: vod_director,
-      actor: vod_actor,
-    }) => ({
+       id: vod_id,
+       tid: type_id,
+       type: type_name,
+       pic: vod_pic,
+       note: vod_remark,
+       name: vod_name,
+       des: vod_content,
+       year: vod_year,
+       area: vod_area,
+       director: vod_director,
+       actor: vod_actor,
+     }) => ({
       vod_id,
       type_id,
       type_name,
@@ -452,7 +452,7 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
     } else if (site.type === 7) {
       const res: any = await t3Work({
         type: 'category',
-        data: { tid: t, pg, filter: _.size(f) ? true : false, extend: _.size(f) ? f : {} },
+        data: {tid: t, pg, filter: _.size(f) ? true : false, extend: _.size(f) ? f : {}},
       });
       return res.data.list;
     } else if (site.type === 8) {
@@ -510,7 +510,7 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
  * @returns
  */
 const convertHotList = (hotItems) => {
-  return hotItems.map(({ id: vod_id, tid: type_id, type: type_name, note: vod_remark, name: vod_name }) => ({
+  return hotItems.map(({id: vod_id, tid: type_id, type: type_name, note: vod_remark, name: vod_name}) => ({
     vod_id,
     type_id,
     type_name,
@@ -592,11 +592,11 @@ const convertSearchList = (searchItem) => {
 
   return result;
 };
-const fetchSearch = async (site, wd) => {
+const fetchSearch = async (site, wd, pg: number = 1) => {
   // xml坑: 单条结果是dict 多条结果list
   try {
     if (site.type === 7) {
-      const res: any = await t3Work({ type: 'search', data: { wd, quick: false, pg: 1 } });
+      const res: any = await t3Work({type: 'search', data: {wd, quick: false, pg: pg}});
       return res.data?.list;
     }
     let url, postData;
@@ -607,7 +607,7 @@ const fetchSearch = async (site, wd) => {
       url = buildUrl(site.api, `/search`);
       postData = {
         wd,
-        pg: 1,
+        pg: pg,
       };
     } else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
 
@@ -732,19 +732,19 @@ const convertDetailList = (detailItems) => {
 
   return detailItems.map(
     ({
-      id: vod_id,
-      tid: type_id,
-      type: type_name,
-      pic: vod_pic,
-      note: vod_remark,
-      name: vod_name,
-      des: vod_content,
-      year: vod_year,
-      area: vod_area,
-      director: vod_director,
-      actor: vod_actor,
-      dl: { dd: dldd },
-    }) => ({
+       id: vod_id,
+       tid: type_id,
+       type: type_name,
+       pic: vod_pic,
+       note: vod_remark,
+       name: vod_name,
+       des: vod_content,
+       year: vod_year,
+       area: vod_area,
+       director: vod_director,
+       actor: vod_actor,
+       dl: {dd: dldd},
+     }) => ({
       vod_id,
       type_id,
       type_name,
@@ -774,7 +774,7 @@ const fetchDetail = async (site, id) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=detail&ids=${id}&extend=${site.ext}`);
     } else if (site.type === 7) {
-      const res: any = await t3Work({ type: 'detail', data: `${id}` });
+      const res: any = await t3Work({type: 'detail', data: `${id}`});
       return res.data.list;
     } else if (site.type === 8) {
       url = buildUrl(site.api, `/detail`);
@@ -807,11 +807,13 @@ const fetchDetail = async (site, id) => {
       const detailxlPat = reptileApiFormat(site.api, 'detailxl');
       const detailxlRes = reptileXpathFormat(json, detailxlPat);
       const detailjsPat = reptileApiFormat(site.api, 'detailjs');
+      // @ts-ignore
       const detailjsRes = reptileXpathFormat(json, detailjsPat);
       const detailjsurlPat = reptileApiFormat(site.api, 'detailjsurl');
       const detailjsurlRes = reptileXpathFormat(json, detailjsurlPat);
 
       const vod_from = detailxlRes.join('$$$');
+      // @ts-ignore
       let zippedData = _.zip(detaillistRes, detailjsurlRes);
       console.log(detaillistRes, detailjsurlRes);
       console.log(vod_from);
@@ -871,7 +873,7 @@ const fetchHipyPlayUrl = async (site, flag, play) => {
  */
 const fetchT3PlayUrl = async (flag: string, id: string, flags: string[] = []) => {
   try {
-    const res: any = await t3Work({ type: 'play', data: { flag, id, flags } });
+    const res: any = await t3Work({type: 'play', data: {flag, id, flags}});
     return res.data;
   } catch (err) {
     throw err;
@@ -891,7 +893,7 @@ const fetchCatvodPlayUrl = async (site, flag: string, id: string) => {
     const response = await request({
       url,
       method: 'POST',
-      data: { flag, id },
+      data: {flag, id},
     });
     return response;
   } catch (err) {
@@ -1053,10 +1055,10 @@ const fetchDoubanRate = async (id, type, name, year) => {
   try {
     let rate = 0.0;
     if (!id || !type) {
-      const { vod_score: foundRate } = (await fetchDoubanSearch(name, year)) as any;
+      const {vod_score: foundRate} = (await fetchDoubanSearch(name, year)) as any;
       rate = foundRate;
     } else {
-      const { vod_score: foundRate } = (await fetchDoubanDetail(id, type)) as any;
+      const {vod_score: foundRate} = (await fetchDoubanDetail(id, type)) as any;
       rate = foundRate;
     }
 
@@ -1077,7 +1079,7 @@ const fetchDoubanRate = async (id, type, name, year) => {
 const fetchDoubanRecommend = async (id, type, name, year) => {
   try {
     if (!id || !type) {
-      const { vod_douban_id: foundId, vod_douban_type: foundType } = (await fetchDoubanSearch(name, year)) as any;
+      const {vod_douban_id: foundId, vod_douban_type: foundType} = (await fetchDoubanSearch(name, year)) as any;
       id = foundId;
       type = foundType;
     }
