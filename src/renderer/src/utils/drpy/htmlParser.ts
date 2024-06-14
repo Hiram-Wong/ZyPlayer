@@ -113,6 +113,28 @@ class Jsoup {
   }
 
   /**
+   * 处理jquery lt和gt顺序不一致会导致跟jsoup表现不一致的问题，确保相邻位置的lt始终在gt前面
+   * @param selector
+   */
+  reorderAdjacentLtAndGt(selector) {
+    // 使用正则表达式匹配相邻的 :gt() 和 :lt()，包括它们的参数
+    const adjacentPattern = /:gt\((\d+)\):lt\((\d+)\)/;
+
+    // 循环，直到没有更多相邻的 :gt() 和 :lt() 需要交换
+    let match;
+    while ((match = adjacentPattern.exec(selector)) !== null) {
+      // 构建交换后的字符串
+      const replacement = `:lt(${match[2]}):gt(${match[1]})`;
+      selector = selector.substring(0, match.index) + replacement + selector.substring(match.index + match[0].length);
+
+      // 为了避免跳过任何可能的匹配项，从当前匹配项的开始位置重新开始匹配
+      adjacentPattern.lastIndex = match.index;
+    }
+
+    return selector;
+  }
+
+  /**
    * 解析空格分割后的原生表达式中的一条记录,正确处理eq的索引,返回处理后的ret
    * @param doc: cheerio.load() load后的dom对象
    * @param nparse: 解析表达式
@@ -120,8 +142,8 @@ class Jsoup {
    * @returns {Cheerio}
    */
   parseOneRule(doc, nparse: string, ret) {
-    const { nparse_rule, nparse_index, excludes } = this.getParseInfo(nparse);
-
+    let { nparse_rule, nparse_index, excludes } = this.getParseInfo(nparse);
+    nparse_rule = this.reorderAdjacentLtAndGt(nparse_rule);
     if (!ret) ret = doc(nparse_rule);
     else ret = ret.find(nparse_rule);
 
