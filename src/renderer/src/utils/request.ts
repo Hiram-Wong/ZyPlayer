@@ -10,6 +10,7 @@ const service: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+// @ts-ignore
 service.interceptors.request.use((config: AxiosRequestConfig) => {
   return config;
 });
