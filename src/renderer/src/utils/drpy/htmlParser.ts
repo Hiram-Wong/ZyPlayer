@@ -161,6 +161,18 @@ class Jsoup {
     return ret;
   }
 
+  parseText(text: string) {
+    // 使用正则表达式替换所有空白字符序列为单个换行符 '\n'
+    text = text.replace(/[\s]+/gm, '\n');
+    // 压缩连续的换行符为单个换行符
+    // text = text.replace(/\n+/g, '\n').trim();
+    // 去除字符串开头的空白。不用trim去所有
+    text = text.replace(/\n+/g, '\n').replace(/^\s+/, '');
+    // 前面两步执行完结果和py的一致。剩下的就是把\n替换成空格就和java的一致了
+    text = text.replace(/\n/g, ' ');
+    return text;
+  }
+
   /**
    * 解析空格分割后的原生表达式,返回处理后的ret
    * https://pyquery.readthedocs.io/en/latest/api.html
@@ -237,7 +249,7 @@ class Jsoup {
 
     if (parse == 'body&&Text' || parse == 'Text') {
       //@ts-ignore
-      return doc.text();
+      return this.parseText(doc.text());
     } else if (parse == 'body&&Html' || parse == 'Html') {
       return doc.html();
     }
@@ -260,6 +272,8 @@ class Jsoup {
       switch (option) {
         case 'Text':
           ret = (ret as cheerio.Cheerio)?.text() || '';
+          //@ts-ignore
+          ret = ret ? this.parseText(ret) : '';
           break;
         case 'Html':
           ret = (ret as cheerio.Cheerio)?.html() || '';
