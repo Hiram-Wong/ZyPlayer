@@ -259,7 +259,8 @@ const pre = () => {
       // 直接操作 rule_fetch_params.headers.Cookie
       eval(preprocessCode);
     } catch (e) {
-      console.log('预处理执行失败:', e);
+      // @ts-ignore
+      console.log(`预处理执行失败:${e.message}`);
     }
   }
 };
@@ -267,7 +268,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta30 20240616`;
+const VERSION = `${vercode} 3.9.50beta31 20240617`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -1347,7 +1348,8 @@ const pdfh2 = (html, parse) => {
       html2 = html.rr(html.ele).toString();
     }
   } catch (e) {
-    console.log('html对象转文本发生了错误:', e);
+    // @ts-ignore
+    console.log(`html对象转文本发生了错误:${e.message}`);
   }
 
   let result = defaultParser.pdfh(html2, parse);
@@ -1378,7 +1380,8 @@ const pdfa2 = (html, parse) => {
       html2 = html.rr(html.ele).toString();
     }
   } catch (e) {
-    console.log('html对象转文本发生了错误:', e);
+    // @ts-ignore
+    console.log(`html对象转文本发生了错误:${e.message}`);
   }
 
   return defaultParser.pdfa(html2, parse);
@@ -1622,7 +1625,8 @@ const verifyCode = (url) => {
         cookie = '';
       }
     } catch (e) {
-      console.log(`[t3]第${cnt + 1}次验证码提交失败`, e);
+      // @ts-ignore
+      console.log(`[t3]第${cnt + 1}次验证码提交失败 ${e.message}`);
       if (cnt + 1 >= OCR_RETRY) {
         cookie = '';
       }
@@ -1676,7 +1680,8 @@ const getHome = (url) => {
   try {
     url = new URL(url).origin;
   } catch (e) {
-    console.info('[t3]URL 解析失败:', e);
+    // @ts-ignore
+    console.info(`[t3]URL 解析失败: ${e.message}`);
   }
 
   return url;
@@ -2004,7 +2009,8 @@ const homeParse = (homeObj) => {
             }
           }
         } catch (e) {
-          console.log(e);
+          // @ts-ignore
+          console.log(e.message);
         }
       } else if (p.length >= 3 && !is_json) {
         // 可以不写正则
@@ -2031,13 +2037,15 @@ const homeParse = (homeObj) => {
                     type_name: name.trim(),
                   });
                 } catch (e) {
-                  console.log(`分类列表定位第${idex}个元素正常报错:${e}`);
+                  // @ts-ignore
+                  console.log(`分类列表定位第${idex}个元素正常报错:${e.message}`);
                 }
               });
             }
           }
         } catch (e) {
-          console.log(e);
+          // @ts-ignore
+          console.log(e.message);
         }
       }
     }
@@ -2160,7 +2168,8 @@ const homeVodParse = (homeVodObj) => {
 
               d.push(vod);
             } catch (e) {
-              console.log('[t3]首页列表双层定位处理发生错误:', e);
+              // @ts-ignore
+              console.log(`[t3]首页列表双层定位处理发生错误:${e.message}`);
             }
           }
         }
@@ -2198,7 +2207,8 @@ const homeVodParse = (homeVodObj) => {
 
             d.push(vod);
           } catch (e) {
-            console.log('首页列表单层定位处理发生错误:', e);
+            // @ts-ignore
+            console.log(`首页列表单层定位处理发生错误:${e.message}`);
           }
         }
       }
@@ -2283,7 +2293,8 @@ const categoryParse = (cateObj) => {
           }
         }
       } catch (e) {
-        console.log('合并不同分类对应的默认筛选出错:', e);
+        // @ts-ignore
+        console.log(`合并不同分类对应的默认筛选出错:${e.message}`);
       }
     }
 
@@ -2353,7 +2364,8 @@ const categoryParse = (cateObj) => {
         });
       }
     } catch (e) {
-      console.log(e);
+      // @ts-ignore
+      console.log(e.message);
     }
   }
 
@@ -2554,7 +2566,8 @@ const searchParse = (searchObj) => {
         });
       }
     } catch (e) {
-      console.log('[t3][search]错误:', e);
+      // @ts-ignore
+      console.log(`[t3][search]错误:${e.message}`);
       return '{}';
     }
   }
@@ -2644,7 +2657,8 @@ const detailParse = (detailObj) => {
       console.log(`[t3]尝试在二级访问前执行代码:${detailObj.二级访问前}`);
       eval(detailObj.二级访问前.trim().replace('js:', ''));
     } catch (e) {
-      console.log('[t3]二级访问前执行代码出现错误:', e);
+      // @ts-ignore
+      console.log(`[t3]二级访问前执行代码出现错误:${e.message}`);
     }
   }
 
@@ -2775,13 +2789,15 @@ const detailParse = (detailObj) => {
               try {
                 LISTS[i] = LISTS[i].map((it) => it.split('$').slice(0, 2).join('$'));
               } catch (e) {
-                console.log('格式化LISTS发生错误:', e);
+                // @ts-ignore
+                console.log(`格式化LISTS发生错误:${e.message}`);
               }
             }
           }
           vod_play_url = LISTS.map((it) => it.join('#')).join(vod_play_url);
         } catch (e) {
-          console.log('js执行lists: 发生错误:', e);
+          // @ts-ignore
+          console.log(`js执行lists: 发生错误:${e.message}`);
         }
       } else {
         let list_text = p.list_text || 'body&&Text';
@@ -2927,7 +2943,8 @@ const tellIsJx = (url: string) => {
     const is_vip = !/\.(m3u8|mp4|m4a)$/.test(url.split('?')[0]) && isGenuine(url);
     return is_vip ? 1 : 0;
   } catch (e) {
-    console.info('Error in tellIsJx:', e);
+    // @ts-ignore
+    console.info(`Error in tellIsJx:${e.message}`);
     return 1;
   }
 };
@@ -2976,7 +2993,8 @@ const playParse = (playObj) => {
             url: input,
           };
     } catch (e) {
-      console.log('js免嗅错误:', e);
+      // @ts-ignore
+      console.log(`js免嗅错误:${e.message}`);
     }
   }
   // print('play_json:'+typeof(rule.play_json));
@@ -3047,7 +3065,8 @@ const isVideoParse = (isVideoObj) => {
       eval(isVideoObj.isVideo);
       return typeof input === 'boolean' ? input : false;
     } catch (e) {
-      console.log('执行嗅探规则发生错误:', e);
+      // @ts-ignore
+      console.log(`执行嗅探规则发生错误:${e.message}`);
       return false;
     }
   }
@@ -3203,7 +3222,8 @@ const init = (ext: string | object) => {
         rule['host'] = HOST.rstrip('/');
         console.log(`[t3][publish]最新域名为${rule['host']}`);
       } catch (e) {
-        console.log(`[t3][publish]执行${rule['hostJs']}获取host发生错误:${e}`);
+        // @ts-ignore
+        console.log(`[t3][publish]执行${rule['hostJs']}获取host发生错误:${e.message}`);
       }
     }
     if (rule['模板'] === '自动') {
@@ -3322,13 +3342,15 @@ const init = (ext: string | object) => {
                 v = fetch(v);
                 rule['headers'][k] = v;
               } catch (e) {
-                console.log(`[t3][init]从${v}获取cookie发生错误:${e}`);
+                // @ts-ignore
+                console.log(`[t3][init]从${v}获取cookie发生错误:${e.message}`);
               }
             }
           }
         }
       } catch (e) {
-        console.log(`[t3][init]处理headers发生错误:${e}`);
+        // @ts-ignore
+        console.log(`[t3][init]处理headers发生错误:${e.message}`);
       }
     }
 
@@ -3339,7 +3361,8 @@ const init = (ext: string | object) => {
     pre();
     return init_test();
   } catch (e) {
-    console.info('[t3][init]init_test发生错误:', e);
+    // @ts-ignore
+    console.info(`[t3][init]init_test发生错误:${e.message}`);
     return {
       version: VERSION,
       rkey: RKEY,
