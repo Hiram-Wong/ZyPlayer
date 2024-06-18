@@ -60,6 +60,22 @@
           <div class="box-anthology-header">
             <div class="left">
               <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
+              <div class="box-anthology-line">
+                <t-dropdown placement="bottom" :max-height="250">
+                  <t-button size="small" theme="default" variant="text" auto-width>
+                    <span class="title">{{ $t('pages.player.film.line') }}</span>
+                    <template #suffix>
+                      <chevron-down-icon size="16" />
+                    </template>
+                  </t-button>
+                  <t-dropdown-menu>
+                    <t-dropdown-item v-for="(_, key, index) in season" :key="index" :value="key"
+                      @click="(options) => switchLineEvent(options.value as string)">
+                      <span :class="[key as any === active.flimSource ? 'active' : '']">{{ key }}</span>
+                    </t-dropdown-item>
+                  </t-dropdown-menu>
+                </t-dropdown>
+              </div>
               <div class="box-anthology-analyze" v-show="isVisible.official">
                 <t-dropdown placement="bottom" :max-height="250">
                   <t-button size="small" theme="default" variant="text" auto-width>
@@ -85,7 +101,21 @@
             </div>
           </div>
           <div class="listbox">
-            <t-tabs v-model="active.flimSource" class="film-tabs">
+            <div class="tag-container">
+              <div v-for="(item, index) in season?.[active.flimSource]" :key="item"
+                :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
+                @click="gotoPlay(item)">
+                <t-tooltip :content="formatName(item)">
+                  <div class="mainVideo_inner">
+                    {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index,
+                      season?.[active.flimSource]?.length)
+                    }}
+                    <div class="playing"></div>
+                  </div>
+                </t-tooltip>
+              </div>
+            </div>
+            <!-- <t-tabs v-model="active.flimSource" class="film-tabs">
               <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key" :label="key">
                 <div class="tag-container">
                   <div v-for="(item, index) in value" :key="item"
@@ -100,7 +130,7 @@
                   </div>
                 </div>
               </t-tab-panel>
-            </t-tabs>
+            </t-tabs> -->
           </div>
         </div>
       </div>
@@ -279,6 +309,10 @@ const gotoPlay = async (item) => {
 
   const response = await filmPlayAndHandleResponse(snifferMode, url, formData.value, analyze, active.flimSource, false);
   if (response?.url) callSysPlayer(response!.url);
+};
+
+const switchLineEvent = async (id: string) => {
+  active.flimSource = id;
 };
 
 // 切换解析接口
@@ -565,6 +599,7 @@ const getDetailInfo = async (): Promise<void> => {
           font-weight: 600;
         }
 
+        .box-anthology-line,
         .box-anthology-analyze {
           :deep(.t-button) {
             padding: 0;
@@ -606,73 +641,74 @@ const getDetailInfo = async (): Promise<void> => {
     }
 
     .listbox {
-      .film-tabs {
-        .tag-container {
-          display: flex;
-          flex-wrap: wrap;
-          padding-top: 10px;
+      overflow: hidden;
 
-          .mainVideo-num {
-            position: relative;
-            width: 41px;
-            font-size: 18px;
-            height: 41px;
-            line-height: 41px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 4px;
-            margin-right: 4px;
-            box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .08);
+      .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        padding-top: 10px;
 
-            &:hover {
-              background-image: linear-gradient(var(--td-brand-color-2), var(--td-brand-color-3));
-            }
+        .mainVideo-num {
+          position: relative;
+          width: 41px;
+          font-size: 18px;
+          height: 41px;
+          line-height: 41px;
+          border-radius: 8px;
+          text-align: center;
+          cursor: pointer;
+          margin-bottom: 4px;
+          margin-right: 4px;
+          box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .08);
 
-            &:before {
-              content: "";
-              display: block;
-              position: absolute;
-              top: 1px;
-              left: 1px;
-              right: 1px;
-              bottom: 1px;
-              border-radius: 8px;
-              background-color: var(--td-bg-color-container);
-              z-index: 2;
-            }
-
-            .mainVideo_inner {
-              position: absolute;
-              top: 1px;
-              left: 1px;
-              right: 1px;
-              bottom: 1px;
-              border-radius: 8px;
-              z-index: 3;
-              overflow: hidden;
-              background-image: linear-gradient(hsla(0, 0%, 100%, .04), hsla(0, 0%, 100%, .06));
-
-              .playing {
-                display: none;
-                min-width: 10px;
-                height: 8px;
-                background: url(@/assets/player/playon-green.gif) no-repeat;
-              }
-            }
+          &:hover {
+            background-image: linear-gradient(var(--td-brand-color-2), var(--td-brand-color-3));
           }
 
-          .mainVideo-selected {
-            color: var(--td-brand-color);
-            background-image: linear-gradient(hsla(0, 0%, 100%, .1), hsla(0, 0%, 100%, .06));
+          &:before {
+            content: "";
+            display: block;
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            border-radius: 8px;
+            background-color: var(--td-bg-container);
+            z-index: 2;
+          }
 
-            // box-shadow: 0 2px 8px 0 rgba(0,0,0,.08), inset 0 4px 10px 0 rgba(0,0,0,.14);
+          .mainVideo_inner {
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            border-radius: 8px;
+            z-index: 3;
+            overflow: hidden;
+            background-image: linear-gradient(hsla(0, 0%, 100%, .04), hsla(0, 0%, 100%, .06));
+
             .playing {
-              display: inline-block !important;
-              position: absolute;
-              left: 6px;
-              bottom: 6px;
-            }    }
+              display: none;
+              min-width: 10px;
+              height: 8px;
+              background: url(@/assets/player/playon-green.gif) no-repeat;
+            }
+          }
+        }
+
+        .mainVideo-selected {
+          color: var(--td-brand-color);
+          background-image: linear-gradient(hsla(0, 0%, 100%, .1), hsla(0, 0%, 100%, .06));
+
+          // box-shadow: 0 2px 8px 0 rgba(0,0,0,.08), inset 0 4px 10px 0 rgba(0,0,0,.14);
+          .playing {
+            display: inline-block !important;
+            position: absolute;
+            left: 6px;
+            bottom: 6px;
+          }
         }
       }
     }
