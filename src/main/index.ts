@@ -161,7 +161,7 @@ app.whenReady().then(async () => {
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   optimizer.registerFramelessWindowIpc();
 
-  createLoad(); // 加载页面
+  // createLoad(); // 加载页面 采用dom操作减少内存消耗
   createMain(); // 主窗口
 
   if (is.dev) tmpDir(join(process.cwd(), 'thumbnail'));
@@ -216,7 +216,7 @@ app.whenReady().then(async () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-      createLoad();
+      // createLoad();
       createMain();
     }
   });

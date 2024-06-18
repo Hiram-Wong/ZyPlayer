@@ -111,15 +111,16 @@ const createMain = () => {
         mainWindow!.webContents.openDevTools();
       }
     });
+    mainWindow!.show();
 
-    setTimeout(() => {
-      mainWindow!.show();
-      const loadWindow = getWin('load');
-      if (loadWindow && !loadWindow.isDestroyed()) {
-        loadWindow.hide();
-        loadWindow.destroy();
-      }
-    }, 1000);
+    // setTimeout(() => {
+    // mainWindow!.show();
+    //   const loadWindow = getWin('load');
+    //   if (loadWindow && !loadWindow.isDestroyed()) {
+    //     loadWindow.hide();
+    //     loadWindow.destroy();
+    //   }
+    // }, 1000);
   });
 
   mainWindow.on('close', () => {

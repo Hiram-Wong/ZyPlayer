@@ -1,5 +1,13 @@
 import { contextBridge } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
+import { domReady } from './utils';
+import { useLoading } from './loading';
+
+const { appendLoading, removeLoading } = useLoading();
+// @ts-ignore (define in dts)
+window.removeLoading = removeLoading;
+
+domReady().then(appendLoading);
 
 // Custom APIs for renderer
 const api = {};

@@ -1,5 +1,7 @@
 // 通用声明
 
+export { }
+
 // Vue
 declare module '*.vue' {
   import { DefineComponent } from 'vue';
@@ -16,3 +18,9 @@ declare module '*.svg' {
 }
 
 declare type Recordable<T = any> = Record<string, T>;
+
+declare global {
+  interface Window {
+    removeLoading: () => void;
+  }
+}
