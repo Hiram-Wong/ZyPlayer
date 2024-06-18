@@ -318,6 +318,7 @@ export default {
     cache: '拉取缓存',
     file: '服务',
     help: '帮助',
+    other: '其他',
     doc: '文档',
     ai: '智脑',
     tool: '工具',

@@ -13,38 +13,22 @@
               </template>
               <div class="fetch-key-content">
                 <t-space>
-                  <div>
-                    <span>1.</span>
-                    <t-link theme="primary" underline href="https://platform.openai.com/api-keys" target="_blank">
-                      {{ $t('pages.setting.editSource.dialog.ai.tip1') }}
-                    </t-link>
-                  </div>
-                  <div>
-                    <span>2.</span>
-                    <t-link theme="primary" underline href="https://github.com/chatanywhere/GPT_API_free"
-                      target="_blank">
-                      {{ $t('pages.setting.editSource.dialog.ai.tip2') }}
-                    </t-link>
-                  </div>
+                  <t-link theme="primary" underline href="https://platform.openai.com/api-keys" target="_blank">
+                    1.{{ $t('pages.setting.editSource.dialog.ai.tip1') }}
+                  </t-link>
+                  <t-link theme="primary" underline href="https://github.com/chatanywhere/GPT_API_free" target="_blank">
+                    2.{{ $t('pages.setting.editSource.dialog.ai.tip2') }}
+                  </t-link>
                 </t-space>
               </div>
-              <div class="code-bar">
-                <div class="item server">
-                  <span class="codebox-label">{{ $t('pages.setting.editSource.dialog.ai.server') }}</span>
-                  <t-input v-model="formData.config.server"></t-input>
-                </div>
-
-                <div class="item key">
-                  <span class="codebox-label">{{ $t('pages.setting.editSource.dialog.ai.key') }}</span>
-                  <t-input v-model="formData.config.key" type="password"></t-input>
-                </div>
-
-                <div class="item model">
-                  <span class="codebox-label">{{ $t('pages.setting.editSource.dialog.ai.model') }}</span>
-                  <t-select v-model="formData.config.model" auto-width>
-                    <t-option v-for="item in models" :key="item.label" :value="item.label" :label="item.label" />
-                  </t-select>
-                </div>
+              <div class="parms-bar">
+                <t-input :label="$t('pages.setting.editSource.dialog.ai.server')" v-model="formData.config.server"
+                  class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.editSource.dialog.ai.key')" v-model="formData.config.key"
+                  class="input-item" type="password"></t-input>
+                <t-select :label="$t('pages.setting.editSource.dialog.ai.model')" v-model="formData.config.model">
+                  <t-option v-for="item in models" :key="item.label" :value="item.label" :label="item.label" />
+                </t-select>
               </div>
             </t-collapse-panel>
           </t-collapse>
@@ -253,49 +237,15 @@ const copyAiAnswer = async () => {
 </script>
 
 <style lang="less" scoped>
-.code-bar {
+.parms-bar {
   height: auto;
 
-  .item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    .codebox-label {
-      display: inline-block;
-      width: 100px;
-      white-space: nowrap;
-      margin: var(--td-comp-margin-s) var(--td-comp-margin-l);
-    }
-
-    :deep(.t-input) {
-      background-color: var(--td-bg-content-input) !important;
-      border-color: transparent;
-    }
-  }
-}
-
-:deep(.t-collapse) {
-  background-color: var(--td-bg-content-input);
-  border-color: transparent;
-  border-radius: var(--td-radius-default);
-
-  .t-collapse-panel__header,
-  .t-collapse-panel__body {
-    border-color: transparent;
+  .input-item {
+    margin-bottom: var(--td-comp-margin-s);
   }
 
-  .t-collapse-panel__header {
-    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-l);
-  }
-
-  .t-collapse-panel__body {
-    border-radius: var(--td-radius-default);
-    margin-bottom: var(--td-comp-margin-xxs);
-
-    .t-collapse-panel__content {
-      padding: var(--td-comp-paddingTB-m) var(--td-comp-paddingLR-xxs);
-    }
+  .input-item:last-child {
+    margin-bottom: 0;
   }
 }
 
@@ -335,7 +285,7 @@ const copyAiAnswer = async () => {
 }
 
 .fetch-key-content {
-  padding: 0 var(--td-comp-paddingLR-l);
+  margin-bottom: var(--td-comp-margin-s);
 }
 
 .hljs-code-container {
@@ -345,7 +295,7 @@ const copyAiAnswer = async () => {
 
 :deep(.t-card--bordered) {
   border-color: transparent;
-  background-color: var(--td-bg-content-input);
+  background-color: var(--td-bg-content-input-2);
 }
 
 :deep(.t-card__header) {

@@ -318,6 +318,7 @@ export default {
     delete: 'DeleteCase',
     file: 'Server',
     help: 'Help',
+    other: 'Other',
     doc: 'Doc',
     ai: 'Ai',
     title: 'Source Tool',

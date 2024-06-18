@@ -31,10 +31,12 @@
           </div>
           <div class="item item-pad-select">
             <help-rectangle-icon />
-            <t-select v-model="tmp.help" @change="fileEvent()">
+            <t-select v-model="tmp.other" @change="fileEvent()">
               <t-option key="ai" :label="$t('pages.setting.editSource.ai')" value="ai" @click="aiEvent" />
               <!-- <t-option key="tool" :label="$t('pages.setting.editSource.tool')" value="tool" @click.stop="toolEvent" /> -->
               <t-option key="doc" :label="$t('pages.setting.editSource.doc')" value="doc" @click="helpEvent" />
+              <t-option key="sift" :label="$t('pages.setting.editSource.sift')" value="sift"
+                @click="siftEvent('Sift')" />
             </t-select>
           </div>
 
@@ -425,7 +427,7 @@ const tmp = computed(() => {
   return {
     file: t('pages.setting.editSource.fileManage'),
     run: t('pages.setting.editSource.run'),
-    help: t('pages.setting.editSource.help'),
+    other: t('pages.setting.editSource.other'),
   }
 })
 
@@ -452,6 +454,8 @@ watch(
     changeTheme();
   }
 );
+
+const emit = defineEmits(['changeComponent']);
 
 let editor: monaco.editor.IStandaloneCodeEditor | undefined;
 let log: monaco.editor.IStandaloneCodeEditor | undefined;
@@ -820,6 +824,10 @@ const debugEvent = async () => {
   };
 };
 
+const siftEvent = (key) => {
+  emit('changeComponent', key);
+};
+
 const cacheEvent = async () => {
   try {
     const res = await fetchDebugSource('all');
@@ -857,7 +865,7 @@ const deleteEvent = async () => {
 const fileEvent = async () => {
   tmp.value.file = t('pages.setting.editSource.fileManage');
   tmp.value.run = t('pages.setting.editSource.run');
-  tmp.value.help = t('pages.setting.editSource.help');
+  tmp.value.other = t('pages.setting.editSource.other');
 };
 const serverEvent = async () => {
   await window.electron.ipcRenderer.send('open-path', 'file', true);
@@ -1278,7 +1286,7 @@ const sourceEvent = () => {
         display: flex;
         height: var(--td-comp-size-m);
         padding: 0 var(--td-comp-paddingLR-xs);
-        background-color: var(--td-bg-content-input);
+        background-color: var(--td-bg-content-input-2);
         border-radius: var(--td-radius-default);
         align-items: center;
 
@@ -1368,14 +1376,14 @@ const sourceEvent = () => {
             }
 
             :deep(.t-input) {
-              background-color: var(--td-bg-content-input) !important;
+              background-color: var(--td-bg-content-input-1) !important;
               border-color: transparent;
             }
           }
         }
 
         :deep(.t-collapse) {
-          background-color: var(--td-bg-content-input);
+          background-color: var(--td-bg-content-input-2);
           border-color: transparent;
           border-radius: var(--td-radius-default);
 
@@ -1557,7 +1565,7 @@ const sourceEvent = () => {
         padding: var(--td-comp-paddingTB-xs) 0 var(--td-comp-paddingTB-m);
 
         :deep(.jv-container) {
-          background-color: var(--td-bg-content-input) !important;
+          background-color: var(--td-bg-content-input-2) !important;
           border-radius: var(--td-radius-default);
 
           .jv-button {
@@ -1599,7 +1607,7 @@ const sourceEvent = () => {
           height: 100%;
           padding-top: var(--td-comp-paddingTB-l);
           border-color: transparent;
-          background-color: var(--td-bg-content-input);
+          background-color: var(--td-bg-content-input-2);
 
           &:focus {
             box-shadow: none;
@@ -1615,7 +1623,7 @@ const sourceEvent = () => {
 :deep(.t-input-number__decrease),
 :deep(.t-input-adornment__text),
 :deep(.t-textarea__inner) {
-  background-color: var(--td-bg-content-input) !important;
+  background-color: var(--td-bg-content-input-2) !important;
   border-color: transparent;
   box-shadow: none;
 }
@@ -1629,7 +1637,7 @@ const sourceEvent = () => {
     height: 100%;
     box-shadow: none;
     padding: 1em 0.5em 0 3.8em;
-    background-color: var(--td-bg-content-input);
+    background-color: var(--td-bg-content-input-2);
   }
 
   .toolbar {
@@ -1647,7 +1655,7 @@ const sourceEvent = () => {
 
   .input-container {
     width: inherit;
-    background-color: var(--td-bg-content-input) !important;
+    background-color: var(--td-bg-content-input-2) !important;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
