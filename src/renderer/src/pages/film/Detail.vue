@@ -13,11 +13,11 @@
               </div>
               <div class="desc">
                 <div class="tag-items">
-                  <t-tag v-show="info.vod_type" shape="round" class="tag-item">{{ info.vod_type }}</t-tag>
-                  <t-tag v-show="info.vod_area" shape="round" class="tag-item">{{ info.vod_area }}</t-tag>
-                  <t-tag v-show="info.vod_lang" shape="round" class="tag-item">{{ info.vod_lang }}</t-tag>
-                  <t-tag v-show="info.vod_year" shape="round" class="tag-item">{{ info.vod_year }}</t-tag>
-                  <t-tag v-show="info.vod_note" shape="round" class="tag-item">{{ info.vod_note }}</t-tag>
+                  <t-tag v-show="info.vod_type" shape="round" class="tag-item nowrap">{{ info.vod_type }}</t-tag>
+                  <t-tag v-show="info.vod_area" shape="round" class="tag-item nowrap">{{ info.vod_area }}</t-tag>
+                  <t-tag v-show="info.vod_lang" shape="round" class="tag-item nowrap">{{ info.vod_lang }}</t-tag>
+                  <t-tag v-show="info.vod_year" shape="round" class="tag-item nowrap">{{ info.vod_year }}</t-tag>
+                  <t-tag v-show="info.vod_note" shape="round" class="tag-item nowrap">{{ info.vod_note }}</t-tag>
                 </div>
               </div>
             </div>
@@ -400,7 +400,18 @@ const getDetailInfo = async (): Promise<void> => {
 .view-container {
   height: calc(100% - 48px);
 
+  .nowrap {
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    height: auto;
+    width: auto;
+    font-weight: normal;
+  }
+
   .plist-body {
+
     .detail-title {
       position: relative;
       display: flex;
@@ -408,6 +419,8 @@ const getDetailInfo = async (): Promise<void> => {
       align-items: center;
 
       .detail-info {
+        max-width: 80%;
+
         .title {
           display: flex;
           align-items: baseline;
@@ -441,11 +454,14 @@ const getDetailInfo = async (): Promise<void> => {
           .tag-items {
             display: flex;
             flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: stretch;
+            align-items: center;
+            width: inherit;
+            overflow: visible;
+            position: relative;
 
             .tag-item {
               margin-right: var(--td-comp-margin-xs);
+              max-width: 30%;
             }
           }
         }
@@ -656,8 +672,7 @@ const getDetailInfo = async (): Promise<void> => {
               position: absolute;
               left: 6px;
               bottom: 6px;
-            }
-          }
+            }    }
         }
       }
     }

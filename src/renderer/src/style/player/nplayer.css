@@ -165,6 +165,11 @@
   border-radius: 8px;
 }
 
+.nplayer_control .nplayer_control_bar:nth-child(2) {
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
 .nplayer_danmaku_reset {
   height: 28px;
   line-height: 28px;
@@ -186,5 +191,13 @@ svg.xgplayer-danmu-open-svg circle {
 @media not all and (hover: none) {
   .nplayer_tooltip:hover {
     background: transparent !important;
+  }
+}
+
+@media (any-hover: hover) {
+  .nplayer_control:hover {
+    cursor: default !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 }
