@@ -20,7 +20,7 @@
               <remove-icon />
               <span>{{ $t('pages.setting.header.delete') }}</span>
             </div>
-            <div class="item" @click="handleAllDataEvent('check')">
+            <div class="item" @click="handleAllDataEvent('check')" v-show="false">
               <refresh-icon />
               <span>{{ $t('pages.setting.header.check') }}</span>
             </div>

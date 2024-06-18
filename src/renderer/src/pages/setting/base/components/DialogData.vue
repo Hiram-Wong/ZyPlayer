@@ -164,7 +164,7 @@ import joinUrl from 'url';
 import { t } from '@/locales';
 import { initializeWebdavClient, rsyncLocal, rsyncRemote } from '@/utils/webdev';
 import { updateSetting, clearDb, exportDb, setDefault, initDb } from '@/api/setting';
-import { getConfig } from '@/utils/tool';
+import { getConfig,encodeMd5 } from '@/utils/tool';
 
 import pkg from '../../../../../../../package.json'
 
@@ -343,7 +343,8 @@ const easyConfig = async () => {
         data["tbl_site"] = config.sites
           .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.includes('.js') && item.ext && typeof item.ext === 'string' && item.ext.includes('.js')))
           .map((item) => ({
-            id: nanoid(),
+            // id: nanoid(),
+            id: [0, 1].includes(item.type) ? nanoid() : encodeMd5(item.api.split('/').slice(-1)[0]+'|'+(item.ext && typeof item.ext === 'string'?item.ext.split('/').slice(-1)[0]:'')),
             name: item.name,
             type: formatType(type, item.type),
             api: formatUrl(item.api, url),

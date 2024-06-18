@@ -81,7 +81,7 @@
     "dayjs": "^1.11.11",
     "dplayer": "^1.27.1",
     "electron": "~22.3.27",
-    "electron-builder": "^25.0.0-alpha.9",
+    "electron-builder": "^24.13.3",
     "electron-vite": "^2.2.0",
     "eslint": "^9.4.0",
     "eslint-plugin-vue": "^9.26.0",

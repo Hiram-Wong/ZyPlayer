@@ -113,6 +113,28 @@ class Jsoup {
   }
 
   /**
+   * 处理jquery lt和gt顺序不一致会导致跟jsoup表现不一致的问题，确保相邻位置的lt始终在gt前面
+   * @param selector
+   */
+  reorderAdjacentLtAndGt(selector) {
+    // 使用正则表达式匹配相邻的 :gt() 和 :lt()，包括它们的参数
+    const adjacentPattern = /:gt\((\d+)\):lt\((\d+)\)/;
+
+    // 循环，直到没有更多相邻的 :gt() 和 :lt() 需要交换
+    let match;
+    while ((match = adjacentPattern.exec(selector)) !== null) {
+      // 构建交换后的字符串
+      const replacement = `:lt(${match[2]}):gt(${match[1]})`;
+      selector = selector.substring(0, match.index) + replacement + selector.substring(match.index + match[0].length);
+
+      // 为了避免跳过任何可能的匹配项，从当前匹配项的开始位置重新开始匹配
+      adjacentPattern.lastIndex = match.index;
+    }
+
+    return selector;
+  }
+
+  /**
    * 解析空格分割后的原生表达式中的一条记录,正确处理eq的索引,返回处理后的ret
    * @param doc: cheerio.load() load后的dom对象
    * @param nparse: 解析表达式
@@ -120,8 +142,8 @@ class Jsoup {
    * @returns {Cheerio}
    */
   parseOneRule(doc, nparse: string, ret) {
-    const { nparse_rule, nparse_index, excludes } = this.getParseInfo(nparse);
-
+    let { nparse_rule, nparse_index, excludes } = this.getParseInfo(nparse);
+    nparse_rule = this.reorderAdjacentLtAndGt(nparse_rule);
     if (!ret) ret = doc(nparse_rule);
     else ret = ret.find(nparse_rule);
 
@@ -137,6 +159,18 @@ class Jsoup {
     }
 
     return ret;
+  }
+
+  parseText(text: string) {
+    // 使用正则表达式替换所有空白字符序列为单个换行符 '\n'
+    text = text.replace(/[\s]+/gm, '\n');
+    // 压缩连续的换行符为单个换行符
+    // text = text.replace(/\n+/g, '\n').trim();
+    // 去除字符串开头的空白。不用trim去所有
+    text = text.replace(/\n+/g, '\n').replace(/^\s+/, '');
+    // 前面两步执行完结果和py的一致。剩下的就是把\n替换成空格就和java的一致了
+    text = text.replace(/\n/g, ' ');
+    return text;
   }
 
   /**
@@ -215,7 +249,7 @@ class Jsoup {
 
     if (parse == 'body&&Text' || parse == 'Text') {
       //@ts-ignore
-      return doc.text();
+      return this.parseText(doc.text());
     } else if (parse == 'body&&Html' || parse == 'Html') {
       return doc.html();
     }
@@ -238,6 +272,8 @@ class Jsoup {
       switch (option) {
         case 'Text':
           ret = (ret as cheerio.Cheerio)?.text() || '';
+          //@ts-ignore
+          ret = ret ? this.parseText(ret) : '';
           break;
         case 'Html':
           ret = (ret as cheerio.Cheerio)?.html() || '';

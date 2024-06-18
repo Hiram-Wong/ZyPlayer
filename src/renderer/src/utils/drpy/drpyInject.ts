@@ -156,6 +156,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     if (withHeaders) {
       return { body: reader.readAsText(blob,encoding), headers: formatHeaders } || emptyResult;
     } else {
+      // @ts-ignore
       return reader.readAsText(blob,encoding) || '';
     }
   } else if (_js_type === 1) {
