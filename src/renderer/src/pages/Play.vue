@@ -1476,6 +1476,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
 
           .tabs {
             height: 100%;
+            background-color: var(--td-bg-container);
           }
 
           .contents-wrap {
