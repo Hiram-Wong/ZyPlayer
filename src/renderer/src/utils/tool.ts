@@ -5,6 +5,7 @@ import * as he from 'he';
 import iconv from 'iconv-lite';
 import ip from 'ip';
 import JSON5 from 'json5';
+import pako from 'pako';
 
 import request, { requestComplete } from '@/utils/request';
 import { usePlayStore, useSettingStore } from '@/store';
@@ -317,6 +318,21 @@ const decodeBase64 = (str: string) => {
   return Base64.parse(str).toString(Utf8);
 };
 
+const encodeBtoa = (str: string) => {
+  return btoa(str);
+};
+
+const decodeAtob = (str: string) => {
+  return btoa(str);
+};
+
+const encodeGzip = (str: string) => {
+  return pako.gzip(str, {});
+};
+const decodeGzip = (str: string) => {
+  return pako.inflate(str);
+};
+
 const encodeUnicode = (str: string) => {
   const encodeUnicode = (str: string) => {
     const res: any = [];
@@ -377,6 +393,10 @@ export {
   encodeUrl,
   decodeUrl,
   encodeMd5,
+  encodeGzip,
+  decodeGzip,
+  encodeBtoa,
+  decodeAtob,
   encodeHtml,
   decodeHtml,
 };
