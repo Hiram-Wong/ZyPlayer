@@ -132,14 +132,14 @@ const getSetting = async () => {
       driveConfig.value.default = data["default"];
       active.value.nav = data["default"]["id"];
       driveConfig.value.default.startPage = driveConfig.value.default.startPage ? driveConfig.value.default.startPage : '/';
+
+      initCloud();
     } else {
       infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noData');
     }
     if (_.has(data, 'data') && !_.isEmpty(data["data"])) {
       driveConfig.value.data = data["data"];
     }
-
-    initCloud();
   } catch (err) {
     console.error(err);
   }
