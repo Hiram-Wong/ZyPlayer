@@ -1,48 +1,48 @@
 <template>
-  <div class="lab view-container">
+  <div class="lab-source view-container">
     <div class="header">
       <div class="left-operation-container">
-        <h3 class="title">{{ $t('pages.setting.editSource.title') }}</h3>
+        <h3 class="title">{{ $t('pages.setting.editSource.source.title') }}</h3>
       </div>
       <div class="right-operation-container">
         <div class="component-op">
           <div class="item" @click="showTemplateDialog()">
             <extension-icon />
-            <span>{{ $t('pages.setting.editSource.template') }}</span>
+            <span>{{ $t('pages.setting.editSource.source.template') }}</span>
           </div>
           <div class="item item-pad-select">
             <file-icon />
             <t-select v-model="tmp.file" @change="fileEvent()">
-              <t-option key="import" :label="$t('pages.setting.editSource.import')" value="import"
+              <t-option key="import" :label="$t('pages.setting.editSource.source.import')" value="import"
                 @click="importFileEvent" />
-              <t-option key="export" :label="$t('pages.setting.editSource.export')" value="export"
+              <t-option key="export" :label="$t('pages.setting.editSource.source.export')" value="export"
                 @click="exportFileEvent" />
-              <t-option key="cache" :label="$t('pages.setting.editSource.cache')" value="cache" @click="cacheEvent" />
+              <t-option key="cache" :label="$t('pages.setting.editSource.source.cache')" value="cache" @click="cacheEvent" />
             </t-select>
           </div>
           <div class="item item-pad-select">
             <bug-icon />
             <t-select v-model="tmp.run" @change="fileEvent()">
-              <t-option key="bug" :label="$t('pages.setting.editSource.bug')" value="bug" @click="debugEvent" />
-              <t-option key="delete" :label="$t('pages.setting.editSource.delete')" value="expdeleteodeletert"
+              <t-option key="bug" :label="$t('pages.setting.editSource.source.bug')" value="bug" @click="debugEvent" />
+              <t-option key="delete" :label="$t('pages.setting.editSource.source.delete')" value="expdeleteodeletert"
                 @click="deleteEvent" />
-              <t-option key="file" :label="$t('pages.setting.editSource.file')" value="file" @click="serverEvent" />
+              <t-option key="file" :label="$t('pages.setting.editSource.source.file')" value="file" @click="serverEvent" />
             </t-select>
           </div>
           <div class="item item-pad-select">
             <help-rectangle-icon />
             <t-select v-model="tmp.other" @change="fileEvent()">
-              <t-option key="ai" :label="$t('pages.setting.editSource.ai')" value="ai" @click="aiEvent" />
-              <!-- <t-option key="tool" :label="$t('pages.setting.editSource.tool')" value="tool" @click.stop="toolEvent" /> -->
-              <t-option key="doc" :label="$t('pages.setting.editSource.doc')" value="doc" @click="helpEvent" />
-              <t-option key="sift" :label="$t('pages.setting.editSource.sift')" value="sift"
+              <t-option key="ai" :label="$t('pages.setting.editSource.source.ai')" value="ai" @click="aiEvent" />
+              <!-- <t-option key="tool" :label="$t('pages.setting.editSource.source.tool')" value="tool" @click.stop="toolEvent" /> -->
+              <t-option key="doc" :label="$t('pages.setting.editSource.source.doc')" value="doc" @click="helpEvent" />
+              <t-option key="sift" :label="$t('pages.setting.editSource.source.sift')" value="sift"
                 @click="siftEvent('Sift')" />
             </t-select>
           </div>
 
-          <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.template')"
+          <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.source.template')"
             show-in-attached-element width="40%" @confirm="confirmTemplate()">
-            <p>{{ $t('pages.setting.editSource.templateTip') }}</p>
+            <p>{{ $t('pages.setting.editSource.source.templateTip') }}</p>
             <t-select v-model="form.template" @change="changeTheme()">
               <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
             </t-select>
@@ -64,7 +64,7 @@
                   </template>
                   <template #append>
                     <t-button class="button" theme="default" @click="getSource()">{{
-                      $t('pages.setting.editSource.action.source') }}</t-button>
+                      $t('pages.setting.editSource.source.action.source') }}</t-button>
                   </template>
                   <div class="input-container">
                     <t-input v-model="form.req.url" :placeholder="$t('pages.setting.placeholder.general')"
@@ -75,21 +75,21 @@
                   </div>
                 </t-input-adornment>
                 <t-dialog v-model:visible="isVisible.reqParam" placement="center"
-                  :header="$t('pages.setting.editSource.dialog.request.title')"
-                  :cancel-btn="$t('pages.setting.editSource.dialog.request.cancel')" show-in-attached-element
+                  :header="$t('pages.setting.editSource.source.dialog.request.title')"
+                  :cancel-btn="$t('pages.setting.editSource.source.dialog.request.cancel')" show-in-attached-element
                   @confirm="isVisible.reqParam = false" @cancel="reqCancel()">
                   <div class="dialog-item">
-                    <p>{{ $t('pages.setting.editSource.dialog.request.reqEncode') }}</p>
+                    <p>{{ $t('pages.setting.editSource.source.dialog.request.reqEncode') }}</p>
                     <t-select v-model="form.req.encode">
                       <t-option v-for="item in reqEncode" :key="item.value" :value="item.value" :label="item.label" />
                     </t-select>
                   </div>
                   <div class="dialog-item">
-                    <p>{{ $t('pages.setting.editSource.dialog.request.reqHeader') }}</p>
+                    <p>{{ $t('pages.setting.editSource.source.dialog.request.reqHeader') }}</p>
                     <t-textarea v-model="form.req.header" placeholder='{ "User-Agent": "Mozilla/5.0 zyplayer" }' />
                   </div>
                   <div v-if="form.req.method !== 'GET'" class="dialog-item">
-                    <p>{{ $t('pages.setting.editSource.dialog.request.reqBody') }}</p>
+                    <p>{{ $t('pages.setting.editSource.source.dialog.request.reqBody') }}</p>
                     <t-select v-model="form.req.contentType" class="contentType" style="margin-bottom: 5px;">
                       <t-option v-for="item in reqContentTypes" :key="item.label" :value="item.value"
                         :label="item.label" />
@@ -100,20 +100,20 @@
               </div>
             </div>
             <div class="code-op-item">
-              <t-input-adornment :prepend="$t('pages.setting.editSource.rule.pdfa')">
+              <t-input-adornment :prepend="$t('pages.setting.editSource.source.rule.pdfa')">
                 <template #append>
                   <t-button theme="default" @click="actionRule('pdfa')">
-                    {{ $t('pages.setting.editSource.rule.try') }}
+                    {{ $t('pages.setting.editSource.source.rule.try') }}
                   </t-button>
                 </template>
                 <t-input v-model="form.rule.pdfa" :placeholder="$t('pages.setting.placeholder.pdfaTip')" />
               </t-input-adornment>
             </div>
             <div class="code-op-item">
-              <t-input-adornment :prepend="$t('pages.setting.editSource.rule.pdfh')">
+              <t-input-adornment :prepend="$t('pages.setting.editSource.source.rule.pdfh')">
                 <template #append>
                   <t-button theme="default" @click="actionRule('pdfh')">
-                    {{ $t('pages.setting.editSource.rule.try') }}
+                    {{ $t('pages.setting.editSource.source.rule.try') }}
                   </t-button>
                 </template>
                 <t-input v-model="form.rule.pdfh" :placeholder="$t('pages.setting.placeholder.pdfhTip')" />
@@ -121,10 +121,10 @@
             </div>
             <div class="code-op-item">
               <div class="item sniffer">
-                <t-input-adornment :prepend="$t('pages.setting.editSource.rule.url')">
+                <t-input-adornment :prepend="$t('pages.setting.editSource.source.rule.url')">
                   <template #append>
                     <t-button class="button w-btn" theme="default" @click="actionSniffer()">{{
-                      $t('pages.setting.editSource.action.sniffer') }}</t-button>
+                      $t('pages.setting.editSource.source.action.sniffer') }}</t-button>
                   </template>
                   <div class="input-container">
                     <t-input v-model="form.sniffer.url" :placeholder="$t('pages.setting.placeholder.general')"
@@ -135,25 +135,25 @@
                   </div>
                 </t-input-adornment>
                 <t-dialog v-model:visible="isVisible.snifferParam" placement="center"
-                  :header="$t('pages.setting.editSource.dialog.sniffer.title')"
-                  :cancel-btn="$t('pages.setting.editSource.dialog.sniffer.cancel')" show-in-attached-element
+                  :header="$t('pages.setting.editSource.source.dialog.sniffer.title')"
+                  :cancel-btn="$t('pages.setting.editSource.source.dialog.sniffer.cancel')" show-in-attached-element
                   @confirm="isVisible.snifferParam = false" @cancel="snifferCancel()">
                   <!-- <div class="dialog-item">
-                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.ua') }}</p>
+                    <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.ua') }}</p>
                     <t-input v-model="form.sniffer.ua" :placeholder="$t('pages.setting.placeholder.general')" />
                   </div> -->
                   <div class="dialog-item">
-                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.auxiliaryRegex') }}</p>
+                    <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.auxiliaryRegex') }}</p>
                     <t-input v-model="form.sniffer.auxiliaryRegex"
                       :placeholder="$t('pages.setting.placeholder.general')" />
                   </div>
                   <div class="dialog-item">
-                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.initScript') }}</p>
+                    <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.initScript') }}</p>
                     <t-textarea v-model="form.sniffer.initScript"
                       :placeholder="$t('pages.setting.placeholder.general')" />
                   </div>
                   <data class="dialog-item">
-                    <p>{{ $t('pages.setting.editSource.dialog.sniffer.runScript') }}</p>
+                    <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.runScript') }}</p>
                     <t-textarea v-model="form.sniffer.runScript"
                       :placeholder="$t('pages.setting.placeholder.general')" />
                   </data>
@@ -162,34 +162,34 @@
             </div>
           </div>
           <t-collapse>
-            <t-collapse-panel :header="$t('pages.setting.editSource.bar.title')">
+            <t-collapse-panel :header="$t('pages.setting.editSource.source.bar.title')">
               <div class="code-bar">
                 <div class="item theme">
-                  <span class="codebox-label">{{ $t('pages.setting.editSource.bar.theme') }}</span>
+                  <span class="codebox-label">{{ $t('pages.setting.editSource.source.bar.theme') }}</span>
                   <t-select v-model="config.theme" auto-width @change="changeTheme()">
                     <t-option v-for="item in themes" :key="item.label" :value="item.value" :label="item.label" />
                   </t-select>
                 </div>
 
                 <div class="item language">
-                  <span class="codebox-label">{{ $t('pages.setting.editSource.bar.language') }}</span>
+                  <span class="codebox-label">{{ $t('pages.setting.editSource.source.bar.language') }}</span>
                   <t-select v-model="config.language" auto-width @change="changeLanguage()">
                     <t-option v-for="item in languages" :key="item.label" :value="item.label" :label="item.label" />
                   </t-select>
                 </div>
 
                 <div class="item eol">
-                  <span class="codebox-label">{{ $t('pages.setting.editSource.bar.eol') }}</span>
+                  <span class="codebox-label">{{ $t('pages.setting.editSource.source.bar.eol') }}</span>
                   <t-select v-model="config.eol" auto-width @change="changeEOL()">
                     <t-option v-for="item in eols" :key="item.label" :value="item.value" :label="item.label" />
                   </t-select>
                 </div>
 
                 <div class="item wordWrap">
-                  <span class="codebox-label">{{ $t('pages.setting.editSource.bar.wordWrap') }}</span>
+                  <span class="codebox-label">{{ $t('pages.setting.editSource.source.bar.wordWrap') }}</span>
                   <t-select v-model="config.wordWrap" auto-width @change="changeWarp()">
-                    <t-option :label="$t('pages.setting.editSource.bar.enable')" value="on" />
-                    <t-option :label="$t('pages.setting.editSource.bar.disable')" value="off" />
+                    <t-option :label="$t('pages.setting.editSource.source.bar.enable')" value="on" />
+                    <t-option :label="$t('pages.setting.editSource.source.bar.disable')" value="off" />
                   </t-select>
                 </div>
               </div>
@@ -203,93 +203,93 @@
           <div class="item">
             <t-button class="button init" theme="default" @click="actionInit">
               <div class="status">
-                <span class="title">{{ $t('pages.setting.editSource.action.init') }}</span>
-                <span class="desc">{{ $t('pages.setting.editSource.action.initStatus') }}: {{ form.init.auto ?
-                  $t('pages.setting.editSource.action.initAuto') :
-                  $t('pages.setting.editSource.action.initManual') }}</span>
+                <span class="title">{{ $t('pages.setting.editSource.source.action.init') }}</span>
+                <span class="desc">{{ $t('pages.setting.editSource.source.action.initStatus') }}: {{ form.init.auto ?
+                  $t('pages.setting.editSource.source.action.initAuto') :
+                  $t('pages.setting.editSource.source.action.initManual') }}</span>
               </div>
               <div class="click" @click.stop="form.init.auto = !form.init.auto">
                 <gesture-click-icon />
               </div>
             </t-button>
             <t-button class="button" theme="default" @click="actionHome">{{
-              $t('pages.setting.editSource.action.classify') }}</t-button>
+              $t('pages.setting.editSource.source.action.classify') }}</t-button>
             <t-button class="button" theme="default" @click="actionHomeVod">{{
-              $t('pages.setting.editSource.action.home') }}</t-button>
+              $t('pages.setting.editSource.source.action.home') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.category.t" :label="$t('pages.setting.editSource.rule.t')"
+            <t-input v-model="form.category.t" :label="$t('pages.setting.editSource.source.rule.t')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-30%" />
-            <t-input v-model="form.category.f" :label="$t('pages.setting.editSource.rule.f')"
+            <t-input v-model="form.category.f" :label="$t('pages.setting.editSource.source.rule.f')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-40%" />
             <t-input-number theme="column" :min="0" v-model="form.category.pg"
-              :label="$t('pages.setting.editSource.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
+              :label="$t('pages.setting.editSource.source.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
               class="input w-33-30%" />
             <t-button class="button w-btn" theme="default" @click="actionList()">{{
-              $t('pages.setting.editSource.action.list') }}</t-button>
+              $t('pages.setting.editSource.source.action.list') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.detail.ids" :label="$t('pages.setting.editSource.rule.ids')"
+            <t-input v-model="form.detail.ids" :label="$t('pages.setting.editSource.source.rule.ids')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
             <t-button class="button w-btn" theme="default" @click="actionDetail()">{{
-              $t('pages.setting.editSource.action.detail') }}</t-button>
+              $t('pages.setting.editSource.source.action.detail') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.search.wd" :label="$t('pages.setting.editSource.rule.wd')"
+            <t-input v-model="form.search.wd" :label="$t('pages.setting.editSource.source.rule.wd')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-70%" />
             <t-input-number theme="column" :min="0" v-model="form.search.pg"
-              :label="$t('pages.setting.editSource.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
+              :label="$t('pages.setting.editSource.source.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
               class="input w-50-30%" />
             <t-button class="button w-btn" theme="default" @click="actionSearch()">{{
-              $t('pages.setting.editSource.action.search') }}</t-button>
+              $t('pages.setting.editSource.source.action.search') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.play.flag" :label="$t('pages.setting.editSource.rule.flag')"
+            <t-input v-model="form.play.flag" :label="$t('pages.setting.editSource.source.rule.flag')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-30%" />
-            <t-input v-model="form.play.play" :label="$t('pages.setting.editSource.rule.play')"
+            <t-input v-model="form.play.play" :label="$t('pages.setting.editSource.source.rule.play')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-70%" />
             <t-button class="button w-btn" theme="default" @click="actionPlay()">{{
-              $t('pages.setting.editSource.action.play') }}</t-button>
+              $t('pages.setting.editSource.source.action.play') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.proxy.url" :label="$t('pages.setting.editSource.rule.url')"
+            <t-input v-model="form.proxy.url" :label="$t('pages.setting.editSource.source.rule.url')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
             <t-button class="button w-btn" theme="default" @click="actionProxy()">{{
-              $t('pages.setting.editSource.action.proxy') }}</t-button>
+              $t('pages.setting.editSource.source.action.proxy') }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.player.url" :label="$t('pages.setting.editSource.rule.url')"
+            <t-input v-model="form.player.url" :label="$t('pages.setting.editSource.source.rule.url')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
             <t-button class="button w-btn" theme="default" @click="actionPlayer()">{{
-              $t('pages.setting.editSource.action.player') }}</t-button>
+              $t('pages.setting.editSource.source.action.player') }}</t-button>
           </div>
         </div>
         <div class="log-box">
           <div class="nav">
             <div class="nav-left">
               <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
-                <t-radio-button value="debug">{{ $t('pages.setting.editSource.select.debug') }}</t-radio-button>
-                <t-radio-button value="source">{{ $t('pages.setting.editSource.select.source') }}</t-radio-button>
-                <t-radio-button value="rule">{{ $t('pages.setting.editSource.select.rule') }}</t-radio-button>
-                <t-radio-button value="log">{{ $t('pages.setting.editSource.select.log') }}</t-radio-button>
+                <t-radio-button value="debug">{{ $t('pages.setting.editSource.source.select.debug') }}</t-radio-button>
+                <t-radio-button value="source">{{ $t('pages.setting.editSource.source.select.source') }}</t-radio-button>
+                <t-radio-button value="rule">{{ $t('pages.setting.editSource.source.select.rule') }}</t-radio-button>
+                <t-radio-button value="log">{{ $t('pages.setting.editSource.source.select.log') }}</t-radio-button>
               </t-radio-group>
             </div>
             <div class="nav-right">
               <t-radio-group variant="default-filled" size="small" v-model="form.clickType.log" @change="logEvent()"
                 v-if="form.nav === 'log'">
-                <t-radio-button value="f12">{{ $t('pages.setting.editSource.select.f12') }}</t-radio-button>
-                <t-radio-button value="clear">{{ $t('pages.setting.editSource.select.clear') }}</t-radio-button>
+                <t-radio-button value="f12">{{ $t('pages.setting.editSource.source.select.f12') }}</t-radio-button>
+                <t-radio-button value="clear">{{ $t('pages.setting.editSource.source.select.clear') }}</t-radio-button>
               </t-radio-group>
               <t-radio-group variant="default-filled" size="small" v-model="form.clickType.proxy" @change="proxyEvent()"
                 v-if='form.nav === "debug" && form.action === "proxy"'>
-                <t-radio-button value="upload">{{ $t('pages.setting.editSource.select.upload') }}</t-radio-button>
-                <t-radio-button value="play">{{ $t('pages.setting.editSource.select.play') }}</t-radio-button>
-                <t-radio-button value="copy">{{ $t('pages.setting.editSource.select.copy') }}</t-radio-button>
+                <t-radio-button value="upload">{{ $t('pages.setting.editSource.source.select.upload') }}</t-radio-button>
+                <t-radio-button value="play">{{ $t('pages.setting.editSource.source.select.play') }}</t-radio-button>
+                <t-radio-button value="copy">{{ $t('pages.setting.editSource.source.select.copy') }}</t-radio-button>
               </t-radio-group>
               <t-radio-group variant="default-filled" size="small" v-model="form.clickType.source"
                 @change="sourceEvent()" v-if="form.nav === 'source'">
-                <t-radio-button value="format">{{ $t('pages.setting.editSource.select.format') }}</t-radio-button>
-                <t-radio-button value="reset">{{ $t('pages.setting.editSource.select.reset') }}</t-radio-button>
+                <t-radio-button value="format">{{ $t('pages.setting.editSource.source.select.format') }}</t-radio-button>
+                <t-radio-button value="reset">{{ $t('pages.setting.editSource.source.select.reset') }}</t-radio-button>
               </t-radio-group>
             </div>
           </div>
@@ -425,9 +425,9 @@ let form = ref({
 
 const tmp = computed(() => {
   return {
-    file: t('pages.setting.editSource.fileManage'),
-    run: t('pages.setting.editSource.run'),
-    other: t('pages.setting.editSource.other'),
+    file: t('pages.setting.editSource.source.fileManage'),
+    run: t('pages.setting.editSource.source.run'),
+    other: t('pages.setting.editSource.source.other'),
   }
 })
 
@@ -764,7 +764,7 @@ const importFileEvent = async () => {
 const exportFileEvent = async () => {
   const content = editor?.getValue() || '';
   if (!content.trim()) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.initNoData'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.initNoData'));
     return;
   }
 
@@ -810,7 +810,7 @@ const debugEvent = async () => {
     };
 
     if (!content.edit) {
-      MessagePlugin.warning(t('pages.setting.editSource.message.initNoData'));
+      MessagePlugin.warning(t('pages.setting.editSource.source.message.initNoData'));
       return;
     } else {
       const res = await setDebugSource(doc);
@@ -863,9 +863,9 @@ const deleteEvent = async () => {
   };
 };
 const fileEvent = async () => {
-  tmp.value.file = t('pages.setting.editSource.fileManage');
-  tmp.value.run = t('pages.setting.editSource.run');
-  tmp.value.other = t('pages.setting.editSource.other');
+  tmp.value.file = t('pages.setting.editSource.source.fileManage');
+  tmp.value.run = t('pages.setting.editSource.source.run');
+  tmp.value.other = t('pages.setting.editSource.source.other');
 };
 const serverEvent = async () => {
   await window.electron.ipcRenderer.send('open-path', 'file', true);
@@ -961,11 +961,11 @@ const actionRule = async (type) => {
   const html = form.value.content.source;
 
   if (!rule) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.ruleNoRule'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.ruleNoRule'));
     return;
   }
   if (!html) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.ruleNoHtml'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.ruleNoHtml'));
     return;
   }
 
@@ -991,7 +991,7 @@ const actionInit = async () => {
   const data = edit.trim();
 
   if (!data) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.initNoData'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.initNoData'));
     return;
   }
 
@@ -1010,7 +1010,7 @@ const actionList = async () => {
   const { t: tid, f, pg } = form.value.category;
 
   if (!tid) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.listNoT'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.listNoT'));
     return;
   }
 
@@ -1027,7 +1027,7 @@ const actionDetail = async () => {
   const { ids } = form.value.detail;
 
   if (!ids) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.detailNoIds'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.detailNoIds'));
     return;
   }
 
@@ -1038,7 +1038,7 @@ const actionSearch = async () => {
   const { wd, pg } = form.value.search;
 
   if (!wd) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.searchNoWd'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.searchNoWd'));
     return;
   }
 
@@ -1054,12 +1054,12 @@ const actionPlay = async () => {
   const { flag, play } = form.value.play;
 
   if (!flag) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.playNoFlag'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.playNoFlag'));
     return;
   }
 
   if (!play) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.playNoPlay'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.playNoPlay'));
     return;
   }
 
@@ -1075,7 +1075,7 @@ const actionProxy = async () => {
   let { url } = form.value.proxy;
 
   if (!url) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.proxyNoUrl'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.proxyNoUrl'));
     return;
   }
 
@@ -1095,7 +1095,7 @@ const actionPlayer = async (url = "") => {
   url = url ? url : form.value.player.url;
 
   if (!url) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.playerNoUrl'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.playerNoUrl'));
     return;
   }
 
@@ -1131,7 +1131,7 @@ const getSource = async () => {
   body = body ? body : '{}';
 
   if (!url) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.htmlNoUrl'));
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.htmlNoUrl'));
     return;
   };
 
@@ -1255,7 +1255,7 @@ const sourceEvent = () => {
 </script>
 
 <style lang="less" scoped>
-.lab {
+.lab-source {
   height: 100%;
   width: 100%;
   display: flex;

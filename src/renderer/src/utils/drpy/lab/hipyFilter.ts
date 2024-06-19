@@ -147,7 +147,6 @@ const getFilters = (
 
           try {
             const reg: any = new RegExp(me, 'g');
-            console.log(reg);
             let str = obj.url;
             let regobj = reg.callback(str, (m, f) => {
               let result = str;
@@ -158,7 +157,6 @@ const getFilters = (
             });
             links[fs].push(regobj);
             let result = reg.exec(str)[1];
-            console.log(result);
             obj.m = result;
             obj.m = decodeURIComponent(obj.m);
           } catch (e) {
@@ -216,7 +214,7 @@ const processCategories = (contentHtml, class_parse, cate_exclude, reurl, url) =
     pdfa(contentHtml, listSelector)
       .map((item) => {
         const title = pdfh(item, titleSelector).trim();
-        if ((cate_exclude != '' && new RegExp(cate_exclude).test(title)) || excludePattern.test(title)) {
+        if ((cate_exclude && new RegExp(cate_exclude).test(title)) || excludePattern.test(title)) {
           console.log(`${title}: 跳过`);
           return;
         }
@@ -264,7 +262,6 @@ const processCategories = (contentHtml, class_parse, cate_exclude, reurl, url) =
   };
 
   const res = convertArrayToObject(categories, ['surl', 'url']);
-  console.log(res);
   return res;
 };
 

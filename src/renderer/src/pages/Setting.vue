@@ -44,7 +44,7 @@ const componentMap = {
   'iptvSource': defineAsyncComponent(() => import('./setting/iptv/IptvSetting.vue')),
   'analyzeSource': defineAsyncComponent(() => import('./setting/analyze/AnalyzeSetting.vue')),
   'driveSource': defineAsyncComponent(() => import('./setting/drive/DriveSetting.vue')),
-  'editSource': defineAsyncComponent(() => import('./setting/tool/EditSource.vue')),
+  'editSource': defineAsyncComponent(() => import('./setting/editSource/Tool.vue')),
 };
 
 const storeSetting = useSettingStore();

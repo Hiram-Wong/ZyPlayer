@@ -1,32 +1,33 @@
 <template>
   <t-dialog v-model:visible="formVisible" :closeOnOverlayClick="false" :width="650"
-    :header="$t('pages.setting.editSource.dialog.ai.title')" placement="center" :footer="false">
+    :header="$t('pages.setting.editSource.source.dialog.ai.title')" placement="center" :footer="false">
     <template #body>
       <div class="ai-dialog">
-        <p class="ai-item">{{ $t('pages.setting.editSource.dialog.ai.declare') }}</p>
+        <p class="ai-item">{{ $t('pages.setting.editSource.source.dialog.ai.declare') }}</p>
         <div class="ai-item">
           <t-collapse>
-            <t-collapse-panel :header="$t('pages.setting.editSource.dialog.ai.parms')">
+            <t-collapse-panel :header="$t('pages.setting.editSource.source.dialog.ai.parms')">
               <template #headerRightContent>
                 <t-button size="small" shape="round" @click.stop="saveAi">{{
-                  $t('pages.setting.editSource.dialog.ai.save') }}</t-button>
+                  $t('pages.setting.editSource.source.dialog.ai.save') }}</t-button>
               </template>
               <div class="fetch-key-content">
                 <t-space>
                   <t-link theme="primary" underline href="https://platform.openai.com/api-keys" target="_blank">
-                    1.{{ $t('pages.setting.editSource.dialog.ai.tip1') }}
+                    1.{{ $t('pages.setting.editSource.source.dialog.ai.tip1') }}
                   </t-link>
                   <t-link theme="primary" underline href="https://github.com/chatanywhere/GPT_API_free" target="_blank">
-                    2.{{ $t('pages.setting.editSource.dialog.ai.tip2') }}
+                    2.{{ $t('pages.setting.editSource.source.dialog.ai.tip2') }}
                   </t-link>
                 </t-space>
               </div>
               <div class="parms-bar">
-                <t-input :label="$t('pages.setting.editSource.dialog.ai.server')" v-model="formData.config.server"
-                  class="input-item"></t-input>
-                <t-input :label="$t('pages.setting.editSource.dialog.ai.key')" v-model="formData.config.key"
+                <t-input :label="$t('pages.setting.editSource.source.dialog.ai.server')"
+                  v-model="formData.config.server" class="input-item"></t-input>
+                <t-input :label="$t('pages.setting.editSource.source.dialog.ai.key')" v-model="formData.config.key"
                   class="input-item" type="password"></t-input>
-                <t-select :label="$t('pages.setting.editSource.dialog.ai.model')" v-model="formData.config.model">
+                <t-select :label="$t('pages.setting.editSource.source.dialog.ai.model')"
+                  v-model="formData.config.model">
                   <t-option v-for="item in models" :key="item.label" :value="item.label" :label="item.label" />
                 </t-select>
               </div>
@@ -34,32 +35,32 @@
           </t-collapse>
         </div>
         <div class="ai-item instructionLibrary">
-          <span class="ai-label">{{ $t('pages.setting.editSource.dialog.ai.instructionLibrary') }}</span>
+          <span class="ai-label">{{ $t('pages.setting.editSource.source.dialog.ai.instructionLibrary') }}</span>
           <t-radio-group variant="default-filled" size="small" v-model="formData.aiType" style="margin-bottom: 0;">
-            <t-radio-button value="qa">{{ $t('pages.setting.editSource.dialog.ai.qa') }}</t-radio-button>
-            <t-radio-button value="filter">{{ $t('pages.setting.editSource.dialog.ai.filter') }}</t-radio-button>
-            <t-radio-button value="cssSelector">{{ $t('pages.setting.editSource.dialog.ai.cssSelector')
+            <t-radio-button value="qa">{{ $t('pages.setting.editSource.source.dialog.ai.qa') }}</t-radio-button>
+            <t-radio-button value="filter">{{ $t('pages.setting.editSource.source.dialog.ai.filter') }}</t-radio-button>
+            <t-radio-button value="cssSelector">{{ $t('pages.setting.editSource.source.dialog.ai.cssSelector')
               }}</t-radio-button>
           </t-radio-group>
         </div>
         <div class="ai-item codeSnippet" v-if="formData.aiType !== 'qa'">
-          <!-- <span class="ai-label">{{ $t('pages.setting.editSource.dialog.ai.codeSnippet') }}</span> -->
+          <!-- <span class="ai-label">{{ $t('pages.setting.editSource.source.dialog.ai.codeSnippet') }}</span> -->
           <t-textarea v-model="formData.codeSnippet" :autosize="{ minRows: 1, maxRows: 5 }"
-            :placeholder="$t('pages.setting.editSource.dialog.ai.codeSnippetTip')"></t-textarea>
+            :placeholder="$t('pages.setting.editSource.source.dialog.ai.codeSnippetTip')"></t-textarea>
         </div>
         <div class="ai-item demand">
           <t-textarea v-model="formData.demand" class="textarea" :autosize="{ minRows: 1, maxRows: 5 }"
-            :placeholder="$t('pages.setting.editSource.dialog.ai.fetchTip')"></t-textarea>
+            :placeholder="$t('pages.setting.editSource.source.dialog.ai.fetchTip')"></t-textarea>
           <t-button :loading="isVisible.loading" size="small" shape="round" class="send" @click="AiAnswerEvent()">
-            {{ $t('pages.setting.editSource.dialog.ai.fetch') }}
+            {{ $t('pages.setting.editSource.source.dialog.ai.fetch') }}
           </t-button>
         </div>
         <div class="ai-item result" v-if="formData.result && !isVisible.loading">
-          <t-card :title="$t('pages.setting.editSource.dialog.ai.result')">
+          <t-card :title="$t('pages.setting.editSource.source.dialog.ai.result')">
             <div ref="contentElm" v-html="formData.contentHtml" class="chat-msg-content pa-3"></div>
             <template #actions>
               <t-button size="small" shape="round" @click.stop="copyAiAnswer">{{
-                $t('pages.setting.editSource.dialog.ai.copy') }}</t-button>
+                $t('pages.setting.editSource.source.dialog.ai.copy') }}</t-button>
             </template>
           </t-card>
         </div>
