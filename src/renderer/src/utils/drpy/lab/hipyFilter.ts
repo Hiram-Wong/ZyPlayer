@@ -188,12 +188,6 @@ const getFilters = (
       });
     });
   });
-  console.log({
-    filters: fls,
-    fs: fs,
-    links,
-    fl: fls.map((x) => x.key),
-  });
   return {
     filters: fls,
     fs: fs,
