@@ -3,6 +3,7 @@ import ora from 'ora';
 
 import { PARSE_ELEMENTS_CONTEXT, GET_ELEMENT_SELECTORS_CONTEXT, HELP_CONTEXT } from './context';
 import { isObject, logStart, logSuccess } from './general';
+import { setting } from '../../../../db/service';
 
 type OpenAIChatModel =
   | 'gpt-4-0125-preview'
@@ -91,22 +92,36 @@ export function createOpenAI(config: CreateOpenAIConfig = {}): OpenAIApp {
     const { model = chatDefaultModel, context, HTMLContent, userContent, responseFormatType } = option;
 
     const spinner = ora(logStart(`AI is answering your question, please wait a moment`)).start();
-    const completion = await openai.chat.completions.create({
-      model,
-      messages: [
-        { role: 'system', content: context },
-        { role: 'user', name: 'zyplayer', content: HTMLContent },
-        { role: 'user', name: 'coder', content: userContent },
-      ],
-      response_format: { type: responseFormatType },
-      temperature: 0.1,
-    });
-    spinner.succeed(logSuccess(`AI has completed your question`));
+    try {
+      const timeout = (await setting.find({ key: 'timeout' }).value) || 5000;
+      const completion = await openai.chat.completions.create(
+        {
+          model,
+          messages: [
+            { role: 'system', content: context },
+            { role: 'user', name: 'zyplayer', content: HTMLContent },
+            { role: 'user', name: 'coder', content: userContent },
+          ],
+          response_format: { type: responseFormatType },
+          temperature: 0.1,
+        },
+        { maxRetries: 1, timeout },
+      );
+      spinner.succeed(logSuccess(`AI has completed your question`));
 
-    const content = completion.choices[0].message.content;
-    const result = responseFormatType === 'json_object' ? JSON.parse(content!) : content;
+      const content = completion.choices[0].message.content;
+      const result = responseFormatType === 'json_object' ? JSON.parse(content!) : content;
 
-    return result;
+      return result;
+    } catch (err) {
+      spinner.fail(`AI encountered an error or timeout`);
+      if (HTMLContent) {
+        return {
+          filters: `AI encountered an error or timeout; ${err}`,
+          selectors: `AI encountered an error or timeout; ${err}`,
+        } as any;
+      } else return `AI encountered an error or timeout; ${err}` as any;
+    }
   }
 
   const app: OpenAIApp = {
@@ -177,7 +192,6 @@ export function createOpenAI(config: CreateOpenAIConfig = {}): OpenAIApp {
         userContent: content,
         responseFormatType: 'text',
       });
-
       return result;
     },
 

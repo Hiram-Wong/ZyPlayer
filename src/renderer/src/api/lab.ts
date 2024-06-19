@@ -1,4 +1,5 @@
 import request from '@/utils/request';
+import { getPinia } from '@/utils/tool';
 
 export function fetchDebugSource(action) {
   return request({
@@ -49,5 +50,6 @@ export function fetchAiAnswer(docs) {
     url: '/v1/lab/ai',
     method: 'post',
     data: docs,
+    timeout: getPinia('setting', 'timeout') * 2,
   });
 }

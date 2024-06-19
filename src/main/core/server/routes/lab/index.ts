@@ -171,23 +171,29 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         // @ts-ignore
         const { type, codeSnippet, demand } = req.body;
 
+        let response: any = '';
         switch (type) {
           case 'filter':
-            data.data = (await crawlOpenAIApp.parseElements(codeSnippet, demand)).filters;
-            data.code = 200;
-            data.msg = 'success';
+            response = (await crawlOpenAIApp.parseElements(codeSnippet, demand)).filters;
             break;
           case 'cssSelector':
-            data.data = (await crawlOpenAIApp.getElementSelectors(codeSnippet, demand)).selectors;
-            data.code = 200;
-            data.msg = 'success';
+            response = (await crawlOpenAIApp.getElementSelectors(codeSnippet, demand)).selectors;
             break;
           case 'qa':
-            data.data = await crawlOpenAIApp.help(demand);
-            data.code = 200;
-            data.msg = 'success';
+            response = await crawlOpenAIApp.help(demand);
             break;
         }
+
+        if (response?.includes('AI encountered an error or timeout')) {
+          data.code = 500;
+          data.msg = response;
+          data.data = '';
+        } else {
+          data.code = 200;
+          data.msg = 'success';
+          data.data = response;
+        }
+
         reply.code(200).send(data);
       } catch (err) {
         reply.code(500).send(err);

@@ -213,15 +213,17 @@ const AiAnswerEvent = async () => {
         }
       } catch (e) { }
       formData.value.result = content;
-      formData.value.contentHtml = md.render(content);
       await nextTick();
       MessagePlugin.success(t('pages.setting.data.success'));
     } else {
-      MessagePlugin.error(`${t('pages.setting.data.fail')}:${response.message}`);
+      formData.value.result = response.msg;
+      MessagePlugin.error(`${t('pages.setting.data.fail')}: ${response.msg}`);
     }
   } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+    formData.value.result = err as string;
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err}`);
   } finally {
+    formData.value.contentHtml = md.render(formData.value.result);
     isVisible.loading = false;
   }
 }
@@ -291,6 +293,14 @@ const copyAiAnswer = async () => {
 .hljs-code-container {
   border-radius: 3px;
   overflow: hidden;
+}
+
+:deep(.chat-msg-content) {
+  a {
+    pointer-events: none;
+    cursor: not-allowed;
+    color: var(--td-brand-color);
+  }
 }
 
 :deep(.t-card--bordered) {
