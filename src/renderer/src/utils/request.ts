@@ -39,7 +39,7 @@ const request = async (config: AxiosRequestConfig) => {
   return data as any;
 };
 
-const requestComplete = async (config: AxiosRequestConfig) => {
+const requestComplete: any = async (config: AxiosRequestConfig) => {
   if (!config?.timeout) {
     const TIMEOUT = getPinia('setting', 'timeout') < 1000 ? 1000 : getPinia('setting', 'timeout');
     config.timeout = TIMEOUT;
