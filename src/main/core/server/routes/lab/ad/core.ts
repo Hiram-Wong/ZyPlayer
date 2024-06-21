@@ -1,13 +1,16 @@
 import axios from 'axios';
 import logger from '../../../../logger';
 
-if (typeof Array.prototype.toReversed !== 'function') {
-  Array.prototype.toReversed = function () {
-    const clonedList = this.slice();
-    // 倒序新数组
-    const reversedList = clonedList.reverse();
-    return reversedList;
-  };
+if (typeof Array.prototype.toReversed != 'function') {
+  Object.defineProperty(Array.prototype, 'toReversed', {
+    value: function () {
+      const clonedList = this.slice();
+      // 倒序新数组
+      const reversedList = clonedList.reverse();
+      return reversedList;
+    },
+    enumerable: false
+  });
 }
 
 const resolve = (from, to) => {
