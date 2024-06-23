@@ -8,7 +8,7 @@ const publicListener = {
   sendDanmu: null as any,
 };
 
-const options = {
+const options: any = {
   container: document.getElementById('artplayer'),
   url: '',
   type: '',
