@@ -75,7 +75,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { chinaottHot, doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
+import { komectHot, doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
 import { fetchHistoryList, clearHistorySearchList, addHistory } from '@/api/history';
 import { fetchSettingDetail } from '@/api/setting';
 
@@ -145,7 +145,7 @@ const clearSearchHistory = async () => {
 
 // 热播映射
 const hotTypeMappings = {
-  chinaott: {
+  komect: {
     hotUpdateTime: () => moment().format('YYYY/MM/DD'),
     hotSource: '电影',
   },
@@ -218,8 +218,8 @@ const getHotList = async (retryCount = 1) => {
       case 'douban':
         queryHotList = await doubanHot(hotConfig.hotSource, 20, 0);
         break;
-      case 'chinaott':
-        queryHotList = await chinaottHot(hotConfig.hotSource, 20, 1);
+      case 'komect':
+        queryHotList = await komectHot(hotConfig.hotSource, 20, 1);
         break;
     }
 
