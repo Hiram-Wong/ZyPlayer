@@ -122,7 +122,7 @@ export default {
     timeout: '超时',
     hotRecommend: '热榜',
     douban: '豆瓣',
-    chinaott: '未来电视',
+    komect: '移动爱家',
     local: '默认站',
     kylive: '酷云',
     enlightent: '云合',

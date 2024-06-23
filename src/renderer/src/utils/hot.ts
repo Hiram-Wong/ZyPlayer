@@ -3,7 +3,7 @@ import qs from 'qs';
 
 import request from '@/utils/request';
 
-const chinaottHot = async (type = '电影', limit = 20, start = 1) => {
+const komectHot = async (type = '电影', limit = 20, start = 1) => {
   try {
     let data: any = [];
     const url = 'https://msi.nsoap.komect.com/msi/cbiz/dp/contentInfo/homePage/list';
@@ -192,4 +192,4 @@ const enlightentHot = async (date, sort, channelType, day) => {
   }
 };
 
-export { chinaottHot, doubanHot, quarkHot, baiduHot, kyLiveHot, enlightentHot };
+export { komectHot, doubanHot, quarkHot, baiduHot, kyLiveHot, enlightentHot };

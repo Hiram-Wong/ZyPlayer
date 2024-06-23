@@ -43,6 +43,7 @@
             <t-radio value="kylive">{{ $t('pages.setting.base.kylive') }}</t-radio>
             <t-radio value="enlightent">{{ $t('pages.setting.base.enlightent') }}</t-radio>
             <t-radio value="douban">{{ $t('pages.setting.base.douban') }}</t-radio>
+            <t-radio value="komect">{{ $t('pages.setting.base.komect') }}</t-radio>
             <!-- <t-radio value="local">{{ $t('pages.setting.base.local') }}</t-radio> -->
           </t-radio-group>
         </div>
