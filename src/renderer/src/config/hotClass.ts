@@ -100,7 +100,7 @@ export default {
       },
     ],
   },
-  chinaott: {
+  komect: {
     name: '未来电视数据',
     url: 'https://msi.nsoap.komect.com/minitvH5/index.html#/hotlist?licensedParty=%E6%9C%AA%E6%9D%A5%E7%94%B5%E8%A7%86&isOuter=undefined&provCode=42&deviceType=502090&isNewTheme',
     data: [
