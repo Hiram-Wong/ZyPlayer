@@ -1,8 +1,8 @@
 <template>
   <div class="search-bar">
     <t-popup placement="bottom-right" :visible="isVisible.popup" :on-visible-change="popupVisibleEvent">
-      <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" clearable :on-focus="focusEvent"
-        v-model="searchValue" :on-enter="searchEvent">
+      <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" clearable v-model="searchValue"
+        :on-enter="searchEvent" :on-click="focusEvent" @clear="searchEvent(searchValue)">
         <template #label>
           <t-select auto-width v-model="active.filmGroupType" class="search-select"
             v-if="activeRouteName === 'FilmIndex'" @click.stop>
