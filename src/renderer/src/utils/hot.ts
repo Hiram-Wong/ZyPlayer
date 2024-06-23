@@ -3,6 +3,57 @@ import qs from 'qs';
 
 import request from '@/utils/request';
 
+const chinaottHot = async (type = '电影', limit = 20, start = 1) => {
+  try {
+    let data: any = [];
+    const url = 'https://msi.nsoap.komect.com/msi/cbiz/dp/contentInfo/homePage/list';
+    const body = {
+      openId: '111',
+      provCode: '42',
+      licensedParty: '未来电视',
+      deviceType: '502090',
+      contentTypeIndexs: [
+        {
+          contentType: type,
+          pageNum: start,
+          pageSize: limit,
+        },
+      ],
+    };
+
+    const response = await request({
+      url,
+      method: 'POST',
+      headers: {
+        auth: '3637df52d98ce8815fe47bbe49fe6459',
+        'custom-origin': 'https://msi.nsoap.komect.com',
+        'custom-referer': 'https://msi.nsoap.komect.com/minitvH5/index.html',
+        channelId: 'H5',
+      },
+      data: body,
+    });
+    if (response?.data.items[0].contentInfoList && response.data.items[0].contentInfoList.length > 0) {
+      for (const subject of response.data.items[0].contentInfoList) {
+        const item = subject;
+        data.push({
+          vod_score: item.dpContentScore,
+          vod_name: item.dpContentName,
+          vod_pic: item.dpContentPicUrl,
+          vod_year: item.publishTime,
+          vod_id: item.psId,
+          vod_hot: item.dpPlayCount,
+        });
+
+        data.sort((a, b) => b.vod_hot - a.vod_hot);
+      }
+    }
+    return data;
+  } catch (err) {
+    console.error('Error making API request:', err);
+    throw err;
+  }
+};
+
 const doubanHot = async (type, limit = 20, start = 0) => {
   try {
     let data: any = [];
@@ -141,4 +192,4 @@ const enlightentHot = async (date, sort, channelType, day) => {
   }
 };
 
-export { doubanHot, quarkHot, baiduHot, kyLiveHot, enlightentHot };
+export { chinaottHot, doubanHot, quarkHot, baiduHot, kyLiveHot, enlightentHot };

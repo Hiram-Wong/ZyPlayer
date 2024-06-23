@@ -122,6 +122,7 @@ export default {
     timeout: 'Timeout',
     hotRecommend: 'HotList',
     douban: 'DouBan',
+    chinaott: 'Chinaott',
     local: 'DefaultSite',
     kylive: 'KyLive',
     enlightent: 'Enlightent',
