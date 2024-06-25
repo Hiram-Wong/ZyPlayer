@@ -42,7 +42,7 @@ const handleMouseDown = (event) => {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .titlebar {
   -webkit-app-region: drag;
   display: flex;
@@ -82,6 +82,10 @@ const handleMouseDown = (event) => {
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .t-button {
+          border-radius: var(--td-radius-medium);
+        }
       }
     }
 
