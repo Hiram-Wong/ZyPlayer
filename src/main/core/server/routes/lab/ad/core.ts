@@ -1,7 +1,7 @@
 import axios from 'axios';
 import logger from '../../../../logger';
 
-if (typeof Array.prototype.toReversed != 'function') {
+if (typeof Array.prototype.toReversed !== 'function') {
   Object.defineProperty(Array.prototype, 'toReversed', {
     value: function () {
       const clonedList = this.slice();
@@ -42,15 +42,15 @@ const urljoin = (fromPath, nowPath) => {
  */
 const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
   let ts = new Date().getTime();
-  let option = headers ? { headers } : {};
+  let option = headers ? {headers: headers} : {};
 
   function b(s1, s2) {
     let i = 0;
     while (i < s1.length) {
       if (s1[i] !== s2[i]) {
-        break;
+        break
       }
-      i++;
+      i++
     }
     return i;
   }
@@ -63,11 +63,7 @@ const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
   const m3u8_response = await axios.get(m3u8_url, option);
   let m3u8 = m3u8_response.data;
   //log('m3u8处理前:' + m3u8);
-  m3u8 = m3u8
-    .trim()
-    .split('\n')
-    .map((it) => (it.startsWith('#') ? it : urljoin(m3u8_url, it)))
-    .join('\n');
+  m3u8 = m3u8.trim().split('\n').map(it => it.startsWith('#') ? it : urljoin(m3u8_url, it)).join('\n');
   //log('m3u8处理后:============:' + m3u8);
   // 获取嵌套m3u8地址
   m3u8 = m3u8.replace(/\n\n/gi, '\n'); //删除多余的换行符
@@ -83,15 +79,34 @@ const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
     m3u8 = m3u8_nest_response.data;
   }
   //log('----处理有广告的地址----');
-  let s = m3u8
-    .trim()
-    .split('\n')
-    .filter((it) => it.trim())
-    .join('\n');
+  let s = m3u8.trim().split('\n').filter(it => it.trim()).join('\n');
   let ss = s.split('\n');
   //找出第一条播放地址
-  let firststr = ss.find((x) => !x.startsWith('#'));
-  let maxl = 0; //最大相同字符
+  //let firststr = ss.find(x => !x.startsWith('#'));
+  let firststr = '';
+  let maxl = 0;//最大相同字符
+  let kk = 0;
+  let kkk = 2;
+  let secondstr = '';
+  for (let i = 0; i < ss.length; i++) {
+    let s = ss[i];
+    if (!s.startsWith("#")) {
+      if (kk == 0) firststr = s;
+      if (kk == 1) maxl = b(firststr, s);
+      if (kk > 1) {
+        if (maxl > b(firststr, s)) {
+          if (secondstr.length < 5) secondstr = s;
+          kkk = kkk + 2;
+        } else {
+          maxl = b(firststr, s);
+          kkk++;
+        }
+      }
+      kk++;
+      if (kk >= 20) break;
+    }
+  }
+  if (kkk > 30) firststr = secondstr;
   let firststrlen = firststr!.length;
   //log('字符串长度：' + firststrlen);
   let ml = Math.round(ss.length / 2).toString().length; //取数据的长度的位数
