@@ -77,7 +77,7 @@ win.on('unmaximize', () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: var(--td-radius-medium);
+    border-radius: var(--td-radius-default);
 
     svg {
       width: 1em;
