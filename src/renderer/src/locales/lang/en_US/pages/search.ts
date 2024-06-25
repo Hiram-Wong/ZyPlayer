@@ -4,7 +4,8 @@ export default {
   site: 'Local',
   group: 'Group',
   all: 'All',
-  searchHistory: 'SearchHistory',
+  searchHistory: 'Search History',
+  searchSource: 'Search Source',
   searchPlaceholder: 'Search resources',
-  hotNoData: 'No data for the past three days'
-}
+  hotNoData: 'No data for the past three days',
+};

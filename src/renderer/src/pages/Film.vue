@@ -744,6 +744,11 @@ filmReloadeventBus.on(async () => {
         width: 100%;
         overflow: hidden;
       }
+
+      .quick_filter {
+        display: flex;
+        align-items: center;
+      }
     }
 
     .container-full {

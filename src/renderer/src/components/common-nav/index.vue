@@ -4,7 +4,9 @@
       <div class="nav-sub-tab nav-sub-tab-header">
         <div class="header" v-if="!isVisible.search">
           <p class="title">{{ title }}</p>
-          <data-search-icon size="large" class="icon" v-if="search" @click="isVisible.search = true" />
+          <t-popup :content="$t('pages.search.searchSource')">
+            <data-search-icon size="large" class="icon" v-if="search" @click="isVisible.search = true" />
+          </t-popup>
         </div>
         <div class="search" v-if="isVisible.search" ref="headerOutsideRef">
           <t-input :placeholder="$t('pages.setting.placeholder.general')" clearable v-model="searchText"
@@ -161,7 +163,7 @@ const searchEvent = () => {
 
       .header {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         height: 32px;
         transition: all 0.25s ease-in-out;
 
@@ -172,7 +174,8 @@ const searchEvent = () => {
         }
 
         .icon {
-          margin-left: var(--td-comp-margin-xxs);
+          margin-left: auto;
+          margin-right: var(--td-comp-margin-s);
           cursor: pointer;
         }
       }
