@@ -1,7 +1,7 @@
 import Worker from '@/utils/drpy/worker?worker';
 import { getPinia } from '@/utils/tool';
 
-let worker: Worker = new Worker();
+let worker: Worker = new Worker({ name: 't3Worker' });
 let timer: any = null;
 
 const doWork = (data) => {
@@ -21,7 +21,7 @@ const doWork = (data) => {
     const TIMEOUT = getPinia('setting', 'timeout') || 5000;
     timer = setTimeout(async () => {
       worker.terminate();
-      worker = new Worker();
+      worker = new Worker({ name: 't3Worker' });
       reject(new Error('Worker job run 15s, timed out'));
     }, TIMEOUT * 2);
   });
@@ -32,7 +32,7 @@ const terminateWork = () => {
     if (timer) clearInterval(timer);
     if (typeof worker !== 'undefined' && worker !== null) {
       worker.terminate();
-      worker = new Worker();
+      worker = new Worker({ name: 't3Worker' });
       resolve({
         msg: 'Worker terminated successfully.',
         code: 200,
