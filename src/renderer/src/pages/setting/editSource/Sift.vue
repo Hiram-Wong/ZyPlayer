@@ -144,6 +144,9 @@ import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { getHtml, copyToClipboardApi, encodeGzip, encodeBtoa } from '@/utils/tool';
 import { getFilters, processCategories } from '@/utils/drpy/lab/hipyFilter';
+import axios from 'axios';
+import { json } from 'node:stream/consumers';
+
 
 const storeSetting = useSettingStore();
 
@@ -402,7 +405,6 @@ const actionClass = () => {
     MessagePlugin.warning(t('pages.setting.editSource.sift.message.sourceFirst'));
     return;
   }
-
   const response = processCategories(contentHtml, class_parse, cate_exclude, reurl, url);
 
   const transformData = (data) => {
@@ -411,14 +413,71 @@ const actionClass = () => {
 
     return titles.map((title, index) => ({
       title: title.trim(),
-      value: ms[index].trim()
+      id: ms[index].trim(),
+      surl: form.value.reurl.replace("fyclass", ms[index].trim())
     }));
   }
-  if (response?.title && response?.m) form.value.content.debug = transformData(response);
+  //if (response?.title && response?.m) form.value.content.debug = transformData(response);
+  let r = transformData(response);
+
+  const { filterInfo = '', filter = '', matchs } = form.value;
+
+  // 调用batchFetch并处理结果
+  batchFetch(r)
+    .then(results => {
+      let rs = {};
+      results.map(item => {
+        const newMatchs = {
+          '剧情': matchs.plot,
+          '地区': matchs.area,
+          '语言': matchs.lang,
+          '年份': matchs.year,
+          '字母': matchs.letter,
+          '排序': matchs.sort,
+        }
+        const response: any = getFilters(item.body, item.id, filter, filterInfo, newMatchs, '').filters;
+        //console.log(response)
+        if (response) {
+          rs[item.id] = response;
+        }
+      })
+      console.log(rs);
+      form.value.content.debug = JSON.stringify(rs, null, 2);
+    })
+    .catch(error => {
+      console.error('Failed to fetch data:', error);
+    });
+
   changeNav('debug', 'class');
 };
 
+
+const batchFetch = async (obj) => {
+  const promises = obj.map(x => {
+    return axios.get(x.surl);
+  });
+  try {
+    // 等待所有请求完成
+    const responses = await Promise.all(promises);
+    // 所有请求都成功后，提取结果数据并关联id
+    const results = responses.map((response, index) => {
+      console.log(index)
+      const { id } = obj[index]; // 获取对应的id
+      return {
+        id: id,
+        body: response.data // 假设响应体的数据在response.data中
+      };
+    });
+    return results; // 返回结果数组
+  } catch (error) {
+    // 如果有任何一个请求失败，则捕捉错误
+    console.error('There was an error with one of the requests:', error);
+    throw error; // 抛出错误，以便调用者可以处理
+  }
+};
+
 const actionFilter = () => {
+  console.log(form.value)
   const { filterInfo = '', filter = '', matchs } = form.value;
   const contentHtml = form.value.content.source;
   if (!(filterInfo && filter)) {
