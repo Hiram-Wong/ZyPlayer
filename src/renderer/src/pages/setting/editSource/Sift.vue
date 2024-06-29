@@ -72,6 +72,9 @@
               <t-button block @click="actionClass">{{ $t('pages.setting.editSource.sift.rule.try') }}</t-button>
             </div>
             <div class="code-op-item card">
+              <t-button block @click="batchResults">{{ $t('pages.setting.editSource.sift.rule.br') }}</t-button>
+            </div>
+            <div class="code-op-item card">
               <t-input v-model="form.filter" :label="$t('pages.setting.editSource.sift.rule.filter')"
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.filterTip')" class="input w-100%" />
               <t-input v-model="form.filterInfo" :label="$t('pages.setting.editSource.sift.rule.filterInfo')"
@@ -144,6 +147,9 @@ import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { getHtml, copyToClipboardApi, encodeGzip, encodeBtoa } from '@/utils/tool';
 import { getFilters, processCategories } from '@/utils/drpy/lab/hipyFilter';
+import axios from 'axios';
+import { json } from 'node:stream/consumers';
+
 
 const storeSetting = useSettingStore();
 
@@ -402,7 +408,6 @@ const actionClass = () => {
     MessagePlugin.warning(t('pages.setting.editSource.sift.message.sourceFirst'));
     return;
   }
-
   const response = processCategories(contentHtml, class_parse, cate_exclude, reurl, url);
 
   const transformData = (data) => {
@@ -411,14 +416,80 @@ const actionClass = () => {
 
     return titles.map((title, index) => ({
       title: title.trim(),
-      value: ms[index].trim()
+      id: ms[index].trim(),
+      surl: form.value.reurl.replace("fyclass", ms[index].trim())
     }));
   }
   if (response?.title && response?.m) form.value.content.debug = transformData(response);
   changeNav('debug', 'class');
 };
 
+
+const batchResults = () => {
+  let r = form.value.content.debug;
+  //console.log(r);
+  const { filterInfo = '', filter = '', matchs } = form.value;
+  if (!(filterInfo && filter)) {
+    MessagePlugin.warning(t('pages.setting.editSource.sift.message.inputNoFilterAndFilterInfo'));
+    return;
+  };
+  // 调用batchFetch并处理结果
+  batchFetch(r)
+    .then(results => {
+      let rs = {};
+      results.map(item => {
+        const newMatchs = {
+          '剧情': matchs.plot,
+          '地区': matchs.area,
+          '语言': matchs.lang,
+          '年份': matchs.year,
+          '字母': matchs.letter,
+          '排序': matchs.sort,
+        }
+        const response: any = getFilters(item.body, item.id, filter, filterInfo, newMatchs, '').filters;
+        //console.log(response)
+        if (response) {
+          rs[item.id] = response;
+        }
+      })
+      console.log(rs);
+      form.value.content.debug = JSON.stringify(rs, null, 2);
+      changeNav('debug', 'class');
+    })
+    .catch(error => {
+      console.error('Failed to fetch data:', error);
+    });
+};
+
+
+
+
+const batchFetch = async (obj) => {
+  const promises = obj.map(x => {
+    return axios.get(x.surl);
+  });
+  try {
+    // 等待所有请求完成
+    const responses = await Promise.all(promises);
+    // 所有请求都成功后，提取结果数据并关联id
+    const results = responses.map((response, index) => {
+      console.log(index)
+      const { id } = obj[index]; // 获取对应的id
+      return {
+        id: id,
+        body: response.data // 假设响应体的数据在response.data中
+      };
+    });
+    return results; // 返回结果数组
+  } catch (error) {
+    // 如果有任何一个请求失败，则捕捉错误
+    console.error('There was an error with one of the requests:', error);
+    throw error; // 抛出错误，以便调用者可以处理
+  }
+};
+
 const actionFilter = () => {
+  console.log(form.value)
   const { filterInfo = '', filter = '', matchs } = form.value;
   const contentHtml = form.value.content.source;
   if (!(filterInfo && filter)) {

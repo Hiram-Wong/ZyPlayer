@@ -475,6 +475,7 @@ export default {
         filterInfo: '详细',
         excludeKeys: '键移除',
         try: '执行',
+        br:'批量结果',
         reg: '正则',
         plot: '剧情',
         area: '地区',
