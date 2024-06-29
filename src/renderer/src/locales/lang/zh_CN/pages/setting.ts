@@ -468,6 +468,7 @@ export default {
         source: '源码',
       },
       rule: {
+        demo:'示例',
         class: '大类',
         cateExclude: '排除',
         link: '链接',
@@ -475,7 +476,10 @@ export default {
         filterInfo: '详细',
         excludeKeys: '键移除',
         try: '执行',
-        br:'批量结果',
+        ctry:'大类执行',
+        br:'批量结果「大类执行后」',
+        tf:'当前过滤',
+        ms:'生成正则列表',
         reg: '正则',
         plot: '剧情',
         area: '地区',
@@ -497,8 +501,8 @@ export default {
         classParseTip: '选择器(如 list;title;url;match)',
         cateExcludeTip: '排除(如 首页｜留言｜APP)',
         linkTip: '拼接fyclass(如 /id/fyclass.html)',
-        filterTip: '选择器(如 body&&.scroll-content)',
-        filterInfoTip: '选择器(如 key;name;type;title;url)',
+        filterTip: '选择器(如 body&&.scroll-content) 同一类型用;分割 不同类型换行',
+        filterInfoTip: '详细筛选(key;name;type;title;url) 一行对应一个',
       },
       dialog: {
         request: {
