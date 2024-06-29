@@ -17,38 +17,35 @@ const options = {
     type: '',
     customType: {
       customHls: (video: HTMLVideoElement, dp: DPlayer) => {
+        if (dp.hls) publicStream.destroy.customHls(dp);
         const hls = publicStream.create.customHls(video, video.src);
         dp.hls = hls;
         dp.on('destroy', () => {
-          hls!.destroy();
-          delete dp.hls;
+          publicStream.destroy.customHls(dp);
         });
       },
       customFlv: (video: HTMLVideoElement, dp: DPlayer) => {
-        if (dp.flv) dp.flv.destroy();
+        if (dp.flv) publicStream.destroy.customFlv(dp);
         const flv = publicStream.create.customFlv(video, video.src);
         dp.flv = flv;
         dp.on('destroy', () => {
-          flv.destroy();
-          delete dp.flv;
+          publicStream.destroy.customFlv(dp);
         });
       },
       customDash: (video: HTMLVideoElement, dp: DPlayer) => {
-        if (dp.mpd) dp.mpd.destroy();
+        if (dp.mpd) publicStream.destroy.customDash(dp);
         const mpd = publicStream.create.customDash(video, video.src);
         dp.mpd = mpd;
         dp.on('destroy', () => {
-          mpd.destroy();
-          delete dp.mpd;
+          publicStream.destroy.customDash(dp);
         });
       },
       customWebTorrent: (video: HTMLVideoElement, dp: DPlayer) => {
-        if (dp.torrent) dp.torrent.destroy();
+        if (dp.torrent) publicStream.destroy.customTorrent(dp);
         const torrent = publicStream.create.customTorrent(video, video.src);
         dp.torrent = torrent;
         dp.on('destroy', () => {
-          // torrent.remove(video.src);
-          torrent.destroy();
+          publicStream.destroy.customTorrent(dp);
         });
       },
     },
@@ -227,9 +224,12 @@ const play = (player: DPlayer) => {
 
 const playNext = (player: DPlayer, options: any) => {
   const { playbackRate } = player.video;
+  if (options.type === 'customFlv') {
+    publicStream.destroy.customFlv(player);
+  }; // 重要
   player.switchVideo({ ...options });
   player.options.video.url = options.url;
-  player.danmaku.clear();
+  if (player?.danmaku) player.danmaku.clear();
   if (playbackRate !== 1) player.speed(playbackRate);
   player.play();
 };

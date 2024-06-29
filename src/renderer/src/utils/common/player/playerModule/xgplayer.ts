@@ -163,7 +163,7 @@ const playNext = (player: XgPlayer, options: any) => {
       break;
   }
   player.playNext({ url: options.url });
-  player.plugins.danmu.clear();
+  if (player.plugins?.danmu) player.plugins.danmu.clear();
 };
 
 const seek = (player: XgPlayer, time: number) => {
