@@ -34,12 +34,12 @@ const elementDeal = {
 
 const pipControl = {
   el: document.createElement('div'),
-  id: 'fullscreen',
+  id: 'pip',
   pipIcon: publicIcons.pipIcon,
   tooltip: '画中画' as any,
   handlePip() {},
-
   init(player, _: any, tooltip) {
+    this.el.id = 'pip';
     const pipDom = document.createElement('div');
     pipDom.className = 'nplayer_icon';
     pipDom.innerHTML = `${this.pipIcon}`;
@@ -59,29 +59,24 @@ const pipControl = {
 
     this.el.addEventListener('click', this.handlePip);
   },
-
   dispose() {
     this.el.removeEventListener('click', this.handlePip);
+    this.el?.remove();
   },
 };
 
 const options = {
-  container: document.getElementById('nplayer'),
+  container: '#nplayer',
   src: '',
   live: false,
   videoProps: { autoplay: 'true' },
   volumeVertical: true,
-  bpControls: {
-    9999: [
-      ['play', 'volume', 'time', 'spacer', 'danmaku-settings', 'settings', pipControl, 'fullscreen'],
-      ['progress'],
-    ],
-  },
+  bpControls: {},
   controls: [
-    ['play', 'volume', 'time', 'spacer', 'settings', 'danmaku-settings', pipControl, 'fullscreen'],
+    ['play', 'volume', 'time', 'spacer', 'danmaku-settings', 'settings', 'fullscreen'],
     ['progress'],
   ],
-  plugins: [new nplayerDanmaku({ autoInsert: true })],
+  plugins: [new nplayerDanmaku({ autoInsert: false })],
 };
 
 const barrge = (player: NPlayer, comments: any, url: string, id: string) => {
@@ -109,40 +104,38 @@ const create = (options: any): NPlayer => {
   NPlayerIcon.register('exitFullscreen', elementDeal.createIcon(publicIcons.exitFullscreen));
 
   if (options.live) {
-    options.bpControls = {
-      9999: [['play', 'volume', 'time', 'spacer', 'settings', pipControl, 'fullscreen'], []],
-    };
-    options.controls = [['play', 'volume', 'time', 'spacer', 'settings', pipControl, 'fullscreen'], []];
+    options.controls = [['play', 'volume', 'time', 'spacer', 'settings', 'fullscreen'], []];
     delete options?.plugins;
   }
-  const player: any = new NPlayer({ ...options });
+
+  const player: any = new NPlayer(options);
 
   switch (options.type) {
     case 'customMp4':
       break;
-    case 'customFlv':
-      if (player.flv) player.flv.destroy();
-      const flv = publicStream.create.customFlv(player.video, options.src);
-      player.flv = flv;
-      player.on('destroy', () => flv.destroy());
-      break;
     case 'customHls':
-      if (player.hls) player.hls.destroy();
+      if (player.hls) publicStream.destroy.customHls(player);
       const hls = publicStream.create.customHls(player.video, options.src);
       player.hls = hls;
-      player.on('destroy', () => hls!.destroy());
+      player.on('destroy', () => publicStream.destroy.customHls(player));
+      break;
+    case 'customFlv':
+      if (player.flv) publicStream.destroy.customFlv(player);
+      const flv = publicStream.create.customFlv(player.video, options.src);
+      player.flv = flv;
+      player.on('destroy', () => publicStream.destroy.customFlv(player));
       break;
     case 'customDash':
-      if (player.mpd) player.mpd.destroy();
+      if (player.mpd) publicStream.destroy.customDash(player);
       const mpd = publicStream.create.customDash(player.video, options.src);
       player.mpd = mpd;
-      player.on('destroy', () => mpd.destroy());
+      player.on('destroy', () => publicStream.destroy.customDash(player));
       break;
     case 'customWebTorrent':
-      if (player.torrent) player.torrent.destroy();
+      if (player.torrent) publicStream.destroy.customTorrent(player);
       const torrent = publicStream.create.customTorrent(player.video, options.src);
       player.torrent = torrent;
-      player.on('destroy', () => torrent.destroy());
+      player.on('destroy', publicStream.destroy.customTorrent(player));
       break;
     default:
       break;
@@ -200,7 +193,7 @@ const playNext = (player: any, options: any) => {
     default:
       break;
   }
-  player.danmaku.clearScreen();
+  if (player?.danmaku) player.danmaku.clearScreen();
 };
 const seek = (player: NPlayer, time: number) => {
   player.once(NPlayerEvent.CANPLAY, () => {

@@ -2,8 +2,8 @@
  * @module multi-player
  * @brief 多播放器集成方案
  * @author HiramWong <admin@catni.cn>
- * @update 2024-06-02
- * @version 0.0.8
+ * @update 2024-06-29
+ * @version 0.1.1
  *
  * **ChangeLog说明**:
  * - 2024.5.12:
@@ -41,6 +41,11 @@
  * - 2024.6.4:
  *   - 修复西瓜播放器加载视频错误
  *   - 修复多次创建播放器扩展插件会重复添加-默认参数使用深拷贝
+ * - 2024.6.29:
+ *   - 修复在live模式下切换下一个报错-需判断弹幕组件库是否加载
+ *   - 修复flv数据流切换失败, 始终播放一个视频流
+ *   - 统一调用公共逻辑摧毁实例(除西瓜播放器外)
+ *   - 去除nplayer控制条调用画中画(多次创建会创建多个bug暂未修复)
  *
  * ---
  */
@@ -73,17 +78,17 @@ const mapVideoTypeToPlayerType = (videoType: string): string | undefined => {
 const loadPlayerMethod = async (playerMode: string) => {
   if (!playerModulesCache[playerMode]) {
     switch (playerMode) {
-      case 'xgplayer':
-        playerModulesCache[playerMode] = await import('./playerModule/xgplayer');
+      case 'artplayer':
+        playerModulesCache[playerMode] = await import('./playerModule/artplayer');
         break;
       case 'dplayer':
         playerModulesCache[playerMode] = await import('./playerModule/dplayer');
         break;
-      case 'artplayer':
-        playerModulesCache[playerMode] = await import('./playerModule/artplayer');
-        break;
       case 'nplayer':
         playerModulesCache[playerMode] = await import('./playerModule/nplayer');
+        break;
+      case 'xgplayer':
+        playerModulesCache[playerMode] = await import('./playerModule/xgplayer');
         break;
       default:
         throw new Error(`Unknown player mode: ${playerMode}`);
@@ -196,7 +201,6 @@ const playerDestroy = async (player: any, playerMode: string) => {
 const playerNext = async (player: any, playerMode: string, options: any) => {
   const playerModule = await loadPlayerMethod(playerMode);
   const { playNext } = playerModule;
-
   const { url, mediaType } = options;
   const videoType = mediaType || (await checkMediaType(url)) || '';
 

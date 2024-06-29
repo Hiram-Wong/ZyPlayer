@@ -9,8 +9,20 @@ import shaka from 'shaka-player/dist/shaka-player.compiled';
 const publicOptions = {
   hls: {},
   flv: {
-    mediaDataSource: {},
-    config: {},
+    mediaDataSource: {
+      type: 'flv',
+      isLive: false,
+    },
+    optionalConfig: {
+      enableWorker: false, // 启用分离线程
+      enableStashBuffer: false, //关闭IO隐藏缓冲区
+      autoCleanupSourceBuffer: true, //自动清除缓存
+      reuseRedirectedURL: true, //允许重定向请求
+      fixAudioTimestampGap: false, // 音视频同步
+      deferLoadAfterSourceOpen: false, // 允许延迟加载
+      // referrerPolicy: 'no-referrer',
+      headers: {},
+    },
   },
   webtorrent: {},
   dash: {},
@@ -34,11 +46,10 @@ const publicStream = {
     customFlv: (video: HTMLVideoElement, url: string): any => {
       if (flvjs.isSupported()) {
         const flvPlayer = flvjs.createPlayer(
-          Object.assign(publicOptions.flv.mediaDataSource || {}, {
-            type: 'flv',
+          Object.assign({}, publicOptions.flv.mediaDataSource || {}, {
             url: url,
           }),
-          publicOptions.flv.config || {},
+          publicOptions.flv.optionalConfig || {},
         );
         flvPlayer.attachMediaElement(video);
         flvPlayer.load();
@@ -118,22 +129,18 @@ const publicStream = {
       return hls;
     },
     customFlv: (video: HTMLVideoElement, flv: any, url: string) => {
+      flv.pause();
       flv.unload();
       flv.detachMediaElement();
       flv.destroy();
       flv = flvjs.createPlayer(
-        {
-          type: 'flv',
+        Object.assign({}, publicOptions.flv.mediaDataSource || {}, {
           url: url,
-        },
-        {
-          enableWorker: true,
-        },
+        }),
+        publicOptions.flv.optionalConfig || {},
       );
-
       flv.attachMediaElement(video);
       flv.load();
-      flv.play();
       return flv;
     },
     customDash: (video: HTMLVideoElement, dash: any, url: string) => {
@@ -181,6 +188,9 @@ const publicStream = {
       delete player.hls;
     },
     customFlv: (player: any) => {
+      player.flv.pause();
+      player.flv.unload();
+      player.flv.detachMediaElement();
       player.flv.destroy();
       delete player.flv;
     },
@@ -194,7 +204,8 @@ const publicStream = {
       delete player.torrent;
     },
     customMpegts: (player: any) => {
-      player.destroy();
+      player.mpeg.destroy();
+      delete player.mpeg;
     },
   },
 };
