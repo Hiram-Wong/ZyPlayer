@@ -160,7 +160,7 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
-import { getHtml, copyToClipboardApi,decodeGzip,encodeGzip, encodeBtoa } from '@/utils/tool';
+import { getHtml, copyToClipboardApi,encodeGzip, encodeBtoa } from '@/utils/tool';
 import { getFilters, processCategories } from '@/utils/drpy/lab/hipyFilter';
 import axios from 'axios';
 import { json } from 'node:stream/consumers';

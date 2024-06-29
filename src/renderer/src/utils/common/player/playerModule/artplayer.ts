@@ -43,46 +43,41 @@ const options: any = {
   customType: {
     customHls: (video: HTMLVideoElement, url: string, art: Artplayer) => {
       art.loading.show = true;
-      if (art.hls) art.hls.destroy();
+      if (art.hls) publicStream.destroy.customHls(art);
       const hls = publicStream.create.customHls(video, url);
       art.hls = hls;
       art.on('destroy', () => {
-        hls!.destroy();
-        delete art.hls;
+        publicStream.destroy.customHls(art);
       });
       art.loading.show = false;
     },
     customFlv: (video: HTMLVideoElement, url: string, art: Artplayer) => {
       art.loading.show = true;
-      if (art.flv) art.flv.destroy();
+      if (art.flv) publicStream.destroy.customFlv(art);
       const flv = publicStream.create.customFlv(video, url);
       art.flv = flv;
       art.on('destroy', () => {
-        flv.destroy();
-        delete art.flv;
+        publicStream.destroy.customFlv(art);
       });
       art.loading.show = false;
     },
     customDash: (video: HTMLVideoElement, url: string, art: Artplayer) => {
       art.loading.show = true;
-      if (art.mpd) art.mpd.destroy();
+      if (art.mpd) publicStream.destroy.customDash(art);
       const mpd = publicStream.create.customDash(video, url);
       art.mpd = mpd;
       art.on('destroy', () => {
-        mpd.destroy();
-        delete art.mpd;
+        publicStream.destroy.customDash(art);
       });
       art.loading.show = false;
     },
     customWebTorrent: (video: HTMLVideoElement, url: string, art: Artplayer) => {
       art.loading.show = true;
-      if (art.torrent) art.torrent.destroy();
+      if (art.torrent) publicStream.destroy.customTorrent(art);
       const torrent = publicStream.create.customTorrent(video, url);
       art.torrent = torrent;
       art.on('destroy', () => {
-        // torrent.remove(url);
-        torrent.destroy();
-        delete art.torrent;
+        publicStream.destroy.customTorrent(art);
       });
       art.loading.show = false;
     },
@@ -140,10 +135,12 @@ const play = (player: Artplayer) => {
 const playNext = (player: Artplayer, options: any) => {
   // player.switch = options.url;
   player.switchUrl(options.url);
-  player.plugins.artplayerPluginDanmuku.config({
-    danmuku: [],
-  });
-  player.plugins.artplayerPluginDanmuku.load();
+  if (player.plugins?.artplayerPluginDanmuku) {
+    player.plugins.artplayerPluginDanmuku.config({
+      danmuku: [],
+    });
+    player.plugins.artplayerPluginDanmuku.load();
+  }
 };
 
 const seek = (player: Artplayer, time: number) => {

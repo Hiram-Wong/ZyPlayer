@@ -10,19 +10,19 @@ const m3u = (text: string) => {
   const LOGO = /.*tvg-logo="(.?|.+?)".*/i;
   const NAME = /.*,(.+?)(?:$|\n|\s)/i;
 
-  const docs = [];
+  const docs: any[] = [];
   let doc: { name?: any; logo?: any; group?: any; url?: any };
   const splitList = text.split('\n');
   splitList.forEach((line: string) => {
     if (line.startsWith('#EXTINF:')) {
       doc = {}; // 切断指针的联系
-      doc.name = line.match(NAME) ? line.match(NAME)[1] : '';
-      doc.logo = line.match(LOGO) ? line.match(LOGO)[1] : '';
-      doc.group = line.match(GROUP) ? line.match(GROUP)[1] : '';
+      doc.name = line.match(NAME) ? line.match(NAME)![1]?.trim() : '';
+      doc.logo = line.match(LOGO) ? line.match(LOGO)![1]?.trim() : '';
+      doc.group = line.match(GROUP) ? line.match(GROUP)![1]?.trim() : '';
     } else if (line.indexOf('://') > -1) {
       if (line.startsWith('#EXT-X-SUB-URL')) return; // #EXT-X-SUB-URL https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u
       if (line.startsWith('#EXTM3U')) return; // #EXTM3U url-tvg="http://epg.51zmt.top:8000/e.xml,https://epg.112114.xyz/pp.xml
-      doc.url = line;
+      doc.url = line?.trim();
       docs.push(doc);
     }
   });
@@ -30,7 +30,7 @@ const m3u = (text: string) => {
 };
 
 const txt = (text: string) => {
-  const docs = [];
+  const docs: any[] = [];
   let group: any;
   const splitList = text.split('\n');
   splitList.forEach((line: string) => {
@@ -39,9 +39,9 @@ const txt = (text: string) => {
     if (line.indexOf('#genre#') > -1) [group] = split;
     if (split[1].indexOf('://') > -1) {
       const doc = {
-        name: split[0],
-        url: split[1],
-        group,
+        name: split[0]?.trim(),
+        url: split[1]?.trim(),
+        group: group?.trim(),
       };
       docs.push(doc);
     }
