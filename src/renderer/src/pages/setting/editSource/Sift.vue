@@ -72,6 +72,9 @@
               <t-button block @click="actionClass">{{ $t('pages.setting.editSource.sift.rule.try') }}</t-button>
             </div>
             <div class="code-op-item card">
+              <t-button block @click="batchResults">{{ $t('pages.setting.editSource.sift.rule.br') }}</t-button>
+            </div>
+            <div class="code-op-item card">
               <t-input v-model="form.filter" :label="$t('pages.setting.editSource.sift.rule.filter')"
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.filterTip')" class="input w-100%" />
               <t-input v-model="form.filterInfo" :label="$t('pages.setting.editSource.sift.rule.filterInfo')"
@@ -417,11 +420,19 @@ const actionClass = () => {
       surl: form.value.reurl.replace("fyclass", ms[index].trim())
     }));
   }
-  //if (response?.title && response?.m) form.value.content.debug = transformData(response);
-  let r = transformData(response);
+  if (response?.title && response?.m) form.value.content.debug = transformData(response);
+  changeNav('debug', 'class');
+};
 
+
+const batchResults = () => {
+  let r = form.value.content.debug;
+  //console.log(r);
   const { filterInfo = '', filter = '', matchs } = form.value;
-
+  if (!(filterInfo && filter)) {
+    MessagePlugin.warning(t('pages.setting.editSource.sift.message.inputNoFilterAndFilterInfo'));
+    return;
+  };
   // 调用batchFetch并处理结果
   batchFetch(r)
     .then(results => {
@@ -443,13 +454,14 @@ const actionClass = () => {
       })
       console.log(rs);
       form.value.content.debug = JSON.stringify(rs, null, 2);
+      changeNav('debug', 'class');
     })
     .catch(error => {
       console.error('Failed to fetch data:', error);
     });
-
-  changeNav('debug', 'class');
 };
+
+
 
 
 const batchFetch = async (obj) => {

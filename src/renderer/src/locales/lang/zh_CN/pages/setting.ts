@@ -339,7 +339,7 @@ export default {
       rule: {
         pdfa: '列表',
         pdfh: '节点',
-        try: '执行',
+        try: '执行r',
         url: '地址',
         wd: '关键词',
         pg: '页',
@@ -475,6 +475,7 @@ export default {
         filterInfo: '详细',
         excludeKeys: '键移除',
         try: '执行',
+        br:'批量结果',
         reg: '正则',
         plot: '剧情',
         area: '地区',
