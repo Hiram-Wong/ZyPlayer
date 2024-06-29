@@ -339,7 +339,7 @@ export default {
       rule: {
         pdfa: '列表',
         pdfh: '节点',
-        try: '执行r',
+        try: '执行',
         url: '地址',
         wd: '关键词',
         pg: '页',
