@@ -81,7 +81,8 @@
               <t-button block @click="actionClass">{{ $t('pages.setting.editSource.sift.rule.ctry') }}</t-button>
             </div>
             <div class="code-op-item card">
-              <t-button block :loading="isVisible.batchFetchLoading" @click="batchResults">{{ $t('pages.setting.editSource.sift.rule.br') }}</t-button>
+              <t-button block :loading="isVisible.batchFetchLoading" @click="batchResults">{{
+                $t('pages.setting.editSource.sift.rule.br') }}</t-button>
             </div>
             <div class="code-op-item card">
               <t-textarea v-model="form.filter" :label="$t('pages.setting.editSource.sift.rule.filter')"
@@ -489,9 +490,14 @@ const actionClass = () => {
   if (Object.keys(response).length > 0) {
     response.m.split("&").map((x, i) => {
       set.add({ m: x, title: response.title.split("&")[i] })
-    })
+    });
 
-    var rs = uniqueObjectsByProperty(Array.from(set), 'm');
+    let rs = uniqueObjectsByProperty(Array.from(set), 'm');
+    if (cate_exclude.length > 0) {
+      let excludeCategories = cate_exclude.split(/\|/).filter(e => e);
+      rs = rs.filter(x => !excludeCategories.some(s => s.includes(x.title)));
+    };
+
     response = concatenateObjects(rs);
   }
 
