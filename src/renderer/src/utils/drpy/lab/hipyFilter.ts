@@ -44,7 +44,6 @@ const getFilters = (
     let key, name, type, title, url;
     try {
       [key, name, type, title, url] = ff.split(/;/g);
-      console.log(name);
     } catch (err) {
       console.log(`[getFilters][error]`, err);
       return;
