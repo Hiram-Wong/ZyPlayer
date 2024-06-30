@@ -470,6 +470,8 @@ export default {
       rule: {
         demo:'示例',
         class: '大类',
+        class_name:'class_name',
+        class_url:'class_url',
         cateExclude: '排除',
         link: '链接',
         filter: '筛选',
@@ -498,6 +500,8 @@ export default {
         reg: '正则',
       },
       placeholder: {
+        classNameTip:'classname(例如 电影&剧集)',
+        classUrlTip:'classurl(例如 1&2)',
         classParseTip: '选择器(如 list;title;url;match)',
         cateExcludeTip: '排除(如 首页｜留言｜APP)',
         linkTip: '拼接fyclass(如 /id/fyclass.html)',
@@ -517,6 +521,7 @@ export default {
         inputNoClassParse: '参数大类为空',
         sourceFirst: '必须先获取源代码',
         inputNoFilterAndFilterInfo: '参数筛选或筛选详细为空',
+        classResultisEmpty:'请先进行大类处理'
       },
     },
   },
