@@ -470,6 +470,8 @@ export default {
       rule: {
         demo:'demo',
         class: 'Class',
+        class_name:'class_name',
+        class_url:'class_url',
         cateExclude: 'CateExclude',
         link: 'Link',
         filter: 'Filter',
@@ -498,6 +500,8 @@ export default {
         reg: 'Reg',
       },
       placeholder: {
+        classNameTip:'classname(e.g movie&tv)',
+        classUrlTip:'classurl(e.g 1&2)',
         classParseTip: 'Selector(e.g. list;title;url;match)',
         cateExcludeTip: 'Excluded(e.g. HOME｜APP)',
         linkTip: 'Splicing fyclass(e.g. /id/fyclass.html)',
@@ -517,6 +521,7 @@ export default {
         inputNoClassParse: 'Parms classParse is empty',
         sourceFirst: 'Get source first',
         inputNoFilterAndFilterInfo: 'Parms filter or filterInfo is empty',
+        classResultisEmpty:'Please process the major categories first'
       },
     },
   },
