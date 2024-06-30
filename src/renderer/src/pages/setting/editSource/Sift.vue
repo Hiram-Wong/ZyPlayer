@@ -71,10 +71,6 @@
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.classNameTip')" class="input w-100%" />
               <t-input v-model="form.class_url" :label="$t('pages.setting.editSource.sift.rule.class_url')"
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.classUrlTip')" class="input w-100%" />
-              <t-input v-model="form.class_name" :label="$t('pages.setting.editSource.sift.rule.class_name')"
-                :placeholder="$t('pages.setting.editSource.sift.placeholder.classNameTip')" class="input w-100%" />
-              <t-input v-model="form.class_url" :label="$t('pages.setting.editSource.sift.rule.class_url')"
-                :placeholder="$t('pages.setting.editSource.sift.placeholder.classUrlTip')" class="input w-100%" />
               <t-input v-model="form.class_parse" :label="$t('pages.setting.editSource.sift.rule.class')"
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.classParseTip')" class="input w-100%" />
               <t-input v-model="form.cate_exclude" :label="$t('pages.setting.editSource.sift.rule.cateExclude')"
@@ -169,7 +165,6 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { getHtml, copyToClipboardApi, encodeGzip, encodeBtoa } from '@/utils/tool';
-import { getHtml, copyToClipboardApi, encodeGzip, encodeBtoa } from '@/utils/tool';
 import { getFilters, processCategories } from '@/utils/drpy/lab/hipyFilter';
 import axios from 'axios';
 import { json } from 'node:stream/consumers';
@@ -220,8 +215,6 @@ let form = ref({
   class_parse: '',
   class_name: '',
   class_url: '',
-  class_name: '',
-  class_url: '',
   cate_exclude: '首页|留言|APP|下载|资讯|新闻|动态',
   reurl: '',
   filter: '',
@@ -230,7 +223,6 @@ let form = ref({
   matchs: {
 
   },
-  classResult: {},
   classResult: {},
   // matchs: {
   //   plot: 'show(.*?)/id',
@@ -498,25 +490,7 @@ function concatenateObjects(array) {
   }, { m: '', title: '' });
 }
 
-function uniqueObjectsByProperty(array, key) {
-  const map = new Map();
-  array.forEach(item => {
-    const keyValue = item[key];
-    map.set(keyValue, item);
-  });
-  return Array.from(map.values());
-}
-
-function concatenateObjects(array) {
-  return array.reduce((accumulator, current) => {
-    accumulator.m = accumulator.m ? `${accumulator.m}&${current.m}` : current.m;
-    accumulator.title = accumulator.title ? `${accumulator.title}&${current.title}` : current.title;
-    return accumulator;
-  }, { m: '', title: '' });
-}
-
 const actionClass = () => {
-  const { class_parse = '', class_name = '', class_url = '', cate_exclude = '', reurl = '' } = form.value;
   const { class_parse = '', class_name = '', class_url = '', cate_exclude = '', reurl = '' } = form.value;
   const { url } = form.value.req;
   const contentHtml = form.value.content.source;
@@ -574,9 +548,6 @@ const actionClass = () => {
 
 const batchResults = () => {
   let classResult = form.value.classResult;
-
-  let classResult = form.value.classResult;
-
   //console.log(r);
   const { filterInfo = '', filter = '', matchs } = form.value;
   if (!(filterInfo && filter)) {
@@ -589,14 +560,12 @@ const batchResults = () => {
     return;
   }
 
-
   if (Object.keys(classResult).length == 0) {
     MessagePlugin.warning(t('pages.setting.editSource.sift.message.classResultisEmpty'));
     return;
   }
 
   // 调用batchFetch并处理结果
-  batchFetch(classResult)
   batchFetch(classResult)
     .then(results => {
       let rs = {};
@@ -616,8 +585,6 @@ const batchResults = () => {
       console.error('Failed to fetch data:', error);
     });
 };
-
-
 
 
 const batchFetch = async (obj) => {
