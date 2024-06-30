@@ -468,6 +468,7 @@ export default {
         source: 'Source',
       },
       rule: {
+        demo:'demo',
         class: 'Class',
         cateExclude: 'CateExclude',
         link: 'Link',
@@ -475,6 +476,10 @@ export default {
         filterInfo: 'FilterInfo',
         excludeKeys: 'ExcludeKeys',
         try: 'Try',
+        ctry:'ClassTry',
+        br:'batchResults「ClassTry」',
+        tf:'currentFilter',
+        ms:'createMatchsList',
         reg: 'Reg',
         plot: 'Plot',
         area: 'Area',

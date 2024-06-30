@@ -29,6 +29,7 @@
                     <t-button class="button" theme="default" @click="getSource()">{{
                       $t('pages.setting.editSource.sift.action.source') }}</t-button>
                   </template>
+
                   <div class="input-container">
                     <t-input v-model="form.req.url" :placeholder="$t('pages.setting.placeholder.general')"
                       class="input" />
@@ -63,26 +64,39 @@
               </div>
             </div>
             <div class="code-op-item card">
+              <div>
+                <t-button theme="default" @click="demo">{{ $t('pages.setting.editSource.sift.rule.demo') }}</t-button>
+              </div>
               <t-input v-model="form.class_parse" :label="$t('pages.setting.editSource.sift.rule.class')"
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.classParseTip')" class="input w-100%" />
               <t-input v-model="form.cate_exclude" :label="$t('pages.setting.editSource.sift.rule.cateExclude')"
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.cateExcludeTip')" class="input w-100%" />
               <t-input v-model="form.reurl" :label="$t('pages.setting.editSource.sift.rule.link')"
                 :placeholder="$t('pages.setting.editSource.sift.placeholder.linkTip')" class="input w-100%" />
-              <t-button block @click="actionClass">{{ $t('pages.setting.editSource.sift.rule.try') }}</t-button>
+              <t-button block @click="actionClass">{{ $t('pages.setting.editSource.sift.rule.ctry') }}</t-button>
             </div>
             <div class="code-op-item card">
               <t-button block @click="batchResults">{{ $t('pages.setting.editSource.sift.rule.br') }}</t-button>
             </div>
             <div class="code-op-item card">
-              <t-input v-model="form.filter" :label="$t('pages.setting.editSource.sift.rule.filter')"
-                :placeholder="$t('pages.setting.editSource.sift.placeholder.filterTip')" class="input w-100%" />
-              <t-input v-model="form.filterInfo" :label="$t('pages.setting.editSource.sift.rule.filterInfo')"
-                :placeholder="$t('pages.setting.editSource.sift.placeholder.filterInfoTip')" class="input w-100%" />
+              <t-textarea v-model="form.filter" :label="$t('pages.setting.editSource.sift.rule.filter')"
+                :placeholder="$t('pages.setting.editSource.sift.placeholder.filterTip')" class="input w-100%"
+                :autosize="{ minRows: 1 }" />
+              <t-textarea t v-model="form.filterInfo" :label="$t('pages.setting.editSource.sift.rule.filterInfo')"
+                :placeholder="$t('pages.setting.editSource.sift.placeholder.filterInfoTip')" class="input w-100%"
+                :autosize="{ minRows: 1 }" />
+              <t-button block @click="getMatchs">{{ $t('pages.setting.editSource.sift.rule.ms') }}</t-button>
+
               <t-input v-model="form.exclude_keys" :label="$t('pages.setting.editSource.sift.rule.excludeKeys')"
                 :placeholder="$t('pages.setting.placeholder.splitForVerticalLine')" class="input w-100%" />
 
-              <t-input v-model="form.matchs.plot" :label="$t('pages.setting.editSource.sift.rule.plot')"
+              <div>
+                <!-- 动态创建的输入框列表 -->
+                <t-input v-for="(input, index) in inputs" v-model="form.matchs[input.key]" :label="input.key"
+                  :key="index" :placeholder="$t('pages.setting.editSource.sift.rule.reg')" class="input w-100%" />
+              </div>
+
+              <!-- <t-input v-model="form.matchs.plot" :label="$t('pages.setting.editSource.sift.rule.plot')"
                 :placeholder="$t('pages.setting.editSource.sift.rule.reg')" class="input w-100%" />
               <t-input v-model="form.matchs.area" :label="$t('pages.setting.editSource.sift.rule.area')"
                 :placeholder="$t('pages.setting.editSource.sift.rule.reg')" class="input w-100%" />
@@ -93,9 +107,9 @@
               <t-input v-model="form.matchs.letter" :label="$t('pages.setting.editSource.sift.rule.letter')"
                 :placeholder="$t('pages.setting.editSource.sift.rule.reg')" class="input w-100%" />
               <t-input v-model="form.matchs.sort" :label="$t('pages.setting.editSource.sift.rule.sort')"
-                :placeholder="$t('pages.setting.editSource.sift.rule.reg')" class="input w-100%" />
+                :placeholder="$t('pages.setting.editSource.sift.rule.reg')" class="input w-100%" /> -->
 
-              <t-button block @click="actionFilter">{{ $t('pages.setting.editSource.sift.rule.try') }}</t-button>
+              <t-button block @click="actionFilter">{{ $t('pages.setting.editSource.sift.rule.tf') }}</t-button>
             </div>
           </div>
         </div>
@@ -132,6 +146,7 @@
 </template>
 
 <script setup lang="ts">
+
 import * as monaco from 'monaco-editor';
 import jsBeautify from 'js-beautify';
 import JSON5 from "json5";
@@ -145,10 +160,12 @@ import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
-import { getHtml, copyToClipboardApi, encodeGzip, encodeBtoa } from '@/utils/tool';
+import { getHtml, copyToClipboardApi,encodeGzip, encodeBtoa } from '@/utils/tool';
 import { getFilters, processCategories } from '@/utils/drpy/lab/hipyFilter';
 import axios from 'axios';
 import { json } from 'node:stream/consumers';
+import { values } from 'lodash';
+import { match } from 'node:assert';
 
 
 const storeSetting = useSettingStore();
@@ -156,6 +173,8 @@ const storeSetting = useSettingStore();
 const systemTheme = computed(() => {
   return storeSetting.displayMode;
 });
+
+const inputs = ref([]);
 
 let form = ref({
   codeType: 'html',
@@ -196,13 +215,17 @@ let form = ref({
   filterInfo: '',
   exclude_keys: '',
   matchs: {
-    plot: 'show(.*?)/id',
-    area: 'show(.*?)/id',
-    lang: '(/lang.*?)\.html@@',
-    year: '(/year.*?)\.html@@',
-    letter: '(/letter.*?)\.html@@',
-    sort: '(/by.*?)/id'
-  }
+
+  },
+  // matchs: {
+  //   plot: 'show(.*?)/id',
+  //   area: 'show(.*?)/id',
+  //   lang: '(/lang.*?)\.html@@',
+  //   year: '(/year.*?)\.html@@',
+  //   letter: '(/letter.*?)\.html@@',
+  //   sort: '(/by.*?)/id'
+  // },
+
 });
 
 const isVisible = reactive({
@@ -214,6 +237,24 @@ const isVisible = reactive({
   ai: false,
   tool: false
 });
+
+const demo=()=>{
+  form.value.req.url="https://hapihd.com/index.php/vod/show/id/dianying.html";
+  form.value.class_parse=String.raw`.navbar-items li;a&&Text;a&&href;/(\w+).html`;
+  form.value.reurl="https://hapihd.com/index.php/vod/show/id/fyclass.html";
+  form.value.cate_exclude="更新|热搜榜";
+  form.value.filter="body&&.scroll-box";
+  form.value.filterInfo=";.module-item-title&&Text;body&&a;a&&Text;a&&href";
+  form.value.matchs={
+    剧情: 'show(.*?)/id',
+    地区: 'show(.*?)/id',
+    语言: '(/lang.*?)\.html@@',
+    年份: '(/year.*?)\.html@@',
+    字母: '(/letter.*?)\.html@@',
+    排序: '(/by.*?)/id'
+  }
+}
+
 
 watch(
   () => systemTheme.value,
@@ -395,6 +436,43 @@ const changeNav = async (nav = '', action = '') => {
   }
 };
 
+
+const getMatchs = () => {
+  const { filterInfo = '', filter = '', matchs } = form.value;
+  const contentHtml = form.value.content.source;
+  if (!(filterInfo && filter)) {
+    MessagePlugin.warning(t('pages.setting.editSource.sift.message.inputNoFilterAndFilterInfo'));
+    return;
+  };
+  if (!contentHtml.trim()) {
+    MessagePlugin.warning(t('pages.setting.editSource.sift.message.sourceFirst'));
+    return;
+  }
+  const response: any = getFilters(contentHtml, '', filter, filterInfo, {}, form.value.exclude_keys);
+  console.log(response.fl)
+  console.log(form.value.matchs)
+
+  response.fl.map((item) => {
+    if (!form.value.matchs.hasOwnProperty(item)) {
+      form.value.matchs[item] = "";
+    }
+
+  });
+
+  inputs.value = response.fl.map((item, index) => ({
+    id: index + 1,
+    key: item,
+    value: form.value.matchs[item]
+  }));
+
+
+  // inputs.value = [
+  //   { id: 1, value: '' },
+  //   { id: 2, value: '' },
+  //   { id: 3, value: '' }
+  // ];
+}
+
 const actionClass = () => {
   const { class_parse = '', cate_exclude = '', reurl = '' } = form.value;
   const { url } = form.value.req;
@@ -409,6 +487,7 @@ const actionClass = () => {
     return;
   }
   const response = processCategories(contentHtml, class_parse, cate_exclude, reurl, url);
+  console.log(contentHtml, class_parse, cate_exclude, reurl, url)
 
   const transformData = (data) => {
     const titles = data.title.split('&');
@@ -438,15 +517,8 @@ const batchResults = () => {
     .then(results => {
       let rs = {};
       results.map(item => {
-        const newMatchs = {
-          '剧情': matchs.plot,
-          '地区': matchs.area,
-          '语言': matchs.lang,
-          '年份': matchs.year,
-          '字母': matchs.letter,
-          '排序': matchs.sort,
-        }
-        const response: any = getFilters(item.body, item.id, filter, filterInfo, newMatchs, '').filters;
+        const newMatchs = form.value.matchs;
+        const response: any = getFilters(item.body, item.id, filter, filterInfo, newMatchs, form.value.exclude_keys).filters;
         //console.log(response)
         if (response) {
           rs[item.id] = response;
@@ -465,19 +537,38 @@ const batchResults = () => {
 
 
 const batchFetch = async (obj) => {
-  const promises = obj.map(x => {
-    return axios.get(x.surl);
+  let { method, encode, header, body, contentType } = form.value.req;
+  header = header ? header : '{}';
+  body = body ? body : '{}';
+  const parsedHeader = JSON5.parse(header);
+  let parsedBody = JSON5.parse(body);
+  if (method !== 'GET' && parsedBody) {
+    parsedHeader['Content-Type'] = contentType;
+    if (contentType === 'application/x-www-form-urlencoded') {
+      parsedBody instanceof URLSearchParams
+        ? parsedBody
+        : (parsedBody = new URLSearchParams(parsedBody));
+    }
+  }
+  let parseHeaderKeys: string[];
+  parseHeaderKeys = Object.keys(parsedHeader).map(it => it.toLowerCase());
+  if (!parseHeaderKeys.includes('accept')) {
+    parsedHeader['accept'] = '*/*';
+  }
+
+  const promises = obj.map(async x => {
+    //return axios.get(x.surl);
+    return getHtml(x.surl.trim(), method, encode, parsedHeader, parsedBody)
   });
   try {
     // 等待所有请求完成
     const responses = await Promise.all(promises);
     // 所有请求都成功后，提取结果数据并关联id
     const results = responses.map((response, index) => {
-      console.log(index)
       const { id } = obj[index]; // 获取对应的id
       return {
         id: id,
-        body: response.data // 假设响应体的数据在response.data中
+        body: response // 假设响应体的数据在response.data中
       };
     });
     return results; // 返回结果数组
@@ -500,16 +591,10 @@ const actionFilter = () => {
     MessagePlugin.warning(t('pages.setting.editSource.sift.message.sourceFirst'));
     return;
   }
-  const newMatchs = {
-    '剧情': matchs.plot,
-    '地区': matchs.area,
-    '语言': matchs.lang,
-    '年份': matchs.year,
-    '字母': matchs.letter,
-    '排序': matchs.sort,
-  }
+  console.log(form.value.exclude_keys);
 
-  const response: any = getFilters(contentHtml, 'zongyi', filter, filterInfo, newMatchs, '').filters;
+  const newMatchs = form.value.matchs;
+  const response: any = getFilters(contentHtml, '', filter, filterInfo, newMatchs, form.value.exclude_keys).filters;
 
   form.value.content.debug = response;
   changeNav('debug', 'filter');
