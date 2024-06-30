@@ -541,7 +541,6 @@ const actionClass = () => {
   }
   if (response?.title && response?.m) form.value.content.debug = transformData(response);
   form.value.classResult = transformData(response);
-  form.value.classResult = transformData(response);
   changeNav('debug', 'class');
 };
 
