@@ -1717,6 +1717,7 @@ const buildUrl = (url: string, obj: any = {}) => {
   let param_list = [];
   let keys = Object.keys(obj);
   keys.forEach(it => {
+    // @ts-ignore
     param_list.push(it + '=' + obj[it]);
   });
   let prs = param_list.join('&');
