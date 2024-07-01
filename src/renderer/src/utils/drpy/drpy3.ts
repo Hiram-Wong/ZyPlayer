@@ -24,9 +24,9 @@ import pako from 'pako';
 import JSEncrypt from 'wxmp-rsa';
 import NODERSA from './utils/node-rsa';
 import cheerio from './utils/cheerio.min';
-import {getMubans} from './template';
+import { getMubans } from './template';
 import gbkTool from './utils/gbk';
-import {pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve} from './drpyInject';
+import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve } from './drpyInject';
 
 let consoleHistory: string[] = [];
 console['oldLog'] = console.log;
@@ -120,7 +120,7 @@ hS7Bbf5yvwjWMhO6Y7l04/Qm7R+35QIgPuQuqXIoUSD080mp1N5WyRW++atksIF+
 5lGv9e6GP/MCICnj8y/rl6Pd7tXDN6zcSeqLrfdNsREKhB3dKOCXgW9JAiAFYtFS
 EJNBXVRTK42SNsZ2hJ/9xLwOwnH2epT8Q43s3Q==
 -----END RSA PRIVATE KEY-----
-`.trim()
+`.trim();
 
   // @ts-ignore
   let pkcs8_private = `
@@ -134,7 +134,7 @@ AiA+5C6pcihRIPTzSanU3lbJFb75q2SwgX7mUa/17oY/8wIgKePzL+uXo93u1cM3
 rNxJ6out902xEQqEHd0o4JeBb0kCIAVi0VIQk0FdVFMrjZI2xnaEn/3EvA7CcfZ6
 lPxDjezd
 -----END PRIVATE KEY-----
-`.trim()
+`.trim();
 
   let data = `
 NodeRsa
@@ -142,34 +142,34 @@ NodeRsa
 
   let encryptedWithPublic = NODERSA.encryptRSAWithPublicKey(data, pkcs1_public, {
     // PublicFormat: "pkcs1-public-pem",
-    outputEncoding: "base64",
-    options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+    outputEncoding: 'base64',
+    options: { environment: 'browser', encryptionScheme: 'pkcs1_oaep' },
   });
-  console.log("公钥加密");
+  console.log('公钥加密');
   console.log(encryptedWithPublic);
 
 
   let decryptedWithPrivate = NODERSA.decryptRSAWithPrivateKey(encryptedWithPublic, pkcs1_private, {
     // PublicFormat: "pkcs1-private",
     // outEncoding: "hex"
-    options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+    options: { environment: 'browser', encryptionScheme: 'pkcs1_oaep' },
   });
-  console.log("私钥解密");
+  console.log('私钥解密');
   console.log(decryptedWithPrivate);
 
 
 // https://www.btool.cn/rsa-sign
-  let pkcs1_sha256_sign = NODERSA.sign("1", pkcs1_private, {
-    outputEncoding: "base64",
-    options: {environment: "browser", encryptionScheme: 'pkcs1', signingScheme: "pkcs1-sha256"},
+  let pkcs1_sha256_sign = NODERSA.sign('1', pkcs1_private, {
+    outputEncoding: 'base64',
+    options: { environment: 'browser', encryptionScheme: 'pkcs1', signingScheme: 'pkcs1-sha256' },
   });
-  console.log("pkcs1_sha256_sign");
+  console.log('pkcs1_sha256_sign');
   console.log(pkcs1_sha256_sign);
 
-  let pkcs1_sha256_sign_verify = NODERSA.verify("1", "Oulx2QrgeipKYBtqEDqFb2s/+ndk2cGQxO4CkhU7iBM1vyNmmvqubpsmeoUuN3waGrYZLknSEdwBkfv0tUMpFQ==", pkcs1_private, {
-    options: {environment: "browser", encryptionScheme: 'pkcs1', signingScheme: "pkcs1-sha256"},
+  let pkcs1_sha256_sign_verify = NODERSA.verify('1', 'Oulx2QrgeipKYBtqEDqFb2s/+ndk2cGQxO4CkhU7iBM1vyNmmvqubpsmeoUuN3waGrYZLknSEdwBkfv0tUMpFQ==', pkcs1_private, {
+    options: { environment: 'browser', encryptionScheme: 'pkcs1', signingScheme: 'pkcs1-sha256' },
   });
-  console.log("pkcs1_sha256_sign_verify");
+  console.log('pkcs1_sha256_sign_verify');
   console.log(pkcs1_sha256_sign_verify);
 
   let pkcs1_oaep_sha256 = NODERSA.encryptRSAWithPublicKey(data, `-----BEGIN RSA PUBLIC KEY-----
@@ -181,19 +181,19 @@ PfI+kYBqEVpo0Ztbc3UdxgFwGC8O1n8AQyriwHnSOtIiuBH62J/7qyC/3LEAApRb
 Dd9YszqzmODjQUddZKHmvc638VW+azc0EwIDAQAB
 -----END RSA PUBLIC KEY-----
 `, {
-    outputEncoding: "base64",
+    outputEncoding: 'base64',
     options: {
-      environment: "browser", encryptionScheme: {
-        scheme: "pkcs1_oaep",
-        hash: "sha256",
+      environment: 'browser', encryptionScheme: {
+        scheme: 'pkcs1_oaep',
+        hash: 'sha256',
       },
-    }
+    },
     // options: { environment: "browser", encryptionScheme: 'pkcs1' },
   });
-  console.log("pkcs1_oaep_sha256");
+  console.log('pkcs1_oaep_sha256');
   console.log(pkcs1_oaep_sha256);
 
-  decryptedWithPrivate = NODERSA.decryptRSAWithPrivateKey("kSZesAAyYh2hdsQnYMdGqb6gKAzTauBKouvBzWcc4+F8RvGd0nwO6mVkUMVilPgUuNxjEauHayHiY8gI3Py45UI3+km0rSGyHrS6dHiHgCkMejXHieglYzAB0IxX3Jkm4z/66bdB/D+GFy0oct5fGCMI1UHPjEAYOsazJDa8lBFNbjiWFeb/qiZtIx3vGM7KYPAZzyRf/zPbbQ8zy9xOmRuOl5nnIxgo0Okp3KO/RIPO4GZOSBA8f2lx1UtNwwrXAMpcNavtoqHVcjJ/9lcotXYQFrn5b299pSIRf2gVm8ZJ31SK6Z8cc14nKtvgnmsgClDzIXJ1o1RcDK+knVAySg==", `-----BEGIN RSA PRIVATE KEY-----
+  decryptedWithPrivate = NODERSA.decryptRSAWithPrivateKey('kSZesAAyYh2hdsQnYMdGqb6gKAzTauBKouvBzWcc4+F8RvGd0nwO6mVkUMVilPgUuNxjEauHayHiY8gI3Py45UI3+km0rSGyHrS6dHiHgCkMejXHieglYzAB0IxX3Jkm4z/66bdB/D+GFy0oct5fGCMI1UHPjEAYOsazJDa8lBFNbjiWFeb/qiZtIx3vGM7KYPAZzyRf/zPbbQ8zy9xOmRuOl5nnIxgo0Okp3KO/RIPO4GZOSBA8f2lx1UtNwwrXAMpcNavtoqHVcjJ/9lcotXYQFrn5b299pSIRf2gVm8ZJ31SK6Z8cc14nKtvgnmsgClDzIXJ1o1RcDK+knVAySg==', `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA5KOq1gRNyllLNWKQy8sGpZE3Q1ULLSmzZw+eaAhj9lvqn7Is
 T1duSYn08FfoOA2qMwtz+1O2l1mgzNoSVCyVpVabnTG+C9XKeZXAnJHd8aYA7l7S
 xhdmkte+iymYZ0ZBPzijo8938iugtVvqi9UgDmnY3u/NlQDqiL5BGqSxSTd/Sgmy
@@ -222,15 +222,15 @@ m7mp8il0kaftHdSxTbspG3tZ2fjIiFIZkLEOmRpd7ogWumgOajzUdA==
 -----END RSA PRIVATE KEY-----`, {
     // PublicFormat: "pkcs1-private",
     // outEncoding: "hex"
-    options: {environment: "browser", encryptionScheme: 'pkcs1_oaep'},
+    options: { environment: 'browser', encryptionScheme: 'pkcs1_oaep' },
   });
   console.log('decryptedWithPrivate');
   console.log(decryptedWithPrivate);
 
 
   (() => {
-    let key = new NODERSA.NodeRSA({b: 1024});
-    key.setOptions({encryptionScheme: 'pkcs1'})
+    let key = new NODERSA.NodeRSA({ b: 1024 });
+    key.setOptions({ encryptionScheme: 'pkcs1' });
     let text = `你好drpy node-ras`;
     let encrypted = key.encrypt(text, 'base64');
     console.log('encrypted: ', encrypted);
@@ -544,10 +544,10 @@ function window_b64() {
  */
 // @ts-ignore
 if (typeof atob !== 'function' || typeof btoa !== 'function') {
-  var {atob, btoa} = window_b64();
+  var { atob, btoa } = window_b64();
 }
 if (typeof Object.assign !== 'function') {
-  Object.assign = function () {
+  Object.assign = function() {
     var target = arguments[0];
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
@@ -561,7 +561,7 @@ if (typeof Object.assign !== 'function') {
   };
 }
 if (!String.prototype.includes) {
-  String.prototype.includes = function (search, start) {
+  String.prototype.includes = function(search, start) {
     if (typeof start !== 'number') {
       start = 0;
     }
@@ -576,7 +576,7 @@ if (!String.prototype.includes) {
 // @ts-ignore
 if (!Array.prototype.includes) {
   Object.defineProperty(Array.prototype, 'includes', {
-    value: function (searchElement, fromIndex) {
+    value: function(searchElement, fromIndex) {
 
       if (this == null) {//this是空或者未定义，抛出错误
         throw new TypeError('"this" is null or not defined');
@@ -600,25 +600,25 @@ if (!Array.prototype.includes) {
       }
       return false;//未找到，返回false
     },
-    enumerable: false
+    enumerable: false,
   });
 }
 if (typeof String.prototype.startsWith !== 'function') {
-  String.prototype.startsWith = function (prefix) {
+  String.prototype.startsWith = function(prefix) {
     return this.slice(0, prefix.length) === prefix;
   };
 }
 if (typeof String.prototype.endsWith !== 'function') {
-  String.prototype.endsWith = function (suffix) {
+  String.prototype.endsWith = function(suffix) {
     return this.indexOf(suffix, this.length - suffix.length) !== -1;
   };
 }
 Object.defineProperty(Object.prototype, 'myValues', {
-  value: function (obj) {
+  value: function(obj) {
     if (obj == null) {
-      throw new TypeError("Cannot convert undefined or null to object");
+      throw new TypeError('Cannot convert undefined or null to object');
     }
-    var res = []
+    var res = [];
     for (var k in obj) {
       if (obj.hasOwnProperty(k)) {//需判断是否是本身的属性
         // @ts-ignore
@@ -627,16 +627,16 @@ Object.defineProperty(Object.prototype, 'myValues', {
     }
     return res;
   },
-  enumerable: false
+  enumerable: false,
 });
 // @ts-ignore
 if (typeof Object.prototype.values != 'function') {
   Object.defineProperty(Object.prototype, 'values', {
-    value: function (obj) {
+    value: function(obj) {
       if (obj == null) {
-        throw new TypeError("Cannot convert undefined or null to object");
+        throw new TypeError('Cannot convert undefined or null to object');
       }
-      var res = []
+      var res = [];
       for (var k in obj) {
         if (obj.hasOwnProperty(k)) {//需判断是否是本身的属性
           // @ts-ignore
@@ -645,25 +645,25 @@ if (typeof Object.prototype.values != 'function') {
       }
       return res;
     },
-    enumerable: false
+    enumerable: false,
   });
 }
 if (typeof Array.prototype.join != 'function') {
   Object.defineProperty(Array.prototype, 'join', {
-    value: function (emoji) {
+    value: function(emoji) {
       // emoji = emoji||',';
       emoji = emoji || '';
       let self = this;
-      let str = "";
+      let str = '';
       let i = 0;
       if (!Array.isArray(self)) {
-        throw String(self) + 'is not Array'
+        throw String(self) + 'is not Array';
       }
       if (self.length === 0) {
-        return ''
+        return '';
       }
       if (self.length === 1) {
-        return String(self[0])
+        return String(self[0]);
       }
       i = 1;
       str = this[0];
@@ -672,36 +672,36 @@ if (typeof Array.prototype.join != 'function') {
       }
       return str;
     },
-    enumerable: false
+    enumerable: false,
   });
 }
 // @ts-ignore
 if (typeof Array.prototype.toReversed !== 'function') {
   Object.defineProperty(Array.prototype, 'toReversed', {
-    value: function () {
+    value: function() {
       const clonedList = this.slice();
       // 倒序新数组
       const reversedList = clonedList.reverse();
       return reversedList;
     },
-    enumerable: false
+    enumerable: false,
   });
 }
 
 Object.defineProperty(Array.prototype, 'append', {
   value: Array.prototype.push,
-  enumerable: false
+  enumerable: false,
 });
 Object.defineProperty(String.prototype, 'strip', {
   value: String.prototype.trim,
-  enumerable: false
+  enumerable: false,
 });
 Object.defineProperty(String.prototype, 'rstrip', {
-  value: function (chars) {
-    let regex = new RegExp(chars + "$");
-    return this.replace(regex, "");
+  value: function(chars) {
+    let regex = new RegExp(chars + '$');
+    return this.replace(regex, '');
   },
-  enumerable: false
+  enumerable: false,
 });
 
 const isGenuine = (vipUrl: string) => {
@@ -800,7 +800,7 @@ const rc = (js) => {
       return encrypted.ciphertext.toString();
     };
 
-    return {De: decrypt, En: encrypt};
+    return { De: decrypt, En: encrypt };
   }
   return {};
 };
@@ -813,10 +813,10 @@ const maoss = (jxurl, ref, key) => {
   // @ts-ignore
   eval(getCryptoJS());
   try {
-    var getVideoInfo = function (text) {
-      return CryptoJS.AES.decrypt(text, key, {iv: iv, padding: CryptoJS.pad.Pkcs7}).toString(CryptoJS.enc.Utf8);
+    var getVideoInfo = function(text) {
+      return CryptoJS.AES.decrypt(text, key, { iv: iv, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8);
     };
-    let temp: any = {getVideoInfo}; // 防止tree-shake
+    let temp: any = { getVideoInfo }; // 防止tree-shake
     temp.stringify({}); // 防止tree-shake
     var token_key = key == undefined ? 'dvyYRQlnPRCMdQSe' : key;
     if (ref) {
@@ -875,7 +875,7 @@ const urlencode = (str) => {
  */
 function encodeUrl(str) {
   if (typeof (encodeURI) == 'function') {
-    return encodeURI(str)
+    return encodeURI(str);
   } else {
     str = (str + '').toString();
     return encodeURIComponent(str).replace(/%2F/g, '/').replace(/%3F/g, '?').replace(/%3A/g, ':').replace(/%40/g, '@').replace(/%3D/g, '=').replace(/%3A/g, ':').replace(/%2C/g, ',').replace(/%2B/g, '+').replace(/%24/g, '$');
@@ -996,7 +996,7 @@ const decodeStr = (input, encoding) => {
 
 function getCryptoJS() {
   // return request('https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/crypto-hiker.js');
-  return 'console.log("CryptoJS已装载");'
+  return 'console.log("CryptoJS已装载");';
 }
 
 // 封装的RSA加解密类
@@ -1144,15 +1144,15 @@ const fixAdM3u8 = (m3u8_text: string, m3u8_url: string, ad_remove: string) => {
  */
 const fixAdM3u8Ai = (m3u8_url: string, headers: object | null = null) => {
   let ts = new Date().getTime();
-  let option = headers ? {headers: headers} : {};
+  let option = headers ? { headers: headers } : {};
 
   function b(s1, s2) {
     let i = 0;
     while (i < s1.length) {
       if (s1[i] !== s2[i]) {
-        break
+        break;
       }
-      i++
+      i++;
     }
     return i;
   }
@@ -1180,7 +1180,7 @@ const fixAdM3u8Ai = (m3u8_url: string, headers: object | null = null) => {
   }
   //log('----处理有广告的地址----');
   let s = m3u8.trim().split('\n').filter(it => it.trim()).join('\n');
-  let ss = s.split('\n')
+  let ss = s.split('\n');
   //找出第一条播放地址
   //let firststr = ss.find(x => !x.startsWith('#'));
   let firststr = '';
@@ -1190,7 +1190,7 @@ const fixAdM3u8Ai = (m3u8_url: string, headers: object | null = null) => {
   let secondstr = '';
   for (let i = 0; i < ss.length; i++) {
     let s = ss[i];
-    if (!s.startsWith("#")) {
+    if (!s.startsWith('#')) {
       if (kk == 0) firststr = s;
       if (kk == 1) maxl = b(firststr, s);
       if (kk > 1) {
@@ -1219,10 +1219,10 @@ const fixAdM3u8Ai = (m3u8_url: string, headers: object | null = null) => {
       maxl = b(firststr, x);
       maxc++;
       if (firststrlen - maxl <= ml + k || maxc > 10) {
-        return true
+        return true;
       }
     }
-    return false
+    return false;
   });
   log('最后一条切片：' + laststr);
   //log('最小相同字符长度：' + maxl);
@@ -1248,7 +1248,7 @@ const fixAdM3u8Ai = (m3u8_url: string, headers: object | null = null) => {
   m3u8 = ss.join('\n');
   //log('处理完成');
   log('处理耗时：' + (new Date().getTime() - ts).toString());
-  return m3u8
+  return m3u8;
 };
 
 /**
@@ -1579,7 +1579,7 @@ const dealJson = (html: string) => {
  */
 var OcrApi = {
   api: OCR_API,
-  classification: function (img) { // img是byte类型,这里不方便搞啊
+  classification: function(img) { // img是byte类型,这里不方便搞啊
     let code = '';
     try {
       // let html = request(this.api,{data:{img:img},headers:{'User-Agent':PC_UA},'method':'POST'},true);
@@ -1588,17 +1588,17 @@ var OcrApi = {
       log('通过drpy_ocr验证码接口过验证...');
       let html = '';
       if (this.api.endsWith('drpy/text')) {
-        html = request(this.api, {data: {img: img}, headers: {'User-Agent': PC_UA}, 'method': 'POST'}, true);
+        html = request(this.api, { data: { img: img }, headers: { 'User-Agent': PC_UA }, 'method': 'POST' }, true);
       } else {
-        html = post(this.api, {body: img});
+        html = post(this.api, { body: img });
       }
       code = html || '';
     } catch (e) {
       // @ts-ignore
-      log(`OCR识别验证码发生错误:${e.message}`)
+      log(`OCR识别验证码发生错误:${e.message}`);
     }
-    return code
-  }
+    return code;
+  },
 };
 
 /**
@@ -1615,7 +1615,7 @@ const verifyCode = (url) => {
     try {
       let yzm_url = `${host}/index.php/verify/index.html`;
       console.log(`[t3]验证码链接: ${yzm_url}`);
-      let hhtml = request(yzm_url, {withHeaders: true, toBase64: true}, true);
+      let hhtml = request(yzm_url, { withHeaders: true, toBase64: true }, true);
       let json = JSON.parse(hhtml);
 
       if (!cookie) {
@@ -1630,7 +1630,7 @@ const verifyCode = (url) => {
       // let submit_url = `${host}/index.php/ajax/verify_check`;
       // let submit_body = `type=search&verify=${code}`;
 
-      let html: any = request(submit_url, {headers: {Cookie: cookie}, method: 'POST'});
+      let html: any = request(submit_url, { headers: { Cookie: cookie }, method: 'POST' });
       // let html: any = request(submit_url, { headers: { Cookie: cookie, 'User-Agent': MOBILE_UA }, method: 'POST',body:submit_body });
       html = JSON.parse(html);
 
@@ -1710,13 +1710,20 @@ const getHome = (url) => {
  * @returns {*}
  */
 const buildUrl = (url: string, obj: any = {}) => {
-  const queryString = Object.entries(obj)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value as string | number | boolean)}`)
-    .join('&');
-
-  if (!url.includes('?') && queryString) url += '?';
-  if (queryString) url += (url.endsWith('?') ? '' : '&') + queryString;
-
+  obj = obj || {};
+  if (url.indexOf('?') < 0) {
+    url += '?';
+  }
+  let param_list = [];
+  let keys = Object.keys(obj);
+  keys.forEach(it => {
+    param_list.push(it + '=' + obj[it]);
+  });
+  let prs = param_list.join('&');
+  if (keys.length > 0 && !url.endsWith('?')) {
+    url += '&';
+  }
+  url += prs;
   return url;
 };
 
@@ -1869,7 +1876,7 @@ const reqCookie = (url: string, obj: object = {}, all_cookie: boolean = false) =
   let setCk = Object.keys(json).find(it => it.toLowerCase() === 'set-cookie');
   let cookie = setCk ? json[setCk] : '';
   if (Array.isArray(cookie)) {
-    cookie = cookie.join(';')
+    cookie = cookie.join(';');
   }
   if (!all_cookie) {
     cookie = cookie.split(';')[0];
@@ -1877,9 +1884,9 @@ const reqCookie = (url: string, obj: object = {}, all_cookie: boolean = false) =
   html = json.body;
   return {
     cookie,
-    html
-  }
-}
+    html,
+  };
+};
 
 fetch = request;
 print = (data: any = '') => {
@@ -1961,7 +1968,7 @@ const getHtml = (url) => {
       obj['headers']['Cookie'] = cookie;
       console.log('[t3]历史有大写过期的cookie,更新过验证后的cookie');
     } else if (!obj['headers']) {
-      obj['headers'] = {Cookie: cookie};
+      obj['headers'] = { Cookie: cookie };
       console.log('[t3]历史无headers,更新过验证后的含cookie的headers');
     }
   }
@@ -2266,7 +2273,7 @@ const homeVodParse = (homeVodObj) => {
     });
   }
 
-  return {list: d};
+  return { list: d };
 };
 
 /**
@@ -2314,7 +2321,7 @@ const categoryParse = (cateObj) => {
       }
     }
 
-    let new_url = cheerio.jinja2(url, {fl: fl});
+    let new_url = cheerio.jinja2(url, { fl: fl });
     url = new_url;
   }
   if (/fypage/.test(url)) {
@@ -2527,7 +2534,7 @@ const searchParse = (searchObj) => {
         }
 
         let _fetch_params = JSON.parse(JSON.stringify(rule_fetch_params));
-        let postData = {body: params};
+        let postData = { body: params };
         Object.assign(_fetch_params, postData);
         html = post(rurl, _fetch_params);
       } else {
@@ -3028,10 +3035,10 @@ const playParse = (playObj) => {
     }
   } else if (rule['play_json'] && !Array.isArray(rule['play_json'])) {
     // 其他情况 非[] 判断true/false
-    lazy_play = Object.assign(lazy_play, {jx: 1});
+    lazy_play = Object.assign(lazy_play, { jx: 1 });
   } else if (!rule['play_json']) {
     // 不解析传0
-    lazy_play = Object.assign(lazy_play, {jx: 0});
+    lazy_play = Object.assign(lazy_play, { jx: 0 });
   }
 
   console.log(JSON.stringify(lazy_play));
@@ -3095,20 +3102,20 @@ const isVideoParse = (isVideoObj) => {
 function getOriginalJs(js_code) {
   let current_match = /var rule|[\u4E00-\u9FA5]+|function|let |var |const |\(|\)|"|'/;
   if (current_match.test(js_code)) {
-    return js_code
+    return js_code;
   }
   let rsa_private_key = 'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqin/jUpqM6+fgYP/oMqj9zcdHMM0mEZXLeTyixIJWP53lzJV2N2E3OP6BBpUmq2O1a9aLnTIbADBaTulTNiOnVGoNG58umBnupnbmmF8iARbDp2mTzdMMeEgLdrfXS6Y3VvazKYALP8EhEQykQVarexR78vRq7ltY3quXx7cgI0ROfZz5Sw3UOLQJ+VoWmwIxu9AMEZLVzFDQN93hzuzs3tNyHK6xspBGB7zGbwCg+TKi0JeqPDrXxYUpAz1cQ/MO+Da0WgvkXnvrry8NQROHejdLVOAslgr6vYthH9bKbsGyNY3H+P12kcxo9RAcVveONnZbcMyxjtF5dWblaernAgMBAAECggEAGdEHlSEPFmAr5PKqKrtoi6tYDHXdyHKHC5tZy4YV+Pp+a6gxxAiUJejx1hRqBcWSPYeKne35BM9dgn5JofgjI5SKzVsuGL6bxl3ayAOu+xXRHWM9f0t8NHoM5fdd0zC3g88dX3fb01geY2QSVtcxSJpEOpNH3twgZe6naT2pgiq1S4okpkpldJPo5GYWGKMCHSLnKGyhwS76gF8bTPLoay9Jxk70uv6BDUMlA4ICENjmsYtd3oirWwLwYMEJbSFMlyJvB7hjOjR/4RpT4FPnlSsIpuRtkCYXD4jdhxGlvpXREw97UF2wwnEUnfgiZJ2FT/MWmvGGoaV/CfboLsLZuQKBgQDTNZdJrs8dbijynHZuuRwvXvwC03GDpEJO6c1tbZ1s9wjRyOZjBbQFRjDgFeWs9/T1aNBLUrgsQL9c9nzgUziXjr1Nmu52I0Mwxi13Km/q3mT+aQfdgNdu6ojsI5apQQHnN/9yMhF6sNHg63YOpH+b+1bGRCtr1XubuLlumKKscwKBgQDOtQ2lQjMtwsqJmyiyRLiUOChtvQ5XI7B2mhKCGi8kZ+WEAbNQcmThPesVzW+puER6D4Ar4hgsh9gCeuTaOzbRfZ+RLn3Aksu2WJEzfs6UrGvm6DU1INn0z/tPYRAwPX7sxoZZGxqML/z+/yQdf2DREoPdClcDa2Lmf1KpHdB+vQKBgBXFCVHz7a8n4pqXG/HvrIMJdEpKRwH9lUQS/zSPPtGzaLpOzchZFyQQBwuh1imM6Te+VPHeldMh3VeUpGxux39/m+160adlnRBS7O7CdgSsZZZ/dusS06HAFNraFDZf1/VgJTk9BeYygX+AZYu+0tReBKSs9BjKSVJUqPBIVUQXAoGBAJcZ7J6oVMcXxHxwqoAeEhtvLcaCU9BJK36XQ/5M67ceJ72mjJC6/plUbNukMAMNyyi62gO6I9exearecRpB/OGIhjNXm99Ar59dAM9228X8gGfryLFMkWcO/fNZzb6lxXmJ6b2LPY3KqpMwqRLTAU/zy+ax30eFoWdDHYa4X6e1AoGAfa8asVGOJ8GL9dlWufEeFkDEDKO9ww5GdnpN+wqLwePWqeJhWCHad7bge6SnlylJp5aZXl1+YaBTtOskC4Whq9TP2J+dNIgxsaF5EFZQJr8Xv+lY9lu0CruYOh9nTNF9x3nubxJgaSid/7yRPfAGnsJRiknB5bsrCvgsFQFjJVs=';
   let decode_content = '';
 
   function aes_decrypt(data) {
-    let key = CryptoJS.enc.Hex.parse("686A64686E780A0A0A0A0A0A0A0A0A0A");
-    let iv = CryptoJS.enc.Hex.parse("647A797964730A0A0A0A0A0A0A0A0A0A");
+    let key = CryptoJS.enc.Hex.parse('686A64686E780A0A0A0A0A0A0A0A0A0A');
+    let iv = CryptoJS.enc.Hex.parse('647A797964730A0A0A0A0A0A0A0A0A0A');
     let encrypted = CryptoJS.AES.decrypt({
-      ciphertext: CryptoJS.enc.Base64.parse(data)
+      ciphertext: CryptoJS.enc.Base64.parse(data),
     }, key, {
       iv: iv,
       mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
+      padding: CryptoJS.pad.Pkcs7,
     }).toString(CryptoJS.enc.Utf8);
     return encrypted;
   }
@@ -3124,38 +3131,38 @@ function getOriginalJs(js_code) {
   let decode_funcs = [
     (text) => {
       try {
-        return ungzip(text)
+        return ungzip(text);
       } catch (e) {
         logger('非gzip加密');
-        return ''
+        return '';
       }
     },
     (text) => {
       try {
-        return base64Decode(text)
+        return base64Decode(text);
       } catch (e) {
         logger('非b64加密');
-        return ''
+        return '';
       }
     },
     (text) => {
       try {
-        return aes_decrypt(text)
+        return aes_decrypt(text);
       } catch (e) {
         logger('非aes加密');
-        return ''
+        return '';
       }
     },
     (text) => {
       try {
-        return RSA.decode(text, rsa_private_key, null)
+        return RSA.decode(text, rsa_private_key, null);
       } catch (e) {
         logger('非rsa加密');
-        return ''
+        return '';
       }
     },
-  ]
-  let func_index = 0
+  ];
+  let func_index = 0;
   while (!current_match.test(decode_content)) {
     decode_content = decode_funcs[func_index](js_code);
     func_index++;
@@ -3163,7 +3170,7 @@ function getOriginalJs(js_code) {
       break;
     }
   }
-  return decode_content
+  return decode_content;
 }
 
 /**
@@ -3174,8 +3181,8 @@ function getOriginalJs(js_code) {
  */
 function runMain(main_func_code, arg) {
   // @ts-ignore
-  let mainFunc = function (arg) {
-    return ''
+  let mainFunc = function(arg) {
+    return '';
   };
   try {
     eval(main_func_code + '\nmainFunc=main;');
@@ -3183,7 +3190,7 @@ function runMain(main_func_code, arg) {
   } catch (e) {
     // @ts-ignore
     log(`执行main_funct发生了错误:${e.message}`);
-    return ''
+    return '';
   }
 }
 
@@ -3204,12 +3211,12 @@ const init = (ext: string | object) => {
     else if (typeof ext == 'string') {
       if (ext.startsWith('http') || ext.startsWith('file://')) {
         let query = getQuery(ext); // 获取链接传参
-        let js: any = request(ext, {method: 'GET'});
+        let js: any = request(ext, { method: 'GET' });
         if (js) {
           js = getOriginalJs(js);
           // eval(js.replace('var rule', 'rule'));
           // eval("(function(){'use strict';"+js.replace('var rule', 'rule')+"})()");
-          eval("(function(){" + js.replace('var rule', 'rule') + "})()");
+          eval('(function(){' + js.replace('var rule', 'rule') + '})()');
         }
         if (query['type'] === 'url' && query['params']) {
           // 指定type是链接并且传了params支持简写如 ./xx.json
@@ -3223,11 +3230,11 @@ const init = (ext: string | object) => {
         // eval(ext.replace('var rule', 'rule'));
         // eval("(function(){'use strict';"+ext.replace('var rule', 'rule')+"})()");
         // @ts-ignore
-        eval("(function(){" + ext.replace('var rule', 'rule') + "})()");
+        eval('(function(){' + ext.replace('var rule', 'rule') + '})()');
       }
     } else {
       console.log(`规则加载失败,不支持的规则类型:${typeof ext}`);
-      return
+      return;
     }
     rule['host'] = (rule['host'] || '').rstrip('/');
     HOST = rule['host'];
@@ -3245,7 +3252,7 @@ const init = (ext: string | object) => {
     if (rule['模板'] === '自动') {
       try {
         let host_headers = rule['headers'] || {};
-        let host_html = getCode(HOST, {headers: host_headers});
+        let host_html = getCode(HOST, { headers: host_headers });
         let match_muban = '';
         let muban_keys = Object.keys(muban).filter(it => !/默认|短视2|采集1/.test(it));
         for (let muban_key of muban_keys) {
@@ -3268,10 +3275,10 @@ const init = (ext: string | object) => {
             eval(rule['模板修改'].replace('js:', '').trim());
           }
         } else {
-          delete rule['模板']
+          delete rule['模板'];
         }
       } catch (e) {
-        delete rule['模板']
+        delete rule['模板'];
       }
     }
     if (rule['模板'] && muban.hasOwnProperty(rule['模板'])) {
@@ -3295,7 +3302,7 @@ const init = (ext: string | object) => {
     rule['searchUrl'] = rule['searchUrl'] || '';
     rule['homeUrl'] =
       rule['host'] && rule['homeUrl'] ? urljoin(rule['host'], rule['homeUrl']) : rule['homeUrl'] || rule['host'];
-    rule['homeUrl'] = cheerio.jinja2(rule['homeUrl'], {rule: rule});
+    rule['homeUrl'] = cheerio.jinja2(rule['homeUrl'], { rule: rule });
     rule['detailUrl'] =
       rule['host'] && rule['detailUrl'] ? urljoin(rule['host'], rule['detailUrl']) : rule['detailUrl'];
     rule['二级访问前'] = rule['二级访问前'] || '';
@@ -3370,7 +3377,7 @@ const init = (ext: string | object) => {
       }
     }
 
-    rule_fetch_params = {headers: rule['headers'] || false, timeout: rule['timeout'], encoding: rule['encoding']};
+    rule_fetch_params = { headers: rule['headers'] || false, timeout: rule['timeout'], encoding: rule['encoding'] };
     oheaders = rule['headers'] || {};
     // @ts-ignore
     RKEY = typeof key !== 'undefined' && key ? key : 'drpy_' + (rule['title'] || rule['host']);
@@ -3383,7 +3390,7 @@ const init = (ext: string | object) => {
       version: VERSION,
       rkey: RKEY,
       rule: {},
-    }
+    };
   }
 };
 
@@ -3611,7 +3618,7 @@ const isVideo = (url: string) => {
  * @returns {{}}
  */
 function getRule(key) {
-  return key ? rule[key] || '' : rule
+  return key ? rule[key] || '' : rule;
 }
 
 // [重要]防止树摇
