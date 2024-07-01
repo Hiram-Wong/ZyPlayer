@@ -55,7 +55,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   let encoding: string = _object.encoding || 'utf-8';
   let data: any = _object.data || {};
   let headers = _object.headers || {};
-  const emptyResult: Response = { content: '', body: '', headers: {} };
+  const emptyResult: Response = {content: '', body: '', headers: {}};
 
   if (_object.hasOwnProperty('redirect')) {
     const redirect = _object.redirect === 1 || _object.redirect === true ? 'follow' : 'manual';
@@ -63,25 +63,32 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   }
 
   if (body && Object.keys(data).length === 0) {
-    if(body.includes('&')) {
+    if (body.includes('&')) {
       body.split('&').forEach((param) => {
-        const [key, value] = param.split('=');
+        let key = param.split('=')[0];
+        let value = param.split('=').slice(1).join('=');
         data[key] = value;
       });
-    }else{
-      data = body
+    } else {
+      data = body;
     }
   } else if (!body && Object.keys(data).length !== 0 && method !== 'GET') {
     const contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type');
-    const contentType = 'application/json';
+    const default_type = 'application/json';
+    let contentType = default_type;
     if (contentTypeKeys.length > 0) {
       const contentTypeKey = contentTypeKeys.slice(-1)[0];
       const oldContentType = headers[contentTypeKey];
-      if (!oldContentType.includes(contentType)) {
-        headers[contentTypeKey] = contentType;
-      }
+      // if (!oldContentType.includes(contentType)) {
+      //   headers[contentTypeKey] = contentType;
+      // }
+      contentType = oldContentType
     } else {
       headers['Content-Type'] = contentType;
+    }
+    if (typeof (data) === 'object' && contentType.includes(default_type)) {
+      // data = JSON.stringify(data);
+      console.log('识别到要提交json数据,这里不管它,后面req_body会自动处理');
     }
   }
 
@@ -100,7 +107,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   };
   headers = keysToLowerCase(headers);
   // 从content-type拿到正确的网页编码
-  if(headers['content-type'] && /charset=(.*)/i.test(headers['content-type'])){
+  if (headers['content-type'] && /charset=(.*)/i.test(headers['content-type'])) {
     // @ts-ignore
     encoding = headers['content-type'].match(/charset=(.*)/i)[1].split(';')[0].trim();
   }
@@ -122,11 +129,11 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     });
   } else {
     let req_body = '';
-    if(typeof (data) === 'string'){
+    if (typeof (data) === 'string') {
       req_body = decodeURIComponent(data);
-    }else if(typeof (data) === 'object' && headers['content-type'] && headers['content-type'].includes('application/json')){
+    } else if (typeof (data) === 'object' && headers['content-type'] && headers['content-type'].includes('application/json')) {
       req_body = JSON.stringify(data);
-    }else{
+    } else {
       req_body = new URLSearchParams(data).toString();
     }
     const requestOptions: any = {
@@ -154,17 +161,17 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
 
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: reader.readAsText(blob,encoding), headers: formatHeaders } || emptyResult;
+      return {body: reader.readAsText(blob, encoding), headers: formatHeaders} || emptyResult;
     } else {
       // @ts-ignore
-      return reader.readAsText(blob,encoding) || '';
+      return reader.readAsText(blob, encoding) || '';
     }
   } else if (_js_type === 1) {
     let content;
     if (bufferType === 2) {
 
       content = reader.readAsDataURL(blob);
-      if(content.includes('base64,')){
+      if (content.includes('base64,')) {
         content = content.split('base64,')[1];
       }
       // const uint8Array = new Uint8Array(r.arrayBuffer()); // 将 ArrayBuffer 转换为一个 Uint8Array
@@ -172,9 +179,9 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
       // const base64String = buffer.toString('base64'); // 将 Buffer 转换为 Base64 字符串
       // content = base64String;
     } else {
-      content = reader.readAsText(blob,encoding);
+      content = reader.readAsText(blob, encoding);
     }
-    return { content, headers: formatHeaders } || emptyResult;
+    return {content, headers: formatHeaders} || emptyResult;
   } else {
     return emptyResult;
   }
@@ -217,7 +224,7 @@ const joinUrl = (base: string, url: string) => {
 const resolve = (from, to) => {
   const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
   if (resolvedUrl.protocol === 'resolve:') {
-    const { pathname, search, hash } = resolvedUrl;
+    const {pathname, search, hash} = resolvedUrl;
     return pathname + search + hash;
   }
   return resolvedUrl.href;
@@ -283,4 +290,4 @@ const local = {
   delete: local_delete,
 };
 
-export { pdfh, pdfa, pdfl, pd, local, req, joinUrl, resolve };
+export {pdfh, pdfa, pdfl, pd, local, req, joinUrl, resolve};
