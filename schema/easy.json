@@ -1,0 +1,224 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "zyplayer简易配置",
+  "type": "object",
+  "properties": {
+    "analyze": {
+      "type": "object",
+      "required": ["default", "data"],
+      "properties": {
+        "default": {
+          "title": "默认标识",
+          "type": "string",
+          "description": "默认标识 对应需设置为默认的id"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "title": "标识",
+                "type": "string",
+                "description": "id唯一值不可重复,不能数字,建议 uuid"
+              },
+              "name": {
+                "title": "名称",
+                "type": "string"
+              },
+              "url": {
+                "title": "解析源地址",
+                "type": "string",
+                "format": "uri"
+              },
+              "isActive": {
+                "title": "是否启用",
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": ["id", "name", "url"]
+          }
+        }
+      }
+    },
+    "iptv": {
+      "type": "object",
+      "required": ["default", "data"],
+      "properties": {
+        "default": {
+          "title": "默认标识",
+          "type": "string",
+          "description": "默认标识 对应需设置为默认的id"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "title": "标识",
+                "type": "string",
+                "description": "id唯一值不可重复,不能数字,建议 uuid"
+              },
+              "name": {
+                "title": "名称",
+                "type": "string"
+              },
+              "url": {
+                "title": "直播源地址",
+                "type": "string",
+                "format": "uri"
+              },
+              "type": {
+                "title": "类型",
+                "enum": ["remote", "local", "auto"],
+                "default": "remote",
+                "description": "remote为远程m3u local本地m3u文件路径"
+              },
+              "isActive": {
+                "title": "是否启用",
+                "type": "boolean",
+                "default": true
+              },
+              "epg": {
+                "title": "电子节目单地址",
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": ["id", "name", "url", "type"]
+          }
+        }
+      }
+    },
+    "sites": {
+      "type": "object",
+      "required": ["default", "data"],
+      "properties": {
+        "default": {
+          "title": "默认标识",
+          "type": "string",
+          "description": "默认标识 对应需设置为默认的id"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "title": "标识",
+                "type": "string",
+                "description": "id唯一值不可重复,不能数字,建议 uuid"
+              },
+              "name": {
+                "title": "名称",
+                "type": "string"
+              },
+              "api": {
+                "title": "站点源地址",
+                "type": "string",
+                "format": "uri"
+              },
+              "playUrl": {
+                "type": "string",
+                "format": "uri",
+                "description": "配合解析去url地址"
+              },
+              "search": {
+                "title": "搜索类型",
+                "type": "number",
+                "enum": [0, 1, 2],
+                "default": 1,
+                "description": "0:关闭\n1:聚合搜索\n2:本站搜索"
+              },
+              "group": {
+                "title": "分组",
+                "type": "string"
+              },
+              "isActive": {
+                "title": "是否启用",
+                "type": "boolean",
+                "default": true
+              },
+              "type": {
+                "title": "接口类型",
+                "type": "number",
+                "enum": [0,1,2,3,4],
+                "default": 1,
+                "description": "0:cms(xml)\n1:cms(json)\n2:drpy\n3:app(v3)\n4:app(v1)"
+              },
+              "ext": {
+                "title": "扩展参数",
+                "type": "string"
+              },
+              "categories": {
+                "title": "分类",
+                "type": "string",
+                "description": "按顺序展示所配置的分类 不配置则默认展示所有分类\n以 `,` 分割"
+              }
+            },
+            "required": ["id", "name", "api", "search", "type"]
+          }
+        }
+      }
+    },
+    "drive": {
+      "type": "object",
+      "required": ["default", "data"],
+      "properties": {
+        "default": {
+          "title": "默认标识",
+          "type": "string",
+          "description": "默认标识 对应需设置为默认的id"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "title": "标识",
+                "type": "string",
+                "description": "id唯一值不可重复,不能数字,建议 uuid"
+              },
+              "name": {
+                "title": "名称",
+                "type": "string"
+              },
+              "server": {
+                "title": "网盘地址",
+                "type": "string",
+                "format": "uri"
+              },
+              "startPage": {
+                "title": "开始页路径",
+                "type": "string",
+                "maxLength": 1024,
+                "format": "uri-template"
+              },
+              "search": {
+                "title": "是否支持搜索",
+                "type": "boolean"
+              },
+              "headers": {
+                "title": "请求头",
+                "type": "object"
+              },
+              "params": {
+                "title": "参数",
+                "type": "object"
+              },
+              "isActive": {
+                "title": "是否启用",
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": ["id", "name", "server"]
+          }
+        }
+      }
+    }
+  }
+}
