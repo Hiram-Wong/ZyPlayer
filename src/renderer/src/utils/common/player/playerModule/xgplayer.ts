@@ -9,11 +9,13 @@ import Mp4Plugin from 'xgplayer-mp4';
 import ShakaPlugin from 'xgplayer-shaka';
 // import DashPlugin from 'xgplayer-dash';
 
-import { publicColor, publicIcons } from './components';
+import { publicColor, publicIcons, publicStorage } from './components';
 
 const publicListener = {
   timeUpdate: null as any,
   sendDanmu: null as any,
+  playrateUpdate: null as any,
+  volumeUpdate: null as any,
 };
 
 // 西瓜、火山公共部分参数
@@ -117,13 +119,33 @@ const create = (options: any): XgPlayer => {
       break;
   }
   delete options.type;
+  let player;
   if (options.isLive) {
     SimplePlayer.defaultPreset = LivePreset;
-    return new SimplePlayer({ ...options });
+    player = new SimplePlayer({ ...options });
   } else {
     options.plugins = [...options.plugins, Danmu];
-    return new XgPlayer({ ...options });
-  }
+    player = new XgPlayer({ ...options });
+  };
+
+  player.storage = new publicStorage('xgplayer_settings');
+
+  player.once(Events.READY, () => {
+    if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
+    player.volume = player.storage.get('volume') || 1;
+  });
+
+  publicListener.playrateUpdate = () => {
+    player.storage.set('playrate', player.playbackRate);
+  };
+  player.on(Events.RATE_CHANGE, publicListener.playrateUpdate);
+
+  publicListener.volumeUpdate = () => {
+    player.storage.set('volume', player.volume);
+  };
+  player.on(Events.VOLUME_CHANGE, publicListener.volumeUpdate);
+
+  return player;
 };
 
 const currentTime = (player: XgPlayer): number => {
@@ -172,6 +194,12 @@ const seek = (player: XgPlayer, time: number) => {
   });
 };
 
+const speed = (player: XgPlayer, speed: number) => {
+  player.once(Events.LOADED_DATA, () => {
+    player.playbackRate = speed;
+  });
+};
+
 const time = (player: XgPlayer) => {
   return {
     currentTime: player.currentTime || 0,
@@ -214,6 +242,7 @@ export {
   play,
   playNext,
   seek,
+  speed,
   time,
   onTimeUpdate,
   offBarrage,

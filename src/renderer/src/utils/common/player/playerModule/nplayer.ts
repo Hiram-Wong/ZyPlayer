@@ -1,11 +1,13 @@
 import NPlayer, { EVENT as NPlayerEvent, Icon as NPlayerIcon } from 'nplayer';
 import nplayerDanmaku from '@nplayer/danmaku';
 
-import { publicIcons, publicBarrageSend, publicStream } from './components';
+import { publicIcons, publicBarrageSend, publicStream, publicStorage } from './components';
 
 const publicListener = {
   timeUpdate: null as any,
   sendDanmu: null as any,
+  playrateUpdate: null as any,
+  volumeUpdate: null as any,
 };
 
 const elementDeal = {
@@ -72,10 +74,7 @@ const options = {
   videoProps: { autoplay: 'true' },
   volumeVertical: true,
   bpControls: {},
-  controls: [
-    ['play', 'volume', 'time', 'spacer', 'danmaku-settings', 'settings', 'fullscreen'],
-    ['progress'],
-  ],
+  controls: [['play', 'volume', 'time', 'spacer', 'danmaku-settings', 'settings', 'fullscreen'], ['progress']],
   plugins: [new nplayerDanmaku({ autoInsert: false })],
 };
 
@@ -109,6 +108,7 @@ const create = (options: any): NPlayer => {
   }
 
   const player: any = new NPlayer(options);
+  player.storage = new publicStorage('nplayer_settings');
 
   switch (options.type) {
     case 'customMp4':
@@ -144,6 +144,50 @@ const create = (options: any): NPlayer => {
 
   // 元素替换，原生太丑
   elementDeal.replace('.nplayer_control_setting', `<div class="nplayer_icon">${publicIcons.danmu}</div>`);
+
+  player.once(NPlayerEvent.CANPLAY, () => {
+    player.settingNamedMap.speed.options = [
+      {
+        value: 0.5,
+        html: '0.5',
+      },
+      {
+        value: 0.75,
+        html: '0.75',
+      },
+      {
+        value: 1,
+        html: '正常',
+      },
+      {
+        value: 1.25,
+        html: '1.25',
+      },
+      {
+        value: 1.5,
+        html: '1.5',
+      },
+      {
+        value: 2,
+        html: '2',
+      },
+    ];
+    if (!options.live) {
+      const speed = player.storage.get('playrate') || 1;
+      player.playbackRate = speed;
+      player.settingNamedMap.speed.value = speed;
+    }
+  });
+
+  publicListener.playrateUpdate = () => {
+    player.storage.set('playrate', player.playbackRate);
+  };
+  player.on(NPlayerEvent.RATE_CHANGE, publicListener.playrateUpdate);
+
+  publicListener.volumeUpdate = () => {
+    player.storage.set('volume', player.volume);
+  };
+  player.on(NPlayerEvent.VOLUME_CHANGE, publicListener.volumeUpdate);
 
   return player;
 };
@@ -200,6 +244,13 @@ const seek = (player: NPlayer, time: number) => {
     player.seek(time);
   });
 };
+
+const speed = (player: NPlayer, speed: number) => {
+  player.playbackRate = speed;
+  // @ts-ignore
+  player.settingNamedMap.speed.value = speed;
+};
+
 const time = (player: NPlayer): { currentTime: number; duration: number } => {
   return {
     currentTime: player.currentTime || 0,
@@ -243,6 +294,7 @@ export {
   play,
   playNext,
   seek,
+  speed,
   time,
   onTimeUpdate,
   offBarrage,

@@ -6,6 +6,7 @@ import { publicBarrageSend, publicColor, publicIcons, publicStream } from './com
 const publicListener = {
   timeUpdate: null as any,
   sendDanmu: null as any,
+  playrateUpdate: null as any,
 };
 
 const options: any = {
@@ -21,6 +22,7 @@ const options: any = {
   flip: true,
   hotkey: true,
   isLive: false,
+  aspectRatio: true,
   plugins: [
     artplayerPluginDanmuku({
       speed: 5,
@@ -109,7 +111,19 @@ const create = (options: any): Artplayer => {
   }
 
   Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
-  return new Artplayer({ ...options });
+
+  const player = new Artplayer({ ...options });
+
+  player.once('ready', () => {
+    if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
+  });
+
+  publicListener.playrateUpdate = () => {
+    player.storage.set('playrate', player.playbackRate);
+  };
+  player.on('video:ratechange', publicListener.playrateUpdate);
+
+  return player;
 };
 
 const currentTime = (player: Artplayer): number => {
@@ -175,6 +189,12 @@ const offTimeUpdate = (player: Artplayer) => {
   player.off('video:timeupdate', publicListener.timeUpdate!);
 };
 
+const speed = (player: Artplayer, speed: number) => {
+  player.once('ready', () => {
+    player.playbackRate = speed;
+  });
+};
+
 const toggle = (player: Artplayer) => {
   player.toggle();
 };
@@ -194,6 +214,7 @@ export {
   play,
   playNext,
   seek,
+  speed,
   time,
   onTimeUpdate,
   offBarrage,

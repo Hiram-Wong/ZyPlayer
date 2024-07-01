@@ -2,8 +2,8 @@
  * @module multi-player
  * @brief 多播放器集成方案
  * @author HiramWong <admin@catni.cn>
- * @update 2024-06-29
- * @version 0.1.1
+ * @update 2024-07-01
+ * @version 0.1.3
  *
  * **ChangeLog说明**:
  * - 2024.5.12:
@@ -45,7 +45,13 @@
  *   - 修复在live模式下切换下一个报错-需判断弹幕组件库是否加载
  *   - 修复flv数据流切换失败, 始终播放一个视频流
  *   - 统一调用公共逻辑摧毁实例(除西瓜播放器外)
- *   - 去除nplayer控制条调用画中画(多次创建会创建多个bug暂未修复)
+ *   - 去除nplayer控制条调用画中画(遗留多次创建会创建多个dom问题bug)
+ * - 2024.6.30:
+ *   - 优化记忆音量和倍速(遗留art播放器UI显示不对bug-已提issue)-存储localStorage
+ *   - 统一倍速为[0.5, 0.75, 1, 1.25, 1.5, 2]
+ * - 2024.7.1:
+ *   - 扩展dplayer播放器缺失once方法
+ *   - 重写dplayer播放器destroy方法-始终会释放playrate为1的信号
  *
  * ---
  */

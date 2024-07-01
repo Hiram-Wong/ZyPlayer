@@ -847,7 +847,7 @@ const changeEvent = async (item) => {
     }, 1500);
   } else {
     await destroyPlayer();
-    await initPlayer(true);
+    await initFilmPlayer(true);
   }
 
   tmp.preloadLoading = false;
