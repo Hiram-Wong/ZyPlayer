@@ -55,7 +55,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
   let encoding: string = _object.encoding || 'utf-8';
   let data: any = _object.data || {};
   let headers = _object.headers || {};
-  const emptyResult: Response = { content: '', body: '', headers: {} };
+  const emptyResult: Response = {content: '', body: '', headers: {}};
 
   if (_object.hasOwnProperty('redirect')) {
     const redirect = _object.redirect === 1 || _object.redirect === true ? 'follow' : 'manual';
@@ -74,15 +74,21 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     }
   } else if (!body && Object.keys(data).length !== 0 && method !== 'GET') {
     const contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type');
-    const contentType = 'application/json';
+    const default_type = 'application/json';
+    let contentType = default_type;
     if (contentTypeKeys.length > 0) {
       const contentTypeKey = contentTypeKeys.slice(-1)[0];
       const oldContentType = headers[contentTypeKey];
-      if (!oldContentType.includes(contentType)) {
-        headers[contentTypeKey] = contentType;
-      }
+      // if (!oldContentType.includes(contentType)) {
+      //   headers[contentTypeKey] = contentType;
+      // }
+      contentType = oldContentType
     } else {
       headers['Content-Type'] = contentType;
+    }
+    if (typeof (data) === 'object' && contentType.includes(default_type)) {
+      // data = JSON.stringify(data);
+      console.log('识别到要提交json数据,这里不管它,后面req_body会自动处理');
     }
   }
 
@@ -155,7 +161,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
 
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: reader.readAsText(blob, encoding), headers: formatHeaders } || emptyResult;
+      return {body: reader.readAsText(blob, encoding), headers: formatHeaders} || emptyResult;
     } else {
       // @ts-ignore
       return reader.readAsText(blob, encoding) || '';
@@ -175,7 +181,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     } else {
       content = reader.readAsText(blob, encoding);
     }
-    return { content, headers: formatHeaders } || emptyResult;
+    return {content, headers: formatHeaders} || emptyResult;
   } else {
     return emptyResult;
   }
@@ -218,7 +224,7 @@ const joinUrl = (base: string, url: string) => {
 const resolve = (from, to) => {
   const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
   if (resolvedUrl.protocol === 'resolve:') {
-    const { pathname, search, hash } = resolvedUrl;
+    const {pathname, search, hash} = resolvedUrl;
     return pathname + search + hash;
   }
   return resolvedUrl.href;
@@ -284,4 +290,4 @@ const local = {
   delete: local_delete,
 };
 
-export { pdfh, pdfa, pdfl, pd, local, req, joinUrl, resolve };
+export {pdfh, pdfa, pdfl, pd, local, req, joinUrl, resolve};
