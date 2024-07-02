@@ -9,7 +9,7 @@ export default {
     manualTip:
       'Example of M3U:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\nExample of genre\nChannel,https://channel-url',
     groupTip: 'Please select a group',
-    categoryTip: 'Please enter the content, separated by commas',
+    categoryTip: 'Please enter shielded main category content, separated by commas',
     shortcutKeyTip: 'Click this to set',
     shortcutKeyEnterTip: 'Press shortcut key combination',
     shortcutKeyNonCompliance: 'Shortcut key combination is not compliant',

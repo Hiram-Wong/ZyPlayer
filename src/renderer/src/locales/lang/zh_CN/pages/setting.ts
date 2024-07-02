@@ -9,7 +9,7 @@ export default {
     manualTip:
       'M3u格式示例:\n#EXTM3U\n#EXTINF:-1,Channel\nhttps://channel-url\n\ngenre格式示例\nChannel,https://channel-url',
     groupTip: '请选择分组',
-    categoryTip: '请输入内容, 逗号分隔',
+    categoryTip: '请输入屏蔽主分类内容, 分类逗号分隔',
     shortcutKeyTip: '点击去设置',
     shortcutKeyEnterTip: '按快捷键组合键',
     shortcutKeyNonCompliance: '当前组合键不合规',
