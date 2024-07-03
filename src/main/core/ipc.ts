@@ -18,7 +18,7 @@ const tmpDir = async (path: string) => {
       await fs.removeSync(path); // 删除文件, 不存在不会报错
     }
     await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
-    logger.info(`[ipcMain] tmpDir: ${path}-created-sucess`);
+    logger.info(`[ipcMain] tmpDir: ${path}-created-success`);
   } catch (err) {
     logger.error(err);
   }

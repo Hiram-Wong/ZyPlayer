@@ -13,7 +13,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         const { key } = req.params;
         // @ts-ignore
         await req.server.db.delete(`/${CACHE_NAME}/${key}`);
-        reply.code(200).send({ code: 200, msg: 'sucess' });
+        reply.code(200).send({ code: 200, msg: 'success' });
       } catch (err) {
         reply.code(200).send({ code: 500, msg: err });
       }
@@ -27,7 +27,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         const { key, value } = req.body;
         // @ts-ignore
         await req.server.db.push(`/${CACHE_NAME}/${key}`, value);
-        reply.code(200).send({ code: 200, msg: 'sucess' });
+        reply.code(200).send({ code: 200, msg: 'success' });
       } catch (err) {
         reply.code(200).send({ code: 500, msg: err });
       }
@@ -39,7 +39,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const { key } = req.params;
       // @ts-ignore
       const res = await req.server.db.getData(`/${CACHE_NAME}/${key}`);
-      reply.code(200).send({ code: 200, msg: 'sucess', data: res });
+      reply.code(200).send({ code: 200, msg: 'success', data: res });
     } catch (err) {
       reply.code(200).send({ code: 500, msg: err, data: '' });
     }
