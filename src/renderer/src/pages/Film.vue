@@ -40,15 +40,20 @@
                          :loading="renderLoading" :error="renderError">
                   <template #overlayContent>
                     <div class="op">
-                      <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
+<!--                      <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>-->
+                      <span v-if="item.vod_name"> {{ item.vod_name }}</span>
                     </div>
                   </template>
                 </t-image>
               </div>
               <div class="card-footer">
-                <p class="card-footer-title text-hide">{{ item.vod_name }}</p>
+<!--                <p class="card-footer-title text-hide">{{ item.vod_name }}</p>-->
+                <p class="card-footer-title text-hide">
+                  <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
+                  <span v-else> {{ item.vod_name }}</span>
+                </p>
                 <p class="card-footer-desc text-hide">{{
-                    item.vod_blurb ? item.vod_blurb.trim() :
+                    item.vod_blurb ? item.vod_blurb.trim():
                       $t('pages.film.noDesc')
                   }}</p>
               </div>
@@ -524,12 +529,20 @@ const getSearchList = async () => {
       length = searchGroup.length > 1 ? 1 : 0;
       return length;
     }
+    // 更新详情为vod_content或者vod_remarks
+    if (resultSearch.length > 0 && !_.has(resultSearch[0], 'vod_blurb')) {
+      resultSearch.forEach(it=>{
+        it.vod_blurb = it.vod_content || it.vod_remarks;
+      });
+    }
     // console.log('currentSite:', currentSite);
     let resultDetail = resultSearch;
     if (resultSearch.length > 0 && !_.has(resultSearch[0], 'vod_pic')) {
       if ([0, 1].includes(currentSite.type)) {
         const ids = resultSearch.map((item) => item.vod_id);
         resultDetail = await fetchDetail(currentSite, ids.join(','));
+      } else if([2, 6, 7].includes(currentSite.type)){
+        console.log('[film][search] updatePic not use in drpy/hipy sites.');
       } else {
         const updatePic = async (item) => {
           try {
