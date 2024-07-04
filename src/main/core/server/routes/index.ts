@@ -12,5 +12,6 @@ import cache from './cache';
 import lab from './lab';
 import file from './file';
 import barrge from './barrge';
+import util from './util';
 
-export { analyze, site, star, history, drive, setting, iptv, db, proxy, catbox, cache, lab, file, barrge };
+export { analyze, site, star, history, drive, setting, iptv, db, proxy, catbox, cache, lab, file, barrge, util };
