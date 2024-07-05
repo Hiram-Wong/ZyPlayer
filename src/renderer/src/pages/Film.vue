@@ -1,14 +1,14 @@
 <template>
   <div class="film view-container">
     <common-nav :title="$t('pages.film.name')" :list="siteConfig.data" :active="active.nav" search
-                @change-key="changeSitesEvent"/>
+      @change-key="changeSitesEvent" />
     <div class="content">
       <header class="header" v-if="classConfig.data.length > 0">
         <div class="header-nav">
-          <tag-nav :list="classConfig.data" :active="active.class" @change-key="changeClassEvent"/>
+          <tag-nav :list="classConfig.data" :active="active.class" @change-key="changeClassEvent" />
         </div>
         <div v-if="filter.data[active.class]" class="quick_item quick_filter">
-          <root-list-icon size="large" @click="isVisible.toolbar = !isVisible.toolbar"/>
+          <root-list-icon size="large" @click="isVisible.toolbar = !isVisible.toolbar" />
         </div>
       </header>
       <div class="container" :class="classConfig.data.length > 0 ? 'container-full' : 'container-hidden'">
@@ -19,8 +19,8 @@
               <div class="item title">{{ filterItem.name }}</div>
               <div class="wp">
                 <div v-for="item in filterItem.value" :key="item" class="item"
-                     :class="{ active: active.filter[filterItem.key] === item.v }" :label="item.n" :value="item.v"
-                     @click="changeFilterEvent(filterItem.key, item.v)">
+                  :class="{ active: active.filter[filterItem.key] === item.v }" :label="item.n" :value="item.v"
+                  @click="changeFilterEvent(filterItem.key, item.v)">
                   {{ item.n }}
                 </div>
               </div>
@@ -30,46 +30,42 @@
         <div class="content-wrapper" id="back-top">
           <t-row :gutter="[16, 16]">
             <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in filmData.list" :key="item.vod_id" class="card"
-                   @click="playEvent(item)">
+              @click="playEvent(item)">
               <div class="card-main">
                 <div v-if="item.vod_remarks || item.vod_remark" class="card-tag card-tag-orange">
                   <span class="card-tag-text text-hide">{{ item.vod_remarks || item.vod_remark }}</span>
                 </div>
                 <t-image class="card-main-item" :src="item.vod_pic"
-                         :style="{ height: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
-                         :loading="renderLoading" :error="renderError">
+                  :style="{ height: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
+                  :loading="renderLoading" :error="renderError">
                   <template #overlayContent>
                     <div class="op">
-<!--                      <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>-->
-                      <span v-if="item.vod_name"> {{ item.vod_name }}</span>
+                      <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
                     </div>
                   </template>
                 </t-image>
               </div>
               <div class="card-footer">
-<!--                <p class="card-footer-title text-hide">{{ item.vod_name }}</p>-->
-                <p class="card-footer-title text-hide">
-                  <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
-                  <span v-else> {{ item.vod_name }}</span>
+                <p class="card-footer-title text-hide">{{ item.vod_name }}</p>
+                <p class="card-footer-desc text-hide">
+                  <span v-if="item.vod_blurb">{{ item.vod_blurb }}</span>
+                  <span v-else-if="item.vod_content">{{ item.vod_content }}</span>
+                  <span v-else>{{ $t('pages.film.noDesc') }}</span>
                 </p>
-                <p class="card-footer-desc text-hide">{{
-                    item.vod_blurb ? item.vod_blurb.trim():
-                      $t('pages.film.noDesc')
-                  }}</p>
               </div>
             </t-col>
           </t-row>
           <infinite-loading v-if="isVisible.infiniteLoading" :identifier="infiniteId" :distance="200"
-                            style="text-align: center" @infinite="load">
+            style="text-align: center" @infinite="load">
             <template #complete>{{ infiniteCompleteTip }}</template>
             <template #error>{{ $t('pages.film.infiniteLoading.complete') }}</template>
           </infinite-loading>
         </div>
       </div>
     </div>
-    <detail-view v-model:visible="isVisible.detail" :site="siteConfig.default" :data="formDetailData"/>
-    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading"/>
-    <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000"/>
+    <detail-view v-model:visible="isVisible.detail" :site="siteConfig.default" :data="formDetailData" />
+    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
+    <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
 </template>
 
@@ -77,19 +73,19 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import {useEventBus} from '@vueuse/core';
+import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import PQueue from 'p-queue';
-import {MessagePlugin} from 'tdesign-vue-next';
-import {RootListIcon} from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import {onMounted, reactive, ref} from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
-import {prefix} from '@/config/global';
-import {t} from '@/locales';
-import {usePlayStore} from '@/store';
+import { prefix } from '@/config/global';
+import { t } from '@/locales';
+import { usePlayStore } from '@/store';
 
-import {fetchSiteActive} from '@/api/site';
+import { fetchSiteActive } from '@/api/site';
 import {
   fetchClassify,
   fetchList,
@@ -109,19 +105,19 @@ const storePlayer = usePlayStore();
 const renderError = () => {
   return (
     <div class="renderIcon" style="height: 100%">
-      <img src={lazyImg} style="height: 100%; object-fit: cover;"/>
+      <img src={lazyImg} style="height: 100%; object-fit: cover;" />
     </div>
   );
 };
 const renderLoading = () => {
   return (
     <div class="renderIcon" style="height: 100%">
-      <img src={lazyImg} style="height: 100%; object-fit: cover;"/>
+      <img src={lazyImg} style="height: 100%; object-fit: cover;" />
     </div>
   );
 };
 
-const queue = new PQueue({concurrency: 5}); // 设置并发限制为5
+const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 const infiniteId = ref(+new Date()); // infinite-loading属性重置组件
 const searchTxt = ref(''); // 搜索框
 const searchCurrentSite = ref(); // 搜索当前源
@@ -193,7 +189,7 @@ const filmData = ref({
 }) as any;
 
 const classConfig = ref({
-  data: [{type_id: 0, type_name: '最新'}]
+  data: [{ type_id: 0, type_name: '最新' }]
 }) as any;
 
 onMounted(() => {
@@ -202,8 +198,8 @@ onMounted(() => {
 
 // cms筛选：基于已有数据
 const filterEvent = () => {
-  const {rawList} = filmData.value;
-  const {area, year, sort} = active.value.filter;
+  const { rawList } = filmData.value;
+  const { area, year, sort } = active.value.filter;
 
   const filteredData = rawList
     .filter((item) => area === '全部' || item["vod_area"].includes(area))
@@ -224,7 +220,7 @@ const filterEvent = () => {
 
 // 非cms筛选：基于请求数据
 const filterApiEvent = async () => {
-  const {type} = siteConfig.value.default;
+  const { type } = siteConfig.value.default;
   let filterFormat;
   if (type === 2 || type === 6 || type === 7 || type === 8) {
     filterFormat = Object.entries(active.value.filter)
@@ -253,7 +249,7 @@ const changeFilterEvent = (key, item) => {
   console.log(`[film] change filter: ${key}:${item}`);
   active.value.filter[key] = item;
 
-  const {type} = siteConfig.value.default;
+  const { type } = siteConfig.value.default;
 
   if (type === 1 || type === 0) filterEvent();
   else filterApiEvent();
@@ -262,7 +258,7 @@ const changeFilterEvent = (key, item) => {
 const searchGroup = (type: string) => {
   // 全局搜索 + 源搜索 0关闭1聚合搜索2本站搜索
   const defaultConfig = siteConfig.value.default;
-  const selfSearch = defaultConfig["search"] !== 0 ? [{...defaultConfig}] : [];
+  const selfSearch = defaultConfig["search"] !== 0 ? [{ ...defaultConfig }] : [];
 
   const groupRes = siteConfig.value.data.filter((item) => item["group"] === defaultConfig["group"] && item["search"] === 1);
   const allRes = siteConfig.value.data.filter((item) => item["search"] === 1);
@@ -304,31 +300,31 @@ const getSetting = async () => {
 
 // 获取地区
 const arrangeCmsArea = () => {
-  const {rawList} = filmData.value;
+  const { rawList } = filmData.value;
   const data = _.compact(_.map(rawList, (item) => item["vod_area"].split(',')[0]));
   data.unshift('全部');
   const dataFormat = _.uniq(data);
 
   const listFormat = dataFormat.map((item) => {
     ;
-    return {n: item, v: item === '全部' ? '' : item};
+    return { n: item, v: item === '全部' ? '' : item };
   });
 
   const id = active.value.class;
   const currentFilter = filter.value.data[id];
 
-  const index = _.findIndex(currentFilter, {key: 'area'});
+  const index = _.findIndex(currentFilter, { key: 'area' });
   console.log(`[film] cms filter area: `, listFormat);
   filter.value.data[id][index].value = listFormat;
 };
 
 // 获取年份
 const arrangeCmsYear = () => {
-  const {rawList} = filmData.value;
+  const { rawList } = filmData.value;
   const id = active.value.class;
-  const {type} = siteConfig.value.default;
+  const { type } = siteConfig.value.default;
   const currentFilter = filter.value.data[id];
-  const index = _.findIndex(currentFilter, {key: 'year'});
+  const index = _.findIndex(currentFilter, { key: 'year' });
 
   let data;
   if (type === 0) data = _.compact(_.map(rawList, (item) => item["vod_year"]));
@@ -337,7 +333,7 @@ const arrangeCmsYear = () => {
   const dataFormat = _.uniq(data);
   const listFormat = dataFormat.map((item) => {
     ;
-    return {n: item, v: item === '全部' ? '' : item};
+    return { n: item, v: item === '全部' ? '' : item };
   });
   console.log(`[film] cms filter year: `, listFormat);
   filter.value.data[id][index].value = listFormat;
@@ -345,7 +341,7 @@ const arrangeCmsYear = () => {
 
 // 类别过滤
 const categoriesFilter = (classData: string[]): string[] => {
-  const {categories} = siteConfig.value.default;
+  const { categories } = siteConfig.value.default;
   if (!categories || categories.trim() === '') return classData;
 
   const categoryList = categories.split(',').map((item) => item.trim());
@@ -383,9 +379,9 @@ const getClassList = async (site) => {
   try {
     const res = await fetchClassify(site);
 
-    const {pagecount, limit, total, classData, filters} = res;
-    const {pageIndex, ...rest} = pagination.value;
-    pagination.value = {pageIndex, ...rest, count: pagecount, pageSize: limit, total};
+    const { pagecount, limit, total, classData, filters } = res;
+    const { pageIndex, ...rest } = pagination.value;
+    pagination.value = { pageIndex, ...rest, count: pagecount, pageSize: limit, total };
     filter.value.data = filters;
 
     const classDataFormat = categoriesFilter(classData);
@@ -413,7 +409,7 @@ const changeClassEvent = (key) => {
   filterApiEvent();
   searchTxt.value = '';
   infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
-  filmData.value = {list: [], rawList: []};
+  filmData.value = { list: [], rawList: [] };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 };
@@ -423,13 +419,13 @@ const getFilmList = async () => {
   const defaultSite = siteConfig.value.default;
   const pg = pagination.value.pageIndex;
   const t = active.value.class;
-  const {format} = filter.value;
+  const { format } = filter.value;
 
-  console.log(`[film] load parameter: ${defaultSite.type === 2 || defaultSite.type === 7 ? JSON.stringify({...format}) : JSON.stringify(format)}`);
+  console.log(`[film] load parameter: ${defaultSite.type === 2 || defaultSite.type === 7 ? JSON.stringify({ ...format }) : JSON.stringify(format)}`);
 
   let length = 0;
   try {
-    const res = await fetchList(defaultSite, pg, t, defaultSite.type === 2 || defaultSite.type === 7 ? {...format} : format);
+    const res = await fetchList(defaultSite, pg, t, defaultSite.type === 2 || defaultSite.type === 7 ? { ...format } : format);
     const newFilms = _.differenceWith(res, filmData.value.list, _.isEqual);
     filmData.value.list = [...filmData.value.list, ...newFilms];
     filmData.value.rawList = [...filmData.value.rawList, ...res];
@@ -529,19 +525,14 @@ const getSearchList = async () => {
       length = searchGroup.length > 1 ? 1 : 0;
       return length;
     }
-    // 更新详情为vod_content或者vod_remarks
-    if (resultSearch.length > 0 && !_.has(resultSearch[0], 'vod_blurb')) {
-      resultSearch.forEach(it=>{
-        it.vod_blurb = it.vod_content || it.vod_remarks;
-      });
-    }
+
     // console.log('currentSite:', currentSite);
     let resultDetail = resultSearch;
     if (resultSearch.length > 0 && !_.has(resultSearch[0], 'vod_pic')) {
       if ([0, 1].includes(currentSite.type)) {
         const ids = resultSearch.map((item) => item.vod_id);
         resultDetail = await fetchDetail(currentSite, ids.join(','));
-      } else if([2, 6, 7].includes(currentSite.type)){
+      } else if ([2, 6, 7].includes(currentSite.type)) {
         console.log('[film][search] updatePic not use in drpy/hipy sites.');
       } else {
         const updatePic = async (item) => {
@@ -557,10 +548,13 @@ const getSearchList = async () => {
       }
     }
 
-    const filmList = resultDetail.map((item) => ({
-      ...item,
-      relateSite: currentSite
-    }));
+    const filmList = resultDetail
+      .filter((item) => item?.vod_name.indexOf(searchTxt.value) > -1)
+      .map((item) => ({
+        ...item,
+        relateSite: currentSite
+      })
+      );
 
     const newFilms = _.differenceWith(filmList, filmData.value.list, _.isEqual); // 去重
     filmData.value.list.push(...newFilms);
@@ -591,11 +585,11 @@ const changeSitesEvent = async (key: string) => {
   isVisible.catvod = false;
   infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
   searchTxt.value = '';
-  const res = _.find(siteConfig.value.data, {id: key});
+  const res = _.find(siteConfig.value.data, { id: key });
   active.value.nav = key;
   siteConfig.value.default = res;
-  classConfig.value.data = [{type_id: 0, type_name: '最新'}];
-  filmData.value = {list: [], rawList: []};
+  classConfig.value.data = [{ type_id: 0, type_name: '最新' }];
+  filmData.value = { list: [], rawList: [] };
   filter.value = {
     data: [],
     format: {},
@@ -654,7 +648,7 @@ const playEvent = async (item) => {
         status: true,
         data: {
           info: item,
-          ext: {site: site},
+          ext: { site: site },
         },
       });
 
@@ -690,8 +684,8 @@ filmReloadeventBus.on(async () => {
   infiniteCompleteTip.value = t('pages.film.infiniteLoading.noMore');
   searchTxt.value = '';
   await getSetting();
-  classConfig.value.data = [{type_id: 0, type_name: '最新'}];
-  filmData.value = {list: [], rawList: []};
+  classConfig.value.data = [{ type_id: 0, type_name: '最新' }];
+  filmData.value = { list: [], rawList: [] };
   filter.value = {
     data: [],
     format: {},
