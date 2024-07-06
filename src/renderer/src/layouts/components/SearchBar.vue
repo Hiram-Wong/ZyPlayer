@@ -36,9 +36,7 @@
                 }}</span>
             </div>
             <div class="hot-content">
-              <template v-for="i in 5" :key="i">
-                <t-skeleton theme="text" :loading="isVisible.load" class="news-skeleton" />
-              </template>
+              <t-skeleton :row-col="rowCol" :loading="isVisible.load"></t-skeleton>
               <div v-if="!isVisible.load">
                 <div v-if="hotConfig.hotData.length !== 0" class="hot-data">
                   <div v-for="(item, index) in hotConfig.hotData" :key="item.vod_id" class="rax-view-v2 hot-item"
@@ -64,7 +62,6 @@
     </t-popup>
   </div>
 </template>
-
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
@@ -96,6 +93,7 @@ const isVisible = reactive({
 const active = reactive({
   type: 'group',
   filmGroupType: 'site',
+  filmFilterType: 'off',
   flag: ''
 });
 const hotConfig = reactive({
@@ -122,6 +120,13 @@ watch(
 onMounted(async () => {
   if (activeRouteName.value === 'FilmIndex') await getFilmSearhConfig();
 });
+
+const rowCol = [
+  { type: 'text', width: '100%', height: '22px' },
+  { type: 'text', width: '100%', height: '22px' },
+  { type: 'text', width: '100%', height: '22px' },
+  { type: 'text', width: '100%', height: '22px' },
+]
 
 const focusEvent = async () => {
   if (activeRouteName.value === 'FilmIndex' || activeRouteName.value === 'AnalyzeIndex') {
@@ -168,8 +173,10 @@ const hotTypeMappings = {
 };
 
 const getFilmSearhConfig = async () => {
-  const res = await fetchSettingDetail('defaultSearchType');
-  active.filmGroupType = res?.value || 'group';
+  const searchResponse = await fetchSettingDetail('defaultSearchType');
+  active.filmGroupType = searchResponse?.value || 'group';
+  const filterResponse = await fetchSettingDetail('defaultFilterType');
+  active.filmFilterType = filterResponse?.value || 'off';
 };
 
 // 获取设置配置
@@ -262,7 +269,7 @@ const searchEvent = async (item) => {
   }
   switch (activeRouteName.value) {
     case 'FilmIndex':
-      filmSearchEmitReload.emit(item, active.filmGroupType || 'site');
+      filmSearchEmitReload.emit(item, { group: active.filmGroupType, filter: active.filmFilterType });
       break;
     case 'IptvIndex':
       channelSearchEmitReload.emit(item);

@@ -37,28 +37,34 @@
           </t-space>
         </div>
       </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.hotRecommend')" name="hotRecommend">
-        <div class="hot-recommend">
-          <t-radio-group v-model="formData.defaultHot">
-            <t-radio value="kylive">{{ $t('pages.setting.base.kylive') }}</t-radio>
-            <t-radio value="enlightent">{{ $t('pages.setting.base.enlightent') }}</t-radio>
-            <t-radio value="douban">{{ $t('pages.setting.base.douban') }}</t-radio>
-            <t-radio value="komect">{{ $t('pages.setting.base.komect') }}</t-radio>
-            <!-- <t-radio value="local">{{ $t('pages.setting.base.local') }}</t-radio> -->
-          </t-radio-group>
-        </div>
-      </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.search')" name="search">
-        <div class="search">
+      <t-form-item :label="$t('pages.setting.base.film')" name="film">
+        <div class="film">
           <t-space direction="vertical">
-            <t-radio-group v-model="formData.defaultSearchType">
-              <t-radio value="site">{{ $t('pages.setting.base.site') }}</t-radio>
-              <t-radio value="group">{{ $t('pages.setting.base.group') }}</t-radio>
-              <t-radio value="all">{{ $t('pages.setting.base.all') }}</t-radio>
-            </t-radio-group>
+            <t-space align="center">
+              <t-select v-model="formData.defaultHot" :placeholder="$t('pages.setting.placeholder.general')"
+                :label="$t('pages.setting.base.hotRecommend')" :style="{ width: '255px' }">
+                <t-option value="kylive" :label="$t('pages.setting.base.kylive')"></t-option>
+                <t-option value="enlightent" :label="$t('pages.setting.base.enlightent')"></t-option>
+                <t-option value="douban" :label="$t('pages.setting.base.douban')"></t-option>
+                <t-option value="komect" :label="$t('pages.setting.base.komect')"></t-option>
+                <!-- <t-option value="local" :label="$t('pages.setting.base.local')"></t-option> -->
+              </t-select>
+            </t-space>
+            <t-space align="center">
+              <t-select v-model="formData.defaultSearchType" :placeholder="$t('pages.setting.placeholder.general')"
+                :label="$t('pages.setting.base.search')" :style="{ width: '120px' }">
+                <t-option value="site" :label="$t('pages.setting.base.site')"></t-option>
+                <t-option value="group" :label="$t('pages.setting.base.group')"></t-option>
+                <t-option value="all" :label="$t('pages.setting.base.all')"></t-option>
+              </t-select>
+              <t-select v-model="formData.defaultFilterType" :placeholder="$t('pages.setting.placeholder.general')"
+                :label="$t('pages.setting.base.filter')" :style="{ width: '120px' }">
+                <t-option value="on" :label="$t('pages.setting.base.on')"></t-option>
+                <t-option value="off" :label="$t('pages.setting.base.off')"></t-option>
+              </t-select>
+            </t-space>
           </t-space>
         </div>
-        <div class="hot-recommend"></div>
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.viewCasual')" name="viewCasual">
         <t-space align="center">
@@ -250,6 +256,7 @@ const formData = ref({
   defaultHot: 'kylive',
   defaultSearchRecommend: 'site',
   defaultSearchType: 'site',
+  defaultFilterType: 'off',
   defaultIptvEpg: 'http://diyp.112114.xyz/',
   defaultIptvLogo: 'https://epg.112114.eu.org/logo/',
   timeout: 5000,

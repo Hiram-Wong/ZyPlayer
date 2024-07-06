@@ -39,8 +39,10 @@
                   :style="{ height: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
                   :loading="renderLoading" :error="renderError">
                   <template #overlayContent>
-                    <div class="op">
-                      <span v-if="item.relateSite"> {{ item.relateSite.name }}</span>
+                    <div class="op" v-if="item.relateSite">
+                      <div class="op-box">
+                        <span>{{ item.relateSite.name }}</span>
+                      </div>
                     </div>
                   </template>
                 </t-image>
@@ -166,6 +168,7 @@ const siteConfig = ref({
     ext: ''
   },
   search: '',
+  filter: false,
   data: [],
   searchGroup: []
 }) as any;
@@ -286,6 +289,9 @@ const getSetting = async () => {
     }
     if (_.has(data, 'data') && !_.isEmpty(data["data"])) {
       siteConfig.value.data = data["data"];
+    }
+    if (_.has(data, 'filter') && !_.isEmpty(data["filter"])) {
+      siteConfig.value.filter = data["filter"];
     }
     if (_.has(data, 'search') && !_.isEmpty(data["search"])) {
       siteConfig.value.search = data["search"];
@@ -450,11 +456,10 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       infiniteCompleteTip.value = t('pages.film.infiniteLoading.noData');
       $state.complete();
       return;
-    }
-    ;
+    };
 
     const defaultSite = searchTxt.value ? searchCurrentSite.value : siteConfig.value.default;
-
+    console.log(defaultSite)
     if (defaultSite.type === 7 && !isVisible.t3Work) {
       const res = await t3RuleInit(defaultSite);
       if (res.code === 200) isVisible.t3Work = true;
@@ -463,8 +468,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       const content = await catvodRuleInit(defaultSite);
       if (typeof content === 'object') isVisible.catvod = true;
       else $state.error();
-    }
-    ;
+    };
 
     if (!isVisible.loadClass && !searchTxt.value) await getClassList(defaultSite); // 加载分类
 
@@ -479,7 +483,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
         arrangeCmsYear();
       }
       $state.loaded();
-    }
+    };
   } catch (err) {
     console.error(err);
     $state.error();
@@ -527,7 +531,8 @@ const getSearchList = async () => {
     }
 
     // console.log('currentSite:', currentSite);
-    let resultDetail = resultSearch;
+    let resultDetail = siteConfig.value.filter === 'on' ? resultSearch.filter((item) => item?.vod_name.indexOf(searchTxt.value) > -1) : resultSearch;
+
     if (resultSearch.length > 0 && !_.has(resultSearch[0], 'vod_pic')) {
       if ([0, 1].includes(currentSite.type)) {
         const ids = resultSearch.map((item) => item.vod_id);
@@ -549,12 +554,10 @@ const getSearchList = async () => {
     }
 
     const filmList = resultDetail
-      .filter((item) => item?.vod_name.indexOf(searchTxt.value) > -1)
       .map((item) => ({
         ...item,
         relateSite: currentSite
-      })
-      );
+      }));
 
     const newFilms = _.differenceWith(filmList, filmData.value.list, _.isEqual); // 去重
     filmData.value.list.push(...newFilms);
@@ -666,13 +669,13 @@ const playEvent = async (item) => {
 const filmReloadeventBus = useEventBus<string>('film-reload');
 const filmSearcheventBus = useEventBus<string>('film-search');
 
-filmSearcheventBus.on((kw: string, groupType: 'local' | 'group' | 'all') => {
+filmSearcheventBus.on((kw: string, data: any) => {
   searchTxt.value = kw;
-  if (siteConfig.value.search !== groupType) {
-    siteConfig.value.search = groupType;
-    siteConfig.value.searchGroup = searchGroup(groupType);
-  }
-  ;
+  siteConfig.value.filter = data.filter;
+  if (siteConfig.value.search !== data.group) {
+    siteConfig.value.search = data.group;
+    siteConfig.value.searchGroup = searchGroup(data.group);
+  };
   searchEvent();
 });
 
@@ -912,14 +915,29 @@ filmReloadeventBus.on(async () => {
               height: 100%;
 
               .op {
-                background-color: rgba(22, 22, 23, 0.8);
-                border-radius: 0 0 7px 7px;
-                width: 100%;
-                color: rgba(255, 255, 255, 0.8);
                 position: absolute;
                 bottom: 0;
-                display: flex;
-                justify-content: center;
+                left: 0;
+                width: 100%;
+                background: linear-gradient(to bottom, rgba(22, 24, 35, 0.4) 0%, rgba(22, 24, 35, .8) 100%);
+
+                .op-box {
+                  padding: var(--td-comp-paddingTB-xs) 0;
+                  background: linear-gradient(to right,
+                      rgba(255, 255, 255, 0),
+                      rgba(255, 255, 255, 0.4) 30%,
+                      rgba(255, 255, 255, 0.4) 70%,
+                      rgba(255, 255, 255, 0));
+                  ;
+
+                  span {
+                    text-align: center;
+                    display: inline-block;
+                    width: 100%;
+                    color: #fdfdfd;
+                    font-weight: 500;
+                  }
+                }
               }
             }
           }
