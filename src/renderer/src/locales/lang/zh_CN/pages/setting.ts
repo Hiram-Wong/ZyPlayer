@@ -522,6 +522,7 @@ export default {
         },
       },
       message: {
+        htmlNoUrl: '地址为空',
         inputNoClassParse: '参数大类为空',
         sourceFirst: '必须先获取源代码',
         inputNoFilterAndFilterInfo: '参数筛选或筛选详细为空',

@@ -614,12 +614,10 @@ const prepareRequestOptions = (method, header, body, contentType) => {
     }
   }
 
-  const parseHeaderKeys = Object.fromEntries(
-    Object.entries(parsedHeader).map(([key, value]) => [key.toLowerCase(), value])
-  );
-
-  if (!parseHeaderKeys.accept) {
-    parseHeaderKeys['accept'] = '*/*';
+  let parseHeaderKeys: string[];
+  parseHeaderKeys = Object.keys(parsedHeader).map(it => it.toLowerCase());
+  if (!parseHeaderKeys.includes('accept')) {
+    parsedHeader['accept'] = '*/*';
   }
 
   return { parsedHeader, parsedBody };
@@ -629,7 +627,7 @@ const getSource = async () => {
   const { url, method, encode, header, body, contentType } = form.value.req;
 
   if (!url) {
-    MessagePlugin.warning(t('pages.setting.editSource.message.htmlNoUrl'));
+    MessagePlugin.warning(t('pages.setting.editSource.sift.message.htmlNoUrl'));
     return;
   };
 

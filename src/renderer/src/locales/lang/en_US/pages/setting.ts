@@ -522,6 +522,7 @@ export default {
         },
       },
       message: {
+        htmlNoUrl: 'The parameter url is empty',
         inputNoClassParse: 'Parms classParse is empty',
         sourceFirst: 'Get source first',
         inputNoFilterAndFilterInfo: 'Parms filter or filterInfo is empty',
