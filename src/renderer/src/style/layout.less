@@ -370,7 +370,7 @@
   }
   .t-tabs__btn {
     border: 0;
-    background-color: var(--td-bg-container);
+    background-color: var(--td-bg-color-container);
     &:hover > svg {
       color: var(--td-brand-color);
     }
@@ -421,10 +421,10 @@
 }
 
 .t-table {
-  background-color: var(--td-bg-container);
+  background-color: var(--td-bg-color-container);
 
   tr {
-    background-color: var(--td-bg-container);
+    background-color: var(--td-bg-color-container);
 
     &:hover {
       background-color: var(--td-bg-color-container-hover);
@@ -432,11 +432,11 @@
   }
 
   .t-table__header--fixed:not(.t-table__header--multiple) > tr > th {
-    background-color: var(--td-bg-container);
+    background-color: var(--td-bg-color-container);
   }
 
   .t-table__pagination {
-    background-color: var(--td-bg-container);
+    background-color: var(--td-bg-color-container);
   }
 
   .t-table__pagination-wrap {
@@ -447,6 +447,9 @@
       }
       .t-pagination__number {
         border-color: transparent;
+      }
+      .t-is-current {
+        background-color: var(--td-bg-color-container-active);
       }
     }
   }
