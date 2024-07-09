@@ -286,11 +286,10 @@ eventBus.on(async () => {
 .drive-container {
   height: 100%;
   display: flex;
-  position: relative;
   flex-direction: row;
-  min-height: 0;
+  justify-content: space-between;
+  position: relative;
   overflow: hidden;
-  flex: 1 1;
 
   .membership-wrapper {
     display: flex;
@@ -316,9 +315,11 @@ eventBus.on(async () => {
   }
 
   .content {
-    flex: 1 1;
+    width: calc(100% - 170px);
     position: relative;
-    overflow: hidden;
+    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    background-color: var(--td-bg-color-container);
+    border-radius: var(--td-radius-default);
 
     .header {
       height: 40px;

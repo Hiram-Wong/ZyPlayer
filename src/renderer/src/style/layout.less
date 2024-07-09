@@ -57,8 +57,8 @@
   }
   .t-menu__item {
     position: relative;
-    width: 60px;
-    height: 61px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--td-radius-large);
     padding: 0;
     margin: 0 0 var(--td-comp-margin-xs) 0;
@@ -89,12 +89,26 @@
   margin-left: 0;
 }
 
+.t-default-menu__inner {
+  display: block;
+}
+
 .t-default-menu__inner .t-menu,
 .t-menu__operations:not(:empty) {
   padding: 0 var(--td-comp-paddingLR-s);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: var(--td-bg-color-container);
+  // box-shadow: var(--td-shadow-3);
+  position: relative;
+  top: 50%;
+  right: -9px;
+  transform: translateY(-50%);
+  width: 60px;
 }
 
 .t-default-menu.t-menu--dark {
@@ -112,8 +126,12 @@
 .@{starter-prefix} {
   // 布局元素调整
   &-aside,
-  &-header {
-    background: var(--td-bg-aside);
+  &-header,
+  &-content {
+    background: transparent;
+    // background: var(--td-bg-color-container);
+    // background: var(--td-bg-container);
+    // background: var(--td-bg-aside);
   }
 
   &-wrapper {
@@ -137,8 +155,8 @@
     position: relative;
     height: calc(100vh - 60px);
     overflow: hidden;
-    border-radius: var(--td-radius-large);
-    background: var(--td-bg-container);
+    border-radius: var(--td-radius-default);
+    // background: var(--td-bg-container);
     margin: 0 var(--td-comp-margin-xs) var(--td-comp-margin-xs) 0;
   }
 
@@ -329,7 +347,7 @@
 
 .t-tabs__header {
   .t-tabs__nav-container.t-is-top {
-    background-color: var(--td-bg-container);
+    background-color: transparent;
     &:after {
       background-color: transparent;
     }

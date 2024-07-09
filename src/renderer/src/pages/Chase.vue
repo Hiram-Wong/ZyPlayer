@@ -52,6 +52,8 @@ const checkUpdaterEvent = () => {
 .view-container {
   width: 100%;
   height: 100%;
+  background-color: var(--td-bg-color-container);
+  border-radius: var(--td-radius-default);
 
   .header {
     height: 40px;

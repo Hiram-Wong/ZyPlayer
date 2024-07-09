@@ -151,15 +151,17 @@ const searchEvent = () => {
 
 <style lang="less" scoped>
 .common-nav {
-  width: 170px;
+  width: 161px;
+  background-color: var(--td-bg-color-container);
+  border-radius: var(--td-radius-default);
 
   .nav-sub {
-    border-right: 1px solid rgba(132, 133, 141, .2);
+    // border-right: 1px solid rgba(132, 133, 141, .2);
     height: 100%;
     padding: var(--td-comp-paddingTB-xs) 0;
 
     .nav-sub-tab-header {
-      margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-s) var(--td-comp-margin-m);
+      margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-s) var(--td-comp-margin-s);
 
       .header {
         display: flex;
@@ -168,7 +170,7 @@ const searchEvent = () => {
         transition: all 0.25s ease-in-out;
 
         .title {
-          padding-left: var(--td-comp-paddingTB-s);
+          // padding-left: var(--td-comp-paddingTB-s);
           font-weight: 700;
           font-size: 1.5em;
         }
@@ -207,7 +209,7 @@ const searchEvent = () => {
       .nav-sub-tab-top {
         overflow-y: scroll;
         width: 100%;
-        padding-left: var(--td-comp-paddingTB-s);
+        // padding-left: var(--td-comp-paddingTB-s);
 
         .nav-menu {
           display: flex;

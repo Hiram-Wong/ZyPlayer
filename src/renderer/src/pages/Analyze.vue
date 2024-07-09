@@ -274,8 +274,9 @@ const changeDefaultEvent = async (id) => {
 .analyze {
   height: 100%;
   display: flex;
-  position: relative;
   flex-direction: row;
+  justify-content: space-between;
+  position: relative;
   overflow: hidden;
 
   .membership-wrapper {
@@ -308,10 +309,11 @@ const changeDefaultEvent = async (id) => {
   }
 
   .content {
-    flex: 1;
+    width: calc(100% - 170px);
     position: relative;
-    overflow: hidden;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    background-color: var(--td-bg-color-container);
+    border-radius: var(--td-radius-default);
 
     .container {
       width: 100%;

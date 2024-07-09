@@ -433,9 +433,9 @@ hotReloadeventBus.on(() => {
   }
 
   :deep(.t-input) {
+    background-color: var(--td-bg-color-container);
+    border-radius: var(--td-radius-default);
     border-color: transparent;
-    border-radius: 50px;
-    background: var(--td-bg-content-input-1);
     box-shadow: none;
 
     &.t-is-focused .t-input__prefix>.t-icon {

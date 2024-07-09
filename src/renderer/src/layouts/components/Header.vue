@@ -8,7 +8,7 @@
     </div>
     <div class="right no-drag">
       <div class="system-functions">
-        <sponsor class="system-function" />
+        <sponsor class="system-function" style="margin: 0" />
         <just-look class="system-function" />
         <language class="system-function" />
         <system-skin class="system-function" />
@@ -74,6 +74,8 @@ const handleMouseDown = (event) => {
       display: flex;
       align-items: center;
       justify-content: space-around;
+      background: var(--td-bg-color-container);
+      border-radius: var(--td-radius-default);
 
       .system-function {
         margin-left: var(--td-comp-margin-xs);

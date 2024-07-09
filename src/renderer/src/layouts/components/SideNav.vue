@@ -1,7 +1,8 @@
 <template>
-  <div :class="[`${prefix}-sidebar-layout`, platform === 'darwin' && !macFull ? 'mac_unmax_style' : '']">
-    <t-menu :value="active" :class="`${prefix}-block-column`">
+  <div :class="[`${prefix}-sidebar-layout`]">
+    <t-menu collapsed :value="active" :class="`${prefix}-block-column`">
       <img class="logo" src="@/assets/icon.png" alt="logo" />
+      <div class="myAgentLine"></div>
       <template v-for="item in list" :key="item.path">
         <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)[0])">
           <template #icon>
@@ -43,7 +44,6 @@ const props = defineProps({
 });
 
 const route = useRoute();
-const { platform } = window.electron.process;
 const { locale } = useLocale();
 const macFull = ref(false);
 
@@ -130,8 +130,17 @@ const openHref = (url: string) => {
 }
 
 .logo {
-  width: var(--td-size-12);
-  height: var(--td-size-12);
-  margin: var(--td-comp-paddingTB-s) 0 var(--td-comp-paddingTB-l) 0;
+  width: var(--td-size-10);
+  height: var(--td-size-10);
+  margin: var(--td-comp-paddingTB-l) 0 var(--td-comp-paddingTB-m) 0;
+}
+
+.myAgentLine {
+  width: 24px;
+  height: 1px;
+  background-color: var(--td-bg-content-active-2);
+  border-radius: 12px;
+  margin-bottom: var(--td-comp-paddingTB-xs);
+  cursor: pointer;
 }
 </style>

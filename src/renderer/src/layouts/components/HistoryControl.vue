@@ -45,10 +45,10 @@ const gotoRefresh = () => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: var(--td-bg-content-input-1);
+  background-color: var(--td-bg-color-container);
+  border-radius: var(--td-radius-default);
   height: 100%;
   width: 100px;
-  border-radius: 50px;
 
   .nav-item {
     color: rgba(132, 133, 141, 0.8);

@@ -108,8 +108,9 @@ const changeClassEvent = (item: string) => {
 .setting-container {
   height: 100%;
   display: flex;
-  position: relative;
   flex-direction: row;
+  justify-content: space-between;
+  position: relative;
   overflow: hidden;
   flex: 1 1;
 
@@ -223,10 +224,11 @@ const changeClassEvent = (item: string) => {
   }
 
   .content {
-    flex: 1 1;
+    width: calc(100% - 170px);
     position: relative;
-    overflow: hidden;
-    height: 100%;
+    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    background-color: var(--td-bg-color-container);
+    border-radius: var(--td-radius-default);
 
     .container {
       height: 100%;

@@ -709,8 +709,9 @@ filmReloadeventBus.on(async () => {
 .film {
   height: 100%;
   display: flex;
-  position: relative;
   flex-direction: row;
+  justify-content: space-between;
+  position: relative;
   overflow: hidden;
 
   .membership-wrapper {
@@ -740,6 +741,8 @@ filmReloadeventBus.on(async () => {
     width: calc(100% - 170px);
     position: relative;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    background-color: var(--td-bg-color-container);
+    border-radius: var(--td-radius-default);
 
     .header {
       display: flex;
