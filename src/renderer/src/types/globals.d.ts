@@ -24,10 +24,4 @@ declare global {
   interface Window {
     removeLoading: () => void;
   }
-  namespace JSX {
-    interface IntrinsicElements {
-      // Define an interface for the web component props
-      'title-bar': Partial<HTMLTitleBarElementAttributes>;
-    }
-  }
 }
