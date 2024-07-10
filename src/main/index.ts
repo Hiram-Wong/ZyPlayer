@@ -1,6 +1,7 @@
 import 'v8-compile-cache'; // 需第一个加载
 import { initialize as renoteInitialize } from '@electron/remote/main';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
+import { registerTitleBarListener } from '@electron-uikit/titlebar';
 
 import { app, BrowserWindow, globalShortcut, nativeTheme, session } from 'electron';
 import fixPath from 'fix-path';
@@ -16,7 +17,7 @@ import createTray from './core/tray';
 import protocolResgin from './core/protocolResgin';
 import initServer from './core/server';
 import { createBossShortcut } from './core/shortcut';
-import { createLoad, createMain } from './core/winManger';
+import { createMain } from './core/winManger';
 import { parseCustomUrl } from './utils/tool';
 
 /**
@@ -56,6 +57,8 @@ let reqIdRedirect = {};
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  registerTitleBarListener();
+
   const defaultSession = session.defaultSession;
 
   defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {

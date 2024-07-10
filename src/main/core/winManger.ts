@@ -1,5 +1,6 @@
 import { is } from '@electron-toolkit/utils';
 import { enable as renoteEnable } from '@electron/remote/main';
+import { attachTitleBarToWindow } from '@electron-uikit/titlebar';
 import { app, BrowserWindow, nativeTheme, shell } from 'electron';
 import { register as localshortcutRegister, unregisterAll as localshortcutUnregisterAll } from 'electron-localshortcut';
 import { join } from 'path';
@@ -26,6 +27,7 @@ const createWin = (name, options) => {
     }, 0);
   } else {
     win = new BrowserWindow(args);
+    attachTitleBarToWindow(win);
     winPool[name] = win.id;
   }
 
@@ -68,6 +70,7 @@ const createMain = () => {
     minWidth: 1000,
     minHeight: 640,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
+    // titleBarStyle: 'hidden',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
@@ -156,6 +159,7 @@ const createPlay = () => {
     minWidth: 480,
     minHeight: 280,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
+    // titleBarStyle: 'hidden',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
@@ -240,6 +244,7 @@ const createLoad = () => {
     minWidth: 1000,
     minHeight: 640,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
+    // titleBarStyle: 'hidden',
     titleBarStyle: 'hiddenInset',
     show: false,
     frame: false,
