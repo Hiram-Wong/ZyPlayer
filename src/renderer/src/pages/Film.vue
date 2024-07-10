@@ -52,6 +52,7 @@
                 <p class="card-footer-desc text-hide">
                   <span v-if="item.vod_blurb">{{ item.vod_blurb }}</span>
                   <span v-else-if="item.vod_content">{{ item.vod_content }}</span>
+                  <span v-else-if="item.vod_remarks">{{ item.vod_remarks }}</span>
                   <span v-else>{{ $t('pages.film.noDesc') }}</span>
                 </p>
               </div>

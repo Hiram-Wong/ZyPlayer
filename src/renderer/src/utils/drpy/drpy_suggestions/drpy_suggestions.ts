@@ -556,6 +556,21 @@ const Function = [
     `.trim(),
   },
   {
+    label: 'batchFetch',
+    insertText: 'batchFetch($1)',
+    detail: '批量请求',
+    documentation: `
+/**
+ * 发起批量请求|一般批量搜索，批量二级请求列表数据
+ * 示例：var data = batchFetch([{url:'http://www.a.cn', options:{headers:{},body:'a=1&b=2',method:'POST'}}, {url:'http://www.b.cn'}]);setError(data[0] + '=====' + data[1]);
+ * 说明：参数为一个数组，数组每一项是一个对象，每个对象包含url和options属性，分别对应fetch方法的第一二个参数，返回一个字符串数组对象，注意是对象，顺序和参数顺序严格一致
+ * 注意：数组参数长度超过16时，会自动分批，同步循环执行，比如20个参数，那么会先16个并发请求，请求完再发起4个并发请求，最后再返回结果
+ * @param list 待批量的链接和options的object列表如 [{url:'',options:{}]
+ * @returns [html,html,null,html]
+ */
+    `.trim(),
+  },
+  {
     label: 'dealJson',
     insertText: 'dealJson($1)',
     detail: '处理返回的json数据',
