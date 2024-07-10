@@ -1,6 +1,6 @@
 <template>
-  <div class="common-nav">
-    <div class="nav-sub">
+  <div :class="['common-nav', isVisible.show ? 'show' : 'hidden']">
+    <div class="nav-sub" :style="{ display: isVisible.show ? 'block' : 'none' }">
       <div class="nav-sub-tab nav-sub-tab-header">
         <div class="header" v-if="!isVisible.search">
           <p class="title">{{ title }}</p>
@@ -36,6 +36,12 @@
         </div>
       </div>
     </div>
+
+    <div class="nav-sub-tab-line" @click="isVisible.show = !isVisible.show">
+      <div class="nav-sub-tab-line-0"></div>
+      <div class="nav-sub-tab-line-1"></div>
+    </div>
+
     <context-menu v-model:show="isVisible.contentMenu" :options="optionsComponent" v-if="contextMenuItems">
       <template v-for="(menuItem, index) in contextMenuItems" :key="index">
         <context-menu-item v-if="menuItem.type === 'item'" :label="menuItem.label" @click="menuItem.handler" />
@@ -91,7 +97,8 @@ const headerOutsideRef = ref(null);
 const searchText = ref('');
 const isVisible = reactive({
   contentMenu: false,
-  search: false
+  search: false,
+  show: true
 });
 const mode = computed(() => {
   return storeSetting.displayMode;
@@ -155,15 +162,17 @@ const searchEvent = () => {
 .common-nav {
   height: 100%;
   width: fit-content;
+  position: relative;
+  padding-right: var(--td-comp-margin-s);
 
   .nav-sub {
     height: 100%;
     min-width: 162px;
     // width: fit-content;
     padding: var(--td-comp-paddingTB-xs) 0;
-    margin-right: var(--td-comp-margin-s);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
+    transition: all .3s ease;
 
     .nav-sub-tab-header {
       margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-s) var(--td-comp-margin-s);
@@ -272,6 +281,130 @@ const searchEvent = () => {
         align-items: center;
         flex-direction: column;
         padding-top: var(--td-comp-paddingTB-xs);
+      }
+    }
+  }
+}
+
+
+
+.show {
+  .nav-sub-tab-line {
+    width: 12px;
+    height: 26px;
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: all .2s ease;
+
+    .nav-sub-tab-line-0 {
+      width: 4px;
+      height: 13px;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      background-color: var(--td-bg-color-component);
+      left: 4px;
+      top: 0;
+      position: absolute;
+      transition: all .2s ease;
+      transform-origin: 50% 0;
+    }
+
+    .nav-sub-tab-line-1 {
+      width: 4px;
+      height: 13px;
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+      background-color: var(--td-bg-color-component);
+      left: 4px;
+      bottom: 0;
+      position: absolute;
+      transition: all .2s ease;
+      transform-origin: 50% 100%;
+    }
+
+    &:hover {
+      .nav-sub-tab-line-0 {
+        background-color: var(--td-bg-content-active-2);
+        transform-origin: 50% 0%;
+        transform: rotate(5deg) translateY(1px);
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border-bottom-left-radius: 10px;
+        height: 16px;
+      }
+
+      .nav-sub-tab-line-1 {
+        background-color: var(--td-bg-content-active-2);
+        transform-origin: 50% 100%;
+        transform: rotate(-5deg) translateY(-1px);
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border-top-left-radius: 10px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.hidden {
+  .nav-sub-tab-line {
+    width: 12px;
+    height: 26px;
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    transition: all .2s ease;
+
+    .nav-sub-tab-line-0 {
+      width: 4px;
+      height: 13px;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      background-color: var(--td-bg-color-component);
+      left: 4px;
+      top: 0;
+      position: absolute;
+      transition: all .2s ease;
+      transform-origin: 50% 0;
+    }
+
+    .nav-sub-tab-line-1 {
+      width: 4px;
+      height: 13px;
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+      background-color: var(--td-bg-color-component);
+      left: 4px;
+      bottom: 0;
+      position: absolute;
+      transition: all .2s ease;
+      transform-origin: 50% 100%;
+    }
+
+    &:hover {
+      .nav-sub-tab-line-0 {
+        background-color: var(--td-bg-content-active-2);
+        transform-origin: 50% 0%;
+        transform: rotate(-5deg) translateY(1px);
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 10px;
+        height: 16px;
+      }
+
+      .nav-sub-tab-line-1 {
+        background-color: var(--td-bg-content-active-2);
+        transform-origin: 50% 100%;
+        transform: rotate(5deg) translateY(-1px);
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        border-top-right-radius: 10px;
+        height: 16px;
       }
     }
   }
