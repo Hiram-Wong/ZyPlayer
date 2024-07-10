@@ -315,11 +315,13 @@ eventBus.on(async () => {
   }
 
   .content {
-    width: calc(100% - 170px);
+    // width: calc(100% - 170px);
+    min-width: 750px;
     position: relative;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
+    flex: 1;
 
     .header {
       height: 40px;

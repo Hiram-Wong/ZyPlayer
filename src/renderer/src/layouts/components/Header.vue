@@ -84,6 +84,25 @@ const handleMouseDown = (event) => {
         display: flex;
         align-items: center;
         justify-content: center;
+
+        :deep(.t-button__text) {
+          svg {
+            color: rgba(132, 133, 141, 0.8);
+          }
+        }
+
+        :deep(.t-button--variant-text) {
+          &:hover {
+            border-color: transparent;
+            background-color: transparent;
+
+            .t-button__text {
+              svg {
+                color: var(--td-primary-color);
+              }
+            }
+          }
+        }
       }
     }
 

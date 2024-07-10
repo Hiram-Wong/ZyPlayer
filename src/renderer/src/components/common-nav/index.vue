@@ -23,9 +23,11 @@
             <li class="nav-menu-item" :class="`${activeData}` === `${item.id}` ? 'is-active' : ''"
               v-for="item in listData" :key="item.id" :value="item.id" @click="handleItemClick(item.id)"
               @contextmenu="conButtonClick(item, $event)">
-              <div class="name-wrapper">
-                <span>{{ item.name }}</span>
-              </div>
+              <t-tooltip :content="item.name">
+                <div class="name-wrapper">
+                  <span>{{ item.name }}</span>
+                </div>
+              </t-tooltip>
             </li>
           </ul>
         </div>
@@ -151,14 +153,17 @@ const searchEvent = () => {
 
 <style lang="less" scoped>
 .common-nav {
-  width: 161px;
-  background-color: var(--td-bg-color-container);
-  border-radius: var(--td-radius-default);
+  height: 100%;
+  width: fit-content;
 
   .nav-sub {
-    // border-right: 1px solid rgba(132, 133, 141, .2);
     height: 100%;
+    min-width: 162px;
+    // width: fit-content;
     padding: var(--td-comp-paddingTB-xs) 0;
+    margin-right: var(--td-comp-margin-s);
+    background-color: var(--td-bg-color-container);
+    border-radius: var(--td-radius-default);
 
     .nav-sub-tab-header {
       margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-s) var(--td-comp-margin-s);
@@ -207,7 +212,8 @@ const searchEvent = () => {
       height: calc(100% - var(--td-comp-margin-s) - var(--td-comp-margin-m) - 32px);
 
       .nav-sub-tab-top {
-        overflow-y: scroll;
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
         // padding-left: var(--td-comp-paddingTB-s);
 
@@ -222,15 +228,9 @@ const searchEvent = () => {
           .nav-menu-item {
             width: 148px;
             height: 40px;
-            padding-left: var(--td-comp-paddingTB-s);
-            line-height: 14px;
-            display: flex;
-            align-items: center;
-            color: var(--td-text-color-primary);
-            cursor: pointer;
             transition: background-color .3s ease;
             border-radius: var(--td-radius-medium);
-            position: relative;
+
 
             &:not(:first-child) {
               margin-top: var(--td-comp-margin-xs);
@@ -238,6 +238,25 @@ const searchEvent = () => {
 
             &:hover {
               background-color: var(--td-bg-content-hover-2);
+            }
+
+            .name-wrapper {
+              height: 100%;
+              width: 100%;
+              padding-left: var(--td-comp-paddingTB-s);
+              line-height: 14px;
+              display: flex;
+              align-items: center;
+              color: var(--td-text-color-primary);
+              cursor: pointer;
+              position: relative;
+              overflow: hidden;
+
+              span {
+                display: inline-block;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              }
             }
           }
 

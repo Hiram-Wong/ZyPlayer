@@ -28,7 +28,7 @@
           </div>
         </div>
         <div class="content-wrapper" id="back-top">
-          <t-row :gutter="[16, 16]">
+          <t-row :gutter="[16, 16]" style="margin: 0;">
             <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in filmData.list" :key="item.vod_id" class="card"
               @click="playEvent(item)">
               <div class="card-main">
@@ -739,11 +739,15 @@ filmReloadeventBus.on(async () => {
   }
 
   .content {
-    width: calc(100% - 170px);
+    // width: calc(100% - 170px);
+    min-width: 750px;
     position: relative;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 
     .header {
       display: flex;

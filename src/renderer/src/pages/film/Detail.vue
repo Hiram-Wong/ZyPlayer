@@ -506,9 +506,9 @@ const getDetailInfo = async (): Promise<void> => {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(0, 0, 0, 0.15);
+        color: var(--td-text-color-primary);
+        background-color: var(--td-bg-color-component);
         border-radius: 36px;
-        filter: blur(0);
         width: 84px;
         height: 42px;
         z-index: 14;

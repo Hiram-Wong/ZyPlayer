@@ -17,7 +17,8 @@
                 @click="importFileEvent" />
               <t-option key="export" :label="$t('pages.setting.editSource.source.export')" value="export"
                 @click="exportFileEvent" />
-              <t-option key="cache" :label="$t('pages.setting.editSource.source.cache')" value="cache" @click="cacheEvent" />
+              <t-option key="cache" :label="$t('pages.setting.editSource.source.cache')" value="cache"
+                @click="cacheEvent" />
             </t-select>
           </div>
           <div class="item item-pad-select">
@@ -26,7 +27,8 @@
               <t-option key="bug" :label="$t('pages.setting.editSource.source.bug')" value="bug" @click="debugEvent" />
               <t-option key="delete" :label="$t('pages.setting.editSource.source.delete')" value="expdeleteodeletert"
                 @click="deleteEvent" />
-              <t-option key="file" :label="$t('pages.setting.editSource.source.file')" value="file" @click="serverEvent" />
+              <t-option key="file" :label="$t('pages.setting.editSource.source.file')" value="file"
+                @click="serverEvent" />
             </t-select>
           </div>
           <div class="item item-pad-select">
@@ -223,8 +225,8 @@
             <t-input v-model="form.category.f" :label="$t('pages.setting.editSource.source.rule.f')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-40%" />
             <t-input-number theme="column" :min="0" v-model="form.category.pg"
-              :label="$t('pages.setting.editSource.source.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33-30%" />
+              :label="$t('pages.setting.editSource.source.rule.pg')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-30%" />
             <t-button class="button w-btn" theme="default" @click="actionList()">{{
               $t('pages.setting.editSource.source.action.list') }}</t-button>
           </div>
@@ -238,8 +240,8 @@
             <t-input v-model="form.search.wd" :label="$t('pages.setting.editSource.source.rule.wd')"
               :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-70%" />
             <t-input-number theme="column" :min="0" v-model="form.search.pg"
-              :label="$t('pages.setting.editSource.source.rule.pg')" :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-30%" />
+              :label="$t('pages.setting.editSource.source.rule.pg')"
+              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-30%" />
             <t-button class="button w-btn" theme="default" @click="actionSearch()">{{
               $t('pages.setting.editSource.source.action.search') }}</t-button>
           </div>
@@ -269,7 +271,8 @@
             <div class="nav-left">
               <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
                 <t-radio-button value="debug">{{ $t('pages.setting.editSource.source.select.debug') }}</t-radio-button>
-                <t-radio-button value="source">{{ $t('pages.setting.editSource.source.select.source') }}</t-radio-button>
+                <t-radio-button value="source">{{ $t('pages.setting.editSource.source.select.source')
+                  }}</t-radio-button>
                 <t-radio-button value="rule">{{ $t('pages.setting.editSource.source.select.rule') }}</t-radio-button>
                 <t-radio-button value="log">{{ $t('pages.setting.editSource.source.select.log') }}</t-radio-button>
               </t-radio-group>
@@ -282,13 +285,15 @@
               </t-radio-group>
               <t-radio-group variant="default-filled" size="small" v-model="form.clickType.proxy" @change="proxyEvent()"
                 v-if='form.nav === "debug" && form.action === "proxy"'>
-                <t-radio-button value="upload">{{ $t('pages.setting.editSource.source.select.upload') }}</t-radio-button>
+                <t-radio-button value="upload">{{ $t('pages.setting.editSource.source.select.upload')
+                  }}</t-radio-button>
                 <t-radio-button value="play">{{ $t('pages.setting.editSource.source.select.play') }}</t-radio-button>
                 <t-radio-button value="copy">{{ $t('pages.setting.editSource.source.select.copy') }}</t-radio-button>
               </t-radio-group>
               <t-radio-group variant="default-filled" size="small" v-model="form.clickType.source"
                 @change="sourceEvent()" v-if="form.nav === 'source'">
-                <t-radio-button value="format">{{ $t('pages.setting.editSource.source.select.format') }}</t-radio-button>
+                <t-radio-button value="format">{{ $t('pages.setting.editSource.source.select.format')
+                  }}</t-radio-button>
                 <t-radio-button value="reset">{{ $t('pages.setting.editSource.source.select.reset') }}</t-radio-button>
               </t-radio-group>
             </div>

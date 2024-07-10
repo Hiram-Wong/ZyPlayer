@@ -10,7 +10,7 @@
       </header>
       <div class="container">
         <div class="content-wrapper" id="back-top">
-          <t-row :gutter="[16, 16]">
+          <t-row :gutter="[16, 16]" style="margin: 0;">
             <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in channelData.list" :key="item.id" class="card"
               @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
               <div class="card-main">
@@ -128,7 +128,7 @@ const active = ref({
   class: '全部'
 })
 
-const channelData = ref({
+const channelData = ref<any>({
   list: [],
   total: 0,
 })
@@ -149,7 +149,7 @@ const optionsComponent = ref({
   theme: mode.value === 'light' ? 'default' : 'mac dark',
 });
 
-const channelItem = ref(null);
+const channelItem = ref<any>(null);
 
 const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
@@ -192,7 +192,7 @@ const getChannel = async () => {
 
   if (skipIpv6) res.data = await checkChannelListIpv6(res.data);
   const restultLength = res.data.length;
-  channelData.value.list = _.unionWith(list, res.data, _.isEqual);
+  channelData.value.list = _.unionWith(list, res.data, _.isEqual) as any;
 
   if (status) checkChannelDelay(pageIndex, pageSize);
   if (thumbnail) generateThumbnail(pageIndex, pageSize);
@@ -255,7 +255,7 @@ const changeClassEvent = async (id) => {
 };
 
 // 播放
-const playEvent = (item: { name: any }) => {
+const playEvent = (item) => {
   isVisible.loading = true;
 
   try {
@@ -382,7 +382,7 @@ const changeDefaultIptvEvent = async (id: string) => {
     active.value.class = '全部';
     active.value.nav = id;
 
-    const { url, type } = _.find(iptvConfig.value.data, { id });
+    const { url, type } = _.find(iptvConfig.value.data, { id }) as any;
     await clearChannel();
     const docs = await parseChannel(type, url);
     await addChannel(docs);
@@ -494,11 +494,15 @@ const generateLogo = (item) => {
   }
 
   .content {
-    width: calc(100% - 170px);
+    // width: calc(100% - 170px);
+    min-width: 750px;
     position: relative;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 
     .header {
       display: flex;

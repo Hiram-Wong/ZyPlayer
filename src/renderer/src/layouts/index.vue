@@ -1,7 +1,7 @@
 <template>
   <div class="layout">
     <t-layout>
-      <t-aside key="side" width="78px" :class="`${prefix}-aside`">
+      <t-aside key="side" :class="`${prefix}-aside`">
         <layout-side-nav :nav-data="sideMenu" />
       </t-aside>
       <t-layout>
@@ -39,7 +39,7 @@ const sideMenu = computed(() => {
 </script>
 
 <style lang="less" scoped>
-.t-layout {
-  overflow-x: hidden;
-}
+// .t-layout {
+//   overflow-x: hidden;
+// }
 </style>
