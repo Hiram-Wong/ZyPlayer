@@ -2,7 +2,7 @@
   <div class="player-show">
     <div v-if="playerStutus.status" class="box-flex">
       <div class="mini-box" @click="focusPlayerWindowEvent">
-        <div class="mini-box-video" @click.stop="destroyPlayerWindowEvent">
+        <div class="mini-box-video">
           <video-library-icon size="large" class="video" />
         </div>
         <div class="mini-box-title-warp">
@@ -53,7 +53,7 @@ const destroyPlayerWindowEvent = () => {
     height: 100%;
 
     .mini-box {
-      border-radius: var(--td-radius-round);
+      border-radius: var(--td-radius-default);
       background-color: var(--td-bg-content-input-1);
       height: 100%;
       width: 140px;
