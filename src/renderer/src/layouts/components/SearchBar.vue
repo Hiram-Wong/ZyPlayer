@@ -1,5 +1,6 @@
 <template>
-  <div class="search-bar">
+  <div class="search-bar"
+    v-if="route.name === 'FilmIndex' || route.name === 'IptvIndex' || route.name === 'AnalyzeIndex'">
     <t-popup placement="bottom-right" :visible="isVisible.popup" :on-visible-change="popupVisibleEvent">
       <t-input :placeholder="$t('pages.search.searchPlaceholder')" class="search-input" clearable v-model="searchValue"
         :on-enter="searchEvent" :on-click="focusEvent" @clear="searchEvent(searchValue)">
