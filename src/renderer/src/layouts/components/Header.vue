@@ -1,5 +1,5 @@
 <template>
-  <div class="titlebar" @mousedown="handleMouseDown">
+  <div class="titlebar" @mousedown.self="handleMouseDown">
     <div class="left no-drag">
       <history-control />
       <search-bar class="mg-left" />
@@ -41,6 +41,7 @@ const handleMouseDown = (event) => {
 
 <style lang="less" scoped>
 .titlebar {
+  -webkit-app-region: drag;
   display: flex;
   justify-content: space-between;
   height: 32px;
