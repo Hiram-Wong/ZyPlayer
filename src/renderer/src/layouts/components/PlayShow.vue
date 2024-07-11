@@ -54,7 +54,7 @@ const destroyPlayerWindowEvent = () => {
 
     .mini-box {
       border-radius: var(--td-radius-default);
-      background-color: var(--td-bg-content-input-1);
+      background-color: var(--td-bg-color-container);
       height: 100%;
       width: 140px;
       display: flex;
