@@ -2,8 +2,7 @@
   <div class="titlebar" @mousedown="handleMouseDown">
     <div class="left no-drag">
       <history-control />
-      <search-bar class="mg-left"
-        v-if="route.name === 'FilmIndex' || route.name === 'IptvIndex' || route.name === 'AnalyzeIndex'" />
+      <search-bar class="mg-left" />
       <player-show class="mg-left" />
     </div>
     <div class="right no-drag">
@@ -14,26 +13,24 @@
         <system-skin class="system-function" />
         <system-config class="system-function" />
       </div>
-      <system-control v-if="platform !== 'darwin'" />
+      <title-bar overlay class="system-controls mg-left" v-if="platform !== 'darwin'"></title-bar>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import '@electron-uikit/titlebar/renderer';
 
 import HistoryControl from './HistoryControl.vue';
 import SearchBar from './SearchBar.vue';
 import PlayerShow from './PlayShow.vue';
 import SystemConfig from './SystemConfig.vue';
-import SystemControl from './SystemControl.vue';
 import SystemSkin from './SystemSkin.vue';
 import Sponsor from './Sponsor.vue';
 import Language from './Language.vue';
-import JustLook from './JustLook.vue'
+import JustLook from './JustLook.vue';
 
 const { platform } = window.electron.process;
-const route = useRoute();
 
 const handleMouseDown = (event) => {
   if (event.detail === 2) {
@@ -44,7 +41,6 @@ const handleMouseDown = (event) => {
 
 <style lang="less" scoped>
 .titlebar {
-  -webkit-app-region: drag;
   display: flex;
   justify-content: space-between;
   height: 32px;
@@ -54,13 +50,13 @@ const handleMouseDown = (event) => {
     -webkit-app-region: no-drag;
   }
 
+  .mg-left {
+    margin-left: 20px;
+  }
+
   .left {
     height: 100%;
     display: flex;
-
-    .mg-left {
-      margin-left: 20px;
-    }
   }
 
   .center {
@@ -69,6 +65,8 @@ const handleMouseDown = (event) => {
 
   .right {
     display: flex;
+    flex-direction: row;
+    align-items: center;
 
     .system-functions {
       display: flex;
@@ -107,7 +105,19 @@ const handleMouseDown = (event) => {
     }
 
     .system-controls {
-      display: flex;
+      width: 102px;
+      height: 100%;
+      overflow: hidden;
+      background: var(--td-bg-color-container);
+      border-radius: var(--td-radius-default);
+      --tb-control-height: 32px;
+      --tb-control-hover-color: var(--td-bg-color-container-hover);
+      --tb-control-symbol-color: rgba(132, 133, 141, 0.8);
+      --tb-control-close-symbol-color: rgba(132, 133, 141, 0.8);
+
+      :deep(.titlebar__window-controls) {
+        position: relative !important;
+      }
     }
   }
 }
