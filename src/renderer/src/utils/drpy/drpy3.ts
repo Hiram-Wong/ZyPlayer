@@ -24,6 +24,7 @@ import pako from 'pako';
 import JSEncrypt from 'wxmp-rsa';
 import NODERSA from './utils/node-rsa';
 import cheerio from './utils/cheerio.min';
+import './utils/jinja';
 import { getMubans } from './template';
 import gbkTool from './utils/gbk';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve, batchFetch } from './drpyInject';
@@ -55,6 +56,10 @@ const clearConsoleHistory = () => {
 //   };
 // })();
 
+cheerio.jinja2 = function (template, obj) {
+  // @ts-ignore
+  return jinja.render(template, obj);
+};
 const init_test = () => {
   const test_data = {
     version: VERSION,
@@ -279,7 +284,7 @@ const pre = () => {
 let rule = {};
 // @ts-ignore
 let vercode = typeof pdfl === 'function' ? 'drpy3.1' : 'drpy3';
-const VERSION = `${vercode} 3.9.50beta33 20240709`;
+const VERSION = `${vercode} 3.9.51beta1 20240711`;
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
