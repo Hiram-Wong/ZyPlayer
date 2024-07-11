@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="nav-sub-tab nav-sub-tab-content">
-        <div class="nav-sub-tab-top">
+        <div class="nav-sub-tab-top" ref="contentRef">
           <ul class="nav-menu">
             <li class="nav-menu-item" :class="`${activeData}` === `${item.id}` ? 'is-active' : ''"
               v-for="item in listData" :key="item.id" :value="item.id" @click="handleItemClick(item.id)"
@@ -62,8 +62,9 @@ import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 
 import { ContextMenu, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup } from '@imengyu/vue3-context-menu';
 import { onClickOutside } from '@vueuse/core';
-import { computed, reactive, ref, watch } from 'vue';
+import Scrollbar from 'smooth-scrollbar';
 import { DataSearchIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { onMounted, computed, reactive, ref, watch } from 'vue';
 
 import { useSettingStore } from '@/store';
 const storeSetting = useSettingStore();
@@ -93,6 +94,7 @@ const props = withDefaults(defineProps<{
 const activeData = ref(props.active);
 const listData = ref(props.list);
 const contextMenuItems = ref(props.contextMenuItems);
+const contentRef = ref(null);
 const headerOutsideRef = ref(null);
 const searchText = ref('');
 const isVisible = reactive({
@@ -109,6 +111,10 @@ const optionsComponent = ref({
   x: 500,
   y: 200,
   theme: mode.value === 'light' ? 'default' : 'mac dark',
+});
+
+onMounted(() => {
+  Scrollbar.init(contentRef.value!);
 });
 
 watch(
@@ -221,8 +227,8 @@ const searchEvent = () => {
       height: calc(100% - var(--td-comp-margin-s) - var(--td-comp-margin-m) - 32px);
 
       .nav-sub-tab-top {
-        overflow-y: auto;
-        overflow-x: hidden;
+        // overflow-y: auto;
+        // overflow-x: hidden;
         width: 100%;
         // padding-left: var(--td-comp-paddingTB-s);
 
@@ -252,19 +258,18 @@ const searchEvent = () => {
             .name-wrapper {
               height: 100%;
               width: 100%;
-              padding-left: var(--td-comp-paddingTB-s);
+              padding: 0 var(--td-comp-paddingTB-s);
               line-height: 14px;
               display: flex;
               align-items: center;
               color: var(--td-text-color-primary);
               cursor: pointer;
-              position: relative;
-              overflow: hidden;
 
               span {
+                overflow: hidden;
                 display: inline-block;
                 white-space: nowrap;
-                text-overflow: ellipsis;
+                // text-overflow: ellipsis;
               }
             }
           }

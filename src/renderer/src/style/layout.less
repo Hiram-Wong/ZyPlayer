@@ -493,16 +493,16 @@
   border-color: transparent;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  background: transparent;
+::-webkit-scrollbar, .scrollbar-track {
+  width: 8px !important;
+  background: transparent !important;
 }
 
-::-webkit-scrollbar-thumb {
-  border-radius: 6px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-  background-color: var(--td-scrollbar-color);
+::-webkit-scrollbar-thumb, .scrollbar-thumb {
+  border-radius: 6px !important;
+  border: 2px solid transparent !important;
+  background-clip: content-box !important;
+  background-color: var(--td-scrollbar-color) !important;
 }
 
 :root[theme-mode='dark'] {

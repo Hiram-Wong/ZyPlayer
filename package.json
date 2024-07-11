@@ -125,6 +125,7 @@
     "qrcode.vue": "^3.4.1",
     "qs": "^6.12.2",
     "shaka-player": "^4.10.2",
+    "smooth-scrollbar": "^8.8.4",
     "stylelint": "^16.6.1",
     "stylelint-config-standard": "^36.0.1",
     "stylelint-order": "^6.0.4",
