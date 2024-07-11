@@ -20,16 +20,16 @@
  */
 
 import CryptoJS from 'crypto-js';
+import JSON5 from 'json5';
 import pako from 'pako';
 import JSEncrypt from 'wxmp-rsa';
-import NODERSA from './utils/node-rsa';
-import cheerio from './utils/cheerio.min';
-import './utils/jinja';
-// import './utils/json5';
-import JSON5 from 'json5';
-import { getMubans } from './template';
-import gbkTool from './utils/gbk';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve, batchFetch } from './drpyInject';
+import { getMubans } from './template';
+import cheerio from './utils/cheerio.min';
+import gbkTool from './utils/gbk';
+import NODERSA from './utils/node-rsa';
+import jinja from './utils/jinja';
+// import JSON5 from './utils/json5';
 
 let consoleHistory: string[] = [];
 console['oldLog'] = console.log;
@@ -59,9 +59,9 @@ const clearConsoleHistory = () => {
 // })();
 
 cheerio.jinja2 = function (template, obj) {
-  // @ts-ignore
   return jinja.render(template, obj);
 };
+
 const init_test = () => {
   const test_data = {
     version: VERSION,
@@ -2357,7 +2357,7 @@ const categoryParse = (cateObj) => {
       }
     }
 
-    let new_url = cheerio.jinja2(url, { fl: fl, fyclass: cateObj.tid});
+    let new_url = cheerio.jinja2(url, { fl: fl, fyclass: cateObj.tid });
     url = new_url;
   }
   if (/fypage/.test(url)) {
