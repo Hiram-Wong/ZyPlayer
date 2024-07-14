@@ -13,7 +13,7 @@
         <system-skin class="system-function" />
         <system-config class="system-function" />
       </div>
-      <system-control class="mg-left" />
+      <system-control class="window mg-left" />
     </div>
   </div>
 </template>
