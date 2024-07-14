@@ -766,6 +766,7 @@ filmReloadeventBus.on(async () => {
       .quick_filter {
         display: flex;
         align-items: center;
+        cursor: pointer;
       }
     }
 

@@ -428,6 +428,11 @@ hotReloadeventBus.on(() => {
       padding: 0;
     }
 
+    .t-input__inner {
+      color: var(--td-text-color-placeholder);
+      font-weight: 500;
+    }
+
     .t-input__suffix:not(:empty) {
       margin-left: var(--td-comp-margin-xxs);
     }
@@ -438,6 +443,11 @@ hotReloadeventBus.on(() => {
     border-radius: var(--td-radius-default);
     border-color: transparent;
     box-shadow: none;
+
+    .t-input__inner::placeholder {
+      color: var(--td-text-color-placeholder);
+      font-weight: 500;
+    }
 
     &.t-is-focused .t-input__prefix>.t-icon {
       color: var(--td-text-color-placeholder);

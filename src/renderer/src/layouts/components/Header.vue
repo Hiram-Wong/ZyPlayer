@@ -7,30 +7,27 @@
     </div>
     <div class="right no-drag">
       <div class="system-functions">
-        <sponsor class="system-function" style="margin: 0" />
+        <sponsor class="system-function" />
         <just-look class="system-function" />
         <language class="system-function" />
         <system-skin class="system-function" />
         <system-config class="system-function" />
       </div>
-      <title-bar overlay class="system-controls mg-left" v-if="platform !== 'darwin'"></title-bar>
+      <system-control class="mg-left" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import '@electron-uikit/titlebar/renderer';
-
 import HistoryControl from './HistoryControl.vue';
-import SearchBar from './SearchBar.vue';
-import PlayerShow from './PlayShow.vue';
-import SystemConfig from './SystemConfig.vue';
-import SystemSkin from './SystemSkin.vue';
-import Sponsor from './Sponsor.vue';
-import Language from './Language.vue';
 import JustLook from './JustLook.vue';
-
-const { platform } = window.electron.process;
+import Language from './Language.vue';
+import PlayerShow from './PlayShow.vue';
+import SearchBar from './SearchBar.vue';
+import Sponsor from './Sponsor.vue';
+import SystemConfig from './SystemConfig.vue';
+import SystemControl from './SystemControl.vue';
+import SystemSkin from './SystemSkin.vue';
 
 const handleMouseDown = (event) => {
   if (event.detail === 2) {
@@ -52,16 +49,12 @@ const handleMouseDown = (event) => {
   }
 
   .mg-left {
-    margin-left: 20px;
+    margin-left: var(--td-comp-margin-l);
   }
 
   .left {
     height: 100%;
     display: flex;
-  }
-
-  .center {
-    margin-left: 20px;
   }
 
   .right {
@@ -76,6 +69,10 @@ const handleMouseDown = (event) => {
       background: var(--td-bg-color-container);
       border-radius: var(--td-radius-default);
 
+      &>.system-function:first-of-type {
+        margin-left: 0;
+      }
+
       .system-function {
         margin-left: var(--td-comp-margin-xs);
         width: 30px;
@@ -86,7 +83,7 @@ const handleMouseDown = (event) => {
 
         :deep(.t-button__text) {
           svg {
-            color: rgba(132, 133, 141, 0.8);
+            color: var(--td-text-color-placeholder);
           }
         }
 
@@ -102,22 +99,6 @@ const handleMouseDown = (event) => {
             }
           }
         }
-      }
-    }
-
-    .system-controls {
-      width: 102px;
-      height: 100%;
-      overflow: hidden;
-      background: var(--td-bg-color-container);
-      border-radius: var(--td-radius-default);
-      --tb-control-height: 32px;
-      --tb-control-hover-color: var(--td-bg-color-container-hover);
-      --tb-control-symbol-color: rgba(132, 133, 141, 0.8);
-      --tb-control-close-symbol-color: rgba(132, 133, 141, 0.8);
-
-      :deep(.titlebar__window-controls) {
-        position: relative !important;
       }
     }
   }

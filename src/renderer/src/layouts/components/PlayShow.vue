@@ -67,7 +67,7 @@ const destroyPlayerWindowEvent = () => {
         text-align: center;
         display: flex;
         align-items: center;
-        color: rgba(132, 133, 141, 0.8);
+        color: var(--td-text-color-placeholder);
       }
 
       &-video {
@@ -91,6 +91,8 @@ const destroyPlayerWindowEvent = () => {
           display: inline-block;
           white-space: nowrap;
           animation: marquee 10s linear infinite;
+          color: var(--td-text-color-placeholder);
+          font-weight: 500;
         }
 
         @keyframes marquee {
