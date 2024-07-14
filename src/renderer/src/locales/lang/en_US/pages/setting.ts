@@ -51,6 +51,8 @@ export default {
     delete: 'Delete',
     deleteTip: 'Are you sure to delete it',
     noData: 'NoData',
+    notSupport: 'NotSupport',
+    skip: 'Skip',
     site: {
       close: 'close',
       together: 'together',

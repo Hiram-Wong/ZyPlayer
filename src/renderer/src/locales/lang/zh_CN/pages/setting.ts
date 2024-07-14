@@ -51,6 +51,8 @@ export default {
     delete: '删除',
     deleteTip: '你确定要删除吗',
     noData: '无数据',
+    notSupport: '不支持',
+    skip: '跳过',
     site: {
       close: '关闭',
       together: '聚合',

@@ -20,7 +20,7 @@
               <remove-icon />
               <span>{{ $t('pages.setting.header.delete') }}</span>
             </div>
-            <div class="item" @click="handleAllDataEvent('check')" v-show="false">
+            <div class="item" @click="handleAllDataEvent('check')">
               <refresh-icon />
               <span>{{ $t('pages.setting.header.check') }}</span>
             </div>
@@ -51,7 +51,8 @@
         <t-switch v-model="row.isActive" @change="switchStatus(row)" />
       </template>
       <template #resource="{ row }">
-        <span v-if="row.resource">{{ row.resource }}</span>
+        <span v-if="row.resource > 0">{{ row.resource }}</span>
+        <span v-else-if="row.resource === -1">{{ $t('pages.setting.table.skip') }}</span>
         <span v-else>{{ $t('pages.setting.table.noData') }}</span>
       </template>
       <template #search="{ row }">
@@ -218,15 +219,22 @@ const checkAllSite = async (select) => {
 };
 
 const checkSingleEvent = async (row, all = false) => {
-  const { status, resource } = await checkValid(row); // 检测状态
-  row.isActive = status; // 检测是否开启变更状态
-  updateSiteItem(row.id, { isActive: row.isActive });
-  row.resource = resource;
+  let isActive: boolean = row.isActive;
+  if (row.type === 7 || row.type === 8) {
+    row.resource = -1;
+  } else {
+    const { status, resource } = await checkValid(row); // 检测状态
+    row.isActive = isActive = status; // 检测是否开启变更状态
+    row.resource = resource;
+    updateSiteItem(row.id, { isActive: row.isActive });
+  };
+
   if (!all) {
     emitReload.emit('film-reload');
     MessagePlugin.success(t('pages.setting.form.success'));
   }
-  return status;
+
+  return isActive;
 };
 
 const rehandlePageChange = (curr) => {
