@@ -89,7 +89,6 @@
     "fast-xml-parser": "^4.4.0",
     "fastify": "^4.28.1",
     "fastify-logger": "^1.0.1",
-    "file-type": "^19.1.1",
     "fix-path": "^4.0.0",
     "flv.js": "^1.6.2",
     "he": "^1.2.0",
