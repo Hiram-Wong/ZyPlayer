@@ -42,6 +42,11 @@ const options: any = {
     fullscreenOff: publicIcons.exitFullscreen,
     setting: publicIcons.setting,
   },
+  cssVar: {
+    '--art-control-height': '40px',
+    '--art-control-icon-size': '20px',
+    '--art-control-icon-scale': '1',
+  },
   customType: {
     customHls: (video: HTMLVideoElement, url: string, art: Artplayer) => {
       art.loading.show = true;

@@ -1,3 +1,4 @@
+
 .art-danmuku-emitter .art-danmuku-send {
   background: linear-gradient(254deg, #08cc7e, #0ccc4c) !important;
 }
@@ -87,4 +88,16 @@
 
 .artplayer-plugin-danmuku .apd-slider .apd-slider-steps .apd-slider-step {
   color: #ddd !important;
+}
+
+.art-controls .art-control {
+  min-width: 30px !important;
+}
+
+[data-danmuku-emitter=false] .art-controls-center .artplayer-plugin-danmuku {
+  gap: 10px !important;
+}
+
+.art-controls .art-controls-center {
+  padding: 0 5px !important;
 }
