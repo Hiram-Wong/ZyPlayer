@@ -51,7 +51,7 @@
         </div>
       </div>
     </div>
-    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
+    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')" :loading="isVisible.loading" />
     <t-back-top container=".container" :visible-height="200" size="small" :offset="['1.4rem', '0.5rem']"
       :duration="2000" :firstload="false" />
   </div>

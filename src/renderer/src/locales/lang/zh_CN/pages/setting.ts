@@ -1,5 +1,6 @@
 export default {
   name: '配置',
+  loading: '加载中...',
   placeholder: {
     general: '请输入内容',
     startPage: '请输入起始页路径, 例如/home/',

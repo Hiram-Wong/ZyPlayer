@@ -1,5 +1,6 @@
 export default {
   name: 'Setting',
+  loading: 'Loading...',
   placeholder: {
     general: 'Please enter the content',
     startPage: 'Please enter the start page path, such as /home/',

@@ -67,7 +67,7 @@
       </div>
     </div>
     <detail-view v-model:visible="isVisible.detail" :site="siteConfig.default" :data="formDetailData" />
-    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading" />
+    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')" :loading="isVisible.loading" />
     <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
 </template>

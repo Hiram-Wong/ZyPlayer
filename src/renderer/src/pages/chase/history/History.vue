@@ -49,7 +49,7 @@
       </div>
     </div>
     <detail-view v-model:visible="isVisible.detail" :site="siteData" :data="formDetailData" />
-    <t-loading :attach="`.${prefix}-content`" size="small" :loading="isVisible.loading"></t-loading>
+    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')" :loading="isVisible.loading" />
   </div>
 </template>
 <script setup lang="tsx">
