@@ -56,32 +56,38 @@
       padding: 0 !important;
     }
   }
-  .t-menu__item {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--td-radius-large);
-    padding: 0;
-    margin: 0 0 var(--td-comp-margin-xs) 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    line-height: 22px;
-    font-size: var(--td-font-size-body-small);
-    color: var(--td-context-secondary) !important;
-    .t-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
+  .t-menu {
+    .t-menu__item {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--td-radius-large);
+      padding: 0;
+      margin: 0 0 var(--td-comp-margin-xs) 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      transition: all 0.3s ease;
+      line-height: 22px;
+      font-size: var(--td-font-size-body-small);
       color: var(--td-context-secondary) !important;
+      .t-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--td-context-secondary) !important;
+      }
+      span {
+        font-weight: 700;
+      }
     }
-    span {
-      font-weight: 700;
+
+    & > .t-menu__item:last-child {
+      margin-bottom: var(--td-comp-paddingTB-l);
     }
   }
 }
@@ -118,11 +124,11 @@
 }
 
 .t-default-menu:not(.t-menu--dark) .t-menu__item.t-is-active:not(.t-is-opened) {
-  background-color: var(--td-bg-content-active-2);
+  background-color: var(--td-bg-color-container-active);
 }
 
 .t-menu__item:hover:not(.t-is-active):not(.t-is-opened):not(.t-is-disabled) {
-  background-color: var(--td-bg-content-hover-1);
+  background-color: var(--td-bg-color-container-hover);
 }
 
 .@{starter-prefix} {
@@ -493,12 +499,14 @@
   border-color: transparent;
 }
 
-::-webkit-scrollbar, .scrollbar-track {
+::-webkit-scrollbar,
+.scrollbar-track {
   width: 8px !important;
   background: transparent !important;
 }
 
-::-webkit-scrollbar-thumb, .scrollbar-thumb {
+::-webkit-scrollbar-thumb,
+.scrollbar-thumb {
   border-radius: 6px !important;
   border: 2px solid transparent !important;
   background-clip: content-box !important;

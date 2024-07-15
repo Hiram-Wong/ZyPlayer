@@ -81,6 +81,12 @@ const handleMouseDown = (event) => {
         align-items: center;
         justify-content: center;
 
+        :deep(.t-button) {
+          &:not(.t-is-disabled):not(.t-button--ghost) {
+            --ripple-color: transparent;
+          }
+        }
+
         :deep(.t-button__text) {
           svg {
             color: var(--td-text-color-placeholder);

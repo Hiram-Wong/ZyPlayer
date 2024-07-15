@@ -307,7 +307,7 @@ const searchEvent = () => {
       height: 13px;
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
-      background-color: var(--td-bg-color-container);
+      background-color: var(--td-bg-color-component-hover);
       left: 4px;
       top: 0;
       position: absolute;
@@ -320,7 +320,7 @@ const searchEvent = () => {
       height: 13px;
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
-      background-color: var(--td-bg-color-container);
+      background-color: var(--td-bg-color-component-hover);
       left: 4px;
       bottom: 0;
       position: absolute;
@@ -330,7 +330,7 @@ const searchEvent = () => {
 
     &:hover {
       .nav-sub-tab-line-0 {
-        background-color: var(--td-bg-content-active-1);
+        background-color: var(--td-bg-color-component-active);
         transform-origin: 50% 0%;
         transform: rotate(5deg) translateY(1px);
         border-top-left-radius: 4px;
@@ -340,7 +340,7 @@ const searchEvent = () => {
       }
 
       .nav-sub-tab-line-1 {
-        background-color: var(--td-bg-content-active-1);
+        background-color: var(--td-bg-color-component-active);
         transform-origin: 50% 100%;
         transform: rotate(-5deg) translateY(-1px);
         border-bottom-left-radius: 4px;
@@ -368,7 +368,7 @@ const searchEvent = () => {
       height: 13px;
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
-      background-color: var(--td-bg-color-container);
+      background-color: var(--td-bg-color-component-hover);
       left: 4px;
       top: 0;
       position: absolute;
@@ -381,7 +381,7 @@ const searchEvent = () => {
       height: 13px;
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
-      background-color: var(--td-bg-color-container);
+      background-color: var(--td-bg-color-component-hover);
       left: 4px;
       bottom: 0;
       position: absolute;
@@ -391,7 +391,7 @@ const searchEvent = () => {
 
     &:hover {
       .nav-sub-tab-line-0 {
-        background-color: var(--td-bg-content-active-1);
+        background-color: var(--td-bg-color-component-active);
         transform-origin: 50% 0%;
         transform: rotate(-5deg) translateY(1px);
         border-top-left-radius: 4px;
@@ -401,7 +401,7 @@ const searchEvent = () => {
       }
 
       .nav-sub-tab-line-1 {
-        background-color: var(--td-bg-content-active-1);
+        background-color: var(--td-bg-color-component-active);
         transform-origin: 50% 100%;
         transform: rotate(5deg) translateY(-1px);
         border-bottom-left-radius: 4px;
