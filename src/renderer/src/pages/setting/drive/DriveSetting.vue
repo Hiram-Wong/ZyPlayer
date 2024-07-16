@@ -1,44 +1,42 @@
 <template>
   <div class="setting-iptv-container">
-    <div class="header">
-      <t-row justify="space-between">
-        <div class="left-operation-container">
-          <div class="component-op">
-            <div class="item" @click="isVisible.dialogAdd = true">
-              <add-icon />
-              <span>{{ $t('pages.setting.header.add') }}</span>
-            </div>
-            <div class="item" @click="handleAllDataEvent('enable')">
-              <check-icon />
-              <span>{{ $t('pages.setting.header.enable') }}</span>
-            </div>
-            <div class="item" @click="handleAllDataEvent('disable')">
-              <poweroff-icon />
-              <span>{{ $t('pages.setting.header.disable') }}</span>
-            </div>
-            <div class="item" @click="handleAllDataEvent('delete')">
-              <remove-icon />
-              <span>{{ $t('pages.setting.header.delete') }}</span>
-            </div>
-            <!-- <div class="item" @click="aliAuthEvent">
+    <div class="header operation-container">
+      <div class="left-operation-container">
+        <div class="component-op">
+          <div class="item" @click="isVisible.dialogAdd = true">
+            <add-icon />
+            <span>{{ $t('pages.setting.header.add') }}</span>
+          </div>
+          <div class="item" @click="handleAllDataEvent('enable')">
+            <check-icon />
+            <span>{{ $t('pages.setting.header.enable') }}</span>
+          </div>
+          <div class="item" @click="handleAllDataEvent('disable')">
+            <poweroff-icon />
+            <span>{{ $t('pages.setting.header.disable') }}</span>
+          </div>
+          <div class="item" @click="handleAllDataEvent('delete')">
+            <remove-icon />
+            <span>{{ $t('pages.setting.header.delete') }}</span>
+          </div>
+          <!-- <div class="item" @click="aliAuthEvent">
               <user-icon />
               <span>阿里授权</span>
             </div> -->
-          </div>
         </div>
-        <div class="right-operation-container">
-          <div class="search">
-            <t-input v-model="searchValue" :placeholder="$t('pages.setting.header.search')" clearable
-              @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
-              <template #prefix-icon>
-                <search-icon size="16px" />
-              </template>
-            </t-input>
-          </div>
+      </div>
+      <div class="right-operation-container">
+        <div class="search">
+          <t-input v-model="searchValue" :placeholder="$t('pages.setting.header.search')" clearable
+            @enter="refreshEvent(true)" @clear="refreshEvent(true)" class="search-bar">
+            <template #prefix-icon>
+              <search-icon size="16px" />
+            </template>
+          </t-input>
         </div>
-      </t-row>
+      </div>
     </div>
-    <t-table row-key="id" :data="driveTableConfig.data" :sort="driveTableConfig.sort" height="calc(100vh - 180px)"
+    <t-table row-key="id" :data="driveTableConfig.data" :sort="driveTableConfig.sort" height="calc(100vh - 172px)"
       :columns="COLUMNS" :hover="true" :pagination="pagination" @sort-change="rehandleSortChange"
       @select-change="rehandleSelectChange" @page-change="rehandlePageChange">
       <template #name="{ row }">
@@ -272,34 +270,8 @@ const aliAuthEvent = () => {
 
   .header {
     margin: var(--td-comp-margin-s) 0;
-  }
-
-  .left-operation-container {
-    .component-op {
-      display: flex;
-      height: var(--td-comp-size-m);
-      padding: 0 var(--td-comp-paddingLR-xs);
-      background-color: var(--td-bg-content-input-2);
-      border-radius: var(--td-radius-default);
-      align-items: center;
-      border-radius: var(--td-radius-medium);
-
-      .item {
-        color: var(--td-text-color-placeholder);
-        border-radius: var(--td-radius-medium);
-        display: flex;
-        align-items: center;
-        padding: 2px 4px;
-        height: 22px;
-        cursor: pointer;
-        text-decoration: none;
-
-        &:hover {
-          transition: all 0.2s ease 0s;
-          color: var(--td-text-color-primary);
-        }
-      }
-    }
+    display: flex;
+    justify-content: space-between;
   }
 }
 </style>

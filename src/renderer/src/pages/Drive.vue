@@ -1,5 +1,5 @@
 <template>
-  <div class="drive-container">
+  <div class="drive view-container">
     <common-nav :title="$t('pages.drive.name')" :list="driveConfig.data" :active="active.nav" search
       @change-key="changeDefaultIptvEvent" />
     <div class="content">
@@ -283,7 +283,7 @@ eventBus.on(async () => {
 </script>
 
 <style lang="less" scoped>
-.drive-container {
+.drive {
   height: 100%;
   display: flex;
   flex-direction: row;

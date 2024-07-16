@@ -20,7 +20,7 @@
       <t-button variant="outline" @click="formVisible = false">{{ $t('pages.analyze.history.cancel') }}</t-button>
     </template>
 
-    <infinite-loading :identifier="infiniteId" style="text-align: center" :distance="200" @infinite="load">
+    <infinite-loading class="infinite-loading-container" :identifier="infiniteId" :distance="200" @infinite="load">
       <template #complete>{{ $t('pages.analyze.infiniteLoading.complete') }}</template>
       <template #error>{{ $t('pages.analyze.infiniteLoading.error') }}</template>
     </infinite-loading>
@@ -150,13 +150,12 @@ const formatDate = (timestamp) => {
     justify-content: space-between;
     align-items: center;
     white-space: nowrap;
-    font-weight: 500;
     cursor: pointer;
     padding: 0 var(--td-comp-paddingLR-xs);
 
     &:hover {
       border-radius: var(--td-radius-medium);
-      background-color: var(--td-bg-content-active-2);
+      background-color: var(--td-bg-color-container-active);
     }
   }
 

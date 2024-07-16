@@ -415,15 +415,43 @@
   background-color: var(--td-context-quarternary);
 }
 
-.search {
-  display: flex;
-  align-items: center;
-  .search-bar {
-    width: 146px;
-    .t-input {
-      border-style: none;
-      background-color: var(--td-bg-content-input-2);
+.operation-container {
+  .component-op {
+    display: flex;
+    height: var(--td-comp-size-m);
+    padding: 0 var(--td-comp-paddingLR-xs);
+    background-color: var(--td-bg-content-input-2);
+    border-radius: var(--td-radius-default);
+    align-items: center;
+    border-radius: var(--td-radius-medium);
+
+    .item {
+      color: var(--td-text-color-placeholder);
       border-radius: var(--td-radius-medium);
+      display: flex;
+      align-items: center;
+      padding: 2px 4px;
+      height: 22px;
+      cursor: pointer;
+      text-decoration: none;
+
+      &:hover {
+        transition: all 0.2s ease 0s;
+        color: var(--td-text-color-primary);
+      }
+    }
+  }
+
+  .search {
+    display: flex;
+    align-items: center;
+    .search-bar {
+      width: 146px;
+      .t-input {
+        border-style: none;
+        background-color: var(--td-bg-content-input-2);
+        border-radius: var(--td-radius-medium);
+      }
     }
   }
 }
@@ -443,21 +471,22 @@
     background-color: var(--td-bg-color-container);
   }
 
-  .t-table__pagination {
-    background-color: var(--td-bg-color-container);
-  }
-
   .t-table__pagination-wrap {
     .t-table__pagination {
+      background-color: var(--td-bg-color-container);
+      padding: var(--td-comp-paddingTB-s) 0;
+
       .t-input--suffix {
-        border-color: transparent;
-        background-color: var(--td-bg-color-container);
+        // border-color: transparent;
+        // background-color: var(--td-bg-color-container);
       }
+
       .t-pagination__number {
-        border-color: transparent;
+        // border-color: transparent;
       }
+
       .t-is-current {
-        background-color: var(--td-bg-color-container-active);
+        // background-color: var(--td-bg-color-container-active);
       }
     }
   }
@@ -497,6 +526,11 @@
 .t-button--variant-base {
   background-color: var(--td-bg-content-input-2);
   border-color: transparent;
+}
+
+.infinite-loading-container {
+  color: var(--td-text-color-placeholder);
+  text-align: center;
 }
 
 ::-webkit-scrollbar,

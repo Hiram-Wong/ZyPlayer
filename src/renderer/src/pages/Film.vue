@@ -58,16 +58,18 @@
               </div>
             </t-col>
           </t-row>
-          <infinite-loading v-if="isVisible.infiniteLoading" :identifier="infiniteId" :distance="200"
-            style="text-align: center" @infinite="load">
+          <infinite-loading v-if="isVisible.infiniteLoading" class="infinite-loading-container" :identifier="infiniteId"
+            :distance="200" @infinite="load">
             <template #complete>{{ infiniteCompleteTip }}</template>
             <template #error>{{ $t('pages.film.infiniteLoading.complete') }}</template>
           </infinite-loading>
         </div>
       </div>
     </div>
+
     <detail-view v-model:visible="isVisible.detail" :site="siteConfig.default" :data="formDetailData" />
-    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')" :loading="isVisible.loading" />
+    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')"
+      :loading="isVisible.loading" />
     <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
 </template>

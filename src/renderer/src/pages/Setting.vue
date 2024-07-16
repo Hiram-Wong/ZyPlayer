@@ -22,7 +22,7 @@
     <div class="content">
       <div class="container">
         <keep-alive>
-          <component :is="currentComponent"></component>
+          <component :is="currentComponent" class="content-wrapper"></component>
         </keep-alive>
       </div>
     </div>
@@ -224,16 +224,27 @@ const changeClassEvent = (item: string) => {
   }
 
   .content {
-    // width: calc(100% - 170px);
     min-width: 750px;
     position: relative;
     padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;
+    display: flex;
+    flex-direction: column;
 
     .container {
+      flex: 1;
       height: 100%;
+      width: 100%;
+
+      .content-wrapper {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
     }
   }
 }

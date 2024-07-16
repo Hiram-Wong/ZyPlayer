@@ -1,57 +1,68 @@
 <template>
-  <div class="history view-container">
-    <div class="content">
-      <div class="container">
-        <div class="content-wrapper">
-          <div v-for="(item, name, index) in options" :key="index" class="container-item">
-            <div v-if="item.length !== 0" class="time">
-              <span v-if="name === 'today'" class="title">{{ $t('pages.chase.date.today') }}</span>
-              <span v-if="name === 'week'" class="title">{{ $t('pages.chase.date.week') }}</span>
-              <span v-if="name === 'ago'" class="title">{{ $t('pages.chase.date.ago') }}</span>
-            </div>
-            <div class="main">
-              <t-row :gutter="[16, 16]">
-                <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="detail in item" :key='detail["id"]' class="card"
-                  @click="playEvent(detail)">
-                  <div class="card-main">
-                    <div class="card-close" @click.stop="removeEvent(detail)"></div>
-                    <t-image class="card-main-item" :src='detail["videoImage"]'
-                      :style="{ width: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
-                      :loading="renderLoading" :error="renderError">
-                      <template #overlayContent>
-                        <div class="op">
-                          <span>{{ detail["siteName"] ? detail["siteName"] : $t('pages.chase.sourceDeleted') }}</span>
-                        </div>
-                      </template>
-                    </t-image>
-                  </div>
-                  <div class="card-footer">
-                    <p class="card-footer-title text-hide">{{ detail["videoName"] }} {{
-                      formatIndex(detail["videoIndex"]).index }}</p>
-                    <p class="card-footer-desc text-hide">
-                      <laptop-icon size="1.3em" class="icon" />
-                      <span v-if='detail["playEnd"]'>{{ $t('pages.chase.progress.watched') }}</span>
-                      <span v-else>{{ $t('pages.chase.progress.watching') }} {{ formatProgress(detail["watchTime"],
-                        detail["duration"])
-                        }}</span>
-                    </p>
-                  </div>
-                </t-col>
-              </t-row>
-            </div>
-          </div>
-
-          <infinite-loading :identifier="infiniteId" style="text-align: center" :duration="200" @infinite="load">
-            <template #complete>{{ $t('pages.chase.infiniteLoading.complete') }}</template>
-            <template #error>{{ $t('pages.chase.infiniteLoading.error') }}</template>
-          </infinite-loading>
-        </div>
-      </div>
+  <div class="history" id="back-top" ref="contentRef">
+    <div class="filter_box" v-if="options.ago.length > 0 && options.week.length > 0 && options.today.length > 0"
+      @click="clearEvent">
+      <span class="icon_btn pos clear">
+        <delete-icon /> {{ $t('pages.chase.history.clearAll') }}
+      </span>
     </div>
+    <div v-for="(item, name, index) in options" :key="index" class="container-item">
+      <template v-if="item.length !== 0">
+        <div class="container-item-header">
+          <span class="title">{{ translateDate[name] }}</span>
+        </div>
+        <div class="container-item-main">
+          <t-row :gutter="[16, 16]" style="margin: 0;">
+            <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="detail in item" :key='detail["id"]' class="card"
+              @click="playEvent(detail)">
+              <div class="card-close" @click.stop="removeEvent(detail)">
+                <delete-icon />
+              </div>
+              <div class="card-main">
+                <t-image class="card-main-item" :src='detail["videoImage"]'
+                  :style="{ width: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
+                  :loading="renderLoading" :error="renderError">
+                  <template #overlayContent>
+                    <div class="op">
+                      <div class="op-box">
+                        <span>{{ detail["siteName"] ? detail["siteName"] : $t('pages.chase.sourceDeleted') }}</span>
+                      </div>
+                    </div>
+                  </template>
+                </t-image>
+              </div>
+              <div class="card-footer">
+                <p class="card-footer-title text-hide">
+                  {{ detail["videoName"] }} {{ formatIndex(detail["videoIndex"]).index }}
+                </p>
+                <p class="card-footer-desc tiles-item_desc_row text-hide">
+                  <laptop-icon size="14px" class="tiles-item_watch_pc icon" />
+                  <span class="tiles-item_desc_watch" v-if='detail["playEnd"]'>{{ $t('pages.chase.progress.watched')
+                    }}</span>
+                  <span class="tiles-item_desc_watch" v-else>
+                    {{ $t('pages.chase.progress.watching') }}{{ formatProgress(detail["watchTime"],
+                      detail["duration"]) }}
+                  </span>
+                </p>
+              </div>
+            </t-col>
+          </t-row>
+        </div>
+      </template>
+    </div>
+
+    <infinite-loading class="infinite-loading-container" :identifier="infiniteId" :duration="200" @infinite="load">
+      <template #complete>{{ $t('pages.chase.infiniteLoading.complete') }}</template>
+      <template #error>{{ $t('pages.chase.infiniteLoading.error') }}</template>
+    </infinite-loading>
     <detail-view v-model:visible="isVisible.detail" :site="siteData" :data="formDetailData" />
-    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')" :loading="isVisible.loading" />
+    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')"
+      :loading="isVisible.loading" />
+    <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
+
   </div>
 </template>
+
 <script setup lang="tsx">
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
@@ -60,16 +71,16 @@ import { useEventBus } from '@vueuse/core';
 
 import _ from 'lodash';
 import moment from 'moment';
-import { LaptopIcon } from 'tdesign-icons-vue-next';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { DeleteIcon, LaptopIcon } from 'tdesign-icons-vue-next';
+import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { ref, reactive } from 'vue';
+import { computed, ref, reactive } from 'vue';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
-import { delHistory, fetchHistoryList } from '@/api/history';
+import { delHistory, fetchHistoryList, clearHistoryFilmList } from '@/api/history';
 import { fetchSiteList } from '@/api/site';
 import { fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
 import { formatIndex } from '@/utils/common/film';
@@ -91,6 +102,14 @@ const renderLoading = () => {
     </div>
   );
 };
+
+const translateDate = computed(() => {
+  return {
+    today: t('pages.chase.date.today'),
+    week: t('pages.chase.date.week'),
+    ago: t('pages.chase.date.ago'),
+  }
+});
 
 const options = ref({
   today: [],
@@ -115,7 +134,7 @@ const isVisible = reactive({
 const infiniteId = ref(+new Date());
 const siteConfig = ref({
   data: []
-})
+});
 
 const getHistoryList = async () => {
   let length = 0;
@@ -185,7 +204,6 @@ const playEvent = async (item) => {
       const [detailItem] = await fetchDetail(site, videoId);
       item = detailItem;
     }
-    console.log(item);
 
     const playerMode = store.getSetting.playerMode;
 
@@ -227,6 +245,26 @@ const removeEvent = async (item) => {
   pagination.value.count--;
 };
 
+const clearEvent = () => {
+  const handleClear = () => {
+    clearHistoryFilmList();
+    defaultSet();
+    confirmDia.hide();
+  };
+
+  const confirmDia = DialogPlugin({
+    body: t('pages.chase.dialog.clearAll.body'),
+    header: t('pages.chase.dialog.clearAll.header'),
+    width: '340px',
+    placement: 'center',
+    closeBtn: '',
+    confirmBtn: t('pages.chase.dialog.confirm'),
+    cancelBtn: t('pages.chase.dialog.cancel'),
+    onConfirm: handleClear,
+    onClose: () => confirmDia.hide(),
+  });
+};
+
 // 日期计算
 const filterDate = (date) => {
   const timeToday = moment().format('YYYY-MM-DD');
@@ -241,9 +279,7 @@ const formatProgress = (start, all) => {
   return progress ? `${progress}%` : '0%';
 };
 
-// 监听播放器变更
-const eventBus = useEventBus('history-reload');
-eventBus.on(() => {
+const defaultSet = () => {
   options.value = {
     today: [],
     week: [],
@@ -251,150 +287,227 @@ eventBus.on(() => {
   };
   if (!_.size(options.value)) infiniteId.value++;
   pagination.value.pageIndex = 0;
+};
+
+// 监听播放器变更
+const eventBus = useEventBus('history-reload');
+eventBus.on(() => {
+  defaultSet();
 });
 </script>
 
 <style lang="less" scoped>
-.view-container {
+.history {
+  width: 100%;
   height: 100%;
+  position: relative;
 
-  .content {
-    .container {
-      .content-wrapper {
-        width: 100%;
-        height: 100%;
+  .filter_box {
+    position: absolute;
+    top: 10px;
+    right: 5px;
+    z-index: 11;
+
+    .pos {
+      cursor: pointer;
+    }
+
+    .icon_btn {
+      font-size: 12px;
+      color: rgba(132, 133, 141, 0.8);
+      letter-spacing: 0;
+      line-height: 16px;
+      user-select: none;
+      padding-left: 20px;
+      position: relative;
+
+      svg {
+        position: absolute;
+        left: 0;
+        bottom: 2px;
+      }
+    }
+
+    .clear {
+      margin-left: 20px;
+    }
+
+    &:hover {
+      .icon_btn {
+        color: var(--td-primary-color);
+      }
+    }
+  }
+
+  .container-item {
+    .container-item-header {
+      height: 40px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background-color: var(--td-bg-color-container);
+
+      .title {
+        display: inline-block;
+        padding-right: 18px;
+        vertical-align: middle;
+        line-height: 40px;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: left;
+      }
+    }
+
+    .container-item-main {
+
+      .card {
+        box-sizing: border-box;
+        width: inherit;
         position: relative;
+        cursor: pointer;
+        border-radius: var(--td-radius-medium);
 
-        .container-item {
-          .time {
-            position: relative;
-            height: 40px;
-            line-height: 40px;
-            font-size: 20px;
-            font-weight: 700;
-            text-align: left;
+        &:hover {
+          .card-close {
+            display: flex;
+          }
 
-            .title {
-              position: relative;
-              display: inline-block;
-              padding-right: 18px;
-              vertical-align: middle;
-              z-index: 10;
+          .card-main {
+            .card-main-item {
+              overflow: hidden;
+
+              :deep(img) {
+                transition: all 0.25s ease-in-out;
+                transform: scale(1.05);
+              }
             }
           }
 
-          .main {
-            .card {
-              box-sizing: border-box;
-              width: inherit;
-              position: relative;
-              cursor: pointer;
-              border-radius: var(--td-radius-medium);
+          .card-footer {
+            .card-footer-title {
+              transition: all 0.25s ease-in-out;
+              color: var(--td-brand-color);
+            }
+          }
+        }
 
-              .card-close {
-                display: none;
-                position: absolute;
-                right: -9px;
-                top: -9px;
-                height: 22px;
-                width: 22px;
-                background: url(../../../assets/close.png) 0 0 no-repeat;
-                z-index: 1000;
-                cursor: pointer;
-                background-size: 100%;
-              }
+        .card-close {
+          cursor: pointer;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          position: absolute;
+          right: 8px;
+          height: 28px;
+          width: 28px;
+          z-index: 9;
+          background-color: rgba(22, 24, 35, .8);
+          border-radius: 0 var(--td-radius-medium);
 
-              .text-hide {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                display: block;
-              }
+          svg {
+            color: var(--td-gray-color-5);
+          }
 
-              .card-main {
-                position: relative;
-                width: 100%;
-                height: 0;
-                border-radius: 7px;
-                padding-top: 62%;
+          &:hover {
+            svg {
+              color: var(--td-brand-color);
+            }
+          }
+        }
 
-                &:hover {
-                  .card-main-item {
-                    overflow: hidden;
+        .text-hide {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          display: block;
+        }
 
-                    :deep(img) {
-                      transition: all 0.25s ease-in-out;
-                      transform: scale(1.05);
-                    }
-                  }
-                }
+        .card-main {
+          position: relative;
+          width: 100%;
+          height: 0;
+          border-radius: 7px;
+          padding-top: 62%;
 
-                &:hover .card-close {
-                  display: block !important;
-                }
+          .card-tag-orange {
+            background: #ffdd9a;
+            color: #4e2d03;
+          }
 
-                .card-tag-orange {
-                  background: #ffdd9a;
-                  color: #4e2d03;
-                }
+          .card-tag {
+            z-index: 15;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 6px 0 6px 0;
+            padding: 1px 6px;
+            max-width: 60%;
 
-                .card-tag {
-                  z-index: 15;
-                  position: absolute;
-                  left: 0;
-                  top: 0;
-                  border-radius: 6px 0 6px 0;
-                  padding: 1px 6px;
-                  max-width: 60%;
+            .card-tag-text {
+              font-size: 12px;
+              height: 18px;
+              line-height: 18px;
+            }
+          }
 
-                  .card-tag-text {
-                    font-size: 12px;
-                    height: 18px;
-                    line-height: 18px;
-                  }
-                }
+          .card-main-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--td-radius-default);
 
-                .card-main-item {
-                  position: absolute;
-                  top: 0;
-                  left: 0;
-                  display: block;
+            .op {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              width: 100%;
+              background: linear-gradient(to bottom, rgba(22, 24, 35, 0.4) 0%, rgba(22, 24, 35, .8) 100%);
+
+              .op-box {
+                padding: var(--td-comp-paddingTB-xs) 0;
+                background: linear-gradient(to right,
+                    rgba(255, 255, 255, 0),
+                    rgba(255, 255, 255, 0.4) 30%,
+                    rgba(255, 255, 255, 0.4) 70%,
+                    rgba(255, 255, 255, 0));
+                ;
+
+                span {
+                  text-align: center;
+                  display: inline-block;
                   width: 100%;
-                  height: 100%;
-                  border-radius: 5px;
-
-                  .op {
-                    background-color: rgba(22, 22, 23, 0.8);
-                    width: 100%;
-                    color: rgba(255, 255, 255, 0.8);
-                    position: absolute;
-                    bottom: 0;
-                    display: flex;
-                    justify-content: center;
-                  }
+                  color: #fdfdfd;
+                  font-weight: 500;
                 }
               }
+            }
+          }
+        }
 
-              .card-footer {
-                position: relative;
-                padding-top: var(--td-comp-paddingTB-s);
+        .card-footer {
+          position: relative;
+          padding-top: var(--td-comp-paddingTB-xs);
 
-                .card-footer-title {
-                  font-weight: 700;
-                  line-height: var(--td-line-height-title-medium);
-                  height: 22px;
-                }
+          .card-footer-title {
+            font-weight: 700;
+            line-height: var(--td-line-height-title-medium);
+            height: 22px;
+          }
 
-                .card-footer-desc {
-                  font-size: 13px;
-                  line-height: var(--td-line-height-body-large);
-                  color: var(--td-text-color-placeholder);
+          .card-footer-desc {
+            font-size: 12px;
+            color: var(--td-text-color-placeholder);
+            align-items: center;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            position: relative;
 
-                  .icon {
-                    margin-right: var(--td-comp-margin-xs);
-                  }
-                }
-              }
+            .icon {
+              margin-right: var(--td-comp-margin-xs);
             }
           }
         }

@@ -40,7 +40,7 @@
               <context-menu-item :label="$t('pages.iptv.contextMenu.delChannel')" @click="delChannelEvent" />
             </context-menu>
           </t-row>
-          <infinite-loading v-if="isVisible.infiniteLoading" :identifier="infiniteId" style="text-align: center"
+          <infinite-loading v-if="isVisible.infiniteLoading" class="infinite-loading-container" :identifier="infiniteId"
             :duration="200" @infinite="load">
             <template #complete>{{ $t(`pages.iptv.infiniteLoading.${infiniteCompleteTip}`) }}</template>
             <template #error>{{ $t('pages.iptv.infiniteLoading.error') }}</template>
@@ -48,7 +48,8 @@
         </div>
       </div>
     </div>
-    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')" :loading="isVisible.loading" />
+    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')"
+      :loading="isVisible.loading" />
     <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
 </template>

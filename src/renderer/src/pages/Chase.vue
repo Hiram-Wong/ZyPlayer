@@ -1,126 +1,75 @@
 <template>
   <div class="chase view-container">
-    <header class="header">
-      <div class="page-title">
-        <p class="title">{{ $t('pages.chase.name') }}</p>
-        <div class="container">
-          <t-radio-group v-model="chaseTag" variant="default-filled" size="small">
-            <t-radio-button value="history">{{ $t('pages.chase.history') }}</t-radio-button>
-            <t-radio-button value="binge">{{ $t('pages.chase.like') }}</t-radio-button>
-          </t-radio-group>
-        </div>
-      </div>
-      <div class="actions">
-        <div v-if="chaseTag === 'binge'" class="check-update chase-container-op-item">
-          <t-button theme="default" size="small" @click="checkUpdaterEvent">
-            <span>{{ $t('pages.chase.update') }}</span>
-            <template #icon>
-              <time-icon />
-            </template>
-          </t-button>
-        </div>
-      </div>
-    </header>
-    <div class="layout-container" id="back-top">
-      <div class="layout-content-wrapper">
-        <history-view ref="historyRef" class="container-item" v-if="chaseTag === 'history'" />
-        <binge-view ref="bingeRef" class="container-item" v-else />
+    <common-nav :title="$t('pages.chase.name')" :list="chaseNav" :active="active.nav" @change-key="changeChaseEvent" />
+    <div class="content">
+      <div class="container">
+        <history-view class="content-wrapper" v-if="active.nav === 'history'" />
+        <binge-view class="content-wrapper" v-else />
       </div>
     </div>
-
-    <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
 </template>
+
 <script setup lang="ts">
-import { TimeIcon } from 'tdesign-icons-vue-next';
-import { ref } from 'vue';
+import { computed, reactive } from 'vue';
+
+import { t } from '@/locales';
 
 import bingeView from './chase/binge/Binge.vue';
 import historyView from './chase/history/History.vue';
 
-const chaseTag = ref('history');
-const bingeRef = ref(null);
-const historyRef = ref(null);
+const active = reactive({
+  nav: 'history',
+});
 
-// 检查更新
-const checkUpdaterEvent = () => {
-  bingeRef.value.checkUpdaterEvent();
+const chaseNav = computed(() => {
+  return [
+    {
+      id: 'history',
+      name: t('pages.chase.history.title')
+    }, {
+      id: 'like',
+      name: t('pages.chase.binge.title')
+    }
+  ]
+});
+
+const changeChaseEvent = (item: string) => {
+  active.nav = item;
 };
 </script>
 
 <style lang="less" scoped>
 .view-container {
-  width: 100%;
   height: 100%;
-  background-color: var(--td-bg-color-container);
-  border-radius: var(--td-radius-default);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
 
-  .header {
-    height: 40px;
-    padding: 0 40px;
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    justify-content: space-between;
-    white-space: nowrap;
-    flex-shrink: 0;
-
-    .page-title {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      flex-grow: 1;
-      height: 100%;
-      overflow: hidden;
-      position: relative;
-
-      .title {
-        font-size: 18px;
-        line-height: 1.4;
-        font-weight: 600;
-        max-width: 100%;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-
-      .container {
-        width: 128px;
-        height: 26px;
-        margin-left: 10px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-    }
-
-    .actions {
-      flex-shrink: 0;
-      display: flex;
-      height: 32px;
-      justify-content: flex-end;
-      gap: 5px;
-      align-items: center;
-    }
-  }
-
-  .layout-container {
-    height: calc(100% - 45px);
+  .content {
+    min-width: 750px;
+    position: relative;
+    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    background-color: var(--td-bg-color-container);
+    border-radius: var(--td-radius-default);
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    position: relative;
-    overflow-y: auto;
-    width: 100%;
 
-    .layout-content-wrapper {
-      width: 100%;
+    .container {
+      flex: 1;
       height: 100%;
-      padding: 0 40px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      flex-grow: 1;
+      width: 100%;
+
+      .content-wrapper {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
     }
   }
 
