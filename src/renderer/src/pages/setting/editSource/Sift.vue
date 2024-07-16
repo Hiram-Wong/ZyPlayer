@@ -119,8 +119,8 @@
         </div>
       </div>
       <div class="right">
-        <div class="log-box">
-          <div class="nav">
+        <div class="log-container">
+          <div class="log-nav">
             <div class="nav-left">
               <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
                 <t-radio-button value="debug">{{ $t('pages.setting.editSource.sift.select.debug') }}</t-radio-button>
@@ -140,8 +140,8 @@
               </t-radio-group>
             </div>
           </div>
-          <div class="text">
-            <div class="log-box" id="siftLogBox"></div>
+          <div class="log-text">
+            <div class="log-box" id="siftLogBox" ref="siftLogBoxRef"></div>
           </div>
         </div>
       </div>
@@ -172,6 +172,7 @@ const systemTheme = computed(() => {
   return storeSetting.displayMode;
 });
 
+const siftLogBoxRef = ref<HTMLElement | null>(null);
 let form = ref({
   codeType: 'html',
   content: {
@@ -330,8 +331,8 @@ const initEditor = () => {
   if (log) log.dispose();
 
   nextTick(() => {
-    const logBox = document.getElementById('siftLogBox');
-    log = monaco.editor.create(logBox as HTMLElement, {
+    const logBox = siftLogBoxRef.value!;
+    log = monaco.editor.create(logBox, {
       theme: config.theme,
       value: form.value.content.text,
       readOnly: true,
@@ -987,14 +988,16 @@ const sourceEvent = () => {
         }
       }
 
-      .log-box {
+      .log-container {
+        position: relative;
         flex: 1;
         width: 100%;
         height: 100%;
         margin-top: var(--td-comp-paddingTB-m);
-        position: relative;
+        border-radius: var(--td-radius-default);
+        background-color: var(--td-bg-content-input-2);
 
-        .nav {
+        .log-nav {
           position: absolute;
           width: calc(100% - 30px);
           z-index: 100;
@@ -1007,64 +1010,23 @@ const sourceEvent = () => {
             box-shadow: var(--td-shadow-3);
           }
         }
-      }
 
-      .text {
-        height: 100%;
-        width: 100%;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        border-radius: var(--td-radius-default);
-        padding: var(--td-comp-paddingTB-xs) 0 var(--td-comp-paddingTB-m);
-
-        :deep(.jv-container) {
-          background-color: var(--td-bg-content-input-2) !important;
-          border-radius: var(--td-radius-default);
-
-          .jv-button {
-            color: var(--td-brand-color);
-          }
-
-          .jv-code {
-            overflow-y: auto !important;
-            height: 100%;
-          }
-
-          .jv-more {
-            display: none;
-          }
-        }
-
-        &::-webkit-scrollbar {
-          width: 8px;
-          background: transparent;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          border-radius: 6px;
-          border: 2px solid transparent;
-          background-clip: content-box;
-          background-color: var(--td-scrollbar-color);
-        }
-      }
-
-      .code {
-        height: calc(100% - var(--td-comp-margin-xs));
-        padding-top: var(--td-comp-paddingTB-l);
-      }
-
-      .t-textarea {
-        height: 100%;
-
-        :deep(.t-textarea__inner) {
+        .log-text {
           height: 100%;
-          padding-top: var(--td-comp-paddingTB-l);
-          border-color: transparent;
-          background-color: var(--td-bg-content-input);
+          width: 100%;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          border-radius: var(--td-radius-default);
+          padding: var(--td-comp-paddingTB-xs) 0 var(--td-comp-paddingTB-m);
 
-          &:focus {
-            box-shadow: none;
+          .log-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin-top: var(--td-comp-paddingTB-m);
+            border-radius: 0 0 var(--td-radius-default) var(--td-radius-default);
+            overflow: hidden;
           }
         }
       }
@@ -1147,7 +1109,8 @@ const sourceEvent = () => {
   }
 }
 
-.w-btn {
-  width: 70px;
+:deep(.monaco-editor) {
+  --vscode-editorGutter-background: var(--td-bg-content-input-2);
+  --vscode-editor-background: var(--td-bg-content-input-2);
 }
 </style>
