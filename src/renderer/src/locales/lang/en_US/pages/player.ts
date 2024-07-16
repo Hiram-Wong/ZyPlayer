@@ -28,8 +28,8 @@ export default {
     playing: 'play',
   },
   infiniteLoading: {
-    complete: 'load complete',
-    error: 'load error',
+    complete: 'Load Complete',
+    error: 'Load Error',
   },
   message: {
     success: 'Success',

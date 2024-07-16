@@ -23,7 +23,13 @@ export function delStar(id) {
   return request({
     url: `/v1/star/${id}`,
     method: 'delete',
-    params: {},
+  });
+}
+
+export function clearStar() {
+  return request({
+    url: `/v1/star/clear`,
+    method: 'delete',
   });
 }
 

@@ -36,7 +36,7 @@ export default {
   },
   inputUrl: 'Enter a link to make the world full of love',
   infiniteLoading: {
-    complete: 'load complete',
-    error: 'load error'
+    complete: 'Load Complete',
+    error: 'Load Error'
   }
 }

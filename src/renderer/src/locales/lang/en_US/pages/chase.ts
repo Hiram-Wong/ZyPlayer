@@ -1,8 +1,26 @@
 export default {
   name: 'Moment',
-  like: 'Liked',
-  history: 'History',
-  update: 'UpDate',
+  history: {
+    clearAll: 'Clear',
+    title: 'History',
+  },
+  binge: {
+    title: 'Favorite',
+    checkUpdate: 'Update',
+    isUpdate: 'Updated',
+    clearAll: 'Clear',
+    message: {
+      noCheckData: 'No detected data, skip this operation',
+    }
+  },
+  dialog: {
+    clearAll: {
+      header: 'Delete the record',
+      body: 'Are you sure you want to delete all records? Recovery is not supported after deletion.'
+    },
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+  },
   date: {
     today: 'Today',
     week: 'Within seven days',
@@ -10,12 +28,12 @@ export default {
   },
   progress: {
     watched: 'Finished',
-    watching: 'Watch'
+    watching: 'Seen'
   },
   infiniteLoading: {
-    complete: 'load complete',
-    error: 'load error'
+    complete: 'Load Complete',
+    error: 'Load Error'
   },
-  sourceDeleted: 'source should be deleted',
+  sourceDeleted: 'Source not exist',
   reqError: 'The request resource station failed, please check the network'
 }

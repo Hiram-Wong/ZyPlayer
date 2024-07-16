@@ -2,10 +2,10 @@ export default {
   name: 'IPTV',
   delay: 'Delay',
   infiniteLoading: {
-    complete: 'load complete',
-    error: 'load error',
-    noMore: 'nothing more',
-    noData: 'no data, please go Setting-IptvSetting set default source'
+    complete: 'Load Complete',
+    error: 'Load Error',
+    noMore: 'Nothing More',
+    noData: 'No data, Please go Setting-IptvSetting set default source'
   },
   contextMenu: {
     copyChannel: 'Copy Channel',
