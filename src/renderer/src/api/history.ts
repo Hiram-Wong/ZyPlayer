@@ -34,6 +34,16 @@ export function clearHistorySearchList() {
   });
 }
 
+export function clearHistoryFilmList() {
+  return request({
+    url: '/v1/history/clear',
+    method: 'delete',
+    params: {
+      action: 'film',
+    },
+  });
+}
+
 // 获取search历史列表
 export function fetchHistorySearchList() {
   return request({
