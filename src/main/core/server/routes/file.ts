@@ -9,68 +9,71 @@ const BASE_PATH = join(app.getPath('userData'), 'file'); // 文件路径
 
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.delete(
-    `/${API_VERSION}/file/:filename(.*)`,
+    `/${API_VERSION}/file/*`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
       try {
-        // @ts-ignore
-        const filename = req.params['*'];
-        const path = join(BASE_PATH, filename);
+        const fileName = (req.params as { '*': string })['*'];
+        const filePath = join(BASE_PATH, fileName);
+        const exists = await fs.pathExists(filePath);
 
-        const exists = await fs.pathExists(path);
         if (exists) {
-          await fs.unlink(path);
-          reply.code(200).send({ message: 'File deleted successfully' });
+          await fs.unlink(filePath);
+          reply.code(200).send({ code: 200, msg: 'file deleted successfully' });
         } else {
-          reply.code(404).send({ error: 'File not found' });
+          reply.code(404).send({ code: 404, msg: 'file not found' });
         }
       } catch (err) {
-        reply.code(500).send(err);
+        reply.code(500).send({ code: 500, msg: err });
       }
     },
   );
   fastify.get(
     `/${API_VERSION}/file/*`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
-      // 注入给index.js文件main函数里使用
       const pathLib = {
         join,
         dirname,
         readDir: fs.readdirSync,
         readFile: fs.readFileSync,
         stat: fs.statSync,
-      };
+      }; // 注入给index.js文件main函数里使用
+
       try {
-        // @ts-ignore
-        const filename = req.params['*'];
-        let path = join(BASE_PATH, filename);
-        const exists = await fs.pathExists(path);
-        let content = '';
+        const fileName = (req.params as { '*': string })['*'];
+        const filePath = join(BASE_PATH, fileName);
+        const exists = await fs.pathExists(filePath);
+
+        let response = '';
         if (exists) {
-          if (pathLib.stat(path).isDirectory()) {
-            path = pathLib.join(path, './index.js');
-            content = await fs.readFile(path, 'utf8');
-          } else {
-            content = await fs.readFile(path, 'utf8');
-          }
-          const path_dir = dirname(path);
-          let response: string = '';
-          if (path.endsWith('index.js')) {
-            console.log('path_dir:', path_dir);
-            try {
-              response = await eval(content + '\nmain()');
-              await fs.writeFile(path.replace('index.js','index.json'), response, 'utf-8');
-            } catch (e) {
-              response = `发生了错误:${e.message}}`;
+          const stats = await fs.statSync(filePath);
+          if (stats.isDirectory()) {
+            const indexPath = join(filePath, './index.js');
+            const indexStats = await fs.statSync(indexPath);
+
+            if (indexStats.isFile()) {
+              const content = await fs.readFile(indexPath, 'utf8');
+              try {
+                const path_dir = dirname(indexPath);
+                const func = new Function('pathLib', 'path_dir', `return (${content});`);
+                // response = await eval(content + '\nmain()');
+                response = await func(pathLib, path_dir)();
+                await fs.writeFile(indexPath.replace('index.js', 'index.json'), response, 'utf-8');
+              } catch (err) {
+                response = `Error: ${(err as Error).message}`;
+                return reply.code(500).send(response);
+              }
+            } else {
+              return reply.code(404).send({ code: 404, msg: 'index.js not found' });
             }
-          } else {
-            response = content;
+          } else if (stats.isFile()) {
+            response = await fs.readFile(filePath, 'utf8');
           }
           reply.code(200).send(response);
         } else {
-          reply.code(404).send({ error: 'File not found' });
+          reply.code(404).send({ code: 404, msg: 'file not found' });
         }
       } catch (err) {
-        reply.code(500).send(err);
+        reply.code(500).send({ code: 500, msg: err });
       }
     },
   );
@@ -113,7 +116,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       reply.code(200).send(doc);
     } catch (err) {
-      reply.code(500).send(err);
+      reply.code(500).send({ code: 500, msg: err });
     }
   });
 };
