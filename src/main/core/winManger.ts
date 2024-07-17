@@ -156,7 +156,7 @@ const createPlay = () => {
     height: db.status ? db.position.height : 550,
     x: db.status ? db.position.x : null,
     y: db.status ? db.position.y : null,
-    minWidth: 516,
+    minWidth: 525,
     minHeight: 280,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#000' : '#fff',
     // titleBarStyle: 'hidden',
