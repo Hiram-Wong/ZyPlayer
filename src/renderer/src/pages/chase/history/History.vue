@@ -74,7 +74,7 @@ import moment from 'moment';
 import { DeleteIcon, LaptopIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, ref, reactive } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
@@ -136,19 +136,19 @@ const siteConfig = ref({
   data: []
 });
 
+onMounted(async () => {
+  const site_res = await fetchSiteList();
+  if (_.has(site_res, "data") && !_.isEmpty(site_res["data"])) {
+    siteConfig.value.data = site_res["data"]
+  }
+});
+
 const getHistoryList = async () => {
   let length = 0;
   try {
     const { pageIndex, pageSize } = pagination.value;
 
-    const [history_res, site_res] = await Promise.all([
-      fetchHistoryList(pageIndex, pageSize, "film"),
-      fetchSiteList()
-    ]);
-
-    if (_.has(site_res, "data") && !_.isEmpty(site_res["data"])) {
-      siteConfig.value.data = site_res["data"]
-    }
+    const history_res = await fetchHistoryList(pageIndex, pageSize, "film");
 
     for (const item of history_res.data) {
       const findItem: any = siteConfig.value.data.find(({ id }) => id === item.relateId);

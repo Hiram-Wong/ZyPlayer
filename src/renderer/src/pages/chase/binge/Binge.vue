@@ -68,7 +68,7 @@ import PQueue from 'p-queue';
 import { AssignmentCheckedIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { ref, reactive } from 'vue';
+import { onMounted, ref, reactive } from 'vue';
 
 import { clearStar, delStar, fetchStarList } from '@/api/star';
 import { fetchSiteList } from '@/api/site';
@@ -122,19 +122,19 @@ const siteConfig = ref({
 
 const infiniteId = ref(+new Date());
 
+onMounted(async () => {
+  const site_res = await fetchSiteList();
+  if (_.has(site_res, "data") && !_.isEmpty(site_res["data"])) {
+    siteConfig.value.data = site_res["data"]
+  }
+});
+
 const getBingeList = async () => {
   let length = 0;
   try {
     const { pageIndex, pageSize } = pagination.value;
 
-    const [star_res, site_res] = await Promise.all([
-      fetchStarList(pageIndex, pageSize),
-      fetchSiteList()
-    ]);
-
-    if (_.has(site_res, "data") && !_.isEmpty(site_res["data"])) {
-      siteConfig.value.data = site_res["data"]
-    }
+    const star_res = await fetchStarList(pageIndex, pageSize);
 
     for (const item of star_res.data) {
       const findItem: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
