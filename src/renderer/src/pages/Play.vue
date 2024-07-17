@@ -2,9 +2,9 @@
   <div class="container">
     <div class="container-header" :class="!isVisible.macMaximize ? 'drag' : 'no-drag'">
       <div class="left no-drag"
-        :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '60px' : '0' }">
+        :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '68px' : '0' }">
         <div class="open-main-win" @click="openMainWinEvent">
-          <home-icon size="large" />
+          <home-icon />
           <span class="tip-gotomain">{{ $t('pages.player.header.backMain') }}</span>
         </div>
       </div>
@@ -14,10 +14,10 @@
       </div>
       <div class="right no-drag">
         <div class="system-functions">
-          <div v-if="type === 'film'" class="setting">
-            <div class="popup item" @click="isSettingVisible = true">
-              <setting-icon size="1.3em" />
-            </div>
+          <div v-if="type === 'film'" class="setting system-function">
+            <t-button theme="default" shape="square" variant="text" @click="isSettingVisible = true">
+              <setting-icon />
+            </t-button>
             <t-dialog v-model:visible="isSettingVisible" :header="$t('pages.player.setting.title')" placement="center"
               width="508" :footer=false>
               <div class="setting-warp">
@@ -55,14 +55,14 @@
               </div>
             </t-dialog>
           </div>
-          <div class="staple">
-            <div class="popup item" @click="toggleAlwaysOnTop">
-              <pin-filled-icon v-if="isVisible.pin" size="1.3em" />
-              <pin-icon v-else size="1.3em" />
-            </div>
+          <div class="staple system-function">
+            <t-button theme="default" shape="square" variant="text" @click="toggleAlwaysOnTop">
+              <pin-filled-icon v-if="isVisible.pin" />
+              <pin-icon v-else />
+            </t-button>
           </div>
         </div>
-        <system-control v-if="platform !== 'darwin'" />
+        <system-control class="mg-left window" />
       </div>
     </div>
     <div class="container-main">
@@ -1267,7 +1267,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
   height: calc(100vh);
   width: calc(100vw);
   overflow-y: hidden;
-  background: var(--td-bg-aside);
+  background: var(--td-bg-color-page);
 
   .nowrap {
     display: inline-block;
@@ -1293,13 +1293,15 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
   }
 
   .container-header {
-    height: var(--td-comp-size-xxxl);
-    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    white-space: nowrap;
-    padding: 10px 15px;
+    height: 32px;
+    margin: var(--td-comp-margin-m) var(--td-comp-margin-xs);
+
+    .mg-left {
+      margin-left: 20px;
+    }
 
     .left {
       .open-main-win {
@@ -1309,8 +1311,8 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
         align-items: center;
         height: 32px;
         width: 120px;
-        border-radius: var(--td-radius-medium);
-        background-color: var(--td-bg-content-active-1);
+        border-radius: var(--td-radius-default);
+        background-color: var(--td-bg-color-container);
         padding: 2px 10px;
         transition: 0.15s linear;
         cursor: pointer;
@@ -1321,7 +1323,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
         }
 
         &:hover {
-          background-color: var(--td-bg-content-hover-1);
+          background-color: var(--td-bg-content-hover-2);
         }
       }
     }
@@ -1342,29 +1344,56 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
 
     .right {
       display: flex;
-
-      .popup {
-        margin-left: var(--td-comp-margin-xs);
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .item {
-        cursor: pointer;
-        text-align: center;
-
-        :hover {
-          // fill: var(--td-primary-color);
-        }
-      }
+      height: 100%;
 
       .system-functions {
         display: flex;
         align-items: center;
         justify-content: space-around;
+        background: var(--td-bg-color-container);
+        border-radius: var(--td-radius-default);
+
+        &>.system-function:first-of-type {
+          margin-left: 0;
+        }
+
+        .system-function {
+          margin-left: var(--td-comp-margin-xs);
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          :deep(.t-button) {
+            &:not(.t-is-disabled):not(.t-button--ghost) {
+              --ripple-color: transparent;
+            }
+          }
+
+          :deep(.t-button__text) {
+            svg {
+              color: rgba(132, 133, 141, 0.8);
+            }
+          }
+
+          :deep(.t-button--variant-text) {
+            &:hover {
+              border-color: transparent;
+              background-color: transparent;
+
+              .t-button__text {
+                svg {
+                  color: var(--td-primary-color);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .window {
+        height: 100%;
       }
     }
   }
@@ -1987,69 +2016,108 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
 
 @media only screen and (max-width: 640px) {
   .container {
-    -webkit-app-region: drag;
-  }
-
-  .container:hover>.container-header {
-    opacity: 1;
-    pointer-events: auto;
-    transition: opacity 0.15s linear 0s, visibility 0s linear 0s;
-  }
-
-  .container-header {
-    background: linear-gradient(360deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .8)) !important;
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
-    z-index: 999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s linear 3s, visibility 0s linear 3s;
+    overflow: auto;
 
-    .left {
-      .open-main-win {
-        background-color: transparent !important;
-        color: #f3f3f3;
-        width: auto !important;
+    &:hover>.container-header {
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 0.15s linear 0s, visibility 0s linear 0s;
+    }
 
-        .tip-gotomain {
+    .container-header {
+      background: linear-gradient(360deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .8));
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s linear 3s, visibility 0s linear 3s;
+      height: 56px;
+      margin: 0;
+      padding: var(--td-comp-paddingTB-xl) var(--td-comp-paddingLR-xs);
+
+      .left {
+        .open-main-win {
+          background-color: transparent !important;
+          color: #f3f3f3;
+          width: auto !important;
+
+          .tip-gotomain {
+            display: none !important;
+          }
+
+          &:hover {
+            background-color: transparent !important;
+            color: #fbfbfb;
+          }
+        }
+      }
+
+      .spacer {
+        color: #fbfbfb;
+      }
+
+      .right {
+        color: #fbfbfb;
+
+        .system-functions {
+          background-color: transparent !important;
+
+          .staple {
+            margin-left: 0;
+
+            svg {
+              color: #fbfbfb !important;
+            }
+
+            &:hover {
+              background-color: transparent !important;
+              color: #fbfbfb !important;
+            }
+          }
+
+          .setting {
+            display: none !important;
+          }
+        }
+
+        .window {
+          margin-left: 0 !important;
+          background-color: transparent !important;
+          --tb-control-hover-color: transparent !important;
+          --tb-control-symbol-color: #fbfbfb !important;
+          --tb-control-close-symbol-color: #fbfbfb !important;
+
+
+        }
+
+        .window :deep(.titlebar__window-controls) {
+          .window__control {
+            cursor: pointer !important;
+          }
+
+          .window__control-close:hover {
+            background-color: transparent !important;
+          }
+        }
+      }
+    }
+
+    .container-main {
+      height: 100vh;
+
+      .player {
+        .dock-show {
           display: none !important;
         }
-
-        &:hover {
-          background-color: transparent !important;
-          color: #fbfbfb;
-        }
       }
-    }
 
-    .spacer {
-      color: #fbfbfb;
-    }
-
-    .right {
-      color: #fbfbfb;
-
-      .system-functions {
-        .setting {
-          display: none;
-        }
-      }
-    }
-  }
-
-  .container-main {
-    height: 100% !important;
-
-    .player {
-      .dock-show {
+      .aside {
         display: none !important;
       }
-    }
-
-    .aside {
-      display: none !important;
     }
   }
 }
