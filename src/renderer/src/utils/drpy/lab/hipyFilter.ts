@@ -67,7 +67,7 @@ const getFilters = (
       c = pdfa(html, item as string);
     }
 
-    c.forEach((it, i) => {
+    c.forEach((it, _i) => {
       let n = '';
       if (name && name.startsWith('s:')) {
         n = name.replace('s:', '');
@@ -75,11 +75,14 @@ const getFilters = (
         n = pdfh(it, name);
       }
 
-      if (rename != '') {
-        n = eval('n' + rename);
+      if (rename !== '') {
+        const func = new Function('str', `return (str${rename});`);
+        n = func(n);
+        // n = eval('n' + rename);
       }
+
       let k = '';
-      if (key == '') {
+      if (key === '') {
         k = n;
       } else if (key.startsWith('s:')) {
         k = key.replace('s:', '');
