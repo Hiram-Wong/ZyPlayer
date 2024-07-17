@@ -372,9 +372,25 @@ const decodeHtml = (str: string) => {
   return he.decode(str);
 };
 
+const getPublicIp = async () => {
+  const urls = ['https://ipv6.icanhazip.com', 'https://ipv4.icanhazip.com'];
+
+  for (const url of urls) {
+    try {
+      const response = await request({ url, method: 'GET' });
+      if (response) return response.trim();
+    } catch (err) {
+      console.info(`[tool][getPublicIp] Error fetching from ${url}:`, err);
+    }
+  }
+
+  return null;
+};
+
 export {
   getConfig,
   getHtml,
+  getPublicIp,
   supportedFormats,
   getMeadiaType,
   checkMediaType,

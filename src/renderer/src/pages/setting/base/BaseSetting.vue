@@ -160,20 +160,20 @@
 
 <script setup lang="ts">
 import { useEventBus } from '@vueuse/core';
+import { ipVersion } from 'is-ip';
 import _ from 'lodash';
 import { CloseIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch, reactive } from 'vue';
-import { publicIp } from 'public-ip';
-
-import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
-import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
-import SettingLightIcon from '@/assets/assets-setting-light.svg';
 
 import { fetchSettingList, updateSetting, clearDb } from '@/api/setting';
 import { usePlayStore, useSettingStore } from '@/store';
 import { t } from '@/locales';
+import { getPublicIp } from '@/utils/tool';
 
+import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
+import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
+import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import DialogDataView from './components/DialogData.vue';
 import DialogUaView from './components/DialogUA.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
@@ -229,7 +229,7 @@ const PLAYER_OPTIONS = computed(() => {
   ]
 });
 
-const shortcutInputRef = ref(null) as Ref<HTMLInputElement | null>;
+const shortcutInputRef = ref<HTMLInputElement | null>(null);
 const placeholderShortcut = ref(t('pages.setting.placeholder.shortcutKeyTip'));
 const statusShortcut = ref('default');
 const tipShortcut = ref('');
@@ -365,7 +365,7 @@ watch(formData,
         snifferMode: formData.value.snifferMode,
         barrage: formData.value.barrage
       },
-    });
+    } as any);
     if (newValue) {
       updateSetting(newValue)
     }
@@ -686,13 +686,10 @@ const flushDialogData = (item) => {
 // ipv6检查
 const checkIpv6 = async () => {
   try {
-    const ip = await publicIp(); // Falls back to IPv4
-
-    const ipv4Regex: RegExp = /^((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])(?::(?:[0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$/
-    const ipv6Regex: RegExp = /(^(?:(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}:[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){5}:([0-9A-Fa-f]{1,4}:)?[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){4}:([0-9A-Fa-f]{1,4}:){0,2}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){3}:([0-9A-Fa-f]{1,4}:){0,3}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){2}:([0-9A-Fa-f]{1,4}:){0,4}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(([0-9A-Fa-f]{1,4}:){0,5}:((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(::([0-9A-Fa-f]{1,4}:){0,5}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|([0-9A-Fa-f]{1,4}::([0-9A-Fa-f]{1,4}:){0,5}[0-9A-Fa-f]{1,4})|(::([0-9A-Fa-f]{1,4}:){0,6}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){1,7}:))$)|(^\[(?:(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}:[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){5}:([0-9A-Fa-f]{1,4}:)?[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){4}:([0-9A-Fa-f]{1,4}:){0,2}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){3}:([0-9A-Fa-f]{1,4}:){0,3}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){2}:([0-9A-Fa-f]{1,4}:){0,4}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){6}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(([0-9A-Fa-f]{1,4}:){0,5}:((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|(::([0-9A-Fa-f]{1,4}:){0,5}((\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b)\.){3}(\b((25[0-5])|(1\d{2})|(2[0-4]\d)|(\d{1,2}))\b))|([0-9A-Fa-f]{1,4}::([0-9A-Fa-f]{1,4}:){0,5}[0-9A-Fa-f]{1,4})|(::([0-9A-Fa-f]{1,4}:){0,6}[0-9A-Fa-f]{1,4})|(([0-9A-Fa-f]{1,4}:){1,7}:))\](?::(?:[0-9]|[1-9][0-9]{1,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$)/i
-
-    if (ip.match(ipv4Regex)) formData.value.iptvSkipIpv6 = true;
-    if (ip.match(ipv6Regex)) formData.value.iptvSkipIpv6 = false;
+    const ip = await getPublicIp();
+    const version = ipVersion(ip);
+    if (version === 4) formData.value.iptvSkipIpv6 = true;
+    if (version === 6) formData.value.iptvSkipIpv6 = false;
     MessagePlugin.success(`${t('pages.setting.message.networkAddress')}: ${ip}`);
   } catch (err) {
     MessagePlugin.error(`${t('pages.setting.message.networkCheckError')}: ${err}`);
