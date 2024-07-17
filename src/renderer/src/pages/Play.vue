@@ -2037,7 +2037,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
       transition: opacity 0.15s linear 3s, visibility 0s linear 3s;
       height: 56px;
       margin: 0;
-      padding: var(--td-comp-paddingTB-xl) var(--td-comp-paddingLR-xs);
+      padding: var(--td-comp-paddingTB-xxxs) var(--td-comp-paddingLR-xs) 0;
 
       .left {
         .open-main-win {
@@ -2085,22 +2085,22 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
         }
 
         .window {
-          margin-left: 0 !important;
+          margin: 12px 0 0 0 !important;
+          border-radius: 0 !important;
           background-color: transparent !important;
+          cursor: pointer;
           --tb-control-hover-color: transparent !important;
           --tb-control-symbol-color: #fbfbfb !important;
           --tb-control-close-symbol-color: #fbfbfb !important;
 
+          :deep(.titlebar__window-controls) {
+            .window__control {
+              cursor: pointer !important;
+            }
 
-        }
-
-        .window :deep(.titlebar__window-controls) {
-          .window__control {
-            cursor: pointer !important;
-          }
-
-          .window__control-close:hover {
-            background-color: transparent !important;
+            .window__control-close:hover {
+              background-color: transparent !important;
+            }
           }
         }
       }
