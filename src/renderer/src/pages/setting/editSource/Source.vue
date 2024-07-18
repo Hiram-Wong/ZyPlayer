@@ -887,7 +887,7 @@ const toolEvent = async () => {
 };
 
 const helpEvent = () => {
-  window.electron.ipcRenderer.send('open-url', 'https://zy.catni.cn/edit-source.html')
+  window.electron.ipcRenderer.send('open-url', 'https://github.com/Hiram-Wong/ZyPlayer/wiki/%E5%86%99%E6%BA%90%E5%B7%A5%E5%85%B7');
 };
 
 const changeNav = async (nav = '', action = '') => {
