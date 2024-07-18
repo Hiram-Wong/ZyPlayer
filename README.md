@@ -1,17 +1,19 @@
 <p align="center">
-<img width="128" src="https://s2.loli.net/2024/02/29/7Q1nVbhkHdSmo5D.png" >
+  <img width="128" src="https://s2.loli.net/2024/02/29/7Q1nVbhkHdSmo5D.png" >
 </p>
 <p align="center">
-<a href="https://zy.catni.cn/" target="_blank">文档</a>
-<a href="https://github.com/Hiram-Wong/ZyPlayer/issues" target="_blank">反馈</a>
-<a href="https://github.com/Hiram-Wong/ZyPlayer/releases" target="_blank">下载</a>
+  <a href="https://github.com/Hiram-Wong/ZyPlayer/wiki" target="_blank">文档</a>
+  <a href="https://github.com/Hiram-Wong/ZyPlayer/issues" target="_blank">反馈</a>
+  <a href="https://github.com/Hiram-Wong/ZyPlayer/releases" target="_blank">下载</a>
 </p>
 
 # 软件介绍
 
-ZyPlayer 是一款采用现代化技术栈开发的全功能媒体播放器，它基于 `electron-vite` 框架，集成了 `TDesign` UI 组件库与 `Vue3` 全家桶，以清新的薄荷绿为主题，旨在为用户提供流畅的跨平台娱乐体验。
+ZyPlayer是一款采用现代化技术栈开发的高颜值媒体播放器，它基于 `electron-vite` 框架，集成了 `TDesign` UI 组件库与 `Vue3` 全家桶，以清新的薄荷绿为主题，旨在为用户提供流畅的跨平台娱乐体验。
 
 **重要提醒**: 仅此Github发布，请勿上当受骗；请各位公众号、QQ群、博客的管理者不要费力宣传及引流本软件!
+
+**重要提醒**: 请务必在有能力的情况请支持正版，我们不提倡盗版!
 
 **重要提醒**: 在开始使用前，请务必详读并同意用户协议，确保遵守相关规定!
 
@@ -34,36 +36,37 @@ ZyPlayer 是一款采用现代化技术栈开发的全功能媒体播放器，�
 13. 本免责声明适用于本软件的所有用户。本软件保留随时修改、更新本声明的权利，并以Github Readme、软件更新等形式通知用户。请您定期查阅并遵守最新的免责声明。
 
 请您在使用本软件之前认真阅读并理解本免责声明的所有内容，感谢您的理解和支持。
+
 </details>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date)](https://star-history.com/#Hiram-Wong/ZyPlayer&Date)
 
 ## 🎉 功能亮点
 
-- **广泛兼容**：全面支持 Windows、Mac、Linux 系统。
+- **广泛兼容**：跨平台支持 Windows、Mac、Linux 系统。
 - **深色模式**：适配夜间使用，保护视力。
 - **资源站接入**：轻松管理 json、xml 等格式的 CMS。
-- **IPTV 支持**：无缝播放 m3u、genre 格式及集成 EPG。
-- **视频平台解析**：解锁主流在线视频内容。
+- **IPTV 支持**：无缝播放 m3u、genre 等格式。
 - **快捷隐藏**：内置老板键，隐私保护一键到位。
 - **多播放器**：内置多种播放器核心，满足不同需求。
+- **更多内容**: 自行探索...
 
 ### 🖼️ 屏幕截图预览
 
 <details>
 <summary>展开查看软件截图</summary>
 
-|                           影视(首页)                           |                             影视(搜索)                             |
-| :-------------------------------------------------------------: | :-----------------------------------------------------------------: |
-| ![影视](https://s2.loli.net/2024/02/29/XvoZTeLMDAz87N5.png) | ![影视搜索](https://s2.loli.net/2024/02/29/kb5Hs9hfuBeVaY1.png) |
-|                           影视(播放)                           |                             影视 (介绍)                             |
-| ![影视播放](https://s2.loli.net/2023/05/07/fgmbdXQvPE73WCY.png) |   ![影视详情](https://s2.loli.net/2024/03/18/hIYEDRKmOrQq4ya.png)   |
-|                          网盘                           |                             直播(首页)                              |
-| ![网盘](https://s2.loli.net/2024/02/29/CpNc4wisOgKQbSM.png) |   ![直播首页](https://s2.loli.net/2024/02/29/hpCKzaD7ryWAqY9.png)   |
-|                           直播(播放)                            |                                解析                                 |
-| ![直播播放](https://s2.loli.net/2024/02/29/aS8UgwBsVNeDzvi.png) |     ![解析](https://s2.loli.net/2024/02/29/3mef2sdDrXoqtjW.png)     |
-|                            历史记录                             |                                在追                                 |
-| ![历史](https://s2.loli.net/2024/02/29/IN2bE5PHSdgew7l.png) |     ![在追](https://s2.loli.net/2024/02/29/EWryHtxd5TZliO6.png)     |
+|                           影视(首页)                            |                           影视(搜索)                            |
+| :-------------------------------------------------------------: | :-------------------------------------------------------------: |
+|   ![影视](https://s2.loli.net/2024/02/29/XvoZTeLMDAz87N5.png)   | ![影视搜索](https://s2.loli.net/2024/02/29/kb5Hs9hfuBeVaY1.png) |
+|                           影视(播放)                            |                           影视 (介绍)                           |
+| ![影视播放](https://s2.loli.net/2023/05/07/fgmbdXQvPE73WCY.png) | ![影视详情](https://s2.loli.net/2024/03/18/hIYEDRKmOrQq4ya.png) |
+|                              网盘                               |                           直播(首页)                            |
+|   ![网盘](https://s2.loli.net/2024/02/29/CpNc4wisOgKQbSM.png)   | ![直播首页](https://s2.loli.net/2024/02/29/hpCKzaD7ryWAqY9.png) |
+|                           直播(播放)                            |                              解析                               |
+| ![直播播放](https://s2.loli.net/2024/02/29/aS8UgwBsVNeDzvi.png) |   ![解析](https://s2.loli.net/2024/02/29/3mef2sdDrXoqtjW.png)   |
+|                            历史记录                             |                              在追                               |
+|   ![历史](https://s2.loli.net/2024/02/29/IN2bE5PHSdgew7l.png)   |   ![在追](https://s2.loli.net/2024/02/29/EWryHtxd5TZliO6.png)   |
 
 </details>
 
@@ -90,18 +93,22 @@ ZyPlayer 是一款采用现代化技术栈开发的全功能媒体播放器，�
 
 ## 🛠️ 下载与安装
 
-> **最新版下载**: 访问 [GitHub 发布页面](https://github.com/Hiram-Wong/ZyPlayer/releases) 获取。
+> **最新发布版下载**: 访问 [GitHub Releases页面](https://github.com/Hiram-Wong/ZyPlayer/releases) 获取。
+
+> **最新开发版下载**: 访问 [GitHub Actions页面](https://github.com/Hiram-Wong/ZyPlayer/actions) 获取。
+
 
 ### macOS 安装问题解决方案
 
 若遇到“已损坏”提示，执行以下命令修复权限
+
 ```bash
 sudo xattr -cr /Applications/zyplayer.app
 ```
 
 ### Linux Appimage桌面快捷方式设置
 
-``` bash
+```bash
 [1] 选择一张icon图标下载
 [2] 在任意位置新建一个名为zyplayer.desktop的文件，并写入如下内容
     [Desktop Entry]
@@ -136,6 +143,7 @@ sudo xattr -cr /Applications/zyplayer.app
 <summary>展开查看接口说明</summary>
 
 > 配置导入格式(备份数据建议此格式)
+
 ```json
 {
   "analyze": [
@@ -161,14 +169,14 @@ sudo xattr -cr /Applications/zyplayer.app
       "id": "0ede1ecd-de69-1042-15d9-4e5e9e3bb897", // id唯一值不可重复,不能数字,建议 uuid
       "name": "CCTV6", // 名称
       "url": "http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221226393/index.m3u8", // 播放地址
-      "group": "央视"  // 分组
+      "group": "央视" // 分组
     }
   ],
   "sites": [
     {
       "id": "51793af6-c923-5504-85db-0ef686624dec", // id唯一值不可重复,不能数字,建议 uuid
       "name": "39影视", // 名称
-      "api": "https://www.39kan.com/api.php/provide/vod/",  // 站点源地址
+      "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
       "playUrl": "", // 配合解析去url地址
       "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
       "group": "切片", // 分组
@@ -176,31 +184,31 @@ sudo xattr -cr /Applications/zyplayer.app
       "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
       "ext": "", // 扩展参数
       "categories": "电视,影视" // 按顺序展示所配置的分类 不配置则默认展示所有分类
-    },
+    }
   ],
   "drive": [
     {
       "id": "3293dc45-cf14-9c66-3028-5b7765b240b7", // id唯一值不可重复,不能数字,建议 uuid
-      "name": "🙋丫仙女",  // 名称
-      "server": "http://alist.xiaoya.pro/",  // 网盘地址
-      "startPage": "",  // 开始页路径
-      "search": false,  // 是否支持搜索 true启用 false 禁用
-      "headers": null,  // 请求头
-      "params": null,  // 参数
+      "name": "🙋丫仙女", // 名称
+      "server": "http://alist.xiaoya.pro/", // 网盘地址
+      "startPage": "", // 开始页路径
+      "search": false, // 是否支持搜索 true启用 false 禁用
+      "headers": null, // 请求头
+      "params": null, // 参数
       "isActive": true // 是否启用 true启用 false 禁用
     }
   ],
   "setting": [
     {
       "version": "3.3.2", // [3.3.2版本启用]当前版本 (一定要根据实际填写,不然数据库执行会报错)
-      "theme": "auto",  // 主题 auto:跟随系统 light:亮色 dark:暗色
-      "lang": "zh_CN",  // [3.3.4版本启用]语言 zh_CN:中文 en_US:英文
-      "defaultHot": "kylive",  // 热搜 kylive:酷云数据 enlightent:云合数据
+      "theme": "auto", // 主题 auto:跟随系统 light:亮色 dark:暗色
+      "lang": "zh_CN", // [3.3.4版本启用]语言 zh_CN:中文 en_US:英文
+      "defaultHot": "kylive", // 热搜 kylive:酷云数据 enlightent:云合数据
       "defaultSearchRecommend": "site", // 搜索推荐 site:站点 quark:夸克 baidu:百度 douban:豆瓣  弃用
       "defaultSearchType": "site", // 全局搜索模式 site:本站 group:组内 all:全部
-      "defaultCheckModel": true,  // [弃用] 忘了干嘛的
-      "defaultChangeModel": false,  // [弃用] 忘了干嘛的
-      "pauseWhenMinimize": false,  // [弃用] 最小化时暂停
+      "defaultCheckModel": true, // [弃用] 忘了干嘛的
+      "defaultChangeModel": false, // [弃用] 忘了干嘛的
+      "pauseWhenMinimize": false, // [弃用] 最小化时暂停
       "defaultIptvEpg": "https://epg.112114.eu.org/", // iptv epg
       "defaultIptvLogo": "https://epg.112114.eu.org/logo/", // iptv logo
       "iptvSkipIpv6": true, // iptv是否跳过ipv6节目
@@ -214,65 +222,50 @@ sudo xattr -cr /Applications/zyplayer.app
       "barrage": {
         "url": "", // 弹幕地址
         "key": "danmuku", // 弹幕接口返回数据对应的key
-        "support": [
-          "qq",
-          "qiyi",
-          "youku",
-          "mgtv"
-        ], // 弹幕支持的线路
+        "support": ["qq", "qiyi", "youku", "mgtv"], // 弹幕支持的线路
         "start": "0", // 弹幕接口返回数据对应的开始时间的位置
         "mode": "1", // 弹幕接口返回数据对应的位置的位置
         "color": "2", // 弹幕接口返回数据对应的颜色的位置
         "content": "4" // 弹幕接口返回数据对应的内容的位置
       }, // [3.3.4版本启用]弹幕参数
-      "analyzeFlag": [
-        "youku",
-        "qq",
-        "iqiyi",
-        "qiyi",
-        "letv",
-        "sohu",
-        "tudou",
-        "pptv",
-        "mgtv"
-      ],  // 解析标识
+      "analyzeFlag": ["youku", "qq", "iqiyi", "qiyi", "letv", "sohu", "tudou", "pptv", "mgtv"], // 解析标识
       "broadcasterType": "xgplayer", // [3.3.4版本弃用,使用playerMode参数]播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合externalPlayer
       "externalPlayer": "", // [3.3.4版本弃用,使用playerMode参数]播放器为custom,调用此处系统命令
       "playerMode": {
-        "type": "xgplayer",  // 播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合external
-        "external": ""  // 播放器为custom,调用此处系统命令
-      },  // [3.3.4版本启用]
+        "type": "xgplayer", // 播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合external
+        "external": "" // 播放器为custom,调用此处系统命令
+      }, // [3.3.4版本启用]
       "softSolution": false, // 是否使用软解 预留
       "communitySubscribe": "", // 社区地址 预留
       "skipStartEnd": false, // [3.3.5版本弃用, pinia存储]是否跳过首尾空白
       "agreementMask": true, // 是否同意协议
       "recordShortcut": "Shift+Command+Z", // 录制快捷键
-      "snifferType" : "pie",  // [3.3.4版本弃用,使用snifferMode参数]嗅探模式 pie iframe
+      "snifferType": "pie", // [3.3.4版本弃用,使用snifferMode参数]嗅探模式 pie iframe
       "snifferMode": {
-        "type": "pie",  // 嗅探模式 pie iframe custom
-        "url": ""  // 当 type 为 custom 时填写自定义地址
-      },  // [3.3.4版本启用]
-      "selfBoot": false,  // 是否开机自启动
-      "hardwareAcceleration": true,  // 是否启用硬件加速
-      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",  // UA
-      "webdevUrl": "https://dav.jianguoyun.com/dav/",  // [3.3.4版本弃用,使用webdev参数]webdev同步盘地址 用于备份
-      "webdevUsername": "",  // [3.3.4版本弃用,使用webdev参数]webdev用户名 用于备份
-      "webdevPassword": "",  // [3.3.4版本弃用,使用webdev参数]webdev密码 用于备份
+        "type": "pie", // 嗅探模式 pie iframe custom
+        "url": "" // 当 type 为 custom 时填写自定义地址
+      }, // [3.3.4版本启用]
+      "selfBoot": false, // 是否开机自启动
+      "hardwareAcceleration": true, // 是否启用硬件加速
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36", // UA
+      "webdevUrl": "https://dav.jianguoyun.com/dav/", // [3.3.4版本弃用,使用webdev参数]webdev同步盘地址 用于备份
+      "webdevUsername": "", // [3.3.4版本弃用,使用webdev参数]webdev用户名 用于备份
+      "webdevPassword": "", // [3.3.4版本弃用,使用webdev参数]webdev密码 用于备份
       "webdev": {
-        "sync": false,  // 自动同步
+        "sync": false, // 自动同步
         "data": {
           "url": "https://dav.jianguoyun.com/dav/", // webdev同步盘地址
           "user": "", // webdev用户名
           "password": "" // webdev密码
-        }  // webdev 用于备份
-      },  // [3.3.4版本启用]
-      "restoreWindowPositionAndSize" : false, // 弃用
+        } // webdev 用于备份
+      }, // [3.3.4版本启用]
+      "restoreWindowPositionAndSize": false, // 弃用
       "windowPosition": {
-        "status": false,  // 是否记录窗口位置
+        "status": false, // 是否记录窗口位置
         "position": {
           "width": 1000,
           "height": 640
-        },  // 窗口位置 [3.3.7版本弃用, 使用position_main｜position_play参数]
+        }, // 窗口位置 [3.3.7版本弃用, 使用position_main｜position_play参数]
         "position_main": {
           "width": 1000,
           "height": 640
@@ -280,15 +273,16 @@ sudo xattr -cr /Applications/zyplayer.app
         "position_play": {
           "width": 875,
           "height": 550
-        }, // 窗口位置 [3.3.7版本启用] 记录播放窗口位置
+        } // 窗口位置 [3.3.7版本启用] 记录播放窗口位置
       },
-      "timeout": 5000,  // [3.3.5版本启用] 用于调整全局请求超时事件, 单位毫秒
+      "timeout": 5000 // [3.3.5版本启用] 用于调整全局请求超时事件, 单位毫秒
     }
   ]
 }
 ```
 
 > 一键配置格式(初次使用建议此格式, 仅支持导入源数据和设置默认源标识)
+
 ```json
 {
   "analyze": {
@@ -315,13 +309,13 @@ sudo xattr -cr /Applications/zyplayer.app
       }
     ]
   },
-  "sites":  {
+  "sites": {
     "default": "51793af6-c923-5504-85db-0ef686624dec", // 默认标识 对应需设置为默认的id
     "data": [
       {
         "id": "51793af6-c923-5504-85db-0ef686624dec", // id唯一值不可重复,不能数字,建议 uuid
         "name": "39影视", // 名称
-        "api": "https://www.39kan.com/api.php/provide/vod/",  // 站点源地址
+        "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
         "playUrl": "", // 配合解析去url地址
         "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
         "group": "切片", // 分组
@@ -332,21 +326,22 @@ sudo xattr -cr /Applications/zyplayer.app
       }
     ]
   },
-  "drive":  {
+  "drive": {
     "default": "3293dc45-cf14-9c66-3028-5b7765b240b7", // 默认标识 对应需设置为默认的id
     "data": [
       {
         "id": "3293dc45-cf14-9c66-3028-5b7765b240b7", // id唯一值不可重复,不能数字,建议 uuid
-        "name": "🙋丫仙女",  // 名称
-        "server": "http://alist.xiaoya.pro/",  // 网盘地址
-        "startPage": "",  // 开始页路径
-        "search": false,  // 是否支持搜索 true启用 false 禁用
-        "headers": null,  // 请求头
-        "params": null,  // 参数
+        "name": "🙋丫仙女", // 名称
+        "server": "http://alist.xiaoya.pro/", // 网盘地址
+        "startPage": "", // 开始页路径
+        "search": false, // 是否支持搜索 true启用 false 禁用
+        "headers": null, // 请求头
+        "params": null, // 参数
         "isActive": true // 是否启用 true启用 false 禁用
       }
     ]
   }
 }
 ```
+
 </details>
