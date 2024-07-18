@@ -447,6 +447,12 @@ const changeDefaultEvent = async (id) => {
           width: 100%;
           position: relative;
           z-index: 3;
+
+          :deep(.container-player) {
+            .player-panel {
+              background: transparent;
+            }
+          }
         }
       }
 
