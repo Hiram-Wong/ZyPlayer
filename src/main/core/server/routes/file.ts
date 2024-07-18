@@ -54,7 +54,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
               const content = await fs.readFile(indexPath, 'utf8');
               try {
                 const path_dir = dirname(indexPath);
-                const func = new Function('pathLib', 'path_dir', `return (${content});`);
+                const func = new Function('pathLib', 'path_dir', `${content}\n return main;`);
                 // response = await eval(content + '\nmain()');
                 response = await func(pathLib, path_dir)();
                 await fs.writeFile(indexPath.replace('index.js', 'index.json'), response, 'utf-8');
