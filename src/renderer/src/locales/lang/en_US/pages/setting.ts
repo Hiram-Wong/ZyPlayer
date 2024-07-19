@@ -167,6 +167,7 @@ export default {
     selefBoot: 'SelefBoot',
     hardwareAcceleration: 'HardwareAcceleration',
     windowPosition: 'WindowPosition',
+    debug: 'Debug',
     other: 'Other',
     restoreFactory: 'RestoreFactory',
     dataMange: 'DataMange',

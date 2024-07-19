@@ -89,5 +89,13 @@
       "key": "",
       "model": ""
     }
+  },
+  {
+    "key": "defaultFilterType",
+    "value": "off"
+  },
+  {
+    "key": "debug",
+    "value": false
   }
 ]

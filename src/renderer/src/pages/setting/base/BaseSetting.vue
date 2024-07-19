@@ -134,6 +134,9 @@
           <t-radio v-model="formData.windowPosition.status" allow-uncheck @change="windowPositionEvnet">
             {{ $t('pages.setting.base.windowPosition') }}
           </t-radio>
+          <t-radio v-model="formData.debug" allow-uncheck @change="debugEvnet">
+            {{ $t('pages.setting.base.debug') }}
+          </t-radio>
         </t-space>
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.other')" name="other">
@@ -302,7 +305,8 @@ const formData = ref({
   ua: '',
   communitySubscribe: '',
   webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } },
-  windowPosition: { status: false, position: { width: 1000, height: 640 } }
+  windowPosition: { status: false, position: { width: 1000, height: 640 } },
+  debug: false
 });
 
 const tmp = reactive({
@@ -637,6 +641,11 @@ const windowPositionEvnet = () => {
   MessagePlugin.success(
     formData.value.windowPosition.status ? t('pages.setting.message.windowPositionOn') : t('pages.setting.message.windowPositionOff'),
   );
+};
+
+const debugEvnet = () => {
+  console.log('调试', formData.value.debug);
+  window?.location.reload();
 };
 
 // ua：打开dialog并设置数据

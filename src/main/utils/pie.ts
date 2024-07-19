@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import { nanoid } from 'nanoid';
 import puppeteer from 'puppeteer-core';
 import pie from 'puppeteer-in-electron';
+import { setting } from '../core/db/service';
 import logger from '../core/logger';
 
 interface PieResponse {
@@ -55,7 +56,8 @@ const puppeteerInElectron = async (
 
   try {
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
-    snifferWindow = new BrowserWindow({ show: false }); // 创建无界面窗口
+    const debugStatus = setting.find({ key: 'debug' })?.value || false;
+    snifferWindow = new BrowserWindow({ show: debugStatus }); // 创建无界面窗口
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
     snifferWindow.webContents.setWindowOpenHandler(() => {
       return { action: 'deny' };

@@ -19,6 +19,7 @@ const update3_3_6_to3_3_7 = () => {
     db.get(TABLE_NAME).remove({ key: 'defaultFilterType' }).write();
   };
   db.get(TABLE_NAME).insert({ key: 'defaultFilterType', value: 'off' }).write();
+  db.get(TABLE_NAME).insert({ key: 'debug', value: false }).write();
 
   db.get(TABLE_NAME).find({ key: 'version' }).assign({ key: 'version', value: '3.3.7' }).write();
   logger.info('[db][magrite][update3_3_6_to3_3_7]completed');

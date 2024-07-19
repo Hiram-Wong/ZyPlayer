@@ -487,6 +487,8 @@ const formatSet = (data) => {
         model: ""
       }
     },
+    { key: "defaultFilterType", value: "off" },
+    { key: "debug", value: false },
     { key: "version", value: pkgVersion },
     // ... 其他新键值对
   ];

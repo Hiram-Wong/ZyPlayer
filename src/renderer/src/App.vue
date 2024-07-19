@@ -13,6 +13,7 @@ import { usePlayStore, useSettingStore } from '@/store';
 import { setup } from '@/api/setting';
 import PLAY_CONFIG from '@/config/play';
 import { autoSync } from '@/utils/webdev';
+import { loadExternalResource } from '@/utils/tool';
 
 import DisclaimerView from '@/pages/Disclaimer.vue';
 
@@ -64,7 +65,7 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, playerMode, webdev, barrage, timeout } = await setup();
+  const { agreementMask, theme, playerMode, webdev, barrage, timeout, debug } = await setup();
 
   storeSetting.updateConfig({ mode: theme });
   storeSetting.updateConfig({ webdev: webdev });
@@ -77,6 +78,20 @@ const initConfig = async () => {
   init.playerMode = playerMode;
   init.barrage = barrage;
   storePlayer.updateConfig({ setting: init });
+
+  if (debug) {
+    const status = await loadExternalResource('https://test.jikejishu.com/page-spy/index.min.js', 'js');
+    console.log(status)
+    if (status) {
+      window.$pageSpy = new PageSpy({
+        api: 'test.jikejishu.com',
+        clientOrigin: 'https://test.jikejishu.com',
+        project: 'zyplayer',
+        autoRender: true,
+        title: 'zyplayer for debug',
+      });
+    }
+  }
 }
 
 window.electron.ipcRenderer.on('system-theme-updated', (_, activeTheme) => {

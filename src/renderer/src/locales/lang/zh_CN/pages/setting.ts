@@ -167,6 +167,7 @@ export default {
     selefBoot: '自启动',
     hardwareAcceleration: '硬件加速',
     windowPosition: '窗口位置',
+    debug: '调试',
     other: '其他',
     restoreFactory: '恢复出厂',
     dataMange: '数据管理',
