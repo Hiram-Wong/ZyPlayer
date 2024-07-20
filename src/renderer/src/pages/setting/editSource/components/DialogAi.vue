@@ -26,9 +26,9 @@
                   v-model="formData.config.server" class="input-item"></t-input>
                 <t-input :label="$t('pages.setting.editSource.source.dialog.ai.key')" v-model="formData.config.key"
                   class="input-item" type="password"></t-input>
-                <t-select :label="$t('pages.setting.editSource.source.dialog.ai.model')"
-                  v-model="formData.config.model">
-                  <t-option v-for="item in models" :key="item.label" :value="item.label" :label="item.label" />
+                <t-select :label="$t('pages.setting.editSource.source.dialog.ai.model')" creatable filterable
+                  @create="createModel" v-model="formData.config.model">
+                  <t-option v-for="item in models" :key="item.label" :value="item.value" :label="item.label" />
                 </t-select>
               </div>
             </t-collapse-panel>
@@ -92,56 +92,20 @@ const props = defineProps({
 });
 
 const formVisible = ref(false);
-const models = [
+const models = reactive([
   {
     label: 'gpt-3.5-turbo',
     value: 'gpt-3.5-turbo',
-  },
-  {
-    label: 'gpt-3.5-turbo-16k',
-    value: 'gpt-3.5-turbo-16k',
-  },
-  {
-    label: 'gpt-3.5-turbo-1106',
-    value: 'gpt-3.5-turbo-1106',
-  },
-  {
-    label: 'gpt-3.5-turbo-0125',
-    value: 'gpt-3.5-turbo-0125',
   },
   {
     label: 'gpt-4o',
     value: 'gpt-4o',
   },
   {
-    label: 'gpt-4',
-    value: 'gpt-4',
+    label: 'gpt-4o-mini',
+    value: 'gpt-4o-mini',
   },
-  {
-    label: 'gpt-4-turbo',
-    value: 'gpt-4-turbo',
-  },
-  {
-    label: 'gpt-4-32k',
-    value: 'gpt-4-32k',
-  },
-  {
-    label: 'gpt-4-1106-preview',
-    value: 'gpt-4-1106-preview',
-  },
-  {
-    label: 'gpt-4-0125-preview',
-    value: 'gpt-4-0125-preview',
-  },
-  {
-    label: 'gpt-4-turbo-preview',
-    value: 'gpt-4-turbo-preview',
-  },
-  {
-    label: 'gpt-4-vision-preview',
-    value: 'gpt-4-vision-preview',
-  },
-];
+]);
 const formData = ref({
   aiType: 'qa',
   config: {
@@ -182,9 +146,15 @@ const md = new MarkdownIt({
 });
 md.use(mathjax3);
 
+const createModel = (val) => {
+  const targetIndex = models.findIndex((obj) => obj.label === val);
+  if (targetIndex === -1) models.push({ value: val, label: val });
+};
+
 const fetchAi = async () => {
   const res = await fetchSettingDetail('ai');
   formData.value.config = res.value;
+  createModel(res.value?.model || 'gpt-3.5-turbo');
 };
 
 const saveAi = async () => {
@@ -227,7 +197,7 @@ const AiAnswerEvent = async () => {
     formData.value.contentHtml = md.render(formData.value.result);
     isVisible.loading = false;
   }
-}
+};
 
 const copyAiAnswer = async () => {
   try {
@@ -236,7 +206,7 @@ const copyAiAnswer = async () => {
   } catch (err) {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   };
-}
+};
 </script>
 
 <style lang="less" scoped>
