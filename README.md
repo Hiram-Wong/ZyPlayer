@@ -56,17 +56,15 @@ ZyPlayer是一款采用现代化技术栈开发的高颜值媒体播放器，它
 <details>
 <summary>展开查看软件截图</summary>
 
-|                           影视(首页)                            |                           影视(搜索)                            |
-| :-------------------------------------------------------------: | :-------------------------------------------------------------: |
-|   ![影视](https://s2.loli.net/2024/02/29/XvoZTeLMDAz87N5.png)   | ![影视搜索](https://s2.loli.net/2024/02/29/kb5Hs9hfuBeVaY1.png) |
-|                           影视(播放)                            |                           影视 (介绍)                           |
-| ![影视播放](https://s2.loli.net/2023/05/07/fgmbdXQvPE73WCY.png) | ![影视详情](https://s2.loli.net/2024/03/18/hIYEDRKmOrQq4ya.png) |
-|                              网盘                               |                           直播(首页)                            |
-|   ![网盘](https://s2.loli.net/2024/02/29/CpNc4wisOgKQbSM.png)   | ![直播首页](https://s2.loli.net/2024/02/29/hpCKzaD7ryWAqY9.png) |
-|                           直播(播放)                            |                              解析                               |
-| ![直播播放](https://s2.loli.net/2024/02/29/aS8UgwBsVNeDzvi.png) |   ![解析](https://s2.loli.net/2024/02/29/3mef2sdDrXoqtjW.png)   |
-|                            历史记录                             |                              在追                               |
-|   ![历史](https://s2.loli.net/2024/02/29/IN2bE5PHSdgew7l.png)   |   ![在追](https://s2.loli.net/2024/02/29/EWryHtxd5TZliO6.png)   |
+|                            影视(首页)                            |                            影视(搜索)                            |
+| :--------------------------------------------------------------: | :--------------------------------------------------------------: |
+| ![影视-首页](https://s2.loli.net/2024/07/20/T8diRvA1q2QaJmP.png) | ![影视-搜索](https://s2.loli.net/2024/07/20/utwCUsVG6c7ShRJ.png) |
+|                            影视(播放)                            |                            解析(首页)                            |
+| ![影视播放](https://s2.loli.net/2024/07/20/DNFBu3LphASROVy.png)  | ![解析-首页](https://s2.loli.net/2024/07/20/JZANVebW4EHOU7I.png) |
+|                            直播(首页)                            |                            直播(播放)                            |
+| ![直播-首页](https://s2.loli.net/2024/07/20/ucxSw3nR2EahG59.png) | ![直播-播放](https://s2.loli.net/2024/07/20/jYEFc6NOwtdWJBV.png) |
+|                             历史记录                             |                               设置                               |
+| ![历史记录](https://s2.loli.net/2024/07/20/DiYsx4fbcH3KU6T.png)  |   ![设置](https://s2.loli.net/2024/07/20/QeaDxZ2IYCFoVki.png)    |
 
 </details>
 
@@ -96,7 +94,6 @@ ZyPlayer是一款采用现代化技术栈开发的高颜值媒体播放器，它
 > **最新发布版下载**: 访问 [GitHub Releases页面](https://github.com/Hiram-Wong/ZyPlayer/releases) 获取。
 
 > **最新开发版下载**: 访问 [GitHub Actions页面](https://github.com/Hiram-Wong/ZyPlayer/actions) 获取。
-
 
 ### macOS 安装问题解决方案
 
@@ -275,6 +272,8 @@ sudo xattr -cr /Applications/zyplayer.app
           "height": 550
         } // 窗口位置 [3.3.7版本启用] 记录播放窗口位置
       },
+      "debug": false, // [3.3.7版本启用] 用于在线调试和嗅探页面弹出
+      "defaultFilterType": "off", // [3.3.7版本启用] 用于影视搜索过滤关键词
       "timeout": 5000 // [3.3.5版本启用] 用于调整全局请求超时事件, 单位毫秒
     }
   ]
