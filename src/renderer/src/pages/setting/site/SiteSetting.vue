@@ -93,7 +93,7 @@ import _ from 'lodash';
 import PQueue from 'p-queue';
 import { AddIcon, CheckIcon, PoweroffIcon, RefreshIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive, watch } from 'vue';
+import { onActivated, onMounted, ref, reactive, watch } from 'vue';
 
 import { t } from '@/locales';
 import { setDefault } from '@/api/setting';
@@ -146,7 +146,7 @@ watch(
   () => siteTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
-      emitter.emit('refreshFilmConfig',111);
+      emitter.emit('refreshFilmConfig', 111);
     }
   }, {
   deep: true
@@ -187,6 +187,38 @@ onMounted(() => {
   getData();
   getGroup();
 });
+
+onActivated(() => {
+  const isListenedRefreshTableData = emitter.all.get('refreshSiteTable');
+  if (!isListenedRefreshTableData) emitter.on('refreshSiteTable', refreshTable);
+});
+
+const defaultSet = () => {
+  pagination.defaultPageSize = 20;
+  pagination.total = 0;
+  pagination.defaultCurrent = 1;
+  pagination.pageSize = 20;
+  pagination.current = 1;
+
+  siteTableConfig.value = {
+    data: [],
+    rawData: [],
+    sort: {},
+    filter: {
+      type: [],
+    },
+    select: [],
+    default: '',
+    group: []
+  };
+};
+
+const refreshTable = () => {
+  console.log('[siteSetting][bus][refresh]');
+  defaultSet();
+  getData();
+  getGroup();
+};
 
 const refreshEvent = (page = false) => {
   getData();

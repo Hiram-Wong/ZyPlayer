@@ -273,18 +273,22 @@ const refreshEmitter = (arryList: string[]) => {
   const actions = {
     site: () => {
       emitter.emit('refreshFilmConfig');
+      emitter.emit('refreshSiteTable');
     },
     iptv: () => {
       emitter.emit('refreshIptvConfig');
+      emitter.emit('refreshIptvTable');
     },
     channel: () => {
       emitter.emit('refreshIptvConfig');
     },
     analyze: () => {
       emitter.emit('refreshAnalyzeConfig');
+      emitter.emit('refreshAnalyzeTable');
     },
     drive: () => {
       emitter.emit('refreshDriveConfig');
+      emitter.emit('refreshDriveTable');
     },
     history: () => {
       emitter.emit('refreshHistory');
@@ -712,10 +716,12 @@ const clearData = async () => {
       'site': async () => {
         await setDefault('defaultSite', null);
         emitter.emit('refreshFilmConfig');
+        emitter.emit('refreshSiteTable');
       },
       'iptv': async () => {
         await setDefault('defaultIptv', null);
         emitter.emit('refreshIptvConfig');
+        emitter.emit('refreshIptvTable');
       },
       'channel': async () => {
         await setDefault('defaultIptv', null);
@@ -724,10 +730,12 @@ const clearData = async () => {
       'analyze': async () => {
         await setDefault('defaultAnalyze', null);
         emitter.emit('refreshAnalyzeConfig');
+        emitter.emit('refreshAnalyzeTable');
       },
       'drive': async () => {
         await setDefault('defaultDrive', null);
         emitter.emit('refreshDriveConfig');
+        emitter.emit('refreshDriveTable');
       },
       'history': () => {
         emitter.emit('refreshHistory');

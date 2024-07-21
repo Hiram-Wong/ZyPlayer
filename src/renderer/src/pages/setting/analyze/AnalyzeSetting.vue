@@ -77,7 +77,7 @@
 import _ from 'lodash';
 import { AddIcon, CheckIcon, DiscountIcon, PoweroffIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive, watch } from 'vue';
+import { onActivated, onMounted, ref, reactive, watch } from 'vue';
 
 import { t } from '@/locales';
 import { fetchAnalyzePage, updateAnalyzeItem, updateAnalyzeStatus, delAnalyzeItem } from '@/api/analyze';
@@ -140,6 +140,38 @@ const rehandleSelectChange = (val) => {
 onMounted(() => {
   getData();
 });
+
+onActivated(() => {
+  const isListenedRefreshTableData = emitter.all.get('refreshAnalyzeTable');
+  if (!isListenedRefreshTableData) emitter.on('refreshAnalyzeTable', refreshTable);
+});
+
+const defaultSet = () => {
+  pagination.defaultPageSize = 20;
+  pagination.total = 0;
+  pagination.defaultCurrent = 1;
+  pagination.pageSize = 20;
+  pagination.current = 1;
+
+  analyzeTableConfig.value = {
+    data: [],
+    rawData: [],
+    sort: {},
+    filter: {
+      type: [],
+    },
+    select: [],
+    default: '',
+    group: [],
+    flag: []
+  };
+};
+
+const refreshTable = () => {
+  console.log('[analyzeSetting][bus][refresh]');
+  defaultSet();
+  getData();
+};
 
 const refreshEvent = (page = false) => {
   getData();

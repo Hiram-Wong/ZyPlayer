@@ -68,7 +68,7 @@
 import _ from 'lodash';
 import { AddIcon, CheckIcon, PoweroffIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive, watch } from 'vue';
+import { onActivated, onMounted, ref, reactive, watch } from 'vue';
 
 import { t } from '@/locales';
 import { fetchDrivePage, updateDriveItem, updateDriveStatus, delDriveItem } from '@/api/drive';
@@ -158,6 +158,36 @@ const getData = async () => {
 onMounted(() => {
   getData();
 });
+
+onActivated(() => {
+  const isListenedRefreshTableData = emitter.all.get('refreshDriveTable');
+  if (!isListenedRefreshTableData) emitter.on('refreshDriveTable', refreshTable);
+});
+
+const defaultSet = () => {
+  pagination.defaultPageSize = 20;
+  pagination.total = 0;
+  pagination.defaultCurrent = 1;
+  pagination.pageSize = 20;
+  pagination.current = 1;
+
+  driveTableConfig.value = {
+    data: [],
+    rawData: [],
+    sort: {},
+    filter: {
+      type: [],
+    },
+    select: [],
+    default: ''
+  };
+};
+
+const refreshTable = () => {
+  console.log('[driveSetting][bus][refresh]');
+  defaultSet();
+  getData();
+};
 
 const refreshEvent = (page = false) => {
   getData();
