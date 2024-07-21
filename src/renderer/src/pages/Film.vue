@@ -203,7 +203,8 @@ onMounted(() => {
 });
 
 onActivated(() => {
-  emitter.on('refreshFilmConfig', refreshConfig)
+  const isListenedRefreshFilmConfig = emitter.all.get('refreshFilmConfig');
+  if (!isListenedRefreshFilmConfig) emitter.on('refreshFilmConfig', refreshConfig);
 });
 
 // cms筛选：基于已有数据

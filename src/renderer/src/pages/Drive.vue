@@ -41,11 +41,7 @@
               </div>
             </div>
           </div>
-          <div v-if="driveList.length === 0 || driveContent.length === 0" style="
-              min-height: 1px;
-              text-align: center;
-              margin-bottom: 2em;
-            ">
+          <div v-if="driveContent.length === 0" style="min-height: 1px; text-align: center; margin-bottom: 2em;">
             {{ infiniteCompleteTip }}
           </div>
         </div>
@@ -78,7 +74,7 @@ import CommonNav from '../components/common-nav/index.vue';
 
 const storePlayer = usePlayStore();
 
-const spider = ref(null);
+const spider = ref<any>(null);
 const renderError = () => {
   return (
     <div class="renderIcon">
@@ -99,7 +95,7 @@ const driveConfig = ref({
   default: {
     name: '',
     server: '',
-    start_page: '',
+    startPage: '',
     search: false,
     headers: {},
     params: {}
@@ -113,20 +109,21 @@ const isVisible = reactive({
   loading: false
 });
 
-const driveList = ref([]);
-const driveContent = ref([]);
-const breadcrumb = ref([]);
+const driveContent = ref<any[]>([]);
+const breadcrumb = ref<any[]>([]);
 
 // const searchTxt = ref('');
 
 const infiniteCompleteTip = ref(`${t('pages.drive.infiniteLoading.noData')}`);
 
-onMounted(() => {
-  getSetting();
+onMounted(async () => {
+  await getSetting();
+  if (active.value.nav) await initCloud();
 });
 
 onActivated(() => {
-  emitter.on('refreshDriveConfig', refreshDriveConfig);
+  const isListenedRefreshDriveConfig = emitter.all.get('refreshDriveConfig');
+  if (!isListenedRefreshDriveConfig) emitter.on('refreshDriveConfig', refreshDriveConfig);
 });
 
 // 获取配置
@@ -137,8 +134,6 @@ const getSetting = async () => {
       driveConfig.value.default = data["default"];
       active.value.nav = data["default"]["id"];
       driveConfig.value.default.startPage = driveConfig.value.default.startPage ? driveConfig.value.default.startPage : '/';
-
-      initCloud();
     } else {
       infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noData');
     }
@@ -165,7 +160,7 @@ const initCloud = async () => {
 
 // 格式化面包屑
 const formatBreadcrumb = (str: string) => {
-  const pathList = [];
+  const pathList: any[] = [];
 
   // 将字符串按每个斜杠分割，并保存分割出的所有部分
   const parts = str.split('/').filter(Boolean);
@@ -266,23 +261,50 @@ const playEvent = (item, fullPath) => {
 const changeDefaultIptvEvent = async (id) => {
   console.log(`[drive] change source: ${id}`);
 
-  const item = _.find(driveConfig.value.data, { id })
+  let item: any = _.find(driveConfig.value.data, { id });
+  item.startPage = item?.startPage ? item!.startPage : '/';
 
   if (spider.value) spider.value.destroy();
   driveContent.value = [];
   breadcrumb.value = [];
+  driveConfig.value = {
+    data: [],
+    default: {
+      name: '',
+      server: '',
+      startPage: '',
+      search: false,
+      headers: {},
+      params: {}
+    }
+  };
+  active.value.nav = '';
   infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
   active.value.nav = id;
   driveConfig.value.default = item;
-  driveConfig.value.default.startPage = item.startPage ? item.startPage : '/';
-  initCloud();
+  await initCloud();
 };
 
 const refreshDriveConfig = async () => {
   console.log('[drive][bus][refresh]');
   if (spider.value) spider.value.destroy();
+  driveContent.value = [];
+  breadcrumb.value = [];
+  driveConfig.value = {
+    data: [],
+    default: {
+      name: '',
+      server: '',
+      startPage: '',
+      search: false,
+      headers: {},
+      params: {}
+    }
+  };
+  active.value.nav = '';
   infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
-  getSetting();
+  await getSetting();
+  if (active.value.nav) await initCloud();
 };
 </script>
 

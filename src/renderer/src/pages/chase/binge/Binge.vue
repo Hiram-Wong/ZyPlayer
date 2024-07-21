@@ -129,8 +129,9 @@ onMounted(async () => {
   }
 });
 
-onActivated(async () => {
-  emitter.on('refreshBinge', refreshBinge);
+onActivated(() => {
+  const isListenedRefreshBinge = emitter.all.get('refreshBinge');
+  if (!isListenedRefreshBinge) emitter.on('refreshBinge', refreshBinge);
 });
 
 const getBingeList = async () => {

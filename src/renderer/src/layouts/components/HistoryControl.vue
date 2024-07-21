@@ -30,7 +30,7 @@ const gotoForward = () => {
 };
 
 const gotoRefresh = () => {
-  const reloadHookModules = ['FilmIndex', 'IptvIndex', 'AnalyzeIndex', 'ChaseIndex', 'SettingIndex'];
+  const reloadHookModules = ['FilmIndex', 'IptvIndex', 'AnalyzeIndex', 'ChaseIndex', 'DriveIndex', 'SettingIndex'];
   if (route.name && reloadHookModules.includes(route.name as string)) {
     emitter.emit('reloadComponent');
   } else {

@@ -142,8 +142,9 @@ onMounted(async () => {
   }
 });
 
-onActivated(async () => {
-  emitter.on('refreshHistory', refreshHistory);
+onActivated(() => {
+  const isListenedRefreshHistory = emitter.all.get('refreshHistory');
+  if (!isListenedRefreshHistory) emitter.on('refreshHistory', refreshHistory);
 });
 
 const getHistoryList = async () => {

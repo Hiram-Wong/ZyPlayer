@@ -127,7 +127,8 @@ onMounted(() => {
 });
 
 onActivated(() => {
-  emitter.on('refreshAnalyzeConfig', refreshAnalyzeConfig)
+  const isListenedRefreshAnalyzeConfig = emitter.all.get('refreshAnalyzeConfig');
+  if (!isListenedRefreshAnalyzeConfig) emitter.on('refreshAnalyzeConfig', refreshAnalyzeConfig);
 });
 
 // 获取解析接口及默认接口

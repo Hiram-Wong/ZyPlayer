@@ -159,7 +159,8 @@ onMounted(() => {
 });
 
 onActivated(() => {
-  emitter.on('refreshIptvConfig', refreshIptvConfig);
+  const isListenedRefreshIptvConfig = emitter.all.get('refreshIptvConfig');
+  if (!isListenedRefreshIptvConfig) emitter.on('refreshIptvConfig', refreshIptvConfig);
 });
 
 // 获取配置

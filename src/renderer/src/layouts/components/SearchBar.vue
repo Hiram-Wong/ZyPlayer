@@ -117,8 +117,9 @@ onMounted(async () => {
   if (activeRouteName.value === 'FilmIndex') await getFilmSearhConfig();
 });
 
-onActivated(async () => {
-  emitter.on('refreshHotConfig', refreshHotConfig);
+onActivated(() => {
+  const isListenedRefreshHotConfig = emitter.all.get('refreshHotConfig');
+  if (!isListenedRefreshHotConfig) emitter.on('refreshHotConfig', refreshHotConfig);
 });
 
 const rowCol = [
