@@ -293,7 +293,7 @@ const defaultSet = () => {
 };
 
 const refreshBinge = () => {
-  console.log('[film][binge][refresh]');
+  console.log('[binge][bus][refresh]');
   defaultSet();
 };
 </script>

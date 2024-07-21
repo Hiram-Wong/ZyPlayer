@@ -575,7 +575,6 @@ const isLegalShortcut = (item) => {
   if (isPubilcKeys && isSpecialKeys) {
     statusShortcut.value = 'default';
     tipShortcut.value = '';
-    console.log(formData.value.recordShortcut);
     shortcutInputRef.value!.blur();
     window.electron.ipcRenderer.send('updateShortcut', { shortcut: formData.value.recordShortcut });
   } else {

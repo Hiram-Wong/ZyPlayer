@@ -268,7 +268,7 @@ const changeDefaultIptvEvent = async (id) => {
 
   const item = _.find(driveConfig.value.data, { id })
 
-  spider.value.destroy();
+  if (spider.value) spider.value.destroy();
   driveContent.value = [];
   breadcrumb.value = [];
   infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
@@ -280,7 +280,7 @@ const changeDefaultIptvEvent = async (id) => {
 
 const refreshDriveConfig = async () => {
   console.log('[drive][bus][refresh]');
-  spider.value.destroy();
+  if (spider.value) spider.value.destroy();
   infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
   getSetting();
 };

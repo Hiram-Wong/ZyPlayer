@@ -293,7 +293,7 @@ const defaultSet = () => {
 };
 
 const refreshHistory = () => {
-  console.log('[film][history][refresh]');
+  console.log('[history][bus][refresh]');
   defaultSet();
 };
 </script>

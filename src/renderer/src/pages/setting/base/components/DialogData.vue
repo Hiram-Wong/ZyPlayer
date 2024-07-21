@@ -267,7 +267,41 @@ watch(
   (val) => {
     formData.webdev = val.webdev;
   }
-)
+);
+
+const refreshEmitter = (arryList: string[]) => {
+  const actions = {
+    site: () => {
+      emitter.emit('refreshFilmConfig');
+    },
+    iptv: () => {
+      emitter.emit('refreshIptvConfig');
+    },
+    channel: () => {
+      emitter.emit('refreshIptvConfig');
+    },
+    analyze: () => {
+      emitter.emit('refreshAnalyzeConfig');
+    },
+    drive: () => {
+      emitter.emit('refreshDriveConfig');
+    },
+    history: () => {
+      emitter.emit('refreshHistory');
+    },
+    star: () => {
+      emitter.emit('refreshBinge');
+    },
+  };
+
+  for (const action of arryList) {
+    const key = action.indexOf('tbl_') > -1 ? action.split('tbl_')[1] : action;
+    console.log(key);
+    if (actions[key]) {
+      actions[key]();
+    }
+  }
+};
 
 // 一键配置
 const easyConfig = async () => {
@@ -355,11 +389,9 @@ const easyConfig = async () => {
           oldLives = [oldLives]
         }
         let iptv: any = [];
-        console.log(oldLives);
         if (oldLives && oldLives.length > 0 && oldLives[0].channels) {
           oldLives.forEach(live => {
             live.channels.forEach(channel => {
-              console.log(channel);
               const urlBase64 = channel.urls[0].split('&ext=')[1];
               let url = urlBase64;
 
@@ -423,10 +455,11 @@ const easyConfig = async () => {
 
     data = await commonDelImportData(data);
     await initDb(data);
+    await refreshEmitter(Object.keys(data));
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
+    console.log('[setting][easyConfig] error', err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-    console.log(err);
   }
 };
 
@@ -579,6 +612,7 @@ const importFromRemote = async (url) => {
     config = await commonDelImportData(config);
 
     await initDb(config);
+    await refreshEmitter(Object.keys(config));
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
@@ -596,6 +630,7 @@ const importFromLocal = (file) => {
       json = await commonDelImportData(json);
 
       await initDb(json);
+      await refreshEmitter(Object.keys(json));
       MessagePlugin.success(t('pages.setting.data.success'));
     } catch (err) {
       MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
@@ -719,10 +754,10 @@ const clearData = async () => {
 
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
-    console.log('data clear fail', err);
+    console.log('[setting][clearData] error', err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
-}
+};
 
 // 保存
 const saveWebdev = async () => {
@@ -743,7 +778,7 @@ const checkWebdevEvent = async () => {
   } else {
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   };
-}
+};
 
 // 覆盖远端
 const rsyncRemoteEvent = async () => {
@@ -754,7 +789,7 @@ const rsyncRemoteEvent = async () => {
   } else {
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   };
-}
+};
 
 // 覆盖本地
 const rsyncLocalEvent = async () => {
@@ -765,7 +800,7 @@ const rsyncLocalEvent = async () => {
   } else {
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   };
-}
+};
 </script>
 
 <style lang="less" scoped>

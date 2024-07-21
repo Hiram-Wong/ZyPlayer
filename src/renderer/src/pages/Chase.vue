@@ -3,20 +3,25 @@
     <common-nav :title="$t('pages.chase.name')" :list="chaseNav" :active="active.nav" @change-key="changeChaseEvent" />
     <div class="content">
       <div class="container">
-        <history-view class="content-wrapper" v-if="active.nav === 'history'" />
-        <binge-view class="content-wrapper" v-else />
+        <transition name="fade" mode="out-in">
+          <keep-alive>
+            <component :is="componentMap[active.nav]" class="content-wrapper"></component>
+          </keep-alive>
+        </transition>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue';
+import { computed, defineAsyncComponent, reactive } from 'vue';
 
 import { t } from '@/locales';
 
-import bingeView from './chase/binge/Binge.vue';
-import historyView from './chase/history/History.vue';
+const componentMap = {
+  'binge': defineAsyncComponent(() => import('./chase/binge/Binge.vue')),
+  'history': defineAsyncComponent(() => import('./chase/history/History.vue')),
+};
 
 const active = reactive({
   nav: 'history',
@@ -28,7 +33,7 @@ const chaseNav = computed(() => {
       id: 'history',
       name: t('pages.chase.history.title')
     }, {
-      id: 'like',
+      id: 'binge',
       name: t('pages.chase.binge.title')
     }
   ]
