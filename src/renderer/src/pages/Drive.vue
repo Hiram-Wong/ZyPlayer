@@ -51,7 +51,8 @@
         </div>
       </div>
     </div>
-    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')" :loading="isVisible.loading" />
+    <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')"
+      :loading="isVisible.loading" />
     <t-back-top container=".container" :visible-height="200" size="small" :offset="['1.4rem', '0.5rem']"
       :duration="2000" :firstload="false" />
   </div>
@@ -60,17 +61,17 @@
 <script setup lang="tsx">
 import 'v3-infinite-loading/lib/style.css';
 
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { Tv1Icon, LoadingIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, reactive, ref } from 'vue';
+import { onActivated, onMounted, reactive, ref } from 'vue';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
 import { fetchDriveActive } from '@/api/drive';
+import emitter from '@/utils/emitter';
 import { __jsEvalReturn } from '@/utils/alist_open';
 
 import CommonNav from '../components/common-nav/index.vue';
@@ -122,6 +123,10 @@ const infiniteCompleteTip = ref(`${t('pages.drive.infiniteLoading.noData')}`);
 
 onMounted(() => {
   getSetting();
+});
+
+onActivated(() => {
+  emitter.on('refreshDriveConfig', refreshDriveConfig);
 });
 
 // 获取配置
@@ -273,13 +278,12 @@ const changeDefaultIptvEvent = async (id) => {
   initCloud();
 };
 
-// 监听设置默认源变更
-const eventBus = useEventBus('drive-reload');
-eventBus.on(async () => {
+const refreshDriveConfig = async () => {
+  console.log('[drive][bus][refresh]');
   spider.value.destroy();
   infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
   getSetting();
-});
+};
 </script>
 
 <style lang="less" scoped>

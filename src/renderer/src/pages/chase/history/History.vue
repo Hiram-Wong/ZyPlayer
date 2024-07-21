@@ -67,14 +67,12 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import { useEventBus } from '@vueuse/core';
-
 import _ from 'lodash';
 import moment from 'moment';
 import { DeleteIcon, LaptopIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onMounted, ref, reactive } from 'vue';
+import { computed, onActivated, onMounted, ref, reactive } from 'vue';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
@@ -84,6 +82,7 @@ import { delHistory, fetchHistoryList, clearHistoryFilmList } from '@/api/histor
 import { fetchSiteList } from '@/api/site';
 import { fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
 import { formatIndex } from '@/utils/common/film';
+import emitter from '@/utils/emitter';
 
 import DetailView from '../../film/Detail.vue';
 
@@ -141,6 +140,10 @@ onMounted(async () => {
   if (_.has(site_res, "data") && !_.isEmpty(site_res["data"])) {
     siteConfig.value.data = site_res["data"]
   }
+});
+
+onActivated(async () => {
+  emitter.on('refreshHistory', refreshHistory);
 });
 
 const getHistoryList = async () => {
@@ -289,11 +292,10 @@ const defaultSet = () => {
   pagination.value.pageIndex = 0;
 };
 
-// 监听播放器变更
-const eventBus = useEventBus('history-reload');
-eventBus.on(() => {
+const refreshHistory = () => {
+  console.log('[film][history][refresh]');
   defaultSet();
-});
+};
 </script>
 
 <style lang="less" scoped>

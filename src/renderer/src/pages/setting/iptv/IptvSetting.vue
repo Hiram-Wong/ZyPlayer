@@ -69,7 +69,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { AddIcon, CheckIcon, PoweroffIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -79,6 +78,7 @@ import { t } from '@/locales';
 import { fetchIptvPage, updateIptvItem, updateIptvStatus, delIptvItem, addChannel, clearChannel } from '@/api/iptv';
 import { setDefault } from '@/api/setting';
 import { parseChannel } from '@/utils/channel';
+import emitter from '@/utils/emitter';
 
 import { COLUMNS } from './constants';
 
@@ -111,15 +111,13 @@ const iptvTableConfig = ref({
   },
   select: [],
   default: ''
-})
-
-const emitReload = useEventBus<string>('iptv-reload');
+});
 
 watch(
   () => iptvTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
-      emitReload.emit('iptv-reload');
+      emitter.emit('refreshIptvConfig');
     }
   }, {
   deep: true
@@ -284,8 +282,7 @@ const defaultEvent = async (row) => {
     await clearChannel();
     const docs = await parseChannel(type, url);
     await addChannel(docs);
-
-    emitReload.emit('iptv-reload');
+    emitter.emit('refreshIptvConfig');
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][iptv][defaultEvent][error]', err);

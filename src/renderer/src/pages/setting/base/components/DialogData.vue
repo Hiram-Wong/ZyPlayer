@@ -153,7 +153,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import Base64 from 'crypto-js/enc-base64';
 import _ from 'lodash';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -164,19 +163,13 @@ import joinUrl from 'url';
 import { t } from '@/locales';
 import { initializeWebdavClient, rsyncLocal, rsyncRemote } from '@/utils/webdev';
 import { updateSetting, clearDb, exportDb, setDefault, initDb } from '@/api/setting';
+import emitter from '@/utils/emitter';
 import { getConfig, encodeMd5 } from '@/utils/tool';
 
 import pkg from '../../../../../../../package.json'
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
-
-const filmEmitReload = useEventBus('film-reload');
-const iptvEmitReload = useEventBus('iptv-reload');
-const analyzeEmitReload = useEventBus('analyze-reload');
-const historyEmitReload = useEventBus('history-reload');
-const bingeEmitReload = useEventBus('binge-reload');
-const driveEmitReload = useEventBus('drive-reload');
 
 const props = defineProps({
   visible: {
@@ -683,29 +676,29 @@ const clearData = async () => {
     const actions: any = {
       'site': async () => {
         await setDefault('defaultSite', null);
-        filmEmitReload.emit('film-reload');
+        emitter.emit('refreshFilmConfig');
       },
       'iptv': async () => {
         await setDefault('defaultIptv', null);
-        iptvEmitReload.emit('iptv-reload');
+        emitter.emit('refreshIptvConfig');
       },
       'channel': async () => {
         await setDefault('defaultIptv', null);
-        iptvEmitReload.emit('iptv-reload');
+        emitter.emit('refreshIptvConfig');
       },
       'analyze': async () => {
         await setDefault('defaultAnalyze', null);
-        analyzeEmitReload.emit('analyze-reload');
+        emitter.emit('refreshAnalyzeConfig');
       },
       'drive': async () => {
         await setDefault('defaultDrive', null);
-        driveEmitReload.emit('drive-reload');
+        emitter.emit('refreshDriveConfig');
       },
       'history': () => {
-        historyEmitReload.emit('history-reload');
+        emitter.emit('refreshHistory');
       },
       'star': () => {
-        bingeEmitReload.emit('binge-reload');
+        emitter.emit('refreshBinge');
       },
       'cache': async () => {
         const { session } = win.webContents;
@@ -714,7 +707,7 @@ const clearData = async () => {
       },
       'thumbnail': async () => {
         await window.electron.ipcRenderer.send('tmpdir-manage', 'rmdir', 'thumbnail');
-        iptvEmitReload.emit('iptv-reload');
+        emitter.emit('refreshIptvConfig');
       }
     };
 

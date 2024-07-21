@@ -60,21 +60,21 @@ import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
 import { ContextMenu, ContextMenuItem } from '@imengyu/vue3-context-menu';
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import PQueue from 'p-queue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { computed, onMounted, ref, reactive } from 'vue';
+import { computed, onActivated, onMounted, ref, reactive } from 'vue';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore, useSettingStore } from '@/store';
 
-import { checkUrlIpv6, copyToClipboardApi } from '@/utils/tool';
 import { fetchIptvActive, clearChannel, addChannel, fetchChannelList, delChannelItem } from '@/api/iptv';
 import { setDefault } from '@/api/setting';
 import { parseChannel, checkChannel, stopCheckChannel } from '@/utils/channel';
+import emitter from '@/utils/emitter';
+import { checkUrlIpv6, copyToClipboardApi } from '@/utils/tool';
 
 import CommonNav from '../components/common-nav/index.vue';
 import TagNav from '../components/tag-nav/index.vue';
@@ -156,6 +156,10 @@ const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
 onMounted(() => {
   getSetting();
+});
+
+onActivated(() => {
+  emitter.on('refreshIptvConfig', refreshIptvConfig);
 });
 
 // 获取配置
@@ -397,16 +401,14 @@ const changeDefaultIptvEvent = async (id: string) => {
   }
 };
 
-// 监听设置默认源变更
-const iptvReloadeventBus = useEventBus<string>('iptv-reload');
-const channelSearcheventBus = useEventBus<string>('channel-search');
-
-channelSearcheventBus.on((kw: string) => {
-  searchTxt.value = kw;
+emitter.on('searchIptv', (kw) => {
+  console.log('[iptv][bus][receive]', kw);
+  searchTxt.value = kw as string;
   searchEvent();
 });
 
-iptvReloadeventBus.on(async () => {
+const refreshIptvConfig = async () => {
+  console.log('[iptv][bus][refresh]');
   infiniteCompleteTip.value = 'noMore';
   searchTxt.value = '';
   classConfig.value.data = [{ type_id: '全部', type_name: '全部' }];
@@ -416,7 +418,7 @@ iptvReloadeventBus.on(async () => {
   await getSetting();
   infiniteId.value++;
   pagination.value.pageIndex = 0;
-});
+};
 
 // 右键
 const conButtonClick = (item: any, { x, y }: any) => {

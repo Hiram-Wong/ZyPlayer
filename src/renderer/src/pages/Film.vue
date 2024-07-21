@@ -78,19 +78,19 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import PQueue from 'p-queue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { onMounted, reactive, ref } from 'vue';
+import { onActivated, onMounted, reactive, ref } from 'vue';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
 import { fetchSiteActive } from '@/api/site';
+import emitter from '@/utils/emitter';
 import {
   fetchClassify,
   fetchList,
@@ -200,6 +200,10 @@ const classConfig = ref({
 
 onMounted(() => {
   getSetting();
+});
+
+onActivated(() => {
+  emitter.on('refreshFilmConfig', refreshConfig)
 });
 
 // cms筛选：基于已有数据
@@ -668,21 +672,20 @@ const playEvent = async (item) => {
   }
 };
 
-// 监听设置默认源变更
-const filmReloadeventBus = useEventBus<string>('film-reload');
-const filmSearcheventBus = useEventBus<string>('film-search');
-
-filmSearcheventBus.on((kw: string, data: any) => {
+emitter.on('searchFilm', (data: any) => {
+  console.log('[film][bus][receive]', data);
+  const { kw, group, filter } = data;
   searchTxt.value = kw;
-  siteConfig.value.filter = data.filter;
-  if (siteConfig.value.search !== data.group) {
-    siteConfig.value.search = data.group;
-    siteConfig.value.searchGroup = searchGroup(data.group);
+  siteConfig.value.filter = filter;
+  if (siteConfig.value.search !== group) {
+    siteConfig.value.search = group;
+    siteConfig.value.searchGroup = searchGroup(group);
   };
   searchEvent();
 });
 
-filmReloadeventBus.on(async () => {
+const refreshConfig = async () => {
+  console.log('[film][bus][refresh]');
   isVisible.loadClass = false;
   isVisible.t3Work = false;
   if (siteConfig.value.default.type === 7) await t3RuleTerminate();
@@ -705,7 +708,7 @@ filmReloadeventBus.on(async () => {
   };
   infiniteId.value++;
   pagination.value.pageIndex = 1;
-});
+};
 </script>
 
 <style lang="less" scoped>

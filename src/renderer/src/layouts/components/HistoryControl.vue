@@ -13,9 +13,10 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import { ChevronLeftIcon, ChevronRightIcon, RotateIcon } from 'tdesign-icons-vue-next';
 import { useRoute, useRouter } from 'vue-router';
+
+import emitter from '@/utils/emitter';
 
 const router = useRouter();
 const route = useRoute();
@@ -28,12 +29,10 @@ const gotoForward = () => {
   router.forward()
 };
 
-const emitReload = useEventBus<string>('reload');
 const gotoRefresh = () => {
-  // 声明具有局部刷新钩子的模块
-  const reloadHookModules = ['/film/index', '/iptv/index', '/analyze/index', '/chase/index', '/community/index'];
-  if (route.path && reloadHookModules.includes(route.path)) {
-    emitReload.emit('reload');
+  const reloadHookModules = ['FilmIndex', 'IptvIndex', 'AnalyzeIndex', 'ChaseIndex', 'SettingIndex'];
+  if (route.name && reloadHookModules.includes(route.name as string)) {
+    emitter.emit('reloadComponent');
   } else {
     window?.location.reload();
   }

@@ -9,11 +9,11 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import { computed, nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { prefix } from '@/config/global';
+import emitter from '@/utils/emitter';
 
 const activeRouteFullPath = computed(() => {
   const router = useRouter();
@@ -21,8 +21,9 @@ const activeRouteFullPath = computed(() => {
 });
 
 const isRouterAlive = ref(true);
-const eventBus = useEventBus('reload');
-eventBus.on(() => {
+
+emitter.on('reloadComponent', () => {
+  console.info('[content][bus][refresh]');
   isRouterAlive.value = false;
   nextTick(() => {
     isRouterAlive.value = true;

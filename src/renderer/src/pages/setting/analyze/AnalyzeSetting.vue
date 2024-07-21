@@ -74,7 +74,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { AddIcon, CheckIcon, DiscountIcon, PoweroffIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -83,6 +82,7 @@ import { onMounted, ref, reactive, watch } from 'vue';
 import { t } from '@/locales';
 import { fetchAnalyzePage, updateAnalyzeItem, updateAnalyzeStatus, delAnalyzeItem } from '@/api/analyze';
 import { setDefault } from '@/api/setting';
+import emitter from '@/utils/emitter';
 
 import { COLUMNS } from './constants';
 
@@ -120,15 +120,13 @@ const analyzeTableConfig = ref({
   default: '',
   group: [],
   flag: []
-})
-
-const emitReload = useEventBus<string>('analyze-reload');
+});
 
 watch(
   () => analyzeTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
-      emitReload.emit('analyze-reload');
+      emitter.emit('refreshAnalyzeConfig');
     }
   }, {
   deep: true
@@ -293,7 +291,7 @@ const defaultEvent = async (row) => {
   try {
     await setDefault("defaultAnalyze", row.id);
     analyzeTableConfig.value.default = row.id;
-    emitReload.emit('analyze-reload');
+    emitter.emit('refreshAnalyzeConfig');
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][analyze][defaultEvent][error]', err);

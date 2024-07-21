@@ -62,13 +62,12 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import PQueue from 'p-queue';
 import { AssignmentCheckedIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { onMounted, ref, reactive } from 'vue';
+import { onActivated, onMounted, ref, reactive } from 'vue';
 
 import { clearStar, delStar, fetchStarList } from '@/api/star';
 import { fetchSiteList } from '@/api/site';
@@ -76,6 +75,7 @@ import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 import { catvodRuleInit, fetchDetail, t3RuleInit } from '@/utils/cms';
+import emitter from '@/utils/emitter';
 
 import DetailView from '../../film/Detail.vue';
 
@@ -127,6 +127,10 @@ onMounted(async () => {
   if (_.has(site_res, "data") && !_.isEmpty(site_res["data"])) {
     siteConfig.value.data = site_res["data"]
   }
+});
+
+onActivated(async () => {
+  emitter.on('refreshBinge', refreshBinge);
 });
 
 const getBingeList = async () => {
@@ -288,11 +292,10 @@ const defaultSet = () => {
   pagination.value.pageIndex = 0;
 };
 
-// 监听播放器变更
-const eventBus = useEventBus('binge-reload');
-eventBus.on(() => {
+const refreshBinge = () => {
+  console.log('[film][binge][refresh]');
   defaultSet();
-});
+};
 </script>
 
 <style lang="less" scoped>

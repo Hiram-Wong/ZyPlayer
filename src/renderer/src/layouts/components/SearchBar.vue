@@ -65,14 +65,14 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import moment from 'moment';
 import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import emitter from '@/utils/emitter';
 import { komectHot, doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
 import { fetchHistoryList, clearHistorySearchList, addHistory } from '@/api/history';
 import { fetchSettingDetail } from '@/api/setting';
@@ -81,11 +81,6 @@ import CONFIG from '@/config/hotClass';
 import emptyImage from '@/assets/empty.svg?raw';
 
 const route = useRoute();
-
-const hotReloadeventBus = useEventBus<string>('hot-reload');
-const filmSearchEmitReload = useEventBus<string>('film-search');
-const channelSearchEmitReload = useEventBus<string>('channel-search');
-const analyzeSearchEmitReload = useEventBus<string>('analyze-search');
 
 const isVisible = reactive({
   load: true,
@@ -120,6 +115,10 @@ watch(
 
 onMounted(async () => {
   if (activeRouteName.value === 'FilmIndex') await getFilmSearhConfig();
+});
+
+onActivated(async () => {
+  emitter.on('refreshHotConfig', refreshHotConfig);
 });
 
 const rowCol = [
@@ -270,13 +269,13 @@ const searchEvent = async (item) => {
   }
   switch (activeRouteName.value) {
     case 'FilmIndex':
-      filmSearchEmitReload.emit(item, { group: active.filmGroupType, filter: active.filmFilterType });
+      emitter.emit('searchFilm', { kw: item, group: active.filmGroupType, filter: active.filmFilterType });
       break;
     case 'IptvIndex':
-      channelSearchEmitReload.emit(item);
+      emitter.emit('searchIptv', item);
       break;
     case 'AnalyzeIndex':
-      analyzeSearchEmitReload.emit(item);
+      emitter.emit('searchAnalyze', item);
       break;
   }
 
@@ -290,10 +289,11 @@ const popupVisibleEvent = (_, context) => {
 }
 
 // 监听设置变更
-hotReloadeventBus.on(() => {
+const refreshHotConfig = () => {
+  console.log('[search][bus][refresh]');
   hotConfig.hotData = [];
-  getSetConfig()
-});
+  getSetConfig();
+};
 </script>
 
 <style lang="less" scoped>

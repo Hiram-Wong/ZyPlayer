@@ -60,18 +60,19 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import moment from 'moment';
 import { Share1Icon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onMounted, ref, reactive, shallowRef } from 'vue';
+import { onActivated, onMounted, ref, reactive, shallowRef } from 'vue';
 
 import { t } from '@/locales';
 
 import { getUrlTitle } from '@/utils/analyze';
 import { fetchAnalyzeActive } from '@/api/analyze';
 import { updateHistory, addHistory, detailHistory } from '@/api/history';
+import { fetchJxJsonPlayUrlHelper } from '@/utils/common/film';
+import emitter from '@/utils/emitter';
 
 import DialogHistoryView from './analyze/DialogHistory.vue';
 import DialogIframemView from './analyze/DialogIframe.vue';
@@ -79,7 +80,6 @@ import DialogSearchView from './analyze/DialogSearch.vue';
 import SharePopup from '../components/share-popup/index.vue';
 import CommonNav from '../components/common-nav/index.vue';
 import Player from '../components/player/index.vue';
-import { fetchJxJsonPlayUrlHelper } from '@/utils/common/film';
 
 const urlTitle = ref(''); // 播放地址的标题
 const analysisUrl = ref(null); // 输入需要解析地址
@@ -124,6 +124,10 @@ const isVisible = reactive({
 
 onMounted(() => {
   getSetting();
+});
+
+onActivated(() => {
+  emitter.on('refreshAnalyzeConfig', refreshAnalyzeConfig)
 });
 
 // 获取解析接口及默认接口
@@ -216,9 +220,9 @@ const historyPlayEvent = async (item) => {
 
 // 打开平台iframe
 const openPlatform = (item) => {
+  console.log('[analyze] search keyword', item);
   const { name, url } = item;
   platformData.value = { name, url };
-  console.log(platformData.value);
   isVisible.platform = true;
 };
 
@@ -239,16 +243,15 @@ const clearWebview = () => {
   player.value = { type: 'iframe', player: '' };
 }
 
-// 监听设置默认源变更
-const analyzeReloadeventBus = useEventBus<string>('analyze-reload');
-const analyzeSearcheventBus = useEventBus<string>('analyze-search');
-analyzeReloadeventBus.on(() => {
-  getSetting();
-});
-
-analyzeSearcheventBus.on((kw: string) => {
+emitter.on('searchAnalyze', (kw) => {
+  console.log('[analyze][bus][receive]', kw);
   if (kw) openPlatform({ name: kw, url: `https://so.360kan.com/?kw=${kw}` });
 });
+
+const refreshAnalyzeConfig = () => {
+  console.log('[analyze][bus][refresh]');
+  getSetting();
+};
 
 // 分享
 const shareEvent = () => {

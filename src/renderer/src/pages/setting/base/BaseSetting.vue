@@ -162,7 +162,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import { ipVersion } from 'is-ip';
 import _ from 'lodash';
 import { CloseIcon } from 'tdesign-icons-vue-next';
@@ -172,6 +171,7 @@ import { computed, onMounted, ref, watch, reactive } from 'vue';
 import { fetchSettingList, updateSetting, clearDb } from '@/api/setting';
 import { usePlayStore, useSettingStore } from '@/store';
 import { t } from '@/locales';
+import emitter from '@/utils/emitter';
 import { getPublicIp } from '@/utils/tool';
 
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
@@ -313,10 +313,6 @@ const tmp = reactive({
   recordedSourceShortcut: ''
 });
 
-const filmEmitReload = useEventBus('film-reload');
-const hotEmitReload = useEventBus('hot-reload');
-const iptvEmitReload = useEventBus('iptv-reload');
-
 watch(theme, (newValue, _) => {
   formData.value.theme = newValue;
 })
@@ -329,7 +325,7 @@ watch(
   ],
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
-      filmEmitReload.emit('film-reload');
+      emitter.emit('refreshFilmConfig');
     }
   },
 );
@@ -341,7 +337,7 @@ watch(
   ],
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
-      hotEmitReload.emit('hot-reload');
+      emitter.emit('refreshHotConfig');
     }
   },
 );
@@ -351,7 +347,7 @@ watch(
   () => [formData.value.iptvSkipIpv6, formData.value.iptvStatus, formData.value.iptvThumbnail, formData.value.defaultIptvEpg],
   (_, oldValue) => {
     if (oldValue.every((item) => typeof item !== 'undefined')) {
-      iptvEmitReload.emit('iptv-reload');
+      emitter.emit('refreshIptvConfig');
     }
   },
 );
@@ -705,12 +701,6 @@ const checkIpv6 = async () => {
     console.log(err);
   };
 };
-
-// 监听设置默认源变更
-const eventBus = useEventBus('base-setting-reload');
-eventBus.on(() => {
-  getData();
-});
 </script>
 
 <style lang="less" scoped>

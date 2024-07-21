@@ -312,7 +312,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
 import moment from 'moment';
@@ -323,6 +322,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } 
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { BugIcon, ExtensionIcon, HelpRectangleIcon, FileIcon, GestureClickIcon, TransformIcon } from 'tdesign-icons-vue-next';
+
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
@@ -337,6 +337,7 @@ import { useSettingStore, usePlayStore } from '@/store';
 
 import { setT3Proxy } from '@/api/proxy';
 import { fetchDebugSource, setDebugSource, delDebugSource } from '@/api/lab';
+import emitter from '@/utils/emitter';
 import { getHtml, copyToClipboardApi } from '@/utils/tool';
 import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
@@ -347,7 +348,6 @@ import drpyObjectInner from '@/utils/drpy/drpy_suggestions/drpy_object_inner.ts?
 
 const remote = window.require('@electron/remote');
 const router = useRouter();
-const emitReload = useEventBus<string>('film-reload');
 const storeSetting = useSettingStore();
 const storePlayer = usePlayStore();
 
@@ -822,7 +822,7 @@ const debugEvent = async () => {
     } else {
       const res = await setDebugSource(doc);
       if (res) MessagePlugin.success(t('pages.setting.data.success'));
-      emitReload.emit('film-reload');
+      emitter.emit('refreshFilmConfig');
       router.push({ name: 'FilmIndex' });
     };
   } catch (err) {
@@ -863,7 +863,7 @@ const deleteEvent = async () => {
   try {
     const res = await delDebugSource();
     if (res) MessagePlugin.success(t('pages.setting.data.success'));
-    emitReload.emit('film-reload');
+    emitter.emit('refreshFilmConfig');
   } catch (err) {
     console.log(`[setting][editSource][deleteEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);

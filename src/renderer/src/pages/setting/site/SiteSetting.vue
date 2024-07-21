@@ -89,7 +89,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import PQueue from 'p-queue';
 import { AddIcon, CheckIcon, PoweroffIcon, RefreshIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
@@ -100,6 +99,7 @@ import { t } from '@/locales';
 import { setDefault } from '@/api/setting';
 import { fetchSitePage, fetchSiteGroup, updateSiteItem, updateSiteStatus, delSiteItem } from '@/api/site';
 import { checkValid } from '@/utils/cms';
+import emitter from '@/utils/emitter';
 
 import { COLUMNS } from './constants';
 
@@ -134,7 +134,7 @@ const siteTableConfig = ref({
   select: [],
   default: '',
   group: []
-})
+});
 
 const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
@@ -142,13 +142,11 @@ const rehandleSelectChange = (val) => {
   siteTableConfig.value.select = val;
 };
 
-const emitReload = useEventBus<string>('film-reload');
-
 watch(
   () => siteTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
-      emitReload.emit('film-reload');
+      emitter.emit('refreshFilmConfig',111);
     }
   }, {
   deep: true
@@ -209,7 +207,6 @@ const checkAllSite = async (select) => {
     });
 
     await Promise.all(checkData.map(item => queue.add(() => checkSingleEvent(item, true))));
-    emitReload.emit('film-reload');
   } catch (err) {
     console.error('[setting][site][checkAllSite][error]', err);
     throw err;
@@ -228,9 +225,8 @@ const checkSingleEvent = async (row, all = false) => {
   };
 
   if (!all) {
-    emitReload.emit('film-reload');
     MessagePlugin.success(t('pages.setting.form.success'));
-  }
+  };
 
   return isActive;
 };
@@ -358,7 +354,7 @@ const defaultEvent = async (row) => {
   try {
     await setDefault("defaultSite", row.id);
     siteTableConfig.value.default = row.id;
-    emitReload.emit('film-reload');
+    emitter.emit('refreshFilmConfig');
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][site][defaultEvent][error]', err);

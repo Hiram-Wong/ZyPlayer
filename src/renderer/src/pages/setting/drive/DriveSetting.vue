@@ -65,7 +65,6 @@
 </template>
 
 <script setup lang="ts">
-import { useEventBus } from '@vueuse/core';
 import _ from 'lodash';
 import { AddIcon, CheckIcon, PoweroffIcon, RemoveIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -74,6 +73,7 @@ import { onMounted, ref, reactive, watch } from 'vue';
 import { t } from '@/locales';
 import { fetchDrivePage, updateDriveItem, updateDriveStatus, delDriveItem } from '@/api/drive';
 import { setDefault } from '@/api/setting';
+import emitter from '@/utils/emitter';
 
 import { COLUMNS } from './constants';
 
@@ -108,15 +108,13 @@ const driveTableConfig = ref({
   },
   select: [],
   default: ''
-})
-
-const emitReload = useEventBus<string>('drive-reload');
+});
 
 watch(
   () => driveTableConfig.value.rawData,
   (_, oldValue) => {
     if (oldValue.length > 0) {
-      emitReload.emit('drive-reload');
+      emitter.emit('refreshDriveConfig');
     }
   }, {
   deep: true
@@ -250,7 +248,7 @@ const defaultEvent = async (row) => {
   try {
     await setDefault("defaultDrive", row.id)
     driveTableConfig.value.default = row.id;
-    emitReload.emit('drive-reload');
+    emitter.emit('refreshDriveConfig');
     MessagePlugin.success(t('pages.setting.form.success'));
   } catch (err) {
     console.log('[setting][drive][defaultEvent][error]', err);
