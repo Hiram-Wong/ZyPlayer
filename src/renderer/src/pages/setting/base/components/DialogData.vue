@@ -796,10 +796,6 @@ const rsyncLocalEvent = async () => {
       .input-item {
         margin-bottom: var(--td-comp-margin-s);
       }
-
-      .input-item:last-child {
-        margin-bottom: 0;
-      }
     }
 
     .action {
