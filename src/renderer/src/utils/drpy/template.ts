@@ -190,7 +190,6 @@ function getMubans() {
         // tabs: '.nav-tabs&&li',
         lists: '.myui-content__list:eq(#id) li',
       },
-      tab_exclude: '热播',
       搜索: '#searchList li;a&&title;.lazyload&&data-original;.pic-text&&Text;a&&href;.detail&&Text',
     }, 首图2: {
       title: '',
