@@ -12,73 +12,48 @@ if (typeof Object.assign !== 'function') {
     return target;
   };
 }
-// @ts-ignore
-if (typeof ($js) === 'undefined' || typeof ($js) !== 'object') {
-  globalThis.$js = {
-    toString(func) {
-      let strfun = func.toString();
-      return strfun.replace(/^\(\)(\s+)?=>(\s+)?\{/, 'js:').replace(/\}$/, '');
-    },
-  };
-}
+
 // 通用免嗅探播放
-// @ts-ignore
-let common_lazy = $js.toString(() => {
-  // @ts-ignore
+let common_lazy = `js:
   let html = request(input);
   let hconf = html.match(/r player_.*?=(.*?)</)[1];
-  // @ts-ignore
   let json = JSON5.parse(hconf);
   let url = json.url;
   if (json.encrypt == '1') {
     url = unescape(url);
   } else if (json.encrypt == '2') {
-    // @ts-ignore
     url = unescape(base64Decode(url));
   }
-  if (/\.(m3u8|mp4|m4a|mp3)/.test(url)) {
-    // @ts-ignore
+  if (/\\.(m3u8|mp4|m4a|mp3)/.test(url)) {
     input = {
       parse: 0,
       jx: 0,
       url: url,
     };
   } else {
-    // @ts-ignore
     input;
-  }
-});
+  }`;
 // 默认嗅探播放
-// @ts-ignore
-let def_lazy = $js.toString(() => {
-  // @ts-ignore
-  input = { parse: 1, url: input, js: '' };
-});
+
+let def_lazy = `js:
+  input = { parse: 1, url: input, js: '' };`;
 // 采集站播放
-// @ts-ignore
-let cj_lazy = $js.toString(() => {
-  // @ts-ignore
-  if (/\.(m3u8|mp4)/.test(input)) {
-    // @ts-ignore
+
+let cj_lazy = `js:
+  if (/\\.(m3u8|mp4)/.test(input)) {
     input = { parse: 0, url: input };
   } else {
-    // @ts-ignore
     if (rule.parse_url.startsWith('json:')) {
-      // @ts-ignore
       let purl = rule.parse_url.replace('json:', '') + input;
-      // @ts-ignore
       let html = request(purl);
       let json = JSON.parse(html);
       if (json.url) {
-        // @ts-ignore
         input = { parse: 0, url: json.url };
       }
     } else {
-      // @ts-ignore
       input = rule.parse_url + input;
     }
-  }
-});
+  }`;
 
 function getMubans() {
   const mubanDict = { // 模板字典
@@ -431,6 +406,5 @@ function getMubans() {
   };
   return JSON.parse(JSON.stringify(mubanDict));
 }
-
 
 export { getMubans };
