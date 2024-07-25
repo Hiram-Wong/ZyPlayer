@@ -31,7 +31,7 @@ let common_lazy = `js:
       url: url,
     };
   } else {
-    input;
+    input = url && url.startsWith('http') && tellIsJx(url) ? {parse:0,jx:1,url:url}:input;
   }`;
 // 默认嗅探播放
 
