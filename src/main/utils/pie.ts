@@ -1,7 +1,9 @@
 import { app, BrowserWindow } from 'electron';
+import { register as localshortcutRegister, unregisterAll as localshortcutUnregisterAll } from 'electron-localshortcut';
 import { nanoid } from 'nanoid';
 import puppeteer from 'puppeteer-core';
 import pie from 'puppeteer-in-electron';
+
 import { setting } from '../core/db/service';
 import logger from '../core/logger';
 
@@ -58,6 +60,13 @@ const puppeteerInElectron = async (
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
     const debugStatus = setting.find({ key: 'debug' })?.value || false;
     snifferWindow = new BrowserWindow({ show: debugStatus }); // 创建无界面窗口
+    localshortcutRegister(snifferWindow!, ['CommandOrControl+Shift+I', 'F12'], () => {
+      if (snifferWindow!.webContents.isDevToolsOpened()) {
+        snifferWindow!.webContents.closeDevTools();
+      } else {
+        snifferWindow!.webContents.openDevTools();
+      }
+    });
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
     snifferWindow.webContents.setWindowOpenHandler(() => {
       return { action: 'deny' };
