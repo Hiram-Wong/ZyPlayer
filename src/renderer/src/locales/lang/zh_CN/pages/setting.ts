@@ -163,6 +163,7 @@ export default {
     security: '安全',
     proxy: '网络代理',
     ua: '用户代理',
+    dns: 'DNS',
     jurisdiction: '权限',
     selefBoot: '自启动',
     hardwareAcceleration: '硬件加速',
@@ -194,6 +195,11 @@ export default {
     title: 'User-Agent',
     topTip: '模拟用户代理',
     bottomTip: '推荐chrome, 空使用系统默认',
+  },
+  dns: {
+    title: 'DNS-over-HTTP',
+    topTip: '使用安全DNS',
+    bottomTip: '推荐腾讯, 空使用系统默认',
   },
   barrage: {
     title: '弹幕',

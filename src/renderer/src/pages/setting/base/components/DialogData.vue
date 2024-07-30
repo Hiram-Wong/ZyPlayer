@@ -519,6 +519,7 @@ const formatSet = (data) => {
     },
     { key: "defaultFilterType", value: "off" },
     { key: "debug", value: false },
+    { key: "dns", value: "" },
     { key: "version", value: pkgVersion },
     // ... 其他新键值对
   ];

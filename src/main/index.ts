@@ -57,6 +57,15 @@ let reqIdRedirect = {};
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
+  if (setting.find({ key: 'dns' }).value) {
+    const doh = setting.find({ key: 'dns' }).value;
+    logger.info(`[dns] doh: ${doh}`)
+    app.configureHostResolver({
+      secureDnsMode: 'secure',
+      secureDnsServers: [doh],
+    });
+  };
+
   registerTitleBarListener();
 
   const defaultSession = session.defaultSession;

@@ -8,7 +8,7 @@
 
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
-          <t-textarea v-model="formData.data" class="dns-input" :placeholder="$t('pages.setting.placeholder.general')"
+          <t-textarea v-model="formData.data" class="text-input" :placeholder="$t('pages.setting.placeholder.general')"
             autofocus :autosize="{ minRows: 2, maxRows: 4 }" @change="changeUatextarea" />
           <t-radio-group v-model="active.select" variant="default-filled" size="small" @change="changeUaSelect">
             <t-radio-button v-for="item in UA_LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
@@ -55,7 +55,7 @@ const active = reactive({
   select: ''
 });
 
-const emit = defineEmits(['update:visible', 'receiveDnsData']);
+const emit = defineEmits(['update:visible', 'receiveData']);
 
 watch(
   () => formVisible.value,
@@ -90,7 +90,7 @@ const changeUaSelect = (item) => {
 
 const onSubmit = async () => {
   const { data, type } = formData.value;
-  emit('receiveDnsData', {
+  emit('receiveData', {
     data,
     type,
   });

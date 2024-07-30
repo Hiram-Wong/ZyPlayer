@@ -1,23 +1,23 @@
 <template>
-  <t-dialog v-model:visible="formVisible" header="DNS-over-HTTP" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.dns.title')" placement="center" :footer="false">
     <template #body>
       <div class="doh-dialog-container dialog-container-padding">
         <div class="header">
-          <p class="tip">确定如何通过安全连接来连接到网站</p>
+          <p class="tip">{{ $t('pages.setting.dns.topTip') }}</p>
         </div>
 
         <!-- 表单内容 -->
         <t-form ref="form" :data="formData" @submit="onSubmit">
-          <t-textarea v-model="formData.data" class="dns-input" placeholder="请输入dns" autofocus
-            :autosize="{ minRows: 2, maxRows: 4 }" @change="changeDnstextarea" />
+          <t-textarea v-model="formData.data" class="text-input" :placeholder="$t('pages.setting.placeholder.general')"
+            autofocus :autosize="{ minRows: 2, maxRows: 4 }" @change="changeDnstextarea" />
           <t-radio-group v-model="dnsSelect" variant="default-filled" size="small" @change="changeDnsSelect">
             <t-radio-button v-for="item in DNS_LIST" :key="item.name" :value="item.dns">{{ item.name }}</t-radio-button>
           </t-radio-group>
-          <p class="tip bottom-tip">推荐使用腾讯国密级，为空使用普通dns查询</p>
+          <p class="tip bottom-tip">{{ $t('pages.setting.dns.bottomTip') }}</p>
           <div class="optios">
             <t-form-item style="float: right">
-              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-              <t-button theme="primary" type="submit">确定</t-button>
+              <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+              <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
             </t-form-item>
           </div>
         </t-form>
@@ -28,7 +28,6 @@
 
 <script setup lang="ts">
 import _ from 'lodash';
-import { MessagePlugin } from 'tdesign-vue-next';
 import { reactive, ref, watch } from 'vue';
 
 import DNS_CONFIG from '@/config/doh';
@@ -55,7 +54,7 @@ const DNS_LIST = reactive([...DNS_CONFIG.doh]);
 
 const dnsSelect = ref('');
 
-const emit = defineEmits(['update:visible', 'receiveDnsData']);
+const emit = defineEmits(['update:visible', 'receiveData']);
 
 watch(
   () => formVisible.value,
@@ -81,7 +80,7 @@ watch(
 
 const changeDnstextarea = (item) => {
   const index = _.findIndex(DNS_LIST, ['dns', item]);
-  if (index === -1) dnsSelect.value = null;
+  if (index === -1) dnsSelect.value = '';
 };
 
 const changeDnsSelect = (item) => {
@@ -90,13 +89,12 @@ const changeDnsSelect = (item) => {
 
 const onSubmit = async () => {
   const { data, type } = formData.value;
-  emit('receiveDnsData', {
+  emit('receiveData', {
     data,
     type,
   });
 
-  window.electron.ipcRenderer.send('update-dns', !!data, data);
-  MessagePlugin.info('重启软件生效');
+  window.electron.ipcRenderer.send('updateDns', data);
 
   formVisible.value = false;
 };

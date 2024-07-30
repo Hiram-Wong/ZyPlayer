@@ -163,6 +163,7 @@ export default {
     security: 'Security',
     proxy: 'Proxy',
     ua: 'UA',
+    dns: 'DNS',
     jurisdiction: 'Jurisdiction',
     selefBoot: 'SelefBoot',
     hardwareAcceleration: 'HardwareAcceleration',
@@ -192,7 +193,12 @@ export default {
   ua: {
     title: 'User-Agent',
     topTip: 'Emulate User Agent',
-    bottomTip: 'recommend chrome, empty use system default',
+    bottomTip: 'Recommend chrome, empty use system default',
+  },
+  dns: {
+    title: 'DNS-over-HTTP',
+    topTip: 'Using Secure DNS',
+    bottomTip: 'Recommend Tencent, empty use system default',
   },
   barrage: {
     title: 'Barrage',

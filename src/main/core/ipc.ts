@@ -206,6 +206,20 @@ const ipcListen = () => {
     }
   });
 
+  ipcMain.on('updateDns', (_, item) => {
+    logger.info(`[ipcMain] new dns: ${item}`);
+    if (item) {
+      app.configureHostResolver({
+        secureDnsMode: 'secure',
+        secureDnsServers: [item],
+      });
+    } else {
+      app.configureHostResolver({
+        secureDnsMode: 'off',
+      });
+    }
+  });
+
   // 事件广播通知
   ipcMain.handle('event-broadcast', (event, eventInfo) => {
     // 遍历window执行

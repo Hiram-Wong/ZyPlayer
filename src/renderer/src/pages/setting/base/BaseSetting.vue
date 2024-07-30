@@ -118,10 +118,12 @@
         <t-space>
           <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">{{ $t('pages.setting.base.proxy')
             }}</span>
-          <span class="title" @click="uaEvnet">{{ $t('pages.setting.base.ua') }}</span>
+          <span class="title" @click="safeEvnet('ua')">{{ $t('pages.setting.base.ua') }}</span>
+          <span class="title" @click="safeEvnet('dns')">{{ $t('pages.setting.base.dns') }}</span>
         </t-space>
 
-        <dialog-ua-view v-model:visible="isVisible.ua" :data="uaDialogData" @receive-dns-data="flushDialogData" />
+        <dialog-ua-view v-model:visible="isVisible.ua" :data="safeDialogData" @receive-data="flushDialogData" />
+        <dialog-dns-view v-model:visible="isVisible.dns" :data="safeDialogData" @receive-data="flushDialogData" />
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.jurisdiction')" name="jurisdiction">
         <t-space>
@@ -179,6 +181,7 @@ import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
 import DialogDataView from './components/DialogData.vue';
 import DialogUaView from './components/DialogUA.vue';
+import DialogDnsView from './components/DialogDns.vue';
 import DialogUpdateView from './components/DialogUpdate.vue';
 import DialogThumbnailView from './components/DialogThumbnail.vue';
 import DialogCustomPlayer from './components/DialogCustomPlayer.vue';
@@ -203,7 +206,7 @@ const isVisible = reactive({
   disclaimer: false,
 });
 
-const uaDialogData = ref({ data: '', type: 'ua' });
+const safeDialogData = ref({ data: '', type: 'dns' });
 const webdevDialogData = ref({ webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } } });
 const snifferDialogData = ref({ data: { type: '', url: '' }, type: 'snifferMode' });
 const barrageDialogData = ref({ url: '', key: '', support: [], start: '', mode: '', color: '', content: '' });
@@ -643,15 +646,14 @@ const debugEvnet = () => {
   window?.location.reload();
 };
 
-// ua：打开dialog并设置数据
-const uaEvnet = () => {
-  const { ua } = formData.value;
-  uaDialogData.value = {
-    data: ua,
-    type: 'ua',
+
+const safeEvnet = (type) => {
+  safeDialogData.value = {
+    data: formData.value[type],
+    type: type,
   };
 
-  isVisible.ua = true;
+  isVisible[type] = true;
 };
 
 const snifferEvent = () => {

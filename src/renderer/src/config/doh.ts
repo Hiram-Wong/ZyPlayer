@@ -9,19 +9,15 @@ export default {
       dns: 'https://dns.alidns.com/dns-query',
     },
     {
-      name: 'cloudflare',
+      name: '360',
+      dns: 'https://doh.360.cn/dns-query',
+    },
+    {
+      name: 'Cloudflare',
       dns: 'https://cloudflare-dns.com/dns-query',
     },
     {
-      name: 'Google',
-      dns: 'https://dns.google/dns-query',
-    },
-    {
-      name: 'IBM',
-      dns: 'https://dns.quad9.net/dns-query',
-    },
-    {
-      name: 'Cisco',
+      name: 'OpenDNS',
       dns: 'https://doh.opendns.com/dns-query',
     },
   ],
