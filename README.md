@@ -274,7 +274,8 @@ sudo xattr -cr /Applications/zyplayer.app
       },
       "debug": false, // [3.3.7版本启用] 用于在线调试和嗅探页面弹出
       "defaultFilterType": "off", // [3.3.7版本启用] 用于影视搜索过滤关键词
-      "timeout": 5000 // [3.3.5版本启用] 用于调整全局请求超时事件, 单位毫秒
+      "timeout": 5000, // [3.3.5版本启用] 用于调整全局请求超时事件, 单位毫秒
+      "dns": "" // [3.3.7版本启用] DNS-over-HTTP
     }
   ]
 }
