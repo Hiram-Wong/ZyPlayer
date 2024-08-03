@@ -9,7 +9,7 @@
           </t-popup>
         </div>
         <div class="search" v-if="isVisible.search" ref="headerOutsideRef">
-          <t-input :placeholder="$t('pages.setting.placeholder.general')" clearable v-model="searchText"
+          <t-input :placeholder="$t('pages.setting.placeholder.general')" autofocus clearable v-model="searchText"
             @change="searchEvent">
             <template #suffixIcon>
               <search-icon :style="{ cursor: 'pointer' }" />
