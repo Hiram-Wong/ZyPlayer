@@ -10,6 +10,7 @@ const { platform } = process;
 
 <style lang="less" scoped>
 .system-controls {
+  position: relative;
   width: 102px;
   height: 100%;
   overflow: hidden;
