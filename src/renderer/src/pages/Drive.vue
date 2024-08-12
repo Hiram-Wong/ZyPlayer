@@ -267,18 +267,6 @@ const changeDefaultIptvEvent = async (id) => {
   if (spider.value) spider.value.destroy();
   driveContent.value = [];
   breadcrumb.value = [];
-  driveConfig.value = {
-    data: [],
-    default: {
-      name: '',
-      server: '',
-      startPage: '',
-      search: false,
-      headers: {},
-      params: {}
-    }
-  };
-  active.value.nav = '';
   infiniteCompleteTip.value = t('pages.drive.infiniteLoading.noMore');
   active.value.nav = id;
   driveConfig.value.default = item;
