@@ -267,18 +267,18 @@ const getWindowState = (name: string) => {
   const db = setting.find({ key: 'windowPosition' }).value || {
     status: false,
     position_main: { width: 1000, height: 640 },
-    position_play: { width: 1000, height: 640 },
+    position_play: { width: 875, height: 550 },
   };
   let data = {};
   if (name === 'main' || name === 'load') {
     data = {
       status: db.status,
-      position: db.position_main,
+      position: db?.position_main || { width: 1000, height: 640 },
     };
   } else if (name === 'play') {
     data = {
       status: db.status,
-      position: db.position_play,
+      position: db?.position_play || { width: 875, height: 550 },
     };
   } else {
     data = db;
