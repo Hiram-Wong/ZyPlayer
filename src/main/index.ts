@@ -72,7 +72,7 @@ app.whenReady().then(async () => {
 
   defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
     let { url, id } = details;
-    const filters = ['devtools-detector.min.js', 'devtools-detector.js'];
+    const filters = ['devtools-detector', 'disable-devtool'];
     if (filters.some((filter) => url.includes(filter))) {
       callback({ cancel: true });
       return;
