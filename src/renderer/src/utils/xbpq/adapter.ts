@@ -498,18 +498,6 @@ class XBPQAdapter {
     this.source = source;
     this.XBPQRule = source.ext;
 
-    // 检查source.ext是否为字符串类型，如果是，则尝试解析JSON5格式的字符串
-    if (typeof source.ext === 'string' && source.ext.startsWith('http')) {
-      // 注意：fetch函数是异步的，这里需要处理异步逻辑
-      // 以下代码仅为示例，实际使用时需要根据具体情况调整
-      fetch(source.ext)
-        .then((response) => response.text())
-        .then((text) => {
-          this.XBPQRule = JSON5.parse(text);
-        })
-        .catch((error) => console.error('Fetch error:', error));
-    }
-
     if (source.click) {
       this.XBPQRule['click'] = source.click;
     }

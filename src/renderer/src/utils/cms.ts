@@ -144,6 +144,12 @@ const xbpqInit = async (site) => {
 
   let ext = site.ext;
   try {
+    if (typeof ext === 'string' && ext.startsWith('http')) {
+      ext = await request({
+        method: 'GET',
+        url: ext,
+      });
+    }
     ext = JSON5.parse(site.ext);
   } catch (err) {}
 
