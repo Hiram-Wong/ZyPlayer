@@ -317,10 +317,11 @@ const easyConfig = async () => {
 
   let data = {};
 
-  const formatType = (selectType: number, soureceType: number) => {
+  const formatType = (selectType: number, soureceType: number, type: string) => {
     // 0cms[xml] 1cms[json] 2drpy[js0] 6hipy[t4] 3app[v3] 4app[v3]
 
     if (selectType === 1) return 2; // drpy
+    else if (type === 'csp_XBPQ') return 9; // xbpq
     else if (selectType === 2) return 1; // tvbox
     else if (selectType === 3) {
       switch (soureceType) {
@@ -343,6 +344,9 @@ const easyConfig = async () => {
 
   const formatUrl = (relativeUrl: string, baseUrl: string): string => {
     if (!relativeUrl) return '';
+    console.log(relativeUrl)
+    if (typeof relativeUrl === 'object') return JSON.stringify(relativeUrl);
+    if (relativeUrl.startsWith('csp_XBPQ')) return relativeUrl;
     return joinUrl.resolve(baseUrl, relativeUrl);
   };
 
@@ -372,12 +376,12 @@ const easyConfig = async () => {
     } else {
       if (_.has(config, "sites")) {
         data["tbl_site"] = config.sites
-          .filter((item) => [0, 1, 4].includes(item.type) || (item.type === 3 && item.api.includes('.js') && item.ext && typeof item.ext === 'string' && item.ext.includes('.js')))
+          .filter((item) => [0, 1, 4].includes(item.type)|| (item.type === 3 && item.api === 'csp_XBPQ') || (item.type === 3 && item.api.includes('.js') && item.ext && typeof item.ext === 'string' && item.ext.includes('.js')))
           .map((item) => ({
-            // id: nanoid(),
-            id: [0, 1].includes(item.type) ? nanoid() : encodeMd5(item.api.split('/').slice(-1)[0] + '|' + (item.ext && typeof item.ext === 'string' ? item.ext.split('/').slice(-1)[0] : '')),
+            // id: [0, 1].includes(item.type) ? nanoid() : encodeMd5(item.api.split('/').slice(-1)[0] + '|' + (item.ext && typeof item.ext === 'string' ? item.ext.split('/').slice(-1)[0] : '')),
+            id: nanoid(),
             name: item.name,
-            type: formatType(type, item.type),
+            type: formatType(type, item.type, item.api),
             api: formatUrl(item.api, url),
             group: formatGroup(type),
             search: _.has(item, "searchable") ? item.searchable : 0,
