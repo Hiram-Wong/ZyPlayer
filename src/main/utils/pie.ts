@@ -46,7 +46,7 @@ const puppeteerInElectron = async (
   url: string,
   run_script: string = '',
   init_script: string = '',
-  customRegex: string,
+  parse_extra: any = { custom_regex: '', sniffer_exclude: ''},
   ua: string | null = null,
 ): Promise<PieResponse> => {
   logger.info(`[sniffer] sniffer url: ${url}`);
@@ -80,7 +80,7 @@ const puppeteerInElectron = async (
     if (init_script && init_script.trim()) {
       try {
         await page.evaluateOnNewDocument(init_script);
-      } catch (e) {
+      } catch (e: any) {
         logger.info(`[pie]执行初始化页面脚本发生错误:${e.message}`);
       }
     }
@@ -111,8 +111,13 @@ const puppeteerInElectron = async (
         if (referer) headers['referer'] = referer;
         if (userAgent) headers['user-agent'] = userAgent;
 
-        if (customRegex && reqUrl.match(new RegExp(customRegex, 'gi'))) {
-          logger.info(`[pie]正则匹配:${reqUrl}`);
+        if (parse_extra?.sniffer_exclude && reqUrl.match(new RegExp(parse_extra?.sniffer_exclude, 'gi'))) {
+          logger.info(`[pie][正则排除] 请求地址:${reqUrl}, 规则: ${parse_extra.sniffer_exclude}`);
+          return req.continue().catch((err) => logger.error(`[pie][continue]${err}`));
+        }
+
+        if (parse_extra?.custom_regex && reqUrl.match(new RegExp(parse_extra?.custom_regex, 'gi'))) {
+          logger.info(`[pie][正则匹配] 请求地址:${reqUrl}, 规则: ${parse_extra.custom_regex}`);
           page.removeAllListeners('request');
           await cleanup(pageId);
           req.abort().catch((err) => logger.error(`[pie][RegExp]${err}`));
@@ -120,7 +125,7 @@ const puppeteerInElectron = async (
         }
 
         if (isVideoUrl(reqUrl)) {
-          logger.info(`[pie]后缀名匹配:${reqUrl}`);
+          logger.info(`[pie][后缀匹配] 请求地址:${reqUrl}`);
           page.removeAllListeners('request');
           await cleanup(pageId);
           req.abort().catch((err) => logger.error(`[pie][isVideoUrl]${err}`));
