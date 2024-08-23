@@ -65,11 +65,12 @@
         <span v-if="row.type === 0">cms[xml]</span>
         <span v-else-if="row.type === 1">cms[json]</span>
         <span v-else-if="row.type === 2">drpy[js0]</span>
+        <span v-else-if="row.type === 3">app[v3]</span>
+        <span v-else-if="row.type === 4">app[v1]</span>
         <span v-else-if="row.type === 6">hipy[t4]</span>
         <span v-else-if="row.type === 7">js[t3]</span>
         <span v-else-if="row.type === 8">catvod[nodejs]</span>
-        <span v-else-if="row.type === 3">app[v3]</span>
-        <span v-else-if="row.type === 4">app[v1]</span>
+        <span v-else-if="row.type === 9">xbpq</span>
       </template>
       <template #op="slotProps">
         <t-space>
@@ -247,7 +248,7 @@ const checkAllSite = async (select) => {
 
 const checkSingleEvent = async (row, all = false) => {
   let isActive: boolean = row.isActive;
-  if (row.type === 7 || row.type === 8) {
+  if (row.type === 7 || row.type === 8  || row.type === 9) {
     row.resource = -1;
   } else {
     const { status, resource } = await checkValid(row); // 检测状态

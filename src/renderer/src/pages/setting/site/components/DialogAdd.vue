@@ -12,12 +12,13 @@
               <t-radio :value="0">cms[xml]</t-radio>
               <t-radio :value="1">cms[json]</t-radio>
               <t-radio :value="2">drpy[js0]</t-radio>
-              <t-radio :value="6">hipy[t4]</t-radio>
-              <t-radio :value="7">js[t3]</t-radio>
-              <t-radio :value="8">catvod[nodejs]</t-radio>
               <t-radio :value="3">app[v3]</t-radio>
               <t-radio :value="4">app[v1]</t-radio>
               <!-- <t-radio :value="5">爬虫</t-radio> -->
+              <t-radio :value="6">hipy[t4]</t-radio>
+              <t-radio :value="7">js[t3]</t-radio>
+              <t-radio :value="8">catvod[nodejs]</t-radio>
+              <t-radio :value="9">xbpq</t-radio>
             </t-radio-group>
           </t-form-item>
           <t-form-item :label="$t('pages.setting.site.api')" name="api">

@@ -80,7 +80,7 @@ import { usePlayStore } from '@/store';
 
 import { delHistory, fetchHistoryList, clearHistoryFilmList } from '@/api/history';
 import { fetchSiteList } from '@/api/site';
-import { fetchDetail, t3RuleInit, catvodRuleInit } from '@/utils/cms';
+import { fetchDetail, t3RuleInit, catvodRuleInit, xbpqInit } from '@/utils/cms';
 import { formatIndex } from '@/utils/common/film';
 import emitter from '@/utils/emitter';
 
@@ -198,16 +198,25 @@ const playEvent = async (item) => {
   isVisible.loading = true;
 
   try {
-    const { videoName, videoId } = item;
-    const site: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
+    const { videoName, videoId, site } = item;
+    // const site: any = siteConfig.value.data.find(({ id }) => id === item.relateId);
     siteData.value = site;
     if (site.type === 7) {
       await t3RuleInit(site);
-    } else if (site.type === 8) await catvodRuleInit(site);
+    } else if (site.type === 8) {
+      await catvodRuleInit(site);
+    } else if (site.type === 9) {
+      await xbpqInit(site);
+    };
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const [detailItem] = await fetchDetail(site, videoId);
+      if (site.type === 9) {
+        detailItem.vod_name = item.videoName;
+        detailItem.vod_pic = item.videoImage;
+      };
       item = detailItem;
     }
+    console.log('[film][playEvent]', item);
 
     const playerMode = store.getSetting.playerMode;
 
@@ -220,9 +229,10 @@ const playEvent = async (item) => {
         status: true,
         data: {
           info: item,
-          ext: { site: site }
+          ext: { site: { ...site } }
         }
       };
+      console.log(config)
 
       store.updateConfig(config);
       window.electron.ipcRenderer.send('openPlayWindow', videoName);

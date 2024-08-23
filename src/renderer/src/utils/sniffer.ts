@@ -50,13 +50,12 @@ const getQuery = (url: string, paramName: string) => {
   }
 };
 
-const snifferPie = async (url: string, run_script: string, init_script: string, customRegex: string): Promise<string> => {
+const snifferPie = async (url: string, run_script: string, init_script: string, parse_extra: object): Promise<string> => {
   console.log('[detail][sniffer][pie][start]: pie嗅探流程开始');
-  // console.log(`[detail][sniffer][pie][init_script]: ${init_script}`);
   let data: string = '';
 
   try {
-    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url, run_script, init_script, customRegex);
+    const res = await window.electron.ipcRenderer.invoke('sniffer-media', url, run_script, init_script, parse_extra);
 
     if (res.code === 200) {
       data = res.data.url;
@@ -111,7 +110,7 @@ const snifferIframe = async (
   url: string,
   run_script: string,
   init_script: string,
-  customRegex: string,
+  parse_extra: object,
   totalTime: number = 15000,
   speeder: number = 250,
 ): Promise<string> => {
@@ -229,13 +228,27 @@ const sniffer = async (type: string, url: string): Promise<{ headers: object; da
   let init_script = query.init_script;
   if (init_script) init_script = Base64.parse(decodeURIComponent(init_script)).toString(Utf8);
   // console.log(`[detail][sniffer][init_script]`, init_script);
-  const customRegex = query.custom_regex;
+  const custom_regex = query.custom_regex || '';
+  const sniffer_exclude = query.sniffer_exclude || '';
+
+  const format_rule = (rule) => {
+    if (rule.includes("*")) {
+      return rule = rule.replace(/\*\./g, '.*\\.');
+    } else {
+      return rule = rule.replace(/\./g, '\\.');
+    }
+  }
+
+  const parse_extra = {
+    custom_regex: format_rule(custom_regex),
+    sniffer_exclude: format_rule(sniffer_exclude),
+  };
 
   const realUrl = query.url;
   if (type === 'iframe') {
-    data = await snifferIframe(realUrl!, script!, init_script!, customRegex!);
+    data = await snifferIframe(realUrl!, script!, init_script!, parse_extra!);
   } else if (type === 'pie') {
-    data = await snifferPie(realUrl!, script!, init_script!, customRegex!);
+    data = await snifferPie(realUrl!, script!, init_script!, parse_extra!);
   } else if (type === 'custom') {
     let _obj = await snifferCustom(url);
     data = _obj.data;

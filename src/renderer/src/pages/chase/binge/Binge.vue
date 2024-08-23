@@ -74,7 +74,7 @@ import { fetchSiteList } from '@/api/site';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
-import { catvodRuleInit, fetchDetail, t3RuleInit } from '@/utils/cms';
+import { catvodRuleInit, fetchDetail, t3RuleInit, xbpqInit } from '@/utils/cms';
 import emitter from '@/utils/emitter';
 
 import DetailView from '../../film/Detail.vue';
@@ -184,12 +184,19 @@ const playEvent = async (item) => {
     siteData.value = site;
     if (site.type === 7) {
       await t3RuleInit(site);
-    } else if (site.type === 8) await catvodRuleInit(site);
+    } else if (site.type === 8) {
+      await catvodRuleInit(site);
+    } else if (site.type === 9) {
+      await xbpqInit(site);
+    };
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const [detailItem] = await fetchDetail(site, videoId);
+      if (site.type === 9) {
+        detailItem.vod_name = item.videoName;
+        detailItem.vod_pic = item.videoImage;
+      };
       item = detailItem;
     }
-    console.log(item);
 
     const playerMode = store.getSetting.playerMode;
 
@@ -247,6 +254,7 @@ const checkUpdaterEvent = async () => {
       try {
         if (site.type === 7) await t3RuleInit(site);
         else if (site.type === 8) await catvodRuleInit(site);
+        else if (site.type === 9) await xbpqInit(site);
         const [res] = await fetchDetail(site, videoId);
         if (res.vod_remarks) {
           updateVideoRemarks(item, res);

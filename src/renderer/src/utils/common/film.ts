@@ -14,9 +14,11 @@ import {
   fetchDrpyPlayUrl,
   fetchHipyPlayUrl,
   fetchT3PlayUrl,
+  fetchXBPQPlayUrl,
   t3RuleProxy,
   t3RuleInit,
   catvodRuleInit,
+  xbpqInit,
   fetchDetail,
   fetchSearch,
   fetchCatvodPlayUrl,
@@ -297,7 +299,17 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
         case 8:
           // catvox获取服务端播放链接
           await catvodRuleInit(site);
-          playerUrl = await fetchCatvodPlayUrlHelper(site, flimSource, url);
+          playData = await fetchCatvodPlayUrlHelper(site, flimSource, url);
+          playerUrl = playData.playUrl;
+          extra = playData.extra;
+          parse = playData.parse;
+          break;
+        case 9:
+          // xbpq获取服务端播放链接
+          await xbpqInit(site);
+          playData = await fetchXBPQPlayUrlHelper(flimSource, url);
+          playerUrl = playData.playUrl;
+          extra = playData.extra;
           break;
       }
       if (!playerUrl) playerUrl = url; // 可能出现处理后是空链接
@@ -325,7 +337,9 @@ const playHelper = async (snifferMode, url: string, site, analyze, flimSource, a
         ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
         : '';
 
-    const snifferPlayUrl = `${snifferApi}?url=${playerUrl}&script=${script}${extra}`;
+    let snifferPlayUrl = `${snifferApi}?url=${playerUrl}`;
+    if (script) snifferPlayUrl += `&script=${script}`
+    if (extra) snifferPlayUrl += `&${extra}`
     // console.log(`snifferPlayUrl: ${snifferPlayUrl}`);
     let snifferResult = await sniffer(snifferMode.type, snifferPlayUrl);
     data.url = snifferResult.data;
@@ -425,10 +439,11 @@ const fetchHipyPlayUrlHelper = async (
 
   try {
     const playRes = await fetchHipyPlayUrl(site, flag, url);
+    const extra =  playRes?.parse_extra ? `parse_extra='${playRes.parse_extra}&sniffer_exclude = ''` : `''`;
     data = {
       playUrl: playRes.url,
       script: playRes.js ? encodeURIComponent(Base64.stringify(Utf8.parse(playRes.js))) : '',
-      extra: playRes.parse_extra || '',
+      extra: extra || '',
       parse: Boolean(playRes.parse),
     };
     console.log(`[film_common][fetchHipyPlayUrlHelper][return]`, data);
@@ -459,10 +474,12 @@ const fetchT3PlayUrlHelper = async (
       await setT3Proxy(proxyRes);
     }
 
+    const extra =  playRes?.parse_extra ? `parse_extra='${playRes.parse_extra}&sniffer_exclude = ''` : `''`;
+
     data = {
       playUrl: playRes.url,
       script: playRes.js ? encodeURIComponent(Base64.stringify(Utf8.parse(playRes.js))) : '',
-      extra: playRes.parse_extra || '',
+      extra: extra || '',
       parse: Boolean(playRes.parse),
     };
     console.log(`[film_common][fetchT3PlayUrlHelper][return]`, data);
@@ -485,6 +502,33 @@ const fetchCatvodPlayUrlHelper = async (site: { [key: string]: any }, flag: stri
     console.log(`[film_common][fetchCatvodPlayUrlHelper][error]`, err);
   } finally {
     console.log(`[film_common][fetchCatvodPlayUrlHelper][end]获取服务端播放链接结束`);
+    return data;
+  }
+};
+
+const fetchXBPQPlayUrlHelper = async (
+  flag: string,
+  id: string,
+): Promise<{ playUrl: string; extra: string; parse: boolean }> => {
+  console.log('[film_common][fetchXBPQPlayUrlHelper][start]获取服务端播放链接开启');
+  let data: { playUrl: string; extra: string; parse: boolean } = {
+    playUrl: '',
+    extra: '',
+    parse: false,
+  };
+  try {
+    const playRes = await fetchXBPQPlayUrl(flag, id);
+
+    data = {
+      playUrl: playRes.url,
+      extra: playRes?.parse_extra || '',
+      parse: Boolean(playRes.parse),
+    };
+    console.log(`[film_common][fetchXBPQPlayUrlHelper][return]`, data);
+  } catch (err) {
+    console.log(`[film_common][fetchXBPQPlayUrlHelper][error]`, err);
+  } finally {
+    console.log(`[film_common][fetchXBPQPlayUrlHelper][end]获取服务端播放链接结束`);
     return data;
   }
 };

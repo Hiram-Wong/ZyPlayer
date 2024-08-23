@@ -98,7 +98,8 @@ import {
   fetchDetail,
   t3RuleInit,
   t3RuleTerminate,
-  catvodRuleInit
+  catvodRuleInit,
+  xbpqInit
 } from '@/utils/cms';
 
 import DetailView from './film/Detail.vue';
@@ -233,7 +234,7 @@ const filterEvent = () => {
 const filterApiEvent = async () => {
   const { type } = siteConfig.value.default;
   let filterFormat;
-  if (type === 2 || type === 6 || type === 7 || type === 8) {
+  if (type === 2 || type === 6 || type === 7 || type === 8 || type === 9) {
     filterFormat = Object.entries(active.value.filter)
       .reduce<{ [key: string]: string | undefined }>((item, [key, value]) => {
         if (typeof value === 'string' && value !== '') {
@@ -467,7 +468,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
     };
 
     const defaultSite = searchTxt.value ? searchCurrentSite.value : siteConfig.value.default;
-    console.log(defaultSite)
+
     if (defaultSite.type === 7 && !isVisible.t3Work) {
       const res = await t3RuleInit(defaultSite);
       if (res.code === 200) isVisible.t3Work = true;
@@ -476,6 +477,9 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
       const content = await catvodRuleInit(defaultSite);
       if (typeof content === 'object') isVisible.catvod = true;
       else $state.error();
+    } else if (defaultSite.type === 9) {
+      const content = await xbpqInit(defaultSite);
+      if (!content) $state.error();
     };
 
     if (!isVisible.loadClass && !searchTxt.value) await getClassList(defaultSite); // 加载分类
@@ -634,8 +638,7 @@ const playEvent = async (item) => {
         } else if (relateSite.type === 8) {
           const content = await catvodRuleInit(relateSite);
           if (typeof content === 'object') isVisible.catvod = true;
-        }
-        ;
+        };
       } catch (err) {
         console.log(`[film][playEvent][error]`, err)
       } finally {
@@ -645,9 +648,15 @@ const playEvent = async (item) => {
     }
 
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
-      const [detailItem] = await fetchDetail(site, item.vod_id);
+      let [detailItem] = await fetchDetail(site, item.vod_id);
+      if (siteConfig.value.default.type === 9) {
+        detailItem.vod_name = item.vod_name;
+        detailItem.vod_pic = item.vod_pic;
+      };
       item = detailItem;
-    }
+    };
+
+    console.log('[film][playEvent]', item);
 
     const playerMode = storePlayer.getSetting.playerMode;
     if (playerMode.type === 'custom') {

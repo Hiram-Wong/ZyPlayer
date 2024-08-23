@@ -1,11 +1,13 @@
-import {XMLParser} from 'fast-xml-parser';
+import { XMLParser } from 'fast-xml-parser';
 import _ from 'lodash';
 import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
 import xpath from 'xpath';
-import {DOMParser} from '@xmldom/xmldom';
+import { DOMParser } from '@xmldom/xmldom';
+import JSON5 from 'json5';
 
-import {doWork as t3Work, terminateWork as t3WorkTerminate} from './drpy';
+import { doWork as t3Work, terminateWork as t3WorkTerminate } from './drpy';
+import XBPQAdapter from './xbpq';
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 import request from '@/utils/request';
 
@@ -95,7 +97,7 @@ const t3RuleInit = async (site) => {
 
   if (_.has(site, 'ext')) {
     try {
-      await t3Work({type: 'init', data: site.ext});
+      await t3Work({ type: 'init', data: site.ext });
       data = {
         code: 200,
         msg: 'success',
@@ -116,7 +118,7 @@ const t3RuleProxy = async (url: string): Promise<any[]> => {
   const formatUrl = new URL(url);
   const params = Object.fromEntries(formatUrl.searchParams.entries());
 
-  const result: any = await t3Work({type: 'proxy', data: params});
+  const result: any = await t3Work({ type: 'proxy', data: params });
   return (result?.data ?? []) as any[];
 };
 
@@ -136,6 +138,80 @@ const catvodRuleInit = async (site) => {
   return res.data;
 };
 
+let xbpqObject: any = null;
+const xbpqInit = async (site) => {
+  if (xbpqObject) xbpqObject = null;
+
+  let ext = site.ext;
+  try {
+    ext = JSON5.parse(site.ext);
+  } catch (err) {}
+
+  xbpqObject = new XBPQAdapter({
+    name: site.name,
+    api: site.api,
+    ext: ext,
+    lazy: ext?.lazy || '',
+    click: ext?.click || '',
+  });
+
+  try {
+    const rule = await xbpqObject.init();
+    return rule;
+  } catch (err) {
+    return null;
+  }
+};
+
+const ruleInit = async (site) => {
+  let returnRes;
+  if (site.type === 7) {
+    let data = {
+      code: 500,
+      msg: 'site parameter not have ext or ext is empty',
+    };
+
+    if (_.has(site, 'ext')) {
+      try {
+        await t3Work({ type: 'init', data: site.ext });
+        data = {
+          code: 200,
+          msg: 'success',
+        };
+      } catch (err) {
+        data.msg = err as string;
+      }
+    }
+
+    returnRes = data;
+  } else if (site.type === 8) {
+    const url = buildUrl(site.api, `/init`);
+    const res = await request({
+      method: 'POST',
+      url,
+      data: site.ext ? JSON5.parse(site.ext) : {},
+    });
+
+    returnRes = res.data;
+  } else if (site.type === 9) {
+    let ext = site.ext;
+    try {
+      ext = JSON5.parse(site.ext);
+    } catch (err) {}
+
+    let xbpqObject = new XBPQAdapter({
+      name: site.name,
+      api: site.api,
+      ext: ext,
+      lazy: ext?.lazy || '',
+      click: ext?.click || '',
+    });
+
+    returnRes = xbpqObject;
+  }
+
+  return returnRes;
+};
 /**
  * 获取资源分类 和 所有资源的总数, 分页等信息
  * @param {*} site 资源配置
@@ -158,7 +234,7 @@ const fetchClassify = async (site) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `&extend=${site.ext}&filter=true`);
     } else if (site.type === 7) {
-      const content: any = await t3Work({type: 'home'});
+      const content: any = await t3Work({ type: 'home' });
       const res = {
         page: 1,
         pagecount: 9999,
@@ -168,8 +244,17 @@ const fetchClassify = async (site) => {
         classData: content.data.class,
       };
       return res;
-    } else if (site.type === 8) {
-      url = buildUrl(site.api, `/home`);
+    } else if (site.type === 9) {
+      const reponse = xbpqObject.home();
+      const content = JSON5.parse(reponse);
+      return {
+        page: 1,
+        pagecount: 9999,
+        limit: 20,
+        total: 9999,
+        filters: content.filters ? content.filters : {},
+        classData: content.class,
+      };
     }
 
     let response;
@@ -304,9 +389,9 @@ const fetchClassify = async (site) => {
             const value = classItem.type_extend[key];
             if (!_.isEmpty(value) && !['star', 'state', 'version', 'director'].includes(key)) {
               const valueList = value.split(',').map((item) => item.trim());
-              const options = valueList.map((value) => ({n: value === '全部' ? '全部' : value, v: value}));
-              const name = (_.find(CLASS_FILTER_CONFIG, {key}) || {}).desc;
-              result.push({key, name, value: [{n: '全部', v: ''}, ...options]});
+              const options = valueList.map((value) => ({ n: value === '全部' ? '全部' : value, v: value }));
+              const name = (_.find(CLASS_FILTER_CONFIG, { key }) || {}).desc;
+              result.push({ key, name, value: [{ n: '全部', v: '' }, ...options] });
             }
           }
           filters[classItem.type_id] = result;
@@ -403,18 +488,18 @@ const checkValid = async (site) => {
 const convertVideoList = (videoItems) => {
   return videoItems.map(
     ({
-       id: vod_id,
-       tid: type_id,
-       type: type_name,
-       pic: vod_pic,
-       note: vod_remark,
-       name: vod_name,
-       des: vod_content,
-       year: vod_year,
-       area: vod_area,
-       director: vod_director,
-       actor: vod_actor,
-     }) => ({
+      id: vod_id,
+      tid: type_id,
+      type: type_name,
+      pic: vod_pic,
+      note: vod_remark,
+      name: vod_name,
+      des: vod_content,
+      year: vod_year,
+      area: vod_area,
+      director: vod_director,
+      actor: vod_actor,
+    }) => ({
       vod_id,
       type_id,
       type_name,
@@ -452,7 +537,7 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
     } else if (site.type === 7) {
       const res: any = await t3Work({
         type: 'category',
-        data: {tid: t, pg, filter: _.size(f) ? true : false, extend: _.size(f) ? f : {}},
+        data: { tid: t, pg, filter: _.size(f) ? true : false, extend: _.size(f) ? f : {} },
       });
       return res.data.list;
     } else if (site.type === 8) {
@@ -462,6 +547,10 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
         page: pg,
         filters: f,
       };
+    } else if (site.type === 9) {
+      const response = await xbpqObject.category(t, pg, _.size(f) ? true : false, _.size(f) ? f : {});
+      const content = JSON5.parse(response);
+      return content.list;
     } else {
       url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}`);
       if (Object.keys(f).length !== 0 && site.type === 2) {
@@ -510,7 +599,7 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
  * @returns
  */
 const convertHotList = (hotItems) => {
-  return hotItems.map(({id: vod_id, tid: type_id, type: type_name, note: vod_remark, name: vod_name}) => ({
+  return hotItems.map(({ id: vod_id, tid: type_id, type: type_name, note: vod_remark, name: vod_name }) => ({
     vod_id,
     type_id,
     type_name,
@@ -523,6 +612,12 @@ const fetchHot = async (site, h) => {
     let url;
     if (site.type === 3) {
       url = buildUrl(site.api, `/index_video`);
+    } else if (site.type === 4) {
+    } else if (site.type === 5) {
+    } else if (site.type === 6) {
+    } else if (site.type === 7) {
+      const res = await t3Work({ type: '' });
+    } else if (site.type === 8) {
     } else {
       url = buildUrl(site.api, `?ac=hot&h=${h}`);
     }
@@ -595,20 +690,23 @@ const convertSearchList = (searchItem) => {
 const fetchSearch = async (site, wd, pg: number = 1) => {
   // xml坑: 单条结果是dict 多条结果list
   try {
-    if (site.type === 7) {
-      const res: any = await t3Work({type: 'search', data: {wd, quick: false, pg: pg}});
-      return res.data?.list;
-    }
     let url, postData;
     if (site.type === 3) url = buildUrl(site.api, `/search?text=${encodeURIComponent(wd)}`);
     else if (site.type === 5) url = `${reptileApiFormat(site.api, 'websearchurl')}${encodeURIComponent(wd)}`;
     else if (site.type === 6) url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}&extend=${site.ext}`);
-    else if (site.type === 8) {
+    else if (site.type === 7) {
+      const res: any = await t3Work({ type: 'search', data: { wd, quick: false, pg: pg } });
+      return res.data?.list;
+    } else if (site.type === 8) {
       url = buildUrl(site.api, `/search`);
       postData = {
         wd,
         pg: pg,
       };
+    } else if (site.type === 9) {
+      const response = await xbpqObject.search(encodeURIComponent(wd), false, pg);
+      const content = JSON5.parse(response);
+      return content.list;
     } else url = buildUrl(site.api, `?wd=${encodeURIComponent(wd)}`);
 
     let response;
@@ -732,19 +830,19 @@ const convertDetailList = (detailItems) => {
 
   return detailItems.map(
     ({
-       id: vod_id,
-       tid: type_id,
-       type: type_name,
-       pic: vod_pic,
-       note: vod_remark,
-       name: vod_name,
-       des: vod_content,
-       year: vod_year,
-       area: vod_area,
-       director: vod_director,
-       actor: vod_actor,
-       dl: {dd: dldd},
-     }) => ({
+      id: vod_id,
+      tid: type_id,
+      type: type_name,
+      pic: vod_pic,
+      note: vod_remark,
+      name: vod_name,
+      des: vod_content,
+      year: vod_year,
+      area: vod_area,
+      director: vod_director,
+      actor: vod_actor,
+      dl: { dd: dldd },
+    }) => ({
       vod_id,
       type_id,
       type_name,
@@ -774,13 +872,18 @@ const fetchDetail = async (site, id) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=detail&ids=${id}&extend=${site.ext}`);
     } else if (site.type === 7) {
-      const res: any = await t3Work({type: 'detail', data: `${id}`});
+      const res: any = await t3Work({ type: 'detail', data: `${id}` });
       return res.data.list;
     } else if (site.type === 8) {
       url = buildUrl(site.api, `/detail`);
       postData = {
         id,
       };
+    } else if (site.type === 9) {
+      const response = await xbpqObject.detail(id);
+      const content = JSON5.parse(response);
+      console.log(content);
+      return content.list;
     } else {
       url = buildUrl(site.api, `?ac=detail&ids=${id}`);
     }
@@ -844,6 +947,54 @@ const fetchDetail = async (site, id) => {
   }
 };
 
+const fetchPlayUrl = async (site, data) => {
+  try {
+    let returnRes;
+    if (site.type === 2) {
+      const parsusePrefix = site.api;
+
+      const hostname = new URL(parsusePrefix).hostname;
+      const protocol = new URL(parsusePrefix).protocol;
+      const port = new URL(parsusePrefix).port;
+      const { url } = data;
+      let parsueUrl;
+      if (port) parsueUrl = `${protocol}//${hostname}:${port}/web/302redirect?url=${encodeURIComponent(url)}`;
+      else parsueUrl = `${protocol}//${hostname}/web/302redirect?url=${encodeURIComponent(url)}`;
+
+      const response = await request({
+        url: parsueUrl,
+        method: 'GET',
+      });
+      returnRes = response;
+    } else if (site.type === 6) {
+      const { flag, play } = data;
+      const url = buildUrl(site.api, `?extend=${site.ext}&flag=${flag}&play=${play}`);
+      const response = await request({
+        url,
+        method: 'GET',
+      });
+      returnRes = response;
+    } else if (site.type === 7) {
+      const { flag, id, flags } = data;
+      const response = await t3Work({ type: 'play', data: { flag, id, flags } });
+      returnRes = response;
+    } else if (site.type === 8) {
+      const { flag, id } = data;
+      const url = buildUrl(site.api, `/play`);
+      const response = await request({
+        url,
+        method: 'POST',
+        data: { flag, id },
+      });
+      returnRes = response;
+    } else if (site.type === 9) {
+      const { flag, id } = data;
+      const response = await xbpqObject.play(flag, id);
+      returnRes = response.data;
+    }
+    return returnRes;
+  } catch (err) {}
+};
 /**
  * hipy[drpy t4]获取播放详情
  * @param {*} site 资源配置
@@ -873,7 +1024,7 @@ const fetchHipyPlayUrl = async (site, flag, play) => {
  */
 const fetchT3PlayUrl = async (flag: string, id: string, flags: string[] = []) => {
   try {
-    const res: any = await t3Work({type: 'play', data: {flag, id, flags}});
+    const res: any = await t3Work({ type: 'play', data: { flag, id, flags } });
     return res.data;
   } catch (err) {
     throw err;
@@ -893,9 +1044,26 @@ const fetchCatvodPlayUrl = async (site, flag: string, id: string) => {
     const response = await request({
       url,
       method: 'POST',
-      data: {flag, id},
+      data: { flag, id },
     });
     return response;
+  } catch (err) {
+    throw err;
+  }
+};
+/**
+ * xbpq获取播放详情
+ * @param {*} flag 资源配置
+ * @param {*} id 播放源
+ * @param {*} flags 播放地址
+ * @returns
+ */
+const fetchXBPQPlayUrl = async (flag: string, id: string) => {
+  try {
+    const response = await xbpqObject.play(flag, id);
+    const content = JSON5.parse(response);
+    console.log(content);
+    return content;
   } catch (err) {
     throw err;
   }
@@ -1055,10 +1223,10 @@ const fetchDoubanRate = async (id, type, name, year) => {
   try {
     let rate = 0.0;
     if (!id || !type) {
-      const {vod_score: foundRate} = (await fetchDoubanSearch(name, year)) as any;
+      const { vod_score: foundRate } = (await fetchDoubanSearch(name, year)) as any;
       rate = foundRate;
     } else {
-      const {vod_score: foundRate} = (await fetchDoubanDetail(id, type)) as any;
+      const { vod_score: foundRate } = (await fetchDoubanDetail(id, type)) as any;
       rate = foundRate;
     }
 
@@ -1079,7 +1247,7 @@ const fetchDoubanRate = async (id, type, name, year) => {
 const fetchDoubanRecommend = async (id, type, name, year) => {
   try {
     if (!id || !type) {
-      const {vod_douban_id: foundId, vod_douban_type: foundType} = (await fetchDoubanSearch(name, year)) as any;
+      const { vod_douban_id: foundId, vod_douban_type: foundType } = (await fetchDoubanSearch(name, year)) as any;
       id = foundId;
       type = foundType;
     }
@@ -1112,10 +1280,12 @@ const fetchDoubanRecommend = async (id, type, name, year) => {
 };
 
 export {
+  ruleInit,
   t3RuleInit,
   t3RuleProxy,
   t3RuleTerminate,
   catvodRuleInit,
+  xbpqInit,
   checkValid,
   fetchClassify,
   fetchList,
@@ -1123,8 +1293,10 @@ export {
   fetchDetail,
   fetchSearch,
   fetchSearchFirstDetail,
+  fetchPlayUrl,
   fetchT3PlayUrl,
   fetchCatvodPlayUrl,
+  fetchXBPQPlayUrl,
   fetchDrpyPlayUrl,
   fetchHipyPlayUrl,
   extractPlayerUrl,
