@@ -173,7 +173,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
 
   if (_js_type === 0) {
     if (withHeaders) {
-      return { body: reader.readAsText(blob, encoding), headers: formatHeaders } || emptyResult;
+      return blob ? { body: reader.readAsText(blob, encoding), headers: formatHeaders } : emptyResult;
     } else {
       // @ts-ignore
       return reader.readAsText(blob, encoding) || '';
@@ -192,7 +192,7 @@ const baseRequest = (_url: string, _object: RequestOptions, _js_type: number = 0
     } else {
       content = reader.readAsText(blob, encoding);
     }
-    return { content, headers: formatHeaders } || emptyResult;
+    return content ? { content, headers: formatHeaders } : emptyResult;
   } else {
     return emptyResult;
   }
