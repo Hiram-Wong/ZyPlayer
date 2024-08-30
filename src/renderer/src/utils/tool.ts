@@ -329,7 +329,7 @@ const decodeAtob = (str: string) => {
 const encodeGzip = (str: string) => {
   return pako.gzip(str, {});
 };
-const decodeGzip = (str: string) => {
+const decodeGzip = (str: string | Uint8Array) => {
   return pako.inflate(str);
 };
 

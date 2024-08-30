@@ -7,17 +7,19 @@
  */
 
 import {
-  init,
+  category,
+  clearConsoleHistory,
+  detail,
+  encryptJs,
+  getConsoleHistory,
+  getOriginalJs,
   home,
   homeVod,
-  category,
-  detail,
-  play,
-  search,
-  proxy,
-  getConsoleHistory,
-  clearConsoleHistory,
+  init,
   keepUnUse,
+  play,
+  proxy,
+  search,
 } from './drpy3';
 
 const initUtils = () => {
@@ -57,6 +59,13 @@ const drpyWork = (parms) => {
       break;
     case 'proxy':
       res.data = proxy(data);
+      break;
+    case 'decode':
+      res.data = getOriginalJs(data);
+      break;
+    case 'encode':
+      const { txt, method } = data;
+      res.data = encryptJs(txt, method);
       break;
     case 'console':
       const { type } = data;

@@ -13,22 +13,23 @@
           <div class="item item-pad-select">
             <file-icon />
             <t-select v-model="tmp.file" @change="fileEvent()">
-              <t-option key="import" :label="$t('pages.setting.editSource.source.import')" value="import"
-                @click="importFileEvent" />
-              <t-option key="export" :label="$t('pages.setting.editSource.source.export')" value="export"
-                @click="exportFileEvent" />
-              <t-option key="cache" :label="$t('pages.setting.editSource.source.cache')" value="cache"
-                @click="cacheEvent" />
+              <t-option :label="$t('pages.setting.editSource.source.import')" value="import" @click="importFileEvent" />
+              <t-option :label="$t('pages.setting.editSource.source.export')" value="export" @click="exportFileEvent" />
+              <t-option :label="$t('pages.setting.editSource.source.cache')" value="cache" @click="cacheEvent" />
+              <t-option :label="$t('pages.setting.editSource.source.encode')" value="encode" @click="encodeEvent" />
+              <t-option :label="$t('pages.setting.editSource.source.decode')" value="decode" @click="decodeEvent" />
             </t-select>
           </div>
           <div class="item item-pad-select">
             <bug-icon />
             <t-select v-model="tmp.run" @change="fileEvent()">
-              <t-option key="bug" :label="$t('pages.setting.editSource.source.bug')" value="bug" @click="debugEvent" />
-              <t-option key="delete" :label="$t('pages.setting.editSource.source.delete')" value="expdeleteodeletert"
-                @click="deleteEvent" />
-              <t-option key="file" :label="$t('pages.setting.editSource.source.file')" value="file"
-                @click="serverEvent" />
+              <t-option :label="$t('pages.setting.editSource.source.bug')" value="bug" @click="debugEvent" />
+              <t-option
+                :label="$t('pages.setting.editSource.source.delete')"
+                value="expdeleteodeletert"
+                @click="deleteEvent"
+              />
+              <t-option :label="$t('pages.setting.editSource.source.file')" value="file" @click="serverEvent" />
             </t-select>
           </div>
           <div class="item item-pad-select">
@@ -37,16 +38,40 @@
               <t-option key="ai" :label="$t('pages.setting.editSource.source.ai')" value="ai" @click="aiEvent" />
               <!-- <t-option key="tool" :label="$t('pages.setting.editSource.source.tool')" value="tool" @click.stop="toolEvent" /> -->
               <t-option key="doc" :label="$t('pages.setting.editSource.source.doc')" value="doc" @click="helpEvent" />
-              <t-option key="sift" :label="$t('pages.setting.editSource.source.sift')" value="sift"
-                @click="siftEvent('Sift')" />
+              <t-option
+                key="sift"
+                :label="$t('pages.setting.editSource.source.sift')"
+                value="sift"
+                @click="siftEvent('Sift')"
+              />
             </t-select>
           </div>
 
-          <t-dialog v-model:visible="isVisible.template" :header="$t('pages.setting.editSource.source.template')"
-            show-in-attached-element width="40%" @confirm="confirmTemplate()">
+          <t-dialog
+            v-model:visible="isVisible.template"
+            :header="$t('pages.setting.editSource.source.template')"
+            show-in-attached-element
+            width="40%"
+            @confirm="confirmTemplate()"
+          >
             <p>{{ $t('pages.setting.editSource.source.templateTip') }}</p>
-            <t-select v-model="form.template" @change="changeTheme()">
+            <t-select v-model="form.template">
               <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
+            </t-select>
+          </t-dialog>
+          <t-dialog
+            v-model:visible="isVisible.encode"
+            :header="$t('pages.setting.editSource.source.encode')"
+            show-in-attached-element
+            width="40%"
+            @confirm="confirmEncode()"
+          >
+            <p>{{ $t('pages.setting.editSource.source.encodeTip') }}</p>
+            <t-select v-model="form.encodeMethod">
+              <t-option value="gzip" label="gzip" />
+              <t-option value="base64" label="base64" />
+              <t-option value="aes" label="aes" />
+              <t-option value="rsa" label="rsa" />
             </t-select>
           </t-dialog>
         </div>
@@ -66,20 +91,29 @@
                   </template>
                   <template #append>
                     <t-button class="button" theme="default" @click="getSource()">{{
-                      $t('pages.setting.editSource.source.action.source') }}</t-button>
+                      $t('pages.setting.editSource.source.action.source')
+                    }}</t-button>
                   </template>
                   <div class="input-container">
-                    <t-input v-model="form.req.url" :placeholder="$t('pages.setting.placeholder.general')"
-                      class="input" />
+                    <t-input
+                      v-model="form.req.url"
+                      :placeholder="$t('pages.setting.placeholder.general')"
+                      class="input"
+                    />
                     <div class="method" @click="showDialog('reqParam')">
                       <transform-icon />
                     </div>
                   </div>
                 </t-input-adornment>
-                <t-dialog v-model:visible="isVisible.reqParam" placement="center"
+                <t-dialog
+                  v-model:visible="isVisible.reqParam"
+                  placement="center"
                   :header="$t('pages.setting.editSource.source.dialog.request.title')"
-                  :cancel-btn="$t('pages.setting.editSource.source.dialog.request.cancel')" show-in-attached-element
-                  @confirm="isVisible.reqParam = false" @cancel="reqCancel()">
+                  :cancel-btn="$t('pages.setting.editSource.source.dialog.request.cancel')"
+                  show-in-attached-element
+                  @confirm="isVisible.reqParam = false"
+                  @cancel="reqCancel()"
+                >
                   <div class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.source.dialog.request.reqEncode') }}</p>
                     <t-select v-model="form.req.encode">
@@ -92,9 +126,13 @@
                   </div>
                   <div v-if="form.req.method !== 'GET'" class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.source.dialog.request.reqBody') }}</p>
-                    <t-select v-model="form.req.contentType" class="contentType" style="margin-bottom: 5px;">
-                      <t-option v-for="item in reqContentTypes" :key="item.label" :value="item.value"
-                        :label="item.label" />
+                    <t-select v-model="form.req.contentType" class="contentType" style="margin-bottom: 5px">
+                      <t-option
+                        v-for="item in reqContentTypes"
+                        :key="item.label"
+                        :value="item.value"
+                        :label="item.label"
+                      />
                     </t-select>
                     <t-textarea v-model="form.req.body" placeholder='{ "key": "01b9b7" }' />
                   </div>
@@ -126,38 +164,53 @@
                 <t-input-adornment :prepend="$t('pages.setting.editSource.source.rule.url')">
                   <template #append>
                     <t-button class="button w-btn" theme="default" @click="actionSniffer()">{{
-                      $t('pages.setting.editSource.source.action.sniffer') }}</t-button>
+                      $t('pages.setting.editSource.source.action.sniffer')
+                    }}</t-button>
                   </template>
                   <div class="input-container">
-                    <t-input v-model="form.sniffer.url" :placeholder="$t('pages.setting.placeholder.general')"
-                      class="input" />
+                    <t-input
+                      v-model="form.sniffer.url"
+                      :placeholder="$t('pages.setting.placeholder.general')"
+                      class="input"
+                    />
                     <div class="method" @click="showDialog('snifferParam')">
                       <transform-icon />
                     </div>
                   </div>
                 </t-input-adornment>
-                <t-dialog v-model:visible="isVisible.snifferParam" placement="center"
+                <t-dialog
+                  v-model:visible="isVisible.snifferParam"
+                  placement="center"
                   :header="$t('pages.setting.editSource.source.dialog.sniffer.title')"
-                  :cancel-btn="$t('pages.setting.editSource.source.dialog.sniffer.cancel')" show-in-attached-element
-                  @confirm="isVisible.snifferParam = false" @cancel="snifferCancel()">
+                  :cancel-btn="$t('pages.setting.editSource.source.dialog.sniffer.cancel')"
+                  show-in-attached-element
+                  @confirm="isVisible.snifferParam = false"
+                  @cancel="snifferCancel()"
+                >
                   <!-- <div class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.ua') }}</p>
                     <t-input v-model="form.sniffer.ua" :placeholder="$t('pages.setting.placeholder.general')" />
                   </div> -->
                   <div class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.auxiliaryRegex') }}</p>
-                    <t-input v-model="form.sniffer.auxiliaryRegex"
-                      :placeholder="$t('pages.setting.placeholder.general')" />
+                    <t-input
+                      v-model="form.sniffer.auxiliaryRegex"
+                      :placeholder="$t('pages.setting.placeholder.general')"
+                    />
                   </div>
                   <div class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.initScript') }}</p>
-                    <t-textarea v-model="form.sniffer.initScript"
-                      :placeholder="$t('pages.setting.placeholder.general')" />
+                    <t-textarea
+                      v-model="form.sniffer.initScript"
+                      :placeholder="$t('pages.setting.placeholder.general')"
+                    />
                   </div>
                   <data class="dialog-item">
                     <p>{{ $t('pages.setting.editSource.source.dialog.sniffer.runScript') }}</p>
-                    <t-textarea v-model="form.sniffer.runScript"
-                      :placeholder="$t('pages.setting.placeholder.general')" />
+                    <t-textarea
+                      v-model="form.sniffer.runScript"
+                      :placeholder="$t('pages.setting.placeholder.general')"
+                    />
                   </data>
                 </t-dialog>
               </div>
@@ -206,64 +259,119 @@
             <t-button class="button init" theme="default" @click="actionInit">
               <div class="status">
                 <span class="title">{{ $t('pages.setting.editSource.source.action.init') }}</span>
-                <span class="desc">{{ $t('pages.setting.editSource.source.action.initStatus') }}: {{ form.init.auto ?
-                  $t('pages.setting.editSource.source.action.initAuto') :
-                  $t('pages.setting.editSource.source.action.initManual') }}</span>
+                <span class="desc"
+                  >{{ $t('pages.setting.editSource.source.action.initStatus') }}:
+                  {{
+                    form.init.auto
+                      ? $t('pages.setting.editSource.source.action.initAuto')
+                      : $t('pages.setting.editSource.source.action.initManual')
+                  }}</span
+                >
               </div>
               <div class="click" @click.stop="form.init.auto = !form.init.auto">
                 <gesture-click-icon />
               </div>
             </t-button>
             <t-button class="button" theme="default" @click="actionHome">{{
-              $t('pages.setting.editSource.source.action.classify') }}</t-button>
+              $t('pages.setting.editSource.source.action.classify')
+            }}</t-button>
             <t-button class="button" theme="default" @click="actionHomeVod">{{
-              $t('pages.setting.editSource.source.action.home') }}</t-button>
+              $t('pages.setting.editSource.source.action.home')
+            }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.category.t" :label="$t('pages.setting.editSource.source.rule.t')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-30%" />
-            <t-input v-model="form.category.f" :label="$t('pages.setting.editSource.source.rule.f')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-40%" />
-            <t-input-number theme="column" :min="0" v-model="form.category.pg"
+            <t-input
+              v-model="form.category.t"
+              :label="$t('pages.setting.editSource.source.rule.t')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-33-30%"
+            />
+            <t-input
+              v-model="form.category.f"
+              :label="$t('pages.setting.editSource.source.rule.f')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-33-40%"
+            />
+            <t-input-number
+              theme="column"
+              :min="0"
+              v-model="form.category.pg"
               :label="$t('pages.setting.editSource.source.rule.pg')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-33-30%" />
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-33-30%"
+            />
             <t-button class="button w-btn" theme="default" @click="actionList()">{{
-              $t('pages.setting.editSource.source.action.list') }}</t-button>
+              $t('pages.setting.editSource.source.action.list')
+            }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.detail.ids" :label="$t('pages.setting.editSource.source.rule.ids')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
+            <t-input
+              v-model="form.detail.ids"
+              :label="$t('pages.setting.editSource.source.rule.ids')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-100%"
+            />
             <t-button class="button w-btn" theme="default" @click="actionDetail()">{{
-              $t('pages.setting.editSource.source.action.detail') }}</t-button>
+              $t('pages.setting.editSource.source.action.detail')
+            }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.search.wd" :label="$t('pages.setting.editSource.source.rule.wd')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-70%" />
-            <t-input-number theme="column" :min="0" v-model="form.search.pg"
+            <t-input
+              v-model="form.search.wd"
+              :label="$t('pages.setting.editSource.source.rule.wd')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-50-70%"
+            />
+            <t-input-number
+              theme="column"
+              :min="0"
+              v-model="form.search.pg"
               :label="$t('pages.setting.editSource.source.rule.pg')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-30%" />
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-50-30%"
+            />
             <t-button class="button w-btn" theme="default" @click="actionSearch()">{{
-              $t('pages.setting.editSource.source.action.search') }}</t-button>
+              $t('pages.setting.editSource.source.action.search')
+            }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.play.flag" :label="$t('pages.setting.editSource.source.rule.flag')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-30%" />
-            <t-input v-model="form.play.play" :label="$t('pages.setting.editSource.source.rule.play')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-50-70%" />
+            <t-input
+              v-model="form.play.flag"
+              :label="$t('pages.setting.editSource.source.rule.flag')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-50-30%"
+            />
+            <t-input
+              v-model="form.play.play"
+              :label="$t('pages.setting.editSource.source.rule.play')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-50-70%"
+            />
             <t-button class="button w-btn" theme="default" @click="actionPlay()">{{
-              $t('pages.setting.editSource.source.action.play') }}</t-button>
+              $t('pages.setting.editSource.source.action.play')
+            }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.proxy.url" :label="$t('pages.setting.editSource.source.rule.url')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
+            <t-input
+              v-model="form.proxy.url"
+              :label="$t('pages.setting.editSource.source.rule.url')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-100%"
+            />
             <t-button class="button w-btn" theme="default" @click="actionProxy()">{{
-              $t('pages.setting.editSource.source.action.proxy') }}</t-button>
+              $t('pages.setting.editSource.source.action.proxy')
+            }}</t-button>
           </div>
           <div class="item">
-            <t-input v-model="form.player.url" :label="$t('pages.setting.editSource.source.rule.url')"
-              :placeholder="$t('pages.setting.placeholder.general')" class="input w-100%" />
+            <t-input
+              v-model="form.player.url"
+              :label="$t('pages.setting.editSource.source.rule.url')"
+              :placeholder="$t('pages.setting.placeholder.general')"
+              class="input w-100%"
+            />
             <t-button class="button w-btn" theme="default" @click="actionPlayer()">{{
-              $t('pages.setting.editSource.source.action.player') }}</t-button>
+              $t('pages.setting.editSource.source.action.player')
+            }}</t-button>
           </div>
         </div>
         <div class="log-container">
@@ -271,29 +379,47 @@
             <div class="nav-left">
               <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
                 <t-radio-button value="debug">{{ $t('pages.setting.editSource.source.select.debug') }}</t-radio-button>
-                <t-radio-button value="source">{{ $t('pages.setting.editSource.source.select.source')
-                  }}</t-radio-button>
+                <t-radio-button value="source">{{
+                  $t('pages.setting.editSource.source.select.source')
+                }}</t-radio-button>
                 <t-radio-button value="rule">{{ $t('pages.setting.editSource.source.select.rule') }}</t-radio-button>
                 <t-radio-button value="log">{{ $t('pages.setting.editSource.source.select.log') }}</t-radio-button>
               </t-radio-group>
             </div>
             <div class="nav-right">
-              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.log" @change="logEvent()"
-                v-if="form.nav === 'log'">
+              <t-radio-group
+                variant="default-filled"
+                size="small"
+                v-model="form.clickType.log"
+                @change="logEvent()"
+                v-if="form.nav === 'log'"
+              >
                 <t-radio-button value="f12">{{ $t('pages.setting.editSource.source.select.f12') }}</t-radio-button>
                 <t-radio-button value="clear">{{ $t('pages.setting.editSource.source.select.clear') }}</t-radio-button>
               </t-radio-group>
-              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.proxy" @change="proxyEvent()"
-                v-if='form.nav === "debug" && form.action === "proxy"'>
-                <t-radio-button value="upload">{{ $t('pages.setting.editSource.source.select.upload')
-                  }}</t-radio-button>
+              <t-radio-group
+                variant="default-filled"
+                size="small"
+                v-model="form.clickType.proxy"
+                @change="proxyEvent()"
+                v-if="form.nav === 'debug' && form.action === 'proxy'"
+              >
+                <t-radio-button value="upload">{{
+                  $t('pages.setting.editSource.source.select.upload')
+                }}</t-radio-button>
                 <t-radio-button value="play">{{ $t('pages.setting.editSource.source.select.play') }}</t-radio-button>
                 <t-radio-button value="copy">{{ $t('pages.setting.editSource.source.select.copy') }}</t-radio-button>
               </t-radio-group>
-              <t-radio-group variant="default-filled" size="small" v-model="form.clickType.source"
-                @change="sourceEvent()" v-if="form.nav === 'source'">
-                <t-radio-button value="format">{{ $t('pages.setting.editSource.source.select.format')
-                  }}</t-radio-button>
+              <t-radio-group
+                variant="default-filled"
+                size="small"
+                v-model="form.clickType.source"
+                @change="sourceEvent()"
+                v-if="form.nav === 'source'"
+              >
+                <t-radio-button value="format">{{
+                  $t('pages.setting.editSource.source.select.format')
+                }}</t-radio-button>
                 <t-radio-button value="reset">{{ $t('pages.setting.editSource.source.select.reset') }}</t-radio-button>
               </t-radio-group>
             </div>
@@ -315,11 +441,18 @@
 import moment from 'moment';
 import * as monaco from 'monaco-editor';
 import jsBeautify from 'js-beautify';
-import JSON5 from "json5";
+import JSON5 from 'json5';
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { BugIcon, ExtensionIcon, HelpRectangleIcon, FileIcon, GestureClickIcon, TransformIcon } from 'tdesign-icons-vue-next';
+import {
+  BugIcon,
+  ExtensionIcon,
+  HelpRectangleIcon,
+  FileIcon,
+  GestureClickIcon,
+  TransformIcon,
+} from 'tdesign-icons-vue-next';
 
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
@@ -339,6 +472,7 @@ import emitter from '@/utils/emitter';
 import { getHtml, copyToClipboardApi, encodeBase64 } from '@/utils/tool';
 import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
+import { encryptJs, getOriginalJs } from '@/utils/drpy/drpy3';
 import sniffer from '@/utils/sniffer';
 import { pdfh, pdfa } from '@/utils/drpy/drpyInject';
 import { createDependencyProposals } from '@/utils/drpy/drpy_suggestions/drpy_suggestions';
@@ -357,18 +491,19 @@ const sourceCodeBoxRef = ref<HTMLElement | null>(null);
 const sourceLogBoxRef = ref<HTMLElement | null>(null);
 let form = ref({
   codeType: 'html',
+  encodeMethod: 'base64',
   content: {
     edit: '',
     log: '',
     text: '',
     debug: '',
     source: '',
-    rule: ''
+    rule: '',
   },
   rule: {
     type: '',
     pdfa: '',
-    pdfh: ''
+    pdfh: '',
   },
   template: 'mxpro',
   url: '',
@@ -379,52 +514,52 @@ let form = ref({
     header: '',
     body: '',
     url: '',
-    contentType: 'application/json'
+    contentType: 'application/json',
   },
   detail: {
-    ids: ''
+    ids: '',
   },
   category: {
     t: '',
     f: '',
-    pg: 1
+    pg: 1,
   },
   search: {
     wd: '',
-    pg: 1
+    pg: 1,
   },
   play: {
     flag: '',
-    play: ''
+    play: '',
   },
   proxy: {
-    url: ''
+    url: '',
   },
   player: {
-    url: ''
+    url: '',
   },
   log: {
-    nav: ''
+    nav: '',
   },
   action: '',
   clickType: {
     log: '',
     proxy: '',
-    source: ''
+    source: '',
   },
   lastEditTime: {
     edit: 0,
-    init: 0
+    init: 0,
   },
   init: {
-    auto: false
+    auto: false,
   },
   sniffer: {
     url: '',
     initScript: '',
     runScript: '',
     ua: '',
-    auxiliaryRegex: ''
+    auxiliaryRegex: '',
   },
 });
 
@@ -433,23 +568,24 @@ const tmp = computed(() => {
     file: t('pages.setting.editSource.source.fileManage'),
     run: t('pages.setting.editSource.source.run'),
     other: t('pages.setting.editSource.source.other'),
-  }
-})
+  };
+});
 
 const isVisible = reactive({
   template: false,
+  encode: false,
   player: false,
   help: false,
   reqParam: false,
   snifferParam: false,
   ai: false,
-  tool: false
+  tool: false,
 });
 
 const formDialog = reactive({
   player: {
-    url: ''
-  }
+    url: '',
+  },
 });
 
 watch(
@@ -457,7 +593,7 @@ watch(
   (val) => {
     config.theme = val === 'light' ? 'vs' : 'vs-dark';
     changeTheme();
-  }
+  },
 );
 
 const emit = defineEmits(['changeComponent']);
@@ -480,8 +616,8 @@ self.MonacoEnvironment = {
   },
 };
 
-const codeThemeKey = 'code-theme';  // localStorage key
-const warpKey = 'code-warp';  // localStorage key
+const codeThemeKey = 'code-theme'; // localStorage key
+const warpKey = 'code-warp'; // localStorage key
 
 type WordWrapOptions = 'off' | 'on' | 'wordWrapColumn' | 'bounded';
 interface EditorConfig {
@@ -515,7 +651,7 @@ const reqMethods = [
   {
     label: 'HEAD',
     value: 'HEAD',
-  }
+  },
 ];
 
 const reqEncode = [
@@ -574,7 +710,7 @@ const themes = [
   {
     label: 'Dark',
     value: 'vs-dark',
-  }
+  },
 ];
 
 const languages = [
@@ -606,7 +742,7 @@ const languages = [
 
 const templates = computed(() => {
   const dictionary = getMubans();
-  const keysAsObjects = Object.keys(dictionary).map(key => ({ label: key, value: key }));
+  const keysAsObjects = Object.keys(dictionary).map((key) => ({ label: key, value: key }));
   return keysAsObjects;
 });
 
@@ -655,6 +791,21 @@ const confirmTemplate = () => {
   isVisible.template = false;
 };
 
+const confirmEncode = () => {
+  try {
+    const { edit } = form.value.content;
+    const { encodeMethod } = form.value;
+
+    const data = encryptJs(edit, encodeMethod);
+    if (editor) editor.setValue(data);
+    isVisible.encode = false;
+    MessagePlugin.success(t('pages.setting.data.success'));
+  } catch (err) {
+    console.log(`[setting][editSource][confirmEncode][err]`, err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+  }
+};
+
 const initEditor = () => {
   if (editor) editor.dispose();
   if (log) log.dispose();
@@ -675,13 +826,13 @@ const initEditor = () => {
       minimap: {
         enabled: true,
       },
-      fixedOverflowWidgets: true
+      fixedOverflowWidgets: true,
     });
     editor.onDidChangeModelContent(() => {
       if (editor) {
         form.value.content.edit = editor.getValue();
         form.value.lastEditTime.edit = moment().unix();
-      };
+      }
     });
 
     // After onDidChangeModelContent
@@ -694,13 +845,13 @@ const initEditor = () => {
           startLineNumber: position.lineNumber,
           endLineNumber: position.lineNumber,
           startColumn: word.startColumn,
-          endColumn: word.endColumn
+          endColumn: word.endColumn,
         };
         const monacoRange = new monaco.Range(
           range.startLineNumber,
           range.startColumn,
           range.endLineNumber,
-          range.endColumn
+          range.endColumn,
         );
         return {
           suggestions: createDependencyProposals(monacoRange, monaco).map((proposal: any) => ({
@@ -710,10 +861,10 @@ const initEditor = () => {
             insertText: proposal.insertText,
             insertTextRules: proposal.insertTextRules || monaco.languages.CompletionItemInsertTextRule.None,
             documentation: proposal.documentation,
-            range: monacoRange // 使用正确的范围类型
-          }))
+            range: monacoRange, // 使用正确的范围类型
+          })),
         };
-      }
+      },
     });
     monaco.languages.typescript.javascriptDefaults.addExtraLib(drpyObjectInner);
     const logBox = sourceLogBoxRef.value;
@@ -731,7 +882,7 @@ const initEditor = () => {
       minimap: {
         enabled: false,
       },
-      fixedOverflowWidgets: true
+      fixedOverflowWidgets: true,
     });
     log.onDidChangeModelContent(() => {
       if (log) form.value.content.text = log.getValue();
@@ -743,7 +894,7 @@ const initEditor = () => {
 
 onMounted(() => {
   initEditor();
-})
+});
 
 onBeforeUnmount(() => {
   if (editor) editor.dispose();
@@ -776,11 +927,15 @@ const exportFileEvent = async () => {
   let title = '';
 
   try {
-    title = content.match(/title:(.*?),/)?.[1].replace(/['"]/g, '').trim() || 'source';
+    title =
+      content
+        .match(/title:(.*?),/)?.[1]
+        .replace(/['"]/g, '')
+        .trim() || 'source';
   } catch (error) {
     console.error('[EditSource][exportFileEvent][error] 文件名匹配错误', error);
     title = 'source';
-  };
+  }
 
   try {
     await window.electron.ipcRenderer.send('tmpdir-manage', 'make', 'file/js');
@@ -792,7 +947,10 @@ const exportFileEvent = async () => {
 
     const { canceled, filePath } = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
       defaultPath,
-      filters: [{ name: 'JavaScript Files', extensions: ['js'] }, { name: 'All Files', extensions: ['*'] }],
+      filters: [
+        { name: 'JavaScript Files', extensions: ['js'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
     });
 
     if (!canceled) {
@@ -803,15 +961,24 @@ const exportFileEvent = async () => {
   } catch (err) {
     console.log(`[setting][editSource][exportFileEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  };
+  }
 };
 
 const debugEvent = async () => {
   try {
     const { rule, category, detail, search, play, proxy, player, content, init, sniffer, req } = form.value;
     const doc = {
-      rule, category, detail, search, play, proxy, player, init, sniffer, req,
-      content: content.edit
+      rule,
+      category,
+      detail,
+      search,
+      play,
+      proxy,
+      player,
+      init,
+      sniffer,
+      req,
+      content: content.edit,
     };
 
     if (!content.edit) {
@@ -822,11 +989,11 @@ const debugEvent = async () => {
       if (res) MessagePlugin.success(t('pages.setting.data.success'));
       emitter.emit('refreshFilmConfig');
       router.push({ name: 'FilmIndex' });
-    };
+    }
   } catch (err) {
     console.log(`[setting][editSource][debugEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  };
+  }
 };
 
 const siftEvent = (key) => {
@@ -854,7 +1021,36 @@ const cacheEvent = async () => {
   } catch (err) {
     console.log(`[setting][editSource][cacheEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  };
+  }
+};
+
+const decodeEvent = async () => {
+  try {
+    const { edit } = form.value.content;
+
+    if (!edit) {
+      MessagePlugin.warning(t('pages.setting.editSource.source.message.initNoData'));
+      return;
+    } else {
+      const data = getOriginalJs(edit);
+      if (editor) editor.setValue(data);
+      MessagePlugin.success(t('pages.setting.data.success'));
+    }
+  } catch (err) {
+    console.log(`[setting][editSource][decodeEvent][err]`, err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+  }
+};
+
+const encodeEvent = () => {
+  const { edit } = form.value.content;
+
+  if (!edit) {
+    MessagePlugin.warning(t('pages.setting.editSource.source.message.initNoData'));
+    return;
+  } else {
+    isVisible.encode = true;
+  }
 };
 
 const deleteEvent = async () => {
@@ -865,13 +1061,15 @@ const deleteEvent = async () => {
   } catch (err) {
     console.log(`[setting][editSource][deleteEvent][err]`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  };
+  }
 };
+
 const fileEvent = async () => {
   tmp.value.file = t('pages.setting.editSource.source.fileManage');
   tmp.value.run = t('pages.setting.editSource.source.run');
   tmp.value.other = t('pages.setting.editSource.source.other');
 };
+
 const serverEvent = async () => {
   await window.electron.ipcRenderer.send('open-path', 'file', true);
 };
@@ -885,7 +1083,10 @@ const toolEvent = async () => {
 };
 
 const helpEvent = () => {
-  window.electron.ipcRenderer.send('open-url', 'https://github.com/Hiram-Wong/ZyPlayer/wiki/%E5%86%99%E6%BA%90%E5%B7%A5%E5%85%B7');
+  window.electron.ipcRenderer.send(
+    'open-url',
+    'https://github.com/Hiram-Wong/ZyPlayer/wiki/%E5%86%99%E6%BA%90%E5%B7%A5%E5%85%B7',
+  );
 };
 
 const changeNav = async (nav = '', action = '') => {
@@ -914,19 +1115,20 @@ const changeNav = async (nav = '', action = '') => {
       break;
     default:
       break;
-  };
+  }
 
   if (log) {
     monaco.editor.setModelLanguage(log.getModel()!, language);
     log.updateOptions({ readOnly });
     if (nav === 'log') {
-      const res: any = await t3Work({ type: 'console', data: { type: 'get' } })
+      const res: any = await t3Work({ type: 'console', data: { type: 'get' } });
       form.value.content[nav] = res.data;
     }
 
-    const contentText = typeof form.value.content[nav] === 'object'
-      ? JSON5.stringify(form.value.content[nav], null, 2)
-      : form.value.content[nav];
+    const contentText =
+      typeof form.value.content[nav] === 'object'
+        ? JSON5.stringify(form.value.content[nav], null, 2)
+        : form.value.content[nav];
 
     form.value.content.text = contentText;
     log.setValue(contentText);
@@ -940,8 +1142,8 @@ const performAction = async (type, requestData = {}) => {
       form.value.lastEditTime.init = currentTime;
       if (type !== 'init') {
         await t3Work({ type: 'init', data: form.value.content.edit });
-      };
-    };
+      }
+    }
     const res: any = await t3Work({ type, data: requestData });
     form.value.content.debug = res.data as string;
     switch (type) {
@@ -978,8 +1180,7 @@ const actionRule = async (type) => {
     let res;
     if (type === 'pdfa') {
       res = await pdfa(html, rule);
-    }
-    else if (type === 'pdfh') {
+    } else if (type === 'pdfh') {
       res = await pdfh(html, rule);
     }
     form.value.content.rule = res;
@@ -1023,7 +1224,7 @@ const actionList = async () => {
     tid,
     pg: pg || 1,
     filter: f ? true : false,
-    extend: f ? JSON5.parse(f) : {}
+    extend: f ? JSON5.parse(f) : {},
   };
   await performAction('category', data);
 };
@@ -1050,7 +1251,7 @@ const actionSearch = async () => {
   const data = {
     wd,
     quick: false,
-    pg: pg || 1
+    pg: pg || 1,
   };
   await performAction('search', data);
 };
@@ -1071,7 +1272,7 @@ const actionPlay = async () => {
   const data = {
     flag: flag,
     id: play,
-    flags: []
+    flags: [],
   };
   await performAction('play', data);
 };
@@ -1084,19 +1285,19 @@ const actionProxy = async () => {
     return;
   }
 
-  if (url && url.startsWith("http")) {
-    if (!url.startsWith("http://127.0.0.1:9978/")) {
+  if (url && url.startsWith('http')) {
+    if (!url.startsWith('http://127.0.0.1:9978/')) {
       const formatUrl = `http://127.0.0.1:9978/proxy?do=js&url=${url}`;
       form.value.proxy.url = formatUrl;
       url = formatUrl;
-    };
+    }
     const formatUrl = new URL(url);
     const params = Object.fromEntries(formatUrl.searchParams.entries());
     await performAction('proxy', params);
   }
 };
 
-const actionPlayer = async (url = "") => {
+const actionPlayer = async (url = '') => {
   url = url ? url : form.value.player.url;
 
   if (!url) {
@@ -1138,7 +1339,7 @@ const getSource = async () => {
   if (!url) {
     MessagePlugin.warning(t('pages.setting.editSource.source.message.htmlNoUrl'));
     return;
-  };
+  }
 
   try {
     const parsedHeader = JSON5.parse(header);
@@ -1147,13 +1348,11 @@ const getSource = async () => {
     if (method !== 'GET' && parsedBody) {
       parsedHeader['Content-Type'] = contentType;
       if (contentType === 'application/x-www-form-urlencoded') {
-        parsedBody instanceof URLSearchParams
-          ? parsedBody
-          : (parsedBody = new URLSearchParams(parsedBody));
+        parsedBody instanceof URLSearchParams ? parsedBody : (parsedBody = new URLSearchParams(parsedBody));
       }
     }
     let parseHeaderKeys: string[];
-    parseHeaderKeys = Object.keys(parsedHeader).map(it => it.toLowerCase());
+    parseHeaderKeys = Object.keys(parsedHeader).map((it) => it.toLowerCase());
     if (!parseHeaderKeys.includes('accept')) {
       parsedHeader['accept'] = '*/*';
     }
@@ -1199,23 +1398,26 @@ const logEvent = async () => {
     const webContents = remote.getCurrentWebContents();
     if (!webContents.isDevToolsOpened()) {
       webContents.openDevTools();
-    };
+    }
   } else if (type === 'clear') {
-    await t3Work({ type: 'console', data: { type: 'clear' } })
-    form.value.content.log = "";
-    form.value.content.text = "";
+    await t3Work({ type: 'console', data: { type: 'clear' } });
+    form.value.content.log = '';
+    form.value.content.text = '';
     console.clear();
-    if (log) log.setValue("");
-  };
+    if (log) log.setValue('');
+  }
 
-  form.value.clickType.log = "";
+  form.value.clickType.log = '';
 };
 
 const proxyEvent = async () => {
   try {
     const type = form.value.clickType.proxy;
-    const str: any = log ? log.getValue() : "";
-    const formatStr = str.split('\n').filter(s => !!s.trim()).join('');
+    const str: any = log ? log.getValue() : '';
+    const formatStr = str
+      .split('\n')
+      .filter((s) => !!s.trim())
+      .join('');
     const jsonStr = JSON5.parse(formatStr);
 
     if (type === 'copy') {
@@ -1224,15 +1426,15 @@ const proxyEvent = async () => {
       actionPlayer(form.value.proxy.url);
     } else if (type === 'upload') {
       await setT3Proxy(jsonStr);
-    };
+    }
 
     MessagePlugin.info(`${t('pages.setting.data.success')}`);
   } catch (err) {
-    console.log(`[editSource][proxyEvent][err]${err}`)
+    console.log(`[editSource][proxyEvent][err]${err}`);
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   } finally {
-    form.value.clickType.proxy = "";
-  };
+    form.value.clickType.proxy = '';
+  }
 };
 
 const sourceEvent = () => {
@@ -1243,19 +1445,18 @@ const sourceEvent = () => {
       log?.setValue(html);
     } else if (type === 'format') {
       const formattedHtml: any = jsBeautify.html(html, {
-        preserve_newlines: false
+        preserve_newlines: false,
       });
       log?.setValue(formattedHtml);
-    };
+    }
 
     MessagePlugin.info(`${t('pages.setting.data.success')}`);
   } catch (err) {
-    console.log(`[editSource][sourceEvent][err]${err}`)
+    console.log(`[editSource][sourceEvent][err]${err}`);
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
-
   } finally {
-    form.value.clickType.source = "";
-  };
+    form.value.clickType.source = '';
+  }
 };
 </script>
 
@@ -1282,7 +1483,7 @@ const sourceEvent = () => {
       align-items: center;
 
       .title {
-        margin-right: 5px
+        margin-right: 5px;
       }
     }
 
@@ -1502,7 +1703,8 @@ const sourceEvent = () => {
             margin-right: var(--td-comp-margin-s);
           }
 
-          .button {}
+          .button {
+          }
 
           .w-btn {
             width: 50px;
@@ -1598,7 +1800,7 @@ const sourceEvent = () => {
   height: 100%;
   border-radius: var(--td-radius-default);
 
-  pre[class*="language-"] {
+  pre[class*='language-'] {
     margin: 0;
     height: 100%;
     box-shadow: none;

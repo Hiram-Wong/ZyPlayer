@@ -21,7 +21,7 @@
 
 import CryptoJS from 'crypto-js';
 import JSON5 from 'json5';
-import pako from 'pako';
+// import pako from 'pako';
 import JSEncrypt from 'wxmp-rsa';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve, batchFetch } from './drpyInject';
 import { getMubans } from './template';
@@ -29,7 +29,13 @@ import cheerio from './utils/cheerio.min';
 import gbkTool from './utils/gbk';
 import NODERSA from './utils/node-rsa';
 import jinja from './utils/jinja';
-// import JSON5 from './utils/json5';
+import {
+  encodeBase64 as base64Encode,
+  decodeBase64 as base64Decode,
+  encodeMd5 as md5,
+  encodeGzip,
+  decodeGzip,
+} from '@/utils/tool';
 
 let consoleHistory: string[] = [];
 console['oldLog'] = console.log;
@@ -60,6 +66,13 @@ const clearConsoleHistory = () => {
 
 cheerio.jinja2 = function (template, obj) {
   return jinja.render(template, obj);
+};
+
+const rsa_private_key =
+  'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqin/jUpqM6+fgYP/oMqj9zcdHMM0mEZXLeTyixIJWP53lzJV2N2E3OP6BBpUmq2O1a9aLnTIbADBaTulTNiOnVGoNG58umBnupnbmmF8iARbDp2mTzdMMeEgLdrfXS6Y3VvazKYALP8EhEQykQVarexR78vRq7ltY3quXx7cgI0ROfZz5Sw3UOLQJ+VoWmwIxu9AMEZLVzFDQN93hzuzs3tNyHK6xspBGB7zGbwCg+TKi0JeqPDrXxYUpAz1cQ/MO+Da0WgvkXnvrry8NQROHejdLVOAslgr6vYthH9bKbsGyNY3H+P12kcxo9RAcVveONnZbcMyxjtF5dWblaernAgMBAAECggEAGdEHlSEPFmAr5PKqKrtoi6tYDHXdyHKHC5tZy4YV+Pp+a6gxxAiUJejx1hRqBcWSPYeKne35BM9dgn5JofgjI5SKzVsuGL6bxl3ayAOu+xXRHWM9f0t8NHoM5fdd0zC3g88dX3fb01geY2QSVtcxSJpEOpNH3twgZe6naT2pgiq1S4okpkpldJPo5GYWGKMCHSLnKGyhwS76gF8bTPLoay9Jxk70uv6BDUMlA4ICENjmsYtd3oirWwLwYMEJbSFMlyJvB7hjOjR/4RpT4FPnlSsIpuRtkCYXD4jdhxGlvpXREw97UF2wwnEUnfgiZJ2FT/MWmvGGoaV/CfboLsLZuQKBgQDTNZdJrs8dbijynHZuuRwvXvwC03GDpEJO6c1tbZ1s9wjRyOZjBbQFRjDgFeWs9/T1aNBLUrgsQL9c9nzgUziXjr1Nmu52I0Mwxi13Km/q3mT+aQfdgNdu6ojsI5apQQHnN/9yMhF6sNHg63YOpH+b+1bGRCtr1XubuLlumKKscwKBgQDOtQ2lQjMtwsqJmyiyRLiUOChtvQ5XI7B2mhKCGi8kZ+WEAbNQcmThPesVzW+puER6D4Ar4hgsh9gCeuTaOzbRfZ+RLn3Aksu2WJEzfs6UrGvm6DU1INn0z/tPYRAwPX7sxoZZGxqML/z+/yQdf2DREoPdClcDa2Lmf1KpHdB+vQKBgBXFCVHz7a8n4pqXG/HvrIMJdEpKRwH9lUQS/zSPPtGzaLpOzchZFyQQBwuh1imM6Te+VPHeldMh3VeUpGxux39/m+160adlnRBS7O7CdgSsZZZ/dusS06HAFNraFDZf1/VgJTk9BeYygX+AZYu+0tReBKSs9BjKSVJUqPBIVUQXAoGBAJcZ7J6oVMcXxHxwqoAeEhtvLcaCU9BJK36XQ/5M67ceJ72mjJC6/plUbNukMAMNyyi62gO6I9exearecRpB/OGIhjNXm99Ar59dAM9228X8gGfryLFMkWcO/fNZzb6lxXmJ6b2LPY3KqpMwqRLTAU/zy+ax30eFoWdDHYa4X6e1AoGAfa8asVGOJ8GL9dlWufEeFkDEDKO9ww5GdnpN+wqLwePWqeJhWCHad7bge6SnlylJp5aZXl1+YaBTtOskC4Whq9TP2J+dNIgxsaF5EFZQJr8Xv+lY9lu0CruYOh9nTNF9x3nubxJgaSid/7yRPfAGnsJRiknB5bsrCvgsFQFjJVs=';
+const aes_key = {
+  key: '686A64686E780A0A0A0A0A0A0A0A0A0A',
+  iv: '647A797964730A0A0A0A0A0A0A0A0A0A',
 };
 
 const init_test = () => {
@@ -914,17 +927,17 @@ function encodeUrl(str) {
   }
 }
 
-const base64Encode = (text: string) => {
-  return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
-};
+// const base64Encode = (text: string) => {
+//   return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
+// };
 
-const base64Decode = (text: string) => {
-  return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
-};
+// const base64Decode = (text: string) => {
+//   return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
+// };
 
-const md5 = (text: string) => {
-  return `${CryptoJS.MD5(text)}`;
-};
+// const md5 = (text: string) => {
+//   return `${CryptoJS.MD5(text)}`;
+// };
 
 const uint8ArrayToBase64 = (uint8Array: Uint8Array) => {
   const binaryString = String.fromCharCode.apply(null, Array.from(uint8Array));
@@ -971,9 +984,10 @@ const Utf8ArrayToStr = (array: Uint8Array) => {
  * @returns {string}
  */
 const gzip = (str) => {
-  const arr = pako.gzip(str, {
-    // to: 'string',
-  });
+  // const arr = pako.gzip(str, {
+  //   // to: 'string',
+  // });
+  const arr = encodeGzip(str);
   return uint8ArrayToBase64(arr);
 };
 
@@ -988,7 +1002,8 @@ const ungzip = (b64Data: string) => {
     return x.charCodeAt(0);
   });
   const binData = new Uint8Array(charData);
-  const data = pako.inflate(binData);
+  // const data = pako.inflate(binData);
+  const data = decodeGzip(binData);
   return Utf8ArrayToStr(data);
 };
 
@@ -1045,7 +1060,7 @@ const RSA = {
     }
     return false;
   },
-  encode(data, key, option) {
+  encode(data, key, option = {}) {
     option = option || {};
     if (typeof JSEncrypt === 'function') {
       // @ts-ignore
@@ -3137,13 +3152,12 @@ function getOriginalJs(js_code) {
   if (current_match.test(js_code)) {
     return js_code;
   }
-  let rsa_private_key =
-    'MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqin/jUpqM6+fgYP/oMqj9zcdHMM0mEZXLeTyixIJWP53lzJV2N2E3OP6BBpUmq2O1a9aLnTIbADBaTulTNiOnVGoNG58umBnupnbmmF8iARbDp2mTzdMMeEgLdrfXS6Y3VvazKYALP8EhEQykQVarexR78vRq7ltY3quXx7cgI0ROfZz5Sw3UOLQJ+VoWmwIxu9AMEZLVzFDQN93hzuzs3tNyHK6xspBGB7zGbwCg+TKi0JeqPDrXxYUpAz1cQ/MO+Da0WgvkXnvrry8NQROHejdLVOAslgr6vYthH9bKbsGyNY3H+P12kcxo9RAcVveONnZbcMyxjtF5dWblaernAgMBAAECggEAGdEHlSEPFmAr5PKqKrtoi6tYDHXdyHKHC5tZy4YV+Pp+a6gxxAiUJejx1hRqBcWSPYeKne35BM9dgn5JofgjI5SKzVsuGL6bxl3ayAOu+xXRHWM9f0t8NHoM5fdd0zC3g88dX3fb01geY2QSVtcxSJpEOpNH3twgZe6naT2pgiq1S4okpkpldJPo5GYWGKMCHSLnKGyhwS76gF8bTPLoay9Jxk70uv6BDUMlA4ICENjmsYtd3oirWwLwYMEJbSFMlyJvB7hjOjR/4RpT4FPnlSsIpuRtkCYXD4jdhxGlvpXREw97UF2wwnEUnfgiZJ2FT/MWmvGGoaV/CfboLsLZuQKBgQDTNZdJrs8dbijynHZuuRwvXvwC03GDpEJO6c1tbZ1s9wjRyOZjBbQFRjDgFeWs9/T1aNBLUrgsQL9c9nzgUziXjr1Nmu52I0Mwxi13Km/q3mT+aQfdgNdu6ojsI5apQQHnN/9yMhF6sNHg63YOpH+b+1bGRCtr1XubuLlumKKscwKBgQDOtQ2lQjMtwsqJmyiyRLiUOChtvQ5XI7B2mhKCGi8kZ+WEAbNQcmThPesVzW+puER6D4Ar4hgsh9gCeuTaOzbRfZ+RLn3Aksu2WJEzfs6UrGvm6DU1INn0z/tPYRAwPX7sxoZZGxqML/z+/yQdf2DREoPdClcDa2Lmf1KpHdB+vQKBgBXFCVHz7a8n4pqXG/HvrIMJdEpKRwH9lUQS/zSPPtGzaLpOzchZFyQQBwuh1imM6Te+VPHeldMh3VeUpGxux39/m+160adlnRBS7O7CdgSsZZZ/dusS06HAFNraFDZf1/VgJTk9BeYygX+AZYu+0tReBKSs9BjKSVJUqPBIVUQXAoGBAJcZ7J6oVMcXxHxwqoAeEhtvLcaCU9BJK36XQ/5M67ceJ72mjJC6/plUbNukMAMNyyi62gO6I9exearecRpB/OGIhjNXm99Ar59dAM9228X8gGfryLFMkWcO/fNZzb6lxXmJ6b2LPY3KqpMwqRLTAU/zy+ax30eFoWdDHYa4X6e1AoGAfa8asVGOJ8GL9dlWufEeFkDEDKO9ww5GdnpN+wqLwePWqeJhWCHad7bge6SnlylJp5aZXl1+YaBTtOskC4Whq9TP2J+dNIgxsaF5EFZQJr8Xv+lY9lu0CruYOh9nTNF9x3nubxJgaSid/7yRPfAGnsJRiknB5bsrCvgsFQFjJVs=';
   let decode_content = '';
 
   function aes_decrypt(data) {
-    let key = CryptoJS.enc.Hex.parse('686A64686E780A0A0A0A0A0A0A0A0A0A');
-    let iv = CryptoJS.enc.Hex.parse('647A797964730A0A0A0A0A0A0A0A0A0A');
+    const key = CryptoJS.enc.Hex.parse(aes_key.key);
+    const iv = CryptoJS.enc.Hex.parse(aes_key.iv);
+
     let encrypted = CryptoJS.AES.decrypt(
       {
         ciphertext: CryptoJS.enc.Base64.parse(data),
@@ -3155,10 +3169,11 @@ function getOriginalJs(js_code) {
         padding: CryptoJS.pad.Pkcs7,
       },
     ).toString(CryptoJS.enc.Utf8);
+
     return encrypted;
   }
 
-  let error_log = false;
+  let error_log = true;
 
   function logger(text) {
     if (error_log) {
@@ -3209,6 +3224,53 @@ function getOriginalJs(js_code) {
     }
   }
   return decode_content;
+}
+
+function encryptJs(js_code: string, type: string | null = null) {
+  const encode_dict = {
+    gzip: 'gzip',
+    base64: 'base64',
+    rsa: 'rsa',
+    aes: 'aes',
+  };
+
+  function getRandomKey(dict) {
+    const keys = Object.keys(dict);
+    const randomIndex = Math.floor(Math.random() * keys.length);
+    return keys[randomIndex];
+  }
+
+  let encode_method = type ? type : getRandomKey(encode_dict);
+
+  let decode_txt = '';
+  switch (encode_method) {
+    case 'gzip':
+      decode_txt = gzip(js_code);
+      break;
+    case 'base64':
+      decode_txt = base64Encode(js_code);
+      break;
+    case 'rsa':
+      decode_txt = RSA.encode(js_code, rsa_private_key);
+      break;
+    case 'aes':
+      function aes_encrypt(data) {
+        const key = CryptoJS.enc.Hex.parse(aes_key.key);
+        const iv = CryptoJS.enc.Hex.parse(aes_key.iv);
+
+        const ciphertext = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(data), key, {
+          iv: iv,
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7,
+        }).toString();
+
+        return ciphertext;
+      }
+      decode_txt = aes_encrypt(js_code);
+      break;
+  }
+
+  return decode_txt;
 }
 
 /**
@@ -3720,17 +3782,19 @@ const keepUnUse = {
 };
 
 export {
+  category,
+  clearConsoleHistory,
+  detail,
+  encryptJs,
+  getConsoleHistory,
+  getOriginalJs,
   getRule,
-  runMain,
-  init,
   home,
   homeVod,
-  category,
-  detail,
-  play,
-  search,
-  proxy,
-  getConsoleHistory,
-  clearConsoleHistory,
+  init,
   keepUnUse,
+  play,
+  proxy,
+  runMain,
+  search,
 };
