@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron';
+import { getWin } from '../core/winManger';
 
 const toggleWindowVisibility = () => {
   const windows = BrowserWindow.getAllWindows();
@@ -6,10 +7,20 @@ const toggleWindowVisibility = () => {
   const anyVisible = windows.some((win) => win.isVisible());
   windows.forEach((win) => {
     if (!win.isDestroyed()) {
+      const playWin = getWin('play');
       if (anyVisible) {
         win.hide();
+        if (playWin) {
+          playWin.webContents.send('media-control', false);
+          playWin.webContents.setAudioMuted(true);
+        }
       } else {
         win.show();
+        if (playWin) {
+          playWin.webContents.send('media-control', true);
+          playWin.webContents.setAudioMuted(false);
+          playWin.focus();
+        }
       }
     }
   });

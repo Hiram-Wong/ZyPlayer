@@ -1,16 +1,18 @@
 <template>
   <div class="container">
     <div class="container-header" :class="!isVisible.macMaximize ? 'drag' : 'no-drag'">
-      <div class="left no-drag"
-        :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '68px' : '0' }">
+      <div
+        class="left no-drag"
+        :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '68px' : '0' }"
+      >
         <div class="open-main-win" @click="openMainWinEvent">
           <home-icon />
           <span class="tip-gotomain">{{ $t('pages.player.header.backMain') }}</span>
         </div>
       </div>
       <div class="spacer">
-        <span v-if="type === 'film'">{{ `${info["vod_name"]} ${formatIndex(active.filmIndex).index}` }}</span>
-        <span v-else>{{ info["name"] }}</span>
+        <span v-if="type === 'film'">{{ `${info['vod_name']} ${formatIndex(active.filmIndex).index}` }}</span>
+        <span v-else>{{ info['name'] }}</span>
       </div>
       <div class="right no-drag">
         <div class="system-functions">
@@ -18,8 +20,13 @@
             <t-button theme="default" shape="square" variant="text" @click="isSettingVisible = true">
               <setting-icon />
             </t-button>
-            <t-dialog v-model:visible="isSettingVisible" :header="$t('pages.player.setting.title')" placement="center"
-              width="508" :footer=false>
+            <t-dialog
+              v-model:visible="isSettingVisible"
+              :header="$t('pages.player.setting.title')"
+              placement="center"
+              width="508"
+              :footer="false"
+            >
               <div class="setting-warp">
                 <div class="setting-item-warp">
                   <span>{{ $t('pages.player.setting.autoSkip') }}</span>
@@ -27,15 +34,23 @@
                 </div>
                 <div v-if="set.skipStartEnd" class="setting-item-warp">
                   <div class="skip-time-in-start">
-                    <t-input-number v-model="skipConfig.skipTimeInStart" theme="normal" align="right"
-                      @change="skipTimeInEndChange">
+                    <t-input-number
+                      v-model="skipConfig.skipTimeInStart"
+                      theme="normal"
+                      align="right"
+                      @change="skipTimeInEndChange"
+                    >
                       <template #label>{{ $t('pages.player.setting.skipStart') }}</template>
                       <template #suffix>{{ $t('pages.player.setting.skipSeconds') }}</template>
                     </t-input-number>
                   </div>
                   <div class="skip-time-in-end">
-                    <t-input-number v-model="skipConfig.skipTimeInEnd" theme="normal" align="right"
-                      @change="skipTimeInEndChange">
+                    <t-input-number
+                      v-model="skipConfig.skipTimeInEnd"
+                      theme="normal"
+                      align="right"
+                      @change="skipTimeInEndChange"
+                    >
                       <template #label>{{ $t('pages.player.setting.skipEnd') }}</template>
                       <template #suffix>{{ $t('pages.player.setting.skipSeconds') }}</template>
                     </t-input-number>
@@ -67,7 +82,7 @@
     </div>
     <div class="container-main">
       <div class="player">
-        <div class="container-player" :class='["subject", isVisible.aside ? "subject-ext" : ""]'>
+        <div class="container-player" :class="['subject', isVisible.aside ? 'subject-ext' : '']">
           <div class="player-panel">
             <div class="player-media">
               <div id="mse" class="player"></div>
@@ -82,7 +97,7 @@
       <div class="aside" v-show="!isVisible.aside">
         <div v-if="type == 'iptv'" class="iptv content">
           <div class="title-warp">
-            <p class="title nowrap">{{ info["name"] }}</p>
+            <p class="title nowrap">{{ info['name'] }}</p>
           </div>
           <div class="iptv-main content-main">
             <t-tabs v-model="active.iptvNav" class="iptv-tabs tabs">
@@ -90,17 +105,17 @@
                 <div class="contents-wrap scroll-y epg-wrap">
                   <div v-for="(item, index) in iptvConfig.epgData" :key="index" class="content">
                     <div class="content-item content-item-between">
-                      <div class="time-warp">{{ item["start"] }}</div>
-                      <div class="title-wrap nowrap">{{ item["title"] }}</div>
+                      <div class="time-warp">{{ item['start'] }}</div>
+                      <div class="title-wrap nowrap">{{ item['title'] }}</div>
                       <div class="status-wrap">
-                        <span v-if='filterEpgStatus(item["start"], item["end"]) === "played"' class="played">
-                          {{ $t(`pages.player.status.${filterEpgStatus(item["start"], item["end"])}`) }}
+                        <span v-if="filterEpgStatus(item['start'], item['end']) === 'played'" class="played">
+                          {{ $t(`pages.player.status.${filterEpgStatus(item['start'], item['end'])}`) }}
                         </span>
-                        <span v-if='filterEpgStatus(item["start"], item["end"]) === "playing"' class="playing">
-                          {{ $t(`pages.player.status.${filterEpgStatus(item["start"], item["end"])}`) }}
+                        <span v-if="filterEpgStatus(item['start'], item['end']) === 'playing'" class="playing">
+                          {{ $t(`pages.player.status.${filterEpgStatus(item['start'], item['end'])}`) }}
                         </span>
-                        <span v-if='filterEpgStatus(item["start"], item["end"]) === "unplay"' class="unplay">
-                          {{ $t(`pages.player.status.${filterEpgStatus(item["start"], item["end"])}`) }}
+                        <span v-if="filterEpgStatus(item['start'], item['end']) === 'unplay'" class="unplay">
+                          {{ $t(`pages.player.status.${filterEpgStatus(item['start'], item['end'])}`) }}
                         </span>
                       </div>
                     </div>
@@ -110,19 +125,28 @@
               </t-tab-panel>
               <t-tab-panel value="channel" :label="$t('pages.player.iptv.channel')">
                 <div class="contents-wrap scroll-y channel-wrap">
-                  <div v-for="item in iptvConfig.channelData" :key='item["id"]' class="content">
+                  <div v-for="item in iptvConfig.channelData" :key="item['id']" class="content">
                     <div class="content-item content-item-start" @click="changeChannelEvent(item)">
                       <div class="logo-wrap">
-                        <t-image class="logo" fit="contain" :src='generateLogo(item)'
-                          :style="{ width: '64px', height: '32px', maxHeight: '32px', background: 'none' }" :lazy="true"
-                          :loading="renderLoading" :error="renderError">
+                        <t-image
+                          class="logo"
+                          fit="contain"
+                          :src="generateLogo(item)"
+                          :style="{ width: '64px', height: '32px', maxHeight: '32px', background: 'none' }"
+                          :lazy="true"
+                          :loading="renderLoading"
+                          :error="renderError"
+                        >
                         </t-image>
                       </div>
-                      <div class="title-wrap nowrap title-warp-channel">{{ item["name"] }}</div>
+                      <div class="title-wrap nowrap title-warp-channel">{{ item['name'] }}</div>
                       <div class="status-wrap">
-                        <span :class='item["id"] === info["id"] ? "playing" : "unplay"'>
-                          {{ item["id"] === info["id"] ? $t('pages.player.status.playing') :
-                            $t('pages.player.status.unplay') }}
+                        <span :class="item['id'] === info['id'] ? 'playing' : 'unplay'">
+                          {{
+                            item['id'] === info['id']
+                              ? $t('pages.player.status.playing')
+                              : $t('pages.player.status.unplay')
+                          }}
                         </span>
                       </div>
                     </div>
@@ -141,7 +165,7 @@
           <div v-if="!active.profile" class="contents-wrap">
             <div class="tvg-block">
               <div class="title-album">
-                <div class="title-text nowrap">{{ info["vod_name"] }}</div>
+                <div class="title-text nowrap">{{ info['vod_name'] }}</div>
                 <div class="title-desc" @click="active.profile = true">
                   <span class="title-unfold">{{ $t('pages.player.film.desc') }}</span>
                   <chevron-right-s-icon />
@@ -150,14 +174,14 @@
               <div class="hot-block nowrap">
                 <span class="rate">
                   <star-icon />
-                  {{ info["vod_score"] ? info["vod_score"] : '0.0' }}
+                  {{ info['vod_score'] ? info['vod_score'] : '0.0' }}
                 </span>
-                <t-divider layout="vertical" v-show='info["type_name"]' />
-                <span v-show='info["type_name"]' class="nowrap">{{ info["type_name"] }}</span>
-                <t-divider layout="vertical" v-show='info["vod_area"]' />
-                <span v-show='info["vod_area"]' class="nowrap">{{ info["vod_area"] }}</span>
-                <t-divider layout="vertical" v-show='info["vod_year"]' />
-                <span v-show='info["vod_year"]' class="nowrap">{{ info["vod_year"] }}</span>
+                <t-divider layout="vertical" v-show="info['type_name']" />
+                <span v-show="info['type_name']" class="nowrap">{{ info['type_name'] }}</span>
+                <t-divider layout="vertical" v-show="info['vod_area']" />
+                <span v-show="info['vod_area']" class="nowrap">{{ info['vod_area'] }}</span>
+                <t-divider layout="vertical" v-show="info['vod_year']" />
+                <span v-show="info['vod_year']" class="nowrap">{{ info['vod_year'] }}</span>
               </div>
               <div class="function">
                 <div class="func-item like" @click="putBinge(false)">
@@ -176,7 +200,7 @@
                 <div class="func-item share" @click="shareEvent">
                   <share-popup v-model:visible="isVisible.share" :data="shareData">
                     <template #customize>
-                      <div style="display: flex;flex-direction: row;align-items: center;">
+                      <div style="display: flex; flex-direction: row; align-items: center">
                         <share-1-icon class="icon" />
                         <span class="tip">{{ $t('pages.player.film.share') }}</span>
                       </div>
@@ -199,8 +223,12 @@
                         </template>
                       </t-button>
                       <t-dropdown-menu>
-                        <t-dropdown-item v-for="(_, key, index) in season" :key="index" :value="key"
-                          @click="(options) => switchLineEvent(options.value as string)">
+                        <t-dropdown-item
+                          v-for="(_, key, index) in season"
+                          :key="index"
+                          :value="key"
+                          @click="(options) => switchLineEvent(options.value as string)"
+                        >
                           <span :class="[key as any === active.flimSource ? 'active' : '']">{{ key }}</span>
                         </t-dropdown-item>
                       </t-dropdown-menu>
@@ -215,8 +243,12 @@
                         </template>
                       </t-button>
                       <t-dropdown-menu>
-                        <t-dropdown-item v-for="item in dataAnalyze.active" :key="item.id" :value="item.id"
-                          @click="(options) => switchAnalyzeEvent(options.value as string)">
+                        <t-dropdown-item
+                          v-for="item in dataAnalyze.active"
+                          :key="item.id"
+                          :value="item.id"
+                          @click="(options) => switchAnalyzeEvent(options.value as string)"
+                        >
                           <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
                         </t-dropdown-item>
                       </t-dropdown-menu>
@@ -232,13 +264,20 @@
               </div>
               <div class="listbox">
                 <div class="tag-container">
-                  <div v-for="(item, index) in season?.[active.flimSource]" :key="item"
-                    :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
-                    @click="changeEvent(item)">
+                  <div
+                    v-for="(item, index) in season?.[active.flimSource]"
+                    :key="item"
+                    :class="['mainVideo-num', item === active.filmIndex ? 'mainVideo-selected' : '']"
+                    @click="changeEvent(item)"
+                  >
                     <t-tooltip :content="formatName(item)">
                       <div class="mainVideo_inner">
-                        {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index,
-                          season?.[active.flimSource]?.length)
+                        {{
+                          formatReverseOrder(
+                            isVisible.reverseOrder ? 'positive' : 'negative',
+                            index,
+                            season?.[active.flimSource]?.length,
+                          )
                         }}
                         <div class="playing"></div>
                       </div>
@@ -267,14 +306,19 @@
               <div class="recommend" v-show="recommend.length != 0">
                 <div class="component-title">{{ $t('pages.player.film.recommend') }}</div>
                 <div class="component-list">
-                  <div v-for="content in recommend" :key='content["id"]' class="videoItem-card">
+                  <div v-for="content in recommend" :key="content['id']" class="videoItem-card">
                     <div class="videoItem-left" @click="recommendEvent(content)">
-                      <t-image class="card-main-item" :src='content["vod_pic"]'
-                        :style="{ width: '126px', height: '70px', 'border-radius': '5px' }" :lazy="true" fit="cover">
+                      <t-image
+                        class="card-main-item"
+                        :src="content['vod_pic']"
+                        :style="{ width: '126px', height: '70px', 'border-radius': '5px' }"
+                        :lazy="true"
+                        fit="cover"
+                      >
                       </t-image>
                     </div>
                     <div class="videoItem-right">
-                      <div class="title nowrap">{{ content["vod_name"] }}</div>
+                      <div class="title nowrap">{{ content['vod_name'] }}</div>
                     </div>
                   </div>
                 </div>
@@ -287,31 +331,36 @@
               <close-icon size="1.3em" class="icon" @click="active.profile = false" />
             </div>
             <t-divider dashed style="margin: 5px 0" />
-            <div class="side-body scroll-y ">
+            <div class="side-body scroll-y">
               <div class="card">
                 <div class="cover">
-                  <t-image class="card-main-item" :src='info["vod_pic"]'
-                    :style="{ width: '100%', height: '100%', 'border-radius': '5px' }" :lazy="true" fit="cover" />
+                  <t-image
+                    class="card-main-item"
+                    :src="info['vod_pic']"
+                    :style="{ width: '100%', height: '100%', 'border-radius': '5px' }"
+                    :lazy="true"
+                    fit="cover"
+                  />
                 </div>
                 <div class="content">
-                  <div class="name">{{ info["vod_name"] }}</div>
-                  <div class="type">{{ info["type_name"] }}</div>
-                  <div class="num">{{ info["vod_remarks"] }}</div>
+                  <div class="name">{{ info['vod_name'] }}</div>
+                  <div class="type">{{ info['type_name'] }}</div>
+                  <div class="num">{{ info['vod_remarks'] }}</div>
                 </div>
               </div>
               <div class="text">
-                <span v-html='formatContent(info["vod_content"])'></span>
+                <span v-html="formatContent(info['vod_content'])"></span>
               </div>
               <div class="case">
                 <div class="title">{{ $t('pages.player.film.actors') }}</div>
                 <div class="content">
-                  <div v-show='info["vod_director"]'>
+                  <div v-show="info['vod_director']">
                     <span class="name">{{ $t('pages.player.film.director') }}: </span>
-                    <span class="role">{{ info["vod_director"] }}</span>
+                    <span class="role">{{ info['vod_director'] }}</span>
                   </div>
-                  <div v-show='info["vod_actor"]'>
+                  <div v-show="info['vod_actor']">
                     <span class="name">{{ $t('pages.player.film.actor') }}: </span>
-                    <span class="role">{{ info["vod_actor"] }}</span>
+                    <span class="role">{{ info['vod_actor'] }}</span>
                   </div>
                 </div>
               </div>
@@ -320,25 +369,34 @@
         </div>
         <div v-if="type == 'drive'" class="drive content">
           <div class="title-warp">
-            <p class="title nowrap">{{ info["name"] }}</p>
+            <p class="title nowrap">{{ info['name'] }}</p>
           </div>
           <div class="drive-main content-main">
             <t-tabs v-model="active.driveNav" class="drive-tabs tabs">
               <t-tab-panel value="season" :label="$t('pages.player.drive.anthology')">
                 <div class="contents-wrap scroll-y drive-wrap">
-                  <div v-for="item in driveDataList" :key='item["id"]' class="content">
-                    <template v-if='item["type"] === 10'>
+                  <div v-for="item in driveDataList" :key="item['id']" class="content">
+                    <template v-if="item['type'] === 10">
                       <div class="content-item content-item-start" @click="changeDriveEvent(item)">
                         <div class="logo-wrap">
-                          <t-image class="logo" fit="cover" :src='item["thumb"]'
+                          <t-image
+                            class="logo"
+                            fit="cover"
+                            :src="item['thumb']"
                             :style="{ width: '64px', height: '28px', background: 'none', borderRadius: '6px' }"
-                            :lazy="true" :loading="renderLoading" :error="renderError" />
+                            :lazy="true"
+                            :loading="renderLoading"
+                            :error="renderError"
+                          />
                         </div>
-                        <div class="title-wrap nowrap">{{ item["name"] }}</div>
+                        <div class="title-wrap nowrap">{{ item['name'] }}</div>
                         <div class="status-wrap">
-                          <span :class='info["name"] === item["name"] ? "playing" : "unplay"'>
-                            {{ item["name"] === info["name"] ? $t('pages.player.status.playing') :
-                              $t('pages.player.status.unplay') }}
+                          <span :class="info['name'] === item['name'] ? 'playing' : 'unplay'">
+                            {{
+                              item['name'] === info['name']
+                                ? $t('pages.player.status.playing')
+                                : $t('pages.player.status.unplay')
+                            }}
                           </span>
                         </div>
                       </div>
@@ -379,7 +437,7 @@ import {
   PinIcon,
   StarIcon,
   SettingIcon,
-  Share1Icon
+  Share1Icon,
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -387,7 +445,18 @@ import { computed, onMounted, ref, reactive, shallowRef } from 'vue';
 
 import { fetchChannelList } from '@/api/iptv';
 import { checkUrlIpv6, getLocalStorage } from '@/utils/tool';
-import { playerBarrage, playerCreate, playerDestroy, playerNext, playerSeek, playerPause, playerTimeUpdate, offPlayerTimeUpdate, offPlayerBarrage } from '@/utils/common/player';
+import {
+  playerBarrage,
+  playerCreate,
+  playerDestroy,
+  playerNext,
+  playerSeek,
+  playerPause,
+  playerToggle,
+  playerTimeUpdate,
+  offPlayerTimeUpdate,
+  offPlayerBarrage,
+} from '@/utils/common/player';
 import {
   fetchBingeData,
   putBingeData,
@@ -403,7 +472,7 @@ import {
   formatIndex,
   formatContent,
   formatSeason,
-  formatReverseOrder
+  formatReverseOrder,
 } from '@/utils/common/film';
 import { __jsEvalReturn } from '@/utils/alist_open';
 import { fetchChannelEpg } from '@/utils/channel';
@@ -454,13 +523,13 @@ const player = shallowRef(null); // 重要, proxy对象art播放器报错
 
 const tmp = reactive({
   skipTime: 0,
-  url: "",
-  sourceUrl: "",
-  preloadNext: "",
+  url: '',
+  sourceUrl: '',
+  preloadNext: '',
   preloadLoading: false,
   preloadBarrage: [],
   preloadSourceUrl: '',
-  playerHeaders: {}
+  playerHeaders: {},
 }) as any;
 
 const active = reactive({
@@ -470,7 +539,7 @@ const active = reactive({
   filmIndex: '',
   filmCurrent: '',
   profile: false,
-  analyzeId: ''
+  analyzeId: '',
 });
 const recommend = ref([]) as any; // 推荐
 const season = ref(); // 选集
@@ -508,7 +577,7 @@ const VIDEO_PROCESS_DOC = reactive({
 const dataAnalyze = ref({
   default: { url: '' },
   flag: [],
-  active: []
+  active: [],
 }) as any;
 
 const isVisible = reactive({
@@ -519,15 +588,15 @@ const isVisible = reactive({
   binge: false,
   aside: false,
   reverseOrder: true,
-  official: false
-})
+  official: false,
+});
 
 const iptvConfig = ref({
   epg: '',
   skipIpv6: false,
   channelData: [],
-  epgData: []
-})
+  epgData: [],
+});
 
 const renderError = () => {
   return (
@@ -560,7 +629,7 @@ const createPlayer = async (url: string, videoType: string = '') => {
     dplayer: document.getElementById('mse'),
     nplayer: '#mse',
   };
-  player.value = await playerCreate(url, type.value, containers[playerMode.type], playerMode.type, videoType) as any;
+  player.value = (await playerCreate(url, type.value, containers[playerMode.type], playerMode.type, videoType)) as any;
   if (tmp.skipTime) playerSeek(player.value, playerMode.type, tmp.skipTime);
 
   if (type.value === 'film') {
@@ -575,9 +644,9 @@ const createPlayer = async (url: string, videoType: string = '') => {
         playerBarrage(player.value, playerMode.type, tmp.sourceUrl, options, tmp.sourceUrl);
       } else {
         playerBarrage(player.value, playerMode.type, danmuList, options, tmp.sourceUrl);
-      };
+      }
     }
-  };
+  }
 
   setSystemMediaInfo(); // 设置系统媒体信息
 
@@ -602,7 +671,7 @@ const destroyPlayer = () => {
 
 // 设置系统媒体信息
 const setSystemMediaInfo = () => {
-  if ("mediaSession" in navigator) {
+  if ('mediaSession' in navigator) {
     let doc = {
       title: '' as string,
       artist: '' as string,
@@ -611,36 +680,30 @@ const setSystemMediaInfo = () => {
 
     if (type.value === 'iptv') {
       doc = {
-        title: info.value["name"],
+        title: info.value['name'],
         artist: '直播',
-        artwork: [
-          { src: logoIcon, sizes: "128x128", type: "image/png" },
-        ]
+        artwork: [{ src: logoIcon, sizes: '128x128', type: 'image/png' }],
       };
     } else if (type.value === 'drive') {
       doc = {
-        title: info.value["name"],
+        title: info.value['name'],
         artist: '网盘',
-        artwork: [
-          { src: logoIcon, sizes: "128x128", type: "image/png" },
-        ]
+        artwork: [{ src: logoIcon, sizes: '128x128', type: 'image/png' }],
       };
     } else {
       doc = {
-        title: info.value["vod_name"],
+        title: info.value['vod_name'],
         artist: formatIndex(active.filmIndex).index,
-        artwork: [
-          { src: info.value["vod_pic"], sizes: "128x128", type: "image/png" },
-        ]
-      }
+        artwork: [{ src: info.value['vod_pic'], sizes: '128x128', type: 'image/png' }],
+      };
     }
 
     navigator.mediaSession.metadata = new MediaMetadata(doc);
-  };
+  }
 
   let title;
-  if (type.value === 'film') title = `${info.value["vod_name"]} ${formatIndex(active.filmIndex).index}`;
-  else title = info.value["name"];
+  if (type.value === 'film') title = `${info.value['vod_name']} ${formatIndex(active.filmIndex).index}`;
+  else title = info.value['name'];
   document.title = title;
 };
 
@@ -700,14 +763,14 @@ const putHistory = async (): Promise<void> => {
     relateId: ext.value.site.id,
     siteSource: active.flimSource,
     playEnd: VIDEO_PROCESS_DOC.playEnd,
-    videoId: info.value["vod_id"],
-    videoImage: info.value["vod_pic"],
-    videoName: info.value["vod_name"],
+    videoId: info.value['vod_id'],
+    videoImage: info.value['vod_pic'],
+    videoName: info.value['vod_name'],
     videoIndex: active.filmIndex,
     watchTime: VIDEO_PROCESS_DOC.watchTime,
     duration: VIDEO_PROCESS_DOC.duration,
     skipTimeInStart: skipConfig.value.skipTimeInStart,
-    skipTimeInEnd: skipConfig.value.skipTimeInEnd
+    skipTimeInEnd: skipConfig.value.skipTimeInEnd,
   };
 
   const response = await putHistoryData(dataHistory.value?.id, doc);
@@ -737,7 +800,7 @@ const initFilmPlayer = async (isFirst) => {
 
   if (!isFirst) {
     await fetchHistory();
-    if (!_.has(dataHistory.value, "id")) await putHistory();
+    if (!_.has(dataHistory.value, 'id')) await putHistory();
     await fetchAnalyze();
 
     fetchRecommend();
@@ -747,7 +810,7 @@ const initFilmPlayer = async (isFirst) => {
     if (set.value.skipStartEnd && dataHistory.value.watchTime < skipConfig.value.skipTimeInStart) {
       tmp.skipTime = skipConfig.value.skipTimeInStart;
     } else {
-      tmp.skipTime = dataHistory.value["watchTime"] || 0;
+      tmp.skipTime = dataHistory.value['watchTime'] || 0;
     }
   } else {
     tmp.skipTime = dataHistory.value.watchTime || 0;
@@ -785,7 +848,7 @@ const initPlayer = async (isFirst = false) => {
       break;
     default:
       break;
-  };
+  }
 };
 
 // 获取播放源及剧集
@@ -811,15 +874,17 @@ const changeEvent = async (item) => {
   // 3. 不同源 不同集 变 return true
   // 4. 不同源 同集 不变 return true
   // 待优化 不同源的index不同，要重新索引  但是 综艺不对应
-  if (dataHistory.value["siteSource"] === active.flimSource) {  // 同源
-    if (formatIndex(dataHistory.value["videoIndex"]).index !== formatIndex(active.filmIndex).index) {
+  if (dataHistory.value['siteSource'] === active.flimSource) {
+    // 同源
+    if (formatIndex(dataHistory.value['videoIndex']).index !== formatIndex(active.filmIndex).index) {
       VIDEO_PROCESS_DOC.watchTime = 0;
       VIDEO_PROCESS_DOC.playEnd = false;
-    };
-  } else if (formatIndex(dataHistory.value["videoIndex"]).index !== formatIndex(active.filmIndex).index) { // 不同源
+    }
+  } else if (formatIndex(dataHistory.value['videoIndex']).index !== formatIndex(active.filmIndex).index) {
+    // 不同源
     VIDEO_PROCESS_DOC.watchTime = 0;
     VIDEO_PROCESS_DOC.playEnd = false;
-  };
+  }
 
   await putHistory();
 
@@ -835,12 +900,12 @@ const changeEvent = async (item) => {
         playerBarrage(player.value, playerMode.type, tmp.preloadSourceUrl, options, tmp.preloadSourceUrl);
       } else {
         playerBarrage(player.value, playerMode.type, tmp.preloadBarrage, options, tmp.preloadSourceUrl);
-      };
+      }
       tmp.preloadBarrage = [];
-    };
+    }
     if (set.value.skipStartEnd) {
       await playerSeek(player.value, playerMode.type, skipConfig.value.skipTimeInStart);
-    };
+    }
     setSystemMediaInfo(); // 更新系统媒体信息
     setTimeout(async () => {
       await timerUpdatePlayProcess();
@@ -869,10 +934,11 @@ const preloadNext = async (item: string) => {
   const response = await playHelper(snifferMode, url, site, analyze, flimSource, skipAd);
   tmp.preloadNext = { ...response };
 
-  if (response?.url) { // 预加载弹幕
+  if (response?.url) {
+    // 预加载弹幕
     const options = set.value.barrage;
     tmp.preloadBarrage = await fetchBarrage(tmp.sourceUrl, options, { flimSource, filmIndex: item });
-  };
+  }
 };
 
 // 获取豆瓣影片推荐
@@ -893,19 +959,22 @@ const timerUpdatePlayProcess = () => {
     } else {
       return index === 0;
     }
-  }
+  };
 
   const autoPlayNext = async () => {
     VIDEO_PROCESS_DOC.playEnd = true;
     VIDEO_PROCESS_DOC.duration = 0;
 
-    if (isLast()) {  // 最后一集
+    if (isLast()) {
+      // 最后一集
       putHistory();
       return;
-    };
+    }
 
     console.log('[player][progress] autoPlayNext');
-    await changeEvent(isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1]);
+    await changeEvent(
+      isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1],
+    );
     MessagePlugin.info(t('pages.player.message.next'));
   };
 
@@ -922,12 +991,17 @@ const timerUpdatePlayProcess = () => {
       if (!isLast() && !tmp.preloadLoading && set.value.preloadNext) {
         try {
           tmp.preloadLoading = true;
-          await preloadNext(isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1]);
-        } catch (err) { };
-      };
-    };
+          await preloadNext(
+            isVisible.reverseOrder ? season.value[siteSource][index + 1] : season.value[siteSource][index - 1],
+          );
+        } catch (err) {}
+      }
+    }
 
-    if (getLocalStorage('player:process')) console.log(`[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`);
+    if (getLocalStorage('player:process'))
+      console.log(
+        `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
+      );
   };
 
   playerTimeUpdate(player.value, playerMode.type, ({ currentTime, duration }) => {
@@ -973,11 +1047,11 @@ const putBinge = async (update: boolean = false) => {
       dataBinge.value = {
         relateId: null,
         videoId: 0,
-        videoImage: "",
-        videoName: "",
-        videoType: "",
-        videoRemarks: "",
-        id: null
+        videoImage: '',
+        videoName: '',
+        videoType: '',
+        videoRemarks: '',
+        id: null,
       };
     }
   } else if (!update) {
@@ -1025,12 +1099,12 @@ const recommendEvent = async (item) => {
     isVisible.binge = false;
     store.updateConfig({
       type: 'film',
-      data: { info: item, ext: ext.value }
+      data: { info: item, ext: ext.value },
     });
 
     initPlayer();
   } else {
-    MessagePlugin.warning(t('pages.player.message.noRecommendSearch'))
+    MessagePlugin.warning(t('pages.player.message.noRecommendSearch'));
   }
 };
 
@@ -1044,8 +1118,8 @@ const shareEvent = () => {
   const sourceUrl = 'https://web.zyplayer.fun/?url=';
   let name;
 
-  if (type.value === 'film') name = `${info.value["vod_name"]} ${formatIndex(active.filmIndex).index}`;
-  else name = info.value["name"];
+  if (type.value === 'film') name = `${info.value['vod_name']} ${formatIndex(active.filmIndex).index}`;
+  else name = info.value['name'];
 
   const params = `${tmp.url}&name=${name}`;
   const url = `${sourceUrl}${params}`;
@@ -1063,15 +1137,15 @@ const shareEvent = () => {
 const downloadEvent = () => {
   downloadDialogData.value = {
     season: season.value,
-    current: tmp.url
+    current: tmp.url,
   };
   isVisible.download = true;
 };
 
 // 初始化iptv
 const initIptvPlayer = async () => {
-  if (data.value.ext["epg"]) getEpgList(ext.value["epg"], info.value["name"], moment().format('YYYY-MM-DD'));
-  const url = info.value["url"];
+  if (data.value.ext['epg']) getEpgList(ext.value['epg'], info.value['name'], moment().format('YYYY-MM-DD'));
+  const url = info.value['url'];
 
   createPlayer(url);
 };
@@ -1120,10 +1194,10 @@ const checkChannelListIpv6 = async (data: any[]) => {
         console.log(`[play][channel][checkIpv6][error]${err}`);
         return null;
       }
-    })
+    }),
   );
 
-  return newdata.filter(item => item !== null);
+  return newdata.filter((item) => item !== null);
 };
 
 // 获取直播列表
@@ -1167,10 +1241,10 @@ const getEpgList = async (url: string, name: string, date: string): Promise<void
 const changeChannelEvent = async (item) => {
   store.updateConfig({
     type: 'iptv',
-    data: { info: item, ext: ext.value }
+    data: { info: item, ext: ext.value },
   });
   info.value = item;
-  const url = info.value["url"];
+  const url = info.value['url'];
   if (player.value) {
     const { playerMode } = set.value;
     playerNext(player.value, playerMode.type, { url, mediaType: '' });
@@ -1184,14 +1258,14 @@ const generateLogo = (item) => {
   let url = item.logo;
   if (ext.value.logo) {
     url = `${ext.value.logo}${item.name}.png`;
-  };
+  }
   return url;
-}
+};
 
 // 初始化网盘
 const initCloudPlayer = async () => {
-  driveDataList.value = ext.value["files"];
-  const url = info.value["url"];
+  driveDataList.value = ext.value['files'];
+  const url = info.value['url'];
   createPlayer(url);
 };
 
@@ -1199,9 +1273,7 @@ const spiderInit = async () => {
   if (!spider.value) spider.value = __jsEvalReturn();
   await spider.value.init({
     skey: 'siteKey',
-    ext: [
-      { ...ext.value.site }
-    ],
+    ext: [{ ...ext.value.site }],
   });
 };
 
@@ -1215,12 +1287,12 @@ const changeDriveEvent = async (item) => {
       info: {
         name: res.name,
         url: res.url,
-        vod_pic: res.thumb
-      }
+        vod_pic: res.thumb,
+      },
     },
   });
   info.value = res;
-  const url = info.value["url"];
+  const url = info.value['url'];
   if (player.value) {
     const { playerMode } = set.value;
     playerNext(player.value, playerMode.type, { url, mediaType: '' });
@@ -1259,6 +1331,11 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
   store.updateConfig({
     status: false,
   });
+});
+
+window.electron.ipcRenderer.on('media-control', (_, playStatus) => {
+  const { playerMode } = set.value;
+  if (player.value) playerToggle(player.value, playerMode.type, playStatus);
 });
 </script>
 
@@ -1353,7 +1430,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
         background: var(--td-bg-color-container);
         border-radius: var(--td-radius-default);
 
-        &>.system-function:first-of-type {
+        & > .system-function:first-of-type {
           margin-left: 0;
         }
 
@@ -1435,7 +1512,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
         width: 100%;
       }
 
-      .subject:hover~.dock-show {
+      .subject:hover ~ .dock-show {
         display: flex;
       }
 
@@ -1446,7 +1523,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
       .dock-show {
         display: none;
         transition: 0.15s ease-out;
-        background: rgba(0, 0, 0, .4);
+        background: rgba(0, 0, 0, 0.4);
         border-radius: 8px 0 0 8px;
         width: 32px;
         height: 84px;
@@ -1462,7 +1539,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
 
         &:hover {
           display: flex;
-          background: rgba(0, 0, 0, .5);
+          background: rgba(0, 0, 0, 0.5);
         }
 
         .btn-icon {
@@ -1640,8 +1717,8 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
             font-size: 14px;
             height: 40px;
             position: relative;
-            background: hsla(0, 0%, 100%, .06);
-            box-shadow: 0 2px 16px 0 rgba(0, 0, 0, .16);
+            background: hsla(0, 0%, 100%, 0.06);
+            box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.16);
             border-radius: 8px;
 
             .func-item {
@@ -1670,7 +1747,12 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
               height: 24px;
               width: 1px;
               border-right: 1px solid;
-              border-image-source: linear-gradient(180deg, hsla(0, 0%, 100%, 0), hsla(0, 0%, 100%, .1) 53%, hsla(0, 0%, 100%, 0));
+              border-image-source: linear-gradient(
+                180deg,
+                hsla(0, 0%, 100%, 0),
+                hsla(0, 0%, 100%, 0.1) 53%,
+                hsla(0, 0%, 100%, 0)
+              );
               border-image-slice: 1;
             }
           }
@@ -1728,7 +1810,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
 
                   .t-button__text {
                     &:before {
-                      content: "";
+                      content: '';
                       width: 1px;
                       margin: 0 var(--td-comp-margin-xs);
                       background: linear-gradient(180deg, transparent, var(--td-border-level-1-color), transparent);
@@ -1771,14 +1853,14 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
                 cursor: pointer;
                 margin-bottom: 4px;
                 margin-right: 4px;
-                box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .08);
+                box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
 
                 &:hover {
                   background-image: linear-gradient(var(--td-brand-color-2), var(--td-brand-color-3));
                 }
 
                 &:before {
-                  content: "";
+                  content: '';
                   display: block;
                   position: absolute;
                   top: 1px;
@@ -1799,7 +1881,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
                   border-radius: 8px;
                   z-index: 3;
                   overflow: hidden;
-                  background-image: linear-gradient(hsla(0, 0%, 100%, .04), hsla(0, 0%, 100%, .06));
+                  background-image: linear-gradient(hsla(0, 0%, 100%, 0.04), hsla(0, 0%, 100%, 0.06));
 
                   .playing {
                     display: none;
@@ -1812,7 +1894,7 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
 
               .mainVideo-selected {
                 color: var(--td-brand-color);
-                background-image: linear-gradient(hsla(0, 0%, 100%, .1), hsla(0, 0%, 100%, .06));
+                background-image: linear-gradient(hsla(0, 0%, 100%, 0.1), hsla(0, 0%, 100%, 0.06));
 
                 // box-shadow: 0 2px 8px 0 rgba(0,0,0,.08), inset 0 4px 10px 0 rgba(0,0,0,.14);
                 .playing {
@@ -2019,14 +2101,16 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
     width: 100%;
     overflow: auto;
 
-    &:hover>.container-header {
+    &:hover > .container-header {
       opacity: 1;
       pointer-events: auto;
-      transition: opacity 0.15s linear 0s, visibility 0s linear 0s;
+      transition:
+        opacity 0.15s linear 0s,
+        visibility 0s linear 0s;
     }
 
     .container-header {
-      background: linear-gradient(360deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .8));
+      background: linear-gradient(360deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8));
       position: fixed;
       top: 0;
       left: 0;
@@ -2034,7 +2118,9 @@ window.electron.ipcRenderer.on('destroy-playerWindow', () => {
       z-index: 999;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.15s linear 3s, visibility 0s linear 3s;
+      transition:
+        opacity 0.15s linear 3s,
+        visibility 0s linear 3s;
       height: 56px;
       margin: 0;
       padding: var(--td-comp-paddingTB-xxxs) var(--td-comp-paddingLR-xs) 0;

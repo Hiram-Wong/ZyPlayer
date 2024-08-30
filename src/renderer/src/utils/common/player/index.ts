@@ -224,6 +224,13 @@ const playerSeek = async (player: any, playerMode: string, time: number) => {
   return seek(player, time);
 };
 
+const playerToggle = async (player: any, playerMode: string, status: boolean) => {
+  const playerModule = await loadPlayerMethod(playerMode);
+  const { play, pause } = playerModule;
+  if (status) return play(player);
+  else return pause(player);
+};
+
 const playerPause = async (player: any, playerMode: string) => {
   const playerModule = await loadPlayerMethod(playerMode);
   const { pause } = playerModule;
@@ -254,6 +261,7 @@ export {
   playerDestroy,
   playerNext,
   playerSeek,
+  playerToggle,
   playerPause,
   playerTimeUpdate,
   offPlayerBarrage,
