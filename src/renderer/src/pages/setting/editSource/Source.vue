@@ -312,8 +312,6 @@
 </template>
 
 <script setup lang="ts">
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
 import moment from 'moment';
 import * as monaco from 'monaco-editor';
 import jsBeautify from 'js-beautify';
@@ -338,7 +336,7 @@ import { useSettingStore, usePlayStore } from '@/store';
 import { setT3Proxy } from '@/api/proxy';
 import { fetchDebugSource, setDebugSource, delDebugSource } from '@/api/lab';
 import emitter from '@/utils/emitter';
-import { getHtml, copyToClipboardApi } from '@/utils/tool';
+import { getHtml, copyToClipboardApi, encodeBase64 } from '@/utils/tool';
 import { getMubans } from '@/utils/drpy/template';
 import { doWork as t3Work } from '@/utils/drpy/index';
 import sniffer from '@/utils/sniffer';
@@ -1119,8 +1117,8 @@ const actionSniffer = async () => {
         ? new URL(snifferMode.url).origin + new URL(snifferMode.url).pathname
         : '';
 
-    if (runScript.trim()) runScript = Base64.stringify(Utf8.parse(runScript));
-    if (initScript.trim()) initScript = Base64.stringify(Utf8.parse(initScript));
+    if (runScript.trim()) runScript = encodeBase64(runScript);
+    if (initScript.trim()) initScript = encodeBase64(initScript);
     const snifferPlayUrl = `${snifferApi}?url=${url}&script=${runScript}&init_script=${initScript}&custom_regex=${auxiliaryRegex}`;
     const response: any = await sniffer(snifferMode.type, snifferPlayUrl);
     form.value.content.debug = response;

@@ -1,7 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
 import _ from 'lodash';
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
 import xpath from 'xpath';
 import { DOMParser } from '@xmldom/xmldom';
 import JSON5 from 'json5';
@@ -10,6 +8,7 @@ import { doWork as t3Work, terminateWork as t3WorkTerminate } from './drpy';
 import XBPQAdapter from './xbpq';
 import CLASS_FILTER_CONFIG from '@/config/appFilter';
 import request from '@/utils/request';
+import { encodeBase64 } from '@/utils/tool';
 
 // 初始化对象xml转json https://github.com/NaturalIntelligence/fast-xml-parser/blob/master/docs/v4/1.GettingStarted.md
 const xmlOptions = {
@@ -537,7 +536,7 @@ const fetchList = async (site, pg = 1, t, f = {}) => {
     } else if (site.type === 6) {
       url = buildUrl(site.api, `?ac=videolist&t=${t}&pg=${pg}&extend=${site.ext}`);
       if (Object.keys(f).length !== 0) {
-        const encodedStr = Base64.stringify(Utf8.parse(JSON.stringify(f)));
+        const encodedStr = encodeBase64(JSON.stringify(f));
         url = buildUrl(url, `&ext=${encodedStr}`);
       }
     } else if (site.type === 7) {

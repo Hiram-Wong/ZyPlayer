@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
 import jsonpath from 'jsonpath';
 import PQueue from 'p-queue';
+
+import { encodeBase64 } from '@/utils/tool';
 
 import { fetchAnalyzePlay } from '@/api/analyze';
 import { updateHistory, detailHistory, addHistory } from '@/api/history';
@@ -442,7 +442,7 @@ const fetchHipyPlayUrlHelper = async (
     const extra =  playRes?.parse_extra ? `parse_extra='${playRes.parse_extra}&sniffer_exclude = ''` : `''`;
     data = {
       playUrl: playRes.url,
-      script: playRes.js ? encodeURIComponent(Base64.stringify(Utf8.parse(playRes.js))) : '',
+      script: playRes.js ? encodeURIComponent(encodeBase64(playRes.js)) : '',
       extra: extra || '',
       parse: Boolean(playRes.parse),
     };
@@ -478,7 +478,7 @@ const fetchT3PlayUrlHelper = async (
 
     data = {
       playUrl: playRes.url,
-      script: playRes.js ? encodeURIComponent(Base64.stringify(Utf8.parse(playRes.js))) : '',
+      script: playRes.js ? encodeURIComponent(encodeBase64(playRes.js)) : '',
       extra: extra || '',
       parse: Boolean(playRes.parse),
     };

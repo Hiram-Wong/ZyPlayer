@@ -1,8 +1,7 @@
 import { nanoid } from 'nanoid';
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
 
 import request from '@/utils/request';
+import { decodeBase64 } from '@/utils/tool'
 
 const { getCurrentWindow } = require('@electron/remote');
 const win = getCurrentWindow();
@@ -223,10 +222,10 @@ const sniffer = async (type: string, url: string): Promise<{ headers: object; da
   let query: any = getQuery(url, '');
   console.log(`[detail][sniffer][query]`, query);
   let script = query.script;
-  if (script) script = Base64.parse(decodeURIComponent(script)).toString(Utf8);
+  if (script) script = decodeBase64(decodeURIComponent(script));
   // console.log(`[detail][sniffer][script]`, script);
   let init_script = query.init_script;
-  if (init_script) init_script = Base64.parse(decodeURIComponent(init_script)).toString(Utf8);
+  if (init_script) init_script = decodeBase64(decodeURIComponent(init_script));
   // console.log(`[detail][sniffer][init_script]`, init_script);
   const custom_regex = query.custom_regex || '';
   const sniffer_exclude = query.sniffer_exclude || '';
