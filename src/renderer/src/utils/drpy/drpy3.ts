@@ -21,7 +21,7 @@
 
 import CryptoJS from 'crypto-js';
 import JSON5 from 'json5';
-// import pako from 'pako';
+import pako from 'pako';
 import JSEncrypt from 'wxmp-rsa';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule, local, req, resolve, batchFetch } from './drpyInject';
 import { getMubans } from './template';
@@ -29,13 +29,6 @@ import cheerio from './utils/cheerio.min';
 import gbkTool from './utils/gbk';
 import NODERSA from './utils/node-rsa';
 import jinja from './utils/jinja';
-import {
-  encodeBase64 as base64Encode,
-  decodeBase64 as base64Decode,
-  encodeMd5 as md5,
-  encodeGzip,
-  decodeGzip,
-} from '@/utils/tool';
 
 let consoleHistory: string[] = [];
 console['oldLog'] = console.log;
@@ -927,17 +920,17 @@ function encodeUrl(str) {
   }
 }
 
-// const base64Encode = (text: string) => {
-//   return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
-// };
+const base64Encode = (text: string) => {
+  return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
+};
 
-// const base64Decode = (text: string) => {
-//   return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
-// };
+const base64Decode = (text: string) => {
+  return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
+};
 
-// const md5 = (text: string) => {
-//   return `${CryptoJS.MD5(text)}`;
-// };
+const md5 = (text: string) => {
+  return `${CryptoJS.MD5(text)}`;
+};
 
 const uint8ArrayToBase64 = (uint8Array: Uint8Array) => {
   const binaryString = String.fromCharCode.apply(null, Array.from(uint8Array));
@@ -984,10 +977,9 @@ const Utf8ArrayToStr = (array: Uint8Array) => {
  * @returns {string}
  */
 const gzip = (str) => {
-  // const arr = pako.gzip(str, {
-  //   // to: 'string',
-  // });
-  const arr = encodeGzip(str);
+  const arr = pako.gzip(str, {
+    // to: 'string',
+  });
   return uint8ArrayToBase64(arr);
 };
 
@@ -1002,8 +994,7 @@ const ungzip = (b64Data: string) => {
     return x.charCodeAt(0);
   });
   const binData = new Uint8Array(charData);
-  // const data = pako.inflate(binData);
-  const data = decodeGzip(binData);
+  const data = pako.inflate(binData);
   return Utf8ArrayToStr(data);
 };
 
