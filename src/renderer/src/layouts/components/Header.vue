@@ -8,7 +8,7 @@
     <div class="right no-drag">
       <div class="system-functions">
         <sponsor class="system-function" />
-        <just-look class="system-function" />
+        <!-- <just-look class="system-function" /> -->
         <language class="system-function" />
         <system-skin class="system-function" />
         <system-config class="system-function" />
@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import HistoryControl from './HistoryControl.vue';
-import JustLook from './JustLook.vue';
+// import JustLook from './JustLook.vue';
 import Language from './Language.vue';
 import PlayerShow from './PlayShow.vue';
 import SearchBar from './SearchBar.vue';

@@ -66,14 +66,14 @@
           </t-space>
         </div>
       </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.viewCasual')" name="viewCasual">
+      <!-- <t-form-item :label="$t('pages.setting.base.viewCasual')" name="viewCasual">
         <t-space align="center">
           <t-input v-model="formData.defaultViewCasual" class="viewCasual-content"
             :placeholder="t('pages.setting.placeholder.general')" :style="{ width: '255px' }">
           </t-input>
-          <!-- <span class="title" @click="reset('viewCasual')">{{ $t('pages.setting.base.reset') }}</span> -->
+          <span class="title" @click="reset('viewCasual')">{{ $t('pages.setting.base.reset') }}</span>
         </t-space>
-      </t-form-item>
+      </t-form-item> -->
       <t-form-item :label="$t('pages.setting.base.iptv')" name="iptv">
         <div class="iptv">
           <t-space direction="vertical">
