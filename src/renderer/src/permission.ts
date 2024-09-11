@@ -4,5 +4,5 @@ import { getPermissionStore } from '@/store';
 router.beforeEach(async () => {
   const permissionStore = getPermissionStore();
 
-  await permissionStore.initRoutes(['all']);
+  await permissionStore.initRoutes();
 });
