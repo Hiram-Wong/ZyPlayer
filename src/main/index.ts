@@ -1,4 +1,3 @@
-import 'v8-compile-cache'; // 需第一个加载
 import { initialize as renoteInitialize } from '@electron/remote/main';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { registerTitleBarListener } from '@electron-uikit/titlebar';
