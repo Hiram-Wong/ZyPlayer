@@ -50,10 +50,7 @@
                   </div>
                 </div>
                 <div v-else class="empty">
-                  <div class="image" style="width: 200px" v-html="emptyImage"></div>
-                  <div class="desc">
-                    <p>{{ $t('pages.search.hotNoData') }}</p>
-                  </div>
+                  <t-empty :title="$t('pages.search.hotNoData')" />
                 </div>
               </div>
             </div>
@@ -452,28 +449,6 @@ const refreshHotConfig = () => {
 
     &.t-is-focused .t-input__prefix>.t-icon {
       color: var(--td-text-color-placeholder);
-    }
-  }
-}
-
-.empty {
-  height: 360px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  text-align: center;
-  box-sizing: border-box;
-  padding: var(--td-comp-paddingTB-xxl) 0;
-
-  .desc {
-    margin-top: var(--td-comp-margin-xl);
-
-    p {
-      margin: 0;
-      font-size: var(--td-font-size-title-small);
-      font-weight: 500;
-      color: var(--el-text-color-secondary);
     }
   }
 }
