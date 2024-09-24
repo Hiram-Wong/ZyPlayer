@@ -19,17 +19,13 @@
       </div>
       <div class="nav-sub-tab nav-sub-tab-content">
         <div class="nav-sub-tab-top" ref="contentRef">
-          <ul class="nav-menu">
-            <li class="nav-menu-item" :class="`${activeData}` === `${item.id}` ? 'is-active' : ''"
-              v-for="item in listData" :key="item.id" :value="item.id" @click="handleItemClick(item.id)"
-              @contextmenu="conButtonClick(item, $event)">
+          <t-list class="nav-menu" :scroll="{ type: 'virtual' }" style="height: 100%;">
+            <t-list-item v-for="(item, index) in listData" :key="index" :class="['nav-menu-item', `${activeData}` === `${item.id}` ? 'is-active' : '']">
               <t-tooltip :content="item.name">
-                <div class="name-wrapper">
-                  <span>{{ item.name }}</span>
-                </div>
+                <t-list-item-meta :description="item.name" @click="handleItemClick(item.id)" @contextmenu="conButtonClick(item, $event)" />
               </t-tooltip>
-            </li>
-          </ul>
+            </t-list-item>
+          </t-list>
         </div>
         <div class="nav-sub-tab-bottom">
           <slot name="customize"></slot>
@@ -62,9 +58,8 @@ import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 
 import { ContextMenu, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup } from '@imengyu/vue3-context-menu';
 import { onClickOutside } from '@vueuse/core';
-import Scrollbar from 'smooth-scrollbar';
 import { DataSearchIcon, SearchIcon } from 'tdesign-icons-vue-next';
-import { onMounted, computed, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 
 import { useSettingStore } from '@/store';
 const storeSetting = useSettingStore();
@@ -111,10 +106,6 @@ const optionsComponent = ref({
   x: 500,
   y: 200,
   theme: mode.value === 'light' ? 'default' : 'mac dark',
-});
-
-onMounted(() => {
-  Scrollbar.init(contentRef.value!);
 });
 
 watch(
@@ -173,8 +164,7 @@ const searchEvent = () => {
 
   .nav-sub {
     height: 100%;
-    min-width: 162px;
-    // width: fit-content;
+    width: 162px;
     padding: var(--td-comp-paddingTB-xs) 0;
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
@@ -227,25 +217,22 @@ const searchEvent = () => {
       height: calc(100% - var(--td-comp-margin-s) - var(--td-comp-margin-m) - 32px);
 
       .nav-sub-tab-top {
-        // overflow-y: auto;
-        // overflow-x: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
-        // padding-left: var(--td-comp-paddingTB-s);
+        height: 100%;
+        padding-left: var(--td-comp-paddingTB-s);
 
         .nav-menu {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          font-size: 14px;
-          line-height: 1.5;
+          width: 100%;
+          height: 100%;
 
           .nav-menu-item {
-            width: 148px;
-            height: 40px;
+            width: 146px;
+            cursor: pointer;
+            padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-m);
             transition: background-color .3s ease;
             border-radius: var(--td-radius-medium);
-
 
             &:not(:first-child) {
               margin-top: var(--td-comp-margin-xs);
@@ -255,22 +242,15 @@ const searchEvent = () => {
               background-color: var(--td-bg-content-hover-2);
             }
 
-            .name-wrapper {
-              height: 100%;
+            :deep(.t-list-item__meta) {
+              overflow: hidden;
+              display: inline-block;
+              white-space: nowrap;
               width: 100%;
-              padding: 0 var(--td-comp-paddingTB-s);
-              line-height: 14px;
-              display: flex;
-              align-items: center;
-              color: var(--td-text-color-primary);
-              cursor: pointer;
+            }
 
-              span {
-                overflow: hidden;
-                display: inline-block;
-                white-space: nowrap;
-                // text-overflow: ellipsis;
-              }
+            :deep(.t-list-item__meta-description) {
+              margin-right: 0;
             }
           }
 
