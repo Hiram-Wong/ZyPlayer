@@ -2,19 +2,19 @@
   <div :class="[`${prefix}-sidebar-layout`]">
     <t-menu collapsed :value="active" :class="`${prefix}-block-column`">
       <img class="logo" src="@/assets/icon.png" alt="logo" />
-      <div class="myAgentLine"></div>
+      <div class="line"></div>
       <template v-for="item in list" :key="item.path">
         <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)[0])">
           <template #icon>
-            <component :is="menuIcon(item)"></component>
+            <component :is="menuIcon(item)" class="t-icon"></component>
           </template>
-          {{ renderMenuTitle(item.title) }}
+          {{ renderMenuTitle(item.title!) }}
         </t-menu-item>
         <t-menu-item v-else :name="item.path" :value="getPath(item)" :to="item.path">
           <template #icon>
-            <component :is="menuIcon(item)"></component>
+            <component :is="menuIcon(item)" class="t-icon"></component>
           </template>
-          {{ renderMenuTitle(item.title) }}
+          {{ renderMenuTitle(item.title!) }}
         </t-menu-item>
       </template>
     </t-menu>
@@ -23,7 +23,7 @@
 
 <script setup lang="tsx">
 import type { PropType } from 'vue';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { prefix } from '@/config/global';
@@ -45,11 +45,6 @@ const props = defineProps({
 
 const route = useRoute();
 const { locale } = useLocale();
-const macFull = ref(false);
-
-window.electron.ipcRenderer.on('screen', (_, args) => {
-  macFull.value = args;
-})
 
 const getActive = (maxLevel = 3): string => {
   if (!route.path) {
@@ -70,7 +65,6 @@ const list = computed(() => {
 });
 
 const menuIcon = (item: ListItemType) => {
-  if (typeof item.icon === 'string') return <t-icon name={item.icon} style="" stroke-width="2.5" />;
   const RenderIcon = item.icon;
   return RenderIcon;
 };
@@ -125,17 +119,13 @@ const openHref = (url: string) => {
 </script>
 
 <style lang="less" scoped>
-.mac_unmax_style {
-  padding-top: var(--td-comp-size-xxl);
-}
-
 .logo {
   width: var(--td-size-10);
   height: var(--td-size-10);
   margin: var(--td-comp-paddingTB-l) 0 var(--td-comp-paddingTB-m) 0;
 }
 
-.myAgentLine {
+.line {
   width: 24px;
   height: 1px;
   background-color: var(--td-bg-content-active-2);

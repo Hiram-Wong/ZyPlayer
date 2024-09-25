@@ -9,7 +9,6 @@ store.use(createSyncPlugin());
 
 export { store };
 
-export * from './modules/permission';
 export * from './modules/play';
 export * from './modules/setting';
 
