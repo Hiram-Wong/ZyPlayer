@@ -4,9 +4,8 @@ import setting from './setting';
 import { db } from './db';
 // import proxy from './proxy';
 // import catbox from './catbox';
-// import cache from './cache';
 import { ai, jsEdit, staticFilter } from './lab';
-// import file from './file';
+import file from './file';
 import { barrge } from './player';
 import system from './system';
 
@@ -32,11 +31,10 @@ const routesModules = {
   db,
   // proxy,
   // catbox,
-  // cache,
   ai,
   jsEdit,
   staticFilter,
-  // file,
+  file,
   barrge,
   system,
 };
