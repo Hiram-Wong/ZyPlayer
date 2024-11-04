@@ -1,68 +1,57 @@
-import _ from 'lodash';
-import db from '../index';
-
-const TABLE_NAME = 'tbl_site';
+import { eq, like, inArray } from 'drizzle-orm';
+import { db, schema } from '../common';
 
 export default {
-  all() {
-    const db_res = db.get(TABLE_NAME).value();
-    return _.castArray(db_res);
+  async all() {
+    return await db.select().from(schema.site);
   },
-  update(id, doc) {
-    return db.get(TABLE_NAME).find({ id }).assign(doc).write();
+  async active() {
+    return await db.select().from(schema.site).where(eq(schema.site.isActive, true));
   },
-  clear() {
-    return db.set(TABLE_NAME, []).write();
+  async update(ids, doc) {
+    return await db.update(schema.site).set(doc).where(inArray(schema.site.id, ids)).returning();
   },
-  set(docs) {
-    docs = _.castArray(docs);
-    return db.set(TABLE_NAME, docs).write();
+  async clear() {
+    return await db.delete(schema.site);
   },
-  find(doc) {
-    return db.get(TABLE_NAME).find(doc).value();
+  async get(id) {
+    const res = await db.select().from(schema.site).where(eq(schema.site.id, id));
+    return res?.[0];
   },
-  filter(doc) {
-    return db.get(TABLE_NAME).filter(doc).value();
+  async findByKey(key) {
+    const res = await db.select().from(schema.site).where(eq(schema.site.key, key));
+    return res?.[0];
   },
-  get(id: string) {
-    return db.get(TABLE_NAME).find({ id }).value();
+  async set(doc) {
+    await db.delete(schema.site);
+    return await db.insert(schema.site).values(doc);
   },
-  add(doc) {
-    return db.get(TABLE_NAME).insert(doc).write();
+  async add(doc) {
+    return await db.insert(schema.site).values(doc).returning();
   },
-  remove(id: string) {
-    return db.get(TABLE_NAME).removeById(id).write();
+  async remove(ids) {
+    return await db.delete(schema.site).where(inArray(schema.site.id, ids));
   },
-  search(kw: string) {
-    let list = db.get(TABLE_NAME).value();
-    if (kw) list = list.filter((item) => item.name.includes(kw));
-    const total = list.length;
+  async page(page = 1, pageSize = 20, kw = '') {
+    let query = db.select().from(schema.site);
+    let count = db.$count(schema.site);
+
+    if (kw) {
+      query = query.where(like(schema.site.name, `%${kw}%`));
+      count = db.$count(schema.site, like(schema.site.name, `%${kw}%`));
+    }
+    query = query.limit(pageSize).offset((page - 1) * pageSize);
+
+    const list = await query;
+    const total = await count;
     return {
       list: list,
       total: total,
     };
   },
-  pagination(kw: string) {
-    let data = _.castArray(db.get(TABLE_NAME).value());
-    if (kw) {
-      data = db
-        .get(TABLE_NAME)
-        .filter((item) => item.name.includes(kw))
-        .value();
-    }
-    const total = data.length;
-    return {
-      data: data,
-      total: total,
-    };
-  },
-  group() {
-    const groups = db.get(TABLE_NAME).map('group').uniq().value();
-    const data = groups.map((group) => ({ label: group, value: group }));
-    const total = data.length;
-    return {
-      data: data,
-      total: total,
-    };
+  async group() {
+    const res = await db.select({ group: schema.site.group }).from(schema.site).groupBy(schema.site.group);
+    const resFormat = res.map((item) => ({ label: item.group, value: item.group }));
+    return resFormat;
   },
 };

@@ -7,13 +7,13 @@ export default {
   history: {
     title: '历史',
     clear: '清空',
-    cancel: '取消'
+    cancel: '取消',
   },
   dialog: {
     cancel: '取消',
     confirm: '确定',
     header: '删除记录',
-    body: '确定删除所有记录吗？删除后不支持找回。'
+    body: '确定删除所有记录吗？删除后不支持找回。',
   },
   search: {
     input: '输入关键词搜索',
@@ -31,12 +31,13 @@ export default {
   },
   message: {
     invalidApi: '无效的解析接口',
-    info: '正在加载当前视频，如遇解析失败请切换线路',
-    empty: '请选择解析接口或输入需要解析的地址'
+    info: '正在加载当前视频, 请耐心等待',
+    error: '加载失败, 请尝试切换其他接口',
+    empty: '请选择解析接口或输入需要解析的地址',
   },
   inputUrl: '输个链接, 让世界充满爱',
   infiniteLoading: {
     complete: '人家是有底线的',
-    error: '哎呀，出了点差错'
-  }
-}
+    error: '哎呀，出了点差错',
+  },
+};

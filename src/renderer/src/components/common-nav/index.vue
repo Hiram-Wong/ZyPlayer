@@ -1,6 +1,6 @@
 <template>
   <div :class="['common-nav', isVisible.show ? 'show' : 'hidden']">
-    <div class="nav-sub" :style="{ display: isVisible.show ? 'block' : 'none' }">
+    <div v-show="isVisible.show" class="nav-sub">
       <div class="nav-sub-tab nav-sub-tab-header">
         <div class="header" v-if="!isVisible.search">
           <p class="title">{{ title }}</p>
@@ -20,8 +20,8 @@
       <div class="nav-sub-tab nav-sub-tab-content">
         <div class="nav-sub-tab-top" ref="contentRef">
           <t-list class="nav-menu" :scroll="{ type: 'virtual' }" style="height: 100%;">
-            <t-list-item v-for="(item, index) in listData" :key="index" :class="['nav-menu-item', `${activeData}` === `${item.id}` ? 'is-active' : '']">
-              <t-tooltip :content="item.name">
+            <t-list-item v-for="(item, index) in listData" :key="index" :class="[activeData === item.id ? 'is-active' : '']">
+              <t-tooltip :content="item.name" destroy-on-close>
                 <t-list-item-meta :description="item.name" @click="handleItemClick(item.id)" @contextmenu="conButtonClick(item, $event)" />
               </t-tooltip>
             </t-list-item>
@@ -160,7 +160,7 @@ const searchEvent = () => {
   height: 100%;
   width: fit-content;
   position: relative;
-  padding-right: var(--td-comp-margin-s);
+  transition: padding .2s ease-in-out;
 
   .nav-sub {
     height: 100%;
@@ -168,7 +168,6 @@ const searchEvent = () => {
     padding: var(--td-comp-paddingTB-xs) 0;
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
-    transition: all .3s ease;
 
     .nav-sub-tab-header {
       margin: var(--td-comp-margin-m) 0 var(--td-comp-margin-s) var(--td-comp-margin-s);
@@ -227,10 +226,10 @@ const searchEvent = () => {
           width: 100%;
           height: 100%;
 
-          .nav-menu-item {
+          :deep(.t-list-item) {
             width: 146px;
             cursor: pointer;
-            padding: var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-m);
+            padding: 0;
             transition: background-color .3s ease;
             border-radius: var(--td-radius-medium);
 
@@ -242,19 +241,25 @@ const searchEvent = () => {
               background-color: var(--td-bg-content-hover-2);
             }
 
-            :deep(.t-list-item__meta) {
-              overflow: hidden;
-              display: inline-block;
-              white-space: nowrap;
-              width: 100%;
-            }
+            .t-list-item-main {
+              .t-list-item__meta {
+                overflow: hidden;
+                display: block;
+                width: 100%;
+                padding: var(--td-comp-paddingTB-s) 0 var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-m);
+                margin-right: var(--td-comp-paddingLR-m);
 
-            :deep(.t-list-item__meta-description) {
-              margin-right: 0;
+                .t-list-item__meta-description {
+                  margin-right: 0;
+                  overflow: hidden;
+                  white-space: nowrap;
+                  text-overflow: ellipsis;
+                }
+              }
             }
           }
 
-          .is-active {
+          :deep(.is-active) {
             background-color: var(--td-bg-content-active-2);
           }
         }
@@ -272,6 +277,8 @@ const searchEvent = () => {
 }
 
 .show {
+  padding-right: var(--td-comp-margin-s);
+
   .nav-sub-tab-line {
     width: 12px;
     height: 26px;
@@ -333,6 +340,8 @@ const searchEvent = () => {
 }
 
 .hidden {
+  padding-right: 0;
+
   .nav-sub-tab-line {
     width: 12px;
     height: 26px;

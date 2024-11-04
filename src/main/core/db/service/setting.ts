@@ -1,61 +1,42 @@
-import _ from 'lodash';
-import db from '../index';
-
-const TABLE_NAME = 'tbl_setting';
+import { eq, inArray } from 'drizzle-orm';
+import { db, schema } from '../common';
 
 export default {
-  all() {
-    const db_res = db.get(TABLE_NAME).value();
-    return _.castArray(db_res);
+  async all() {
+    const res = await db.select().from(schema.setting);
+    let resFormat = {};
+    res.map((item) => {
+      resFormat[item['key']] = item['value']?.['data'];
+    });
+    return resFormat;
   },
-  format_all() {
-    const db_res = _.castArray(db.get(TABLE_NAME).value());
-    const res = _.reduce(
-      _.map(db_res, (obj) => [obj.key, obj.value]),
-      (acc, [key, value]) => {
-        acc[key] = value;
-        return acc;
-      },
-      {},
-    );
-    return res;
+  async update(ids, doc) {
+    return await db
+      .update(schema.setting)
+      .set({ value: { data: doc } })
+      .where(inArray(schema.setting.key, ids))
+      .returning();
   },
-  source() {
-    return _.castArray(db.get(TABLE_NAME).value());
+  async clear() {
+    return await db.delete(schema.setting);
   },
-  update(id, doc) {
-    return db.get(TABLE_NAME).find({ id }).assign(doc).write();
+  async get(id) {
+    const res = await db.select().from(schema.setting).where(eq(schema.setting.key, id));
+    const resFormat = res?.[0]?.['value']?.['data'];
+    return resFormat || null;
   },
-  update_data(key, doc) {
-    return db.get(TABLE_NAME).find({ key: key }).assign(doc).write();
+  async set(doc) {
+    await db.delete(schema.setting);
+    let newDoc: any[] = [];
+    for (const key in doc) {
+      newDoc.push({ key: key, value: { data: doc[key] } });
+    }
+    return await db.insert(schema.setting).values(newDoc);
   },
-  clear() {
-    return db.set(TABLE_NAME, []).write();
+  async add(doc) {
+    return await db.insert(schema.setting).values(doc).returning();
   },
-  set(docs) {
-    docs = _.castArray(docs);
-    return db.set(TABLE_NAME, docs).write();
-  },
-  find(doc) {
-    const res = db.get(TABLE_NAME).find(doc).value();
-    if (res) return res;
-    else
-      return {
-        id: '',
-        key: '',
-        value: '',
-      };
-  },
-  filter(doc) {
-    return db.get(TABLE_NAME).filter(doc).value();
-  },
-  get(id: string) {
-    return db.get(TABLE_NAME).find({ id }).value();
-  },
-  add(doc) {
-    return db.get(TABLE_NAME).insert(doc).write();
-  },
-  remove(id: string) {
-    return db.get(TABLE_NAME).removeById(id).write();
+  async remove(ids) {
+    return await db.delete(schema.setting).where(inArray(schema.setting.key, ids));
   },
 };

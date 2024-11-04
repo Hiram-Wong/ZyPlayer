@@ -1,103 +1,6 @@
-import Base64 from 'crypto-js/enc-base64';
-import Utf8 from 'crypto-js/enc-utf8';
-import Md5 from 'crypto-js/md5';
-import * as he from 'he';
-import iconv from 'iconv-lite';
 import ip from 'ip';
-import JSON5 from 'json5';
-import pako from 'pako';
-
 import request, { requestComplete } from '@/utils/request';
 import { usePlayStore, useSettingStore } from '@/store';
-
-/**
- * 将obj所有key变小写
- * @param obj
- */
-function keysToLowerCase(obj) {
-  return Object.keys(obj).reduce((result, key) => {
-    const newKey = key.toLowerCase();
-    result[newKey] = obj[key]; // 如果值也是对象，可以递归调用本函数
-    return result;
-  }, {});
-}
-
-const getConfig = async (url: string, method = 'GET', headers = {}, body = {}) => {
-  try {
-    const customHeaders = {
-      Cookie: 'custom-cookie',
-      Origin: 'custom-origin',
-      Host: 'custom-host',
-      Connection: 'custom-connection',
-      'User-Agent': 'custom-ua',
-      Referer: 'custom-referer',
-      Redirect: 'custom-redirect',
-    };
-    headers = keysToLowerCase(headers);
-
-    for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
-      let originalHeaderKey = originalHeader.toLowerCase();
-      if (headers.hasOwnProperty(originalHeaderKey)) {
-        headers[customHeader] = headers[originalHeaderKey];
-        delete headers[originalHeaderKey];
-      }
-    }
-
-    const response = await request({
-      url,
-      method,
-      data: method !== 'GET' ? body : undefined,
-      headers: headers || undefined,
-    });
-
-    let res;
-    try {
-      res = JSON5.parse(response);
-    } catch (parseError) {
-      res = response;
-    }
-
-    return res || '';
-  } catch (err) {
-    throw err;
-  }
-};
-
-const getHtml = async (url: string, method = 'GET', encode = 'UTF-8', headers = {}, body = {}) => {
-  try {
-    const customHeaders = {
-      Cookie: 'custom-cookie',
-      Origin: 'custom-origin',
-      Host: 'custom-host',
-      Connection: 'custom-connection',
-      'User-Agent': 'custom-ua',
-      Referer: 'custom-referer',
-      Redirect: 'custom-redirect',
-    };
-    headers = keysToLowerCase(headers);
-
-    for (const [originalHeader, customHeader] of Object.entries(customHeaders)) {
-      let originalHeaderKey = originalHeader.toLowerCase();
-      if (headers.hasOwnProperty(originalHeaderKey)) {
-        headers[customHeader] = headers[originalHeaderKey];
-        delete headers[originalHeaderKey];
-      }
-    }
-
-    const response = await request({
-      url,
-      method,
-      responseType: 'arraybuffer',
-      data: method !== 'GET' ? body : undefined,
-      headers: headers || undefined,
-    });
-
-    const res = iconv.decode(Buffer.from(response), encode); // 假设后端编码为GBK
-    return res || '';
-  } catch (err) {
-    throw err;
-  }
-};
 
 const supportedFormats: string[] = [
   'mp4',
@@ -180,11 +83,11 @@ const getMeadiaType = async (url: string): Promise<string> => {
 const checkUrlIpv6 = async (url: string) => {
   let hostname = new URL(url).hostname;
   if (ip.isV4Format(hostname)) {
-    return 'IPv4';
+    return 4;
   } else if (ip.isV6Format(hostname)) {
-    return 'IPv6';
+    return 6;
   } else {
-    return 'Unknown';
+    return -1;
   }
 };
 
@@ -310,87 +213,42 @@ const loadExternalResource = (url: string, type: 'css' | 'js' | 'font') => {
   });
 };
 
-const encodeBase64 = (str: string) => {
-  return Base64.stringify(Utf8.parse(str));
+const singleton = <T extends new (...args: any[]) => any>(className: T): T => {
+  let instance: InstanceType<T> | null = null;
+  const proxy = new Proxy(className, {
+    construct(target, args) {
+      if (!instance) {
+        instance = Reflect.construct(target, args);
+      }
+      return instance as InstanceType<T>;
+    },
+  });
+  proxy.prototype.construct = proxy;
+  return proxy;
 };
+const mapVideoTypeToPlayerType = (videoType: string): string | undefined => {
+  const audioTypes = ['mp3', 'm4a', 'wav', 'flac', 'aac', 'ogg', 'wma'];
+  if (audioTypes.includes(videoType)) return 'customMpegts';
 
-const decodeBase64 = (str: string) => {
-  return Base64.parse(str).toString(Utf8);
-};
-
-const encodeBtoa = (str: string) => {
-  return btoa(str);
-};
-
-const decodeAtob = (str: string) => {
-  return btoa(str);
-};
-
-const encodeGzip = (str: string) => {
-  return pako.gzip(str, {});
-};
-const decodeGzip = (str: string | Uint8Array) => {
-  return pako.inflate(str);
-};
-
-const encodeUnicode = (str: string) => {
-  const encodeUnicode = (str: string) => {
-    const res: any = [];
-    for (var i = 0; i < str.length; i++) {
-      res[i] = ('00' + str.charCodeAt(i).toString(16)).slice(-4);
-    }
-    return '\\u' + res.join('\\u');
-  };
-  return encodeUnicode(str);
-};
-
-const decodeUnicode = (str: string) => {
-  function decodeUnicode(str) {
-    str = str.replace(/\\/g, '%');
-    return unescape(str);
+  switch (videoType) {
+    case 'mp4':
+      return 'customMp4';
+    case 'flv':
+      return 'customFlv';
+    case 'm3u8':
+      return 'customHls';
+    case 'mpd':
+      return 'customDash';
+    case 'magnet':
+      return 'customWebTorrent';
+    default:
+      return 'customHls';
   }
-  return decodeUnicode(str);
-};
-
-const encodeUrl = (str: string) => {
-  return encodeURIComponent(str);
-};
-
-const decodeUrl = (str: string) => {
-  return decodeURIComponent(str);
-};
-
-const encodeMd5 = (str: string) => {
-  return Md5(str).toString();
-};
-
-const encodeHtml = (str: string) => {
-  return he.encode(str, { encodeEverything: true });
-};
-
-const decodeHtml = (str: string) => {
-  return he.decode(str);
-};
-
-const getPublicIp = async () => {
-  const urls = ['https://ipv6.icanhazip.com', 'https://ipv4.icanhazip.com'];
-
-  for (const url of urls) {
-    try {
-      const response = await request({ url, method: 'GET' });
-      if (response) return response.trim();
-    } catch (err) {
-      console.info(`[tool][getPublicIp] Error fetching from ${url}:`, err);
-    }
-  }
-
-  return null;
 };
 
 export {
-  getConfig,
-  getHtml,
-  getPublicIp,
+  mapVideoTypeToPlayerType,
+  singleton,
   supportedFormats,
   getMeadiaType,
   checkMediaType,
@@ -402,17 +260,4 @@ export {
   setLocalStorage,
   getPinia,
   loadExternalResource,
-  encodeBase64,
-  decodeBase64,
-  encodeUnicode,
-  decodeUnicode,
-  encodeUrl,
-  decodeUrl,
-  encodeMd5,
-  encodeGzip,
-  decodeGzip,
-  encodeBtoa,
-  decodeAtob,
-  encodeHtml,
-  decodeHtml,
 };

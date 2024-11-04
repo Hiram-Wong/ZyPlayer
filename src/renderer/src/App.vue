@@ -1,55 +1,36 @@
 <template>
-  <router-view></router-view>
-  <disclaimer-view v-model:visible="isVisible.dialogDisclaimer" />
+  <t-config-provider :global-config="getComponentsLocale">
+    <router-view />
+    <!-- 需脱离文档流, 不然会影响后面dom渲染问题 -->
+    <disclaimer-view v-model:visible="active.disclaimer" style="position: fixed; z-index: 999;"/>
+  </t-config-provider>
 </template>
 
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, watch } from 'vue';
 
 import { localeConfigKey } from '@/locales/index';
 import { useLocale } from '@/locales/useLocale';
 import { usePlayStore, useSettingStore } from '@/store';
-import { setup } from '@/api/setting';
+import { fetchSetup } from '@/api/setting';
 import PLAY_CONFIG from '@/config/play';
-import { autoSync } from '@/utils/webdev';
 import { loadExternalResource } from '@/utils/tool';
 
 import DisclaimerView from '@/pages/Disclaimer.vue';
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
-const { changeLocale } = useLocale();
+const { getComponentsLocale, changeLocale } = useLocale();
 
-const isVisible = reactive({
-  dialogDisclaimer: false,
+const active = reactive({
+  disclaimer: false,
 });
 
 const theme = computed(() => {
   return storeSetting.getStateMode;
 });
 
-const webdev = computed(() => {
-  return storeSetting.webdev;
-});
-
-const intervalId = ref();
-
-watch(
-  () => webdev.value,
-  (val) => {
-    if (intervalId.value) clearInterval(intervalId.value);
-    if (val.sync) {
-      intervalId.value = setInterval(
-        () => {
-          autoSync(val.data.url, val.data.username, val.data.password);
-        },
-        1000 * 5 * 60,
-      );
-    }
-  },
-  { deep: true },
-);
 watch(
   () => storeSetting.displayMode,
   (val) => {
@@ -69,29 +50,31 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, playerMode, webdev, barrage, timeout, debug } = await setup();
+  const { agreementMask, theme, playerMode, webdev, barrage, timeout, debug } = await fetchSetup();
 
-  storeSetting.updateConfig({ mode: theme });
-  storeSetting.updateConfig({ webdev: webdev });
-  storeSetting.updateConfig({ timeout: timeout || 5000 });
-  isVisible.dialogDisclaimer = !agreementMask;
+  storeSetting.updateConfig({
+    mode: theme,
+    webdev: webdev,
+    timeout: timeout || 5000
+  });
+  active.disclaimer = !agreementMask;
 
-  const init = {
-    ...PLAY_CONFIG.setting,
-  };
-  init.playerMode = playerMode;
-  init.barrage = barrage;
+  const init = Object.assign(
+    { ...PLAY_CONFIG.setting },
+    { playerMode, barrage }
+  )
   storePlayer.updateConfig({ setting: init });
 
   if (debug) {
-    const status = await loadExternalResource('https://test.jikejishu.com/page-spy/index.min.js', 'js');
+    const status = await loadExternalResource('https://pagespy.jikejishu.com/page-spy/index.min.js', 'js');
     if (status) {
+      // @ts-ignore
       window.$pageSpy = new PageSpy({
-        api: 'test.jikejishu.com',
-        clientOrigin: 'https://test.jikejishu.com',
-        project: 'zyplayer',
+        api: 'pagespy.jikejishu.com',
+        clientOrigin: 'https://pagespy.jikejishu.com',
+        project: 'zyfun',
         autoRender: true,
-        title: 'zyplayer for debug',
+        title: 'zyfun for debug',
       });
     }
   }

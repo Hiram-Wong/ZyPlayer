@@ -4,9 +4,11 @@ export default {
   },
   film: {
     desc: 'Desc',
-    like: 'like',
-    download: 'download',
-    share: 'share',
+    background: '背景',
+    like: 'Like',
+    download: 'Down',
+    share: 'Share',
+    setting: 'Setting',
     analyze: 'Analyze',
     anthology: 'Anthology',
     line: 'Line',
@@ -18,6 +20,7 @@ export default {
   iptv: {
     epg: 'EPG',
     channel: 'Channel',
+    group: 'Group',
   },
   drive: {
     anthology: 'Anthology',
@@ -46,12 +49,12 @@ export default {
   },
   setting: {
     title: 'Setting',
-    autoSkip: 'Skip start and end',
-    autoNext: 'Preload next episode',
+    autoSkip: 'Skip Time',
+    autoNext: 'Preload',
     skipStart: 'Start',
     skipEnd: 'End',
     skipSeconds: 'S',
-    skipAd: 'Skip ads',
+    skipAd: 'Skip Ads',
     tip: 'The switch takes effect globally.',
   },
   download: {

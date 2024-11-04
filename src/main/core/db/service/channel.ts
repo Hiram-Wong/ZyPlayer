@@ -1,80 +1,57 @@
-import _ from 'lodash';
-import db from '../index';
-
-const TABLE_NAME = 'tbl_channel';
+import { eq, like, inArray } from 'drizzle-orm';
+import { db, schema } from '../common';
 
 export default {
-  all() {
-    const db_res = db.get(TABLE_NAME).value();
-    return _.castArray(db_res);
+  async all() {
+    return await db.select().from(schema.channel);
   },
-  update(id, doc) {
-    return db.get(TABLE_NAME).find({ id }).assign(doc).write();
+  async update(ids, doc) {
+    return await db.update(schema.channel).set(doc).where(inArray(schema.channel.id, ids)).returning();
   },
-  clear() {
-    return db.set(TABLE_NAME, []).write();
+  async clear() {
+    return await db.delete(schema.channel);
   },
-  set(docs) {
-    docs = _.castArray(docs);
-    return db.set(TABLE_NAME, docs).write();
+  async get(id) {
+    const res = await db.select().from(schema.channel).where(eq(schema.channel.id, id));
+    return res?.[0];
   },
-  find(doc) {
-    return db.get(TABLE_NAME).find(doc).value();
+  async set(doc) {
+    await db.delete(schema.channel);
+    return await db.insert(schema.channel).values(doc);
   },
-  filter(doc) {
-    return db.get(TABLE_NAME).filter(doc).value();
+  async add(doc) {
+    return await db.insert(schema.channel).values(doc).returning();
   },
-  get(id: string) {
-    return db.get(TABLE_NAME).find({ id }).value();
+  async remove(ids) {
+    return await db.delete(schema.channel).where(inArray(schema.channel.id, ids));
   },
-  add(doc) {
-    return db.get(TABLE_NAME).insert(doc).write();
-  },
-  remove(id: string) {
-    return db.get(TABLE_NAME).removeById(id).write();
-  },
-  search(keyword) {
-    let list = db.get(TABLE_NAME).value();
-    if (keyword) list = list.filter((item) => item.name.includes(keyword));
-    const total = list.length;
-    return {
-      list: list,
-      total: total,
-    };
-  },
-  pagination(pageIndex = 0, pageSize = 10, kw = '', group = '全部') {
-    let list = [];
-    let total = 0;
-    const jumpCount = pageIndex * pageSize;
-    if (group == '全部') {
-      const items = db
-        .get(TABLE_NAME)
-        .filter((x) => {
-          return x.name.toLowerCase().includes(kw.toLowerCase());
-        })
-        .value();
-      list = _.slice(items, jumpCount, jumpCount + pageSize);
-      total = _.size(items);
-    } else {
-      const items = db
-        .get(TABLE_NAME)
-        .filter((x) => {
-          return x.group === group && x.name.toLowerCase().includes(kw.toLowerCase());
-        })
-        .value();
-      list = _.slice(items, jumpCount, jumpCount + pageSize);
-      total = _.size(items);
+  async page(page = 1, pageSize = 20, kw = '', group = '全部') {
+    let query = db.select().from(schema.channel);
+    let countQuery = db.select().from(schema.channel);
+
+    if (kw) {
+      query = query.where(like(schema.channel.name, `%${kw}%`));
+      countQuery = countQuery.where(like(schema.channel.name, `%${kw}%`));
     }
+
+    if (group !== '全部') {
+      query = query.where(eq(schema.channel.group, group));
+      countQuery = countQuery.where(eq(schema.channel.group, group));
+    }
+
+    query = query.limit(pageSize).offset((page - 1) * pageSize);
+
+    const list = await query;
+    const total = await countQuery;
 
     return {
       list: list,
-      total: total,
+      total: total.length,
     };
   },
-  async class() {
-    const group_query = await db.get(TABLE_NAME).map('group').uniq().value();
-    const group_query_format = group_query.map((group) => ({ type_id: group, type_name: group }));
-    const group_all = _.unionWith([{ type_id: '全部', type_name: '全部' }], group_query_format, _.isEqual);
-    return group_all;
+  async group() {
+    const res = await db.select({ group: schema.channel.group }).from(schema.channel).groupBy(schema.channel['group']);
+    const resFormat = res.map((item) => ({ type_id: item.group, type_name: item.group }));
+    return resFormat;
   },
 };

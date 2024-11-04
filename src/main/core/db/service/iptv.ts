@@ -1,56 +1,45 @@
-import _ from 'lodash';
-import db from '../index';
-
-const TABLE_NAME = 'tbl_iptv';
+import { eq, like, inArray } from 'drizzle-orm';
+import { db, schema } from '../common';
 
 export default {
-  all() {
-    const db_res = db.get(TABLE_NAME).value();
-    return _.castArray(db_res);
+  async all() {
+    return await db.select().from(schema.iptv);
   },
-  update(id, doc) {
-    return db.get(TABLE_NAME).find({ id }).assign(doc).write();
+  async active() {
+    return await db.select().from(schema.iptv).where(eq(schema.iptv.isActive, true));
   },
-  clear() {
-    return db.set(TABLE_NAME, []).write();
+  async update(ids, doc) {
+    return await db.update(schema.iptv).set(doc).where(inArray(schema.iptv.id, ids)).returning();
   },
-  set(docs) {
-    docs = _.castArray(docs);
-    return db.set(TABLE_NAME, docs).write();
+  async clear() {
+    return await db.delete(schema.iptv);
   },
-  find(doc) {
-    return db.get(TABLE_NAME).find(doc).value();
+  async get(id) {
+    const res = await db.select().from(schema.iptv).where(eq(schema.iptv.id, id));
+    return res?.[0];
   },
-  filter(doc) {
-    return db.get(TABLE_NAME).filter(doc).value();
+  async set(doc) {
+    await db.delete(schema.iptv);
+    return await db.insert(schema.iptv).values(doc);
   },
-  get(id: string) {
-    return db.get(TABLE_NAME).find({ id }).value();
+  async add(doc) {
+    return await db.insert(schema.iptv).values(doc).returning();
   },
-  add(doc) {
-    return db.get(TABLE_NAME).insert(doc).write();
+  async remove(ids) {
+    return await db.delete(schema.iptv).where(inArray(schema.iptv.id, ids));
   },
-  remove(id: string) {
-    return db.get(TABLE_NAME).removeById(id).write();
-  },
-  pagination(kw) {
-    let data = _.castArray(db.get(TABLE_NAME).value());
+  async page(page = 1, pageSize = 20, kw = '') {
+    let query = db.select().from(schema.iptv);
+    let count = db.$count(schema.iptv);
+
     if (kw) {
-      data = db
-        .get(TABLE_NAME)
-        .filter((item) => item.name.includes(kw))
-        .value();
+      query = query.where(like(schema.iptv.name, `%${kw}%`));
+      count = db.$count(schema.iptv, like(schema.iptv.name, `%${kw}%`));
     }
-    const total = data.length;
-    return {
-      data: data,
-      total: total,
-    };
-  },
-  search(keyword) {
-    let list = db.get(TABLE_NAME).value();
-    if (keyword) list = list.filter((item) => item.name.includes(keyword));
-    const total = list.length;
+    query = query.limit(pageSize).offset((page - 1) * pageSize);
+
+    const list = await query;
+    const total = await count;
     return {
       list: list,
       total: total,

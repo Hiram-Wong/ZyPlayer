@@ -6,19 +6,19 @@ export default {
   thumbanilFfmpeg: {
     title: 'Thumbnail usage note',
     content: thumbnailFfmpegMD,
-    confirm: "Check",
-    cancel: "Ok"
+    confirm: 'Check',
+    cancel: 'Ok',
   },
   customPlayer: {
     title: 'Custom player usage note',
     content: customPlayerMD,
-    confirm: "Ok"
+    confirm: 'Ok',
   },
   privacyPolicy: {
-    title: 'Disclaimer',
+    title: 'User Instructions',
     content: privacyPolicyMD,
     quitTip: 'Auto quit app after 5 seconds',
-    confirm: "Aagree",
-    cancel: "Disagree"
+    confirm: 'Aagree',
+    cancel: 'Disagree',
   },
 };

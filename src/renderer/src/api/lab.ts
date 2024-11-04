@@ -53,3 +53,49 @@ export function fetchAiAnswer(docs) {
     timeout: getPinia('setting', 'timeout') * 2,
   });
 }
+
+export function fetchStaticFilterFilter(doc) {
+  return request({
+    url: `/v1/lab/static-filter/filter`,
+    method: 'POST',
+    data: doc,
+  });
+}
+
+export function fetchStaticFilterCategory(doc) {
+  return request({
+    url: `/v1/lab/static-filter/category`,
+    method: 'POST',
+    data: doc,
+  });
+}
+
+export function fetchJsEditPdfa(doc) {
+  return request({
+    url: `/v1/lab/js-edit/pdfa`,
+    method: 'POST',
+    data: doc,
+  });
+}
+
+export function fetchJsEditPdfh(doc) {
+  return request({
+    url: `/v1/lab/js-edit/pdfh`,
+    method: 'POST',
+    data: doc,
+  });
+}
+export function fetchJsEditMuban() {
+  return request({
+    url: `/v1/lab/js-edit/muban`,
+    method: 'POST',
+  });
+}
+
+export function fetchJsEditDebugInit(doc) {
+  return request({
+    url: `/v1/lab/js-edit/debug-init`,
+    method: 'POST',
+    data: doc,
+  });
+}

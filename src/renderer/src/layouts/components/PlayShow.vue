@@ -34,11 +34,11 @@ const playerStutus = computed(() => {
 });
 
 const focusPlayerWindowEvent = () => {
-  window.electron.ipcRenderer.send('manage-playerWindow', 'focus');
+  window.electron.ipcRenderer.send('manage-win', 'play', 'focus');
 };
 
 const destroyPlayerWindowEvent = () => {
-  window.electron.ipcRenderer.send('manage-playerWindow', 'destroy');
+  window.electron.ipcRenderer.send('manage-win', 'play', 'destroy');
   playerStore.updateConfig({
     status: false,
   });

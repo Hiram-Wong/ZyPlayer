@@ -1,10 +1,11 @@
 export default {
   name: 'Drive',
   message: {
-    reqError: 'request network error',
+    reqError: 'Request network error, Please try to retry',
+    skipOp: 'The last request was not completed. Skip this operation',
   },
   infiniteLoading: {
-    noMore: 'nothing more',
-    noData: 'no data, please go Setting-DriveSetting set default source'
-  }
-}
+    noMore: 'Nothing more',
+    noData: 'No data, please go to [Settings->CloudConfig] to configure the data',
+  },
+};

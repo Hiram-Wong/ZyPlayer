@@ -1,11 +1,9 @@
 import { contextBridge } from 'electron';
 import { electronAPI } from '@electron-toolkit/preload';
-import { domReady } from './utils';
-import { useLoading } from './loading';
+import { domReady } from './utils/dom';
+import { useLoading } from './utils/loading';
 
 const { appendLoading, removeLoading } = useLoading();
-// @ts-ignore (define in dts)
-window.removeLoading = removeLoading;
 
 domReady().then(appendLoading);
 
@@ -19,6 +17,7 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI);
     contextBridge.exposeInMainWorld('api', api);
+    contextBridge.exposeInMainWorld('removeLoading', removeLoading);
   } catch (error) {
     console.error(error);
   }
@@ -27,4 +26,6 @@ if (process.contextIsolated) {
   window.electron = electronAPI;
   // @ts-ignore (define in dts)
   window.api = api;
+  // @ts-ignore (define in dts)
+  window.removeLoading = removeLoading;
 }

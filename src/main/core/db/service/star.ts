@@ -1,57 +1,51 @@
-import _ from 'lodash';
-import db from '../index';
-
-const TABLE_NAME = 'tbl_star';
+import { and, eq, like, inArray } from 'drizzle-orm';
+import { db, schema } from '../common';
 
 export default {
-  all() {
-    const db_res = db.get(TABLE_NAME).value();
-    return _.castArray(db_res);
+  async all() {
+    return await db.select().from(schema.star);
   },
-  update(id, doc) {
-    return db.get(TABLE_NAME).find({ id }).assign(doc).write();
+  async update(ids, doc) {
+    return await db.update(schema.star).set(doc).where(inArray(schema.star.id, ids)).returning();
   },
-  clear() {
-    return db.set(TABLE_NAME, []).write();
+  async clear() {
+    return await db.delete(schema.star);
   },
-  set(docs) {
-    docs = _.castArray(docs);
-    return db.set(TABLE_NAME, docs).write();
+  async get(id) {
+    const res = await db.select().from(schema.star).where(eq(schema.star.id, id));
+    return res?.[0];
   },
-  find(doc) {
-    return db.get(TABLE_NAME).find(doc).value();
+  async find(relateId, videoId) {
+    const res = await db
+      .select()
+      .from(schema.star)
+      .where(and(eq(schema.star.relateId, relateId), eq(schema.star.videoId, videoId)));
+    return res?.[0];
   },
-  filter(doc) {
-    return db.get(TABLE_NAME).filter(doc).value();
+  async set(doc) {
+    await db.delete(schema.star);
+    return await db.insert(schema.star).values(doc);
   },
-  get(id: string) {
-    return db.get(TABLE_NAME).find({ id }).value();
+  async add(doc) {
+    return await db.insert(schema.star).values(doc).returning();
   },
-  add(doc) {
-    return db.get(TABLE_NAME).insert(doc).write();
+  async remove(ids) {
+    return await db.delete(schema.star).where(inArray(schema.star.id, ids));
   },
-  remove(id: string) {
-    return db.get(TABLE_NAME).removeById(id).write();
-  },
-  search(keyword) {
-    let list = db.get(TABLE_NAME).value();
-    if (keyword) list = list.filter((item) => item.name.includes(keyword));
-    const total = list.length;
+  async page(page = 1, pageSize = 20, kw = '') {
+    let query = db.select().from(schema.star);
+    let count = db.$count(schema.star);
+
+    if (kw) {
+      query = query.where(like(schema.star.name, `%${kw}%`));
+      count = db.$count(schema.star, like(schema.star.name, `%${kw}%`));
+    }
+    query = query.limit(pageSize).offset((page - 1) * pageSize);
+
+    const list = await query;
+    const total = await count;
     return {
       list: list,
-      total: total,
-    };
-  },
-  pagination(pageIndex = 0, pageSize = 10) {
-    let data = [];
-    let total = 0;
-    const jumpCount = pageIndex * pageSize;
-    const items = db.get(TABLE_NAME).value();
-    data = _.slice(items, jumpCount, jumpCount + pageSize);
-    total = _.size(items);
-
-    return {
-      data: data,
       total: total,
     };
   },

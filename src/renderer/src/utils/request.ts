@@ -1,13 +1,16 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { getPinia } from '@/utils/tool';
+
+// import { getPinia } from '@/utils/tool';
 
 const baseURL = String(
   import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`,
 );
 
+// const TIMEOUT = getPinia('setting', 'timeout') < 1000 ? 1000 : getPinia('setting', 'timeout');
+
 const service: AxiosInstance = axios.create({
   baseURL,
-  withCredentials: true,
+  // timeout: TIMEOUT,
 });
 
 // @ts-ignore
@@ -17,32 +20,28 @@ service.interceptors.request.use((config: AxiosRequestConfig) => {
 
 service.interceptors.response.use(
   (response: AxiosResponse) => {
-    const res = response;
-    return res;
+    return response;
   },
   (error: AxiosError) => {
-    const { response } = error;
-    const data = response?.data as any;
-    if (data?.code === 301 && data?.message === '未登录') {
-      console.log('未登录');
-    }
     return Promise.reject(error);
   },
 );
 
 const request = async (config: AxiosRequestConfig) => {
-  if (!config?.timeout) {
-    const TIMEOUT = getPinia('setting', 'timeout') < 1000 ? 1000 : getPinia('setting', 'timeout');
-    config.timeout = TIMEOUT;
+  if (config?.timeout && config?.timeout < 3000) {
+    delete config.timeout;
   }
-  const { data } = await service.request(config);
-  return data as any;
+  const res = await service.request(config);
+  if (res.data.code === 0 && res.status === 200) {
+    return res.data.data;
+  } else {
+    throw new Error(res.data.msg);
+  }
 };
 
 const requestComplete: any = async (config: AxiosRequestConfig) => {
-  if (!config?.timeout) {
-    const TIMEOUT = getPinia('setting', 'timeout') < 1000 ? 1000 : getPinia('setting', 'timeout');
-    config.timeout = TIMEOUT;
+  if (config?.timeout && config?.timeout < 3000) {
+    delete config.timeout;
   }
   const { status, data, headers } = await service.request(config);
   return {

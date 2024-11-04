@@ -1,4 +1,4 @@
-> Thank you for choosing to use zyplayer (hereinafter referred to as the Software), before using the products and services, please read and understand the following statement.
+> Thank you for choosing to use zyfun (hereinafter referred to as the Software), before using the products and services, please read and understand the following statement.
 
 1. If you do not agree with any content of this statement, please stop using this software immediately. Once you start using the software products and services, you agree to all the contents of this statement.
 

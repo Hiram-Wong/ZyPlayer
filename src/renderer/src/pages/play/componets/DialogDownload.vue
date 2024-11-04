@@ -47,12 +47,10 @@ const props = defineProps({
   },
   data: {
     type: Object,
-    default: () => {
-      return {
-        season: {},
-        current: '',
-      };
-    },
+    default: {
+      season: {},
+      current: '',
+    }
   },
 });
 const { isSupported, copy } = useClipboard();

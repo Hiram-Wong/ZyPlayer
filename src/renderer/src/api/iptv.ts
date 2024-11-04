@@ -1,47 +1,52 @@
 import request from '@/utils/request';
 
-// 获取iptv列表
-export function fetchIPTVList() {
+export function addIptv(doc: object) {
   return request({
-    url: '/v1/iptv/list',
-    method: 'get',
-    params: {
-      timestamp: new Date().getTime(),
-    },
+    url: `/v1/iptv`,
+    method: 'post',
+    data: doc,
   });
 }
 
-// 获取iptv活跃列表
+export function delIptv(doc: object) {
+  return request({
+    url: `/v1/iptv`,
+    method: 'delete',
+    data: doc,
+  });
+}
+
+export function putIptv(doc: object) {
+  return request({
+    url: `/v1/iptv`,
+    method: 'put',
+    data: doc,
+  });
+}
+
+export function putIptvDefault(id: string) {
+  return request({
+    url: `/v1/iptv/default/${id}`,
+    method: 'put',
+  });
+}
+
 export function fetchIptvActive() {
   return request({
     url: '/v1/iptv/active',
     method: 'get',
-    params: {},
   });
 }
 
-// iptv分页
-export function fetchIptvPage(kw: string) {
+export function fetchIptvPage(doc: object) {
   return request({
     url: `/v1/iptv/page`,
     method: 'get',
-    params: {
-      kw,
-    },
+    params: doc,
   });
 }
 
-// 清空 channel
-export function clearChannel() {
-  return request({
-    url: '/v1/channel/clear',
-    method: 'delete',
-    params: {},
-  });
-}
-
-// 添加 channel
-export function addChannel(doc) {
+export function addChannel(doc: object) {
   return request({
     url: '/v1/channel',
     method: 'post',
@@ -49,53 +54,26 @@ export function addChannel(doc) {
   });
 }
 
-export function fetchChannelList(page, limit, key: null | string = null, group: null | string = null) {
+export function delChannel(doc: object) {
+  return request({
+    url: `/v1/channel`,
+    method: 'delete',
+    data: doc,
+  });
+}
+
+export function fetchChannelPage(doc: object) {
   return request({
     url: '/v1/channel/page',
     method: 'get',
-    params: {
-      page,
-      limit,
-      key,
-      group,
-    },
+    params: doc,
   });
 }
 
-export function delChannelItem(id) {
+export function fetchChannelEpg(doc: object) {
   return request({
-    url: `/v1/channel/${id}`,
-    method: 'delete',
-  });
-}
-
-export function updateIptvItem(id, doc) {
-  return request({
-    url: `/v1/iptv/${id}`,
-    method: 'put',
-    data: doc,
-  });
-}
-
-export function updateIptvStatus(type, id) {
-  return request({
-    url: `/v1/iptv/status/${type}/${id}`,
-    method: 'put',
-  });
-}
-
-export function delIptvItem(id) {
-  return request({
-    url: `/v1/iptv/${id}`,
-    method: 'delete',
-  });
-}
-
-// iptv添加
-export function addIptvItem(doc) {
-  return request({
-    url: `/v1/iptv`,
-    method: 'post',
-    data: doc,
+    url: `/v1/channel/epg`,
+    method: 'get',
+    params: doc,
   });
 }

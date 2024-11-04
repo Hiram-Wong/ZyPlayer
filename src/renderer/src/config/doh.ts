@@ -1,11 +1,11 @@
 export default {
   doh: [
     {
-      name: '腾讯(国密)',
+      name: 'Tencent',
       dns: 'https://sm2.doh.pub/dns-query',
     },
     {
-      name: '阿里',
+      name: 'AliYun',
       dns: 'https://dns.alidns.com/dns-query',
     },
     {

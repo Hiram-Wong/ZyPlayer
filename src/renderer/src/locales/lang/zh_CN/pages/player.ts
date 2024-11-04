@@ -4,9 +4,11 @@ export default {
   },
   film: {
     desc: '简介',
+    background: '背景',
     like: '收藏',
     download: '下载',
     share: '分享',
+    setting: '设置',
     analyze: '解析',
     anthology: '选集',
     line: '线路',
@@ -18,6 +20,7 @@ export default {
   iptv: {
     epg: '节目',
     channel: '频道',
+    group: '分组',
   },
   drive: {
     anthology: '选集',
@@ -46,8 +49,8 @@ export default {
   },
   setting: {
     title: '设置',
-    autoSkip: '跳片头片尾',
-    autoNext: '预加载下一集',
+    autoSkip: '跳进度',
+    autoNext: '预加载',
     skipStart: '开始',
     skipEnd: '结束',
     skipSeconds: '秒',

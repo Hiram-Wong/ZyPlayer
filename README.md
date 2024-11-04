@@ -9,17 +9,17 @@
 
 # 软件介绍
 
-ZyPlayer是一款采用现代化技术栈开发的高颜值媒体播放器，它基于 `electron-vite` 框架，集成了 `TDesign` UI 组件库与 `Vue3` 全家桶，以清新的薄荷绿为主题，旨在为用户提供流畅的跨平台娱乐体验。
+zyfun[老版为zyplayer]是一款采用现代化技术栈开发的高颜值媒体播放器，它基于 `electron-vite` 框架，集成了 `TDesign` UI 组件库与 `Vue3` 全家桶，以清新的薄荷绿为主题，旨在为用户提供流畅的跨平台娱乐体验。
 
 **重要提醒**: 仅此Github发布，请勿上当受骗；请各位公众号、QQ群、博客的管理者不要费力宣传及引流本软件!
 
-**重要提醒**: 请务必在有能力的情况请支持正版，我们不提倡盗版!
+**重要提醒**: 请务必支持正版版权，我们不提倡盗版!
 
 **重要提醒**: 在开始使用前，请务必详读并同意用户协议，确保遵守相关规定!
 
 <details>
 <summary>展开查看用户协议及免责申明</summary>
-感谢您选择使用zyplayer(以下简称本软件)，在使用产品和服务之前，请您仔细阅读和理解以下声明:
+感谢您选择使用zyfun(以下简称本软件)，在使用产品和服务之前，请您仔细阅读和理解以下声明:
 
 1. 若您不同意本声明的任何内容，请您立即停止使用本软件。一旦您开始使用本软件产品和服务，则表示您已同意本声明的所有内容。
 2. 本软件仅供个人学习、研究和技术交流使用，仅提供展示功能，所有数据资源均由用户自身制作提供，包括但不限于视频网站、媒体分享站点等。本软件无法控制这些资源的合法性、准确性、完整性或可用性，因此不对资源内容的真实性、合法性或适用性负责。
@@ -83,11 +83,22 @@ ZyPlayer是一款采用现代化技术栈开发的高颜值媒体播放器，它
 - 播放器选择需考虑格式兼容性，如 h264 与 h265 的差异
 - 针对播放失败, 建议切换播放器或者调用系统播放器
 
-### 安装包说明
+### 跨平台说明
 
-- **MacOS**: 提供 arm64、x64 及 universal 三种架构安装包。
-- **Windows**: 支持 arm64、x64、ia32，以及通用版本，但请注意 Electron 23 起不再支持 Win 7/8/8.1。
-- **Linux**: 针对 arm64、x64 架构发行 image、deb、rpm 安装包。
+> {appname}为软件名
+
+- **MacOS**:
+  - 提供 arm64(苹果芯)、x64(英特尔芯) 及 universal(通用) 三种架构安装包
+  - 日志路径: `~/Library/Logs/{appname}/`
+  - 数据库路径: `~/Library/Application\ Support/{appname}/database/`
+- **Linux**:
+  - 针对 arm64、x64 架构发行 image、deb、rpm 安装包
+  - 日志路径: `~/.config/{appname}/logs/`
+  - 数据库路径: `~/.config/{appname}/database/`
+- **Windows**:
+  - 支持 arm64、x64、ia32，以及通用版本
+  - 日志路径: `%USERPROFILE%\AppData\Roaming\{appname}\logs\`
+  - 数据库路径: `%USERPROFILE%\AppData\Roaming\{appname}\database\`
 
 ## 🛠️ 下载与安装
 
@@ -97,10 +108,42 @@ ZyPlayer是一款采用现代化技术栈开发的高颜值媒体播放器，它
 
 ### macOS 安装问题解决方案
 
-若遇到“已损坏”提示，执行以下命令修复权限
+因为软件没有签名，所以会被 macOS 的安全检查所拦下。安装后打开遇到「文件已损坏」的情况，请按如下方式操作：
 
 ```bash
-sudo xattr -cr /Applications/zyplayer.app
+[1] 执行下面命令信任开发者, 会要求输入密码:
+    sudo spctl --master-disable
+[2] 执行下面命令放行软件 :
+    sudo xattr -cr /Applications/zyplayer.app
+
+完成上面两个步骤，大多数情况下都能正常打开应用。
+
+ps:
+如果提示以下内容：
+option -r not recognized
+
+usage: xattr [-slz] file [file ...]
+       xattr -p [-slz] attr_name file [file ...]
+       xattr -w [-sz] attr_name attr_value file [file ...]
+       xattr -d [-s] attr_name file [file ...]
+       xattr -c [-s] file [file ...]
+
+The first form lists the names of all xattrs on the given file(s).
+The second form (-p) prints the value of the xattr attr_name.
+The third form (-w) sets the value of the xattr attr_name to attr_value.
+The fourth form (-d) deletes the xattr attr_name.
+The fifth form (-c) deletes (clears) all xattrs.
+
+options:
+  -h: print this help
+  -s: act on symbolic links themselves rather than their targets
+  -l: print long format (attr_name: attr_value)
+  -z: compress or decompress (if compressed) attribute value in zip format
+
+则执行命令
+xattr -c /Applications/zyplayer.app/*
+如果上述命令依然没有效果，可以尝试下面的命令：
+sudo xattr -d com.apple.quarantine /Applications/zyplayer.app/
 ```
 
 ### Linux Appimage桌面快捷方式设置
@@ -121,78 +164,94 @@ sudo xattr -cr /Applications/zyplayer.app
 ## 🚗 二次开发
 
 ```
-[1]安装 node.js version18 以上
-[2]克隆项目  git clone https://github.com/Hiram-Wong/ZyPlayer.git
-[3]进入项目  cd ZyPlayer/
-[4]打开vscode  code .
-[5]修改代码
-[6]修改packgae.json[仅win8.1、7] "electron": "^19.1.9",
-[7]安装依赖包  yarn
-[8]全局安装electron-vite框架 yarn add electron-vite -D
-[9]打包  yarn build:win[mac/linux]
+[1] 安装 node.js version18 以上
+[2] 克隆项目
+    git clone https://github.com/Hiram-Wong/ZyPlayer.git
+[3] 进入项目
+    cd ZyPlayer/
+[4] 打开项目<此处使用命令行快捷打开vscode>
+    code .
+[5] 修改代码
+[6] 安装依赖包
+    yarn
+[7] 全局安装electron-vite框架
+    yarn add electron-vite -D
+[8] 打包编译发布
+    yarn build:win[mac/linux]
+
+ps:
+  - 同步库说明
+    - sync-fetch: 渲染进程 + webworker线程运行
+    - sync-request: 主进程 + fork线程运行 + tree-kill结束
+  - 兼容win7说明
+    - Electron 23 起不再支持 Win 7/8/8.1, 推荐"electron": "~22.3.27"
+    - Electron 23 以下不支持升级fastif及相关插件, 最高版本为4.x
+    - Electron 23 以下不支持升级cheerio, 最高版本为1.0.0-rc.12
+    - Electron 23 以下puppeteer存在兼容性问题, 推荐"puppeteer-core": "~21.3.8", "puppeteer-in-electron": "^3.0.5"
 ```
 
 ## 📚 数据结构
 
-> 请严格按照数据结构填写，避免不必要的报错
+> 请严格按照数据结构填写, 避免不必要的报错(如数据字段类型不匹配)
 
 <details>
 <summary>展开查看接口说明</summary>
-
-> 配置导入格式(备份数据建议此格式)
 
 ```json
 {
   "analyze": [
     {
-      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // id唯一值不可重复,不能数字,建议 uuid
-      "name": "纯净", // 名称
-      "url": "https://im1907.top/?jx=", // 解析源地址
-      "isActive": true // 是否启用 true启用 false 禁用
+      "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // id唯一值不可重复[uuidv4]
+      "name": "Parse", // 名称[string]
+      "type": 0, // 类型[number | 0:web-1:json]
+      "url": "https://xxx.top/?jx=", // 解析源地址[string]
+      "isActive": true // 是否启用[boolean | true启用-false禁用]
     }
   ],
   "iptv": [
     {
-      "id": "993841fe-5e91-5e5d-35d6-5be81822960b", // id唯一值不可重复,不能数字,建议 uuid
-      "name": "APTV", // 名称
-      "url": "https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
-      "type": "remote", // remote为远程m3u local本地m3u文件路径
-      "isActive": true, // 是否启用 true启用 false 禁用
-      "epg": "https://epg.112114.xyz/" // 电子节目单地址
+      "id": "993841fe-5e91-5e5d-35d6-5be81822960b", // id唯一值不可重复[uuidv4]
+      "name": "IPTV", // 名称[string]
+      "url": "https://xxx.com/m3u/iptv.m3u", // 直播源地址[string]
+      "type": "remote", // url格式[string | remote:远程m3u-local本地m3u文件路径-json本地手动文件]
+      "isActive": true, // 是否启用[boolean | true启用-false禁用]
+      "epg": "https://epg.112114.xyz/", // 电子节目单地址[string]
+      "logo": "https://epg.112114.xyz/" // 台标地址[string] - 3.3.8启用该参数
     }
   ],
   "channel": [
     {
-      "id": "0ede1ecd-de69-1042-15d9-4e5e9e3bb897", // id唯一值不可重复,不能数字,建议 uuid
-      "name": "CCTV6", // 名称
-      "url": "http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221226393/index.m3u8", // 播放地址
-      "group": "央视" // 分组
+      "id": "0ede1ecd-de69-1042-15d9-4e5e9e3bb897", // id唯一值不可重复[uuidv4]
+      "name": "xx卫视", // 名称[string]
+      "url": "http://xxx.com/index.m3u8", // 播放地址[string]
+      "group": "默认" // 分组[string]
     }
   ],
   "sites": [
     {
-      "id": "51793af6-c923-5504-85db-0ef686624dec", // id唯一值不可重复,不能数字,建议 uuid
-      "name": "39影视", // 名称
-      "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
-      "playUrl": "", // 配合解析去url地址
-      "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
-      "group": "切片", // 分组
-      "isActive": true, // 是否启用 true启用 false 禁用
-      "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
-      "ext": "", // 扩展参数
-      "categories": "电视,影视" // 按顺序展示所配置的分类 不配置则默认展示所有分类
+      "id": "51793af6-c923-5504-85db-0ef686624dec", // id唯一值不可重复[uuidv4]
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // key值不建议重复[string]
+      "name": "xx9影视", // 名称[string]
+      "api": "https://www.xxx.com/api.php/provide/vod/", // 站点源地址[string]
+      "playUrl": "", // 配合解析去url地址[string]
+      "search": false, // 是否支持搜索[boolean | true启用-false禁用]
+      "group": "切片", // 分组[string]
+      "type": 1, // 数据源类型[number | 0:T0(xml)-1:T1(json)-2:drpy(js0)-6:T4(hipy)-7:T3(js)-8:catvod(nodejs)-9:csp(XBPQ)-10:csp(XYQ)-11:csp(AppYsV2)]
+      "ext": "", // 扩展参数[string]
+      "categories": "电视,影视", // 按顺序展示所配置的分类 不配置则默认展示所有分类[string]
+      "isActive": true // 是否启用[boolean | true启用-false禁用]
     }
   ],
   "drive": [
     {
-      "id": "3293dc45-cf14-9c66-3028-5b7765b240b7", // id唯一值不可重复,不能数字,建议 uuid
-      "name": "🙋丫仙女", // 名称
-      "server": "http://alist.xiaoya.pro/", // 网盘地址
-      "startPage": "", // 开始页路径
-      "search": false, // 是否支持搜索 true启用 false 禁用
-      "headers": null, // 请求头
-      "params": null, // 参数
-      "isActive": true // 是否启用 true启用 false 禁用
+      "id": "3293dc45-cf14-9c66-3028-5b7765b240b7",// id唯一值不可重复[uuidv4]
+      "name": "alist", // 名称[string]
+      "server": "http://alist.xxx.pro/", // 网盘地址[string]
+      "startPage": "", // 开始页路径[string]
+      "search": false, // 是否支持搜索[boolean | true启用-false禁用] 未启用预留
+      "headers": "{}", // 请求头[string] 未启用预留
+      "params": "{}", // 参数[string]
+      "isActive": true // 是否启用[boolean | true启用-false禁用]
     }
   ],
   "setting": [
@@ -208,14 +267,16 @@ sudo xattr -cr /Applications/zyplayer.app
       "pauseWhenMinimize": false, // [弃用] 最小化时暂停
       "defaultIptvEpg": "https://epg.112114.eu.org/", // iptv epg
       "defaultIptvLogo": "https://epg.112114.eu.org/logo/", // iptv logo
-      "iptvSkipIpv6": true, // iptv是否跳过ipv6节目
+      "iptvSkipIpv6": true, // [3.3.8版本弃用] iptv是否跳过ipv6节目
+      "iptvMarkIp": true, // [3.3.8版本启用] iptv标识IP类型
       "iptvThumbnail": true, // iptv是否显示缩略图
-      "iptvStatus": true, // iptv是否检测延迟
+      "iptvStatus": true, // [3.3.8版本弃用] iptv是否检测延迟
+      "iptvDelay": true, // [3.3.8版本启用]  iptv是否检测延迟
       "defaultSite": "51793af6-c923-5504-85db-0ef686624dec", // site 默认源标识
       "defaultIptv": "993841fe-5e91-5e5d-35d6-5be81822960b", // iptv 默认源标识
       "defaultAnalyze": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // analyze 默认源标识
       "defaultDrive": "3293dc45-cf14-9c66-3028-5b7765b240b7", // drive 默认源标识
-      "defaultViewCasual": "", // [3.3.4版本启用]心性看地址
+      "defaultViewCasual": "", // [3.3.4版本启用] 随心看地址
       "barrage": {
         "url": "", // 弹幕地址
         "key": "danmuku", // 弹幕接口返回数据对应的key
@@ -278,69 +339,6 @@ sudo xattr -cr /Applications/zyplayer.app
       "dns": "" // [3.3.7版本启用] DNS-over-HTTP
     }
   ]
-}
-```
-
-> 一键配置格式(初次使用建议此格式, 仅支持导入源数据和设置默认源标识)
-
-```json
-{
-  "analyze": {
-    "default": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // 默认标识 对应需设置为默认的id
-    "data": [
-      {
-        "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // id唯一值不可重复,不能数字,建议 uuid
-        "name": "纯净", // 名称
-        "url": "https://im1907.top/?jx=", // 解析源地址
-        "isActive": true // 是否启用 true启用 false 禁用
-      }
-    ]
-  },
-  "iptv": {
-    "default": "993841fe-5e91-5e5d-35d6-5be81822960b", // 默认标识 对应需设置为默认的id
-    "data": [
-      {
-        "id": "993841fe-5e91-5e5d-35d6-5be81822960b", // id唯一值不可重复,不能数字,建议 uuid
-        "name": "APTV", // 名称
-        "url": "https://ghproxy.com/https://raw.githubusercontent.com/Kimentanm/aptv/master/m3u/iptv.m3u", // 直播源地址
-        "type": "remote", // remote为远程m3u local本地m3u文件路径
-        "isActive": true, // 是否启用 true启用 false 禁用
-        "epg": "https://epg.112114.xyz/" // 电子节目单地址
-      }
-    ]
-  },
-  "sites": {
-    "default": "51793af6-c923-5504-85db-0ef686624dec", // 默认标识 对应需设置为默认的id
-    "data": [
-      {
-        "id": "51793af6-c923-5504-85db-0ef686624dec", // id唯一值不可重复,不能数字,建议 uuid
-        "name": "39影视", // 名称
-        "api": "https://www.39kan.com/api.php/provide/vod/", // 站点源地址
-        "playUrl": "", // 配合解析去url地址
-        "search": 1, // 0:关闭 1:聚合搜索 2:本站搜索
-        "group": "切片", // 分组
-        "isActive": true, // 是否启用 true启用 false 禁用
-        "type": 1, // 0:cms(xml) 1:cms(json) 2:drpy 3:app(v3) 4:app(v1)
-        "ext": "", // 扩展参数
-        "categories": "电视,影视" // 按顺序展示所配置的分类 不配置则默认展示所有分类
-      }
-    ]
-  },
-  "drive": {
-    "default": "3293dc45-cf14-9c66-3028-5b7765b240b7", // 默认标识 对应需设置为默认的id
-    "data": [
-      {
-        "id": "3293dc45-cf14-9c66-3028-5b7765b240b7", // id唯一值不可重复,不能数字,建议 uuid
-        "name": "🙋丫仙女", // 名称
-        "server": "http://alist.xiaoya.pro/", // 网盘地址
-        "startPage": "", // 开始页路径
-        "search": false, // 是否支持搜索 true启用 false 禁用
-        "headers": null, // 请求头
-        "params": null, // 参数
-        "isActive": true // 是否启用 true启用 false 禁用
-      }
-    ]
-  }
 }
 ```
 

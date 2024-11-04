@@ -1,4 +1,4 @@
 export default {
-  title: 'Please drink coffee',
-  desc: 'Scan code to sponsor'
-}
+  title: 'By for Coffee',
+  desc: 'Scan QR code',
+};

@@ -1,57 +1,43 @@
 import request from '@/utils/request';
-
-// 获取star列表
-export function fetchStarList(page, limit) {
+export function addStar(doc: object) {
   return request({
-    url: '/v1/star/page',
-    method: 'get',
-    params: {
-      page,
-      limit,
-    },
-  });
-}
-
-export function clearStarList() {
-  return request({
-    url: '/v1/star/clear',
-    method: 'delete',
-  });
-}
-
-export function delStar(id) {
-  return request({
-    url: `/v1/star/${id}`,
-    method: 'delete',
-  });
-}
-
-export function clearStar() {
-  return request({
-    url: `/v1/star/clear`,
-    method: 'delete',
-  });
-}
-
-export function updateStar(id, doc) {
-  return request({
-    url: `/v1/star/${id}`,
-    method: 'put',
-    data: doc,
-  });
-}
-
-export function detailStar(doc) {
-  return request({
-    url: `/v1/star/detail`,
+    url: `/v1/star`,
     method: 'post',
     data: doc,
   });
 }
-
-export function addStar(doc) {
+export function delStar(doc: object) {
   return request({
     url: `/v1/star`,
+    method: 'delete',
+    data: doc,
+  });
+}
+export function putStar(doc: object) {
+  return request({
+    url: `/v1/star`,
+    method: 'put',
+    data: doc,
+  });
+}
+export function fetchStarPage(doc: object) {
+  return request({
+    url: '/v1/star/page',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchStarDetail(id: string) {
+  return request({
+    url: `/v1/star/${id}`,
+    method: 'get',
+  });
+}
+
+export function findStar(doc: object) {
+  return request({
+    url: `/v1/star/find`,
     method: 'post',
     data: doc,
   });

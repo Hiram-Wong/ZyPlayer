@@ -21,7 +21,7 @@ import { BrowseGalleryIcon, ModeDarkIcon, ModeLightIcon } from 'tdesign-icons-vu
 import { computed } from 'vue';
 
 import { useSettingStore } from '@/store';
-import { setDefault } from '@/api/setting';
+import { putSetting } from '@/api/setting';
 
 const theme = computed(() => {
   return storeSetting.getStateMode;
@@ -37,8 +37,8 @@ const themeIcons = {
 
 const currentIcon = computed(() => themeIcons[theme.value]);
 
-const setTheme = (theme: 'light' | 'dark' | 'auto') => {
-  setDefault('theme', theme);
+const setTheme = async (theme: 'light' | 'dark' | 'auto') => {
+  await putSetting({ key: "theme", doc: theme });
   storeSetting.updateConfig({ mode: theme });
 };
 </script>

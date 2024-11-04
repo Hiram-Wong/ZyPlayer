@@ -1,229 +1,252 @@
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
+import { publicBarrageSend, publicColor, publicIcons, publicStream, publicStorage } from './components';
 
-import { publicBarrageSend, publicColor, publicIcons, publicStream } from './components';
+class ArtPlayerAdapter {
+  player: Artplayer | null = null;
+  options: { [key: string]: any } = {
+    container: document.getElementById('artplayer'),
+    url: '',
+    type: '',
+    theme: publicColor.theme,
+    autoplay: true,
+    playbackRate: true,
+    fullscreen: true,
+    pip: true,
+    setting: true,
+    flip: true,
+    hotkey: true,
+    isLive: false,
+    aspectRatio: true,
+    plugins: [
+      artplayerPluginDanmuku({
+        speed: 5,
+        danmuku: [],
+        // useWorker: true, // 5.0.1 版本参数
+        synchronousPlayback: true, // 5.1.0 版本参数
+        emitter: false, // 5.1.0 版本参数
+      }),
+    ],
+    icons: {
+      play: publicIcons.play,
+      pause: publicIcons.pause,
+      volume: publicIcons.volumeLarge,
+      volumeClose: publicIcons.volumeMuted,
+      pip: publicIcons.pipIcon,
+      fullscreenOn: publicIcons.fullscreen,
+      fullscreenOff: publicIcons.exitFullscreen,
+      setting: publicIcons.setting,
+    },
+    cssVar: {
+      '--art-control-height': '40px',
+      '--art-control-icon-size': '20px',
+      '--art-control-icon-scale': '1',
+    },
+    customType: {
+      customHls: (video: HTMLVideoElement, url: string, art: Artplayer) => {
+        art.loading.show = true;
+        if (art.hls) publicStream.destroy.customHls(art);
+        const hls = publicStream.create.customHls(video, url);
+        art.hls = hls;
+        art.on('destroy', () => {
+          publicStream.destroy.customHls(art);
+        });
+        art.loading.show = false;
+      },
+      customFlv: (video: HTMLVideoElement, url: string, art: Artplayer) => {
+        art.loading.show = true;
+        if (art.flv) publicStream.destroy.customFlv(art);
+        const flv = publicStream.create.customFlv(video, url);
+        art.flv = flv;
+        art.on('destroy', () => {
+          publicStream.destroy.customFlv(art);
+        });
+        art.loading.show = false;
+      },
+      customDash: (video: HTMLVideoElement, url: string, art: Artplayer) => {
+        art.loading.show = true;
+        if (art.mpd) publicStream.destroy.customDash(art);
+        const mpd = publicStream.create.customDash(video, url);
+        art.mpd = mpd;
+        art.on('destroy', () => {
+          publicStream.destroy.customDash(art);
+        });
+        art.loading.show = false;
+      },
+      customWebTorrent: (video: HTMLVideoElement, url: string, art: Artplayer) => {
+        art.loading.show = true;
+        if (art.torrent) publicStream.destroy.customTorrent(art);
+        const torrent = publicStream.create.customTorrent(video, url);
+        art.torrent = torrent;
+        art.on('destroy', () => {
+          publicStream.destroy.customTorrent(art);
+        });
+        art.loading.show = false;
+      },
+    },
+  };
+  publicListener: { [key: string]: any } = {
+    timeUpdate: () => {},
+    sendDanmu: () => {},
+    playrateUpdate: () => {},
+    volumeUpdate: () => {},
+    mutedUpdate: () => {},
+  };
 
-const publicListener = {
-  timeUpdate: null as any,
-  sendDanmu: null as any,
-  playrateUpdate: null as any,
-};
-
-const options: any = {
-  container: document.getElementById('artplayer'),
-  url: '',
-  type: '',
-  theme: publicColor.theme,
-  autoplay: true,
-  playbackRate: true,
-  fullscreen: true,
-  pip: true,
-  setting: true,
-  flip: true,
-  hotkey: true,
-  isLive: false,
-  aspectRatio: true,
-  plugins: [
-    artplayerPluginDanmuku({
-      speed: 5,
-      danmuku: [],
-      // useWorker: true, // 5.0.1 版本参数
-      synchronousPlayback: true, // 5.1.0 版本参数
-      emitter: false, // 5.1.0 版本参数
-    }),
-  ],
-  icons: {
-    play: publicIcons.play,
-    pause: publicIcons.pause,
-    volume: publicIcons.volumeLarge,
-    volumeClose: publicIcons.volumeMuted,
-    pip: publicIcons.pipIcon,
-    fullscreenOn: publicIcons.fullscreen,
-    fullscreenOff: publicIcons.exitFullscreen,
-    setting: publicIcons.setting,
-  },
-  cssVar: {
-    '--art-control-height': '40px',
-    '--art-control-icon-size': '20px',
-    '--art-control-icon-scale': '1',
-  },
-  customType: {
-    customHls: (video: HTMLVideoElement, url: string, art: Artplayer) => {
-      art.loading.show = true;
-      if (art.hls) publicStream.destroy.customHls(art);
-      const hls = publicStream.create.customHls(video, url);
-      art.hls = hls;
-      art.on('destroy', () => {
-        publicStream.destroy.customHls(art);
-      });
-      art.loading.show = false;
-    },
-    customFlv: (video: HTMLVideoElement, url: string, art: Artplayer) => {
-      art.loading.show = true;
-      if (art.flv) publicStream.destroy.customFlv(art);
-      const flv = publicStream.create.customFlv(video, url);
-      art.flv = flv;
-      art.on('destroy', () => {
-        publicStream.destroy.customFlv(art);
-      });
-      art.loading.show = false;
-    },
-    customDash: (video: HTMLVideoElement, url: string, art: Artplayer) => {
-      art.loading.show = true;
-      if (art.mpd) publicStream.destroy.customDash(art);
-      const mpd = publicStream.create.customDash(video, url);
-      art.mpd = mpd;
-      art.on('destroy', () => {
-        publicStream.destroy.customDash(art);
-      });
-      art.loading.show = false;
-    },
-    customWebTorrent: (video: HTMLVideoElement, url: string, art: Artplayer) => {
-      art.loading.show = true;
-      if (art.torrent) publicStream.destroy.customTorrent(art);
-      const torrent = publicStream.create.customTorrent(video, url);
-      art.torrent = torrent;
-      art.on('destroy', () => {
-        publicStream.destroy.customTorrent(art);
-      });
-      art.loading.show = false;
-    },
-  },
-};
-
-const barrge = (player: Artplayer, comments: any, url: string, id: string) => {
-  player.plugins.artplayerPluginDanmuku.config({
-    danmuku: comments,
-  });
-  player.plugins.artplayerPluginDanmuku.load();
-  publicListener.sendDanmu = (danmu: any) => {
-    const options = {
-      player: id,
-      text: danmu.text,
-      time: danmu.time,
-      color: danmu.color,
-      type: danmu.mode == 1 ? '5' : '0',
+  barrge = (comments: any, url: string, id: string) => {
+    if (!this.player) return;
+    this.player.plugins.artplayerPluginDanmuku.config({
+      danmuku: comments,
+    });
+    this.player.plugins.artplayerPluginDanmuku.load();
+    this.publicListener.sendDanmu = (danmu: any) => {
+      const options = {
+        player: id,
+        text: danmu.text,
+        time: danmu.time,
+        color: danmu.color,
+        type: danmu.mode == 1 ? '5' : '0',
+      };
+      publicBarrageSend(url, options);
     };
-    publicBarrageSend(url, options);
+    // @ts-ignore
+    this.player.on('artplayerPluginDanmuku:emit', publicListener.sendDanmu);
   };
-  // @ts-ignore
-  player.on('artplayerPluginDanmuku:emit', publicListener.sendDanmu);
-};
 
-const create = (options: any): Artplayer => {
-  if (options.isLive) {
-    delete options?.plugins;
-  }
+  create = (options: any): Artplayer => {
+    options = { ...this.options, ...options };
+    options.container = `#${options.container}`;
+    if (options.isLive) {
+      delete options?.plugins;
+    }
+    const startTime = options?.startTime || 0;
+    delete options.startTime;
 
-  Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    let player;
+    player = new Artplayer({ ...options });
+    player.storage = new publicStorage('player_settings');
 
-  const player = new Artplayer({ ...options });
-
-  player.once('ready', () => {
-    if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
-  });
-
-  publicListener.playrateUpdate = () => {
-    player.storage.set('playrate', player.playbackRate);
-  };
-  player.on('video:ratechange', publicListener.playrateUpdate);
-
-  return player;
-};
-
-const currentTime = (player: Artplayer): number => {
-  return player.video.currentTime || 0;
-};
-
-const destroy = (player: Artplayer) => {
-  player.destroy();
-};
-
-const duration = (player: Artplayer): number => {
-  return player.video.duration || 0;
-};
-
-const pause = (player: Artplayer) => {
-  player.pause();
-};
-
-const play = (player: Artplayer) => {
-  player.play();
-};
-
-const playNext = (player: Artplayer, options: any) => {
-  // player.switch = options.url;
-  player.switchUrl(options.url);
-  if (player.plugins?.artplayerPluginDanmuku) {
-    player.plugins.artplayerPluginDanmuku.config({
-      danmuku: [],
+    player.once('ready', () => {
+      if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
+      player.muted = player.storage.get('muted') || false;
+      player.volume =
+        player.storage.get('volume') === null || player.storage.get('volume') === undefined
+          ? 1
+          : player.storage.get('volume');
+      if (!options.isLive && startTime && startTime > 0) player.seek = startTime;
     });
-    player.plugins.artplayerPluginDanmuku.load();
-  }
-};
 
-const seek = (player: Artplayer, time: number) => {
-  player.once('ready', () => {
-    player.seek = time;
-  });
-};
+    this.publicListener.playrateUpdate = () => {
+      player.storage.set('playrate', player.playbackRate);
+    };
+    player.on('video:ratechange', this.publicListener.playrateUpdate);
 
-const time = (player: Artplayer): { currentTime: number; duration: number } => {
-  return {
-    currentTime: player.video.currentTime || 0,
-    duration: player.video.duration || 0,
+    this.publicListener.volumeUpdate = () => {
+      player.storage.set('volume', player.volume);
+    };
+    player.on('video:volumechange', this.publicListener.volumeUpdate);
+    this.publicListener.mutedUpdate = (state) => {
+      player.storage.set('muted', state);
+    };
+    player.on('muted', this.publicListener.mutedUpdate);
+    this.player = player;
+    return player;
   };
-};
 
-const onTimeUpdate = (player: Artplayer, callback: any) => {
-  publicListener.timeUpdate = () => {
-    callback({
-      currentTime: player.video.currentTime || 0,
-      duration: player.video.duration || 0,
+  currentTime = (): number => {
+    if (!this.player) return 0;
+    return this.player.video.currentTime || 0;
+  };
+
+  destroy = () => {
+    if (!this.player) return;
+    this.player.destroy();
+  };
+
+  duration = (): number => {
+    if (!this.player) return 0;
+    return this.player.video.duration || 0;
+  };
+
+  pause = () => {
+    if (!this.player) return;
+    this.player.pause();
+  };
+
+  play = () => {
+    if (!this.player) return;
+    this.player.play();
+  };
+
+  playNext = (player: Artplayer, options: any) => {
+    // player.switch = options.url;
+    player.switchUrl(options.url);
+    if (player.plugins?.artplayerPluginDanmuku) {
+      player.plugins.artplayerPluginDanmuku.config({
+        danmuku: [],
+      });
+      player.plugins.artplayerPluginDanmuku.load();
+    }
+  };
+
+  seek = (time: number) => {
+    if (!this.player) return;
+    this.player.once('ready', () => {
+      this.player!.seek = time;
     });
   };
-  player.on('video:timeupdate', publicListener.timeUpdate);
-};
 
-const offBarrage = (player: Artplayer) => {
-  // @ts-ignore
-  player.off('artplayerPluginDanmuku:emit', publicListener.sendDanmu!);
-};
+  time = (): { currentTime: number; duration: number } => {
+    if (!this.player)
+      return {
+        currentTime: 0,
+        duration: 0,
+      };
+    return {
+      currentTime: this.player.video.currentTime || 0,
+      duration: this.player.video.duration || 0,
+    };
+  };
 
-const offTimeUpdate = (player: Artplayer) => {
-  player.off('video:timeupdate', publicListener.timeUpdate!);
-};
+  onTimeUpdate = (callback: any) => {
+    if (!this.player) return;
+    this.publicListener.timeUpdate = () => {
+      callback({
+        currentTime: this.player?.video.currentTime || 0,
+        duration: this.player?.video.duration || 0,
+      });
+    };
+    this.player.on('video:timeupdate', this.publicListener.timeUpdate);
+  };
 
-const speed = (player: Artplayer, speed: number) => {
-  player.once('ready', () => {
-    player.playbackRate = speed;
-  });
-};
+  offBarrage = () => {
+    if (!this.player) return;
+    // @ts-ignore
+    this.player.off('artplayerPluginDanmuku:emit', publicListener.sendDanmu);
+  };
 
-const toggle = (player: Artplayer) => {
-  player.toggle();
-};
+  offTimeUpdate = () => {
+    if (!this.player) return;
+    this.player.off('video:timeupdate', this.publicListener.timeUpdate);
+  };
 
-const volume = (player: Artplayer, volume: number) => {
-  player.volume = volume;
-};
+  speed = (speed: number) => {
+    if (!this.player) return;
+    this.player.once('ready', () => {
+      this.player!.playbackRate = speed;
+    });
+  };
 
-export {
-  options,
-  barrge,
-  create,
-  currentTime,
-  destroy,
-  duration,
-  pause,
-  play,
-  playNext,
-  seek,
-  speed,
-  time,
-  onTimeUpdate,
-  offBarrage,
-  offTimeUpdate,
-  toggle,
-  volume,
-};
+  toggle = () => {
+    if (!this.player) return;
+    this.player.toggle();
+  };
+
+  volume = (volume: number) => {
+    if (!this.player) return;
+    this.player.volume = volume;
+  };
+}
+
+export default ArtPlayerAdapter;

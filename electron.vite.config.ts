@@ -25,7 +25,11 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       },
       build: {
         rollupOptions: {
-          external: ['sqlite3'],
+          input: {
+            index: resolve(__dirname, 'src/main/index.ts'),
+            worker: resolve(__dirname, 'src/main/core/server/routes/v1/site/cms/adapter/drpy/worker.ts'),
+          },
+          external: [],
         },
       },
       plugins: [externalizeDepsPlugin(), swcPlugin()],
@@ -42,19 +46,25 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       },
       build: {
         emptyOutDir: true, // 打包时先清空上一次构建生成的目录
-        reportCompressedSize: false, // 关闭文件计算
         sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
+        minify: false, // 关闭压缩
+        chunkSizeWarningLimit: 2000, // 打包后超过2kb的会单独打包
+        assetsInlineLimit: 4096, // 小于4kb的图片会转成base64
         rollupOptions: {
           output: {
             entryFileNames: `assets/entry/[name][hash].js`, // 引入文件名的名称
             chunkFileNames: `assets/chunk/[name][hash].js`, // 包的入口文件名称
             assetFileNames: `assets/file/[name][hash].[ext]`, // 资源文件像 字体，图片等
             manualChunks(id) {
-              if (id.includes('monaco-editor'))
-                return 'monaco-editor_'; //代码分割为编辑器
-              else if (id.includes('node_modules'))
-                return 'vendor_'; //代码分割为第三方包
-              else if (id.includes('src/renderer/src/utils/drpy')) return 'worker_t3_'; //代码分割为worker进程
+              if (id.includes('monaco-editor')) return 'monaco-editor_';
+              else if (id.includes('tdesign-vue-next')) return 'tdesign_';
+              else if (id.includes('lodash')) return 'lodash_';
+              else if (id.includes('artplayer')) return 'artplayer_';
+              else if (id.includes('dplayer')) return 'dplayer_';
+              else if (id.includes('nplayer')) return 'nplayer_';
+              else if (id.includes('xgplayer')) return 'xgplayer_';
+              else if (id.includes('node_modules')) return 'vendor_';
+              // else if (id.includes('src/renderer/src/utils/drpy')) return 'worker_t3_'; //代码分割为worker进程
             },
           },
         },

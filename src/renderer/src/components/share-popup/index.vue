@@ -13,18 +13,18 @@
               {{ $t('pages.share.headerInfoScan') }}
             </div>
             <div class="header-copyright text-hide">
-              <span>{{ data.provider }}</span>
+              <span>{{ formData.provider }}</span>
               <span>&nbsp;{{ $t('pages.share.headerCopyright') }}</span>
             </div>
             <t-divider dashed style="margin: 5px 0" />
           </div>
           <div class="share-container-main-right">
-            <qrcode-vue :value="data.url" :size="85" :margin="5" level="H" render-as="svg" class="qrcode" />
+            <qrcode-vue :value="formData.url" :size="85" :margin="5" level="H" render-as="svg" class="qrcode" />
           </div>
         </div>
-        <div class="bottom-title text-hide">{{ data.name }}</div>
+        <div class="bottom-title text-hide">{{ formData.name }}</div>
         <div class="bottom-copy">
-          <input v-model="data.url" class="input-url" readonly />
+          <input v-model="formData.url" class="input-url" readonly />
           <button class="btn-copy" @click="copyShareUrl">{{ $t('pages.share.copyUrl') }}</button>
         </div>
       </div>
@@ -56,8 +56,9 @@ const props = defineProps({
   },
 });
 
-const data = ref(props.data);
+const formData = ref(props.data);
 const formVisible = ref(false);
+const DEFAULT_SHARE_URL = 'https://web.zyplayer.fun/?url=';
 
 const emit = defineEmits(['update:visible']);
 
@@ -76,7 +77,8 @@ watch(
 watch(
   () => props.data,
   (val) => {
-    data.value = val;
+    formData.value = val;
+    formData.value.url = DEFAULT_SHARE_URL + formData.value.url + '&name=' + formData.value.name;
   },
 );
 
@@ -99,7 +101,7 @@ const onShareVisibleChange = (_, context) => {
 const copyShareUrl = async () => {
   const successMessage = t('pages.share.message.copySuccess');
   const errorMessage = t('pages.share.message.copyFail');
-  await copyToClipboard(data.value.url, successMessage, errorMessage);
+  await copyToClipboard(formData.value.url, successMessage, errorMessage);
 
   formVisible.value = false;
 };

@@ -6,6 +6,8 @@
         :key="'type_' + item.type_id + '_index_' + index"
         :value="item.type_id"
         :label="item.type_name"
+        :destroy-on-hide="true"
+        :lazy="true"
         class="bar"
       />
     </t-tabs>
@@ -13,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -34,9 +36,10 @@ watch(
 const emit = defineEmits(['changeKey']);
 
 const tagFlag = ref(props.active);
-const uniqueList = computed(() => _.uniqBy(props.list, 'type_id'));
+const uniqueList = computed(() => uniqBy(props.list, 'type_id'));
 
 const handleItemClick = (key: string | number) => {
+  console.log(key)
   emit('changeKey', key);
 };
 </script>

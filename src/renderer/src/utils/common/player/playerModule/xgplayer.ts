@@ -11,242 +11,233 @@ import ShakaPlugin from 'xgplayer-shaka';
 
 import { publicColor, publicIcons, publicStorage } from './components';
 
-const publicListener = {
-  timeUpdate: null as any,
-  sendDanmu: null as any,
-  playrateUpdate: null as any,
-  volumeUpdate: null as any,
-};
+// const barrge = (player: XgPlayer, comments: any, _url: string, _id: string) => {
+//   player.plugins.danmu.updateComments(comments, true);
+//   player.getPlugin('danmu').updateComments(comments, true); // 效果一样
+//   player.plugins.danmu.sendComment({
+//     duration: 5000, //弹幕持续显示时间,毫秒(最低为5000毫秒)
+//     id: nanoid(), //弹幕id，需唯一
+//     start: player.currentTime * 1000, //弹幕出现时间，毫秒
+//     color: true, //该条弹幕为彩色弹幕，默认false
+//     txt: '', //弹幕文字内容
+//     style: {
+//       //弹幕自定义样式
+//       color: '#FFFFFF',
+//     },
+//   }); // 应插件内实现
+// };
 
-// 西瓜、火山公共部分参数
-const publicConfigVeXg = {
-  url: '',
-  autoplay: true,
-  pip: true,
-  cssFullscreen: false,
-  startTime: 0,
-  playbackRate: {
-    list: [
-      2,
-      1.5,
-      1.25,
-      {
-        rate: 1,
-        iconText: {
-          zh: '倍速',
-        },
-      },
-      0.75,
-      0.5,
-    ],
-    index: 7,
-  },
-  time: {
-    index: 0,
-  },
-  icons: {
-    play: publicIcons.play,
-    pause: publicIcons.pause,
-    playNext: publicIcons.playNext,
-    fullscreen: publicIcons.fullscreen,
-    exitFullscreen: publicIcons.exitFullscreen,
-    volumeSmall: publicIcons.volumeSmall,
-    volumeLarge: publicIcons.volumeLarge,
-    volumeMuted: publicIcons.volumeMuted,
-    pipIcon: publicIcons.pipIcon,
-    pipIconExit: publicIcons.pipIconExit,
-    openDanmu: publicIcons.openDanmu,
-    closeDanmu: publicIcons.closeDanmu,
-  },
-  commonStyle: {
-    playedColor: publicColor.theme, // 播放完成部分进度条底色
-    volumeColor: publicColor.theme, // 音量颜色
-  },
-  width: 'auto',
-  height: '100%',
-};
-
-// 播放器配置
-const options = {
-  ...publicConfigVeXg,
-  url: '',
-  type: '',
-  id: 'xgplayer',
-  enableContextmenu: true,
-  danmu: {
-    panel: false,
-    comments: [],
-    area: { start: 0, end: 0.3 },
-    defaultOff: true, //开启此项后弹幕不会初始化，默认初始化弹幕
-  },
-  plugins: [],
-};
-
-const barrge = (player: XgPlayer, comments: any, _url: string, _id: string) => {
-  player.plugins.danmu.updateComments(comments, true);
-  // player.getPlugin('danmu').updateComments(comments, true); // 效果一样
-  // player.plugins.danmu.sendComment({
-  //   duration: 5000, //弹幕持续显示时间,毫秒(最低为5000毫秒)
-  //   id: nanoid(), //弹幕id，需唯一
-  //   start: player.currentTime * 1000, //弹幕出现时间，毫秒
-  //   color: true, //该条弹幕为彩色弹幕，默认false
-  //   txt: '', //弹幕文字内容
-  //   style: {
-  //     //弹幕自定义样式
-  //     color: '#FFFFFF',
-  //   },
-  // }); // 应插件内实现
-};
-
-const create = (options: any): XgPlayer => {
-  const plugins = options.plugins;
-
-  switch (options.type) {
-    case 'customMp4':
-      options.plugins = [...plugins, Mp4Plugin];
-      break;
-    case 'customFlv':
-      options.plugins = [...plugins, FlvPlugin];
-      break;
-    case 'customHls':
-      options.plugins = [...plugins, HlsPlugin];
-      break;
-    case 'customDash':
-      options.plugins = [...plugins, ShakaPlugin];
-    case 'customWebTorrent':
-      break;
-    default:
-      break;
-  }
-  delete options.type;
-  let player;
-  if (options.isLive) {
-    SimplePlayer.defaultPreset = LivePreset;
-    player = new SimplePlayer({ ...options });
-  } else {
-    options.plugins = [...options.plugins, Danmu];
-    player = new XgPlayer({ ...options });
+class XgPlayerAdapter {
+  player: XgPlayer | null = null;
+  options: { [key: string]: any } = {
+    url: '',
+    autoplay: true,
+    pip: true,
+    cssFullscreen: false,
+    startTime: 0,
+    playbackRate: {
+      list: [2, 1.5, 1.25, { rate: 1, iconText: { zh: '倍速' } }, 0.75, 0.5],
+      index: 3,
+    },
+    time: { index: 0 },
+    icons: {
+      play: publicIcons.play,
+      pause: publicIcons.pause,
+      playNext: publicIcons.playNext,
+      fullscreen: publicIcons.fullscreen,
+      exitFullscreen: publicIcons.exitFullscreen,
+      volumeSmall: publicIcons.volumeSmall,
+      volumeLarge: publicIcons.volumeLarge,
+      volumeMuted: publicIcons.volumeMuted,
+      pipIcon: publicIcons.pipIcon,
+      pipIconExit: publicIcons.pipIconExit,
+      openDanmu: publicIcons.openDanmu,
+      closeDanmu: publicIcons.closeDanmu,
+    },
+    commonStyle: {
+      playedColor: publicColor.theme, // 播放完成部分进度条底色
+      volumeColor: publicColor.theme, // 音量颜色
+    },
+    width: 'auto',
+    height: '100%',
+    type: '',
+    id: 'xgplayer',
+    enableContextmenu: true,
+    danmu: {
+      panel: false,
+      comments: [],
+      area: { start: 0, end: 0.3 },
+      defaultOff: true, //开启此项后弹幕不会初始化，默认初始化弹幕
+    },
+    plugins: [],
+  };
+  publicListener: { [key: string]: any } = {
+    timeUpdate: () => {},
+    sendDanmu: () => {},
+    playrateUpdate: () => {},
+    volumeUpdate: () => {},
+    mutedUpdate: () => {},
   };
 
-  player.storage = new publicStorage('xgplayer_settings');
+  create = (options: any): XgPlayer => {
+    options = { ...this.options, ...options };
+    const plugins = options.plugins;
+    options.id = options.container;
+    delete options.container;
+    options.startTime = options?.startTime || 0;
 
-  player.once(Events.READY, () => {
-    if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
-    player.volume = player.storage.get('volume') || 1;
-  });
+    switch (options.type) {
+      case 'customMp4':
+        options.plugins = [...plugins, Mp4Plugin];
+        break;
+      case 'customFlv':
+        options.plugins = [...plugins, FlvPlugin];
+        break;
+      case 'customHls':
+        options.plugins = [...plugins, HlsPlugin];
+        break;
+      case 'customDash':
+        options.plugins = [...plugins, ShakaPlugin];
+      case 'customWebTorrent':
+        break;
+      default:
+        break;
+    }
+    delete options.type;
+    let player;
+    if (options.isLive) {
+      delete options.startTime;
+      SimplePlayer.defaultPreset = LivePreset;
+      player = new SimplePlayer({ ...options });
+    } else {
+      options.plugins = [...options.plugins, Danmu];
+      player = new XgPlayer({ ...options });
+    }
 
-  publicListener.playrateUpdate = () => {
-    player.storage.set('playrate', player.playbackRate);
+    player.storage = new publicStorage('player_settings');
+
+    player.once(Events.READY, () => {
+      if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
+      player.muted = player.storage.get('muted') || false;
+      player.volume =
+        player.storage.get('volume') === null || player.storage.get('volume') === undefined
+          ? 1
+          : player.storage.get('volume');
+    });
+
+    this.publicListener.playrateUpdate = () => {
+      player.storage.set('playrate', player.playbackRate);
+    };
+    player.on(Events.RATE_CHANGE, this.publicListener.playrateUpdate);
+
+    this.publicListener.volumeUpdate = () => {
+      player.storage.set('muted', player.muted);
+      player.storage.set('volume', player.volume);
+    };
+    player.on(Events.VOLUME_CHANGE, this.publicListener.volumeUpdate);
+    this.player = player;
+    return player;
   };
-  player.on(Events.RATE_CHANGE, publicListener.playrateUpdate);
 
-  publicListener.volumeUpdate = () => {
-    player.storage.set('volume', player.volume);
+  currentTime = (): number => {
+    if (!this.player) return 0;
+    return this.player.currentTime || 0;
   };
-  player.on(Events.VOLUME_CHANGE, publicListener.volumeUpdate);
 
-  return player;
-};
-
-const currentTime = (player: XgPlayer): number => {
-  return player.currentTime || 0;
-};
-
-const destroy = (player: XgPlayer) => {
-  player.destroy();
-};
-
-const duration = (player: XgPlayer): number => {
-  return player.duration || 0;
-};
-
-const pause = (player: XgPlayer) => {
-  player.pause();
-};
-
-const play = (player: XgPlayer) => {
-  player.play();
-};
-
-const playNext = (player: XgPlayer, options: any) => {
-  switch (options.type) {
-    case 'customMp4':
-      options.plugins = [Danmu, Mp4Plugin];
-      break;
-    case 'customFlv':
-      options.plugins = [Danmu, FlvPlugin];
-      break;
-    case 'customHls':
-      options.plugins = [Danmu, HlsPlugin];
-      break;
-    case 'customWebTorrent':
-      break;
-    default:
-      break;
-  }
-  player.playNext({ url: options.url });
-  if (player.plugins?.danmu) player.plugins.danmu.clear();
-};
-
-const seek = (player: XgPlayer, time: number) => {
-  player.once(Events.LOADED_DATA, () => {
-    player.seek(time);
-  });
-};
-
-const speed = (player: XgPlayer, speed: number) => {
-  player.once(Events.LOADED_DATA, () => {
-    player.playbackRate = speed;
-  });
-};
-
-const time = (player: XgPlayer) => {
-  return {
-    currentTime: player.currentTime || 0,
-    duration: player.duration || 0,
+  destroy = () => {
+    if (!this.player) return;
+    this.player.destroy();
   };
-};
 
-const offBarrage = (_player: XgPlayer) => {
-  // player.offAll();
-  // 无该事件
-};
+  duration = (): number => {
+    if (!this.player) return 0;
+    return this.player.duration || 0;
+  };
 
-const onTimeUpdate = (player: XgPlayer, callback: any) => {
-  publicListener.timeUpdate = ({ currentTime, duration }) => callback({ currentTime, duration });
-  player.on(Events.TIME_UPDATE, publicListener.timeUpdate);
-};
+  pause = () => {
+    if (!this.player) return;
+    this.player.pause();
+  };
 
-const offTimeUpdate = (player: XgPlayer) => {
-  // player.offAll();
-  player.off(Events.TIME_UPDATE, publicListener.timeUpdate);
-};
+  play = () => {
+    if (!this.player) return;
+    this.player.play();
+  };
 
-const toggle = (player: XgPlayer) => {
-  if (player.paused) player.play();
-  else player.pause();
-};
+  playNext = (options: any) => {
+    if (!this.player) return;
+    switch (options.type) {
+      case 'customMp4':
+        options.plugins = [Danmu, Mp4Plugin];
+        break;
+      case 'customFlv':
+        options.plugins = [Danmu, FlvPlugin];
+        break;
+      case 'customHls':
+        options.plugins = [Danmu, HlsPlugin];
+        break;
+      case 'customWebTorrent':
+        break;
+      default:
+        break;
+    }
+    this.player.playNext({ url: options.url });
+    if (this.player.plugins?.danmu) this.player.plugins.danmu.clear();
+  };
 
-const volume = (player: Artplayer, volume: number) => {
-  player.volume = volume;
-};
+  seek = (time: number) => {
+    if (!this.player) return;
+    this.player.once(Events.LOADED_DATA, () => {
+      this.player!.seek(time);
+    });
+  };
 
-export {
-  options,
-  barrge,
-  create,
-  currentTime,
-  destroy,
-  duration,
-  pause,
-  play,
-  playNext,
-  seek,
-  speed,
-  time,
-  onTimeUpdate,
-  offBarrage,
-  offTimeUpdate,
-  toggle,
-  volume,
-};
+  speed = (speed: number) => {
+    if (!this.player) return;
+    this.player.once(Events.LOADED_DATA, () => {
+      this.player!.playbackRate = speed;
+    });
+  };
+
+  time = (): { currentTime: number; duration: number } => {
+    if (!this.player)
+      return {
+        currentTime: 0,
+        duration: 0,
+      };
+    return {
+      currentTime: this.player.currentTime || 0,
+      duration: this.player.duration || 0,
+    };
+  };
+
+  offBarrage = (_player: XgPlayer) => {
+    if (!this.player) return;
+    // player.offAll();
+    // 无该事件
+  };
+
+  onTimeUpdate = (callback: any) => {
+    if (!this.player) return;
+    this.publicListener.timeUpdate = ({ currentTime, duration }) => callback({ currentTime, duration });
+    this.player.on(Events.TIME_UPDATE, this.publicListener.timeUpdate);
+  };
+
+  offTimeUpdate = () => {
+    if (!this.player) return;
+    this.player.off(Events.TIME_UPDATE, this.publicListener.timeUpdate);
+  };
+
+  toggle = () => {
+    if (!this.player) return;
+    if (this.player.paused) this.player.play();
+    else this.player.pause();
+  };
+
+  volume = (volume: number) => {
+    if (!this.player) return;
+    this.player.volume = volume;
+  };
+}
+
+export default XgPlayerAdapter;

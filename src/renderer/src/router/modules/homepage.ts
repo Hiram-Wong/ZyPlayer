@@ -1,4 +1,5 @@
 import {
+  ExtensionIcon,
   MovieClapperIcon,
   Tv1Icon,
   CloudIcon,
@@ -28,7 +29,7 @@ export default [
       {
         path: 'index',
         name: 'FilmIndex',
-        component: () => import('@/pages/Film.vue'),
+        component: () => import('@/pages/film/index.vue'),
       },
     ],
   },
@@ -40,7 +41,7 @@ export default [
     meta: {
       title: {
         zh_CN: '电视',
-        en_US: 'IPTV',
+        en_US: 'Iptv',
       },
       icon: Tv1Icon,
     },
@@ -48,7 +49,7 @@ export default [
       {
         path: 'index',
         name: 'IptvIndex',
-        component: () => import('@/pages/Iptv.vue'),
+        component: () => import('@/pages/iptv/index.vue'),
       },
     ],
   },
@@ -68,7 +69,7 @@ export default [
       {
         path: 'index',
         name: 'DriveIndex',
-        component: () => import('@/pages/Drive.vue'),
+        component: () => import('@/pages/drive/index.vue'),
       },
     ],
   },
@@ -88,7 +89,7 @@ export default [
       {
         path: 'index',
         name: 'PlayIndex',
-        component: () => import('@/pages/Play.vue'),
+        component: () => import('@/pages/play/index.vue'),
       },
     ],
   },
@@ -108,7 +109,7 @@ export default [
       {
         path: 'index',
         name: 'AnalyzeIndex',
-        component: () => import('@/pages/Analyze.vue'),
+        component: () => import('@/pages/analyze/index.vue'),
       },
     ],
   },
@@ -128,7 +129,7 @@ export default [
       {
         path: 'index',
         name: 'ChaseIndex',
-        component: () => import('@/pages/Chase.vue'),
+        component: () => import('@/pages/chase/index.vue'),
       },
     ],
   },
@@ -149,7 +150,28 @@ export default [
       {
         path: 'index',
         name: 'SettingIndex',
-        component: () => import('@/pages/Setting.vue'),
+        component: () => import('@/pages/setting/index.vue'),
+      },
+    ],
+  },
+  {
+    path: '/lab',
+    name: 'lab',
+    component: Layout,
+    redirect: '/lab/index',
+    meta: {
+      title: {
+        zh_CN: '实验室',
+        en_US: 'Lab',
+      },
+      icon: ExtensionIcon,
+      hidden: true,
+    },
+    children: [
+      {
+        path: 'index',
+        name: 'LabIndex',
+        component: () => import('@/pages/lab/index.vue'),
       },
     ],
   },
@@ -170,7 +192,7 @@ export default [
       {
         path: 'index',
         name: 'TestIndex',
-        component: () => import('@/pages/Test.vue'),
+        component: () => import('@/pages/test/index.vue'),
       },
     ],
   },

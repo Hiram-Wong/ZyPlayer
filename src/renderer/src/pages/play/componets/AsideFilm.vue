@@ -1,0 +1,756 @@
+<template>
+  <div class="container-aside-film">
+    <div v-if="!active.profile" class="contents-wrap">
+      <div class="tvg-block">
+        <div class="title-album">
+          <div class="title-text txthide">{{ info['vod_name'] }}</div>
+          <div class="title-desc" @click="active.profile = true">
+            <span class="title-unfold">{{ $t('pages.player.film.desc') }}</span>
+            <chevron-right-s-icon />
+          </div>
+        </div>
+        <div class="hot-block txthide">
+          <span class="rate">
+            <star-icon size="12px" />
+            {{ info['vod_score'] ? info['vod_score'] : '0.0' }}
+          </span>
+          <t-divider layout="vertical" v-show="info['type_name']" />
+          <span v-show="info['type_name']" class="txthide">{{ info['type_name'] }}</span>
+          <t-divider layout="vertical" v-show="info['vod_area']" />
+          <span v-show="info['vod_area']" class="txthide">{{ info['vod_area'] }}</span>
+          <t-divider layout="vertical" v-show="info['vod_year']" />
+          <span v-show="info['vod_year']" class="txthide">{{ info['vod_year'] }}</span>
+        </div>
+        <div class="function">
+          <div class="func-item like" @click="putBinge(false)">
+            <span>
+              <heart-icon class="icon" v-if="active.binge" />
+              <heart-filled-icon class="icon" v-else />
+            </span>
+            <span class="tip">{{ $t('pages.player.film.like') }}</span>
+          </div>
+          <div class="dot"></div>
+          <div class="func-item download" @click="downloadEvent">
+            <download-icon class="icon" />
+            <span class="tip">{{ $t('pages.player.film.download') }}</span>
+          </div>
+          <div class="dot"></div>
+          <div class="func-item share" @click="shareEvent">
+            <share-popup v-model:visible="active.share" :data="shareFormData">
+              <template #customize>
+                <div style="display: flex; flex-direction: row; align-items: center">
+                  <share1-icon class="icon" />
+                  <span class="tip">{{ $t('pages.player.film.share') }}</span>
+                </div>
+              </template>
+            </share-popup>
+          </div>
+          <div class="dot"></div>
+          <div class="func-item more">
+            <t-dropdown trigger="click">
+              <t-button theme="default" shape="square" variant="text">
+                <more-icon />
+              </t-button>
+              <t-dropdown-menu>
+                <t-dropdown-item>
+                  <div class="setting-item" @click="settingEvent">
+                    <setting-icon />
+                    {{ $t('pages.player.film.setting') }}
+                  </div>
+                </t-dropdown-item>
+              </t-dropdown-menu>
+            </t-dropdown>
+          </div>
+        </div>
+        <dialog-setting-view v-model:visible="active.setting" :data="settingFormData" @update="settingUpdateEvent" />
+        <dialog-download-view v-model:visible="active.download" :data="downloadFormData" />
+      </div>
+      <div class="anthology-contents scroll-y">
+        <div class="box-anthology-header">
+          <div class="left">
+            <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
+            <div class="box-anthology-analyze" v-show="active.official">
+              <t-dropdown placement="bottom" :max-height="250">
+                <t-button size="small" theme="default" variant="text" auto-width>
+                  <span class="title">{{ $t('pages.player.film.analyze') }}</span>
+                  <template #suffix>
+                    <chevron-down-icon size="16" />
+                  </template>
+                </t-button>
+                <t-dropdown-menu>
+                  <t-dropdown-item
+                    v-for="item in analyzeData.list"
+                    :key="item.id"
+                    :value="item.id"
+                    @click="(options) => switchAnalyzeEvent(options.value as string)"
+                  >
+                    <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
+                  </t-dropdown-item>
+                </t-dropdown-menu>
+              </t-dropdown>
+            </div>
+          </div>
+          <div class="right">
+            <div class="box-anthology-reverse-order" @click="reverseOrderEvent">
+              <order-descending-icon v-if="active.reverseOrder" size="1.2em" />
+              <order-ascending-icon v-else size="1.2em" />
+            </div>
+          </div>
+        </div>
+        <div class="listbox">
+          <title-menu v-if="lineList.length > 1" :list="lineList" :active="active.flimSource" class="nav" @change-key="changeLineEvent" />
+          <div class="tag-container">
+            <div
+              v-for="(item, index) in seasonData?.[active.flimSource]"
+              :key="item"
+              :class="['mainVideo-num', item === active.filmIndex ? 'mainVideo-selected' : '']"
+              @click="changeEvent(item)"
+            >
+              <t-tooltip :content="formatName(item)">
+                <div class="mainVideo_inner">
+                  {{
+                    formatReverseOrder(
+                      active.reverseOrder ? 'positive' : 'negative',
+                      index,
+                      seasonData?.[active.flimSource]?.length,
+                    )
+                  }}
+                  <div class="playing"></div>
+                </div>
+              </t-tooltip>
+            </div>
+          </div>
+          <!-- <t-tabs v-model="active.flimSource" class="film-tabs">
+            <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key" :label="key">
+              <div class="tag-container">
+                <div v-for="(item, index) in season?.[active.flimSource]" :key="item"
+                  :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
+                  @click="changeEvent(item)">
+                  {{ index }} {{ item }}
+                  <t-tooltip :content="formatName(item)">
+                    <div class="mainVideo_inner">
+                      {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index, value.length)
+                      }}
+                      <div class="playing"></div>
+                    </div>
+                  </t-tooltip>
+                </div>
+              </div>
+            </t-tab-panel>
+          </t-tabs> -->
+        </div>
+        <div class="recommend" v-show="recommendList.length != 0">
+          <div class="component-title">{{ $t('pages.player.film.recommend') }}</div>
+          <div class="component-list">
+            <div v-for="content in recommendList" :key="content['id']" class="videoItem-card"  @click="recommendEvent(content)">
+              <div class="videoItem-left">
+                <t-image
+                  class="card-main-item"
+                  :src="content['vod_pic']"
+                  :style="{ width: '126px', height: '70px', 'border-radius': '5px' }"
+                  :lazy="true"
+                  fit="cover"
+                >
+                </t-image>
+              </div>
+              <div class="videoItem-right">
+                <div class="title txthide">{{ content['vod_name'] }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else class="profile">
+      <div class="side-head">
+        <div class="title">{{ $t('pages.player.film.desc') }}</div>
+        <close-icon size="1.3em" class="icon" @click="active.profile = false" />
+      </div>
+      <t-divider dashed style="margin: 5px 0" />
+      <div class="side-body scroll-y">
+        <div class="card">
+          <div class="cover">
+            <t-image
+              class="card-main-item"
+              :src="info['vod_pic']"
+              :style="{ width: '100%', height: '100%', 'border-radius': '5px' }"
+              :lazy="true"
+              fit="cover"
+            />
+          </div>
+          <div class="content">
+            <div class="name">{{ info['vod_name'] }}</div>
+            <div class="type">{{ info['type_name'] }}</div>
+            <div class="num">{{ info['vod_remarks'] }}</div>
+          </div>
+        </div>
+        <div class="background">
+          <div class="title">{{ $t('pages.player.film.background') }} </div>
+          <div class="content">
+            <span class="txt" v-html="formatContent(info['vod_content'], '简介')"></span>
+          </div>
+        </div>
+        <div class="case">
+          <div class="title">{{ $t('pages.player.film.actors') }}</div>
+          <div class="content">
+            <div v-show="info['vod_director']">
+              <span class="name">{{ $t('pages.player.film.director') }}: </span>
+              <span class="role">{{ formatContent(info['vod_director'], '导演') }}</span>
+            </div>
+            <div v-show="info['vod_actor']">
+              <span class="name">{{ $t('pages.player.film.actor') }}: </span>
+              <span class="role">{{ formatContent(info['vod_actor'], '主演') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="tsx">
+import { ref, watch, computed, onMounted } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
+import moment from 'moment';
+import {
+  ChevronDownIcon,
+  ChevronRightSIcon,
+  CloseIcon,
+  DownloadIcon,
+  HeartIcon,
+  HeartFilledIcon,
+  SettingIcon,
+  MoreIcon,
+  OrderAscendingIcon,
+  OrderDescendingIcon,
+  StarIcon,
+  Share1Icon
+} from 'tdesign-icons-vue-next';
+import {
+  fetchBingeData,
+  putBingeData,
+  fetchHistoryData,
+  putHistoryData,
+  fetchAnalyzeData,
+  fetchBarrageData,
+  playHelper,
+  reverseOrderHelper,
+  fetchRecommSearchHelper,
+  formatName,
+  formatIndex,
+  formatContent,
+  formatSeason,
+  formatReverseOrder,
+} from '@/utils/common/film';
+import { fetchRecommPage } from '@/api/site';
+import { fetchConfig } from '@/api/setting';
+import { t } from '@/locales';
+import DialogDownloadView from './DialogDownload.vue';
+import DialogSettingView from './DialogSetting.vue';
+import SharePopup from '@/components/share-popup/index.vue';
+import TitleMenu from '@/components/title-menu/index.vue';
+
+const props = defineProps({
+  info: {
+    type: Object,
+    default: {}
+  },
+  ext: {
+    type: Object,
+    default: {}
+  },
+  process: {
+    type: Object,
+    default: {
+      currentTime: 0,
+      duration: 0
+    }
+  }
+});
+
+const emits = defineEmits(['update', 'play']);
+const infoConf = ref(props.info);
+const extConf = ref(props.ext);
+const processConf = ref(props.process)
+
+const formData = ref({
+  title: props.info.vod_name
+});
+const analyzeData = ref<{ [key: string]: any[] }>({
+  list: [],
+  flag: [],
+});
+const bingeData = ref<{ [key: string]: any }>({});
+const historyData = ref<{ [key: string]: any }>({});
+const seasonData = ref<{ [key: string]: any }>({});
+const lineList = computed(() => {
+  return Object.keys(seasonData.value).map(item => ({ type_id: item, type_name: item}))
+});
+const videoData = ref<{ [key: string]: any }>({
+  url: '',
+  playEnd: false,
+  watchTime: 0,
+  duration: 0,
+  skipTimeInStart: 30,
+  skipTimeInEnd: 30,
+});
+const recommendList = ref<any[]>([]);
+const shareFormData = ref({
+  name: '',
+  url: '',
+  provider: 'zyfun',
+});
+const downloadFormData = ref({ season: {}, current: '' });
+const settingFormData = ref({
+  skipStartEnd: false,
+  skipTimeInStart: 30,
+  skipTimeInEnd: 30,
+  preloadNext: false,
+  skipAd: false
+});
+const playFormData = ref({
+  url: '',
+  headers: {},
+});
+const active = ref({
+  profile: false,
+  binge: true,
+  reverseOrder: true,
+  share: false,
+  download: false,
+  setting: false,
+  official: false,
+  analyzeId: '',
+  filmIndex: '',
+  flimSource: '',
+});
+const tmp = ref({
+  preloadNext: {
+    url: '',
+    headers: {},
+    load: false,
+    init: false,
+    barrage: [],
+    mediaType: '',
+  },
+  end: false,
+});
+
+watch(
+  () => props.info,
+  (val) => {
+    infoConf.value = val;
+    formData.value.title = val.vod_name;
+  },
+  { deep: true }
+);
+watch(
+  () => props.process,
+  (val) => {
+    processConf.value = val;
+  },
+  { deep: true }
+);
+watch(
+  () => props.ext,
+  (val) => {
+    extConf.value = val;
+  },
+  { deep: true }
+);
+watch(
+  () => processConf.value,
+  (val) => {
+    // console.log(val)
+    timerUpdatePlayProcess(val.currentTime, val.duration);
+  },
+  { deep: true }
+);
+onMounted(() => {
+  setup();
+});
+
+
+// 获取收藏
+const fetchBinge = async () => {
+  const { key } = extConf.value.site;
+  const { vod_id } = infoConf.value;
+  const response = await fetchBingeData(key, vod_id);
+  bingeData.value = response.data;
+  active.value.binge = !response.status;
+};
+
+// 更新收藏
+const putBinge = async (update: boolean = false) => {
+  const constructDoc = () => ({
+    relateId: extConf.value.site.key,
+    videoId: infoConf.value.vod_id,
+    videoImage: infoConf.value.vod_pic,
+    videoName: infoConf.value.vod_name,
+    videoType: infoConf.value.type_name,
+    videoRemarks: infoConf.value.vod_remarks,
+  });
+
+  let response: any;
+
+  if (bingeData.value?.id) {
+    if (update) {
+      response = await putBingeData('update', bingeData.value.id, constructDoc());
+      if (response?.data) bingeData.value = response.data;
+    } else {
+      response = await putBingeData('del', bingeData.value.id, {});
+      bingeData.value = {
+        relateId: null,
+        videoId: 0,
+        videoImage: '',
+        videoName: '',
+        videoType: '',
+        videoRemarks: '',
+        id: null,
+      };
+    }
+  } else if (!update) {
+    response = await putBingeData('add', '', constructDoc());
+    if (response?.data) bingeData.value = response.data;
+  }
+
+  if (response && !response.status) {
+    MessagePlugin.error(t('pages.player.message.error'));
+    return;
+  }
+
+  if (!update) active.value.binge = !active.value.binge;
+};
+
+// 获取历史
+const fetchHistory = async () => {
+  const response = await fetchHistoryData(extConf.value.site.key, infoConf.value.vod_id);
+  if (response.siteSource) active.value.flimSource = response.siteSource;
+  if (response.videoIndex) active.value.filmIndex = response.videoIndex;
+  if (!response.siteSource) response.siteSource = active.value.flimSource;
+  if (!response.videoIndex) response.videoIndex = active.value.filmIndex;
+  historyData.value = response;
+  videoData.value.skipTimeInStart = response.skipTimeInStart;
+  videoData.value.skipTimeInEnd = response.skipTimeInEnd;
+};
+
+// 更新历史
+const putHistory = async () => {
+  const doc = {
+    date: moment().unix(),
+    type: 'film',
+    relateId: extConf.value.site.key,
+    siteSource: active.value.flimSource,
+    playEnd: videoData.value.playEnd,
+    videoId: infoConf.value['vod_id'],
+    videoImage: infoConf.value['vod_pic'],
+    videoName: infoConf.value['vod_name'],
+    videoIndex: active.value.filmIndex,
+    watchTime: videoData.value.watchTime,
+    duration: videoData.value.duration,
+    skipTimeInStart: videoData.value.skipTimeInStart,
+    skipTimeInEnd: videoData.value.skipTimeInEnd,
+  };
+  console.log(1111)
+  const response: any = await putHistoryData(historyData.value?.id, doc);
+  historyData.value = response;
+};
+
+// 分享 dialog 数据
+const shareEvent = () => {
+  const name = `${infoConf.value['vod_name']} ${formatIndex(active.value.filmIndex).index}`;
+  shareFormData.value = { ...shareFormData.value, name, url: videoData.value.url };
+  active.value.share = true;
+};
+
+// 下载 dialog 数据
+const downloadEvent = () => {
+  downloadFormData.value = {
+    season: seasonData.value,
+    current: videoData.value.url,
+  };
+  active.value.download = true;
+};
+
+const settingEvent = () => {
+  settingFormData.value = {
+    skipStartEnd: extConf.value.setting.skipStartEnd,
+    skipTimeInStart: videoData.value.skipTimeInStart,
+    skipTimeInEnd: videoData.value.skipTimeInEnd,
+    preloadNext: extConf.value.setting.preloadNext,
+    skipAd: extConf.value.setting.skipAd
+  };
+  active.value.setting = true;
+};
+
+const switchLineEvent = (id: string) => {
+  active.value.flimSource = id;
+};
+
+// 切换解析接口
+const switchAnalyzeEvent = async (id: string) => {
+  active.value.analyzeId = id;
+  if (active.value.filmIndex) {
+    const { site } = extConf.value;
+    const { skipAd } = extConf.value.setting;
+    let { url } = formatIndex(active.value.filmIndex);
+    url = decodeURIComponent(url);
+    const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
+    const response = await playHelper(url, site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, skipAd);
+    if (response?.url) {
+      videoData.value.url = response.url;
+      emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
+    };
+  }
+};
+
+// 剧集顺序
+const reverseOrderEvent = () => {
+  active.value.reverseOrder = !active.value.reverseOrder;
+  if (active.value.reverseOrder) {
+    seasonData.value = reverseOrderHelper('positive', infoConf.value.fullList);
+  } else {
+    seasonData.value = reverseOrderHelper('negative', seasonData.value);
+  }
+};
+
+const settingUpdateEvent = (item) => {
+  console.log(item)
+  historyData.value.skipTimeInStart = item.skipTimeInStart;
+  historyData.value.skipTimeInEnd = item.skipTimeInEnd;
+  videoData.value.skipTimeInStart = item.skipTimeInStart;
+  videoData.value.skipTimeInEnd = item.skipTimeInEnd;
+  extConf.value.setting.skipAd = item.skipAd;
+  extConf.value.setting.preloadNext = item.preloadNext;
+  extConf.value.setting.skipStartEnd = item.skipStartEnd;
+
+  emits('update', {
+    type: 'film',
+    setting: extConf.value.setting,
+    data: Object.assign({}, { info: infoConf, ext: extConf })
+  });
+};
+
+// 获取豆瓣影片推荐
+const fetchRecommend = async () => {
+  let { vod_name: name, vod_year: year, vod_douban_id: doubanId, vod_douban_type: doubanType } = infoConf.value;
+  if (!year) year = new Date().getFullYear();
+  const res = await fetchRecommPage({ id: doubanId, type: doubanType, name, year });
+  recommendList.value = res || [];
+};
+
+// 推荐刷新数据
+const recommendEvent = async (item) => {
+  const { site } = extConf.value;
+  const res = await fetchRecommSearchHelper(site, item.vod_name);
+
+  if (Object.keys(res).length > 0) {
+    infoConf.value = res;
+    recommendList.value = [];
+    historyData.value = {};
+    seasonData.value = {};
+    videoData.value = {
+      url: '',
+      playEnd: false,
+      watchTime: 0,
+      duration: 0,
+      skipTimeInStart: 30,
+      skipTimeInEnd: 30,
+    };
+    active.value = {
+      profile: false,
+      binge: false,
+      reverseOrder: true,
+      share: false,
+      download: false,
+      setting: false,
+      official: false,
+      analyzeId: '',
+      filmIndex: '',
+      flimSource: '',
+    };
+    emits('update', {
+      type: 'film',
+      data: Object.assign({ info: item, ext: extConf })
+    });
+    setup();
+  } else {
+    MessagePlugin.warning(t('pages.player.message.noRecommendSearch'));
+  }
+};
+
+// 切换选集
+const changeEvent = async (item) => {
+  active.value.filmIndex = item;
+
+  // 当前源dataHistory.value.siteSource 选择源active.flimSource；当前集dataHistory.value.videoIndex 选择源index
+  // 1. 同源 不同集 变   return true
+  // 2. 同源 同集 不变   return true
+  // 3. 不同源 不同集 变 return true
+  // 4. 不同源 同集 不变 return true
+  // 待优化 不同源的index不同，要重新索引  但是 综艺不对应
+  if (historyData.value['siteSource'] === active.value.flimSource) {
+    // 同源
+    if (formatIndex(historyData.value['videoIndex']).index !== formatIndex(active.value.filmIndex).index) {
+      videoData.value.watchTime = 0;
+      videoData.value.playEnd = false;
+    }
+  } else if (formatIndex(historyData.value['videoIndex']).index !== formatIndex(active.value.filmIndex).index) {
+    // 不同源
+    videoData.value.watchTime = 0;
+    videoData.value.playEnd = false;
+  }
+
+  await putHistory();
+  const { skipAd } = extConf.value.setting;
+  let { url } = formatIndex(active.value.filmIndex);
+  url = decodeURIComponent(url);
+  videoData.value.url = url;
+  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
+  let response;
+  if (tmp.value.preloadNext.init) response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType }
+  response = await playHelper(url, extConf.value.site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, skipAd);
+  if (response?.url) {
+    videoData.value.url = response.url;
+    emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
+  };
+  tmp.value = {
+    preloadNext: {
+      url: '',
+      headers: {},
+      load: false,
+      init: false,
+      barrage: [],
+      mediaType: '',
+    },
+    end: false,
+  }
+};
+
+// 获取弹幕
+const fetchBarrage = async (url: string, options: any, active: any) => {
+  const response = await fetchBarrageData(url, options, active);
+  return response || [];
+};
+
+const setup = async () => {
+  const { site, setting } = extConf.value;
+
+  // 1. 格式化剧集数据
+  const formattedSeason = await formatSeason(infoConf.value);
+  infoConf.value.fullList = formattedSeason;
+
+  // 2. 设置默认选集
+  active.value.flimSource = active.value.flimSource || Object.keys(formattedSeason)[0];
+  active.value.filmIndex = active.value.filmIndex || formattedSeason[active.value.flimSource][0];
+
+  // 3. 选集排序
+  if (active.value.reverseOrder) seasonData.value = formattedSeason;
+  else seasonData.value = reverseOrderHelper('negative', formattedSeason);
+
+  // 4. 获取播放记录
+  await fetchHistory();
+  if (!historyData.value?.id) await putHistory();
+
+  // 5. 获取解析规则 + 是否显示解析
+  const analyzeRes = await fetchAnalyzeData();
+  if (analyzeRes.hasOwnProperty('data')) analyzeData.value.list = analyzeRes['data'];
+  if (analyzeRes.hasOwnProperty('default')) active.value.analyzeId = analyzeRes['default']['id'];
+  if (analyzeRes.hasOwnProperty('flag')) {
+    analyzeData.value.flag = analyzeRes['flag'];
+    if (analyzeRes.flag.includes(active.value.flimSource)) active.value.official = true;
+  };
+
+  // 6. 获取推荐(不影响)
+  fetchRecommend();
+
+  // 7. 获取收藏(不影响)
+  fetchBinge();
+
+  // 8. 获取跳过时间
+  if (setting.skipStartEnd) {
+    if (historyData.value.watchTime < videoData.value.skipTimeInStart) {
+      videoData.value.skipTime = videoData.value.skipTimeInStart;
+    } else {
+      videoData.value.skipTime = historyData.value.watchTime;
+    };
+  };
+
+  // 9. 播放
+  let { url } = formatIndex(active.value.filmIndex);
+  url = decodeURIComponent(url);
+  videoData.value.url = url;
+  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
+  const response = await playHelper(url, site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, setting.skipAd);
+  if (response?.url) {
+    videoData.value.url = response.url;
+    emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
+  };
+};
+
+// 定时更新播放进度
+const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
+  // 1.不处理当前或总进度为0或负数
+  if (!currentTime || !duration || currentTime < 0 || duration < 0) return;
+
+  const index = seasonData.value[active.value.flimSource].indexOf(active.value.filmIndex);
+  if (index === -1) return;
+
+  const isLast = () => {
+    if (active.value.reverseOrder) {
+      return seasonData.value[active.value.flimSource].length === index + 1;
+    } else {
+      return index === 0;
+    }
+  };
+
+  // 2.获取跳过时间
+  const { preloadNext, skipStartEnd, skipAd, barrage } = extConf.value.setting;
+  const watchTime = skipStartEnd ? currentTime + videoData.value.skipTimeInEnd : currentTime;
+  console.log(
+    `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
+  );
+
+  // 3.预加载下集链接 提前30秒预加载
+  if (watchTime + 30 >= duration && duration !== 0) {
+    if (!isLast() && !tmp.value.preloadNext.load && preloadNext) {
+      tmp.value.preloadNext.load = true;
+      try {
+        const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
+        const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
+        const sourceUrl = formatIndex(nextInfo).url;
+        const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
+        const response = await playHelper(sourceUrl, extConf.value.site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, skipAd);
+
+        if (response?.url) {
+          tmp.value.preloadNext.url = response.url;
+          tmp.value.preloadNext.headers = response.headers;
+          tmp.value.preloadNext.mediaType = response.mediaType;
+          const { url, key, support, start, mode, color, content } = barrage;
+          if (!(url && key && support && start && mode && color && content)) return;
+          if (!support.includes(active.value.flimSource)) return;
+          const barrageRes = await fetchConfig({ url: `${url}${sourceUrl}`, method: 'GET'});
+          if (!barrageRes[key] || barrageRes[key].length === 0) return;
+          tmp.value.preloadNext.barrage = barrageRes.danmuku;
+          tmp.value.preloadNext.init = true;
+        }
+      } catch (err) {}
+    }
+  };
+
+  // 4.播放下集  不是最后一集 & 时间>尾部跳过时间+观看时间
+  if (!isLast() && watchTime >= duration && duration !== 0 && !tmp.value.end) {
+    tmp.value.end = true;
+    const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
+    const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
+    await changeEvent(nextInfo);
+  };
+};
+
+const changeLineEvent = (key) => {
+  active.value.flimSource = key;
+}
+</script>
+
+<style lang="less" scoped>
+</style>

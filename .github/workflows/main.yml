@@ -10,9 +10,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
-        # os: [windows-latest, macos-latest, ubuntu-latest]
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
       - name: Check out Git repository
@@ -20,7 +20,7 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Install Node.js 22.x
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'latest'
@@ -51,23 +51,12 @@ jobs:
           path: ./dist/*-win-*.exe
           if-no-files-found: ignore
 
-      - name: Upload Artifact (Linux AppImage)
+      - name: Upload Artifact (Linux)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux-appimage
-          path: ./dist/*.AppImage
-          if-no-files-found: ignore
-
-      - name: Upload Artifact (Linux deb)
-        uses: actions/upload-artifact@v4
-        with:
-          name: zyplayer-linux-deb
-          path: ./dist/*.deb
-          if-no-files-found: ignore
-
-      - name: Upload Artifact (Linux rpm)
-        uses: actions/upload-artifact@v4
-        with:
-          name: zyplayer-linux-rpm
-          path: ./dist/*.rpm
+          name: zyplayer-linux
+          path: |
+            ./dist/*.AppImage
+            ./dist/*.deb
+            ./dist/*.rpm
           if-no-files-found: ignore

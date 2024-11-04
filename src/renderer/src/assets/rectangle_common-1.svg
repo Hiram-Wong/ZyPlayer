@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12.9338439px" height="28px" viewBox="0 0 12.9338439 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>矩形</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="13" height="28"></rect>
+    </defs>
+    <g id="PCW" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="TVG调整细节" transform="translate(-1001, -766)">
+            <g id="矩形" transform="translate(1001, 766)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="蒙版"></g>
+                <path d="M8.93384394,0 C11.1429829,0 12.9338439,1.790861 12.9338439,4 C12.9338439,4.54170711 12.8238129,5.0777698 12.6104241,5.57567719 L4.03899549,25.5756772 C3.40868032,27.0464126 1.9625278,28 0.362415368,28 L-51,28 C-53.209139,28 -55,26.209139 -55,24 L-55,4 C-55,1.790861 -53.209139,0 -51,0 L8.93384394,0 Z M8.93384394,1 L-51,1 C-52.6568542,1 -54,2.34314575 -54,4 L-54,24 C-54,25.6568542 -52.6568542,27 -51,27 L0.362415368,27 C1.56249969,27 2.64711408,26.2848094 3.11985046,25.1817579 L11.691279,5.1817579 C11.8513207,4.80832735 11.9338439,4.40628033 11.9338439,4 C11.9338439,2.34314575 10.5906982,1 8.93384394,1 Z" fill-opacity="0.1" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-2)"></path>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -26,7 +26,6 @@ export function mapModuleRouterList(modules: Record<string, unknown>): Array<Rou
     const modList = Array.isArray(mod) ? [...mod] : [mod];
     routerList.push(...modList);
   });
-  console.log(routerList);
   return routerList;
 }
 

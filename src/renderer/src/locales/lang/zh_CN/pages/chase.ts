@@ -11,7 +11,7 @@ export default {
     clearAll: '清空',
     message: {
       noCheckData: '无检测数据, 跳过此操作',
-    }
+    },
   },
   dialog: {
     clearAll: {
@@ -32,6 +32,7 @@ export default {
   },
   infiniteLoading: {
     complete: '人家是有底线的',
+    noMore: '人家是有底线的',
     error: '哎呀，出了点差错',
   },
   sourceDeleted: '该源应该被删除了哦',

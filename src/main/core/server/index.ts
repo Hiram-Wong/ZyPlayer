@@ -1,40 +1,34 @@
 import { app } from 'electron';
 import fastify from 'fastify';
-import fastifyLogger from 'fastify-logger';
-import fastifyMultipart from '@fastify/multipart';
 import fastifyCors from '@fastify/cors';
+import fastifyMultipart from '@fastify/multipart';
+import fastifyLogger from 'fastify-logger';
+import fastifyPlugin from 'fastify-plugin';
 
 import { JsonDB, Config } from 'node-json-db';
 import { join } from 'path';
-import logger from '../logger';
-import {
-  analyze,
-  iptv,
-  setting,
-  drive,
-  site,
-  history,
-  star,
-  db,
-  proxy,
-  catbox,
-  cache,
-  lab,
-  file,
-  barrge,
-  util,
-} from './routes';
-import initConfig from './routes/catbox/config';
+import logger from '@main/core/logger';
+import routesV1Modules from './routes/v1';
+import initConfig from './routes/v1/catbox/config';
+import webdev from '@main/utils/webdev';
+import { setting, db } from '@main/core/db/service';
 
-logger.info('[server] fastify module initialized');
+async function jsonDbPlugin(fastify) {
+  const db = new JsonDB(new Config(join(app.getPath('userData'), 'cache.json'), true, true, '/'));
+  fastify.decorate('db', db);
+}
+
+const wrappedJsonDbPlugin = fastifyPlugin(jsonDbPlugin, {
+  fastify: '5.x',
+  name: 'json-db-plugin',
+});
 
 let logOpt = {
-  console: true, // 是否开启console.log 。。。
+  console: true,
   file: join(app.getPath('userData'), 'logs/fastify.log'), // 文件路径
   maxBufferLength: 4096, // 日志写入缓存队列最大长度
   flushInterval: 1000, // flush间隔
   logrotator: {
-    // 分割配置
     byHour: false,
     byDay: true,
     hourDelimiter: '_',
@@ -43,7 +37,7 @@ let logOpt = {
 const { opt } = fastifyLogger(logOpt);
 opt.stream = null;
 
-const initServer = async () => {
+const setup = async () => {
   const server = fastify({
     logger: opt, // 是否开启日志
     forceCloseConnections: true, // 是否强制关闭连接
@@ -53,41 +47,70 @@ const initServer = async () => {
   });
 
   try {
-    server.addHook('onError', async (_request, _reply, error) => {
-      logger.error(error);
-      if (!error.statusCode) error.statusCode = 500;
-      return error;
+    server.setErrorHandler((error, _request, reply) => {
+      server.log.error(error);
+
+      reply.status(500).send({
+        code: -1,
+        msg: `Internal Server Error - ${error.name}`,
+        data: error.message,
+      });
     });
 
     server.decorate('config', initConfig);
-    server.decorate('db', new JsonDB(new Config(join(app.getPath('userData'), 'cache.json'), true, true, '/')));
-
-    server.get('/', async (_, reply) => {
-      reply.code(200).send({ status: 'run' });
-    });
+    server.register(wrappedJsonDbPlugin);
     server.register(fastifyMultipart);
     server.register(fastifyCors);
-    server.register(analyze);
-    server.register(iptv);
-    server.register(setting);
-    server.register(drive);
-    server.register(site);
-    server.register(history);
-    server.register(star);
-    server.register(db);
-    server.register(proxy);
-    server.register(catbox);
-    server.register(cache);
-    server.register(lab);
-    server.register(file);
-    server.register(barrge);
-    server.register(util);
+
+    // 注册 v1 路由
+    Object.keys(routesV1Modules).forEach((key) => {
+      server.register(routesV1Modules[key]);
+    });
 
     await server.listen({ port: 9978, host: '0.0.0.0' });
+    logger.info('[server][init] listen:http://0.0.0.0:9978');
+
+    const syncWebdevData = async () => {
+      logger.info('[webdev][sync]开始尝试同步数据...');
+
+      try {
+        const dbResWebdev = await setting.get('webdev');
+        if (!dbResWebdev || !dbResWebdev.sync) {
+          logger.info('[webdev][sync]同步未开启, 跳过同步');
+          return;
+        }
+
+        const webdevConfig = dbResWebdev.data;
+        if (!webdevConfig.url || !webdevConfig.username || !webdevConfig.password) {
+          logger.info('[webdev][sync]配置不完整, 同步失败');
+          return;
+        }
+
+        let instance: webdev | null = new webdev({
+          url: webdevConfig.url,
+          username: webdevConfig.username,
+          password: webdevConfig.password,
+        });
+
+        const initRes = await instance.initializeWebdavClient();
+        if (initRes) {
+          const doc = await db.all();
+          await instance.rsyncRemote(doc);
+          instance = null; // 释放内存
+          logger.info('[webdev][sync]数据同步完成');
+        } else {
+          logger.info('[webdev][sync]客户端初始化失败');
+        }
+      } catch (err: any) {
+        logger.info(`[webdev][sync]同步过程中发生错误:${err.message}`);
+      }
+    };
+
+    setInterval(syncWebdevData, 5 * 60 * 1000);
   } catch (err) {
     server.log.error(err);
     process.exit(1);
   }
 };
 
-export default initServer;
+export default setup;

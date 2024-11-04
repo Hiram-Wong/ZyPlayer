@@ -8,10 +8,11 @@
     <div class="right no-drag">
       <div class="system-functions">
         <sponsor class="system-function" />
-        <!-- <just-look class="system-function" /> -->
         <language class="system-function" />
         <system-skin class="system-function" />
+        <lab class="system-function" />
         <system-config class="system-function" />
+        <system-pin class="system-function" />
       </div>
       <system-control class="window mg-left" />
     </div>
@@ -20,7 +21,6 @@
 
 <script setup lang="ts">
 import HistoryControl from './HistoryControl.vue';
-// import JustLook from './JustLook.vue';
 import Language from './Language.vue';
 import PlayerShow from './PlayShow.vue';
 import SearchBar from './SearchBar.vue';
@@ -28,6 +28,8 @@ import Sponsor from './Sponsor.vue';
 import SystemConfig from './SystemConfig.vue';
 import SystemControl from './SystemControl.vue';
 import SystemSkin from './SystemSkin.vue';
+import SystemPin from './SystemPin.vue';
+import Lab from './Lab.vue';
 
 const handleMouseDown = (event) => {
   if (event.detail === 2) {
@@ -41,8 +43,11 @@ const handleMouseDown = (event) => {
   -webkit-app-region: drag;
   display: flex;
   justify-content: space-between;
-  height: 32px;
-  margin: var(--td-comp-margin-m) var(--td-comp-margin-xs) var(--td-comp-margin-m) 0;
+  width: 100%;
+  height: 56px;
+  padding: var(--td-comp-margin-m) var(--td-comp-margin-xs) var(--td-comp-margin-m) 0;
+  // height: 32px;
+  // margin: var(--td-comp-margin-m) var(--td-comp-margin-xs) var(--td-comp-margin-m) 0;
 
   .no-drag {
     -webkit-app-region: no-drag;

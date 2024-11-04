@@ -1,10 +1,10 @@
 # see config at https://www.electron.build/configuration/configuration
 
 # 应用程序的唯一标识符
-appId: com.hiram.zyplayer
+appId: com.hiram.zyfun
 # 应用程序的产品名称
-productName: zyplayer
-copyright: Copyright © 2023 zyplayer Team Inc.
+productName: zyfun
+copyright: Copyright © 2023 zyfun Team Inc.
 # 构建资源所在的目录
 directories:
   buildResources: build
@@ -19,10 +19,11 @@ files:
 # 哪些文件将不会被压缩，而是解压到构建目录
 asarUnpack:
   - resources/**
+afterSign: build/notarize.js
 # Windows 平台配置
 win:
   # 可执行文件名
-  executableName: zyplayer
+  executableName: zyfun
   # 应用程序的图标文件路径
   icon: build/icons/logo.ico
   # 构建类型
@@ -31,7 +32,6 @@ win:
       arch:
         - x64
         - arm64
-        - ia32
 # NSIS 安装器配置
 nsis:
   # 安装程序的生成名称
@@ -51,11 +51,11 @@ nsis:
   # 是否显示辅助安装程序的安装模式安装程序页面（选择按机器还是按用户）
   perMachine: true
   # 自定义 nsis
-  include: build/installer.nsh
+  # include: build/installer.nsh（win11 部分机器有 无法正常打开）
 # macOS 平台配置
 mac:
   # 可执行文件名
-  executableName: zyplayer
+  executableName: zyfun
   # 应用程序的图标文件路径
   icon: build/icons/logo.icns
   # 权限继承的文件路径
@@ -84,7 +84,7 @@ dmg:
 # Linux 平台配置
 linux:
   # 可执行文件名
-  executableName: zyplayer
+  executableName: zyfun
   # 应用程序的图标文件路径
   icon: build/icons/logo.icns
   # 构建类型

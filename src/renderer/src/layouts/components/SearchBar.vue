@@ -27,7 +27,7 @@
             </div>
             <div class="history-content">
               <t-tag class="nav-item" shape="round" variant="outline" v-for="(item, index) in searchList" :key="index"
-                @click="searchEvent(item.title)">{{ item.title }}</t-tag>
+                @click="searchEvent(item.videoName)">{{ item.videoName }}</t-tag>
             </div>
           </div>
           <div class="hot">
@@ -62,7 +62,6 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash';
 import moment from 'moment';
 import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -70,12 +69,11 @@ import { computed, onActivated, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import emitter from '@/utils/emitter';
-import { komectHot, doubanHot, kyLiveHot, enlightentHot } from '@/utils/hot';
-import { fetchHistoryList, clearHistorySearchList, addHistory } from '@/api/history';
+import { fetchHistoryPage, delHistory, addHistory } from '@/api/history';
 import { fetchSettingDetail } from '@/api/setting';
+import { fetchHotActive, fetchHotPage } from '@/api/site';
 
 import CONFIG from '@/config/hotClass';
-import emptyImage from '@/assets/empty.svg?raw';
 
 const route = useRoute();
 
@@ -97,10 +95,10 @@ const hotConfig = reactive({
   hotSource: 1,
   hotUpdateTime: moment().format('YYYY-MM-DD'),
   hotData: [],
-  hotOption: [] || {},
+  hotOption: [],
 }) as any;
-const searchList = ref([]) as any;
-const searchValue = ref('');
+const searchList = ref<any []>([]);
+const searchValue = ref<string>('');
 const activeRouteName = computed(() => route.name);
 
 watch(
@@ -136,13 +134,17 @@ const focusEvent = async () => {
 
 // 获取搜索历史
 const getSearchHistory = async () => {
-  const res = await fetchHistoryList(0, 5, 'search');
-  searchList.value = res.data;
+  const res = await fetchHistoryPage({
+    page: 1,
+    pageSize: 5,
+    type: 'search'
+  });
+  if (res.hasOwnProperty('list')) searchList.value = res.list;
 }
 
 // 清空搜索历史
 const clearSearchHistory = async () => {
-  await clearHistorySearchList();
+  await delHistory({ type: 'search' });
   searchList.value = [];
 }
 
@@ -179,8 +181,8 @@ const getFilmSearhConfig = async () => {
 
 // 获取设置配置
 const getSetConfig = async () => {
-  const res = await fetchSettingDetail('defaultHot');
-  const hotType = res.value;
+  const res = await fetchHotActive();
+  const hotType = res?.default;
 
   hotConfig.hotType = hotType;
   if (hotType in hotTypeMappings) {
@@ -212,23 +214,42 @@ const getHotList = async (retryCount = 1) => {
     const date = moment().subtract(retryCount, 'days');
     const dateFormat = hotConfig.hotType === 'enlightent' ? date.format('YYYY/MM/DD') : date.format('YYYY-MM-DD');
 
-    let queryHotList;
+    let queryHotDoc = {};
     switch (hotConfig.hotType) {
       case 'kylive':
-        queryHotList = await kyLiveHot(dateFormat, 2, hotConfig.hotSource);
+        queryHotDoc = {
+          date: dateFormat,
+          type: 2,
+          plat: hotConfig.hotSource
+        };
         break;
       case 'enlightent':
-        queryHotList = await enlightentHot(dateFormat, 'allHot', hotConfig.hotSource, 1);
+        queryHotDoc = {
+          date: dateFormat,
+          sort: 'allHot',
+          channelType: hotConfig.hotSource,
+          day: 1
+        };
         break;
       case 'douban':
-        queryHotList = await doubanHot(hotConfig.hotSource, 20, 0);
+        queryHotDoc = {
+          type: hotConfig.hotSource,
+          limit: 20,
+          start: 0
+        };
         break;
       case 'komect':
-        queryHotList = await komectHot(hotConfig.hotSource, 20, 1);
+        queryHotDoc = {
+          type: hotConfig.hotSource,
+          limit: 20,
+          start: 1
+        };
         break;
-    }
+    };
 
-    if (_.size(queryHotList)) {
+    const queryHotList = await fetchHotPage(queryHotDoc);
+
+    if (queryHotList && queryHotList.length > 0) {
       isVisible.load = false;
       hotConfig.hotData = queryHotList;
       hotConfig.hotUpdateTime = dateFormat;
@@ -249,13 +270,13 @@ const getHotList = async (retryCount = 1) => {
 const searchEvent = async (item) => {
   searchValue.value = item;
   if (activeRouteName.value === 'FilmIndex' || activeRouteName.value === 'AnalyzeIndex') {
-    if (item && _.findIndex(searchList.value, { title: item }) === -1) {
+    if (item && searchList.value.findIndex(doc => doc.videoName === item) === -1) {
       const doc = {
         date: moment().unix(),
-        title: item,
+        videoName: item,
         type: 'search'
       };
-      const searchListSize = _.size(searchList.value);
+      const searchListSize = searchList.value.length;
       if (searchListSize <= 5) {
         searchList.value.unshift(doc);
       } else {
@@ -419,7 +440,7 @@ const refreshHotConfig = () => {
 
 .search-input {
   height: 32px;
-  width: 200px;
+  width: 250px;
 
   :deep(.t-input__prefix) {
     .t-input--suffix {

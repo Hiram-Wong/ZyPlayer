@@ -1,83 +1,51 @@
 import request from '@/utils/request';
 
-// 获取site列表
-export function fetchSiteList() {
+export function addSite(doc: object) {
   return request({
-    url: '/v1/site/list',
-    method: 'get',
-    params: {
-      timestamp: new Date().getTime(),
-    },
+    url: `/v1/site`,
+    method: 'post',
+    data: doc,
   });
 }
 
-// 获取site活跃列表
+export function delSite(doc: object) {
+  return request({
+    url: `/v1/site`,
+    method: 'delete',
+    data: doc,
+  });
+}
+
+export function putSite(doc: object) {
+  return request({
+    url: `/v1/site`,
+    method: 'put',
+    data: doc,
+  });
+}
+
+export function putSiteDefault(id: string) {
+  return request({
+    url: `/v1/site/default/${id}`,
+    method: 'put',
+  });
+}
+
 export function fetchSiteActive() {
   return request({
     url: '/v1/site/active',
     method: 'get',
-    params: {},
   });
 }
 
-// 获取site活跃列表
-export function fetchSiteGroup() {
+export function fetchSitePage(doc: object) {
   return request({
-    url: '/v1/site/group',
+    url: `/v1/site/page`,
     method: 'get',
-    params: {},
+    params: doc,
   });
 }
 
-// 获取分类列表
-export function fetchFilmClass(id: string) {
-  return request({
-    url: '/v1/film/class',
-    method: 'get',
-    params: {
-      id,
-    },
-  });
-}
-
-// 获取影视列表
-export function fetchFilmList(id: string, pg: number, t: string, f: any) {
-  return request({
-    url: '/v1/film/list',
-    method: 'get',
-    params: {
-      id,
-      pg,
-      t,
-      f,
-    },
-  });
-}
-// film搜索
-export function searchFilmList(id: string, kw: string) {
-  return request({
-    url: '/v1/film/search',
-    method: 'get',
-    params: {
-      id,
-      kw,
-    },
-  });
-}
-
-// film详情
-export function fetchFilmDetail(id: string, video_id: string) {
-  return request({
-    url: '/v1/film/detail',
-    method: 'get',
-    params: {
-      id,
-      video_id,
-    },
-  });
-}
-
-// site详情
 export function fetchSiteDetail(id: string) {
   return request({
     url: `/v1/site/${id}`,
@@ -85,54 +53,89 @@ export function fetchSiteDetail(id: string) {
   });
 }
 
-// site分页
-export function fetchSitePage(kw: string) {
+export function fetchHotActive() {
   return request({
-    url: `/v1/site/page`,
+    url: '/v1/hot/active',
     method: 'get',
-    params: {
-      kw,
-    },
   });
 }
 
-export function updateSiteItem(id, doc) {
+export function fetchHotPage(doc: object) {
   return request({
-    url: `/v1/site/${id}`,
-    method: 'put',
-    data: doc,
-  });
-}
-
-export function updateSiteStatus(type, id) {
-  return request({
-    url: `/v1/site/status/${type}/${id}`,
-    method: 'put',
-  });
-}
-
-export function delSiteItem(id) {
-  return request({
-    url: `/v1/site/${id}`,
-    method: 'delete',
-  });
-}
-
-export function checkFilm(id) {
-  return request({
-    url: `/v1/film/check`,
+    url: '/v1/hot/page',
     method: 'get',
-    params: {
-      id,
-    },
+    params: doc,
   });
 }
 
-// site添加
-export function addSiteItem(doc) {
+export function fetchCmsInit(doc: object) {
   return request({
-    url: `/v1/site`,
+    url: '/v1/cms/init',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchCmsHome(doc: object) {
+  return request({
+    url: '/v1/cms/home',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchCmsHomeVod(doc: object) {
+  return request({
+    url: '/v1/cms/homeVod',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchCmsCategory(doc: object) {
+  return request({
+    url: '/v1/cms/category',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchCmsSearch(doc: object) {
+  return request({
+    url: '/v1/cms/search',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchCmsDetail(doc: object) {
+  return request({
+    url: '/v1/cms/detail',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchCmsPlay(doc: object) {
+  return request({
+    url: '/v1/cms/play',
+    method: 'get',
+    params: doc,
+  });
+}
+
+export function fetchCmsRunMain(doc: object) {
+  return request({
+    url: '/v1/cms/runMain',
     method: 'post',
     data: doc,
+  });
+}
+
+export function fetchRecommPage(doc: object) {
+  return request({
+    url: '/v1/recommend/douban',
+    method: 'get',
+    params: doc,
   });
 }
