@@ -18,14 +18,14 @@
             </div>
             <div class="right">
               <div class="info">
-                <p class="name txthide2">{{ info.vod_name }}</p>
-                <p class="info-item">
+                <p class="name txthide">{{ info.vod_name }}</p>
+                <p class="info-item txthide">
                   <span class="label">{{ $t('pages.film.info.release') }}: {{ info?.vod_year || $t('pages.film.info.unknown') }}</span>
                 </p>
-                <p class="info-item">
+                <p class="info-item txthide">
                   <span class="label">{{ $t('pages.film.info.type') }}: {{ info?.type_name || $t('pages.film.info.unknown') }}</span>
                 </p>
-                <p class="info-item">
+                <p class="info-item txthide">
                   <span class="label">{{ $t('pages.film.info.area') }}: {{ info?.vod_area || $t('pages.film.info.unknown') }}</span>
                 </p>
               </div>
@@ -35,7 +35,6 @@
                   <heart-filled-icon class="icon" v-else />
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -43,22 +42,6 @@
           <div class="box-anthology-header">
             <div class="left">
               <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
-              <div class="box-anthology-line">
-                <t-dropdown placement="bottom" :max-height="250">
-                  <t-button size="small" theme="default" variant="text" auto-width>
-                    <span class="title">{{ $t('pages.player.film.line') }}</span>
-                    <template #suffix>
-                      <chevron-down-icon size="16" />
-                    </template>
-                  </t-button>
-                  <t-dropdown-menu>
-                    <t-dropdown-item v-for="(_, key, index) in seasonData" :key="index" :value="key"
-                      @click="(options) => switchLineEvent(options.value as string)">
-                      <span :class="[key as any === active.flimSource ? 'active' : '']">{{ key }}</span>
-                    </t-dropdown-item>
-                  </t-dropdown-menu>
-                </t-dropdown>
-              </div>
               <div class="box-anthology-analyze" v-show="active.official">
                 <t-dropdown placement="bottom" :max-height="250">
                   <t-button size="small" theme="default" variant="text" auto-width>
@@ -84,6 +67,7 @@
             </div>
           </div>
           <div class="listbox">
+            <title-menu v-if="lineList.length > 1" :list="lineList" :active="active.flimSource" class="nav" @change-key="changeLineEvent" />
             <div class="tag-container">
               <div v-for="(item, index) in seasonData?.[active.flimSource]" :key="item"
                 :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
@@ -98,22 +82,6 @@
                 </t-tooltip>
               </div>
             </div>
-            <!-- <t-tabs v-model="active.flimSource" class="film-tabs">
-              <t-tab-panel v-for="(value, key, index) in seasonData" :key="index" :value="key" :label="key">
-                <div class="tag-container">
-                  <div v-for="(item, index) in value" :key="item"
-                    :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
-                    @click="gotoPlay(item)">
-                    <t-tooltip :content="formatName(item)">
-                      <div class="mainVideo_inner">
-                        {{ formatReverseOrder(active.reverseOrder ? 'positive' : 'negative', index, value.length) }}
-                        <div class="playing"></div>
-                      </div>
-                    </t-tooltip>
-                  </div>
-                </div>
-              </t-tab-panel>
-            </t-tabs> -->
           </div>
         </div>
       </div>
@@ -132,11 +100,9 @@ import {
   OrderDescendingIcon,
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { ref, reactive, watch, computed } from 'vue';
-
+import { ref, watch, computed } from 'vue';
 import { usePlayStore } from '@/store';
 import { t } from '@/locales';
-
 import {
   fetchBingeData,
   putBingeData,
@@ -150,6 +116,8 @@ import {
   formatSeason,
   formatReverseOrder
 } from '@/utils/common/film';
+import TitleMenu from '@/components/title-menu/index.vue';
+
 
 const props = defineProps({
   visible: {
@@ -189,6 +157,9 @@ const storePlayer = usePlayStore();
 const set = computed(() => {
   return storePlayer.getSetting;
 });
+const lineList = computed(() => {
+  return Object.keys(seasonData.value).map(item => ({ type_id: item, type_name: item}))
+});
 const formVisible = ref(false);
 const info = ref(props.data);
 const formData = ref(props.site);
@@ -201,7 +172,7 @@ const dataAnalyze = ref({
   active: []
 }) as any;
 
-const active = reactive({
+const active = ref({
   binge: false,
   reverseOrder: true,
   official: false,
@@ -211,8 +182,8 @@ const active = reactive({
 })
 
 const snifferAnalyze = computed(() => {
-  const analyzeSource = active.analyzeId
-    ? dataAnalyze.value.active.find(item => item.id === active.analyzeId)
+  const analyzeSource = active.value.analyzeId
+    ? dataAnalyze.value.active.find(item => item.id === active.value.analyzeId)
     : dataAnalyze.value.default;
 
   const data = {
@@ -233,9 +204,9 @@ const loadData = () => {
 }
 
 const resetStates = () => {
-  active.flimSource = active.filmIndex = active.analyzeId = '';
-  active.official = active.binge = false;
-  active.reverseOrder = true;
+  active.value.flimSource = active.value.filmIndex = active.value.analyzeId = '';
+  active.value.official = active.value.binge = false;
+  active.value.reverseOrder = true;
   seasonData.value = [];
   historyData.value = bingeData.value = dataAnalyze.value = {};
 }
@@ -275,16 +246,16 @@ const fetchAnalyze = async (): Promise<void> => {
   const response = await fetchAnalyzeData();
   dataAnalyze.value = response;
 
-  if (response.default?.id) active.analyzeId = response.default?.id;
+  if (response.default?.id) active.value.analyzeId = response.default?.id;
 };
 
 const filmPlayAndHandleResponse = async (url, site, analyze, flimSource, skipAd) => {
   MessagePlugin.info(t('pages.player.message.play'));
   const response = await playHelper(url, site, analyze, flimSource, skipAd);
-  active.official = response!.isOfficial;
+  active.value.official = response!.isOfficial;
 
   if (response?.url) {
-    if (active.official) {
+    if (active.value.official) {
       if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
       else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
     }
@@ -297,21 +268,21 @@ const filmPlayAndHandleResponse = async (url, site, analyze, flimSource, skipAd)
 const gotoPlay = async (item) => {
   let { url } = formatIndex(item);
   url = decodeURIComponent(url);
-  active.filmIndex = item;
+  active.value.filmIndex = item;
   const analyze = snifferAnalyze.value;
 
-  const response = await filmPlayAndHandleResponse(url, formData.value, analyze, active.flimSource, false);
+  const response = await filmPlayAndHandleResponse(url, formData.value, analyze, active.value.flimSource, false);
   if (response?.url) callSysPlayer(response!.url);
 };
 
 const switchLineEvent = async (id: string) => {
-  active.flimSource = id;
+  active.value.flimSource = id;
 };
 
 // 切换解析接口
 const switchAnalyzeEvent = (id: string) => {
-  active.analyzeId = id;
-  if (active.filmIndex) gotoPlay(active.filmIndex);
+  active.value.analyzeId = id;
+  if (active.value.filmIndex) gotoPlay(active.value.filmIndex);
 };
 
 const callSysPlayer = (url: string): void => {
@@ -326,7 +297,7 @@ const fetchBinge = async () => {
   const { vod_id } = info.value;
   const response = await fetchBingeData(key, vod_id);
   bingeData.value = response.data;
-  active.binge = !response.status;
+  active.value.binge = !response.status;
 };
 
 // 更新收藏
@@ -368,13 +339,13 @@ const putBinge = async (update: boolean = false) => {
     return;
   }
 
-  if (!update) active.binge = !active.binge;
+  if (!update) active.value.binge = !active.value.binge;
 };
 
 // 选集排序
 const reverseOrderEvent = () => {
-  active.reverseOrder = !active.reverseOrder;
-  if (active.reverseOrder) {
+  active.value.reverseOrder = !active.value.reverseOrder;
+  if (active.value.reverseOrder) {
     seasonData.value = reverseOrderHelper('positive', info.value.fullList);
   } else {
     seasonData.value = reverseOrderHelper('negative', seasonData.value);
@@ -385,8 +356,8 @@ const reverseOrderEvent = () => {
 const fetchHistory = async (): Promise<void> => {
   const response = await fetchHistoryData(formData.value.key, info.value.vod_id);
   historyData.value = response;
-  if (response.siteSource) active.flimSource = response.siteSource;
-  if (response.videoIndex) active.filmIndex = response.videoIndex;
+  if (response.siteSource) active.value.flimSource = response.siteSource;
+  if (response.videoIndex) active.value.filmIndex = response.videoIndex;
 };
 
 // 更新历史
@@ -395,12 +366,12 @@ const putHistory = async (): Promise<void> => {
     date: moment().unix(),
     type: 'film',
     relateId: formData.value.key,
-    siteSource: active.flimSource,
+    siteSource: active.value.flimSource,
     playEnd: false,
     videoId: info.value["vod_id"],
     videoImage: info.value["vod_pic"],
     videoName: info.value["vod_name"],
-    videoIndex: active.filmIndex,
+    videoIndex: active.value.filmIndex,
     watchTime: 0,
     duration: null,
     skipTimeInStart: 30,
@@ -415,12 +386,16 @@ const putHistory = async (): Promise<void> => {
 const getDetailInfo = async (): Promise<void> => {
   const formattedSeason = await formatSeason(info.value);
 
-  active.flimSource = active.flimSource || Object.keys(formattedSeason)[0];
-  active.filmIndex = active.filmIndex || formattedSeason[active.flimSource][0];
+  active.value.flimSource = active.value.flimSource || Object.keys(formattedSeason)[0];
+  active.value.filmIndex = active.value.filmIndex || formattedSeason[active.value.flimSource][0];
 
   info.value.fullList = formattedSeason;
   seasonData.value = formattedSeason;
 };
+
+const changeLineEvent = (key: string) => {
+  active.value.flimSource = key;
+}
 </script>
 
 <style lang="less" scoped>
@@ -525,17 +500,18 @@ const getDetailInfo = async (): Promise<void> => {
       line-height: 20px;
       display: flex;
       flex-direction: row;
+      gap: 12px;
 
       .left {
         width: 120px;
         display: block;
         position: relative;
         height: 100%;
-        margin-right: 12px;
       }
 
       .right {
-        // width: calc(100% - 120px);
+        width: calc(100% - 120px - 12px);
+        flex: 1;
       }
 
       .info {
@@ -614,6 +590,7 @@ const getDetailInfo = async (): Promise<void> => {
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
+    margin-top: var(--td-comp-margin-s);
 
     .box-anthology-header {
       font-size: 16px;
@@ -686,10 +663,14 @@ const getDetailInfo = async (): Promise<void> => {
     .listbox {
       overflow: hidden;
 
+      .nav {
+        margin-top: var(--td-comp-margin-s);
+      }
+
       .tag-container {
         display: flex;
         flex-wrap: wrap;
-        padding-top: 10px;
+        margin-top: var(--td-comp-margin-s);
 
         .mainVideo-num {
           position: relative;

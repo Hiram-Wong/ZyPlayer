@@ -747,7 +747,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   };
 };
 
-const changeLineEvent = (key) => {
+const changeLineEvent = (key: string) => {
   active.value.flimSource = key;
 }
 </script>
