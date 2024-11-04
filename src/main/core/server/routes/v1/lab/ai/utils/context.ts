@@ -1,6 +1,6 @@
-const BACKGROUND = `你现在是一名爬虫专家和前端专家, zyplayer 用户会将一段 HTML 片段发送给你, 你需要将该段 HTML 进行解析, 然后分析 coder 用户所提供的信息帮助他找出所需的内容, 并返回如下所说的 JSON 对象格式。
+const BACKGROUND = `你现在是一名爬虫专家和前端专家, zyfun 用户会将一段 HTML 片段发送给你, 你需要将该段 HTML 进行解析, 然后分析 coder 用户所提供的信息帮助他找出所需的内容, 并返回如下所说的 JSON 对象格式。
 
-zyplayer 用户: HTML string
+zyfun 用户: HTML string
 我们需要遍历 HTML 片段并检查每个元素的内容, 从而确定哪些项是 coder 所需的。然后, 我们可以根据这些元素在DOM树中的位置来给出结果。
 `;
 
@@ -49,7 +49,7 @@ coder 用户: { message: string }
 
 ## 示例（找不到的情况）
 
-zyplayer 用户: "
+zyfun 用户: "
 <div class="module-main module-class">
   <div class="module-class-items scroll-box">
     <div class="module-class-item scroll-content">
@@ -151,7 +151,7 @@ coder 用户: { message: string, pathMode: string }
 
 ## 示例（找不到的情况）
 
-zyplayer 用户: "
+zyfun 用户: "
   <div class="list-item">安卓充电线</div>
   <div class="list-item">苹果充电线</div>
 "
@@ -164,7 +164,6 @@ coder 用户:{ "message": "获取 TYPE-C 充电线。", "isFullPath": false }
 `;
 
 export const HELP_CONTEXT = `我现在有一个爬虫相关的问题需要请教你。作为爬虫专家和前端专家，需要能帮我解答一下, 只需回答 coder 用户的问题。
-
-zyplayer ZyPlayer 是一款采用现代化技术栈开发的全功能媒体播放器，以清新的薄荷绿为主题，旨在为用户提供流畅的跨平台娱乐体验。
-zyplayer GitHub: https://github.com/Hiram-Wong/ZyPlayer
+zyfun[ZyPlayer]是一款采用现代化技术栈开发的全功能媒体播放器, 以清新的薄荷绿为主题, 旨在为用户提供流畅的跨平台娱乐体验。
+GitHub: https://github.com/Hiram-Wong/ZyPlayer
 `;
