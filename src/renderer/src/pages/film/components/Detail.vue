@@ -113,7 +113,6 @@ import {
   formatSeason,
   formatReverseOrder
 } from '@/utils/common/film';
-import { usePlayStore } from '@/store';
 import { t } from '@/locales';
 import TitleMenu from '@/components/title-menu/index.vue';
 
@@ -123,17 +122,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  data: {
+  info: {
     type: Object,
-    default: () => {
-      return {};
-    },
+    default: {}
   },
-  site: {
+  ext: {
     type: Object,
-    default: () => {
-      return {};
-    },
+    default: { site: {}, setting: {} }
   },
 });
 
@@ -152,13 +147,9 @@ const renderLoading = () => {
   );
 };
 
-const storePlayer = usePlayStore();
-const set = computed(() => {
-  return storePlayer.getSetting;
-});
 const formVisible = ref(false);
-const infoConf = ref(props.data);
-const formData = ref(props.site);
+const infoConf = ref(props.info);
+const extConf = ref(props.ext);
 const bingeData = ref<{ [key: string]: any }>({});
 const historyData = ref<{ [key: string]: any }>({});
 const seasonData = ref<{ [key: string]: any }>({});
@@ -205,16 +196,17 @@ watch(
   }
 );
 watch(
-  () => props.data,
+  () => props.info,
   (val) => {
     infoConf.value = val;
   }
 );
 watch(
-  () => props.site,
+  () => props.ext,
   (val) => {
-    formData.value = val;
-  }
+    extConf.value = val;
+  },
+  { deep: true }
 );
 
 // 调用本地播放器 + 历史
@@ -223,9 +215,9 @@ const gotoPlay = async (item) => {
   url = decodeURIComponent(url);
   active.value.filmIndex = item;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  const response = await playHelper(url, formData.value, analyzeInfo, analyzeData.value.flag, active.value.flimSource, false);
+  const response = await playHelper(url, extConf.value.site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, false);
   if (response?.url) {
-    const playerMode = set.value.playerMode;
+    const { playerMode } = extConf.value.setting;
     window.electron.ipcRenderer.send('call-player', playerMode.external, response.url);
     putHistory();
   };
@@ -246,7 +238,7 @@ const switchAnalyzeEvent = (key: string) => {
 
 // 获取收藏
 const fetchBinge = async () => {
-  const { key } = formData.value;
+  const { key } = extConf.value.site;
   const { vod_id } = infoConf.value;
   const response = await fetchBingeData(key, vod_id);
   bingeData.value = response.data;
@@ -256,7 +248,7 @@ const fetchBinge = async () => {
 // 更新收藏
 const putBinge = async (update: boolean = false) => {
   const constructDoc = () => ({
-    relateId: formData.value.key,
+    relateId: extConf.value.site.key,
     videoId: infoConf.value.vod_id,
     videoImage: infoConf.value.vod_pic,
     videoName: infoConf.value.vod_name,
@@ -307,7 +299,7 @@ const reverseOrderEvent = () => {
 
 // 获取历史
 const fetchHistory = async () => {
-  const response = await fetchHistoryData(formData.value.key, infoConf.value.vod_id);
+  const response = await fetchHistoryData(extConf.value.site.key, infoConf.value.vod_id);
   if (response.siteSource) active.value.flimSource = response.siteSource;
   if (response.videoIndex) active.value.filmIndex = response.videoIndex;
   if (!response.siteSource) response.siteSource = active.value.flimSource;
@@ -320,7 +312,7 @@ const putHistory = async () => {
   const doc = {
     date: moment().unix(),
     type: 'film',
-    relateId: formData.value.key,
+    relateId: extConf.value.site.key,
     siteSource: active.value.flimSource,
     playEnd: false,
     videoId: infoConf.value['vod_id'],

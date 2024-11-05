@@ -85,7 +85,7 @@
       </div>
     </div>
 
-    <detail-view v-model:visible="isVisible.detail" :site="siteConfig.default" :data="formDetailData" />
+    <detail-view v-model:visible="isVisible.detail" :ext="detailFormData.ext" :info="detailFormData.info" />
     <t-loading :attach="`.${prefix}-content`" size="medium" :loading="isVisible.loading" />
     <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
   </div>
@@ -134,10 +134,9 @@ const infiniteId = ref(+new Date()); // infinite-loading属性重置组件
 const searchTxt = ref(''); // 搜索框
 const searchCurrentSite = ref(); // 搜索当前源
 
-const formDetailData = ref({
-  neme: '',
-  key: '',
-  type: 1,
+const detailFormData = ref({
+  info: {},
+  ext: { site: {}, setting: {} },
 }); //  详情组件源传参
 const isVisible = reactive({
   toolbar: false,
@@ -485,17 +484,18 @@ const playEvent = async (item) => {
     console.log('[film][playEvent]', item);
 
     const playerMode = storePlayer.getSetting.playerMode;
+    const doc = {
+      info: item,
+      ext: { site, setting: storePlayer.setting },
+    }
     if (playerMode.type === 'custom') {
-      formDetailData.value = item;
+      detailFormData.value = doc;
       isVisible.detail = true;
     } else {
       storePlayer.updateConfig({
         type: 'film',
         status: true,
-        data: {
-          info: item,
-          ext: { site: site, setting: storePlayer.setting },
-        },
+        data: doc,
       });
 
       window.electron.ipcRenderer.send('open-play-win', item.vod_name);
