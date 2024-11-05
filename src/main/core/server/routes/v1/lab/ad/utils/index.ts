@@ -1,4 +1,4 @@
-import axios from 'axios';
+import request from '@main/utils/request';
 import logger from '@main/core/logger';
 
 if (typeof Array.prototype.toReversed !== 'function') {
@@ -40,10 +40,11 @@ const urljoin = (fromPath, nowPath) => {
  * @param headers 自定义访问m3u8的请求头,可以不传
  * @returns {string}
  */
-const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
+const fixAdM3u8Ai = async (m3u8_url: string, headers: object = {}) => {
   let ts = new Date().getTime();
-  let option = headers ? { headers: headers } : {};
+  let option = headers;
 
+  // 字符串比较
   function b(s1, s2) {
     let i = 0;
     while (i < s1.length) {
@@ -59,16 +60,24 @@ const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
     return str.split('').reverse().join('');
   }
 
-  //log('播放的地址：' + m3u8_url);
-  const m3u8_response = await axios.get(m3u8_url, option);
-  let m3u8 = m3u8_response.data;
-  //log('m3u8处理前:' + m3u8);
+  // logger.info('播放的地址：' + m3u8_url);
+  console.log({
+    url: m3u8_url,
+    method: 'get',
+    ...option,
+  });
+  let m3u8 = await request({
+    url: m3u8_url,
+    method: 'get',
+    ...option,
+  });
+  // logger.info('m3u8处理前:' + m3u8);
   m3u8 = m3u8
     .trim()
     .split('\n')
     .map((it) => (it.startsWith('#') ? it : urljoin(m3u8_url, it)))
     .join('\n');
-  //log('m3u8处理后:============:' + m3u8);
+  // logger.info('m3u8处理后:============:' + m3u8);
   // 获取嵌套m3u8地址
   m3u8 = m3u8.replace(/\n\n/gi, '\n'); //删除多余的换行符
   let last_url = m3u8.split('\n').slice(-1)[0];
@@ -79,10 +88,13 @@ const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
   if (last_url.includes('.m3u8') && last_url !== m3u8_url) {
     m3u8_url = urljoin(m3u8_url, last_url);
     logger.info('嵌套的m3u8_url:' + m3u8_url);
-    const m3u8_nest_response = await axios.get(m3u8_url, option);
-    m3u8 = m3u8_nest_response.data;
+    m3u8 = await request({
+      url: m3u8_url,
+      method: 'get',
+      ...option,
+    });
   }
-  //log('----处理有广告的地址----');
+  // logger.info('----处理有广告的地址----');
   let s = m3u8
     .trim()
     .split('\n')
@@ -116,9 +128,9 @@ const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
   }
   if (kkk > 30) firststr = secondstr;
   let firststrlen = firststr!.length;
-  //log('字符串长度：' + firststrlen);
+  // logger.info('字符串长度：' + firststrlen);
   let ml = Math.round(ss.length / 2).toString().length; //取数据的长度的位数
-  //log('数据条数的长度：' + ml);
+  // logger.info('数据条数的长度：' + ml);
   //找出最后一条播放地址
   let maxc = 0;
   let laststr = ss.toReversed().find((x) => {
@@ -133,7 +145,7 @@ const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
     return false;
   });
   logger.info('最后一条切片：' + laststr);
-  //log('最小相同字符长度：' + maxl);
+  // logger.info('最小相同字符长度：' + maxl);
   let ad_urls: string[] = [];
   for (let i = 0; i < ss.length; i++) {
     let s = ss[i];
@@ -153,7 +165,7 @@ const fixAdM3u8Ai = async (m3u8_url: string, headers: object | null = null) => {
   logger.info('----广告地址----');
   logger.info(ad_urls);
   m3u8 = ss.join('\n');
-  //log('处理完成');
+  // logger.info('处理完成');
   logger.info('处理耗时：' + (new Date().getTime() - ts).toString());
   return m3u8;
 };

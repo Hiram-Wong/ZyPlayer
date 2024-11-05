@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { JSONPath } from 'jsonpath-plus';
 import PQueue from 'p-queue';
 import { putHistory, findHistory, addHistory } from '@/api/history';
-import { setStream } from '@/api/lab';
 import { setT3Proxy } from '@/api/proxy';
 import { fetchConfig } from '@/api/setting';
 
@@ -234,9 +233,7 @@ const playHelper = async (
   } finally {
     if (adFlag && data.url && !data.url.startsWith('http://127.0.0.1') && data.mediaType.includes('m3u8')) {
       console.log('[film_common][removeAd][start]开始移除广告流程');
-      const response = await setStream(url, '.m3u8', data.headers);
-      if (response.code === 200) data.url = response?.url;
-      data.url = `http://127.0.0.1:9978/api/v1/lab/removeAd?url=${data.url}`;
+      data.url = `http://127.0.0.1:9978/api/v1/lab/ad?url=${encodeURI(data.url)}&type=m3u8&headers=${JSON.stringify(data.headers || {})}`;
       console.log('[film_common][removeAd][end]结束移除广告流程');
     }
     console.log(`[film_common][playHelper][return]`, data);

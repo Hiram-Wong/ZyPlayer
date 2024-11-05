@@ -4,7 +4,7 @@ import setting from './setting';
 import { db } from './db';
 // import proxy from './proxy';
 // import catbox from './catbox';
-import { ai, jsEdit, staticFilter } from './lab';
+import { ad, ai, jsEdit, staticFilter } from './lab';
 import file from './file';
 import { barrge } from './player';
 import system from './system';
@@ -31,6 +31,7 @@ const routesModules = {
   db,
   // proxy,
   // catbox,
+  ad,
   ai,
   jsEdit,
   staticFilter,

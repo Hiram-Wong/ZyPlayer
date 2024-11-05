@@ -26,22 +26,11 @@ export function delDebugSource() {
   });
 }
 
-export function fetchStream(url) {
+export function fetchDelAdStream(doc) {
   return request({
-    url: `/v1/lab/removeAd/${url}`,
+    url: `/v1/lab/ad`,
     method: 'GET',
-  });
-}
-
-export function setStream(url, type, headers: object | null = null) {
-  return request({
-    url: `/v1/lab/removeAd`,
-    params: {
-      url,
-      type,
-      headers,
-    },
-    method: 'GET',
+    params: doc,
   });
 }
 
