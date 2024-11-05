@@ -112,7 +112,7 @@ const fetchHistoryData = async (relateId: string, videoId: number) => {
 };
 
 const putHistoryData = async (id: any = null, doc: any = {}): Promise<void> => {
-  // console.log('[film_common][putHistoryData][start]历史更新流程开启');
+  console.log('[film_common][putHistoryData][start]历史更新流程开启');
   let data: any = {
     id: null,
     date: 1715018234,
@@ -139,12 +139,12 @@ const putHistoryData = async (id: any = null, doc: any = {}): Promise<void> => {
     } else {
       data = await addHistory(doc);
     }
-    // console.log(`[film_common][putHistoryData][return]`, data);
+    console.log(`[film_common][putHistoryData][return]`, data);
   } catch (err) {
     console.log(`[film_common][putHistoryData][error]`, err);
   } finally {
-    // console.log(`[film_common][putHistoryData][end]历史更新流程结束`);
-    return data;
+    console.log(`[film_common][putHistoryData][end]历史更新流程结束`);
+    return data?.[0];
   }
 };
 
