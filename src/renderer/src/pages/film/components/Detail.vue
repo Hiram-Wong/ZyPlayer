@@ -7,7 +7,7 @@
             <div class="left">
               <t-image
                 class="card-main-item"
-                :src="info.vod_pic"
+                :src="infoConf.vod_pic"
                 fit="cover"
                 shape="round"
                 :style="{ width: '120px', height: '100%' }"
@@ -18,15 +18,15 @@
             </div>
             <div class="right">
               <div class="info">
-                <p class="name txthide">{{ info.vod_name }}</p>
+                <p class="name txthide">{{ infoConf.vod_name }}</p>
                 <p class="info-item txthide">
-                  <span class="label">{{ $t('pages.film.info.release') }}: {{ info?.vod_year || $t('pages.film.info.unknown') }}</span>
+                  <span class="label">{{ $t('pages.film.info.release') }}: {{ infoConf?.vod_year || $t('pages.film.info.unknown') }}</span>
                 </p>
                 <p class="info-item txthide">
-                  <span class="label">{{ $t('pages.film.info.type') }}: {{ info?.type_name || $t('pages.film.info.unknown') }}</span>
+                  <span class="label">{{ $t('pages.film.info.type') }}: {{ infoConf?.type_name || $t('pages.film.info.unknown') }}</span>
                 </p>
                 <p class="info-item txthide">
-                  <span class="label">{{ $t('pages.film.info.area') }}: {{ info?.vod_area || $t('pages.film.info.unknown') }}</span>
+                  <span class="label">{{ $t('pages.film.info.area') }}: {{ infoConf?.vod_area || $t('pages.film.info.unknown') }}</span>
                 </p>
               </div>
               <div class="add-box" @click="putBinge(false)">
@@ -51,8 +51,7 @@
                     </template>
                   </t-button>
                   <t-dropdown-menu>
-                    <t-dropdown-item v-for="item in dataAnalyze.active" :key="item.id" :value="item.id"
-                      @click="(options) => switchAnalyzeEvent(options.value as string)">
+                    <t-dropdown-item v-for="item in analyzeData.list" :key="item.id" :value="item.id" @click="switchAnalyzeEvent(item.id)">
                       <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
                     </t-dropdown-item>
                   </t-dropdown-menu>
@@ -67,7 +66,7 @@
             </div>
           </div>
           <div class="listbox">
-            <title-menu v-if="lineList.length > 1" :list="lineList" :active="active.flimSource" class="nav" @change-key="changeLineEvent" />
+            <title-menu v-if="lineList.length > 1" :list="lineList" :active="active.flimSource" class="nav" @change-key="switchLineEvent" />
             <div class="tag-container">
               <div v-for="(item, index) in seasonData?.[active.flimSource]" :key="item"
                 :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
@@ -101,14 +100,12 @@ import {
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch, computed } from 'vue';
-import { usePlayStore } from '@/store';
-import { t } from '@/locales';
+import { fetchAnalyzeActive } from '@/api/analyze';
 import {
   fetchBingeData,
   putBingeData,
   fetchHistoryData,
   putHistoryData,
-  fetchAnalyzeData,
   playHelper,
   reverseOrderHelper,
   formatName,
@@ -116,6 +113,8 @@ import {
   formatSeason,
   formatReverseOrder
 } from '@/utils/common/film';
+import { usePlayStore } from '@/store';
+import { t } from '@/locales';
 import TitleMenu from '@/components/title-menu/index.vue';
 
 
@@ -157,21 +156,19 @@ const storePlayer = usePlayStore();
 const set = computed(() => {
   return storePlayer.getSetting;
 });
-const lineList = computed(() => {
-  return Object.keys(seasonData.value).map(item => ({ type_id: item, type_name: item}))
-});
 const formVisible = ref(false);
-const info = ref(props.data);
+const infoConf = ref(props.data);
 const formData = ref(props.site);
 const bingeData = ref<{ [key: string]: any }>({});
 const historyData = ref<{ [key: string]: any }>({});
 const seasonData = ref<{ [key: string]: any }>({});
-const dataAnalyze = ref({
-  default: { url: '' },
+const lineList = computed(() => {
+  return Object.keys(seasonData.value).map(item => ({ type_id: item, type_name: item}))
+});
+const analyzeData = ref<{ [key: string]: any[] }>({
+  list: [],
   flag: [],
-  active: []
-}) as any;
-
+});
 const active = ref({
   binge: false,
   reverseOrder: true,
@@ -179,44 +176,25 @@ const active = ref({
   flimSource: '',
   filmIndex: '',
   analyzeId: ''
-})
-
-const snifferAnalyze = computed(() => {
-  const analyzeSource = active.value.analyzeId
-    ? dataAnalyze.value.active.find(item => item.id === active.value.analyzeId)
-    : dataAnalyze.value.default;
-
-  const data = {
-    flag: dataAnalyze.value.flag,
-    name: analyzeSource.name,
-    url: analyzeSource.url,
-    type: analyzeSource.type,
-  };
-  return data;
 });
 
 const emit = defineEmits(['update:visible']);
-
-const loadData = () => {
-  fetchBinge();
-  fetchHistory();
-  fetchAnalyze();
-}
 
 const resetStates = () => {
   active.value.flimSource = active.value.filmIndex = active.value.analyzeId = '';
   active.value.official = active.value.binge = false;
   active.value.reverseOrder = true;
   seasonData.value = [];
-  historyData.value = bingeData.value = dataAnalyze.value = {};
-}
+  historyData.value = bingeData.value = {};
+  analyzeData.value = { list: [], flag: [] };
+};
 
 watch(
   () => formVisible.value,
   (val) => {
     emit('update:visible', val);
 
-    if (val) loadData();
+    if (val) setup();
     else resetStates();
   }
 );
@@ -229,9 +207,7 @@ watch(
 watch(
   () => props.data,
   (val) => {
-    info.value = val;
-
-    getDetailInfo();
+    infoConf.value = val;
   }
 );
 watch(
@@ -241,60 +217,37 @@ watch(
   }
 );
 
-// 获取解析
-const fetchAnalyze = async (): Promise<void> => {
-  const response = await fetchAnalyzeData();
-  dataAnalyze.value = response;
-
-  if (response.default?.id) active.value.analyzeId = response.default?.id;
-};
-
-const filmPlayAndHandleResponse = async (url, site, analyze, flimSource, skipAd) => {
-  MessagePlugin.info(t('pages.player.message.play'));
-  const response = await playHelper(url, site, analyze, flimSource, skipAd);
-  active.value.official = response!.isOfficial;
-
-  if (response?.url) {
-    if (active.value.official) {
-      if (analyze?.name) MessagePlugin.info(t('pages.player.message.official', [analyze.name]));
-      else MessagePlugin.warning(t('pages.player.message.noDefaultAnalyze'));
-    }
-  } else MessagePlugin.error(t('pages.player.message.sniiferError'));
-
-  return response;
-};
-
 // 调用本地播放器 + 历史
 const gotoPlay = async (item) => {
   let { url } = formatIndex(item);
   url = decodeURIComponent(url);
   active.value.filmIndex = item;
-  const analyze = snifferAnalyze.value;
-
-  const response = await filmPlayAndHandleResponse(url, formData.value, analyze, active.value.flimSource, false);
-  if (response?.url) callSysPlayer(response!.url);
+  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
+  const response = await playHelper(url, formData.value, analyzeInfo, analyzeData.value.flag, active.value.flimSource, false);
+  if (response?.url) {
+    const playerMode = set.value.playerMode;
+    window.electron.ipcRenderer.send('call-player', playerMode.external, response.url);
+    putHistory();
+  };
 };
 
-const switchLineEvent = async (id: string) => {
-  active.value.flimSource = id;
+// 切换线路
+const switchLineEvent = (key: string) => {
+  active.value.flimSource = key;
+  if (analyzeData.value.flag.includes(key)) active.value.official = true;
+  else active.value.official = false;
 };
 
 // 切换解析接口
-const switchAnalyzeEvent = (id: string) => {
-  active.value.analyzeId = id;
+const switchAnalyzeEvent = (key: string) => {
+  active.value.analyzeId = key;
   if (active.value.filmIndex) gotoPlay(active.value.filmIndex);
-};
-
-const callSysPlayer = (url: string): void => {
-  const playerMode = set.value.playerMode;
-  window.electron.ipcRenderer.send('call-player', playerMode.external, url);
-  putHistory();
 };
 
 // 获取收藏
 const fetchBinge = async () => {
   const { key } = formData.value;
-  const { vod_id } = info.value;
+  const { vod_id } = infoConf.value;
   const response = await fetchBingeData(key, vod_id);
   bingeData.value = response.data;
   active.value.binge = !response.status;
@@ -304,11 +257,11 @@ const fetchBinge = async () => {
 const putBinge = async (update: boolean = false) => {
   const constructDoc = () => ({
     relateId: formData.value.key,
-    videoId: info.value.vod_id,
-    videoImage: info.value.vod_pic,
-    videoName: info.value.vod_name,
-    videoType: info.value.type_name,
-    videoRemarks: info.value.vod_remarks,
+    videoId: infoConf.value.vod_id,
+    videoImage: infoConf.value.vod_pic,
+    videoName: infoConf.value.vod_name,
+    videoType: infoConf.value.type_name,
+    videoRemarks: infoConf.value.vod_remarks,
   });
 
   let response: any;
@@ -322,11 +275,11 @@ const putBinge = async (update: boolean = false) => {
       bingeData.value = {
         relateId: null,
         videoId: 0,
-        videoImage: "",
-        videoName: "",
-        videoType: "",
-        videoRemarks: "",
-        id: null
+        videoImage: '',
+        videoName: '',
+        videoType: '',
+        videoRemarks: '',
+        id: null,
       };
     }
   } else if (!update) {
@@ -342,60 +295,77 @@ const putBinge = async (update: boolean = false) => {
   if (!update) active.value.binge = !active.value.binge;
 };
 
-// 选集排序
+// 剧集顺序
 const reverseOrderEvent = () => {
   active.value.reverseOrder = !active.value.reverseOrder;
   if (active.value.reverseOrder) {
-    seasonData.value = reverseOrderHelper('positive', info.value.fullList);
+    seasonData.value = reverseOrderHelper('positive', infoConf.value.fullList);
   } else {
     seasonData.value = reverseOrderHelper('negative', seasonData.value);
   }
 };
 
 // 获取历史
-const fetchHistory = async (): Promise<void> => {
-  const response = await fetchHistoryData(formData.value.key, info.value.vod_id);
-  historyData.value = response;
+const fetchHistory = async () => {
+  const response = await fetchHistoryData(formData.value.key, infoConf.value.vod_id);
   if (response.siteSource) active.value.flimSource = response.siteSource;
   if (response.videoIndex) active.value.filmIndex = response.videoIndex;
+  if (!response.siteSource) response.siteSource = active.value.flimSource;
+  if (!response.videoIndex) response.videoIndex = active.value.filmIndex;
+  historyData.value = response;
 };
 
 // 更新历史
-const putHistory = async (): Promise<void> => {
+const putHistory = async () => {
   const doc = {
     date: moment().unix(),
     type: 'film',
     relateId: formData.value.key,
     siteSource: active.value.flimSource,
     playEnd: false,
-    videoId: info.value["vod_id"],
-    videoImage: info.value["vod_pic"],
-    videoName: info.value["vod_name"],
+    videoId: infoConf.value['vod_id'],
+    videoImage: infoConf.value['vod_pic'],
+    videoName: infoConf.value['vod_name'],
     videoIndex: active.value.filmIndex,
     watchTime: 0,
-    duration: null,
+    duration: 0,
     skipTimeInStart: 30,
     skipTimeInEnd: 30,
   };
-
   const response: any = await putHistoryData(historyData.value?.id, doc);
   historyData.value = response;
 };
 
 // 获取播放源及剧集
-const getDetailInfo = async (): Promise<void> => {
-  const formattedSeason = await formatSeason(info.value);
+const setup = async () => {
+  // 1. 格式化剧集数据
+  const formattedSeason = await formatSeason(infoConf.value);
+  infoConf.value.fullList = formattedSeason;
 
+  // 2. 设置默认选集
   active.value.flimSource = active.value.flimSource || Object.keys(formattedSeason)[0];
   active.value.filmIndex = active.value.filmIndex || formattedSeason[active.value.flimSource][0];
 
-  info.value.fullList = formattedSeason;
-  seasonData.value = formattedSeason;
-};
+  // 3. 选集排序
+  if (active.value.reverseOrder) seasonData.value = formattedSeason;
+  else seasonData.value = reverseOrderHelper('negative', formattedSeason);
 
-const changeLineEvent = (key: string) => {
-  active.value.flimSource = key;
-}
+  // 4. 获取播放记录
+  await fetchHistory();
+
+  // 5. 获取解析规则 + 是否显示解析
+  const analyzeRes = await fetchAnalyzeActive();
+  console.log(analyzeRes)
+  if (analyzeRes.hasOwnProperty('data')) analyzeData.value.list = analyzeRes['data'];
+  if (analyzeRes.hasOwnProperty('default')) active.value.analyzeId = analyzeRes['default']['id'];
+  if (analyzeRes.hasOwnProperty('flag')) {
+    analyzeData.value.flag = analyzeRes['flag'];
+    if (analyzeRes.flag.includes(active.value.flimSource)) active.value.official = true;
+  };
+
+  // 6. 获取收藏(不影响)
+  fetchBinge();
+};
 </script>
 
 <style lang="less" scoped>
