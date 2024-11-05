@@ -70,7 +70,7 @@
             <div class="tag-container">
               <div v-for="(item, index) in seasonData?.[active.flimSource]" :key="item"
                 :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
-                @click="gotoPlay(item)">
+                @click="switchSeasonEvent(item)">
                 <t-tooltip :content="formatName(item)">
                   <div class="mainVideo_inner">
                     {{ formatReverseOrder(active.reverseOrder ? 'positive' : 'negative', index,
@@ -211,10 +211,9 @@ watch(
 );
 
 // 调用本地播放器 + 历史
-const gotoPlay = async (item) => {
+const callPlay = async (item) => {
   let { url } = formatIndex(item);
   url = decodeURIComponent(url);
-  active.value.filmIndex = item;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
   let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
   if (active.value.official) {
@@ -245,7 +244,13 @@ const switchLineEvent = (key: string) => {
 // 切换解析接口
 const switchAnalyzeEvent = (key: string) => {
   active.value.analyzeId = key;
-  if (active.value.filmIndex) gotoPlay(active.value.filmIndex);
+  if (active.value.filmIndex) callPlay(active.value.filmIndex);
+};
+
+// 切换选集
+const switchSeasonEvent = (item) => {
+  active.value.filmIndex = item;
+  callPlay(item);
 };
 
 // 获取收藏
