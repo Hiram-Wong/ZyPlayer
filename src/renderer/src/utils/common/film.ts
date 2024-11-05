@@ -363,6 +363,7 @@ const formatSeason = (videoList: Record<string, any>) => {
     error: ['formatError$seeMoreErrorMessageForF12'],
   };
   try {
+    if (!videoList['vod_play_from'] || !videoList['vod_play_url']) return;
     // 分离播放源
     const playFrom = videoList['vod_play_from'];
     const playSources = playFrom.split('$').filter(Boolean);
