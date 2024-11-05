@@ -1,10 +1,6 @@
 import _ from 'lodash';
 import { JSONPath } from 'jsonpath-plus';
 import PQueue from 'p-queue';
-
-import { base64 } from '@/utild/crypto';
-
-import { fetchAnalyzeActive } from '@/api/analyze';
 import { putHistory, findHistory, addHistory } from '@/api/history';
 import { setStream } from '@/api/lab';
 import { setT3Proxy } from '@/api/proxy';
@@ -14,7 +10,7 @@ import { findStar, addStar, delStar, putStar } from '@/api/star';
 import { fetchRecommPage, fetchCmsDetail, fetchCmsSearch, fetchCmsPlay } from '@/api/site';
 
 import sniffer from '@/utils/sniffer';
-import { checkMediaType, dictDeepClone } from '@/utils/tool';
+import { checkMediaType } from '@/utils/tool';
 
 const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
@@ -153,48 +149,6 @@ const putHistoryData = async (id: any = null, doc: any = {}): Promise<void> => {
   }
 };
 
-// Analyze
-const fetchAnalyzeData = async (): Promise<{ default: any; flag: any[]; active: any[] }> => {
-  console.log('[film_common][fetchAnalyzeData][start]开始获取解析数据流程');
-  let data: { default: any; flag: any[]; active: any[] } = { default: {}, flag: [], active: [] };
-
-  try {
-    const response = await fetchAnalyzeActive();
-    data = {
-      default: response.default || {},
-      flag: response.flag || [],
-      active: response.active || {},
-    };
-    console.log(`[film_common][fetchAnalyzeData][return]`, data);
-  } catch (err) {
-    console.error(`[film_common][fetchAnalyzeData][error]`, err);
-  } finally {
-    console.log('[film_common][fetchAnalyzeData][end]获取解析数据流程结束');
-    return data;
-  }
-};
-
-// Ad
-const removeAd = async (url: string, type: string, headers: object | null = null) => {
-  console.log('[film_common][removeAd][start]开始移除广告流程');
-  let data = {
-    url,
-    msg: 'fail',
-    code: 500,
-  };
-  try {
-    if (type === 'm3u8') {
-      data = await setStream(url, '.m3u8', headers ? headers : null);
-    }
-    console.log(`[film_common][removeAd][return]`, data);
-  } catch (err) {
-    console.error(`[film_common][removeAd][error]`, err);
-  } finally {
-    console.log('[film_common][removeAd][end]移除广告流程结束');
-    return data;
-  }
-};
-
 /**
  * playHelper
  *
@@ -208,7 +162,7 @@ const removeAd = async (url: string, type: string, headers: object | null = null
  * @param snifferMode 嗅探数据 type url
  * @param url 播放链接
  * @param site 源信息
- * @param analyze 解析 url type flag
+ * @param analyzeType 解析类型
  * @param flimSource 当前选中线路
  * @param adFlag 是否去广告
  * @returns
@@ -216,26 +170,27 @@ const removeAd = async (url: string, type: string, headers: object | null = null
 const playHelper = async (
   url: string,
   site: { [key: string]: string | number },
-  analyze: { [key: string]: string | number },
-  flag: any[],
   flimSource: string,
+  analyzeType: number = -1,
   adFlag = false,
 ) => {
   console.log(`[film_common][playHelper][before_start]准备处理地址:${url}`);
   console.log(`[film_common][playHelper][start]播放处理流程开始`);
 
-  let data: { url: string; mediaType: string; isOfficial: boolean; headers: object } = {
-    url: '',
-    mediaType: '',
-    isOfficial: false,
-    headers: {},
-  };
+  let data = { url: '', originalUrl: url, mediaType: '', headers: {} };
 
   try {
+    // 1. 解析
+    if (analyzeType !== -1) {
+      const analyzeRes = await fetchAnalyzeHelper(url, analyzeType);
+      data = { ...data, url: analyzeRes.url, mediaType: analyzeRes.mediaType, headers: analyzeRes.headers };
+      return;
+    }
+
+    // 2. 执行源规则
     const play = {
       headers: {},
       parse: 0,
-      playUrl: '',
       url,
       sniffer: {
         run_script: '',
@@ -244,57 +199,21 @@ const playHelper = async (
         sniffer_exclude: '',
       },
     };
-
-    // 1. 解析
-    const analyzeUrlObj = url.startsWith('http') ? new URL(url) : null;
-    const analyzeHostname = analyzeUrlObj?.hostname;
-    const isOfficial = (analyzeHostname && VIP_LIST.includes(analyzeHostname)) || flag.includes(flimSource);
-    if (isOfficial) {
-      const officialSnifferUrl = `${analyze.url}${url}`;
-      if (analyze.type == 1) {
-        const resOfficial = await fetchConfig({ url: officialSnifferUrl, method: 'GET' });
-        if (JSONPath({ path: '$.url', json: resOfficial }).length > 0) {
-          play.playUrl = JSONPath({ path: '$.url', json: resOfficial })[0];
-          play.headers = resOfficial.headers;
-        }
-      } else if (analyze.type == 1) {
-        const resOfficial = await sniffer(officialSnifferUrl);
-        if (resOfficial.url) {
-          play.playUrl = resOfficial.url;
-          play.headers = resOfficial.headers;
-        }
-      }
-
-      if (play.playUrl) {
-        const mediaType = await checkMediaType(play.playUrl);
-        if (mediaType !== 'unknown' && mediaType !== 'error') {
-          data = { url: play.playUrl, mediaType, isOfficial, headers: play.headers };
-          return;
-        }
-      }
-    }
-
-    // 2. 执行源规则
     const playRes = await fetchCmsPlay({ sourceId: site.id, input: url, flag: flimSource });
     if (playRes?.header) play.headers = playRes.header;
     if (playRes?.parse) play.parse = playRes.parse;
-    if (playRes?.playUrl) play.playUrl = playRes.playUrl;
     if (playRes?.url) play.url = playRes.url;
-    if ([6, 7].includes(site.type as number)) {
-    }
-    if (site.type === 9) {
-    }
     if (playRes?.parse_extra?.run_script) play.sniffer.run_script = playRes.parse_extra.run_script;
     if (playRes?.parse_extra?.init_script) play.sniffer.init_script = playRes.parse_extra.init_script;
     if (playRes?.parse_extra?.custom_regex) play.sniffer.custom_regex = playRes.parse_extra.custom_regex;
     if (playRes?.parse_extra?.sniffer_exclude) play.sniffer.sniffer_exclude = playRes.parse_extra.sniffer_exclude;
 
     // 直链直接获取数据类型
-    if (play.playUrl && play.parse === 0) {
-      const mediaType = await checkMediaType(play.playUrl);
+    if (play.url && play.parse === 0) {
+      const mediaType = await checkMediaType(play.url);
       if (mediaType !== 'unknown' && mediaType !== 'error') {
-        data = { url: play.playUrl, mediaType, isOfficial, headers: play.headers };
-        return;
+        data = { ...data, url: play.url, mediaType, headers: play.headers };
+        return data;
       }
     }
 
@@ -315,17 +234,14 @@ const playHelper = async (
   } catch (err) {
     console.error(`[film_common][playHelper][error]`, err);
   } finally {
-    // console.log(`[film_common][playHelper][end]播放处理流程结束`);
-    // if (adFlag && data.url && !data.url.startsWith('http://127.0.0.1') && data.mediaType.includes('m3u8')) {
-    //   // const response = await removeAd(data.url, data.mediaType!, data.headers);
-    //   // if (response.code === 200) data.url = response?.url;
-    //   data.url = `http://127.0.0.1:9978/api/v1/lab/removeAd?url=${data.url}`;
-    //   if (data.headers && Object.keys(data.headers).length > 0) {
-    //     data.url += '&headers=' + JSON.stringify(data.headers);
-    //   }
-    //   data.url += '&type=.m3u8';
-    // console.log(`本地代理去广告链接: ${data.url}`);
-    // }
+    if (adFlag && data.url && !data.url.startsWith('http://127.0.0.1') && data.mediaType.includes('m3u8')) {
+      console.log('[film_common][removeAd][start]开始移除广告流程');
+      const response = await setStream(url, '.m3u8', data.headers);
+      if (response.code === 200) data.url = response?.url;
+      data.url = `http://127.0.0.1:9978/api/v1/lab/removeAd?url=${data.url}`;
+      console.log('[film_common][removeAd][end]结束移除广告流程');
+    }
+    console.log(`[film_common][playHelper][end]播放处理流程结束`);
     return data;
   }
 };
@@ -336,7 +252,7 @@ const playHelper = async (
  * @param data 数据
  */
 const reverseOrderHelper = (action: 'positive' | 'negative', data: Record<string, any[]>): Record<string, any[]> => {
-  const newData = dictDeepClone(data);
+  const newData = JSON.parse(JSON.stringify(data));
 
   if (action === 'positive') {
     console.log('[film_common][reverseOrderHelper]正序');
@@ -441,7 +357,7 @@ const formatContent = (text: string | undefined | null, keyword: string): string
 };
 
 // 获取播放源及剧集
-const formatSeason = (videoList: Record<string, any>): Record<string, any> => {
+const formatSeason = (videoList: Record<string, any>) => {
   console.log('[film_common][formatSeason][start]剧集格式化流程开启');
   let data: { [key: string]: any[] } = {
     error: ['formatError$seeMoreErrorMessageForF12'],
@@ -464,7 +380,7 @@ const formatSeason = (videoList: Record<string, any>): Record<string, any> => {
       );
 
     // 构建完整列表
-    const fullList: Record<string, string[]> = playSources.reduce((acc, source, index) => {
+    const fullList = playSources.reduce((acc, source, index) => {
       acc[source] = episodesBySource[index];
       return acc;
     }, {});
@@ -517,17 +433,11 @@ const fetchBarrageData = async (realUrl: string, options, active): Promise<any> 
 
 const fetchAnalyzeHelper = async (url: string, type: number) => {
   console.log('[film_common][fetchAnalyzeHelper][start]获取解析流程开启');
-  let data = {
-    url: '',
-    mediaType: '',
-    headers: {},
-  };
+  let data = { url: '', originalUrl: url, mediaType: '', headers: {} };
+
   try {
-    const play = {
-      playUrl: '',
-      headers: {},
-    };
-    console.log(url, type);
+    const play = { playUrl: '', headers: {} };
+
     if (type == 1) {
       const resOfficial = await fetchConfig({ url, method: 'GET' });
       if (JSONPath({ path: '$.url', json: resOfficial }).length > 0) {
@@ -545,11 +455,10 @@ const fetchAnalyzeHelper = async (url: string, type: number) => {
     if (play.playUrl) {
       const mediaType = await checkMediaType(play.playUrl);
       if (mediaType !== 'unknown' && mediaType !== 'error') {
-        data = { url: play.playUrl, mediaType, headers: play.headers };
+        data = { url: play.playUrl, originalUrl: url, mediaType, headers: play.headers };
       }
     }
   } catch (err: any) {
-    console.log(err);
     console.log(`[film_common][fetchAnalyzeHelper][error]${err.message}`);
   } finally {
     console.log(`[film_common][fetchAnalyzeHelper][end]获取解析流程结束`);
@@ -563,7 +472,6 @@ export {
   putBingeData,
   fetchHistoryData,
   putHistoryData,
-  fetchAnalyzeData,
   fetchBarrageData,
   playHelper,
   reverseOrderHelper,

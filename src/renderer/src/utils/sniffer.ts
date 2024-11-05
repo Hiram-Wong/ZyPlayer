@@ -30,7 +30,7 @@ const snifferPie = async (
     if (res.code === 0) {
       data.url = res.data.url;
       data.headers = res.data.headers;
-      console.log(`[sniffer][pie][return]: pie嗅探流程返回链接:${data}`);
+      console.log(`[sniffer][pie][return]: pie嗅探流程返回链接:${JSON.stringify(data)}`);
     } else if (res.code === -1) {
       console.log(`[sniffer][pie][error]: pie嗅探流程错误:${res.msg}`);
     }

@@ -474,12 +474,11 @@ const switchLineEvent = (id: string) => {
 const switchAnalyzeEvent = async (id: string) => {
   active.value.analyzeId = id;
   if (active.value.filmIndex) {
-    const { site } = extConf.value;
-    const { skipAd } = extConf.value.setting;
+    const { setting } = extConf.value;
     let { url } = formatIndex(active.value.filmIndex);
     url = decodeURIComponent(url);
     const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-    const response = await playHelper(url, site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, skipAd);
+    const response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
     if (response?.url) {
       videoData.value.url = response.url;
       emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
@@ -585,14 +584,14 @@ const changeEvent = async (item) => {
   }
 
   await putHistory();
-  const { skipAd } = extConf.value.setting;
+  const { setting } = extConf.value;
   let { url } = formatIndex(active.value.filmIndex);
   url = decodeURIComponent(url);
   videoData.value.url = url;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
   let response;
-  if (tmp.value.preloadNext.init) response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType }
-  response = await playHelper(url, extConf.value.site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, skipAd);
+  if (tmp.value.preloadNext.init) response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
+  response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
   if (response?.url) {
     videoData.value.url = response.url;
     emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
@@ -646,10 +645,9 @@ const setup = async () => {
   if (analyzeRes.hasOwnProperty('flag')) {
     analyzeData.value.flag = analyzeRes['flag'];
     let vipUrl = formatIndex(active.value.filmIndex)?.url;
-      vipUrl = decodeURIComponent(vipUrl);
-      const vipUrlHostname = /^(https?:\/\/)/.test(vipUrl) ? new URL(vipUrl)?.hostname : '';
-      if (analyzeRes.flag.includes(active.value.flimSource) || VIP_LIST.includes(vipUrlHostname)) active.value.official = true;
-    };
+    vipUrl = decodeURIComponent(vipUrl);
+    const vipUrlHostname = /^(https?:\/\/)/.test(vipUrl) ? new URL(vipUrl)?.hostname : '';
+    if (analyzeRes.flag.includes(active.value.flimSource) || VIP_LIST.includes(vipUrlHostname)) active.value.official = true;
   };
 
   // 6. 获取推荐(不影响)
@@ -672,7 +670,7 @@ const setup = async () => {
   url = decodeURIComponent(url);
   videoData.value.url = url;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  const response = await playHelper(url, site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, setting.skipAd);
+  const response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
   if (response?.url) {
     videoData.value.url = response.url;
     emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
@@ -711,8 +709,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
         const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
         const sourceUrl = formatIndex(nextInfo).url;
         const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-        const response = await playHelper(sourceUrl, extConf.value.site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, skipAd);
-
+        const response = await playHelper(active.value.official ? `${analyzeInfo.url}${sourceUrl}`: sourceUrl, extConf.value.site, active.value.flimSource, analyzeInfo.type, skipAd);
         if (response?.url) {
           tmp.value.preloadNext.url = response.url;
           tmp.value.preloadNext.headers = response.headers;

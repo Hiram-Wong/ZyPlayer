@@ -162,7 +162,7 @@ const analyzeData = ref<{ [key: string]: any[] }>({
   flag: [],
 });
 const active = ref({
-  binge: false,
+  binge: true,
   reverseOrder: true,
   official: false,
   flimSource: '',
@@ -216,7 +216,7 @@ const gotoPlay = async (item) => {
   url = decodeURIComponent(url);
   active.value.filmIndex = item;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  const response = await playHelper(url, extConf.value.site, analyzeInfo, analyzeData.value.flag, active.value.flimSource, false);
+  const response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, false);
   if (response?.url) {
     const { playerMode } = extConf.value.setting;
     window.electron.ipcRenderer.send('call-player', playerMode.external, response.url);
