@@ -444,7 +444,7 @@ const formatContent = (text: string | undefined | null, keyword: string): string
 const formatSeason = (videoList: Record<string, any>): Record<string, any> => {
   console.log('[film_common][formatSeason][start]剧集格式化流程开启');
   let data: { [key: string]: any[] } = {
-    报错: ['格式化报错$f12查看更多报错信息'],
+    error: ['formatError$seeMoreErrorMessageForF12'],
   };
   try {
     // 分离播放源

@@ -209,6 +209,7 @@ import {
   Share1Icon
 } from 'tdesign-icons-vue-next';
 import {
+  VIP_LIST,
   fetchBingeData,
   putBingeData,
   fetchHistoryData,
@@ -621,6 +622,10 @@ const setup = async () => {
   // 1. 格式化剧集数据
   const formattedSeason = await formatSeason(infoConf.value);
   infoConf.value.fullList = formattedSeason;
+  if (Object.keys(formattedSeason)?.[0] === 'error') {
+    MessagePlugin.warning(t('pages.film.message.formatSeasonError'));
+    return;
+  };
 
   // 2. 设置默认选集
   active.value.flimSource = active.value.flimSource || Object.keys(formattedSeason)[0];
@@ -640,7 +645,11 @@ const setup = async () => {
   if (analyzeRes.hasOwnProperty('default')) active.value.analyzeId = analyzeRes['default']['id'];
   if (analyzeRes.hasOwnProperty('flag')) {
     analyzeData.value.flag = analyzeRes['flag'];
-    if (analyzeRes.flag.includes(active.value.flimSource)) active.value.official = true;
+    let vipUrl = formatIndex(active.value.filmIndex)?.url;
+      vipUrl = decodeURIComponent(vipUrl);
+      const vipUrlHostname = /^(https?:\/\/)/.test(vipUrl) ? new URL(vipUrl)?.hostname : '';
+      if (analyzeRes.flag.includes(active.value.flimSource) || VIP_LIST.includes(vipUrlHostname)) active.value.official = true;
+    };
   };
 
   // 6. 获取推荐(不影响)
