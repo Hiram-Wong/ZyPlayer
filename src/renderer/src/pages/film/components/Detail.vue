@@ -355,7 +355,6 @@ const setup = async () => {
 
   // 5. 获取解析规则 + 是否显示解析
   const analyzeRes = await fetchAnalyzeActive();
-  console.log(analyzeRes)
   if (analyzeRes.hasOwnProperty('data')) analyzeData.value.list = analyzeRes['data'];
   if (analyzeRes.hasOwnProperty('default')) active.value.analyzeId = analyzeRes['default']['id'];
   if (analyzeRes.hasOwnProperty('flag')) {

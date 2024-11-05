@@ -82,7 +82,7 @@
                     v-for="item in analyzeData.list"
                     :key="item.id"
                     :value="item.id"
-                    @click="(options) => switchAnalyzeEvent(options.value as string)"
+                    @click="switchAnalyzeEvent(item.id)"
                   >
                     <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
                   </t-dropdown-item>
@@ -120,24 +120,6 @@
               </t-tooltip>
             </div>
           </div>
-          <!-- <t-tabs v-model="active.flimSource" class="film-tabs">
-            <t-tab-panel v-for="(value, key, index) in season" :key="index" :value="key" :label="key">
-              <div class="tag-container">
-                <div v-for="(item, index) in season?.[active.flimSource]" :key="item"
-                  :class='["mainVideo-num", item === active.filmIndex ? "mainVideo-selected" : ""]'
-                  @click="changeEvent(item)">
-                  {{ index }} {{ item }}
-                  <t-tooltip :content="formatName(item)">
-                    <div class="mainVideo_inner">
-                      {{ formatReverseOrder(isVisible.reverseOrder ? 'positive' : 'negative', index, value.length)
-                      }}
-                      <div class="playing"></div>
-                    </div>
-                  </t-tooltip>
-                </div>
-              </div>
-            </t-tab-panel>
-          </t-tabs> -->
         </div>
         <div class="recommend" v-show="recommendList.length != 0">
           <div class="component-title">{{ $t('pages.player.film.recommend') }}</div>
@@ -231,7 +213,6 @@ import {
   putBingeData,
   fetchHistoryData,
   putHistoryData,
-  fetchAnalyzeData,
   fetchBarrageData,
   playHelper,
   reverseOrderHelper,
@@ -243,6 +224,7 @@ import {
   formatReverseOrder,
 } from '@/utils/common/film';
 import { fetchRecommPage } from '@/api/site';
+import { fetchAnalyzeActive } from '@/api/analyze';
 import { fetchConfig } from '@/api/setting';
 import { t } from '@/locales';
 import DialogDownloadView from './DialogDownload.vue';
@@ -653,7 +635,7 @@ const setup = async () => {
   if (!historyData.value?.id) await putHistory();
 
   // 5. 获取解析规则 + 是否显示解析
-  const analyzeRes = await fetchAnalyzeData();
+  const analyzeRes = await fetchAnalyzeActive();
   if (analyzeRes.hasOwnProperty('data')) analyzeData.value.list = analyzeRes['data'];
   if (analyzeRes.hasOwnProperty('default')) active.value.analyzeId = analyzeRes['default']['id'];
   if (analyzeRes.hasOwnProperty('flag')) {
