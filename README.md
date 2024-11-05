@@ -292,7 +292,7 @@ ps:
         "color": "2", // 弹幕接口返回数据对应的颜色的位置
         "content": "4" // 弹幕接口返回数据对应的内容的位置
       }, // [3.3.4版本启用]弹幕参数
-      "analyzeFlag": ["youku", "qq", "iqiyi", "qiyi", "letv", "sohu", "tudou", "pptv", "mgtv"], // 解析标识
+      "analyzeFlag": ["youku", "qq", "iqiyi", "qiyi", "letv", "leshi", "sohu", "tudou", "pptv", "mgtv", "imgo"], // 解析标识
       "broadcasterType": "xgplayer", // [3.3.4版本弃用,使用playerMode参数]播放器 xgplayer:西瓜 dplayer:呆呆 custom:自定义结合externalPlayer
       "externalPlayer": "", // [3.3.4版本弃用,使用playerMode参数]播放器为custom,调用此处系统命令
       "playerMode": {
@@ -349,15 +349,3 @@ ps:
 ```
 
 </details>
-
-> 3.3.8及以后版本数据如何管理(pgLite为pg数据库wasm版本)
-
-```bash
-非 docker
-1. 安装pg数据库
-2. 将数据文件拷贝到pg数据库目录下
-
-docker
-1. 拉取pg镜像
-2. 映射文件到数据文件夹并启动pg容器
-```

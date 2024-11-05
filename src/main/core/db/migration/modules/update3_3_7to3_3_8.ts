@@ -12,10 +12,19 @@ const update = async () => {
     });
   }
 
+  await db.delete(schema.setting).where(eq(schema.setting.key, 'iptvSkipIpv6'));
   await db.insert(schema.setting).values({ key: 'iptvMarkIp', value: { data: true } });
-  await db.delete(schema.setting).where(eq(schema.setting.key, 'iptvMarkIp'));
-  await db.insert(schema.setting).values({ key: 'iptvDelay', value: { data: false } });
+
   await db.delete(schema.setting).where(eq(schema.setting.key, 'iptvStatus'));
+  await db.insert(schema.setting).values({ key: 'iptvDelay', value: { data: false } });
+
+  await db.delete(schema.setting).where(eq(schema.setting.key, 'analyzeFlag'));
+  await db
+    .insert(schema.setting)
+    .values({
+      key: 'analyzeFlag',
+      value: { data: ['youku', 'qq', 'iqiyi', 'qiyi', 'letv', 'leshi', 'sohu', 'tudou', 'pptv', 'mgtv', 'imgo'] },
+    });
 
   const old_version = await db.select().from(schema.setting).where(eq(schema.setting.key, 'version'));
   if (old_version.length > 0) {
