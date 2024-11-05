@@ -15,4 +15,7 @@ export default {
     netwotkError: 'Network request failed, Please try to refresh manually',
     categoryError: 'Set category exception, Please go to Setting to check source category then try to refresh manually',
   },
+  message: {
+    formatSeasonError: 'Data source formatting episode error, check if the data source is normal',
+  },
 };

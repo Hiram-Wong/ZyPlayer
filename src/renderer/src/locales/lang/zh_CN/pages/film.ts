@@ -15,4 +15,7 @@ export default {
     netwotkError: '网络请求失败, 请尝试手动刷新',
     categoryError: '设置分类异常, 请前往设置检查源分类后尝试手动刷新',
   },
+  message: {
+    formatSeasonError: '数据源格式化剧集错误, 确认数据源是否正常',
+  },
 };
