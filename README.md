@@ -9,7 +9,9 @@
 
 # 软件介绍
 
-zyfun[老版为zyplayer]是一款采用现代化技术栈开发的高颜值媒体播放器，它基于 `electron-vite` 框架，集成了 `TDesign` UI 组件库与 `Vue3` 全家桶，以清新的薄荷绿为主题，旨在为用户提供流畅的跨平台娱乐体验。
+> 名称新[zyfun]-名称旧[zyplayer]
+
+一款采用现代化技术栈开发的高颜值媒体播放器，它基于 `electron-vite` 框架，集成了 `TDesign` UI 组件库与 `Vue3` 全家桶，以清新的薄荷绿为主题，旨在为用户提供流畅的跨平台娱乐体验。
 
 **重要提醒**: 仅此Github发布，请勿上当受骗；请各位公众号、QQ群、博客的管理者不要费力宣传及引流本软件!
 
@@ -111,10 +113,12 @@ zyfun[老版为zyplayer]是一款采用现代化技术栈开发的高颜值媒�
 因为软件没有签名，所以会被 macOS 的安全检查所拦下。安装后打开遇到「文件已损坏」的情况，请按如下方式操作：
 
 ```bash
+> {appname}为软件名
+
 [1] 执行下面命令信任开发者, 会要求输入密码:
     sudo spctl --master-disable
 [2] 执行下面命令放行软件 :
-    sudo xattr -cr /Applications/zyplayer.app
+    sudo xattr -cr /Applications/{appname}.app
 
 完成上面两个步骤，大多数情况下都能正常打开应用。
 
@@ -141,24 +145,24 @@ options:
   -z: compress or decompress (if compressed) attribute value in zip format
 
 则执行命令
-xattr -c /Applications/zyplayer.app/*
+xattr -c /Applications/{appname}.app/*
 如果上述命令依然没有效果，可以尝试下面的命令：
-sudo xattr -d com.apple.quarantine /Applications/zyplayer.app/
+sudo xattr -d com.apple.quarantine /Applications/{appname}.app/
 ```
 
 ### Linux Appimage桌面快捷方式设置
 
 ```bash
 [1] 选择一张icon图标下载
-[2] 在任意位置新建一个名为zyplayer.desktop的文件，并写入如下内容
+[2] 在任意位置新建一个名为{appname}.desktop的文件，并写入如下内容
     [Desktop Entry]
-    Name=zyplayer
-    Exec=/home/xxx/Downloads/zyplayer-3.3.5.AppImage  # AppImage程序路径
-    Icon=/home/xxx/Downloads/zyplayer.png  # 图标路径
+    Name={appname}
+    Exec=/home/xxx/Downloads/{appname}-3.3.8.AppImage  # AppImage程序路径
+    Icon=/home/xxx/Downloads/{appname}.png  # 图标路径
     Type=Application
     StartupNotify=true
-[3] 保存zyplayer.desktop后右键属性,在权限目录下允许作为程序执行文件上打钩
-[4] 讲zyplayer.desktop文件复制到/usr/share/applications路径下
+[3] 保存{appname}.desktop后右键属性,在权限目录下允许作为程序执行文件上打钩
+[4] 将{appname}.desktop文件复制到/usr/share/applications路径下
 ```
 
 ## 🚗 二次开发
@@ -194,6 +198,8 @@ ps:
 
 > 请严格按照数据结构填写, 避免不必要的报错(如数据字段类型不匹配)
 
+> 数据合并,请先手动导出后编辑数据后导入(软件直接导入为覆盖数据)
+
 <details>
 <summary>展开查看接口说明</summary>
 
@@ -215,8 +221,8 @@ ps:
       "url": "https://xxx.com/m3u/iptv.m3u", // 直播源地址[string]
       "type": "remote", // url格式[string | remote:远程m3u-local本地m3u文件路径-json本地手动文件]
       "isActive": true, // 是否启用[boolean | true启用-false禁用]
-      "epg": "https://epg.112114.xyz/", // 电子节目单地址[string]
-      "logo": "https://epg.112114.xyz/" // 台标地址[string] - 3.3.8启用该参数
+      "epg": "https://epg.112114.eu.org/?ch={name}&date={date}", // 电子节目单地址[string]
+      "logo": "https://epg.112114.eu.org/logo/{name}.png" // 台标地址[string] - 3.3.8启用该参数
     }
   ],
   "channel": [
@@ -265,8 +271,8 @@ ps:
       "defaultCheckModel": true, // [弃用] 忘了干嘛的
       "defaultChangeModel": false, // [弃用] 忘了干嘛的
       "pauseWhenMinimize": false, // [弃用] 最小化时暂停
-      "defaultIptvEpg": "https://epg.112114.eu.org/", // iptv epg
-      "defaultIptvLogo": "https://epg.112114.eu.org/logo/", // iptv logo
+      "defaultIptvEpg": "https://epg.112114.eu.org/?ch={name}&date={date}", // iptv epg
+      "defaultIptvLogo": "https://epg.112114.eu.org/logo/{name}.png", // iptv logo
       "iptvSkipIpv6": true, // [3.3.8版本弃用] iptv是否跳过ipv6节目
       "iptvMarkIp": true, // [3.3.8版本启用] iptv标识IP类型
       "iptvThumbnail": true, // iptv是否显示缩略图
@@ -343,3 +349,15 @@ ps:
 ```
 
 </details>
+
+> 3.3.8及以后版本数据如何管理(pgLite为pg数据库wasm版本)
+
+```bash
+非 docker
+1. 安装pg数据库
+2. 将数据文件拷贝到pg数据库目录下
+
+docker
+1. 拉取pg镜像
+2. 映射文件到数据文件夹并启动pg容器
+```
