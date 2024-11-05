@@ -17,5 +17,6 @@ export default {
   },
   message: {
     formatSeasonError: 'Data source formatting episode error, check if the data source is normal',
+    notSelectAnalyze: 'Recognized official data, but no analyze selected.',
   },
 };

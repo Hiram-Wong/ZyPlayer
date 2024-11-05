@@ -216,7 +216,18 @@ const gotoPlay = async (item) => {
   url = decodeURIComponent(url);
   active.value.filmIndex = item;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  const response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, false);
+  let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
+  if (active.value.official) {
+    if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
+      MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
+      return;
+    };
+    url = `${analyzeInfo.url}${url}`;
+    analyzeType = analyzeInfo.type;
+  } else {
+    analyzeType = -1;
+  }
+  const response = await playHelper(url, { ...extConf.value.site }, active.value.flimSource, analyzeType, false);
   if (response?.url) {
     const { playerMode } = extConf.value.setting;
     window.electron.ipcRenderer.send('call-player', playerMode.external, response.url);
@@ -332,7 +343,7 @@ const putHistory = async () => {
 // 获取播放源及剧集
 const setup = async () => {
   // 1. 格式化剧集数据
-  const formattedSeason = await formatSeason(infoConf.value);
+  const formattedSeason: any = await formatSeason(infoConf.value);
   if (Object.keys(formattedSeason)?.[0] === 'error') {
     MessagePlugin.warning(t('pages.film.message.formatSeasonError'));
     return;

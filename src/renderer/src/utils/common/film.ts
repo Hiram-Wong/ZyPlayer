@@ -229,8 +229,6 @@ const playHelper = async (
     data.headers = snifferResult.headers;
     data.url = snifferResult.url;
     data.mediaType = (await checkMediaType(snifferResult.url)) || 'm3u8';
-
-    console.log(`[film_common][playHelper][return]`, data);
   } catch (err) {
     console.error(`[film_common][playHelper][error]`, err);
   } finally {
@@ -241,6 +239,7 @@ const playHelper = async (
       data.url = `http://127.0.0.1:9978/api/v1/lab/removeAd?url=${data.url}`;
       console.log('[film_common][removeAd][end]结束移除广告流程');
     }
+    console.log(`[film_common][playHelper][return]`, data);
     console.log(`[film_common][playHelper][end]播放处理流程结束`);
     return data;
   }

@@ -98,7 +98,7 @@
           </div>
         </div>
         <div class="listbox">
-          <title-menu v-if="lineList.length > 1" :list="lineList" :active="active.flimSource" class="nav" @change-key="changeLineEvent" />
+          <title-menu v-if="lineList.length > 1" :list="lineList" :active="active.flimSource" class="nav" @change-key="switchLineEvent" />
           <div class="tag-container">
             <div
               v-for="(item, index) in seasonData?.[active.flimSource]"
@@ -466,8 +466,10 @@ const settingEvent = () => {
   active.value.setting = true;
 };
 
-const switchLineEvent = (id: string) => {
-  active.value.flimSource = id;
+const switchLineEvent = (key: string) => {
+  active.value.flimSource = key;
+  if (analyzeData.value.flag.includes(key)) active.value.official = true;
+  else active.value.official = false;
 };
 
 // 切换解析接口
@@ -478,7 +480,17 @@ const switchAnalyzeEvent = async (id: string) => {
     let { url } = formatIndex(active.value.filmIndex);
     url = decodeURIComponent(url);
     const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-    const response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
+    let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
+    if (active.value.official) {
+      if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
+        MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
+        return;
+      };
+      analyzeType = analyzeInfo.type;
+    } else {
+      analyzeType = -1;
+    }
+    const response = await playHelper(url, extConf.value.site, active.value.flimSource,analyzeType, setting.skipAd);
     if (response?.url) {
       videoData.value.url = response.url;
       emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
@@ -619,7 +631,7 @@ const setup = async () => {
   const { site, setting } = extConf.value;
 
   // 1. 格式化剧集数据
-  const formattedSeason = await formatSeason(infoConf.value);
+  const formattedSeason: any = await formatSeason(infoConf.value);
   infoConf.value.fullList = formattedSeason;
   if (Object.keys(formattedSeason)?.[0] === 'error') {
     MessagePlugin.warning(t('pages.film.message.formatSeasonError'));
@@ -670,7 +682,18 @@ const setup = async () => {
   url = decodeURIComponent(url);
   videoData.value.url = url;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  const response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
+  let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
+  if (active.value.official) {
+    if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
+      MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
+      return;
+    };
+    url = `${analyzeInfo.url}${url}`;
+    analyzeType = analyzeInfo.type;
+  } else {
+    analyzeType = -1;
+  };
+  const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, setting.skipAd);
   if (response?.url) {
     videoData.value.url = response.url;
     emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
@@ -707,17 +730,29 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
       try {
         const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
         const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
-        const sourceUrl = formatIndex(nextInfo).url;
+        let url = formatIndex(nextInfo).url;
+        url = decodeURIComponent(url);
         const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-        const response = await playHelper(active.value.official ? `${analyzeInfo.url}${sourceUrl}`: sourceUrl, extConf.value.site, active.value.flimSource, analyzeInfo.type, skipAd);
+        let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
+        if (active.value.official) {
+          if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
+            MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
+            return;
+          };
+          url = `${analyzeInfo.url}${url}`;
+          analyzeType = analyzeInfo.type;
+        } else {
+          analyzeType = -1;
+        }
+        const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, skipAd);
         if (response?.url) {
           tmp.value.preloadNext.url = response.url;
           tmp.value.preloadNext.headers = response.headers;
           tmp.value.preloadNext.mediaType = response.mediaType;
-          const { url, key, support, start, mode, color, content } = barrage;
-          if (!(url && key && support && start && mode && color && content)) return;
+          const { url: barrageUrl, key, support, start, mode, color, content } = barrage;
+          if (!(barrageUrl && key && support && start && mode && color && content)) return;
           if (!support.includes(active.value.flimSource)) return;
-          const barrageRes = await fetchConfig({ url: `${url}${sourceUrl}`, method: 'GET'});
+          const barrageRes = await fetchConfig({ url: `${barrageUrl}${url}`, method: 'GET'});
           if (!barrageRes[key] || barrageRes[key].length === 0) return;
           tmp.value.preloadNext.barrage = barrageRes.danmuku;
           tmp.value.preloadNext.init = true;
@@ -734,10 +769,6 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
     await changeEvent(nextInfo);
   };
 };
-
-const changeLineEvent = (key: string) => {
-  active.value.flimSource = key;
-}
 </script>
 
 <style lang="less" scoped>
