@@ -80,14 +80,13 @@ const getMeadiaType = async (url: string): Promise<string> => {
   }
 };
 
-const checkIpVersion = async (url: string) => {
+const checkIpVersion = async (ip: string) => {
   let version = -1;
   try {
-    const hostname = new URL(url).hostname;
-    const ip = ipaddr.parse(hostname);
-    if (ip.kind() === 'ipv4') {
+    const ipParse = ipaddr.parse(ip);
+    if (ipParse.kind() === 'ipv4') {
       version = 4;
-    } else if (ip.kind() === 'ipv6') {
+    } else if (ipParse.kind() === 'ipv6') {
       version = 6;
     }
   } finally {

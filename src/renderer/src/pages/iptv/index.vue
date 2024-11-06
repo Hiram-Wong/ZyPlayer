@@ -100,7 +100,7 @@ import { usePlayStore, useSettingStore } from '@/store';
 import { fetchIptvActive, fetchChannelPage, delChannel, putIptvDefault } from '@/api/iptv';
 import { checkChannel, stopCheckChannel } from '@/utils/channel';
 import emitter from '@/utils/emitter';
-import { checkUrlIpv6, copyToClipboardApi } from '@/utils/tool';
+import { checkIpVersion, copyToClipboardApi } from '@/utils/tool';
 
 import CommonNav from '@/components/common-nav/index.vue';
 import TitleMenu from '@/components/title-menu/index.vue';
@@ -316,7 +316,8 @@ const checkChannelIp = async (pageIndex: number, pageSize: number) => {
   const dataList = channelList.value.slice(start, end); // 从原数组中截取需要处理的数据段
   const updateStatus = async (item) => {
     try {
-      const res = await checkUrlIpv6(item.url);
+      const hostname = new URL(item.url)?.hostname;
+      const res = await checkIpVersion(hostname);
       return res;
     } catch (err) {
       return -1;
