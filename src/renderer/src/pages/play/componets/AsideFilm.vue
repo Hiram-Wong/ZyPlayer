@@ -104,7 +104,7 @@
               v-for="(item, index) in seasonData?.[active.flimSource]"
               :key="item"
               :class="['mainVideo-num', item === active.filmIndex ? 'mainVideo-selected' : '']"
-              @click="changeEvent(item)"
+              @click="switchSeasonEvent(item)"
             >
               <t-tooltip :content="formatName(item)">
                 <div class="mainVideo_inner">
@@ -434,7 +434,6 @@ const putHistory = async () => {
     skipTimeInStart: videoData.value.skipTimeInStart,
     skipTimeInEnd: videoData.value.skipTimeInEnd,
   };
-  console.log(1111)
   const response: any = await putHistoryData(historyData.value?.id, doc);
   historyData.value = response;
 };
@@ -466,6 +465,31 @@ const settingEvent = () => {
   active.value.setting = true;
 };
 
+// 调用播放器
+const callPlay = async (item) => {
+  let { url } = formatIndex(item);
+  url = decodeURIComponent(url);
+  active.value.filmIndex = item;
+  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
+  let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
+  if (active.value.official) {
+    if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
+      MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
+      return;
+    };
+    url = `${analyzeInfo.url}${url}`;
+    analyzeType = analyzeInfo.type;
+  } else {
+    analyzeType = -1;
+  }
+  const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.skipAd);
+  if (response?.url) {
+    videoData.value.url = response.url;
+    emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
+  };
+};
+
+// 切换线路
 const switchLineEvent = (key: string) => {
   active.value.flimSource = key;
   if (analyzeData.value.flag.includes(key)) active.value.official = true;
@@ -473,28 +497,58 @@ const switchLineEvent = (key: string) => {
 };
 
 // 切换解析接口
-const switchAnalyzeEvent = async (id: string) => {
-  active.value.analyzeId = id;
-  if (active.value.filmIndex) {
-    const { setting } = extConf.value;
-    let { url } = formatIndex(active.value.filmIndex);
-    url = decodeURIComponent(url);
-    const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-    let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
-    if (active.value.official) {
-      if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
-        MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
-        return;
-      };
-      analyzeType = analyzeInfo.type;
-    } else {
-      analyzeType = -1;
+const switchAnalyzeEvent = async (key: string) => {
+  active.value.analyzeId = key;
+  if (active.value.filmIndex) await callPlay(active.value.filmIndex);
+};
+
+// 切换选集
+const switchSeasonEvent = async (item) => {
+  active.value.filmIndex = item;
+
+  // 当前源dataHistory.value.siteSource 选择源active.flimSource；当前集dataHistory.value.videoIndex 选择源index
+  // 1. 同源 不同集 变   return true
+  // 2. 同源 同集 不变   return true
+  // 3. 不同源 不同集 变 return true
+  // 4. 不同源 同集 不变 return true
+  // 待优化 不同源的index不同，要重新索引  但是 综艺不对应
+  if (historyData.value['siteSource'] === active.value.flimSource) {
+    // 同源
+    if (formatIndex(historyData.value['videoIndex']).index !== formatIndex(active.value.filmIndex).index) {
+      videoData.value.watchTime = 0;
+      videoData.value.playEnd = false;
     }
-    const response = await playHelper(url, extConf.value.site, active.value.flimSource,analyzeType, setting.skipAd);
-    if (response?.url) {
-      videoData.value.url = response.url;
-      emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
-    };
+  } else if (formatIndex(historyData.value['videoIndex']).index !== formatIndex(active.value.filmIndex).index) {
+    // 不同源
+    videoData.value.watchTime = 0;
+    videoData.value.playEnd = false;
+  };
+
+  await callPlay(active.value.filmIndex);
+
+  await putHistory();
+  const { setting } = extConf.value;
+  let { url } = formatIndex(active.value.filmIndex);
+  url = decodeURIComponent(url);
+  videoData.value.url = url;
+  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
+  let response;
+  if (tmp.value.preloadNext.init) response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
+  response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
+  if (response?.url) {
+    videoData.value.url = response.url;
+    emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
+  };
+  tmp.value = {
+    preloadNext: {
+      url: '',
+      headers: {},
+      load: false,
+      init: false,
+      barrage: [],
+      mediaType: '',
+    },
+    end: false,
   }
 };
 
@@ -573,54 +627,6 @@ const recommendEvent = async (item) => {
   }
 };
 
-// 切换选集
-const changeEvent = async (item) => {
-  active.value.filmIndex = item;
-
-  // 当前源dataHistory.value.siteSource 选择源active.flimSource；当前集dataHistory.value.videoIndex 选择源index
-  // 1. 同源 不同集 变   return true
-  // 2. 同源 同集 不变   return true
-  // 3. 不同源 不同集 变 return true
-  // 4. 不同源 同集 不变 return true
-  // 待优化 不同源的index不同，要重新索引  但是 综艺不对应
-  if (historyData.value['siteSource'] === active.value.flimSource) {
-    // 同源
-    if (formatIndex(historyData.value['videoIndex']).index !== formatIndex(active.value.filmIndex).index) {
-      videoData.value.watchTime = 0;
-      videoData.value.playEnd = false;
-    }
-  } else if (formatIndex(historyData.value['videoIndex']).index !== formatIndex(active.value.filmIndex).index) {
-    // 不同源
-    videoData.value.watchTime = 0;
-    videoData.value.playEnd = false;
-  }
-
-  await putHistory();
-  const { setting } = extConf.value;
-  let { url } = formatIndex(active.value.filmIndex);
-  url = decodeURIComponent(url);
-  videoData.value.url = url;
-  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  let response;
-  if (tmp.value.preloadNext.init) response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
-  response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
-  if (response?.url) {
-    videoData.value.url = response.url;
-    emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
-  };
-  tmp.value = {
-    preloadNext: {
-      url: '',
-      headers: {},
-      load: false,
-      init: false,
-      barrage: [],
-      mediaType: '',
-    },
-    end: false,
-  }
-};
-
 // 获取弹幕
 const fetchBarrage = async (url: string, options: any, active: any) => {
   const response = await fetchBarrageData(url, options, active);
@@ -628,8 +634,6 @@ const fetchBarrage = async (url: string, options: any, active: any) => {
 };
 
 const setup = async () => {
-  const { site, setting } = extConf.value;
-
   // 1. 格式化剧集数据
   const formattedSeason: any = await formatSeason(infoConf.value);
   infoConf.value.fullList = formattedSeason;
@@ -669,7 +673,7 @@ const setup = async () => {
   fetchBinge();
 
   // 8. 获取跳过时间
-  if (setting.skipStartEnd) {
+  if (extConf.value.setting.skipStartEnd) {
     if (historyData.value.watchTime < videoData.value.skipTimeInStart) {
       videoData.value.skipTime = videoData.value.skipTimeInStart;
     } else {
@@ -678,26 +682,7 @@ const setup = async () => {
   };
 
   // 9. 播放
-  let { url } = formatIndex(active.value.filmIndex);
-  url = decodeURIComponent(url);
-  videoData.value.url = url;
-  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
-  if (active.value.official) {
-    if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
-      MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
-      return;
-    };
-    url = `${analyzeInfo.url}${url}`;
-    analyzeType = analyzeInfo.type;
-  } else {
-    analyzeType = -1;
-  };
-  const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, setting.skipAd);
-  if (response?.url) {
-    videoData.value.url = response.url;
-    emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
-  };
+  await callPlay(active.value.filmIndex);
 };
 
 // 定时更新播放进度
@@ -766,7 +751,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
     tmp.value.end = true;
     const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
     const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
-    await changeEvent(nextInfo);
+    await switchSeasonEvent(nextInfo);
   };
 };
 </script>
