@@ -265,8 +265,8 @@ const changeClassEvent = (id: string) => {
   clearQueue();
   infiniteCompleteTip.value = 'noMore';
   active.value.class = id;
-
   channelList.value = [];
+  emitter.emit('refreshSearchConfig');
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 };
@@ -415,6 +415,7 @@ const defaultConf = () => {
   active.value.class = '全部';
   active.value.nav = '';
   channelList.value = [];
+  emitter.emit('refreshSearchConfig');
   pagination.value.pageIndex = 1;
   infiniteId.value++;
 };

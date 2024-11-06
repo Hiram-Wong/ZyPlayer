@@ -287,6 +287,7 @@ const changeClassEvent = (key: string) => {
   searchTxt.value = '';
   active.value.infiniteType = 'noMore';
   filmData.value = { list: [], rawList: [] };
+  emitter.emit('refreshSearchConfig');
   pagination.value.pageIndex = 1;
   infiniteId.value++;
 };
@@ -531,6 +532,7 @@ const defaultConf = () => {
   classConfig.value.data = [];
   filmData.value = { list: [], rawList: [] };
   filterData.value = {};
+  emitter.emit('refreshSearchConfig');
   pagination.value.pageIndex = 1;
   infiniteId.value++;
 };

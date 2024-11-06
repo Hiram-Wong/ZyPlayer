@@ -67,7 +67,7 @@
 import moment from 'moment';
 import { Share1Icon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onActivated, onMounted, ref, useTemplateRef } from 'vue';
+import { onActivated, onMounted, ref, watch, useTemplateRef } from 'vue';
 
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
@@ -127,6 +127,13 @@ onActivated(() => {
   const isListenedRefreshAnalyzeConfig = emitter.all.get('refreshAnalyzeConfig');
   if (!isListenedRefreshAnalyzeConfig) emitter.on('refreshAnalyzeConfig', refreshConf);
 });
+
+watch(
+  () => active.value.platform,
+  (val) => {
+    if (!val) emitter.emit('refreshSearchConfig');
+  }
+);
 
 // 获取解析接口及默认接口
 const getSetting = async () => {
@@ -245,6 +252,7 @@ const openPlatform = (item) => {
   console.log('[analyze] search keyword', item);
   const { name, url } = item;
   platFormData.value = { name, url };
+  active.value.search = false;
   active.value.platform = true;
 };
 
@@ -283,6 +291,7 @@ const clearContent = async ()=> {
 
 const defaultConf = ()=>{
   active.value.nav = '';
+  emitter.emit('refreshSearchConfig');
 };
 
 const refreshConf = () => {

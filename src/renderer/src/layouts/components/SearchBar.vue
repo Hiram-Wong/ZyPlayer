@@ -65,7 +65,7 @@
 import moment from 'moment';
 import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, onActivated, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import emitter from '@/utils/emitter';
@@ -110,11 +110,6 @@ watch(
 
 onMounted(async () => {
   if (activeRouteName.value === 'FilmIndex') await getFilmSearhConfig();
-});
-
-onActivated(() => {
-  const isListenedRefreshHotConfig = emitter.all.get('refreshHotConfig');
-  if (!isListenedRefreshHotConfig) emitter.on('refreshHotConfig', refreshHotConfig);
 });
 
 const rowCol = [
@@ -309,10 +304,20 @@ const popupVisibleEvent = (_, context) => {
 
 // 监听设置变更
 const refreshHotConfig = () => {
-  console.log('[search][bus][refresh]');
+  console.log('[search][bus][hot-refresh]');
   hotConfig.hotData = [];
   getSetConfig();
 };
+
+const refreshSearchConfig = () => {
+  console.log('[search][bus][search-refresh]');
+  searchValue.value = '';
+};
+
+const isListenedRefreshHotConfig = emitter.all.get('refreshHotConfig');
+if (!isListenedRefreshHotConfig) emitter.on('refreshHotConfig', refreshHotConfig);
+const isListenedRefreshSearchConfig = emitter.all.get('refreshSearchConfig');
+if (!isListenedRefreshSearchConfig) emitter.on('refreshSearchConfig', refreshSearchConfig);
 </script>
 
 <style lang="less" scoped>
