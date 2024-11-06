@@ -1,9 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
-import transform from 'lodash/transform';
-import entries from 'lodash/entries';
-import get from 'lodash/get';
-import isEqual from 'lodash/isEqual';
 import { setting } from '@main/core/db/service';
+import initSettingData from '@main/core/db/migration/modules/init/tbl_setting.json';
 
 const API_PREFIX = 'api/v1/setting';
 
@@ -18,20 +15,30 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   });
   fastify.put(`/${API_PREFIX}/source`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
     const destination = req.body;
+    const initRes = initSettingData;
     const dbRes = await setting.all();
 
-    const diffObject = transform(
-      entries(dbRes),
-      (result, [key, value]) => {
-        if (!isEqual(value, get(destination, key))) {
-          result[key] = { from: value, to: get(destination, key, 'undefined') };
-        }
-      },
-      {},
-    );
+    for (const item of initRes) {
+      const dbValue = dbRes[item.key];
+      const destValue = destination[item.key];
 
-    for (const i in diffObject) {
-      await setting.update([i], diffObject[i]['to']);
+      if (dbValue !== undefined) {
+        if (destValue !== undefined && dbValue !== destValue) {
+          await setting.update([item.key], destValue);
+        }
+      } else {
+        if (destValue !== undefined) {
+          await setting.add({ key: item.key, value: { data: destValue } });
+        } else {
+          await setting.add({ key: item.key, value: { data: item.value } });
+        }
+      }
+    }
+
+    for (const key in dbRes) {
+      if (initRes.find((item) => item.key === key) === undefined) {
+        await setting.remove([key]);
+      }
     }
 
     return {
