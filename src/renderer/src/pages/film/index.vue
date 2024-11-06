@@ -595,6 +595,7 @@ const changeConf = async (key: string) => {
         display: flex;
         align-items: center;
         cursor: pointer;
+        margin-left: var(--td-comp-margin-s);
       }
     }
 
