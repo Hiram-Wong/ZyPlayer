@@ -89,7 +89,7 @@ class T3Adapter {
 
     return {
       class: classes,
-      filters: response?.filter || {},
+      filters: response?.filters || {},
     };
   }
   async homeVod() {
