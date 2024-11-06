@@ -101,7 +101,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
 
     TABLES.forEach(async (table) => {
       const prefix = table.substring(4);
-      if (data.hasOwnProperty(table) && tableSetters[prefix]) {
+      // Object.keys 支持同时检查 array 和 object
+      if (data.hasOwnProperty(table) && tableSetters[prefix] && Object.keys(data[table]).length > 0) {
         await tableSetters[prefix](data[table]);
       }
     });

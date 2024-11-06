@@ -4,6 +4,7 @@ import { v4 as uuidv4, validate as uuidValidate, version as uuidVersion } from '
 import { resolve } from 'url';
 import request from '@main/utils/request';
 import { base64 } from '@main/utils/crypto';
+import initSettingData from '@main/core/db/migration/modules/init/tbl_setting.json';
 
 // 一键配置
 const easyConfig = async (config, url, type) => {
@@ -136,7 +137,7 @@ const easyConfig = async (config, url, type) => {
         id: item?.id || uuidv4(),
         name: item.name,
         url: item.url,
-        type: item.type ? item.type : 0,
+        type: item?.type ? item.type : 0,
         isActive: true,
       }));
     data['tbl_analyze'] = analyze;
@@ -162,23 +163,16 @@ const easyConfig = async (config, url, type) => {
 
 // 公共导入方法
 const commonDelImportData = (data) => {
-  // 先处理旧数据
+  // 1.key变换 - newkey
   ['sites', 'iptv', 'analyze', 'drive', 'setting', 'channel'].forEach((key) => {
+    const tblKey = key === 'sites' ? 'site' : key;
+    const newtblKey = tblKey.startsWith('tbl') ? tblKey : `tbl_${tblKey}`;
     if (data.hasOwnProperty(key)) {
-      const tblKey = key === 'sites' ? 'site' : key;
-      if (key === 'setting') {
-        const tblSetting = data.setting[0]
-          ? Object.entries(data.setting[0]).map(([k, v]) => ({ key: k, value: v }))
-          : [];
-
-        data[`tbl_${tblKey}`] = tblSetting;
-      } else {
-        data[`tbl_${tblKey}`] = data[key].data || data[key];
-      }
+      data[newtblKey] = data[key];
+      delete data[key];
     }
   });
 
-  // 规范化 id 字段
   const newDataTypes = [
     'tbl_site',
     'tbl_iptv',
@@ -189,8 +183,166 @@ const commonDelImportData = (data) => {
     'tbl_star',
     'tbl_setting',
   ];
+
+  // 2.移除非新数据类型中的字段
+  for (const key in data) {
+    if (!newDataTypes.includes(key)) {
+      delete data[key];
+    }
+  }
+
+  // 3. 格式化数据
+  for (const key in data) {
+    switch (key) {
+      case 'tbl_setting':
+        // 1. 将数组转换为对象
+        if (Array.isArray(data[key])) {
+          const doc = {};
+          for (const item of data[key]) {
+            doc[item.key] = item.value;
+          }
+          data[key] = doc;
+        }
+
+        // 2.更新缺失的设置项-init数据为准
+        for (const item of initSettingData) {
+          if (data[key][item.key] === undefined) {
+            data[key][item.key] = item.value;
+          }
+        }
+
+        // 3.删除不存在于初始配置中的键-已有数据
+        for (const data_key in data[key]) {
+          if (initSettingData.find((item) => item.key === data_key) === undefined) {
+            delete data[key][data_key];
+          }
+        }
+
+        // 4.处理默认数据
+        ['defaultSite', 'defaultIptv', 'defaultAnalyze', 'defaultDrive'].forEach((defaultKey) => {
+          if (defaultKey && (!uuidValidate(defaultKey) || uuidVersion(defaultKey) !== 4)) {
+            data[key][defaultKey] = '';
+          }
+        });
+        break;
+      case 'tbl_site':
+        data[key] = data[key]
+          .filter((item) => item?.name && item?.api && item?.type)
+          .map((item) => ({
+            id: item?.id || uuidv4(),
+            key: item?.key || item?.id || uuidv4(),
+            name: item?.name || '',
+            type: item?.type || 0,
+            api: item?.api || '',
+            group: item?.group || '',
+            search: item?.searchable !== 0 ? true : false,
+            categories: item.hasOwnProperty('categories')
+              ? Array.isArray(item.categories)
+                ? item.categories.join(',')
+                : item.categories
+              : '',
+            ext: item?.ext || '',
+            isActive: true,
+          }));
+        break;
+      case 'iptv':
+        data[key] = data[key]
+          .filter((item) => item?.name && item?.url)
+          .map((item) => {
+            return {
+              id: item?.id || uuidv4(),
+              name: item.name,
+              type: item?.type || 'remote',
+              url: item.url,
+              epg: item?.epg || '',
+              logo: item?.logo || '',
+              isActive: true,
+            };
+          });
+        break;
+      case 'tbl_channel':
+        data[key] = data[key]
+          .filter((item) => item?.name && item?.url && item.url.startsWith('http'))
+          .map((item) => {
+            return {
+              id: item?.id || uuidv4(),
+              name: item.name || '',
+              url: item?.url || '',
+              group: item?.group || '',
+            };
+          });
+        break;
+      case 'tbl_drive':
+        data[key] = data[key]
+          .filter((item) => item?.name && item?.server)
+          .map((item) => {
+            return {
+              id: item?.id || uuidv4(),
+              name: item?.name || '',
+              server: item?.server || '',
+              startPage: item?.startPage || '',
+              search: !!item.search,
+              headers: item.headers || null,
+              params: item.params || null,
+              isActive: true,
+            };
+          });
+        break;
+      case 'tbl_analyze':
+        data[key] = data[key]
+          .filter((item) => item?.name && item?.url)
+          .map((item) => {
+            return {
+              id: item?.id || uuidv4(),
+              name: item?.name || '',
+              url: item?.url || '',
+              type: item?.type ? item.type : 0,
+              isActive: true,
+            };
+          });
+        break;
+      case 'tbl_history':
+        data[key] = data[key]
+          .filter((item) => item?.type)
+          .map((item) => {
+            return {
+              id: item?.id || uuidv4(),
+              type: item?.type,
+              relateId: item.relateId,
+              siteSource: item?.siteSource || '',
+              playEnd: item?.playEnd || null,
+              videoId: item?.videoId || '',
+              videoImage: item?.videoImage || '',
+              videoName: item?.videoName || '',
+              videoIndex: item?.videoIndex || '',
+              watchTime: item?.watchTime || null,
+              duration: item?.duration || null,
+              skipTimeInEnd: item?.skipTimeInEnd || null,
+              skipTimeInStart: item?.skipTimeInStart || null,
+            };
+          });
+        break;
+      case 'tbl_star':
+        data[key] = data[key]
+          .filter((item) => item?.trelateId && item?.videoId)
+          .map((item) => {
+            return {
+              id: item?.id || uuidv4(),
+              relateId: item.relateId,
+              videoId: item.videoId,
+              videoImage: item?.videoImage || '',
+              videoName: item?.videoName || '',
+              videoType: item?.videoType || '',
+              videoRemarks: item?.videoRemarks || '',
+            };
+          });
+        break;
+    }
+  }
+
+  // 4. 处理数据id 必须为 uuid
   for (const dataType of newDataTypes) {
-    if (data.hasOwnProperty(dataType)) {
+    if (data.hasOwnProperty(dataType) && Array.isArray(data[dataType])) {
       const dataArray = data[dataType];
       const existingIds = new Set();
 
@@ -212,13 +364,6 @@ const commonDelImportData = (data) => {
           existingIds.add(data[dataType][i].id);
         }
       }
-    }
-  }
-
-  // 移除非新数据类型中的字段
-  for (const key in data) {
-    if (!newDataTypes.includes(key)) {
-      delete data[key];
     }
   }
 
