@@ -24,10 +24,23 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         },
       },
       build: {
+        sourcemap: false,
         rollupOptions: {
+          onwarn: (warning, warn) => {
+            if (warning.code === 'EVAL') return; // 忽略 eval 警告
+            if (warning.code === 'SOURCEMAP_ERROR') return; // 忽略 sourcemap 错误
+            warn(warning);
+          },
           input: {
             index: resolve(__dirname, 'src/main/index.ts'),
             worker: resolve(__dirname, 'src/main/core/server/routes/v1/site/cms/adapter/drpy/worker.ts'),
+          },
+          output: {
+            manualChunks: {
+              fastify: ['fastify', 'fastify-logger', 'fastify-plugin', '@fastify/cors', '@fastify/multipart'],
+              db: ['drizzle-kit', 'drizzle-orm'],
+              crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa'],
+            },
           },
           external: [],
         },
@@ -54,17 +67,39 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           output: {
             entryFileNames: `assets/entry/[name][hash].js`, // 引入文件名的名称
             chunkFileNames: `assets/chunk/[name][hash].js`, // 包的入口文件名称
-            assetFileNames: `assets/file/[name][hash].[ext]`, // 资源文件像 字体，图片等
-            manualChunks(id) {
-              if (id.includes('monaco-editor')) return 'monaco-editor_';
-              else if (id.includes('tdesign-vue-next')) return 'tdesign_';
-              else if (id.includes('lodash')) return 'lodash_';
-              else if (id.includes('artplayer')) return 'artplayer_';
-              else if (id.includes('dplayer')) return 'dplayer_';
-              else if (id.includes('nplayer')) return 'nplayer_';
-              else if (id.includes('xgplayer')) return 'xgplayer_';
-              else if (id.includes('node_modules')) return 'vendor_';
-              // else if (id.includes('src/renderer/src/utils/drpy')) return 'worker_t3_'; //代码分割为worker进程
+            assetFileNames: `assets/static/[ext]/[name][hash].[ext]`, // 资源文件像 字体，图片等
+            manualChunks: {
+              'monaco-editor': ['monaco-editor'],
+              lodash: ['lodash'],
+              xgplayer: [
+                'xgplayer',
+                'xgplayer-dash',
+                'xgplayer-flv',
+                'xgplayer-flv.js',
+                'xgplayer-hls',
+                'xgplayer-hls.js',
+                'xgplayer-mp4',
+                'xgplayer-shaka',
+              ],
+              artplayer: ['artplayer', 'artplayer-plugin-danmuku'],
+              dplayer: ['dplayer'],
+              nplayer: ['nplayer', '@nplayer/danmaku'],
+              videoDecoder: ['flv.js', 'hls.js', 'shaka-player', 'mpegts.js'],
+              tdesign: ['tdesign-vue-next', 'tdesign-icons-vue-next'],
+              md: ['github-markdown-css', 'markdown-it', 'markdown-it-highlightjs', 'markdown-it-mathjax3'],
+              crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa'],
+              vue: [
+                'vue',
+                'vue-router',
+                'pinia',
+                'vue-i18n',
+                'pinia-plugin-persistedstate',
+                'qrcode.vue',
+                'smooth-scrollbar',
+                'v3-infinite-loading',
+                'mitt',
+                '@imengyu/vue3-context-menu',
+              ],
             },
           },
         },
