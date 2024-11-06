@@ -5,7 +5,7 @@
       :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '68px' : '0' }"
     >
       <div class="open-main-win" @click="openMainWinEvent">
-        <home-icon />
+        <home-icon size="1em"/>
         <span class="tip-gotomain">{{ $t('pages.player.header.backMain') }}</span>
       </div>
     </div>
@@ -143,15 +143,17 @@ const setSystemMediaInfo = () => {
     flex: 1 1 auto;
     overflow: hidden;
     text-align: center;
+    height: 32px;
 
     span {
-      font-weight: 700;
+      font-weight: 500;
       text-align: center;
       display: inline-block;
       text-overflow: ellipsis;
       white-space: nowrap;
       width: 80%;
       overflow: hidden;
+      line-height: 32px;
     }
   }
 
