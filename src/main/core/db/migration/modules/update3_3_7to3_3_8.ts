@@ -7,7 +7,7 @@ const update = async () => {
   if (old_site.length > 0) {
     old_site.forEach(async (item: { [key: string]: any }) => {
       if (item.type === 3 || item.type === 4) {
-        await db.update(schema.site).set({ type: 11 }).where(eq(schema.analyze.id, item.id));
+        await db.update(schema.site).set({ type: 11 }).where(eq(schema.site.id, item.id));
       }
     });
   }
@@ -19,12 +19,10 @@ const update = async () => {
   await db.insert(schema.setting).values({ key: 'iptvDelay', value: { data: false } });
 
   await db.delete(schema.setting).where(eq(schema.setting.key, 'analyzeFlag'));
-  await db
-    .insert(schema.setting)
-    .values({
-      key: 'analyzeFlag',
-      value: { data: ['youku', 'qq', 'iqiyi', 'qiyi', 'letv', 'leshi', 'sohu', 'tudou', 'pptv', 'mgtv', 'imgo'] },
-    });
+  await db.insert(schema.setting).values({
+    key: 'analyzeFlag',
+    value: { data: ['youku', 'qq', 'iqiyi', 'qiyi', 'letv', 'leshi', 'sohu', 'tudou', 'pptv', 'mgtv', 'imgo'] },
+  });
 
   const old_version = await db.select().from(schema.setting).where(eq(schema.setting.key, 'version'));
   if (old_version.length > 0) {

@@ -6,10 +6,11 @@ const update = async () => {
   const old_analyze = await db.select().from(schema.analyze);
   if (old_analyze.length > 0) {
     old_analyze.forEach(async (item: { [key: string]: any }) => {
-      await db
-        .update(schema.analyze)
-        .set({ type: item?.type || 0 })
-        .where(eq(schema.analyze.id, item.id));
+      if (item?.type === undefined)
+        await db
+          .update(schema.analyze)
+          .set({ type: item?.type || 0 })
+          .where(eq(schema.analyze.id, item.id));
     });
   }
 
