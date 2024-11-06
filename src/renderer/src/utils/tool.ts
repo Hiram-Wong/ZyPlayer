@@ -1,4 +1,4 @@
-import ip from 'ip';
+import ipaddr from 'ipaddr.js';
 import request, { requestComplete } from '@/utils/request';
 import { usePlayStore, useSettingStore } from '@/store';
 
@@ -80,14 +80,18 @@ const getMeadiaType = async (url: string): Promise<string> => {
   }
 };
 
-const checkUrlIpv6 = async (url: string) => {
-  let hostname = new URL(url).hostname;
-  if (ip.isV4Format(hostname)) {
-    return 4;
-  } else if (ip.isV6Format(hostname)) {
-    return 6;
-  } else {
-    return -1;
+const checkIpVersion = async (url: string) => {
+  let version = -1;
+  try {
+    const hostname = new URL(url).hostname;
+    const ip = ipaddr.parse(hostname);
+    if (ip.kind() === 'ipv4') {
+      version = 4;
+    } else if (ip.kind() === 'ipv6') {
+      version = 6;
+    }
+  } finally {
+    return version;
   }
 };
 
@@ -252,7 +256,7 @@ export {
   supportedFormats,
   getMeadiaType,
   checkMediaType,
-  checkUrlIpv6,
+  checkIpVersion,
   checkLiveM3U8,
   copyToClipboardApi,
   dictDeepClone,

@@ -2186,24 +2186,24 @@
   resolved "https://registry.npmmirror.com/@vue/devtools-api/-/devtools-api-6.6.4.tgz#cbe97fe0162b365edc1dba80e173f90492535343"
   integrity sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g==
 
-"@vue/devtools-core@^7.6.2":
-  version "7.6.2"
-  resolved "https://registry.npmmirror.com/@vue/devtools-core/-/devtools-core-7.6.2.tgz#1eba210bdb2525152b56fa8505acd89e63011736"
-  integrity sha512-hJfjNR3ai94Mb6i0PB42kxUPkPreS6Dl07FUaHAcw+umtkUX55jTXe7+mhsHx9NI6NFT+1WMFREIy8O81KLYyA==
+"@vue/devtools-core@^7.6.3":
+  version "7.6.3"
+  resolved "https://registry.npmmirror.com/@vue/devtools-core/-/devtools-core-7.6.3.tgz#801ca8aca7e6eaf1b7142c16c05c78ad488dffee"
+  integrity sha512-C7FOuh3Z+EmXXzDU9eRjHQL7zW7/CFovM6yCNNpUb+zXxhrn4fiqTum+a3gNau9DuzYfEtQXwZ9F7MeK0JKYVw==
   dependencies:
-    "@vue/devtools-kit" "^7.6.2"
-    "@vue/devtools-shared" "^7.6.2"
+    "@vue/devtools-kit" "^7.6.3"
+    "@vue/devtools-shared" "^7.6.3"
     mitt "^3.0.1"
     nanoid "^3.3.4"
     pathe "^1.1.2"
     vite-hot-client "^0.2.3"
 
-"@vue/devtools-kit@^7.6.2":
-  version "7.6.2"
-  resolved "https://registry.npmmirror.com/@vue/devtools-kit/-/devtools-kit-7.6.2.tgz#17f1584c74c0e30fa2086a89e65acbce3fc47945"
-  integrity sha512-k61BxHRmcTtIQZFouF9QWt9nCCNtSdw12lhg8VNtHq5/XOBGD+ewiK27a40UJ8UPYoCJvi80hbvbYr5E/Zeu1g==
+"@vue/devtools-kit@^7.6.3":
+  version "7.6.3"
+  resolved "https://registry.npmmirror.com/@vue/devtools-kit/-/devtools-kit-7.6.3.tgz#df4d43376d1c729793ef8f9033ad48525a707349"
+  integrity sha512-ETsFc8GlOp04rSFN79tB2TpVloWfsSx9BoCSElV3w3CaJTSBfz42KsIi5Ka+dNTJs1jY7QVLTDeoBmUGgA9h2A==
   dependencies:
-    "@vue/devtools-shared" "^7.6.2"
+    "@vue/devtools-shared" "^7.6.3"
     birpc "^0.2.19"
     hookable "^5.5.3"
     mitt "^3.0.1"
@@ -2211,10 +2211,10 @@
     speakingurl "^14.0.1"
     superjson "^2.2.1"
 
-"@vue/devtools-shared@^7.6.2":
-  version "7.6.2"
-  resolved "https://registry.npmmirror.com/@vue/devtools-shared/-/devtools-shared-7.6.2.tgz#585769040c3a84a641087fb722377a526b70b59d"
-  integrity sha512-lcjyJ7hCC0W0kNwnCGMLVTMvDLoZgjcq9BvboPgS+6jQyDul7fpzRSKTGtGhCHoxrDox7qBAKGbAl2Rcf7GE1A==
+"@vue/devtools-shared@^7.6.3":
+  version "7.6.3"
+  resolved "https://registry.npmmirror.com/@vue/devtools-shared/-/devtools-shared-7.6.3.tgz#c8c55cf4d8d50b9b5c45e3c87ab054c131f2a37d"
+  integrity sha512-wJW5QF27i16+sNQIaes8QoEZg1eqEgF83GkiPUlEQe9k7ZoHXHV7PRrnrxOKem42sIHPU813J2V/ZK1uqTJe6g==
   dependencies:
     rfdc "^1.4.1"
 
@@ -4004,10 +4004,10 @@ electron@*:
     "@types/node" "^20.9.0"
     extract-zip "^2.0.1"
 
-electron@^33.0.2:
-  version "33.0.2"
-  resolved "https://registry.npmmirror.com/electron/-/electron-33.0.2.tgz#db31b105bf0edd7c8600dfb70c2dfc214e3789f1"
-  integrity sha512-C2WksfP0COsMHbYXSJG68j6S3TjuGDrw/YT42B526yXalIlNQZ2GeAYKryg6AEMkIp3p8TUfDRD0+HyiyCt/nw==
+electron@^33.1.0:
+  version "33.1.0"
+  resolved "https://registry.npmmirror.com/electron/-/electron-33.1.0.tgz#c86042e71fa964a054b3306810a3c451aada98f7"
+  integrity sha512-7KiY6MtRo1fVFLPGyHS7Inh8yZfrbUTy43nNwUgMD2CBk729BgSwOC2WhmcptNJVlzHJpVxSWkiVi2hp9mH/bw==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^20.9.0"
@@ -5499,15 +5499,15 @@ ip-regex@^5.0.0:
   resolved "https://registry.npmmirror.com/ip-regex/-/ip-regex-5.0.0.tgz#cd313b2ae9c80c07bd3851e12bf4fa4dc5480632"
   integrity sha512-fOCG6lhoKKakwv+C6KdsOnGvgXnmgfmp0myi3bcNwj3qfwPAxRKWEuFhvEFF7ceYIz6+1jRZ+yguLFAmUNPEfw==
 
-ip@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.npmmirror.com/ip/-/ip-2.0.1.tgz#e8f3595d33a3ea66490204234b77636965307105"
-  integrity sha512-lJUL9imLTNi1ZfXT+DU6rBBdbiKGBuay9B6xGSPVjUeQwaH1RIGqef8RZkUtHioLmSNpPR5M4HVKJGm1j8FWVQ==
-
 ipaddr.js@1.9.1:
   version "1.9.1"
   resolved "https://registry.npmmirror.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
   integrity sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==
+
+ipaddr.js@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/ipaddr.js/-/ipaddr.js-2.2.0.tgz#d33fa7bac284f4de7af949638c9d68157c6b92e8"
+  integrity sha512-Ag3wB2o37wslZS19hZqorUnrnzSkpOVy+IiiDEiTqNubEYpYuHWIf6K4psgN2ZWKExS4xhVCrRVfb/wfW8fWJA==
 
 is-arrayish@^0.2.1:
   version "0.2.1"
@@ -9310,14 +9310,14 @@ vite-plugin-inspect@^0.8.7:
     picocolors "^1.0.1"
     sirv "^2.0.4"
 
-vite-plugin-vue-devtools@^7.6.2:
-  version "7.6.2"
-  resolved "https://registry.npmmirror.com/vite-plugin-vue-devtools/-/vite-plugin-vue-devtools-7.6.2.tgz#44e8c6aebcb250393cd4ff5cf31e6d9d437a72bf"
-  integrity sha512-YPE/8AIBsomvHadZ02Kkp8yZo2FR0SFNjbC2lcMgW+hNA1ZoXu9b5oi18gTMzJcLLFRNNSMNjShA4RLqXlIR/A==
+vite-plugin-vue-devtools@^7.6.3:
+  version "7.6.3"
+  resolved "https://registry.npmmirror.com/vite-plugin-vue-devtools/-/vite-plugin-vue-devtools-7.6.3.tgz#c0ff8e16be0597da1e445a9c934a6d702314f392"
+  integrity sha512-p1rZMKzreWqxj9U05RaxY1vDoOhGYhA6iX8vKfo4nD6jqTmVoGjjk+U1g5HYwwTCdr/eck3kzO2f4gnPCjqVKA==
   dependencies:
-    "@vue/devtools-core" "^7.6.2"
-    "@vue/devtools-kit" "^7.6.2"
-    "@vue/devtools-shared" "^7.6.2"
+    "@vue/devtools-core" "^7.6.3"
+    "@vue/devtools-kit" "^7.6.3"
+    "@vue/devtools-shared" "^7.6.3"
     execa "^8.0.1"
     sirv "^3.0.0"
     vite-plugin-inspect "^0.8.7"
