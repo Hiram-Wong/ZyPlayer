@@ -80,8 +80,8 @@ const handleMouseDown = (event) => {
 
       .system-function {
         margin-left: var(--td-comp-margin-xs);
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;

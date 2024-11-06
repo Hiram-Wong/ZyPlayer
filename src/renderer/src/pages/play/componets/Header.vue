@@ -5,7 +5,7 @@
       :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '68px' : '0' }"
     >
       <div class="open-main-win" @click="openMainWinEvent">
-        <home-icon size="1.5em" />
+        <home-icon />
         <span class="tip-gotomain">{{ $t('pages.player.header.backMain') }}</span>
       </div>
     </div>
@@ -120,19 +120,21 @@ const setSystemMediaInfo = () => {
       align-items: center;
       height: 32px;
       width: 120px;
+      font-weight: 500;
       border-radius: var(--td-radius-default);
+      color: var(--td-text-color-placeholder);
       background-color: var(--td-bg-color-container);
-      padding: 2px 10px;
-      transition: 0.15s linear;
+      padding: 1px 10px;
+      transition: all 0.2s linear;
       cursor: pointer;
 
       .tip-gotomain {
         display: inline-block;
-        margin-left: 5px;
+        margin-left: var(--td-comp-margin-xxs);
       }
 
       &:hover {
-        background-color: var(--td-bg-content-hover-2);
+        color: var(--td-primary-color);
       }
     }
   }
@@ -170,8 +172,8 @@ const setSystemMediaInfo = () => {
 
       .system-function {
         margin-left: var(--td-comp-margin-xs);
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
