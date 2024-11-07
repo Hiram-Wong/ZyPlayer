@@ -11,22 +11,6 @@ import ShakaPlugin from 'xgplayer-shaka';
 
 import { publicColor, publicIcons, publicStorage } from './components';
 
-// const barrge = (player: XgPlayer, comments: any, _url: string, _id: string) => {
-//   player.plugins.danmu.updateComments(comments, true);
-//   player.getPlugin('danmu').updateComments(comments, true); // 效果一样
-//   player.plugins.danmu.sendComment({
-//     duration: 5000, //弹幕持续显示时间,毫秒(最低为5000毫秒)
-//     id: nanoid(), //弹幕id，需唯一
-//     start: player.currentTime * 1000, //弹幕出现时间，毫秒
-//     color: true, //该条弹幕为彩色弹幕，默认false
-//     txt: '', //弹幕文字内容
-//     style: {
-//       //弹幕自定义样式
-//       color: '#FFFFFF',
-//     },
-//   }); // 应插件内实现
-// };
-
 class XgPlayerAdapter {
   player: XgPlayer | null = null;
   options: { [key: string]: any } = {
@@ -77,6 +61,32 @@ class XgPlayerAdapter {
     playrateUpdate: () => {},
     volumeUpdate: () => {},
     mutedUpdate: () => {},
+  };
+
+  barrage = (comments: any, _url: string, _id: string) => {
+    if (!this.player) return;
+    comments = comments.map((item, index) => ({
+      duration: 5000,
+      id: String(index + 1),
+      txt: item.text,
+      start: item.time * 1000,
+      mode: ['left', 'right'].includes(item.mode) ? 'scroll' : item.mode,
+      color: true,
+      style: { color: item.color },
+    }));
+    this.player.plugins.danmu.updateComments(comments, true);
+    // this.player.getPlugin('danmu').updateComments(comments, true); // 效果一样
+    // this.player.plugins.danmu.sendComment({
+    //   duration: 5000, //弹幕持续显示时间,毫秒(最低为5000毫秒)
+    //   id: nanoid(), //弹幕id，需唯一
+    //   start: player.currentTime * 1000, //弹幕出现时间，毫秒
+    //   color: true, //该条弹幕为彩色弹幕，默认false
+    //   txt: '', //弹幕文字内容
+    //   style: {
+    //     //弹幕自定义样式
+    //     color: '#FFFFFF',
+    //   },
+    // }); // 应插件内实现
   };
 
   create = (options: any): XgPlayer => {

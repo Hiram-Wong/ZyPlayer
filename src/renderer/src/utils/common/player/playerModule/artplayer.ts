@@ -93,8 +93,15 @@ class ArtPlayerAdapter {
     mutedUpdate: () => {},
   };
 
-  barrge = (comments: any, url: string, id: string) => {
+  barrage = (comments: any, url: string, id: string) => {
     if (!this.player) return;
+    comments = comments.map((item) => ({
+      color: item.color,
+      text: item.text,
+      time: item.time,
+      mode: item.mode === 'scroll' ? 1 : 0,
+      border: false,
+    }));
     this.player.plugins.artplayerPluginDanmuku.config({
       danmuku: comments,
     });
@@ -110,7 +117,7 @@ class ArtPlayerAdapter {
       publicBarrageSend(url, options);
     };
     // @ts-ignore
-    this.player.on('artplayerPluginDanmuku:emit', publicListener.sendDanmu);
+    this.player.on('artplayerPluginDanmuku:emit', this.publicListener.sendDanmu);
   };
 
   create = (options: any): Artplayer => {
@@ -223,7 +230,7 @@ class ArtPlayerAdapter {
   offBarrage = () => {
     if (!this.player) return;
     // @ts-ignore
-    this.player.off('artplayerPluginDanmuku:emit', publicListener.sendDanmu);
+    this.player.off('artplayerPluginDanmuku:emit', this.publicListener.sendDanmu);
   };
 
   offTimeUpdate = () => {

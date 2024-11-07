@@ -161,9 +161,9 @@ class DPlayerAdapter {
     },
     danmaku: {
       id: '', //必填，视频id, 用于下面api请求时使用
-      api: 'http://127.0.0.1:9978/api/v1/barrge/', //必填,后台提供
+      api: 'http://127.0.0.1:9978/api/v1/barrage/', //必填,后台提供
       addition: [], //可选，额外的弹幕
-      user: 'ZyPlayer', //弹幕作者
+      user: 'zyfun', //弹幕作者
       bottom: '15%',
       unlimited: false,
     },
@@ -175,14 +175,15 @@ class DPlayerAdapter {
     volumeUpdate: () => {},
   };
 
-  barrge = (player: any, comments: any, _url: string, _id: string) => {
-    const video = player.options.video;
-    let danmaku: any = player.options.danmaku;
-    danmaku.id = comments;
-    const { currentTime, playbackRate } = player.video;
-    player.switchVideo({ ...video }, { ...danmaku });
-    if (currentTime) player.seek(currentTime);
-    if (playbackRate !== 1) player.speed(playbackRate);
+  barrage = (_comments: any, _url: string, id: string) => {
+    if (!this.player) return;
+    const video = this.player.options.video;
+    let danmaku = this.player.options.danmaku;
+    danmaku.id = id;
+    const { currentTime, playbackRate } = this.player.video;
+    this.player.switchVideo({ ...video }, { ...danmaku });
+    if (currentTime) this.player.seek(currentTime);
+    if (playbackRate !== 1) this.player.speed(playbackRate);
   };
 
   create = (options: any): any => {

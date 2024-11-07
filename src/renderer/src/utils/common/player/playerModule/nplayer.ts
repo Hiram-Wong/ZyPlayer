@@ -82,8 +82,16 @@ class NPlayerAdapter {
     volumeUpdate: () => {},
   };
 
-  barrge = (comments: any, url: string, id: string) => {
+  barrage = (comments: any, url: string, id: string) => {
     if (!this.player) return;
+    comments = comments.map((item) => ({
+      color: item.color,
+      text: item.text,
+      time: item.time,
+      type: item.mode === 'top' || item.mode === 'bottom' ? item.mode : 'scroll',
+      isMe: false,
+      force: true,
+    }));
     this.player.danmaku.resetItems(comments);
     this.publicListener.sendDanmu = (danmu: any) => {
       const options = {
