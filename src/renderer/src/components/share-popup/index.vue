@@ -19,7 +19,7 @@
             <t-divider dashed style="margin: 5px 0" />
           </div>
           <div class="share-container-main-right">
-            <qrcode-vue :value="formData.url" :size="85" :margin="5" level="H" render-as="svg" class="qrcode" />
+            <qrcode-vue :value="formData.url" :size="85" :margin="3" render-as="svg" class="qrcode" />
           </div>
         </div>
         <div class="bottom-title text-hide">{{ formData.name }}</div>
