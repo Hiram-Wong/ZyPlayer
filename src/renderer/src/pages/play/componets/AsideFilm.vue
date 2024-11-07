@@ -215,7 +215,6 @@ import {
   putBingeData,
   fetchHistoryData,
   putHistoryData,
-  fetchBarrageData,
   playHelper,
   reverseOrderHelper,
   fetchRecommSearchHelper,
@@ -292,10 +291,6 @@ const settingFormData = ref({
   skipTimeInEnd: 30,
   preloadNext: false,
   skipAd: false
-});
-const playFormData = ref({
-  url: '',
-  headers: {},
 });
 const active = ref({
   profile: false,
@@ -486,6 +481,7 @@ const callPlay = async (item) => {
   if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
     response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
   } else {
+    console.log('不存在预加载下一集');
     let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
     if (active.value.official) {
       if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
@@ -511,8 +507,10 @@ const callPlay = async (item) => {
     if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
       if (tmp.value.preloadNext.barrage.length > 0) barrage = tmp.value.preloadNext.barrage;
     } else {
-      const barrageRes = await fetchConfig({ url: `${barrageUrl}${originalUrl}`, method: 'GET'});
-      if (Array.isArray(barrageRes[key]) && barrageRes[key].length > 0) barrage = barrageRes[key];
+      try {
+        const barrageRes = await fetchConfig({ url: `${barrageUrl}${originalUrl}`, method: 'GET'});
+        if (Array.isArray(barrageRes[key]) && barrageRes[key].length > 0) barrage = barrageRes[key];
+      } catch (err) {};
     };
   };
   if (response?.url && barrage.length > 0) {
@@ -526,7 +524,6 @@ const callPlay = async (item) => {
     emits('barrage', { comments: formatBarrage, url: barrageUrl, id: hash['md5-16'](originalUrl) });
   };
 
-  videoData.value.playEnd = false;
   tmp.value = {
     preloadNext: {
       url: '',
@@ -574,6 +571,12 @@ const switchSeasonEvent = async (item) => {
     videoData.value.watchTime = 0;
     videoData.value.playEnd = false;
   };
+  videoData.value.skipTime = videoData.value.watchTime;
+  if (extConf.value.setting.skipStartEnd) {
+    if (videoData.value.skipTime < videoData.value.skipTimeInStart) {
+      videoData.value.skipTime = videoData.value.skipTimeInStart;
+    }
+  }
 
   await callPlay(active.value.filmIndex);
 };
@@ -652,12 +655,6 @@ const recommendEvent = async (item) => {
   }
 };
 
-// 获取弹幕
-const fetchBarrage = async (url: string, options: any, active: any) => {
-  const response = await fetchBarrageData(url, options, active);
-  return response || [];
-};
-
 const setup = async () => {
   // 1. 格式化剧集数据
   const formattedSeason: any = await formatSeason(infoConf.value);
@@ -729,9 +726,9 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   // 2.获取跳过时间
   const { preloadNext, skipStartEnd, skipAd, barrage } = extConf.value.setting;
   const watchTime = skipStartEnd ? currentTime + videoData.value.skipTimeInEnd : currentTime;
-  // console.log(
-  //   `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
-  // );
+  console.log(
+    `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
+  );
 
   // 3.更新播放记录
   videoData.value.watchTime = currentTime;
@@ -739,7 +736,16 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   if (watchTime >= duration) videoData.value.playEnd = true;
   throttlePutHistory();
 
-  // 4.预加载下集链接 提前30秒预加载
+  // 4.播放下集  不是最后一集 & 时间>尾部跳过时间+观看时间
+  if (!isLast() && watchTime >= duration && duration !== 0 && !tmp.value.end) {
+    tmp.value.end = true;
+    const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
+    const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
+    await switchSeasonEvent(nextInfo);
+    return;
+  };
+
+  // 5.预加载下集链接 提前30秒预加载
   if (watchTime + 30 >= duration && duration !== 0) {
     if (!isLast() && !tmp.value.preloadNext.load && preloadNext) {
       tmp.value.preloadNext.load = true; // 标识是否触发预加载
@@ -748,6 +754,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
         const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
         let url = formatIndex(nextInfo).url;
         url = decodeURIComponent(url);
+        const originUrl = url;
         const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
         let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
         if (active.value.official) {
@@ -765,20 +772,14 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
           tmp.value.preloadNext.init = true; // 标识是否预加载完毕
           const { url: barrageUrl, key, support, start, mode, color, content } = barrage;
           if (barrageUrl && key && support && start && mode && color && content && support.includes(active.value.flimSource)) {
-            const barrageRes = await fetchConfig({ url: `${barrageUrl}${url}`, method: 'GET'});
-            if (Array.isArray(barrageRes[key]) && barrageRes[key].length === 0) tmp.value.preloadNext.barrage = barrageRes[key] as any;
+            try {
+              const barrageRes = await fetchConfig({ url: `${barrageUrl}${originUrl}`, method: 'GET'});
+              if (Array.isArray(barrageRes[key]) && barrageRes[key].length === 0) tmp.value.preloadNext.barrage = barrageRes[key] as any;
+            } catch(err) {}
           }
         }
       } catch (err) {}
     }
-  };
-
-  // 5.播放下集  不是最后一集 & 时间>尾部跳过时间+观看时间
-  if (!isLast() && watchTime >= duration && duration !== 0 && !tmp.value.end) {
-    tmp.value.end = true;
-    const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
-    const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
-    await switchSeasonEvent(nextInfo);
   };
 };
 </script>
