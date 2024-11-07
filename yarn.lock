@@ -1593,74 +1593,74 @@
   resolved "https://registry.npmmirror.com/@sindresorhus/merge-streams/-/merge-streams-2.3.0.tgz#719df7fb41766bc143369eaa0dd56d8dc87c9958"
   integrity sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==
 
-"@swc/core-darwin-arm64@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-darwin-arm64/-/core-darwin-arm64-1.9.0.tgz#afba3b708bed5bb5fbbe1bb23a9b10a44ff16840"
-  integrity sha512-GEuJYhJMqJIvkYAikGch4qbgwWhMkvJHfEOEwDwG9vvmFmWi7B1flfjvtpri0stkxWCix5SPDIWELP8Brx24+g==
+"@swc/core-darwin-arm64@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-darwin-arm64/-/core-darwin-arm64-1.9.1.tgz#0fd83e5febe1044c7b12f128089cb8b213e14d0b"
+  integrity sha512-2/ncHSCdAh5OHem1fMITrWEzzl97OdMK1PHc9CkxSJnphLjRubfxB5sbc5tDhcO68a5tVy+DxwaBgDec3PXnOg==
 
-"@swc/core-darwin-x64@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-darwin-x64/-/core-darwin-x64-1.9.0.tgz#6d116a66bd86e745af673203044adff964fa77ae"
-  integrity sha512-djThBGT+9LRdWvWApqj/1cQfivmbMF9ng+e+xLCE6qPDw5ARyZH0P8jky5ieCai55Ro9VBT1NSU/GA/E0kj+sw==
+"@swc/core-darwin-x64@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-darwin-x64/-/core-darwin-x64-1.9.1.tgz#da28fcd37207655d2ad34dcb0d0819f20decb57a"
+  integrity sha512-4MDOFC5zmNqRJ9RGFOH95oYf27J9HniLVpB1pYm2gGeNHdl2QvDMtx2QTuMHQ6+OTn/3y1BHYuhBGp7d405oLA==
 
-"@swc/core-linux-arm-gnueabihf@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-arm-gnueabihf/-/core-linux-arm-gnueabihf-1.9.0.tgz#c597a068232be31498e0a08667c2707d24a96ad9"
-  integrity sha512-PKOi1Cd3ksQB6FZLslNIl/NtJh3pmTimmBxwJkiv6m73iYCIkDMj6o8mosIAPoqfxOcrJkHJAVP1FI0msOn90A==
+"@swc/core-linux-arm-gnueabihf@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-arm-gnueabihf/-/core-linux-arm-gnueabihf-1.9.1.tgz#dde1a15d1b88a6be000bbcecebe301227eb76c57"
+  integrity sha512-eVW/BjRW8/HpLe3+1jRU7w7PdRLBgnEEYTkHJISU8805/EKT03xNZn6CfaBpKfeAloY4043hbGzE/NP9IahdpQ==
 
-"@swc/core-linux-arm64-gnu@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.9.0.tgz#9bb043b152f51dc3e47119cd1401167e0dcf6b31"
-  integrity sha512-ZQoRyQ1cDbYFCqquhOnQ/gH+0SVqDyRhzrruyb2XU78XfRff7wvW8CSyCSZXj9tXWmlsgikSLrMj0u1ta+VzPA==
+"@swc/core-linux-arm64-gnu@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.9.1.tgz#8b6d15b56597ba5e097932d3a305e88c3d749cec"
+  integrity sha512-8m3u1v8R8NgI/9+cHMkzk14w87blSy3OsQPWPfhOL+XPwhyLPvat+ahQJb2nZmltjTgkB4IbzKFSfbuA34LmNA==
 
-"@swc/core-linux-arm64-musl@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.9.0.tgz#356b5411c020fec5918b9112c778189ce2ecc0f1"
-  integrity sha512-MxFCgrwl0+82ugy8GfR1czSMF//e4jI1iW+vayBiHG+nab6f5omouitZkLtHHL+eoO2bKb+HH0KjgpPYEaJczQ==
+"@swc/core-linux-arm64-musl@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.9.1.tgz#dd822efe61b2bbbd378e6ca8d80b4ba992c34ad8"
+  integrity sha512-hpT0sQAZnW8l02I289yeyFfT9llGO9PzKDxUq8pocKtioEHiElRqR53juCWoSmzuWi+6KX7zUJ0NKCBrc8pmDg==
 
-"@swc/core-linux-x64-gnu@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-gnu/-/core-linux-x64-gnu-1.9.0.tgz#94208128dbd2c77aacdac6eaf44f4cfdfdbec75f"
-  integrity sha512-7pBHreGdgfoGQ7pcoOh+Mo5QRodOwtzqEQkISSuAzBtzqtrykaaIFrqJVVSoIZ7w1I6s9k8FZy4dwHBUNB1Nhw==
+"@swc/core-linux-x64-gnu@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-gnu/-/core-linux-x64-gnu-1.9.1.tgz#d02c63e96d4137c988e71189ccf1c40deb43b4cc"
+  integrity sha512-sGFdpdAYusk/ropHiwtXom2JrdaKPxl8MqemRv6dvxZq1Gm/GdmOowxdXIPjCgBGMgoXVcgNviH6CgiO5q+UtA==
 
-"@swc/core-linux-x64-musl@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-musl/-/core-linux-x64-musl-1.9.0.tgz#53524030728c86d8c75e2df6742489cd2dd7bef8"
-  integrity sha512-1u1vYGWOTG3VNNPeWikIR3Pmnw0n0Arbk7Op6qfnx7FD6UmVNMYg1QmSjxXRVSR9qn/oef04YKQbSfc1knLubw==
+"@swc/core-linux-x64-musl@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-musl/-/core-linux-x64-musl-1.9.1.tgz#a8736ddb8e573aa59ccceb50813badff806b299b"
+  integrity sha512-YtNLNwIWs0Z2+XgBs6+LrCIGtfCDtNr4S4b6Q5HDOreEIGzSvhkef8eyBI5L+fJ2eGov4b7iEo61C4izDJS5RA==
 
-"@swc/core-win32-arm64-msvc@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.9.0.tgz#e19daa76c177660a7ef0b8c59d5187d6133588d9"
-  integrity sha512-VrPF5VQA7abSOhTJdRz/AKeaOGAUe2EPD2nHEOGWx7AFNkpEKSDyJX4t1ur/dsNJR2kD9/40q+V7QdnaLh2enQ==
+"@swc/core-win32-arm64-msvc@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.9.1.tgz#91c75fe95cd7bb7f7ae85c6b3bd405af63dc5984"
+  integrity sha512-qSxD3uZW2vSiHqUt30vUi0PB92zDh9bjqh5YKpfhhVa7h1vt/xXhlid8yMvSNToTfzhRrTEffOAPUr7WVoyQUA==
 
-"@swc/core-win32-ia32-msvc@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-win32-ia32-msvc/-/core-win32-ia32-msvc-1.9.0.tgz#ff570d11a2678309bb2cb4da3376e36617d06a30"
-  integrity sha512-81tMJ2OAxxnmwTT8E2CWcV/FWa8bem60GnZOnOdLZ+gqDeusICyAf9s0mozTHTJIkq7s1ge9KoC++K5QVhixqQ==
+"@swc/core-win32-ia32-msvc@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-win32-ia32-msvc/-/core-win32-ia32-msvc-1.9.1.tgz#e2ea0be7ca34b642b3adbb6c1fad34fb7874514b"
+  integrity sha512-C3fPEwyX/WRPlX6zIToNykJuz1JkZX0sk8H1QH2vpnKuySUkt/Ur5K2FzLgSWzJdbfxstpgS151/es0VGAD+ZA==
 
-"@swc/core-win32-x64-msvc@1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.9.0.tgz#751d2201754f79a4abfe678ebfda27d17e4355c7"
-  integrity sha512-EIHePEgWMW7Bvv2TAYJeAITnFOF7Z9MObxIKLHSu/5/YCxsrij6F0vRSGhUURLu+XqKrQzDDS1QsZw60GxYgRQ==
+"@swc/core-win32-x64-msvc@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.9.1.tgz#c9e532a791fdf44e3c9635135b1026f140d06483"
+  integrity sha512-2XZ+U1AyVsOAXeH6WK1syDm7+gwTjA8fShs93WcbxnK7HV+NigDlvr4124CeJLTHyh3fMh1o7+CnQnaBJhlysQ==
 
-"@swc/core@^1.9.0":
-  version "1.9.0"
-  resolved "https://registry.npmmirror.com/@swc/core/-/core-1.9.0.tgz#3c853fda3a44edb1564a26b43cbcd1c3165c3b74"
-  integrity sha512-jIeqMdsdtPkhKERTWG8tDsG2aOJ5HsHjsCNFgro8urifPd1V3HBcGryt020mQrD8dOLKc3z/5bh3wOdsB/1VPw==
+"@swc/core@^1.9.1":
+  version "1.9.1"
+  resolved "https://registry.npmmirror.com/@swc/core/-/core-1.9.1.tgz#1a1b8378e4b64b74e7f932014ca800ea6133ac27"
+  integrity sha512-OnPc+Kt5oy3xTvr/KCUOqE9ptJcWbyQgAUr1ydh9EmbBcmJTaO1kfQCxm/axzJi6sKeDTxL9rX5zvLOhoYIaQw==
   dependencies:
     "@swc/counter" "^0.1.3"
     "@swc/types" "^0.1.14"
   optionalDependencies:
-    "@swc/core-darwin-arm64" "1.9.0"
-    "@swc/core-darwin-x64" "1.9.0"
-    "@swc/core-linux-arm-gnueabihf" "1.9.0"
-    "@swc/core-linux-arm64-gnu" "1.9.0"
-    "@swc/core-linux-arm64-musl" "1.9.0"
-    "@swc/core-linux-x64-gnu" "1.9.0"
-    "@swc/core-linux-x64-musl" "1.9.0"
-    "@swc/core-win32-arm64-msvc" "1.9.0"
-    "@swc/core-win32-ia32-msvc" "1.9.0"
-    "@swc/core-win32-x64-msvc" "1.9.0"
+    "@swc/core-darwin-arm64" "1.9.1"
+    "@swc/core-darwin-x64" "1.9.1"
+    "@swc/core-linux-arm-gnueabihf" "1.9.1"
+    "@swc/core-linux-arm64-gnu" "1.9.1"
+    "@swc/core-linux-arm64-musl" "1.9.1"
+    "@swc/core-linux-x64-gnu" "1.9.1"
+    "@swc/core-linux-x64-musl" "1.9.1"
+    "@swc/core-win32-arm64-msvc" "1.9.1"
+    "@swc/core-win32-ia32-msvc" "1.9.1"
+    "@swc/core-win32-x64-msvc" "1.9.1"
 
 "@swc/counter@^0.1.3":
   version "0.1.3"
@@ -1971,10 +1971,10 @@
   resolved "https://registry.npmmirror.com/@types/web-bluetooth/-/web-bluetooth-0.0.20.tgz#f066abfcd1cbe66267cdbbf0de010d8a41b41597"
   integrity sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==
 
-"@types/web@^0.0.176":
-  version "0.0.176"
-  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.176.tgz#34f845895f840e5775026b4bef541210cd16c7ea"
-  integrity sha512-ZPiEUDiXACru+FlfZ7SdzD20aexUUymircht8paRLP2YvhGeQxlP+hYniQ9AMROKxTP33eyjdALogaghf/VptQ==
+"@types/web@^0.0.177":
+  version "0.0.177"
+  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.177.tgz#0e0a5967656d56042c1d6ebea3ca0ab7290bad62"
+  integrity sha512-u2zIJ5QbQRmsuQAN/p38+fgwObOyywAH205c3Z122Nd3CvqfD4PzTBMp2y/1sSjlPDtpWnYuC1wlEudtz2bskA==
 
 "@types/yauzl@^2.9.1":
   version "2.10.3"
@@ -3870,20 +3870,20 @@ dplayer@^1.27.1:
     balloon-css "^1.0.3"
     promise-polyfill "8.3.0"
 
-drizzle-kit@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.npmmirror.com/drizzle-kit/-/drizzle-kit-0.27.2.tgz#e4ceb8c5bf55fe9e6f58bfb71116814f370fc1ca"
-  integrity sha512-F6cFZ1wxa9XzFyeeQsp/0/lIzUbDuQjS8/njpYBDWa+wdWmXuY+Z/X2hHFK/9PGHZkv3c9mER+mVWfKlp/B6Vw==
+drizzle-kit@^0.28.0:
+  version "0.28.0"
+  resolved "https://registry.npmmirror.com/drizzle-kit/-/drizzle-kit-0.28.0.tgz#76e16d576090b40edee3e2f57c582329c53a2335"
+  integrity sha512-KqI+CS2Ga9GYIrXpxpCDUJJrH/AT/k4UY0Pb4oRgQEGkgN1EdCnqp664cXgwPWjDr5RBtTsjZipw8+8C//K63A==
   dependencies:
     "@drizzle-team/brocli" "^0.10.2"
     "@esbuild-kit/esm-loader" "^2.5.5"
     esbuild "^0.19.7"
     esbuild-register "^3.5.0"
 
-drizzle-orm@^0.36.0:
-  version "0.36.0"
-  resolved "https://registry.npmmirror.com/drizzle-orm/-/drizzle-orm-0.36.0.tgz#5bbaaf97a50b2967c16658cdb5aa22a293ddbb5d"
-  integrity sha512-6BETYPdKSR7cDHC0ZfqZk2VrKJ8n/Rfd3ajFPsAbc69gi87nwZ6oBA2wUGMELHA0tQE4kUKN0Ds00LUZQ6Z69A==
+drizzle-orm@^0.36.1:
+  version "0.36.1"
+  resolved "https://registry.npmmirror.com/drizzle-orm/-/drizzle-orm-0.36.1.tgz#86d5698a03f2e04213d916bd2d25553b01c875b1"
+  integrity sha512-F4hbimnMEhyWzDowQB4xEuVJJWXLHZYD7FYwvo8RImY+N7pStGqsbfmT95jDbec1s4qKmQbiuxEDZY90LRrfIw==
 
 eastasianwidth@^0.2.0:
   version "0.2.0"
@@ -7092,10 +7092,10 @@ open@^10.1.0:
     is-inside-container "^1.0.0"
     is-wsl "^3.1.0"
 
-openai@^4.71.0:
-  version "4.71.0"
-  resolved "https://registry.npmmirror.com/openai/-/openai-4.71.0.tgz#77f344c0229f52786b833e6988634a882b06c76f"
-  integrity sha512-jeJ7+6cZvj+ZbIsbX/Ag8+pug2+vjKbrD/v3Hwp6uv3KZyWjSkZa5MdUshzpNC3jsFzakfbUhEEFQXsKWNgm/g==
+openai@^4.71.1:
+  version "4.71.1"
+  resolved "https://registry.npmmirror.com/openai/-/openai-4.71.1.tgz#f26bf5db00d75703676d80bf0ae7cb7674e41eac"
+  integrity sha512-C6JNMaQ1eijM0lrjiRUL3MgThVP5RdwNAghpbJFdW0t11LzmyqON8Eh8MuUuEZ+CeD6bgYl2Fkn2BoptVxv9Ug==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -7732,10 +7732,10 @@ punycode@^2.1.0:
   resolved "https://registry.npmmirror.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@^23.7.0:
-  version "23.7.0"
-  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-23.7.0.tgz#b737476f8f5e2a36a6683d91595eaa5c0e231a37"
-  integrity sha512-0kC81k3K6n6Upg/k04xv+Mi8yy62bNAJiK7LCA71zfq2XKEo9WAzas1t6UQiLgaNHtGNKM0d1KbR56p/+mgEiQ==
+puppeteer-core@^23.7.1:
+  version "23.7.1"
+  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-23.7.1.tgz#b1c313f1d3572ed772d82178b012f7c046cb53bb"
+  integrity sha512-Om/qCZhd+HLoAr7GltrRAZpS3uOXwHu7tXAoDbNcJADHjG2zeAlDArgyIPXYGG4QB/EQUHk13Q6RklNxGM73Pg==
   dependencies:
     "@puppeteer/browsers" "2.4.1"
     chromium-bidi "0.8.0"
@@ -8791,10 +8791,17 @@ tar@^7.4.3:
     mkdirp "^3.0.1"
     yallist "^5.0.0"
 
-tdesign-icons-vue-next@^0.2.4, tdesign-icons-vue-next@^0.2.6:
+tdesign-icons-vue-next@^0.2.4:
   version "0.2.6"
   resolved "https://registry.npmmirror.com/tdesign-icons-vue-next/-/tdesign-icons-vue-next-0.2.6.tgz#964be958cf8145271bf033f7f11093ee8baf5ff0"
   integrity sha512-Se/3N6AAfbpEyJfuBUCMcBl26FCfwUYCf9OwEFp1dw0HhMeCd6LENoZx0o43/V69NpcUGp+0Ya+xVuNKiP8M+Q==
+  dependencies:
+    "@babel/runtime" "^7.16.3"
+
+tdesign-icons-vue-next@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.npmmirror.com/tdesign-icons-vue-next/-/tdesign-icons-vue-next-0.3.0.tgz#569e5b16e3529d01980a2705854f90e7dce10b2c"
+  integrity sha512-vW/iM7byli9V+vAT3Pshpd/kOmHY/wnp008FHM/t+nLPnHl+ZPGvlh0LJhDlE4meIKfieAio3XELahAkKz96rg==
   dependencies:
     "@babel/runtime" "^7.16.3"
 
