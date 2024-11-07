@@ -57,7 +57,7 @@
     "value": {
       "url": "",
       "key": "danmuku",
-      "support": ["qq", "qiyi", "youku", "mgtv"],
+      "support": ["youku", "qq", "iqiyi", "qiyi", "letv", "leshi", "sohu", "tudou", "pptv", "mgtv", "imgo"],
       "start": 0,
       "mode": 1,
       "color": 2,
