@@ -481,7 +481,6 @@ const callPlay = async (item) => {
   if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
     response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
   } else {
-    console.log('不存在预加载下一集');
     let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
     if (active.value.official) {
       if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
@@ -726,9 +725,9 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   // 2.获取跳过时间
   const { preloadNext, skipStartEnd, skipAd, barrage } = extConf.value.setting;
   const watchTime = skipStartEnd ? currentTime + videoData.value.skipTimeInEnd : currentTime;
-  console.log(
-    `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
-  );
+  // console.log(
+  //   `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
+  // );
 
   // 3.更新播放记录
   videoData.value.watchTime = currentTime;
