@@ -45,11 +45,6 @@
           <div class="analyze-setting-group">
             <t-input v-model="analyzeUrl" class="input-url" :placeholder="$t('pages.analyze.inputUrl')" size="large"
               @change="formatUrlEvent" @enter="analyzeEvent" />
-            <div class="analyze-bottom-group">
-              <div class="popover" @click="active.search = true">
-                <app-icon size="1.3rem" class="popover-icon" />
-              </div>
-            </div>
             <t-button class="analyze-play" size="large" @click="analyzeEvent">
               <p class="analyze-tip">{{ $t('pages.analyze.play') }}</p>
             </t-button>
@@ -58,14 +53,14 @@
       </div>
     </div>
     <dialog-iframem-view v-model:visible="active.platform" :data="platFormData" @platform-play="platformPlay" />
-    <dialog-search-view v-model:visible="active.search" class="dialog-search-view" @open-platform="openPlatform" />
+    <dialog-search-view v-model:visible="active.search"  :kw="searchText" class="dialog-search-view" @open-platform="openPlatform" />
     <dialog-history-view v-model:visible="active.history" @history-play="historyPlayEvent" />
   </div>
 </template>
 
 <script setup lang="ts">
 import moment from 'moment';
-import { Share1Icon, CloseIcon, HistoryIcon, AppIcon } from 'tdesign-icons-vue-next';
+import { Share1Icon, CloseIcon, HistoryIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onActivated, onMounted, ref, watch, useTemplateRef } from 'vue';
 
@@ -84,6 +79,7 @@ import CommonNav from '@/components/common-nav/index.vue';
 import PlayerView from '@/components/player/index.vue';
 
 const store = usePlayStore();
+const searchText = ref('');
 const urlTitle = ref(''); // 播放地址的标题
 const analyzeUrl = ref<string>(''); // 输入需要解析地址
 const playerRef = useTemplateRef('playerRef');
@@ -129,7 +125,7 @@ onActivated(() => {
 });
 
 watch(
-  () => active.value.platform,
+  () => active.value.search,
   (val) => {
     if (!val) emitter.emit('refreshSearchConfig');
   }
@@ -291,6 +287,7 @@ const clearContent = async ()=> {
 
 const defaultConf = ()=>{
   active.value.nav = '';
+  searchText.value = '';
   emitter.emit('refreshSearchConfig');
 };
 
@@ -317,7 +314,10 @@ const changeConf = async (id: string) => {
 
 emitter.on('searchAnalyze', (kw) => {
   console.log('[analyze][bus][receive]', kw);
-  if (kw) openPlatform({ name: kw, url: `https://so.360kan.com/?kw=${kw}` });
+  if (kw) {
+    searchText.value = kw as string;
+    active.value.search = true;
+  };
 });
 </script>
 
@@ -497,28 +497,6 @@ emitter.on('searchAnalyze', (kw) => {
             font-size: 15px;
             color: var(--td-text-color-primary);
             display: inline-block;
-          }
-
-          .analyze-bottom-group {
-            display: flex;
-            align-items: center;
-            height: 40px;
-
-            .popover {
-              cursor: pointer;
-
-              &:hover {
-                .popover-icon {
-                  opacity: 1;
-                  color: var(--td-text-color-primary);
-                }
-              }
-
-              &-icon {
-                opacity: .6;
-                margin-right: 20px;
-              }
-            }
           }
 
           .analyze-play {

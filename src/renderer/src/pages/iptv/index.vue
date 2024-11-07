@@ -266,7 +266,6 @@ const changeClassEvent = (id: string) => {
   infiniteCompleteTip.value = 'noMore';
   active.value.class = id;
   channelList.value = [];
-  emitter.emit('refreshSearchConfig');
   infiniteId.value++;
   pagination.value.pageIndex = 1;
 };

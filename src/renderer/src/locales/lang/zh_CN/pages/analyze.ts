@@ -17,6 +17,7 @@ export default {
   },
   search: {
     input: '输入关键词搜索',
+    enter: '回车',
     clear: '清空',
     tip: '输入 {0} 快速指定搜索源, 例如',
     watch: '查看',

@@ -25,7 +25,7 @@
         </div>
         <div class="search-modal-body">
           <ul v-if="!isVisible.filter" class="search-filter-list">
-            <li v-for="(item, index) in VIDEOSITES" :key="index" class="search-filter-list-item"
+            <li v-for="item in VIDEOSITES" :key="item.id" class="search-filter-list-item"
               @click="selectFilterSearchEvent(item)">
               <div class="icon" v-html="item.img"></div>
               <span class="text">{{ $t(`pages.analyze.search.${item.id}`) }}</span>
@@ -41,7 +41,7 @@
                   {{ $t('pages.analyze.search.content') }}
                 </p>
               </div>
-              <span class="shortcut">Enter</span>
+              <span class="shortcut">{{ $t('pages.analyze.search.enter') }}</span>
             </div>
           </div>
         </div>
@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import { CloseIcon, InfoCircleIcon, SearchIcon } from 'tdesign-icons-vue-next';
-import { nextTick, reactive, ref, watch } from 'vue';
+import { nextTick, reactive, ref, watch, useTemplateRef } from 'vue';
 
 import PLATFORM_CONFIG from '@/config/platform';
 import { t } from '@/locales';
@@ -70,6 +70,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  kw: {
+    type: String,
+    default: '',
+  }
 });
 
 const emit = defineEmits(['update:visible', 'open-platform']);
@@ -78,10 +82,10 @@ const isVisible = reactive({
   filter: false
 })
 const formVisible = ref(false); // 控制dialog
-const searchText = ref('');
+const searchText = ref(props.kw);
 const searchTag = ref('');
-const searchInputRef = ref<HTMLInputElement | null>(null);
-const VIDEOSITES = { ...PLATFORM_CONFIG.site }; // 视频网站列表
+const searchInputRef = useTemplateRef<HTMLInputElement | null>('searchInputRef');
+const VIDEOSITES = [ ...PLATFORM_CONFIG ]; // 视频网站列表
 
 watch(
   () => formVisible.value,
@@ -100,6 +104,12 @@ watch(
     }
   },
 );
+watch(
+  () => props.kw,
+  (val) => {
+    searchText.value = val;
+  },
+);
 
 // 自动匹配搜索类型
 watch(
@@ -108,7 +118,7 @@ watch(
     if (val.includes('@')) {
       const patchFlag = val.split('@')[0];
       const patchValue = val.split('@')[1];
-      const item = VIDEOSITES.find(item => item.name === patchFlag) || VIDEOSITES.find(item => item.id === patchFlag);
+      const item = VIDEOSITES.find(item => item.name === patchFlag || item.id === patchFlag);
       if (item) {
         isVisible.filter = true;
         searchTag.value = `${patchFlag}@`;
@@ -132,8 +142,8 @@ const clearSearchEvent = () => {
 
 // 聚焦 input
 const focusSearchInput = () => {
-  searchInputRef.value?.focus();
-  searchInputRef.value?.select();
+  if (!searchInputRef.value) return;
+  searchInputRef.value.focus();
 };
 
 // 手动选择搜索源
@@ -146,12 +156,12 @@ const selectFilterSearchEvent = (item) => {
 
 // 搜索
 const searchEvent = () => {
-  let searchDomain: string | undefined = 'https://so.360kan.com/?kw=';
+  let searchDomain: string = 'https://so.360kan.com/?kw=';
   if (searchTag.value) {
     const searchTagSplite = searchTag.value.split('@')[0];
-    const item = VIDEOSITES.find(item => item.name === searchTagSplite) || VIDEOSITES.find(item => item.id === searchTagSplite);
-    searchDomain = item?.search;
-  }
+    const item: any = VIDEOSITES.find(item => item.name === searchTagSplite || item.id === searchTagSplite);
+    if (Object.keys(item).length > 0) searchDomain = item.search;
+  };
   const searchUrl = `${searchDomain}${searchText.value}`;
   console.log(`[analyze][search]${searchUrl}`);
   emit('open-platform', { name: searchText.value, url: searchUrl });

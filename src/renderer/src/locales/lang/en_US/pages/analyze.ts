@@ -17,6 +17,7 @@ export default {
   },
   search: {
     input: 'Enter keyword to search',
+    enter: 'Enter',
     clear: 'Clear',
     tip: 'Enter {0} to quickly search source, for example',
     watch: 'watch all about',
