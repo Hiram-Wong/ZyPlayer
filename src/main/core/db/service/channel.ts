@@ -1,4 +1,4 @@
-import { eq, like, inArray } from 'drizzle-orm';
+import { and, eq, like, inArray } from 'drizzle-orm';
 import { db, schema } from '../common';
 
 export default {
@@ -26,22 +26,21 @@ export default {
     return await db.delete(schema.channel).where(inArray(schema.channel.id, ids));
   },
   async page(page = 1, pageSize = 20, kw = '', group = '全部') {
-    let query = db.select().from(schema.channel);
-    let countQuery = db.select().from(schema.channel);
-
-    if (kw) {
-      query = query.where(like(schema.channel.name, `%${kw}%`));
-      countQuery = countQuery.where(like(schema.channel.name, `%${kw}%`));
-    }
+    const baseQuery = db.select().from(schema.channel);
+    const conditions: any[] = [];
 
     if (group !== '全部') {
-      query = query.where(eq(schema.channel.group, group));
-      countQuery = countQuery.where(eq(schema.channel.group, group));
+      conditions.push(eq(schema.channel.group, group));
+    }
+    if (kw) {
+      conditions.push(like(schema.channel.name, `%${kw}%`));
     }
 
-    query = query.limit(pageSize).offset((page - 1) * pageSize);
-
+    const query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
+    query.limit(pageSize).offset((page - 1) * pageSize);
     const list = await query;
+
+    const countQuery = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
     const total = await countQuery;
 
     return {

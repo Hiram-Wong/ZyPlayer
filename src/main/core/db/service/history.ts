@@ -36,22 +36,21 @@ export default {
     return await db.delete(schema.history).where(eq(schema.history.type, type));
   },
   async page(page = 1, pageSize = 20, type = 'all', kw = '') {
-    let query = db.select().from(schema.history);
-    let countQuery = db.select().from(schema.history);
-
-    if (kw) {
-      query = query.where(like(schema.history.name, `%${kw}%`));
-      countQuery = countQuery.where(like(schema.history.name, `%${kw}%`));
-    }
+    const baseQuery = db.select().from(schema.history);
+    const conditions: any[] = [];
 
     if (type !== 'all') {
-      query = query.where(eq(schema.history.type, type));
-      countQuery = countQuery.where(eq(schema.history.type, type));
+      conditions.push(eq(schema.history.type, type));
+    }
+    if (kw) {
+      conditions.push(like(schema.history.videoName, `%${kw}%`));
     }
 
-    query = query.limit(pageSize).offset((page - 1) * pageSize);
-
+    const query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
+    query.limit(pageSize).offset((page - 1) * pageSize);
     const list = await query;
+
+    const countQuery = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
     const total = await countQuery;
 
     return {
