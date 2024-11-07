@@ -193,6 +193,7 @@
 <script setup lang="tsx">
 import { ref, watch, computed, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import throttle from 'lodash/throttle';
 import moment from 'moment';
 import {
   ChevronDownIcon,
@@ -436,6 +437,15 @@ const putHistory = async () => {
   const response: any = await putHistoryData(historyData.value?.id, doc);
   historyData.value = response;
 };
+// 节流更新历史
+const throttlePutHistory = throttle(
+    putHistory,
+    3000,
+    {
+      leading: true, // 节流开始前，默认true
+      trailing: false, // 节流结束后，默认true
+    }
+  );
 
 // 分享 dialog 数据
 const shareEvent = () => {
@@ -491,7 +501,7 @@ const callPlay = async (item) => {
     videoData.value.url = response.url;
     emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
   };
-
+  videoData.value.playEnd = false;
   tmp.value = {
     preloadNext: {
       url: '',
@@ -700,7 +710,13 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
     `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
   );
 
-  // 3.预加载下集链接 提前30秒预加载
+  // 3.更新播放记录
+  videoData.value.watchTime = currentTime;
+  videoData.value.duration = duration;
+  if (watchTime >= duration) videoData.value.playEnd = true;
+  throttlePutHistory();
+
+  // 4.预加载下集链接 提前30秒预加载
   if (watchTime + 30 >= duration && duration !== 0) {
     if (!isLast() && !tmp.value.preloadNext.load && preloadNext) {
       tmp.value.preloadNext.load = true; // 标识是否触发预加载
@@ -735,7 +751,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
     }
   };
 
-  // 4.播放下集  不是最后一集 & 时间>尾部跳过时间+观看时间
+  // 5.播放下集  不是最后一集 & 时间>尾部跳过时间+观看时间
   if (!isLast() && watchTime >= duration && duration !== 0 && !tmp.value.end) {
     tmp.value.end = true;
     const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
