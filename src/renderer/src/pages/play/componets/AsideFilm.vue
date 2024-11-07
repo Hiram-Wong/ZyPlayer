@@ -344,7 +344,6 @@ watch(
 watch(
   () => processConf.value,
   (val) => {
-    // console.log(val)
     timerUpdatePlayProcess(val.currentTime, val.duration);
   },
   { deep: true }
@@ -471,22 +470,39 @@ const callPlay = async (item) => {
   url = decodeURIComponent(url);
   active.value.filmIndex = item;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
-  if (active.value.official) {
-    if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
-      MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
-      return;
-    };
-    url = `${analyzeInfo.url}${url}`;
-    analyzeType = analyzeInfo.type;
+  let response;
+  if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
+    response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
   } else {
-    analyzeType = -1;
+    let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
+    if (active.value.official) {
+      if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
+        MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
+        return;
+      };
+      url = `${analyzeInfo.url}${url}`;
+      analyzeType = analyzeInfo.type;
+    } else {
+      analyzeType = -1;
+    }
+    response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.skipAd);
   }
-  const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.skipAd);
   if (response?.url) {
     videoData.value.url = response.url;
     emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
   };
+
+  tmp.value = {
+    preloadNext: {
+      url: '',
+      headers: {},
+      load: false,
+      init: false,
+      barrage: [],
+      mediaType: '',
+    },
+    end: false,
+  }
 };
 
 // 切换线路
@@ -527,29 +543,6 @@ const switchSeasonEvent = async (item) => {
   await callPlay(active.value.filmIndex);
 
   await putHistory();
-  const { setting } = extConf.value;
-  let { url } = formatIndex(active.value.filmIndex);
-  url = decodeURIComponent(url);
-  videoData.value.url = url;
-  const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
-  let response;
-  if (tmp.value.preloadNext.init) response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
-  response = await playHelper(active.value.official ? `${analyzeInfo.url}${url}`: url, extConf.value.site, active.value.flimSource, analyzeInfo.type, setting.skipAd);
-  if (response?.url) {
-    videoData.value.url = response.url;
-    emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
-  };
-  tmp.value = {
-    preloadNext: {
-      url: '',
-      headers: {},
-      load: false,
-      init: false,
-      barrage: [],
-      mediaType: '',
-    },
-    end: false,
-  }
 };
 
 // 剧集顺序
@@ -563,7 +556,6 @@ const reverseOrderEvent = () => {
 };
 
 const settingUpdateEvent = (item) => {
-  console.log(item)
   historyData.value.skipTimeInStart = item.skipTimeInStart;
   historyData.value.skipTimeInEnd = item.skipTimeInEnd;
   videoData.value.skipTimeInStart = item.skipTimeInStart;
@@ -711,7 +703,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   // 3.预加载下集链接 提前30秒预加载
   if (watchTime + 30 >= duration && duration !== 0) {
     if (!isLast() && !tmp.value.preloadNext.load && preloadNext) {
-      tmp.value.preloadNext.load = true;
+      tmp.value.preloadNext.load = true; // 标识是否触发预加载
       try {
         const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
         const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
@@ -720,10 +712,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
         const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
         let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
         if (active.value.official) {
-          if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) {
-            MessagePlugin.warning(t('pages.film.message.notSelectAnalyze'));
-            return;
-          };
+          if (!analyzeInfo || typeof analyzeInfo !== 'object' || Object.keys(analyzeInfo).length === 0) return;
           url = `${analyzeInfo.url}${url}`;
           analyzeType = analyzeInfo.type;
         } else {
@@ -734,13 +723,13 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
           tmp.value.preloadNext.url = response.url;
           tmp.value.preloadNext.headers = response.headers;
           tmp.value.preloadNext.mediaType = response.mediaType;
+          tmp.value.preloadNext.init = true; // 标识是否预加载完毕
           const { url: barrageUrl, key, support, start, mode, color, content } = barrage;
           if (!(barrageUrl && key && support && start && mode && color && content)) return;
           if (!support.includes(active.value.flimSource)) return;
           const barrageRes = await fetchConfig({ url: `${barrageUrl}${url}`, method: 'GET'});
           if (!barrageRes[key] || barrageRes[key].length === 0) return;
           tmp.value.preloadNext.barrage = barrageRes.danmuku;
-          tmp.value.preloadNext.init = true;
         }
       } catch (err) {}
     }
