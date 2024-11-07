@@ -1,6 +1,5 @@
 <template>
   <div class="comm-player">
-    <!-- <div class="comm-player-bg"></div> -->
     <div ref="mseRef" id="comm-mse" class="comm-player-mse"></div>
   </div>
 </template>
@@ -60,6 +59,11 @@ const pause = async () => {
   await adapter.value.pause();
 };
 
+const barrage = async (comments, url, id) => {
+  if (!adapter.value) return;
+  await adapter.value.barrage(comments, url, id);
+};
+
 const onTimeUpdate = async () => {
   if (!adapter.value) return;
   await adapter.value.onTimeUpdate(({ currentTime, duration }) => {
@@ -69,6 +73,7 @@ const onTimeUpdate = async () => {
 
 defineExpose({
   init,
+  barrage,
   create,
   destroy,
   play,

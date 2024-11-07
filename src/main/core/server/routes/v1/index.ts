@@ -6,7 +6,7 @@ import { db } from './db';
 // import catbox from './catbox';
 import { ad, ai, jsEdit, staticFilter } from './lab';
 import file from './file';
-import { barrge } from './player';
+import { barrage } from './player';
 import system from './system';
 
 import { db as driveDb, work as driveWork } from './drive';
@@ -36,7 +36,7 @@ const routesModules = {
   jsEdit,
   staticFilter,
   file,
-  barrge,
+  barrage,
   system,
 };
 

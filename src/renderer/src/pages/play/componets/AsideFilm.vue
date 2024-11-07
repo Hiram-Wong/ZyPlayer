@@ -229,6 +229,7 @@ import { fetchRecommPage } from '@/api/site';
 import { fetchAnalyzeActive } from '@/api/analyze';
 import { fetchConfig } from '@/api/setting';
 import { t } from '@/locales';
+import { hash } from '@/utils/crypto';
 import DialogDownloadView from './DialogDownload.vue';
 import DialogSettingView from './DialogSetting.vue';
 import SharePopup from '@/components/share-popup/index.vue';
@@ -252,7 +253,7 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(['update', 'play']);
+const emits = defineEmits(['update', 'play', 'barrage']);
 const infoConf = ref(props.info);
 const extConf = ref(props.ext);
 const processConf = ref(props.process)
@@ -478,6 +479,7 @@ const settingEvent = () => {
 const callPlay = async (item) => {
   let { url } = formatIndex(item);
   url = decodeURIComponent(url);
+  const originalUrl = url;
   active.value.filmIndex = item;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
   let response;
@@ -496,11 +498,34 @@ const callPlay = async (item) => {
       analyzeType = -1;
     }
     response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.skipAd);
-  }
+  };
+
   if (response?.url) {
     videoData.value.url = response.url;
     emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
   };
+
+  let barrage: any[] = [];
+  const { url: barrageUrl, key, support, start, mode, color, content } = extConf.value.setting.barrage;
+  if (barrageUrl && key && support && start && mode && color && content && support.includes(active.value.flimSource)) {
+    if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
+      if (tmp.value.preloadNext.barrage.length > 0) barrage = tmp.value.preloadNext.barrage;
+    } else {
+      const barrageRes = await fetchConfig({ url: `${barrageUrl}${originalUrl}`, method: 'GET'});
+      if (Array.isArray(barrageRes[key]) && barrageRes[key].length > 0) barrage = barrageRes[key];
+    };
+  };
+  if (response?.url && barrage.length > 0) {
+    const formatBarrage = barrage.map((item) => ({
+      text: item[content],
+      time: parseInt(item[start]),
+      color: item[color],
+      border: false,
+      mode: item[mode],
+    }));
+    emits('barrage', { comments: formatBarrage, url: barrageUrl, id: hash['md5-16'](originalUrl) });
+  };
+
   videoData.value.playEnd = false;
   tmp.value = {
     preloadNext: {
@@ -512,7 +537,7 @@ const callPlay = async (item) => {
       mediaType: '',
     },
     end: false,
-  }
+  };
 };
 
 // 切换线路
@@ -551,8 +576,6 @@ const switchSeasonEvent = async (item) => {
   };
 
   await callPlay(active.value.filmIndex);
-
-  await putHistory();
 };
 
 // 剧集顺序
@@ -706,9 +729,9 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   // 2.获取跳过时间
   const { preloadNext, skipStartEnd, skipAd, barrage } = extConf.value.setting;
   const watchTime = skipStartEnd ? currentTime + videoData.value.skipTimeInEnd : currentTime;
-  console.log(
-    `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
-  );
+  // console.log(
+  //   `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
+  // );
 
   // 3.更新播放记录
   videoData.value.watchTime = currentTime;
@@ -741,11 +764,10 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
           tmp.value.preloadNext.mediaType = response.mediaType;
           tmp.value.preloadNext.init = true; // 标识是否预加载完毕
           const { url: barrageUrl, key, support, start, mode, color, content } = barrage;
-          if (!(barrageUrl && key && support && start && mode && color && content)) return;
-          if (!support.includes(active.value.flimSource)) return;
-          const barrageRes = await fetchConfig({ url: `${barrageUrl}${url}`, method: 'GET'});
-          if (!barrageRes[key] || barrageRes[key].length === 0) return;
-          tmp.value.preloadNext.barrage = barrageRes.danmuku;
+          if (barrageUrl && key && support && start && mode && color && content && support.includes(active.value.flimSource)) {
+            const barrageRes = await fetchConfig({ url: `${barrageUrl}${url}`, method: 'GET'});
+            if (Array.isArray(barrageRes[key]) && barrageRes[key].length === 0) tmp.value.preloadNext.barrage = barrageRes[key] as any;
+          }
         }
       } catch (err) {}
     }

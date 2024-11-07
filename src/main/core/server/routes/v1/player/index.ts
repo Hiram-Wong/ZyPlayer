@@ -1,3 +1,3 @@
-import barrge from './barrge';
+import barrage from './barrage';
 
-export { barrge };
+export { barrage };

@@ -21,6 +21,7 @@
             :process="processFormData"
             @update="updateConf"
             @play="updatePlay"
+            @barrage="updateBarrage"
           />
           <aside-iptv-view class="container-aside"
             v-if="storeConf.type === 'iptv'"
@@ -117,20 +118,14 @@ const updateConf = (item) => {
 const updatePlay = async (item) => {
   playerFormData.value = { ...playerFormData.value, ...item };
   await playerRef.value?.init();
-  console.log(playerFormData.value)
   await playerRef.value?.create({ ...playerFormData.value });
-  if (storeConf.value.type === 'film') await playerRef.value?.onTimeUpdate();
-  // await playerRef.value?.create({
-  //   url: 'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/hls/xgplayer-demo.m3u8',
-  //   type: 'customHls',
-  //   container: adapterContainers[activePlayer]
-  // });
-  // await playerRef.value?.create({
-  //   url: 'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-360p.mp4',
-  //   type: 'customMp4',
-  //   container: adapterContainers[activePlayer]
-  // });
+  if (storeConf.value.type === 'film') {
+    await playerRef.value?.onTimeUpdate();
+  }
+};
 
+const updateBarrage = async (item) => {
+  if (playerRef.value) await playerRef.value?.barrage(item.comments, item.url, item.id);
 };
 
 const handleTimeUpdate = (time) => {
