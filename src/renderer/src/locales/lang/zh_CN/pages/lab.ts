@@ -188,7 +188,7 @@ export default {
   aiBrain: {
     title: 'Ai-创想无限',
     declare: '服务容由人工智能模型生成，其内容的准确性和完整性无法保证，不代表软件的态度或观点。',
-    parms: 'ApenAI参数',
+    parms: 'OpenAI参数',
     server: '服务器',
     key: '密钥',
     model: '模型',
