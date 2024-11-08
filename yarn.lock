@@ -1971,10 +1971,10 @@
   resolved "https://registry.npmmirror.com/@types/web-bluetooth/-/web-bluetooth-0.0.20.tgz#f066abfcd1cbe66267cdbbf0de010d8a41b41597"
   integrity sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==
 
-"@types/web@^0.0.177":
-  version "0.0.177"
-  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.177.tgz#0e0a5967656d56042c1d6ebea3ca0ab7290bad62"
-  integrity sha512-u2zIJ5QbQRmsuQAN/p38+fgwObOyywAH205c3Z122Nd3CvqfD4PzTBMp2y/1sSjlPDtpWnYuC1wlEudtz2bskA==
+"@types/web@^0.0.178":
+  version "0.0.178"
+  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.178.tgz#03a3464f92f59d0df6bcae044dfb49e027a65c42"
+  integrity sha512-+lV0ucKXG4sQuaa9dJRyTUjEA7q2RSOwsAvh28luoJfAKPFqR5KfCtisEdGR/WoY4x4+qcmInqCvMjrR6E8f6A==
 
 "@types/yauzl@^2.9.1":
   version "2.10.3"
@@ -3938,10 +3938,10 @@ electron-localshortcut@^3.2.1:
     keyboardevent-from-electron-accelerator "^2.0.0"
     keyboardevents-areequal "^0.2.1"
 
-electron-log@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.npmmirror.com/electron-log/-/electron-log-5.2.0.tgz#505716926dfcf9cb3e74f42b1003be6d865bcb88"
-  integrity sha512-VjLkvaLmbP3AOGOh5Fob9M8bFU0mmeSAb5G2EoTBx+kQLf2XA/0byzjsVGBTHhikbT+m1AB27NEQUv9wX9nM8w==
+electron-log@^5.2.2:
+  version "5.2.2"
+  resolved "https://registry.npmmirror.com/electron-log/-/electron-log-5.2.2.tgz#cdb0a6dc48178a7cbacb434a268ab097ad5198dc"
+  integrity sha512-fgvx6srjIHDowJD8WAAjoAXmiTyOz6JnGQoxOtk1mXw7o4S+HutuPHLCsk24xTXqWZgy4uO63NbedG+oEvldLw==
 
 electron-notarize@^1.2.2:
   version "1.2.2"
@@ -4004,10 +4004,10 @@ electron@*:
     "@types/node" "^20.9.0"
     extract-zip "^2.0.1"
 
-electron@^33.1.0:
-  version "33.1.0"
-  resolved "https://registry.npmmirror.com/electron/-/electron-33.1.0.tgz#c86042e71fa964a054b3306810a3c451aada98f7"
-  integrity sha512-7KiY6MtRo1fVFLPGyHS7Inh8yZfrbUTy43nNwUgMD2CBk729BgSwOC2WhmcptNJVlzHJpVxSWkiVi2hp9mH/bw==
+electron@^33.2.0:
+  version "33.2.0"
+  resolved "https://registry.npmmirror.com/electron/-/electron-33.2.0.tgz#2a7098653eaf1a53c7311a01d5636783019f2354"
+  integrity sha512-PVw1ICAQDPsnnsmpNFX/b1i/49h67pbSPxuIENd9K9WpGO1tsRaQt+K2bmXqTuoMJsbzIc75Ce8zqtuwBPqawA==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^20.9.0"
