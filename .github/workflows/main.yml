@@ -37,26 +37,78 @@ jobs:
           # release the app after building
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
-      - name: Upload Artifact (macOS)
+      - name: Upload Artifact (macOS-x64)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-mac
-          path: ./dist/*-mac-*.dmg
+          name: zyplayer-mac-x64
+          path: ./dist/*-x64.dmg
+          if-no-files-found: ignore
+          
+      - name: Upload Artifact (macOS-arm64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyplayer-mac-arm64
+          path: ./dist/*-arm64.dmg
+          if-no-files-found: ignore
+          
+      - name: Upload Artifact (Windows-x64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyplayer-win-x64
+          path: ./dist/*-x64.exe
           if-no-files-found: ignore
 
-      - name: Upload Artifact (Windows)
+      - name: Upload Artifact (Windows-arm64)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-win
-          path: ./dist/*-win-*.exe
+          name: zyplayer-win-arm64
+          path: ./dist/*arm64.exe
           if-no-files-found: ignore
-
-      - name: Upload Artifact (Linux)
+          
+      - name: Upload Artifact (Linux-amd64-deb)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux
+          name: zyplayer-linux-amd64-deb
           path: |
-            ./dist/*.AppImage
-            ./dist/*.deb
-            ./dist/*.rpm
+            ./dist/*-amd64.deb
+          if-no-files-found: ignore
+          
+      - name: Upload Artifact (Linux-arm64-deb)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyplayer-linux-arm64-deb
+          path: |
+            ./dist/*-arm64.deb
+          if-no-files-found: ignore
+          
+      - name: Upload Artifact (Linux-x86_64-rpm)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyplayer-linux-x86_64-rpm
+          path: |
+            ./dist/*-x86_64.rpm
+          if-no-files-found: ignore
+          
+      - name: Upload Artifact (Linux-aarch64-rpm)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyplayer-linux-aarch64-rpm
+          path: |
+            ./dist/*-aarch64.rpm
+          if-no-files-found: ignore
+          
+      - name: Upload Artifact (Linux-x86_64-AppImage)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyplayer-linux-x86_64-AppImage
+          path: |
+            ./dist/*-x86_64.AppImage
+          if-no-files-found: ignore
+          
+      - name: Upload Artifact (Linux-arm64-AppImage)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zyplayer-linux-arm64-AppImage
+          path: |
+            ./dist/*-arm64.AppImage
           if-no-files-found: ignore
