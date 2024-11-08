@@ -37,8 +37,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     };
   });
   fastify.get(`/${API_PREFIX}/page`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>) => {
-    const { page, pageSize, type } = req.query;
-    const dbResStar = await star.page(parseInt(page), parseInt(pageSize), type);
+    const { page, pageSize, kw } = req.query;
+    const dbResStar = await star.page(parseInt(page), parseInt(pageSize), kw);
     // 使用 map 来处理异步操作，并且使用 Promise.all 来等待所有的异步操作完成
     const processedList = await Promise.all(
       dbResStar.list.map(async (item) => {
