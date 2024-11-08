@@ -395,7 +395,7 @@ const getSearchList = async () => {
   searchCurrentSite.value = isLastSite ? currentSite : searchGroup[index + 1];
 
   try {
-    const res = await fetchCmsSearch({ sourceId: currentSite.id, kw: searchTxt.value, page: pg });
+    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, page: pg });
     const resultSearch = res.list;
     if (!resultSearch || resultSearch.length === 0) {
       console.log('[film][search] Empty search results.');
