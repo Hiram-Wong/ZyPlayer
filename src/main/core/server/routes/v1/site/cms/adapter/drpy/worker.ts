@@ -25,8 +25,14 @@ const drpyWork = (parms) => {
       res.data = JSON.parse(res.data);
       break;
     case 'category':
-      const { tid, page: categoryPg, filter, extend } = data;
-      res.data = category(tid, categoryPg, filter, extend);
+      const { tid, page: categoryPg, f } = data;
+      const filter = JSON.parse(f || '{}');
+      res.data = category(
+        tid,
+        categoryPg,
+        Object.keys(filter).length > 0 ? true : false,
+        Object.keys(filter).length > 0 ? filter : {},
+      );
       res.data = JSON.parse(res.data);
       break;
     case 'detail':
