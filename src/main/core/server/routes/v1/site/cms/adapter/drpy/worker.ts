@@ -47,7 +47,7 @@ const drpyWork = (parms) => {
       break;
     case 'search':
       const { wd, quick, page: searchPg } = data;
-      res.data = search(wd, quick, searchPg);
+      res.data = search(wd, quick || false, searchPg);
       res.data = JSON.parse(res.data);
       break;
     case 'proxy':

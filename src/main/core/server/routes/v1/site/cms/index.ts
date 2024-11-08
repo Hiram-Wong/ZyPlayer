@@ -32,11 +32,10 @@ const lruCache = new LruCache(10);
 
 const init = async (id: string) => {
   const dbResSource = await site.get(id);
-  if (dbResSource.type !== 7 && lruCache.has(id)) {
+  if (lruCache.has(id)) {
     return lruCache.get(id);
   } else {
     try {
-      if (dbResSource.type === 7) lruCache.delete(id);
       const singleAdapter = singleton(adapterRelation[dbResSource.type!]);
       const adapter = new singleAdapter(dbResSource);
       await adapter.init(); // 确保适配器初始化成功

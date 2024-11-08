@@ -51,16 +51,25 @@ export { doWork, terminateWork };
 class T3Adapter {
   ext: string = '';
   categoryfilter: any[] = [];
+  private instance: any = null;
   constructor(source) {
     this.ext = source.ext;
     this.categoryfilter = source.categories;
   }
 
+  private async getInstance() {
+    if (!this.instance) {
+      restart();
+      this.instance = await doWork({ type: 'init', data: this.ext });
+    }
+    return this.instance;
+  }
+
   async init() {
-    restart();
-    return await doWork({ type: 'init', data: this.ext });
+    return await this.getInstance();
   }
   async home() {
+    await this.getInstance();
     const response: any = await doWork({ type: 'home', data: null });
     let classes: any[] = [];
 
@@ -93,21 +102,27 @@ class T3Adapter {
     };
   }
   async homeVod() {
+    await this.getInstance();
     return await doWork({ type: 'homeVod', data: null });
   }
   async category(doc: { [key: string]: string }) {
+    await this.getInstance();
     return await doWork({ type: 'category', data: doc });
   }
   async detail(doc: { [key: string]: string }) {
+    await this.getInstance();
     return await doWork({ type: 'detail', data: doc });
   }
   async search(doc: { [key: string]: string }) {
+    await this.getInstance();
     return await doWork({ type: 'search', data: doc });
   }
   async play(doc: { [key: string]: string }) {
+    await this.getInstance();
     return await doWork({ type: 'play', data: doc });
   }
   async runMain(doc: { [key: string]: string }) {
+    await this.getInstance();
     return await doWork({ type: 'runMain', data: doc });
   }
 }
