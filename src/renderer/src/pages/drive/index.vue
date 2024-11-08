@@ -26,7 +26,7 @@
         <div class="content-wrapper">
           <div class="container-flow-wrap">
             <div v-for="item in driveContent" :key="item.path" class="card-wrap">
-              <div class="card" @click="getCloudFile(item)">
+              <div class="card" @click="getFileOrFolder(item)">
                 <div class="cover">
                   <div class="folder-cover">
                     <t-image
@@ -61,13 +61,7 @@
       </div>
     </div>
 
-    <t-loading
-      :attach="`.${prefix}-content`"
-      size="medium"
-      :text="$t('pages.setting.loading')"
-      :loading="isVisible.loading"
-    />
-
+    <t-loading :attach="`.${prefix}-content`" size="medium" :loading="isVisible.loading" />
     <t-back-top
       container=".container"
       :visible-height="200"
@@ -172,10 +166,7 @@ const initCloud = async () => {
   try {
     const { startPage, id } = driveConfig.value.default;
     await putAlistInit({ sourceId: id });
-    let path = startPage;
-    let files = await fetchAlistDir({ path: startPage, sourceId: id });
-    driveContent.value = files.list;
-    breadcrumb.value = formatBreadcrumb(path);
+    await getCloudFolder({ path: startPage});
   } finally {
     isVisible.lazyload = false;
   }
@@ -229,27 +220,41 @@ const gotoBreadcrumbPath = async (path:string) => {
   }
 };
 
-// 获取
-const getCloudFile = async (item) => {
-  if (isVisible.lazyload) {
-    MessagePlugin.warning(t('pages.drive.message.skipOp'));
-    return;
+//
+const getFileOrFolder = (item) => {
+  const isFolder = item.type === 0;
+  if (isFolder) {
+    getCloudFolder(item)
+  } else {
+    playEvent(item);
   }
+};
+
+const getCloudFile = async (item) => {
   isVisible.lazyload = true;
+
   try {
     const { id } = driveConfig.value.default;
-    const isFolder = item.type === 0;
-    if (isFolder) {
-      const res = await fetchAlistDir({ path: item.path, sourceId: id });
-      driveContent.value = res.list;
-      breadcrumb.value = formatBreadcrumb(item.path);
-    } else {
-      const res = await fetchAlistFile({ path: item.path, sourceId: id });
-      const tid = item.path;
-      const index = tid.indexOf('/', 1);
-      const path = tid.substring(index);
-      playEvent(res, path);
-    };
+    const res = await fetchAlistFile({ path: item.path, sourceId: id });
+    const tid = item.path;
+    const index = tid.indexOf('/', 1);
+    const path = tid.substring(index);
+  } catch (err) {
+    console.log(err);
+    MessagePlugin.error(t('pages.drive.message.reqError'));
+  } finally {
+    isVisible.lazyload = false;
+  }
+};
+
+const getCloudFolder = async (item) => {
+  isVisible.lazyload = true;
+
+  try {
+    const { id } = driveConfig.value.default;
+    const res = await fetchAlistDir({ path: item.path, sourceId: id });
+    driveContent.value = res.list;
+    breadcrumb.value = formatBreadcrumb(item.path);
   } catch (err) {
     console.log(err);
     MessagePlugin.error(t('pages.drive.message.reqError'));
@@ -259,12 +264,18 @@ const getCloudFile = async (item) => {
 };
 
 // 播放
-const playEvent = (item, fullPath) => {
+const playEvent = async (item) => {
   isVisible.loading = true;
 
   try {
+    const { id } = driveConfig.value.default;
+    const res = await fetchAlistFile({ path: item.path, sourceId: id });
+    const tid = item.path;
+    const index = tid.indexOf('/', 1);
+    const path = tid.substring(index);
+
     const playerMode = storePlayer.getSetting.playerMode;
-    const shareUrl = `${driveConfig.value.default.server}/d/${fullPath}${item.sign ? `?sign=${item.sign}` : ''}`
+    const shareUrl = `${driveConfig.value.default.server}/d/${path}${res.sign ? `?sign=${res.sign}` : ''}`
     if (playerMode.type === 'custom') {
       window.electron.ipcRenderer.send('call-player', playerMode.external, shareUrl);
     } else {
@@ -273,9 +284,9 @@ const playEvent = (item, fullPath) => {
         status: true,
         data: {
           info: {
-            name: item.name,
-            url: item.url,
-            vod_pic: item.thumb
+            name: res.name,
+            url: res.url,
+            vod_pic: res.thumb
           },
           ext: {
             files: driveContent.value,
@@ -283,7 +294,7 @@ const playEvent = (item, fullPath) => {
           }
         },
       });
-      window.electron.ipcRenderer.send('open-play-win', item.name);
+      window.electron.ipcRenderer.send('open-play-win', res.name);
     }
   } catch (err) {
     console.error(`[film][playEvent][error]`, err);
