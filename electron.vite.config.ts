@@ -24,8 +24,11 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         },
       },
       build: {
-        sourcemap: false,
+        emptyOutDir: true, // 打包时先清空上一次构建生成的目录
+        sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
+        minify: false, // 关闭压缩
         rollupOptions: {
+          treeshake: false, // 关闭treeshake
           onwarn: (warning, warn) => {
             if (warning.code === 'EVAL') return; // 忽略 eval 警告
             if (warning.code === 'SOURCEMAP_ERROR') return; // 忽略 sourcemap 错误
