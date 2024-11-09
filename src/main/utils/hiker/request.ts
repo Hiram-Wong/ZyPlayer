@@ -68,7 +68,8 @@ const fetch = (url: string, options: RequestOptions = {}) => {
       }
     }
     // 软件会自动加Content-Type添加application/json
-    if (!config.headers['content-type']) config['headers']['Content-Type'] = 'application/json';
+    // if (!config.headers['content-type']) config['headers']['Content-Type'] = 'application/json';
+    delete config.headers['content-type'];
 
     console.log(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
