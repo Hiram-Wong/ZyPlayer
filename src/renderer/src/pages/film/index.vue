@@ -282,6 +282,7 @@ const getClassList = async (source) => {
 // 切换分类
 const changeClassEvent = (key: string) => {
   active.value.class = key;
+  active.value.tmpClass = '';
 
   classFilter();
   searchTxt.value = '';
@@ -526,6 +527,7 @@ const defaultConf = () => {
   isVisible.loadClass = false;
   active.value.infiniteType = 'noData';
   active.value.class = 'homeVod';
+  active.value.tmpClass = '';
   searchTxt.value = '';
   active.value.nav = '';
   siteConfig.value.default = {};
