@@ -132,6 +132,14 @@ export function fetchCmsRunMain(doc: object) {
   });
 }
 
+export function fetchCmsProxy(doc: object) {
+  return request({
+    url: '/v1/cms/proxy',
+    method: 'post',
+    data: doc,
+  });
+}
+
 export function fetchRecommPage(doc: object) {
   return request({
     url: '/v1/recommend/douban',

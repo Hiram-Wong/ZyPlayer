@@ -147,6 +147,16 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       data: res,
     };
   });
+  fastify.post(`/${API_PREFIX}/proxy`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
+    const { sourceId, ...doc } = req.body;
+    const adapter = await init(sourceId);
+    const res = await adapter.proxy(doc);
+    return {
+      code: 0,
+      msg: 'ok',
+      data: res,
+    };
+  });
 };
 
 export default api;

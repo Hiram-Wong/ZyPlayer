@@ -52,7 +52,6 @@ const drpyWork = (parms) => {
       break;
     case 'proxy':
       res.data = proxy(data);
-      res.data = JSON.parse(res.data);
       break;
     case 'runMain':
       const { func, arg } = data;

@@ -1,17 +1,14 @@
 import _ from 'lodash';
 import { JSONPath } from 'jsonpath-plus';
-import PQueue from 'p-queue';
 import { putHistory, findHistory, addHistory } from '@/api/history';
 import { setT3Proxy } from '@/api/proxy';
 import { fetchConfig } from '@/api/setting';
 
 import { findStar, addStar, delStar, putStar } from '@/api/star';
-import { fetchRecommPage, fetchCmsDetail, fetchCmsSearch, fetchCmsPlay } from '@/api/site';
+import { fetchRecommPage, fetchCmsDetail, fetchCmsSearch, fetchCmsPlay, fetchCmsProxy } from '@/api/site';
 
 import sniffer from '@/utils/sniffer';
 import { checkMediaType } from '@/utils/tool';
-
-const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 
 // 官解地址
 const VIP_LIST = [
@@ -209,6 +206,14 @@ const playHelper = async (
 
     // 直链直接获取数据类型
     if (play.url && play.parse === 0) {
+      // 设置代理
+      if (playRes.url.indexOf('http://127.0.0.1:9978/proxy') > -1) {
+        const formatProxyUrl = new URL(playRes.url);
+        const proxyParams = Object.fromEntries(formatProxyUrl.searchParams.entries());
+        const proxyData = await fetchCmsProxy({ sourceId: site.id, ...proxyParams });
+        await setT3Proxy({ text: proxyData, url: proxyParams.url });
+      }
+
       const mediaType = await checkMediaType(play.url);
       if (mediaType !== 'unknown' && mediaType !== 'error') {
         data = { ...data, url: play.url, mediaType, headers: play.headers };

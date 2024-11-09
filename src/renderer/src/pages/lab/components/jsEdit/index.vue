@@ -210,10 +210,7 @@
                 @change="proxyEvent()"
                 v-if="form.nav === 'debug' && form.action === 'proxy'"
               >
-                <t-radio-button value="upload">{{
-                  $t('pages.lab.jsEdit.select.upload')
-                }}</t-radio-button>
-                <t-radio-button value="play">{{ $t('pages.lab.jsEdit.select.play') }}</t-radio-button>
+                <t-radio-button value="upload">{{ $t('pages.lab.jsEdit.select.upload') }}</t-radio-button>
                 <t-radio-button value="copy">{{ $t('pages.lab.jsEdit.select.copy') }}</t-radio-button>
               </t-radio-group>
               <t-radio-group
@@ -256,8 +253,9 @@ import { useSettingStore } from '@/store';
 import emitter from '@/utils/emitter';
 import { copyToClipboardApi } from '@/utils/tool';
 import { CodeEditor } from '@/components/code-editor';
+import { setT3Proxy } from '@/api/proxy';
 import { fetchJsEditPdfa, fetchJsEditPdfh, fetchJsEditMuban, fetchJsEditDebugInit } from '@/api/lab';
-import { fetchCmsHome, fetchCmsHomeVod, fetchCmsDetail, fetchCmsCategory, fetchCmsPlay, fetchCmsSearch, fetchCmsInit, fetchCmsRunMain, putSiteDefault } from '@/api/site';
+import { fetchCmsHome, fetchCmsHomeVod, fetchCmsDetail, fetchCmsCategory, fetchCmsPlay, fetchCmsSearch, fetchCmsInit, fetchCmsRunMain, putSiteDefault, fetchCmsProxy } from '@/api/site';
 import reqHtml from '../reqHtml/index.vue';
 import drpySuggestions from './utils/drpy_suggestions';
 import drpyObjectInner from './utils/drpy_object_inner.ts?raw';
@@ -616,6 +614,7 @@ const performAction = async (type, requestData = {}) => {
       'category': fetchCmsCategory,
       'search': fetchCmsSearch,
       'play': fetchCmsPlay,
+      'proxy': fetchCmsProxy,
       'log': fetchCmsRunMain,
     };
     const res = await methodMap[type](Object.assign({}, requestData, {sourceId: debugId.value}));
@@ -748,7 +747,7 @@ const actionProxy = async () => {
       const formatUrl = `http://127.0.0.1:9978/proxy?do=js&url=${url}`;
       form.value.proxy.url = formatUrl;
       url = formatUrl;
-    }
+    };
     const formatUrl = new URL(url);
     const params = Object.fromEntries(formatUrl.searchParams.entries());
     await performAction('proxy', params);
@@ -799,11 +798,12 @@ const proxyEvent = async () => {
 
     if (type === 'copy') {
       await copyToClipboardApi(form.value.proxy.url);
-    } else if (type === 'play') {
-      actionPlayer(form.value.proxy.url);
     } else if (type === 'upload') {
-      await setT3Proxy(jsonStr);
-    }
+      const url = form.value.proxy.url;
+      const formatUrl = new URL(url);
+      const params = Object.fromEntries(formatUrl.searchParams.entries());
+      await setT3Proxy({ text: jsonStr, url: params.url });
+    };
 
     MessagePlugin.info(`${t('pages.setting.data.success')}`);
   } catch (err) {

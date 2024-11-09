@@ -121,6 +121,10 @@ class T3Adapter {
     await this.getInstance();
     return await doWork({ type: 'play', data: doc });
   }
+  async proxy(doc: { [key: string]: string }) {
+    await this.getInstance();
+    return await doWork({ type: 'proxy', data: doc });
+  }
   async runMain(doc: { [key: string]: string }) {
     await this.getInstance();
     return await doWork({ type: 'runMain', data: doc });
