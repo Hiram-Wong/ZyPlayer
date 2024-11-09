@@ -476,10 +476,8 @@ const playEvent = async (item) => {
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const res = await fetchCmsDetail({ sourceId: site.id, id: item.vod_id });
       const detailItem = res?.list[0];
-      if (siteConfig.value.default.type === 9) {
-        detailItem.vod_name = item.vod_name;
-        detailItem.vod_pic = item.vod_pic;
-      };
+      detailItem.vod_name = item.vod_name;
+      detailItem.vod_pic = item.vod_pic;
       item = detailItem;
     };
 
