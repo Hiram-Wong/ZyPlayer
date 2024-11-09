@@ -7,30 +7,30 @@
  * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/files/drpy3_libs/drpy3.js | Source on GitHub}
  *
  * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2024-11-6T13:50:19+08:00
- * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取, 自定义请求头用于前端被自动丢失\底层拦截, 并采取措施防止 Tree-Shaking 删除关键代码
+ * @modification-date 2024-11-9T20:55:19+08:00
+ * @modification-description 使用TypeScript适配, 替换eval函数防止报错, 增加日志读取
  *
  * **防止 Tree-Shake 说明**:
- * - 为了确保 `drpy3.ts` 中的函数和变量不被 Tree Shaking, 已采取以下措施：
  *   - ts 说明
  *     zy-use-hiker-module 使用 封装的 hiker 模块
  *     zy-edit 修改部分错误
  *     e.message报错, 全局使用 e:any ts 类型
- *   - 作用域参数举例：`[a, b, c].forEach(item => if (item) item)` —— 显式遍历数组元素防止数组相关操作被优化掉。
- *   - 作用域函数举例：`let temp = _; temp.stringify({});` —— 对于 `_` 符合的对象，确保其方法被调用，防止被误删。
- *   - 全局函数与参数举例：`keepUnUse.useful._` —— 对于 `_` 符合的对象，确保其方法被调用，防止被误删。
- *
  * ---
  */
 
-import CryptoJS from 'crypto-js';
-import JSON5 from 'json5';
+import JSON5Module from 'json5';
 import { local, req } from './drpyInject';
 import * as 模板 from './template';
 import cheerio from './utils/cheerio.min';
 import NODERSA from 'node-rsa';
 import jinja from '../../utils/jinja';
-import { base64 as base64Module, hash as hashModule, gzip as gzipModule, rsa as rsaModule } from '@main/utils/crypto';
+import {
+  base64 as base64Module,
+  hash as hashModule,
+  gzip as gzipModule,
+  rsa as rsaModule,
+  crypto as cryptoModule,
+} from '@main/utils/crypto';
 import {
   MOBILE_UA as MOBILEUAModule,
   PC_UA as PCUAModule,
@@ -38,12 +38,20 @@ import {
   UC_UA as UCUAModule,
   IOS_UA as IOSUAModule,
 } from '@main/utils/hiker/ua';
-import { base64Encode, base64Decode, encodeStr, decodeStr } from '@main/utils/hiker/crypto';
+import { encodeStr as encodeStrModule, decodeStr as decodeStrModule } from '@main/utils/hiker/crypto';
 import { urljoin as urljoinModule } from '@main/utils/hiker/base';
-import { batchFetch } from '@main/utils/hiker/request';
+import { batchFetch as batchFetchModule } from '@main/utils/hiker/request';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule } from '@main/utils/hiker/htmlParser';
 
-// history 部分为zy 需要
+// 全局依赖部分为zy需要  // zy-use-hiker-module
+var pdfh = pdfhModule;
+var pdfa = pdfaModule;
+var pd = pdModule;
+var CryptoJS = cryptoModule;
+var JSON5 = JSON5Module;
+var batchFetch = batchFetchModule;
+
+// history部分为zy需要
 let consoleHistory: any[] = [];
 console['oldLog'] = console.log;
 console.log = (str: string) => {
@@ -227,9 +235,6 @@ lPxDjezd
 -----END PRIVATE KEY-----
 `.trim();
 
-  [pkcs1_public_pem, pkcs8_private, pkcs8_public, pkcs8_public_pem].map((item) => {
-    if (item) item;
-  }); // 防止tree-shake
   let data = `
 NodeRsa
 这是node-rsa 现在修改集成在drpy里使用`.trim();
@@ -417,9 +422,6 @@ var oheaders;
 var _pdfh;
 var _pdfa;
 var _pd;
-var pdfh = pdfhModule; // zy-use-hiker-module
-var pdfa = pdfaModule; // zy-use-hiker-module
-var pd = pdModule; // zy-use-hiker-module
 // const DOM_CHECK_ATTR = ['url', 'src', 'href', 'data-original', 'data-src'];
 const DOM_CHECK_ATTR = /(url|src|href|-original|-src|-play|-url|style)$/;
 // 过滤特殊链接,不走urlJoin
@@ -919,8 +921,6 @@ function maoss(jxurl, ref, key) {
     var getVideoInfo = function (text) {
       return CryptoJS.AES.decrypt(text, key, { iv: iv, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8);
     };
-    let temp: any = { getVideoInfo }; // 防止tree-shake
-    temp.stringify({}); // 防止tree-shake
     var token_key = key == undefined ? 'dvyYRQlnPRCMdQSe' : key;
     if (ref) {
       var html = request(jxurl, {
@@ -1004,15 +1004,17 @@ function encodeUrl(str) {
   }
 }
 
-// function base64Encode(text) {
-//   return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
-//   // return text
-// }  // zy-use-hiker-module
+function base64Encode(text) {
+  return base64Module.encode(text);
+  // return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
+  // return text
+} // zy-use-hiker-module
 
-// function base64Decode(text) {
-//   return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
-//   // return text
-// }  // zy-use-hiker-module
+function base64Decode(text) {
+  return base64Module.decode(text);
+  // return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
+  // return text
+} // zy-use-hiker-module
 
 function md5(text) {
   // return CryptoJS.MD5(text).toString();
@@ -1082,14 +1084,15 @@ const ungzip = (text: string) => {
  * @param encoding
  * @returns {*}
  */
-// function encodeStr(input, encoding) {
-//   encoding = encoding || 'gbk';
-//   if (encoding.startsWith('gb')) {
-//     const strTool = gbkTool();
-//     input = strTool.encode(input);
-//   }
-//   return input;
-// } // zy-use-hiker-module
+function encodeStr(input, encoding) {
+  return encodeStrModule(input, encoding);
+  // encoding = encoding || 'gbk';
+  // if (encoding.startsWith('gb')) {
+  //   const strTool = gbkTool();
+  //   input = strTool.encode(input);
+  // }
+  // return input;
+} // zy-use-hiker-module
 
 /**
  * 字符串指定解码
@@ -1097,14 +1100,15 @@ const ungzip = (text: string) => {
  * @param encoding
  * @returns {*}
  */
-// function decodeStr(input, encoding) {
-//   encoding = encoding || 'gbk';
-//   if (encoding.startsWith('gb')) {
-//     const strTool = gbkTool();
-//     input = strTool.decode(input);
-//   }
-//   return input;
-// } // zy-use-hiker-module
+function decodeStr(input, encoding) {
+  return decodeStrModule(input, encoding);
+  // encoding = encoding || 'gbk';
+  // if (encoding.startsWith('gb')) {
+  //   const strTool = gbkTool();
+  //   input = strTool.decode(input);
+  // }
+  // return input;
+} // zy-use-hiker-module
 
 function getCryptoJS() {
   // return request('https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/crypto-hiker.js');
@@ -2267,9 +2271,6 @@ function homeVodParse(homeVodObj) {
   if (p.startsWith('js:')) {
     const TYPE = 'home';
     var input = MY_URL;
-    [input, TYPE].map((item) => {
-      if (item) item;
-    }); // 防止tree-shake
     HOST = rule.host;
     eval(p.replace('js:', ''));
     d = VODS;
@@ -2514,9 +2515,6 @@ function categoryParse(cateObj) {
     var input = MY_URL;
     const MY_PAGE = cateObj.pg;
     var desc = '';
-    [MY_FL, TYPE, input, MY_PAGE, desc].map((item) => {
-      if (item) item;
-    }); // 防止tree-shake
     eval(p.trim().replace('js:', ''));
     d = VODS;
   } else {
@@ -2679,9 +2677,6 @@ function searchParse(searchObj) {
     const KEY = searchObj.wd;
     var input = MY_URL;
     var detailUrl = rule.detailUrl || '';
-    [TYPE, MY_PAGE, KEY, input, detailUrl].map((item) => {
-      if (item) item;
-    }); // 防止tree-shake
     eval(p.trim().replace('js:', ''));
     d = VODS;
   } else {
@@ -2869,9 +2864,6 @@ function detailParse(detailObj) {
   let url = detailObj.url;
   let detailUrl = detailObj.detailUrl;
   let fyclass = detailObj.fyclass;
-  [fyclass].map((item) => {
-    if (item) item;
-  }); // 防止tree-shake
   let tab_exclude = detailObj.tab_exclude;
   let html = detailObj.html || '';
   MY_URL = url;
@@ -2893,9 +2885,6 @@ function detailParse(detailObj) {
     vod.vod_play_url = '嗅探播放$' + MY_URL.split('@@')[0];
   } else if (typeof p === 'string' && p.trim().startsWith('js:')) {
     const TYPE = 'detail';
-    [TYPE].map((item) => {
-      if (item) item;
-    }); // 防止tree-shake
     var input = MY_URL;
     var play_url = '';
     eval(p.trim().replace('js:', ''));
@@ -3016,9 +3005,6 @@ function detailParse(detailObj) {
         try {
           var input = MY_URL;
           var play_url = '';
-          [input, play_url].map((item) => {
-            if (item) item;
-          }); // 防止tree-shake
           eval(p.lists.replace('js:', ''));
           for (let i in LISTS) {
             if (LISTS.hasOwnProperty(i)) {
@@ -3421,9 +3407,6 @@ function getOriginalJs(js_code) {
  */
 function runMain(main_func_code, arg) {
   let mainFunc = function (arg) {
-    [arg].map((item) => {
-      if (item) item;
-    }); // 防止tree-shake
     return '';
   };
   try {
@@ -3655,9 +3638,6 @@ let homeHtmlCache = undefined;
  */
 // zy-edit default parms
 function home(filter = {}, home_html = '', class_parse = '') {
-  [filter].map((item) => {
-    if (item) item;
-  }); // 防止tree-shake
   console.log('home');
   home_html = home_html || '';
   class_parse = class_parse || '';
@@ -3930,9 +3910,6 @@ function cut(text, start, end, method, All) {
     let result = '';
     let rs = [];
     let results = [];
-    [rs, results].map((item) => {
-      if (item) item.length;
-    }); // 防止tree-shake
     try {
       let lr = new RegExp(String.raw`${s}`.toString());
       let rr = new RegExp(String.raw`${e}`.toString());
@@ -3967,71 +3944,71 @@ function cut(text, start, end, method, All) {
 }
 
 // [重要]防止树摇
-const keepUnUse = {
-  useful: (): void => {
-    const _ = {
-      batchFetch,
-      UA,
-      UC_UA,
-      IOS_UA, // UA
-      pdfa,
-      pdfh,
-      pd, // html parser
-      log,
-      oheaders, // global parms
-      NOADD_INDEX,
-      URLJOIN_ATTR,
-      SELECT_REGEX,
-      SELECT_REGEX_A, // REGEX
-      getUpdateInfo,
-      urlDeal,
-      setResult2,
-      setHomeResult,
-      rc,
-      maoss,
-      getProxyUrl,
-      urljoin2,
-      urlencode,
-      encodeUrl,
-      stringify,
-      jsp,
-      jq,
-      buildUrl,
-      $require,
-      proxy,
-      sniffer,
-      isVideo,
-      getRule,
-      runMain,
-      gzip,
-      readFile,
-      fixAdM3u8,
-      fixAdM3u8Ai, // ad
-      base64Encode,
-      NODERSA,
-      md5,
-      decodeStr,
-      RSA, // encryption and decryption
-      clearItem, // cache
-      $js, // $工具
-      reqCookie, // cookie获取
-      ocr_demo_test,
-      rsa_demo_test,
-      JSON5, // json5.js的库
-      window_b64,
-      Utf8ArrayToStr,
-      uint8ArrayToBase64,
-      parseQueryString,
-      objectToQueryString,
-      cut,
-      clearConsoleHistory,
-      getConsoleHistory,
-    };
-    let temp = _;
-    temp.stringify({});
-  },
-};
-keepUnUse.useful();
+// const keepUnUse = {
+//   useful: (): void => {
+//     const _ = {
+//       batchFetch,
+//       UA,
+//       UC_UA,
+//       IOS_UA, // UA
+//       pdfa,
+//       pdfh,
+//       pd, // html parser
+//       log,
+//       oheaders, // global parms
+//       NOADD_INDEX,
+//       URLJOIN_ATTR,
+//       SELECT_REGEX,
+//       SELECT_REGEX_A, // REGEX
+//       getUpdateInfo,
+//       urlDeal,
+//       setResult2,
+//       setHomeResult,
+//       rc,
+//       maoss,
+//       getProxyUrl,
+//       urljoin2,
+//       urlencode,
+//       encodeUrl,
+//       stringify,
+//       jsp,
+//       jq,
+//       buildUrl,
+//       $require,
+//       proxy,
+//       sniffer,
+//       isVideo,
+//       getRule,
+//       runMain,
+//       gzip,
+//       readFile,
+//       fixAdM3u8,
+//       fixAdM3u8Ai, // ad
+//       base64Encode,
+//       NODERSA,
+//       md5,
+//       decodeStr,
+//       RSA, // encryption and decryption
+//       clearItem, // cache
+//       $js, // $工具
+//       reqCookie, // cookie获取
+//       ocr_demo_test,
+//       rsa_demo_test,
+//       JSON5, // json5.js的库
+//       window_b64,
+//       Utf8ArrayToStr,
+//       uint8ArrayToBase64,
+//       parseQueryString,
+//       objectToQueryString,
+//       cut,
+//       clearConsoleHistory,
+//       getConsoleHistory,
+//     };
+//     let temp = _;
+//     temp.stringify({});
+//   },
+// };
+// keepUnUse.useful();
 
 function DRPY() {
   //导出函数
