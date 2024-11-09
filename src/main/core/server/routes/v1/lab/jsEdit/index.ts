@@ -1,15 +1,15 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { pdfa, pdfh } from '@main/utils/hiker/htmlParser';
 import { getMubans } from '../../site/cms/adapter/drpy/template';
-import { site, setting } from '@main/core/db/service';
+import { site } from '@main/core/db/service';
 
 const API_PREFIX = 'api/v1/lab/js-edit';
 
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post(`/${API_PREFIX}/pdfa`, async (req: FastifyRequest<{ Body: { [key: string]: any } }>) => {
-    const { html, parse } = req.body;
+    const { html, rule } = req.body;
 
-    const res = pdfa(html, parse);
+    const res = pdfa(html, rule);
     return {
       code: 0,
       msg: 'ok',
@@ -17,8 +17,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     };
   });
   fastify.post(`/${API_PREFIX}/pdfh`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
-    const { html, parse, baseUrl } = req.body;
-    const res = pdfh(html, parse, baseUrl);
+    const { html, rule, baseUrl } = req.body;
+    const res = pdfh(html, rule, baseUrl);
     return {
       code: 0,
       msg: 'ok',
