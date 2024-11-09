@@ -32,29 +32,12 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       data: getMubans(),
     };
   });
-  fastify.post(`/${API_PREFIX}/debug-init`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
-    const { doc } = req.body;
+  fastify.get(`/${API_PREFIX}/debug`, async () => {
     const dbResSite = await site.findByKey('debug');
-    let res;
-    if (!dbResSite) {
-      res = await site.add({
-        name: 'debug',
-        key: 'debug',
-        type: 7,
-        api: 'csp_DRPY',
-        search: true,
-        playUrl: '',
-        group: 'debug',
-        category: '',
-        ext: doc,
-      });
-    } else {
-      res = await site.update([dbResSite?.id], { ext: doc });
-    }
     return {
       code: 0,
       msg: 'ok',
-      data: res,
+      data: dbResSite,
     };
   });
 };

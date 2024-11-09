@@ -81,10 +81,9 @@ export function fetchJsEditMuban() {
   });
 }
 
-export function fetchJsEditDebugInit(doc) {
+export function fetchJsEditDebug() {
   return request({
-    url: `/v1/lab/js-edit/debug-init`,
-    method: 'POST',
-    data: doc,
+    url: `/v1/lab/js-edit/debug`,
+    method: 'GET',
   });
 }

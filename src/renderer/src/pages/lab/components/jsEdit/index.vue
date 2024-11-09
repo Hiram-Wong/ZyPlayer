@@ -254,7 +254,8 @@ import emitter from '@/utils/emitter';
 import { copyToClipboardApi } from '@/utils/tool';
 import { CodeEditor } from '@/components/code-editor';
 import { setT3Proxy } from '@/api/proxy';
-import { fetchJsEditPdfa, fetchJsEditPdfh, fetchJsEditMuban, fetchJsEditDebugInit } from '@/api/lab';
+import { addSite, putSite } from '@/api/site'
+import { fetchJsEditPdfa, fetchJsEditPdfh, fetchJsEditMuban, fetchJsEditDebug } from '@/api/lab';
 import { fetchCmsHome, fetchCmsHomeVod, fetchCmsDetail, fetchCmsCategory, fetchCmsPlay, fetchCmsSearch, fetchCmsInit, fetchCmsRunMain, putSiteDefault, fetchCmsProxy } from '@/api/site';
 import reqHtml from '../reqHtml/index.vue';
 import drpySuggestions from './utils/drpy_suggestions';
@@ -378,10 +379,43 @@ watch(
     logEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
   }
 );
+watch(
+  () => form.value.content.edit,
+  () => {
+    const currentTime = moment().unix();
+    form.value.lastEditTime.edit = currentTime;
+  }
+);
 
 onMounted(() => {
   getMuban();
+  getDebugData();
 });
+
+const getDebugData = async () => {
+  if (!debugId.value) {
+    const debugRes = await fetchJsEditDebug();
+    if (debugRes?.id) {
+      debugId.value = debugRes.id;
+      form.value.content.edit = debugRes.ext;
+    } else {
+      const siteRes = await addSite({
+        name: 'debug',
+        key: 'debug',
+        type: 7,
+        api: 'csp_DRPY',
+        search: true,
+        playUrl: '',
+        group: 'debug',
+        category: '',
+        ext: '',
+      });
+      if (Array.isArray(siteRes) && siteRes.length > 0 && siteRes[0].hasOwnProperty('id')) {
+        debugId.value = siteRes[0].id;
+      } else return;
+    };
+  };
+};
 
 const getMuban = async  () => {
   const res = await fetchJsEditMuban();
@@ -485,12 +519,7 @@ const debugEvent = async () => {
       MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
       return;
     };
-    if (!debugId.value) {
-      const res = await fetchJsEditDebugInit({ doc: `${content}` });
-      if (Array.isArray(res) && res.length > 0 && res[0].hasOwnProperty('id')) {
-        debugId.value = res[0].id;
-      } else return;
-    };
+    await putSite({ ids: [debugId.value], doc: { ext: content } });
     await putSiteDefault(debugId.value);
     emitter.emit('refreshFilmConfig');
     router.push({ name: 'FilmIndex' });
@@ -508,10 +537,8 @@ const decodeEvent = async () => {
       return;
     };
     if (!debugId.value) {
-      const res = await fetchJsEditDebugInit({ doc: `${content}` });
-      if (Array.isArray(res) && res.length > 0 && res[0].hasOwnProperty('id')) {
-        debugId.value = res[0].id;
-      } else return;
+      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
+      return;
     };
 
     const res = await fetchCmsRunMain({
@@ -565,10 +592,8 @@ const changeNav = async (nav = '', action = '') => {
       return;
     };
     if (!debugId.value) {
-      const res = await fetchJsEditDebugInit({ doc: `${content}` });
-      if (Array.isArray(res) && res.length > 0 && res[0].hasOwnProperty('id')) {
-        debugId.value = res[0].id;
-      } else return;
+      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
+      return;
     };
     const res = await fetchCmsRunMain({
       func: "function main() {return getConsoleHistory()}",
@@ -589,21 +614,46 @@ const changeNav = async (nav = '', action = '') => {
 const performAction = async (type, requestData = {}) => {
   try {
     const content = form.value.content.edit;
+    // 1. 判断是否为空
     if (!content || content.trim().length === 0) {
       MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
       return;
     };
-    if (!debugId.value) {
-      const res = await fetchJsEditDebugInit({ doc: `${content}` });
-      if (Array.isArray(res) && res.length > 0 && res[0].hasOwnProperty('id')) {
-        debugId.value = res[0].id;
-      } else return;
+    // 2. 判断是否存在debugid
+    if (!debugId.value && type !== 'init') {
+      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
+      return;
     };
+    // 3. 不存在泽获取
+    if (!debugId.value && type === 'init') {
+      const debugRes = await fetchJsEditDebug();
+      if (debugRes?.id) {
+        debugId.value = debugRes.id;
+      } else {
+        const siteRes = await addSite({
+          name: 'debug',
+          key: 'debug',
+          type: 7,
+          api: 'csp_DRPY',
+          search: true,
+          playUrl: '',
+          group: 'debug',
+          category: '',
+          ext: content,
+        });
+        if (Array.isArray(siteRes) && siteRes.length > 0 && siteRes[0].hasOwnProperty('id')) {
+          debugId.value = siteRes[0].id;
+          await fetchCmsInit({ sourceId: siteRes[0].id, debug: true });
+        } else return;
+      };
+    };
+    // 4.自动初始化则上传并初始化
     if (type === 'init' || (form.value.lastEditTime.edit > form.value.lastEditTime.init && form.value.init.auto)) {
       const currentTime = moment().unix();
       form.value.lastEditTime.init = currentTime;
+      await putSite({ ids: [debugId.value], doc: { ext: content } });
       if (type !== 'init') {
-        await fetchCmsInit({ sourceId: debugId.value });
+        await fetchCmsInit({ sourceId: debugId.value, debug: true });
       };
     };
     const methodMap = {
@@ -659,7 +709,7 @@ const actionRule = async (type) => {
 };
 
 const actionInit = async () => {
-  await performAction('init');
+  await performAction('init', { debug:true });
 };
 
 const actionHome = async () => {
@@ -768,10 +818,8 @@ const logEvent = async () => {
       return;
     };
     if (!debugId.value) {
-      const res = await fetchJsEditDebugInit({ doc: `${content}` });
-      if (Array.isArray(res) && res.length > 0 && res[0].hasOwnProperty('id')) {
-        debugId.value = res[0].id;
-      } else return;
+      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
+      return;
     };
     await fetchCmsRunMain({
       func: "function main() { clearConsoleHistory(); return 'ok'}",
@@ -1130,9 +1178,6 @@ const handleMonacoObject = (monaco) => {
           .input {
             width: 100%;
             margin-right: var(--td-comp-margin-s);
-          }
-
-          .button {
           }
 
           .w-btn {

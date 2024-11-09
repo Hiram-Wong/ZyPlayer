@@ -91,6 +91,7 @@ export default {
       ruleNoHtml: 'You must get the source code first',
       ruleNoRule: 'The parameter rule is empty',
       initNoData: 'The editor content is empty',
+      initNoDebugId: 'Please init to get the debug id first',
       listNoT: 'The parameter t is empty',
       detailNoIds: 'The parameter ids is empty',
       searchNoWd: 'The parameter wd is empty',

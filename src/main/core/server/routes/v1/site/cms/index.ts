@@ -30,34 +30,57 @@ const adapterRelation = {
 
 const lruCache = new LruCache(10);
 
-const init = async (id: string) => {
+const init = async (id: string, debug: boolean = false) => {
   const dbResSource = await site.get(id);
-  if (lruCache.has(id)) {
-    return lruCache.get(id);
-  } else {
+
+  // 检查 dbResSource.type 是否存在
+  if (!dbResSource.type) {
+    throw new Error('dbResSource.type is undefined');
+  }
+
+  if (debug) {
     try {
-      const singleAdapter = singleton(adapterRelation[dbResSource.type!]);
+      const singleAdapter = singleton(adapterRelation[dbResSource.type]);
       const adapter = new singleAdapter(dbResSource);
-      await adapter.init(); // 确保适配器初始化成功
+      await adapter.init();
       lruCache.put(id, adapter);
+      console.log(`Adapter for ${id} initialized successfully in debug mode.`);
       return adapter;
     } catch (err: any) {
-      console.error(`Error init cms adapter:${err.message}`);
+      console.error(`Error init cms adapter: ${err.message}`);
       throw err;
+    }
+  } else {
+    if (lruCache.has(id)) {
+      return lruCache.get(id);
+    } else {
+      try {
+        const singleAdapter = singleton(adapterRelation[dbResSource.type]);
+        const adapter = new singleAdapter(dbResSource);
+        await adapter.init();
+        lruCache.put(id, adapter);
+        return adapter;
+      } catch (err: any) {
+        console.error(`Error init cms adapter: ${err.message}`);
+        throw err;
+      }
     }
   }
 };
 
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
-  fastify.get(`/${API_PREFIX}/init`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>) => {
-    const { sourceId } = req.query;
-    await init(sourceId);
-    return {
-      code: 0,
-      msg: 'ok',
-      data: null,
-    };
-  });
+  fastify.get(
+    `/${API_PREFIX}/init`,
+    async (req: FastifyRequest<{ Querystring: { [key: string]: string | boolean } }>) => {
+      const { sourceId, debug = false } = req.query;
+      await init(sourceId as string, debug as boolean);
+      return {
+        code: 0,
+        msg: 'ok',
+        data: null,
+      };
+    },
+  );
   fastify.get(`/${API_PREFIX}/home`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>) => {
     const { sourceId } = req.query;
     const adapter = await init(sourceId);

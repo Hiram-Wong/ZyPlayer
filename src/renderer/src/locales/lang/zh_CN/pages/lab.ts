@@ -92,6 +92,7 @@ export default {
       ruleNoHtml: '必须先获取源代码',
       ruleNoRule: '规则为空',
       initNoData: '编辑器内容为空',
+      initNoDebugId: '请先初始化获取标识',
       listNoT: '参数t为空',
       detailNoIds: '参数ids为空',
       searchNoWd: '参数wd为空',
