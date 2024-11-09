@@ -40,35 +40,35 @@ jobs:
       - name: Upload Artifact (macOS-x64)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-mac-x64
+          name: zyfun-mac-x64
           path: ./dist/*-x64.dmg
           if-no-files-found: ignore
           
       - name: Upload Artifact (macOS-arm64)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-mac-arm64
+          name: zyfun-mac-arm64
           path: ./dist/*-arm64.dmg
           if-no-files-found: ignore
           
       - name: Upload Artifact (Windows-x64)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-win-x64
+          name: zyfun-win-x64
           path: ./dist/*-x64.exe
           if-no-files-found: ignore
 
       - name: Upload Artifact (Windows-arm64)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-win-arm64
+          name: zyfun-win-arm64
           path: ./dist/*arm64.exe
           if-no-files-found: ignore
           
       - name: Upload Artifact (Linux-amd64-deb)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux-amd64-deb
+          name: zyfun-linux-amd64-deb
           path: |
             ./dist/*-amd64.deb
           if-no-files-found: ignore
@@ -76,7 +76,7 @@ jobs:
       - name: Upload Artifact (Linux-arm64-deb)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux-arm64-deb
+          name: zyfun-linux-arm64-deb
           path: |
             ./dist/*-arm64.deb
           if-no-files-found: ignore
@@ -84,7 +84,7 @@ jobs:
       - name: Upload Artifact (Linux-x86_64-rpm)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux-x86_64-rpm
+          name: zyfun-linux-x86_64-rpm
           path: |
             ./dist/*-x86_64.rpm
           if-no-files-found: ignore
@@ -92,7 +92,7 @@ jobs:
       - name: Upload Artifact (Linux-aarch64-rpm)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux-aarch64-rpm
+          name: zyfun-linux-aarch64-rpm
           path: |
             ./dist/*-aarch64.rpm
           if-no-files-found: ignore
@@ -100,7 +100,7 @@ jobs:
       - name: Upload Artifact (Linux-x86_64-AppImage)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux-x86_64-AppImage
+          name: zyfun-linux-x86_64-AppImage
           path: |
             ./dist/*-x86_64.AppImage
           if-no-files-found: ignore
@@ -108,7 +108,7 @@ jobs:
       - name: Upload Artifact (Linux-arm64-AppImage)
         uses: actions/upload-artifact@v4
         with:
-          name: zyplayer-linux-arm64-AppImage
+          name: zyfun-linux-arm64-AppImage
           path: |
             ./dist/*-arm64.AppImage
           if-no-files-found: ignore
