@@ -17,7 +17,7 @@
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
-        <t-switch v-model="row.isActive" @change="handleOpChange(!row.isActive ? 'disable' : 'enable', [row.id])" />
+        <t-switch v-model="row.isActive" :disabled="row.key === 'debug'"  @change="handleOpDefault(row.id)" />
       </template>
       <template #op="slotProps">
         <t-space>
@@ -201,6 +201,11 @@ const reqDel = async (index) => {
     console.log('[setting][drive][reqDel][error]', err);
     MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err.message}`);
   }
+};
+
+const handleOpDefault = async (id) => {
+  const item: any = tableConfig.value.data.find((item: any) => item.id === id);
+  handleOpChange(item.isActive ? 'enable' : 'disable', [id]);
 };
 
 const handleOpChange = async (type, doc) => {
