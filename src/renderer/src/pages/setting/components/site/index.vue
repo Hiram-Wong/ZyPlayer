@@ -17,7 +17,7 @@
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
-        <t-switch v-model="row.isActive" @change="handleOpChange(!row.isActive ? 'disable' : 'enable', [row.id])" />
+        <t-switch v-model="row.isActive" :disabled="row.key === 'debug'"  @change="handleOpChange(!row.isActive ? 'disable' : 'enable', [row.id])" />
       </template>
       <template #type="{ row }">
         <span v-if="row.type === 0">T0[xml]</span>
@@ -37,7 +37,7 @@
           <t-link theme="primary" @click="handleOpChange('default', slotProps.row.id)">{{ $t('pages.setting.table.default') }}</t-link>
           <t-link theme="primary" @click="handleOpChange('edit', slotProps.row)">{{ $t('pages.setting.table.edit') }}</t-link>
           <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="handleOpChange('delete', [slotProps.row.id])">
-            <t-link theme="danger">{{ $t('pages.setting.table.delete') }}</t-link>
+            <t-link theme="danger" :disabled="slotProps.row.key === 'debug'">{{ $t('pages.setting.table.delete') }}</t-link>
           </t-popconfirm>
         </t-space>
       </template>

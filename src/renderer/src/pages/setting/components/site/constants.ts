@@ -2,7 +2,13 @@ import { t } from '@/locales';
 import { PrimaryTableCol, TableRowData } from 'tdesign-vue-next';
 
 export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
-  { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
+  {
+    colKey: 'row-select',
+    type: 'multiple',
+    width: 64,
+    fixed: 'left',
+    disabled: ({ row }) => row.key === 'debug',
+  },
   {
     title: t('pages.setting.table.header.name'),
     fixed: 'left',
@@ -24,7 +30,12 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     ellipsis: true,
     colKey: 'group',
   },
-  { title: t('pages.setting.table.header.status'), align: 'left', colKey: 'isActive', width: 80 },
+  {
+    title: t('pages.setting.table.header.status'),
+    align: 'left',
+    colKey: 'isActive',
+    width: 80,
+  },
   {
     align: 'center',
     fixed: 'right',
