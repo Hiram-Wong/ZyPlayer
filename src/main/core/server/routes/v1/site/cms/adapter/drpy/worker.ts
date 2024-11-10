@@ -64,6 +64,15 @@ const drpyWork = (parms) => {
 };
 
 process.on('message', (message: { [key: string]: any }) => {
-  const res: any = drpyWork(message);
+  let res;
+  try {
+    res = drpyWork(message);
+  } catch (err: any) {
+    res = {
+      type: message.type,
+      data: null,
+    };
+    console.log(`[t3][worker][child][error]${err.message}`);
+  }
   process.send!(res);
 });
