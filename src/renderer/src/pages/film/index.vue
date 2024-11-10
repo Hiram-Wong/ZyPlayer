@@ -95,7 +95,8 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import PQueue from 'p-queue';
+import differenceWith from 'lodash/differenceWith';
+import isEqual from 'lodash/isEqual';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -129,7 +130,6 @@ const renderLoading = () => {
   );
 };
 
-const queue = new PQueue({ concurrency: 5 }); // 设置并发限制为5
 const infiniteId = ref(+new Date()); // infinite-loading属性重置组件
 const searchTxt = ref(''); // 搜索框
 const searchCurrentSite = ref(); // 搜索当前源
@@ -170,6 +170,7 @@ const active = ref({
   nav: null,
   class: 'homeVod',
   tmpClass: '',
+  tmpId: '',
   infiniteType: 'loading',
   filter: {}
 }) as any;
@@ -181,6 +182,12 @@ const filmData = ref({
 
 const classConfig = ref({
   data: []
+});
+
+const tmp = ref({
+  class: '',
+  id: '',
+  search: ''
 });
 
 onMounted(() => {
@@ -311,11 +318,16 @@ const getFilmList = async (source) => {
         f: JSON.stringify(active.value.filter)
       });
     };
-    const newFilms = res.list;
-    filmData.value.list = [...filmData.value.list, ...newFilms];
-    filmData.value.rawList = [...filmData.value.rawList, ...res.list];
-    pagination.value.pageIndex++;
-    length = newFilms.length;
+    if (Array.isArray(res?.list) && res?.list.length > 0) {
+      const newFilms = differenceWith(res.list, filmData.value.list, isEqual);
+      filmData.value.list = [...filmData.value.list, ...newFilms];
+      filmData.value.rawList = [...filmData.value.rawList, ...res.list];
+      pagination.value.pageIndex++;
+      length = newFilms.length;
+    } else {
+      active.value.infiniteType = 'netwotkError';
+      length = 0;
+    };
   } catch (err) {
     active.value.infiniteType = 'netwotkError';
     console.error(err);
@@ -341,7 +353,11 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
     const defaultSite = searchTxt.value ? searchCurrentSite.value : siteConfig.value.default;
 
     // setp1: 初始化
-    if (defaultSite?.id) await fetchCmsInit({ sourceId: defaultSite.id });
+    if (!active.value.tmpId || active.value.tmpId !== defaultSite.id) {
+      await fetchCmsInit({ sourceId: defaultSite.id });
+      active.value.tmpId = defaultSite.id;
+      pagination.value.pageIndex = 1;
+    };
 
     // setp2: 获取分类
     if (classConfig.value.data.length <= 1 && !searchTxt.value) {
@@ -379,82 +395,55 @@ const searchEvent = async () => {
 const getSearchList = async () => {
   let length = 0;
   const pg = pagination.value.pageIndex;
-  const searchGroup: any = siteConfig.value.searchGroup;
+  const searchGroup = siteConfig.value.searchGroup;
   const currentSite = searchCurrentSite.value;
-
-  if (!currentSite) {
-    console.log('[film][search] No search site found.');
-    return length;
-  }
 
   const index = searchGroup.indexOf(currentSite);
   const isLastSite = index + 1 >= searchGroup.length;
-  if (index + 1 > searchGroup.length && searchGroup.length > 1) return length; // 没有更多站点
-  // if (pg > 5) return length; // 单个搜索不允许超过5页
-
-  // searchCurrentSite.value = isLastSite ? null : searchGroup[index + 1];
-  searchCurrentSite.value = isLastSite ? currentSite : searchGroup[index + 1];
 
   try {
+    // 没有搜索站点
+    if (!currentSite) {
+      console.log('[film][search] no search site');
+      return length;
+    };
+    // 超出站点
+    if (index + 1 > searchGroup.length) {
+      console.log('[film][search] out of site');
+      return length;
+    }
+
     const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, page: pg });
     const resultSearch = res.list;
-    if (!resultSearch || resultSearch.length === 0) {
-      console.log('[film][search] Empty search results.');
+
+    if (!Array.isArray(resultSearch) || resultSearch.length === 0) {
+      console.log('[film][search] empty search results');
       // 聚搜过程中,如果某个站搜不出来结果，返回1让其他站继续搜索。单搜就返回0终止搜索
       length = searchGroup.length > 1 ? 1 : 0;
       return length;
     }
 
-    // console.log('currentSite:', currentSite);
-    let resultDetail = siteConfig.value.filter === 'on' ? resultSearch.filter((item) => item?.vod_name.indexOf(searchTxt.value) > -1) : resultSearch;
-    console.log(resultDetail)
+    let resultDetail = siteConfig.value.filter === 'on' ? resultSearch.filter((item) => item?.vod_name.includes(searchTxt.value)) : resultSearch;
 
-    if (resultSearch.length > 0 && !resultSearch[0].hasOwnProperty('vod_pic')) {
-      if ([0, 1].includes(currentSite.type)) {
-        const ids = resultSearch.map((item) => item.vod_id);
-        const res  = await fetchCmsDetail({ sourceId: currentSite.id, id: ids.join(',') });
-        resultDetail = res.list;
-      } else {
-        console.log(6666)
-        const updatePic = async (item) => {
-          console.log(item)
-          try {
-            const res = await fetchCmsDetail({ sourceId: currentSite.id,  id: item.vod_id });
-            const result = res.list;
-            console.log(result[0])
-            return result[0];
-          } catch (err) {
-            console.log(err)
-            return false;
-          }
-        };
-        const res = await Promise.all(resultSearch.map(item => queue.add(() => updatePic(item))));
-        resultDetail = res.filter(Boolean);
-      }
-    }
-    // console.log(resultDetail)
-    const filmList = resultDetail
-      .map((item) => ({
-        ...item,
-        relateSite: currentSite
-      }));
+    const filmList = resultDetail.map((item) => ({
+      ...item,
+      relateSite: currentSite
+    }));
 
-    const newFilms = [...filmList, ...filmData.value.list]; // 去重
+    const newFilms = differenceWith(filmList, filmData.value.list, isEqual); // 去重
     filmData.value.list.push(...newFilms);
     // 最后一个站点，并且是聚搜，参与搜索的站点数大于1的情况，正常搜完一个就结束。只有一个站点正常搜索还要继续搜
-    length = isLastSite && searchGroup.length > 1 ? 0 : newFilms.length;
+    length = isLastSite ? 0 : newFilms.length;
+    if (length > 0) pagination.value.pageIndex++;
   } catch (err) {
     // 聚搜的某一个站点发生错误,返回1让其他站点能继续搜索。只有一个站点进行搜索的时候发生错误就返回0终止搜索
-    length = searchGroup.length > 1 ? 1 : 0;
-    console.error(err);
+    length = isLastSite ? 0 : 1;
+    pagination.value.pageIndex = 1;
   } finally {
     console.log(`[film] load data length: ${length}`);
-    if (searchGroup.length > 1) { // 聚搜的站点每个搜索完都重新初始化drpy源
-    } else { // 只有一个站点搜索的情况给页面加1下次继续搜索
-      pagination.value.pageIndex++;
-    }
+    searchCurrentSite.value = isLastSite ? currentSite : searchGroup[index + 1];  // 更新当前搜索站点
+    return length;
   }
-  return length;
 };
 
 // 播放
@@ -526,6 +515,7 @@ const defaultConf = () => {
   active.value.infiniteType = 'noData';
   active.value.class = 'homeVod';
   active.value.tmpClass = '';
+  active.value.tmpId = '';
   searchTxt.value = '';
   active.value.nav = '';
   siteConfig.value.default = {};
@@ -549,6 +539,7 @@ const changeConf = async (key: string) => {
     active.value.nav = key;
     siteConfig.value.default = siteConfig.value.data.find(item => item.id === key);
     siteConfig.value.searchGroup = searchGroup(siteConfig.value.search, siteConfig.value.default);
+    console.log(siteConfig.value.searchGroup)
     active.value.infiniteType = 'noMore';
   } catch (err) {
     active.value.infiniteType = 'noData';
