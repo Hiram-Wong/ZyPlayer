@@ -72,7 +72,9 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(
     `/${API_PREFIX}/init`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string | boolean } }>) => {
-      const { sourceId, debug = false } = req.query;
+      let { sourceId, debug = false } = req.query;
+      const dbResSource = await site.get(sourceId);
+      if (dbResSource.type === 7) debug = true;
       const res = await init(sourceId as string, debug as boolean);
       return {
         code: 0,
