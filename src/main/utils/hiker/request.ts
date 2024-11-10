@@ -24,29 +24,50 @@ interface RequestOptions {
 const fetch = (url: string, options: RequestOptions = {}) => {
   try {
     const method: HttpMethod = (options.method || 'GET').toUpperCase() as HttpMethod;
-    const containsUnescapedChars = (url: string) => {
-      const regex = /[^a-zA-Z0-9\-_.!~*'()/?:@&=+$,;%]/;
-      return regex.test(url);
+    url = new URL(url).href;
+
+    const toTitleCase = (str) => {
+      return str
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join('-');
     };
-    if (containsUnescapedChars(url)) url = encodeURI(url); // 有未转义字符请求会失败
+
+    const headers = options?.headers || {};
+    const headersInTitleCase = Object.keys(headers).reduce((obj, key) => {
+      obj[toTitleCase(key)] = headers[key];
+      return obj;
+    }, {});
+
     const config = {
-      headers: keysToLowerCase(options?.headers || {}),
+      headers: headersInTitleCase,
       timeout: options?.timeout || 5000,
       followRedirects: options?.redirect === false ? false : true,
     };
+
+    if (!config.headers['User-Agent']) {
+      config.headers['User-Agent'] = MOBILE_UA;
+    }
+
+    if (!config.headers['Referer']) {
+      config.headers['Referer'] = getHome(url);
+    }
+
+    if (/[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/.test(config.headers['Referer'])) {
+      config.headers['Referer'] = new URL(config.headers['Referer']).href;
+    }
+
+    const contentType = config.headers?.['Content-Type'] || '';
     let charset: string = 'utf-8';
 
-    const headerKeys = Object.keys(config.headers);
-    if (!headerKeys.includes('user-agent')) {
-      config['headers']['User-Agent'] = MOBILE_UA;
-    }
-    if (!headerKeys.includes('referer')) {
-      config['headers']['Referer'] = getHome(url);
-    }
-    const contentType = config.headers?.['content-type'] || '';
     if (contentType.includes('charset=')) {
-      const macthRes = contentType.match(/charset=(\w+)/);
-      if (macthRes && macthRes.length > 0) charset = macthRes[1];
+      const matchRes = contentType.match(/charset=[\w-]+/);
+      if (matchRes && matchRes.length > 0) {
+        const charsetMatch = matchRes[0].match(/charset=([\w-]+)/);
+        if (charsetMatch && charsetMatch.length > 1) {
+          charset = charsetMatch[1];
+        }
+      }
     }
     if (method !== 'GET') {
       // 软件会自动将body请求体a=xx&b=1转成{a:xx,b:1}
@@ -69,9 +90,9 @@ const fetch = (url: string, options: RequestOptions = {}) => {
     }
     // 软件会自动加Content-Type添加application/json
     // if (!config.headers['content-type']) config['headers']['Content-Type'] = 'application/json';
-    delete config.headers['content-type'];
+    delete config.headers['Content-Type'];
 
-    console.log(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
+    console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
     let res = syncRequest(method, url, config);
     // @ts-ignore 重写getBody函数, 否则300+请求码报错
