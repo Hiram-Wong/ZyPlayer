@@ -1,5 +1,5 @@
 <template>
-  <t-dialog v-model:visible="formVisible" width="70%" placement="center" :footer="false">
+  <t-dialog v-model:visible="formVisible" show-in-attached-element attach=".zy-component" width="70%" placement="center" :footer="false">
     <template #body>
       <div class="detail view-container">
         <div class="plist-body">
