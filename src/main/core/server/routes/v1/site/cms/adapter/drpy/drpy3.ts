@@ -53,9 +53,9 @@ var batchFetch = batchFetchModule;
 
 // history部分为zy需要
 let consoleHistory: any[] = [];
-console['oldLog'] = console.log;
+const _console = console.log;
 console.log = (str: string) => {
-  console['oldLog'](str);
+  _console(str);
   consoleHistory.push(str); // 将所有参数作为一个数组推入
 };
 
@@ -3622,6 +3622,11 @@ function init(ext) {
     RKEY = typeof key !== 'undefined' && key ? key : 'drpy_' + (rule.title || rule.host);
     pre(); // 预处理
     init_test();
+    return {
+      version: VERSION,
+      rkey: RKEY,
+      rule: rule,
+    }; // zy-add-return
   } catch (e: any) {
     console.log(`init_test发生错误:${e.message}`);
   }

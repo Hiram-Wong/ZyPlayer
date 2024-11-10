@@ -73,11 +73,11 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     `/${API_PREFIX}/init`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string | boolean } }>) => {
       const { sourceId, debug = false } = req.query;
-      await init(sourceId as string, debug as boolean);
+      const res = await init(sourceId as string, debug as boolean);
       return {
         code: 0,
         msg: 'ok',
-        data: null,
+        data: res,
       };
     },
   );
@@ -161,7 +161,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   });
   fastify.post(`/${API_PREFIX}/runMain`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
     const { sourceId, ...doc } = req.body;
-    console.log(doc);
     const adapter = await init(sourceId);
     const res = await adapter.runMain(doc);
     return {

@@ -64,7 +64,6 @@ const drpyWork = (parms) => {
 };
 
 process.on('message', (message: { [key: string]: any }) => {
-  console.log(`[worker[T3Drpy][arg]${process.argv[2]}`);
   const res: any = drpyWork(message);
   process.send!(res);
 });
