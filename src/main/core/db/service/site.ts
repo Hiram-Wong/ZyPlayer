@@ -1,4 +1,4 @@
-import { eq, like, inArray } from 'drizzle-orm';
+import { asc, eq, like, inArray } from 'drizzle-orm';
 import { db, schema } from '../common';
 
 export default {
@@ -40,7 +40,10 @@ export default {
       query = query.where(like(schema.site.name, `%${kw}%`));
       count = db.$count(schema.site, like(schema.site.name, `%${kw}%`));
     }
-    query = query.limit(pageSize).offset((page - 1) * pageSize);
+    query = query
+      .limit(pageSize)
+      .offset((page - 1) * pageSize)
+      .orderBy(asc(schema.site.name));
 
     const list = await query;
     const total = await count;

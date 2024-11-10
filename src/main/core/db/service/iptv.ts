@@ -1,4 +1,4 @@
-import { eq, like, inArray } from 'drizzle-orm';
+import { asc, eq, like, inArray } from 'drizzle-orm';
 import { db, schema } from '../common';
 
 export default {
@@ -36,7 +36,10 @@ export default {
       query = query.where(like(schema.iptv.name, `%${kw}%`));
       count = db.$count(schema.iptv, like(schema.iptv.name, `%${kw}%`));
     }
-    query = query.limit(pageSize).offset((page - 1) * pageSize);
+    query = query
+      .limit(pageSize)
+      .offset((page - 1) * pageSize)
+      .orderBy(asc(schema.iptv.name));
 
     const list = await query;
     const total = await count;
