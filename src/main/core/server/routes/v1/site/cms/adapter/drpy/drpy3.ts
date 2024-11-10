@@ -22,7 +22,7 @@ import JSON5Module from 'json5';
 import { local, req } from './drpyInject';
 import * as 模板 from './template';
 import cheerio from './utils/cheerio.min';
-import NODERSA from 'node-rsa';
+import nodeRsaModule from 'node-rsa';
 import jinja from '../../utils/jinja';
 import {
   base64 as base64Module,
@@ -50,6 +50,7 @@ var pd = pdModule;
 var CryptoJS = cryptoModule;
 var JSON5 = JSON5Module;
 var batchFetch = batchFetchModule;
+var NODERSA = { NodeRSA: nodeRsaModule, ...nodeRsaModule };
 
 // history部分为zy需要
 let consoleHistory: any[] = [];
@@ -238,7 +239,6 @@ lPxDjezd
   let data = `
 NodeRsa
 这是node-rsa 现在修改集成在drpy里使用`.trim();
-
   let encryptedWithPublic = NODERSA.encryptRSAWithPublicKey(data, pkcs1_public, {
     // PublicFormat: "pkcs1-public-pem",
     outputEncoding: 'base64',
