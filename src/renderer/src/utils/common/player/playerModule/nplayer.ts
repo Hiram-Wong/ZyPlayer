@@ -132,30 +132,31 @@ class NPlayerAdapter {
     const player: any = new NPlayer(options);
     player.storage = new publicStorage('player_settings');
 
+    const headers = options.headers || {};
     switch (options.type) {
       case 'customMp4':
         break;
       case 'customHls':
         if (player.hls) publicStream.destroy.customHls(player);
-        const hls = publicStream.create.customHls(player.video, options.src);
+        const hls = publicStream.create.customHls(player.video, options.src, headers);
         player.hls = hls;
         player.on('destroy', () => publicStream.destroy.customHls(player));
         break;
       case 'customFlv':
         if (player.flv) publicStream.destroy.customFlv(player);
-        const flv = publicStream.create.customFlv(player.video, options.src);
+        const flv = publicStream.create.customFlv(player.video, options.src, headers);
         player.flv = flv;
         player.on('destroy', () => publicStream.destroy.customFlv(player));
         break;
       case 'customDash':
         if (player.mpd) publicStream.destroy.customDash(player);
-        const mpd = publicStream.create.customDash(player.video, options.src);
+        const mpd = publicStream.create.customDash(player.video, options.src, headers);
         player.mpd = mpd;
         player.on('destroy', () => publicStream.destroy.customDash(player));
         break;
       case 'customWebTorrent':
         if (player.torrent) publicStream.destroy.customTorrent(player);
-        const torrent = publicStream.create.customTorrent(player.video, options.src);
+        const torrent = publicStream.create.customTorrent(player.video, options.src, headers);
         player.torrent = torrent;
         player.on('destroy', publicStream.destroy.customTorrent(player));
         break;

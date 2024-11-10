@@ -96,18 +96,36 @@ class XgPlayerAdapter {
     delete options.container;
     options.startTime = options?.startTime || 0;
 
+    const headers = options.headers || {};
     switch (options.type) {
       case 'customMp4':
         options.plugins = [...plugins, Mp4Plugin];
+        if (Object.keys(options.headers).length > 0)
+          options.mp4plugin = {
+            reqOptions: {
+              headers,
+            },
+          };
         break;
       case 'customFlv':
         options.plugins = [...plugins, FlvPlugin];
+        if (Object.keys(options.headers).length > 0) options.flvJsPlugin = {};
         break;
       case 'customHls':
         options.plugins = [...plugins, HlsPlugin];
+        if (Object.keys(options.headers).length > 0)
+          options.hlsJsPlugin = {
+            xhrSetup: function (xhr, _url) {
+              xhr.withCredentials = true; // do send cookies
+              for (const key in headers) {
+                xhr.setRequestHeader(key, headers[key]);
+              }
+            },
+          };
         break;
       case 'customDash':
         options.plugins = [...plugins, ShakaPlugin];
+        if (Object.keys(options.headers).length > 0) options.shakaPlugin = {};
       case 'customWebTorrent':
         break;
       default:

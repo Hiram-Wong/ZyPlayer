@@ -46,7 +46,9 @@ class ArtPlayerAdapter {
       customHls: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
         if (art.hls) publicStream.destroy.customHls(art);
-        const hls = publicStream.create.customHls(video, url);
+        // @ts-ignore
+        const headers = art.option.headers || {};
+        const hls = publicStream.create.customHls(video, url, headers);
         art.hls = hls;
         art.on('destroy', () => {
           publicStream.destroy.customHls(art);
@@ -56,7 +58,9 @@ class ArtPlayerAdapter {
       customFlv: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
         if (art.flv) publicStream.destroy.customFlv(art);
-        const flv = publicStream.create.customFlv(video, url);
+        // @ts-ignore
+        const headers = art.option.headers || {};
+        const flv = publicStream.create.customFlv(video, url, headers);
         art.flv = flv;
         art.on('destroy', () => {
           publicStream.destroy.customFlv(art);
@@ -66,7 +70,9 @@ class ArtPlayerAdapter {
       customDash: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
         if (art.mpd) publicStream.destroy.customDash(art);
-        const mpd = publicStream.create.customDash(video, url);
+        // @ts-ignore
+        const headers = art.option.headers || {};
+        const mpd = publicStream.create.customDash(video, url, headers);
         art.mpd = mpd;
         art.on('destroy', () => {
           publicStream.destroy.customDash(art);
@@ -76,7 +82,9 @@ class ArtPlayerAdapter {
       customWebTorrent: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
         if (art.torrent) publicStream.destroy.customTorrent(art);
-        const torrent = publicStream.create.customTorrent(video, url);
+        // @ts-ignore
+        const headers = art.option.headers || {};
+        const torrent = publicStream.create.customTorrent(video, url, headers);
         art.torrent = torrent;
         art.on('destroy', () => {
           publicStream.destroy.customTorrent(art);

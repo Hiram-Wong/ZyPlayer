@@ -31,9 +31,17 @@ const publicOptions = {
 
 const publicStream = {
   create: {
-    customHls: (video: HTMLVideoElement, url: string): Hls | null => {
+    customHls: (video: HTMLVideoElement, url: string, headers: { [key: string]: string } = {}): Hls | null => {
       if (Hls.isSupported()) {
-        const options = publicOptions.hls || {};
+        const options: any = Object.assign({}, { ...publicOptions.hls });
+        if (Object.keys(headers).length > 0) {
+          options.xhrSetup = function (xhr, _url) {
+            xhr.withCredentials = true; // do send cookies
+            for (const key in headers) {
+              xhr.setRequestHeader(key, headers[key]);
+            }
+          };
+        }
         const hls = new Hls(options);
         hls.loadSource(url);
         hls.attachMedia(video);
@@ -43,13 +51,11 @@ const publicStream = {
         return null;
       }
     },
-    customFlv: (video: HTMLVideoElement, url: string): any => {
+    customFlv: (video: HTMLVideoElement, url: string, headers: { [key: string]: string } = {}): any => {
       if (flvjs.isSupported()) {
         const flvPlayer = flvjs.createPlayer(
-          Object.assign({}, publicOptions.flv.mediaDataSource || {}, {
-            url: url,
-          }),
-          publicOptions.flv.optionalConfig || {},
+          Object.assign({}, { ...publicOptions.flv.mediaDataSource }, { url: url }),
+          Object.assign({}, { ...publicOptions.flv.optionalConfig }, headers),
         );
         flvPlayer.attachMediaElement(video);
         flvPlayer.load();
@@ -59,7 +65,7 @@ const publicStream = {
         return null;
       }
     },
-    customTorrent: (video: HTMLVideoElement, url: string) => {
+    customTorrent: (video: HTMLVideoElement, url: string, headers: { [key: string]: string } = {}) => {
       if (WebTorrent.WEBRTC_SUPPORT) {
         const options = publicOptions.webtorrent;
         const client = new WebTorrent(options);
@@ -79,14 +85,17 @@ const publicStream = {
         return null;
       }
     },
-    customDash: (video: HTMLVideoElement, url: string) => {
-      // const dashjsPlayer = dashjs.MediaPlayer().create();
-      // dashjsPlayer.initialize(video, url, true);
-      // const options = publicOptions.dash;
-      // dashjsPlayer.updateSettings(options);
-      // return dashjsPlayer;
+    customDash: (video: HTMLVideoElement, url: string, headers: { [key: string]: string } = {}) => {
       if (shaka.Player.isBrowserSupported()) {
         const playerShaka = new shaka.Player(video);
+        playerShaka.getNetworkingEngine().registerRequestFilter(function (type, request) {
+          if (type != shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+            return;
+          }
+          for (const header in headers) {
+            request.headers[header] = headers[header];
+          }
+        });
         playerShaka.load(url);
         const options = publicOptions.dash;
         playerShaka.configure(options);
@@ -96,13 +105,17 @@ const publicStream = {
         return null;
       }
     },
-    customMpegts: (video: HTMLVideoElement, url: string): any => {
+    customMpegts: (video: HTMLVideoElement, url: string, headers: { [key: string]: string } = {}): any => {
       if (MpegTs.isSupported()) {
-        const playerMpegts = MpegTs.createPlayer({
-          type: 'mse', // could also be mpegts, m2ts, flv
-          isLive: false,
-          url,
-        });
+        const playerMpegts = MpegTs.createPlayer(
+          {
+            type: 'mp4', // could also be mpegts, m2ts, flv
+            isLive: false,
+            url,
+            withCredentials: true,
+          },
+          { referrerPolicy: 'no-referrer', headers },
+        );
         playerMpegts.attachMediaElement(video);
         playerMpegts.load();
         playerMpegts.play();
@@ -204,8 +217,8 @@ const publicStream = {
       delete player.torrent;
     },
     customMpegts: (player: any) => {
-      player.mpeg.destroy();
-      delete player.mpeg;
+      player.mpegts.destroy();
+      delete player.mpegts;
     },
   },
 };

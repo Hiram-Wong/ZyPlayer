@@ -127,7 +127,8 @@ class DPlayerAdapter {
       customType: {
         customHls: (video: HTMLVideoElement, dp: DPlayer) => {
           if (dp.hls) publicStream.destroy.customHls(dp);
-          const hls = publicStream.create.customHls(video, video.src);
+          const headers = dp.options.headers || {};
+          const hls = publicStream.create.customHls(video, video.src, headers);
           dp.hls = hls;
           dp.on('destroy', () => {
             publicStream.destroy.customHls(dp);
@@ -135,7 +136,8 @@ class DPlayerAdapter {
         },
         customFlv: (video: HTMLVideoElement, dp: DPlayer) => {
           if (dp.flv) publicStream.destroy.customFlv(dp);
-          const flv = publicStream.create.customFlv(video, video.src);
+          const headers = dp.options.headers || {};
+          const flv = publicStream.create.customFlv(video, video.src, headers);
           dp.flv = flv;
           dp.on('destroy', () => {
             publicStream.destroy.customFlv(dp);
@@ -143,7 +145,8 @@ class DPlayerAdapter {
         },
         customDash: (video: HTMLVideoElement, dp: DPlayer) => {
           if (dp.mpd) publicStream.destroy.customDash(dp);
-          const mpd = publicStream.create.customDash(video, video.src);
+          const headers = dp.options.headers || {};
+          const mpd = publicStream.create.customDash(video, video.src, headers);
           dp.mpd = mpd;
           dp.on('destroy', () => {
             publicStream.destroy.customDash(dp);
@@ -151,7 +154,8 @@ class DPlayerAdapter {
         },
         customWebTorrent: (video: HTMLVideoElement, dp: DPlayer) => {
           if (dp.torrent) publicStream.destroy.customTorrent(dp);
-          const torrent = publicStream.create.customTorrent(video, video.src);
+          const headers = dp.options.headers || {};
+          const torrent = publicStream.create.customTorrent(video, video.src, headers);
           dp.torrent = torrent;
           dp.on('destroy', () => {
             publicStream.destroy.customTorrent(dp);
