@@ -191,6 +191,7 @@ export default {
     networkAddress: 'Network address',
     networkCheckError: 'Network status detection failed',
     checking: 'Please wait for the completion of status batch detection',
+    defaultDisable: 'Set default source when enabled',
   },
   ad: {
     title: 'Better on Hipy',

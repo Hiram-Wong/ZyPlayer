@@ -250,6 +250,11 @@ const handleOpChange = async (type, doc) => {
   } else if (type === 'delete') {
     await reqDel(doc);
   } else if (type === 'default') {
+    const activeItem: any = tableConfig.value.data.find((item:any) => item.id === doc)
+    if (!activeItem || !activeItem.isActive) {
+      MessagePlugin.warning(t('pages.setting.message.defaultDisable'));
+      return;
+    };
     await reqDefault(doc);
   } else if (type === 'edit') {
     active.formType = 'edit';

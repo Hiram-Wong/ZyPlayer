@@ -192,6 +192,7 @@ export default {
     networkCheckError: '网络状态检测失败',
     noSelectData: '请先选择数据',
     checking: '状态批量检测中, 请等待完成',
+    defaultDisable: '启用后设置默认源',
   },
   ad: {
     title: '与Hipy更配哦',
