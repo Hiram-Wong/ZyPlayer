@@ -5,7 +5,7 @@ import { gzip } from '@main/utils/crypto';
 
 const APP_MARK = 'zy';
 const APP_MARK_PATH = `${APP_MARK}://`;
-const APP_STORE_PATH = join(app.getPath('userData'), 'docs');
+const APP_STORE_PATH = join(app.getPath('userData'), 'file');
 const isCheckAppMark = (url: string) => url.startsWith(APP_MARK_PATH);
 const isCheckAppStore = (url: string) => url.startsWith(APP_STORE_PATH);
 const relative2absolute = (path: string) => {
