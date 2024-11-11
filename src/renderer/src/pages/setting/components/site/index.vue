@@ -36,9 +36,10 @@
         <t-space>
           <t-link theme="primary" @click="handleOpChange('default', slotProps.row.id)">{{ $t('pages.setting.table.default') }}</t-link>
           <t-link theme="primary" @click="handleOpChange('edit', slotProps.row)">{{ $t('pages.setting.table.edit') }}</t-link>
-          <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="handleOpChange('delete', [slotProps.row.id])">
-            <t-link theme="danger" :disabled="slotProps.row.key === 'debug'">{{ $t('pages.setting.table.delete') }}</t-link>
+          <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="handleOpChange('delete', [slotProps.row.id])" v-if="slotProps.row.key !== 'debug'">
+            <t-link theme="danger">{{ $t('pages.setting.table.delete') }}</t-link>
           </t-popconfirm>
+          <t-link theme="danger" :disabled="slotProps.row.key === 'debug'" v-else>{{ $t('pages.setting.table.delete') }}</t-link>
         </t-space>
       </template>
     </common-setting>
