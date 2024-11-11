@@ -124,9 +124,9 @@
           <t-radio v-if="platform !== 'linux'" v-model="formData.selfBoot" allow-uncheck @change="selefBootEvnet">
             {{ $t('pages.setting.base.selefBoot') }}
           </t-radio>
-          <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="hardwareAccelerationEvnet">
+          <!-- <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="hardwareAccelerationEvnet">
             {{ $t('pages.setting.base.hardwareAcceleration') }}
-          </t-radio>
+          </t-radio> -->
           <t-radio v-model="formData.windowPosition.status" allow-uncheck @change="windowPositionEvnet">
             {{ $t('pages.setting.base.windowPosition') }}
           </t-radio>
@@ -161,7 +161,7 @@ import { CloseIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, onActivated, ref, watch, reactive } from 'vue';
 
-import { fetchSettingList, clearDb, sourceSetting, fetchIp } from '@/api/setting';
+import { fetchSettingList, clearDb, sourceSetting } from '@/api/setting';
 import { usePlayStore, useSettingStore } from '@/store';
 import { t } from '@/locales';
 import emitter from '@/utils/emitter';

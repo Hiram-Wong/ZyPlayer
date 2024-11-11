@@ -36,22 +36,15 @@ const setup = async () => {
     'disable-features',
     'OutOfBlinkCors, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process',
   ); // 禁用
-  app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport'); // 启用
+  app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport, HardwareAccelerationModeDefault'); // 启用
   app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书错误
-  app.commandLine.appendSwitch('disable-web-security');
+  app.commandLine.appendSwitch('disable-web-security'); // 禁用安全
+  app.commandLine.appendSwitch('gpu-memory-buffer-compositor-resources'); // GPU内存缓冲
 
   remoteInit(); // 主进程初始化
   await dbInit(); // 初始化数据库
   await globalVariable(); // 全局变量
   await serverInit(); // 后端服务
-
-  // 禁用硬件加速
-  if (global.variable.hardwareAcceleration) {
-    app.commandLine.appendSwitch('enable-features', 'HardwareAccelerationModeDefault'); // 硬件加速
-    app.commandLine.appendSwitch('gpu-memory-buffer-compositor-resources'); // GPU内存缓冲
-  } else {
-    app.disableHardwareAcceleration();
-  }
 };
 
 let reqIdMethod = {}; // 请求id与header列表
@@ -61,7 +54,7 @@ const ready = () => {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.whenReady().then(async () => {
+  app.whenReady().then(() => {
     if (global.variable.dns) {
       logger.info(`[dns] doh: ${global.variable.dns}`);
       app.configureHostResolver({
