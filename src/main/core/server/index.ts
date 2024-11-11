@@ -71,18 +71,18 @@ const setup = async () => {
     logger.info('[server][init] listen:http://0.0.0.0:9978');
 
     const syncWebdevData = async () => {
-      logger.info('[webdev][sync]开始尝试同步数据...');
+      logger.info('[webdev][sync][start] try');
 
       try {
         const dbResWebdev = await setting.get('webdev');
         if (!dbResWebdev || !dbResWebdev.sync) {
-          logger.info('[webdev][sync]同步未开启, 跳过同步');
+          logger.info('[webdev][sync][skip] not open sync');
           return;
         }
 
         const webdevConfig = dbResWebdev.data;
         if (!webdevConfig.url || !webdevConfig.username || !webdevConfig.password) {
-          logger.info('[webdev][sync]配置不完整, 同步失败');
+          logger.info('[webdev][sync][fail] incomplete config');
           return;
         }
 
@@ -97,12 +97,12 @@ const setup = async () => {
           const doc = await db.all();
           await instance.rsyncRemote(doc);
           instance = null; // 释放内存
-          logger.info('[webdev][sync]数据同步完成');
+          logger.info('[webdev][sync][success]');
         } else {
-          logger.info('[webdev][sync]客户端初始化失败');
+          logger.info('[webdev][sync][fail] init error');
         }
       } catch (err: any) {
-        logger.info(`[webdev][sync]同步过程中发生错误:${err.message}`);
+        logger.info(`[webdev][sync][fail] ${err.message}`);
       }
     };
 
