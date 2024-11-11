@@ -18,8 +18,8 @@
         <language class="system-function" />
         <system-skin class="system-function" />
         <system-pin class="system-function" />
-        <system-control class="mg-left window" />
       </div>
+      <system-control class="mg-left window" />
     </div>
   </div>
 </template>
@@ -107,9 +107,10 @@ const setSystemMediaInfo = () => {
   justify-content: space-between;
   align-items: center;
   padding: var(--td-comp-margin-m) var(--td-comp-margin-xs);
+  height: 100%;
 
   .mg-left {
-    margin-left: 20px;
+    margin-left: var(--td-comp-margin-l);
   }
 
   .left {
@@ -143,7 +144,7 @@ const setSystemMediaInfo = () => {
     flex: 1 1 auto;
     overflow: hidden;
     text-align: center;
-    height: 32px;
+    height: 100%;
 
     span {
       font-weight: 500;
