@@ -557,10 +557,10 @@
   resolved "https://registry.npmmirror.com/@dual-bundle/import-meta-resolve/-/import-meta-resolve-4.1.0.tgz#519c1549b0e147759e7825701ecffd25e5819f7b"
   integrity sha512-+nxncfwHM5SgAtrVzgpzJOI1ol0PkumhVo469KCf9lUi21IGcY90G98VuHm9VRrUypmAzawAHO9bs6hqeADaVg==
 
-"@electric-sql/pglite@^0.2.12":
-  version "0.2.12"
-  resolved "https://registry.npmmirror.com/@electric-sql/pglite/-/pglite-0.2.12.tgz#bf2bac86773d47acfd777e333cd0576ce0657a20"
-  integrity sha512-J/X42ujcoFEbOkgRyoNqZB5qcqrnJRWVlwpH3fKYoJkTz49N91uAK/rDSSG/85WRas9nC9mdV4FnMTxnQWE/rw==
+"@electric-sql/pglite@^0.2.13":
+  version "0.2.13"
+  resolved "https://registry.npmmirror.com/@electric-sql/pglite/-/pglite-0.2.13.tgz#2324ab94473fd554dcd861589c964d17c5b23f3c"
+  integrity sha512-YRY806NnScVqa21/1L1vaysSQ+0/cAva50z7vlwzaGiBOTS9JhdzIRHN0KfgMhobFAphbznZJ7urMso4RtMBIQ==
 
 "@electron-toolkit/eslint-config-ts@^2.0.0":
   version "2.0.0"
@@ -7050,7 +7050,7 @@ npm-bundled@^4.0.0:
   dependencies:
     npm-normalize-package-bin "^4.0.0"
 
-npm-check-updates@^17.1.10:
+npm-check-updates@^17.1.11:
   version "17.1.10"
   resolved "https://registry.npmmirror.com/npm-check-updates/-/npm-check-updates-17.1.10.tgz#936f6d7741b226ae5aaed8661551c54e8b6c932f"
   integrity sha512-GnN6KbUzC8BpwsRYJntuumgCiagZ0+xxorvUJM9m06d7AlyK9lm3iFsAsnXF3VAZZzpD5QjZvWBwNze61Vywkw==
@@ -8384,10 +8384,10 @@ shaka-player@^2.4.0:
   dependencies:
     eme-encryption-scheme-polyfill "^2.0.1"
 
-shaka-player@^4.11.11:
-  version "4.11.11"
-  resolved "https://registry.npmmirror.com/shaka-player/-/shaka-player-4.11.11.tgz#e9d58240501bbc5e4ba5ab70823ca318b2fb247a"
-  integrity sha512-7NPbU3cSMKjBwwg4ISOKcZ1SlyBiuF/mlAvh9XAvzFRvbWiOnJSB0N36lub//K73pXBpkpxrHemK03v4KEgwPA==
+shaka-player@^4.11.12:
+  version "4.11.12"
+  resolved "https://registry.npmmirror.com/shaka-player/-/shaka-player-4.11.12.tgz#e1c02112a608b4b4501713748e999014e2f9fcc1"
+  integrity sha512-QMORSyNi/jvBDWA8VxzzmyLfRihcfzGj+op0exQ6E1iegxpyM0TmdwyXotNMREdZDsiJsKxnNDxDzVxAkhGZQw==
   dependencies:
     eme-encryption-scheme-polyfill "^2.1.5"
 
@@ -9007,10 +9007,10 @@ tdesign-icons-vue-next@^0.2.4:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-icons-vue-next@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.npmmirror.com/tdesign-icons-vue-next/-/tdesign-icons-vue-next-0.3.0.tgz#569e5b16e3529d01980a2705854f90e7dce10b2c"
-  integrity sha512-vW/iM7byli9V+vAT3Pshpd/kOmHY/wnp008FHM/t+nLPnHl+ZPGvlh0LJhDlE4meIKfieAio3XELahAkKz96rg==
+tdesign-icons-vue-next@^0.3.3:
+  version "0.3.3"
+  resolved "https://registry.npmmirror.com/tdesign-icons-vue-next/-/tdesign-icons-vue-next-0.3.3.tgz#fbd9e01979de9730a2edeef6443d669e4d1fb46b"
+  integrity sha512-wop1ur/jo7cS+0BR8vtwv1XbfHkvpIb5Od3yxCe3nwRlK01MyA0PHUp1tyJo6k5/r2SnR49k7BzVhFWIL9SKKQ==
   dependencies:
     "@babel/runtime" "^7.16.3"
 
