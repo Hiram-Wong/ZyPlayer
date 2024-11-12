@@ -1,14 +1,14 @@
 <template>
   <div class="history-control">
-    <div class="back nav-item" @click="gotoBack">
-      <chevron-left-icon size="large" />
-    </div>
-    <div class="forward nav-item" @click="gotoForward">
-      <chevron-right-icon size="large" />
-    </div>
-    <div class="refresh nav-item" @click="gotoRefresh">
-      <rotate-icon size="large" />
-    </div>
+    <t-button theme="default" shape="square" variant="text" @click="gotoBack">
+      <chevron-left-icon />
+    </t-button>
+    <t-button theme="default" shape="square" variant="text" @click="gotoForward">
+      <chevron-right-icon />
+    </t-button>
+    <t-button theme="default" shape="square" variant="text" @click="gotoRefresh">
+      <rotate-icon />
+    </t-button>
   </div>
 </template>
 
@@ -49,15 +49,28 @@ const gotoRefresh = () => {
   height: 100%;
   width: 100px;
 
-  .nav-item {
-    color: rgba(132, 133, 141, 0.8);
-    cursor: pointer;
-    text-align: center;
-    display: flex;
-    align-items: center;
+  :deep(.t-button) {
+    &:not(.t-is-disabled):not(.t-button--ghost) {
+      --ripple-color: transparent;
+    }
+  }
 
+  :deep(.t-button__text) {
+    svg {
+      color: var(--td-text-color-placeholder);
+    }
+  }
+
+  :deep(.t-button--variant-text) {
     &:hover {
-      color: var(--td-primary-color);
+      border-color: transparent;
+      background-color: transparent;
+
+      .t-button__text {
+        svg {
+          color: var(--td-primary-color);
+        }
+      }
     }
   }
 }
