@@ -1,15 +1,15 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import PQueue from 'p-queue';
 
-const getTimeout = (timeout: number | undefined) => {
+const getTimeout = (timeout: number | undefined | null) => {
   const baseTimeout = 3000;
 
-  if (timeout != null) {
+  if (timeout !== null && timeout !== undefined) {
     return Math.max(baseTimeout, timeout);
   }
 
-  if (global.variable?.timeout) {
-    return Math.max(baseTimeout, global.variable.timeout);
+  if (globalThis.variable?.timeout) {
+    return Math.max(baseTimeout, globalThis.variable.timeout);
   }
 
   return baseTimeout;

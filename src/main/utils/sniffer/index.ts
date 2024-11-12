@@ -58,7 +58,7 @@ const puppeteerInElectron = async (
 
   try {
     const browser = await pie.connect(app, puppeteer as any); // 连接puppeteer
-    const debugStatus = global.variable.debug || false;
+    const debugStatus = globalThis.variable.debug || false;
     snifferWindow = createWin(`sniffer-${pageId}`, { title: 'zy-sniifer', show: debugStatus }); // 创建无界面窗口
     snifferWindow.webContents.setAudioMuted(true); // 设置窗口静音
     snifferWindow.webContents.setWindowOpenHandler(() => {

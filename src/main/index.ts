@@ -1,5 +1,5 @@
 import { initialize as remoteInit } from '@electron/remote/main';
-import { electronApp, is, optimizer } from '@electron-toolkit/utils';
+import { electronApp, platform, optimizer } from '@electron-toolkit/utils';
 import { registerContextMenuListener } from '@electron-uikit/contextmenu';
 import { registerTitleBarListener } from '@electron-uikit/titlebar';
 import { app, BrowserWindow, globalShortcut, nativeTheme, session } from 'electron';
@@ -41,6 +41,10 @@ const setup = async () => {
   app.commandLine.appendSwitch('disable-web-security'); // 禁用安全
   app.commandLine.appendSwitch('gpu-memory-buffer-compositor-resources'); // GPU内存缓冲
 
+  if (platform.isLinux) {
+    app.disableHardwareAcceleration();
+  }
+
   remoteInit(); // 主进程初始化
   await dbInit(); // 初始化数据库
   await globalVariable(); // 全局变量
@@ -55,11 +59,11 @@ const ready = () => {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   app.whenReady().then(() => {
-    if (global.variable.dns) {
-      logger.info(`[dns] doh: ${global.variable.dns}`);
+    if (globalThis.variable.dns) {
+      logger.info(`[dns] doh: ${globalThis.variable.dns}`);
       app.configureHostResolver({
         secureDnsMode: 'secure',
-        secureDnsServers: [global.variable.dns],
+        secureDnsServers: [globalThis.variable.dns],
       });
     }
 
@@ -111,7 +115,8 @@ const ready = () => {
       }
 
       // 处理 User-Agent
-      requestHeaders['User-Agent'] = headers?.['User-Agent'] || requestHeaders?.['User-Agent'] || global.variable.ua;
+      requestHeaders['User-Agent'] =
+        headers?.['User-Agent'] || requestHeaders?.['User-Agent'] || globalThis.variable.ua;
       // 处理 Host
       requestHeaders['Host'] = headers?.['Host'] || requestHeaders?.['Host'] || new URL(url).host;
       // 处理 Cookie

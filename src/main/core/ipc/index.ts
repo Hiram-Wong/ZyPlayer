@@ -77,7 +77,7 @@ const ipcListen = () => {
   });
 
   ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
-    const ua = global.variable.ua;
+    const ua = globalThis.variable.ua;
     const formatPath = is.dev
       ? join(process.cwd(), 'thumbnail', `${key}.jpg`)
       : join(app.getPath('userData'), 'thumbnail', `${key}.jpg`);
@@ -184,7 +184,7 @@ const ipcListen = () => {
     globalShortcut.register(shortcut, () => {
       toggleWindowVisibility();
     });
-    global.variable.recordShortcut = shortcut;
+    globalThis.variable.recordShortcut = shortcut;
   });
 
   ipcMain.on('manage-win', (_, winName, action) => {
@@ -252,8 +252,8 @@ const ipcListen = () => {
 
   ipcMain.on('update-global', (_, key, value) => {
     logger.info(`[ipcMain] update-global: key: ${key} - value: ${value}`);
-    if (Object.keys(global.variable).includes(key)) {
-      global.variable[key] = value;
+    if (Object.keys(globalThis.variable).includes(key)) {
+      globalThis.variable[key] = value;
     }
   });
 

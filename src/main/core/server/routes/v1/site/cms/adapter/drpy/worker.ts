@@ -64,6 +64,10 @@ const drpyWork = (parms) => {
 };
 
 process.on('message', (message: { [key: string]: any }) => {
+  const variable = {
+    timeout: process.argv?.[3] || 3000,
+  };
+  globalThis.variable = variable;
   let res;
   try {
     res = drpyWork(message);

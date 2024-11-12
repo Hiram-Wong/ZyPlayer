@@ -92,7 +92,7 @@ export function createOpenAI(config: CreateOpenAIConfig = {}): OpenAIApp {
 
     const spinner = ora(logStart(`AI is answering your question, please wait a moment`)).start();
     try {
-      const timeout = global.variable.timeout || 5000;
+      const timeout = globalThis.variable.timeout || 5000;
       const completion = await openai.chat.completions.create(
         {
           model,

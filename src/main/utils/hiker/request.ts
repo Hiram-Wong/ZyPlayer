@@ -7,6 +7,20 @@ import { getHome, keysToLowerCase, parseQueryString } from './base';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+const getTimeout = (timeout: number | undefined | null) => {
+  const baseTimeout = 3000;
+
+  if (timeout !== null && timeout !== undefined) {
+    return Math.max(baseTimeout, timeout);
+  }
+
+  if (globalThis.variable?.timeout) {
+    return Math.max(baseTimeout, globalThis.variable.timeout);
+  }
+
+  return baseTimeout;
+};
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
 
 interface RequestOptions {
@@ -41,7 +55,7 @@ const fetch = (url: string, options: RequestOptions = {}) => {
 
     const config = {
       headers: headersInTitleCase,
-      timeout: options?.timeout || 5000,
+      timeout: getTimeout(options?.timeout),
       followRedirects: options?.redirect === false ? false : true,
     };
 

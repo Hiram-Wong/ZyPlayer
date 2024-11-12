@@ -12,7 +12,7 @@ const setup = async () => {
     debug: (await setting.get('debug')) || false,
   };
 
-  global.variable = variable;
+  globalThis.variable = variable;
   logger.info(`[global][variable]`, variable);
 };
 

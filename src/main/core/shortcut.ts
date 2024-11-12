@@ -9,8 +9,8 @@ const customShortcutResgin = (shortcut, func) => {
 };
 
 const bossShortcutResgin = () => {
-  if (global.variable.recordShortcut) {
-    globalShortcut.register(global.variable.recordShortcut, () => {
+  if (globalThis.variable.recordShortcut) {
+    globalShortcut.register(globalThis.variable.recordShortcut, () => {
       toggleWindowVisibility();
     });
   }

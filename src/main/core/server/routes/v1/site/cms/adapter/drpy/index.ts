@@ -6,14 +6,15 @@ import treeKill from 'tree-kill';
 import logger from '@main/core/logger';
 
 let child: ChildProcess | null = null;
-const restart = (): void => {
+const restart = async () => {
   logger.warn(`[t3][worker][restart] worker id:${uuidv4()}`);
   if (child) {
     child.removeAllListeners();
     treeKill(child.pid!, 'SIGTERM');
   }
   child = null;
-  child = fork(resolve(__dirname, 'worker.js'), [`T3DrpyWorker-${uuidv4()}`]);
+  const TIMEOUT = globalThis.variable.timeout;
+  child = fork(resolve(__dirname, 'worker.js'), [`T3DrpyWorker-${uuidv4()}`, TIMEOUT]);
 };
 
 const doWork = (data: { [key: string]: string | object | null }): Promise<{ [key: string]: any }> => {
@@ -61,7 +62,7 @@ class T3Adapter {
 
   private async getInstance() {
     if (!this.instance) {
-      restart();
+      await restart();
       this.instance = await doWork({ type: 'init', data: this.ext });
     }
     return this.instance;
