@@ -156,7 +156,6 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash';
 import { CloseIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, onActivated, ref, watch, reactive } from 'vue';
@@ -307,7 +306,7 @@ watch(formData,
     storeSetting.updateConfig({
       mode: formData.value.theme,
       webdev: formData.value.webdev,
-      timeout: formData.value.timeout < 1000 ? 1000 : formData.value.timeout
+      timeout: formData.value.timeout < 5000 ? 5000 : formData.value.timeout
     });
     storePlayer.updateConfig({
       setting: {
@@ -491,7 +490,7 @@ const getShortKeys = (_, event) => {
 // 判断快捷键是否合法
 const isLegalShortcut = (item) => {
   const specialKeys = ['Crl', 'Alt', 'Shift', 'Meta'];
-  const pubilcKeys = [
+  const publicKeys = [
     '=',
     '-',
     '~',
@@ -546,11 +545,11 @@ const isLegalShortcut = (item) => {
   let isPubilcKeys = false;
   let isSpecialKeys = false;
 
-  const keys = _.split(item, '+');
+  const keys = item.split('+');
 
-  _.forIn(keys, (e) => {
-    if (_.includes(specialKeys, e)) isSpecialKeys = true;
-    if (_.includes(pubilcKeys, e)) isPubilcKeys = true;
+  keys.forEach((key) => {
+    if (specialKeys.includes(key)) isSpecialKeys = true;
+    if (publicKeys.includes(key)) isPubilcKeys = true;
   });
   if (isPubilcKeys && isSpecialKeys) {
     statusShortcut.value = 'default';
