@@ -33,7 +33,7 @@
             <t-input-number v-model="formData.timeout" theme="column" class="timeout-content"
               :placeholder="t('pages.setting.placeholder.general')"
               :style="{ width: '255px' }"
-              :min="3000"
+              :min="5000"
               :max="1000 * 60"
               @change="changeTimeoutEvent"
             />
@@ -602,7 +602,7 @@ const reset = (type: string) => {
   } else if (type === 'viewCasual') {
     formData.value.defaultViewCasual = 'http://api.yujn.cn/api/zzxjj.php';
   } else if (type === 'timeout') {
-    formData.value.timeout = 3000;
+    formData.value.timeout = 5000;
     window.electron.ipcRenderer.send('update-global', 'timeout', formData.value.timeout);
   }
 };
@@ -676,8 +676,8 @@ const flushDialogData = (item) => {
 };
 
 const changeTimeoutEvent = (item: number) => {
-  if (item < 3000 || item > 1000 * 60) {
-    formData.value.timeout = 3000;
+  if (item < 5000 || item > 1000 * 60) {
+    formData.value.timeout = 5000;
   };
   window.electron.ipcRenderer.send('update-global', 'timeout', formData.value.timeout);
 };

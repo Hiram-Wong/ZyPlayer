@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 import PQueue from 'p-queue';
 
 const getTimeout = (timeout: number | undefined | null) => {
-  const baseTimeout = 3000;
+  const baseTimeout = 5000;
 
   if (timeout !== null && timeout !== undefined) {
     return Math.max(baseTimeout, timeout);
@@ -16,7 +16,7 @@ const getTimeout = (timeout: number | undefined | null) => {
 };
 
 const service: AxiosInstance = axios.create({
-  timeout: 3000,
+  timeout: 5000,
 });
 
 // @ts-ignore

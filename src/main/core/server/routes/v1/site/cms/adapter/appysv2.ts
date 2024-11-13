@@ -134,14 +134,12 @@ class AppYsV2Adapter {
       if (this.type === 1) {
         res = await request({
           url: buildUrl(this.api, '/vodPhbAll'),
-          timeout: 3000,
           method: 'GET',
         });
         videoList = res.data.list;
       } else {
         res = await request({
           url: buildUrl(this.api, '/index_video'),
-          timeout: 3000,
           method: 'GET',
         });
         videoList = res.list || res.data;

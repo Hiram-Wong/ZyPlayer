@@ -8,7 +8,7 @@ import { getHome, keysToLowerCase, parseQueryString } from './base';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const getTimeout = (timeout: number | undefined | null) => {
-  const baseTimeout = 3000;
+  const baseTimeout = 5000;
 
   if (timeout !== null && timeout !== undefined) {
     return Math.max(baseTimeout, timeout);

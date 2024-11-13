@@ -28,7 +28,7 @@ service.interceptors.response.use(
 );
 
 const request = async (config: AxiosRequestConfig) => {
-  if (config?.timeout && config?.timeout < 3000) {
+  if (config?.timeout && config?.timeout < 5000) {
     delete config.timeout;
   }
   const res = await service.request(config);
@@ -40,7 +40,7 @@ const request = async (config: AxiosRequestConfig) => {
 };
 
 const requestComplete: any = async (config: AxiosRequestConfig) => {
-  if (config?.timeout && config?.timeout < 3000) {
+  if (config?.timeout && config?.timeout < 5000) {
     delete config.timeout;
   }
   const { status, data, headers } = await service.request(config);

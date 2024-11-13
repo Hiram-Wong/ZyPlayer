@@ -8,7 +8,7 @@ const setup = async () => {
     dns: (await setting.get('dns')) || '',
     selfBoot: (await setting.get('selfBoot')) || false,
     recordShortcut: (await setting.get('recordShortcut')) || '',
-    timeout: (await setting.get('timeout')) || 3000,
+    timeout: (await setting.get('timeout')) || 5000,
     debug: (await setting.get('debug')) || false,
   };
 
