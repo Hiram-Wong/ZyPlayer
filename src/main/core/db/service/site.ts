@@ -6,7 +6,7 @@ export default {
     return await db.select().from(schema.site);
   },
   async active() {
-    return await db.select().from(schema.site).where(eq(schema.site.isActive, true));
+    return await db.select().from(schema.site).where(eq(schema.site.isActive, true)).orderBy(asc(schema.site.name));
   },
   async update(ids, doc) {
     return await db.update(schema.site).set(doc).where(inArray(schema.site.id, ids)).returning();

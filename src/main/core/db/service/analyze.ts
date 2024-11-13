@@ -6,7 +6,11 @@ export default {
     return await db.select().from(schema.analyze);
   },
   async active() {
-    return await db.select().from(schema.analyze).where(eq(schema.analyze.isActive, true));
+    return await db
+      .select()
+      .from(schema.analyze)
+      .where(eq(schema.analyze.isActive, true))
+      .orderBy(asc(schema.analyze.name));
   },
   async update(ids, doc) {
     return await db.update(schema.analyze).set(doc).where(inArray(schema.analyze.id, ids)).returning();

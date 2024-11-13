@@ -6,7 +6,7 @@ export default {
     return await db.select().from(schema.iptv);
   },
   async active() {
-    return await db.select().from(schema.iptv).where(eq(schema.iptv.isActive, true));
+    return await db.select().from(schema.iptv).where(eq(schema.iptv.isActive, true)).orderBy(asc(schema.iptv.name));
   },
   async update(ids, doc) {
     return await db.update(schema.iptv).set(doc).where(inArray(schema.iptv.id, ids)).returning();

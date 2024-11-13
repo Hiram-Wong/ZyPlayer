@@ -6,7 +6,7 @@ export default {
     return await db.select().from(schema.drive);
   },
   async active() {
-    return await db.select().from(schema.drive).where(eq(schema.drive.isActive, true));
+    return await db.select().from(schema.drive).where(eq(schema.drive.isActive, true)).orderBy(asc(schema.drive.name));
   },
   async update(ids, doc) {
     return await db.update(schema.drive).set(doc).where(inArray(schema.drive.id, ids)).returning();
