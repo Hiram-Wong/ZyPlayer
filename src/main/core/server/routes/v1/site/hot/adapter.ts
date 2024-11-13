@@ -1,6 +1,9 @@
 import request from '@main/utils/request';
 
-const komect = async ({ type = '电影', limit = 20, start = 1 }) => {
+const komect = async (doc: { [key: string]: string | number }) => {
+  let { type = '电影', limit = 20, start = 0 } = doc;
+  if (typeof limit === 'string') limit = parseInt(limit);
+  if (typeof start === 'string') start = parseInt(start);
   try {
     let data: any = [];
     const url = 'https://msi.nsoap.komect.com/msi/cbiz/dp/contentInfo/homePage/list';
@@ -23,8 +26,8 @@ const komect = async ({ type = '电影', limit = 20, start = 1 }) => {
       method: 'POST',
       headers: {
         auth: '3637df52d98ce8815fe47bbe49fe6459',
-        'custom-origin': 'https://msi.nsoap.komect.com',
-        'custom-referer': 'https://msi.nsoap.komect.com/minitvH5/index.html',
+        Origin: 'https://msi.nsoap.komect.com',
+        Referer: 'https://msi.nsoap.komect.com/minitvH5/index.html',
         channelId: 'H5',
       },
       data: body,
@@ -51,7 +54,10 @@ const komect = async ({ type = '电影', limit = 20, start = 1 }) => {
   }
 };
 
-const douban = async ({ type, limit = 20, start = 0 }) => {
+const douban = async (doc: { [key: string]: string | number }) => {
+  let { type, limit = 20, start = 0 } = doc;
+  if (typeof limit === 'string') limit = parseInt(limit);
+  if (typeof start === 'string') start = parseInt(start);
   try {
     let data: any = [];
     const url = `https://m.douban.com/rexxar/api/v2/subject_collection/${type}/items?start=${limit * start}&count=${limit}`;
@@ -60,7 +66,7 @@ const douban = async ({ type, limit = 20, start = 0 }) => {
       url,
       method: 'GET',
       headers: {
-        'custom-referer': 'https://movie.douban.com',
+        Referer: 'https://movie.douban.com',
       },
     });
     if (response?.subject_collection_items && response.subject_collection_items.length > 0) {

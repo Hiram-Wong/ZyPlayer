@@ -53,13 +53,6 @@ export function fetchSiteDetail(id: string) {
   });
 }
 
-export function fetchHotActive() {
-  return request({
-    url: '/v1/hot/active',
-    method: 'get',
-  });
-}
-
 export function fetchHotPage(doc: object) {
   return request({
     url: '/v1/hot/page',

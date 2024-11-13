@@ -244,7 +244,6 @@ const formData = ref({
   theme: 'auto',
   lang: 'zh_CN',
   defaultHot: 'kylive',
-  defaultSearchRecommend: 'site',
   defaultSearchType: 'site',
   defaultFilterType: 'off',
   defaultIptvEpg: 'https://epg.112114.eu.org/?ch={name}&date={date}',
@@ -299,44 +298,9 @@ const tmp = reactive({
   recordedSourceShortcut: ''
 });
 
-watch(theme, (newValue, _) => {
+watch(theme, (newValue) => {
   formData.value.theme = newValue;
-})
-
-// 监听刷新film
-watch(
-  () => [
-    formData.value.defaultSearchType,
-    formData.value.defaultSearchRecommend,
-  ],
-  (_, oldValue) => {
-    if (oldValue.every((item) => typeof item !== 'undefined')) {
-      emitter.emit('refreshFilmConfig');
-    }
-  },
-);
-
-// 监听刷新hot
-watch(
-  () => [
-    formData.value.defaultHot,
-  ],
-  (_, oldValue) => {
-    if (oldValue.every((item) => typeof item !== 'undefined')) {
-      emitter.emit('refreshHotConfig');
-    }
-  },
-);
-
-// 监听刷新iptv
-watch(
-  () => [formData.value.iptvMarkIp, formData.value.iptvDelay, formData.value.iptvThumbnail, formData.value.defaultIptvEpg],
-  (_, oldValue) => {
-    if (oldValue.every((item) => typeof item !== 'undefined')) {
-      emitter.emit('refreshIptvConfig');
-    }
-  },
-);
+});
 
 watch(formData,
   (newValue, _) => {
@@ -359,6 +323,31 @@ watch(formData,
   {
     deep: true
   }
+);
+
+
+// 监听刷新hot
+watch(
+  () => [
+    formData.value.defaultHot,
+    formData.value.defaultSearchType,
+    formData.value.defaultFilterType,
+  ],
+  (_, oldValue) => {
+    if (oldValue.every((item) => typeof item !== 'undefined')) {
+      emitter.emit('refreshHotConfig');
+    }
+  },
+);
+
+// 监听刷新iptv
+watch(
+  () => [formData.value.iptvMarkIp, formData.value.iptvDelay, formData.value.iptvThumbnail, formData.value.defaultIptvEpg],
+  (_, oldValue) => {
+    if (oldValue.every((item) => typeof item !== 'undefined')) {
+      emitter.emit('refreshIptvConfig');
+    }
+  },
 );
 
 onMounted(() => {
