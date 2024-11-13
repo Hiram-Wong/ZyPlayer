@@ -168,9 +168,12 @@ const searchEvent = () => {
     padding: var(--td-comp-paddingTB-s) 0;
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
+    display: flex;
+    flex-direction: column;
+    gap: var(--td-size-4);
 
     .nav-sub-tab-header {
-      margin: 0 0 var(--td-comp-margin-s) var(--td-comp-margin-s);
+      margin-left: var(--td-comp-margin-s);
 
       .header {
         display: flex;
@@ -213,7 +216,8 @@ const searchEvent = () => {
       flex-direction: column;
       align-items: flex-start;
       justify-content: space-between;
-      height: calc(100% - var(--td-comp-margin-s) - var(--td-comp-margin-m) - 32px);
+      flex: 1;
+      overflow: hidden;
 
       .nav-sub-tab-top {
         overflow-y: auto;
