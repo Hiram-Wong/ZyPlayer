@@ -333,7 +333,7 @@ emitter.on('searchAnalyze', (kw) => {
     // width: calc(100% - 170px);
     min-width: 750px;
     position: relative;
-    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    padding: var(--td-pop-padding-l);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;
@@ -344,11 +344,11 @@ emitter.on('searchAnalyze', (kw) => {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      gap: var(--td-size-4);
 
       .analyze-player {
-        flex: 1 1;
+        flex: 1;
         border-radius: var(--td-radius-default);
-        border: 3px solid var(--td-bg-color-secondarycontainer);
         height: 100%;
         width: 100%;
         position: relative;
@@ -466,8 +466,6 @@ emitter.on('searchAnalyze', (kw) => {
       }
 
       .analyze-setting {
-        margin-top: 5px;
-
         &-group {
           position: relative;
           height: 40px;

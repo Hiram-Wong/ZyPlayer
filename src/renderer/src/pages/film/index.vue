@@ -13,28 +13,28 @@
         <div class="header-nav">
           <TitleMenu :list="classConfig.data" :active="active.class" @change-key="changeClassEvent" />
         </div>
-        <div v-if="filterData[active.class]" class="quick_item quick_filter">
-          <root-list-icon size="large" @click="isVisible.toolbar = !isVisible.toolbar" />
-        </div>
+        <t-button theme="default" shape="square" variant="text" v-if="filterData[active.class]" class="quick_filter">
+          <root-list-icon @click="isVisible.toolbar = !isVisible.toolbar" />
+        </t-button>
       </header>
-      <div class="container" :class="classConfig.data.length > 0 ? 'container-full' : 'container-hidden'">
-        <!-- 过滤工具栏 -->
-        <div v-show="isVisible.toolbar" class="filter header-wrapper">
-          <div class="tags">
-            <div v-for="filterItem in filterData[active.class]" :key="filterItem.key" class="tags-list">
-              <div class="item title">{{ filterItem.name }}</div>
-              <div class="wp">
-                <div v-for="item in filterItem.value" :key="item" class="item"
-                  :class="{ active: active.filter[filterItem.key] === item.v }" :label="item.n" :value="item.v"
-                  @click="changeFilterEvent(filterItem.key, item.v)">
-                  {{ item.n }}
-                </div>
+      <!-- 过滤工具栏 -->
+      <div v-show="isVisible.toolbar" class="filter header-wrapper">
+        <div class="tags">
+          <div v-for="filterItem in filterData[active.class]" :key="filterItem.key" class="tags-list">
+            <div class="item title">{{ filterItem.name }}</div>
+            <div class="wp">
+              <div v-for="item in filterItem.value" :key="item" class="item"
+                :class="{ active: active.filter[filterItem.key] === item.v }" :label="item.n" :value="item.v"
+                @click="changeFilterEvent(filterItem.key, item.v)">
+                {{ item.n }}
               </div>
             </div>
           </div>
         </div>
+      </div>
+      <div class="container">
         <div class="content-wrapper" id="back-top">
-          <t-row :gutter="[16, 16]" style="margin: 0;">
+          <t-row :gutter="[16, 4]" style="margin-left: -8px; margin-right: -8px">
             <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in filmData.list" :key="item.vod_id" class="card"
               @click="playEvent(item)">
               <div class="card-main">
@@ -561,17 +561,17 @@ const changeConf = async (key: string) => {
     // width: calc(100% - 170px);
     min-width: 750px;
     position: relative;
-    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    padding: var(--td-pop-padding-l);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;
     display: flex;
     flex-direction: column;
+    gap: var(--td-size-4);
 
     .header {
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
       justify-content: space-between;
       white-space: nowrap;
       flex-shrink: 0;
@@ -582,109 +582,121 @@ const changeConf = async (key: string) => {
         overflow: hidden;
       }
 
-      .quick_filter {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        margin-left: var(--td-comp-margin-s);
+      :deep(.t-button) {
+        &:not(.t-is-disabled):not(.t-button--ghost) {
+          --ripple-color: transparent;
+        }
       }
-    }
 
-    .container-full {
-      height: calc(100% - 58px);
-    }
+      :deep(.t-button__text) {
+        svg {
+          color: var(--td-text-color-placeholder);
+        }
+      }
 
-    .container-hidden {
-      height: 100%;
-    }
+      :deep(.t-button--variant-text) {
+        &:hover {
+          border-color: transparent;
+          background-color: transparent;
 
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      width: 100%;
-
-      .filter {
-        position: relative;
-        height: auto;
-        margin-bottom: 10px;
-        transition: height 0.3s;
-        width: 100%;
-
-        .tags {
-          width: 100%;
-
-          .tags-list {
-            padding-top: var(--td-comp-paddingTB-xs);
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-
-            &:after {
-              clear: both;
-              display: block;
-              height: 0;
-              visibility: hidden;
-              content: '';
-            }
-
-            .title {
-              // float: left;
-              width: 50px;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              text-align: left;
-              cursor: auto;
-              box-sizing: border-box;
-              height: 30px;
-              font-weight: 400;
-              font-size: 15px;
-              line-height: 30px;
-            }
-
-            .wp {
-              // float: left;
-              // width: calc(100% - 50px);
-              width: 100%;
-              overflow-y: auto;
-              white-space: nowrap;
-              flex-wrap: nowrap;
-              display: flex;
-              align-items: center;
-              justify-content: flex-start;
-              align-content: center;
-
-              &::-webkit-scrollbar {
-                height: 8px;
-                background: transparent;
-              }
-
-              .item {
-                display: block;
-                padding: 0 14px;
-                margin-right: 5px;
-                box-sizing: border-box;
-                height: 30px;
-                font-weight: 400;
-                font-size: 13px;
-                line-height: 30px;
-                text-align: center;
-                cursor: pointer;
-              }
-
-              .active {
-                height: 30px;
-                border-radius: 20px;
-                background: var(--td-bg-color-component);
-              }
+          .t-button__text {
+            svg {
+              color: var(--td-primary-color);
             }
           }
         }
       }
+
+      .quick_filter {
+        margin-right: -6px;
+      }
+    }
+
+    .filter {
+      position: relative;
+      height: auto;
+      transition: height 0.3s;
+      width: 100%;
+
+      .tags {
+        width: 100%;
+
+        .tags-list {
+          padding-top: var(--td-comp-paddingTB-xs);
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+
+          &:after {
+            clear: both;
+            display: block;
+            height: 0;
+            visibility: hidden;
+            content: '';
+          }
+
+          .title {
+            // float: left;
+            width: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: left;
+            cursor: auto;
+            box-sizing: border-box;
+            height: 30px;
+            font-weight: 400;
+            font-size: 15px;
+            line-height: 30px;
+          }
+
+          .wp {
+            // float: left;
+            // width: calc(100% - 50px);
+            width: 100%;
+            overflow-y: auto;
+            white-space: nowrap;
+            flex-wrap: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            align-content: center;
+
+            &::-webkit-scrollbar {
+              height: 8px;
+              background: transparent;
+            }
+
+            .item {
+              display: block;
+              padding: 0 14px;
+              margin-right: 5px;
+              box-sizing: border-box;
+              height: 30px;
+              font-weight: 400;
+              font-size: 13px;
+              line-height: 30px;
+              text-align: center;
+              cursor: pointer;
+            }
+
+            .active {
+              height: 30px;
+              border-radius: 20px;
+              background: var(--td-bg-color-component);
+            }
+          }
+        }
+      }
+    }
+
+    .container {
+      flex: 1;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
 
       .content-wrapper {
         overflow-y: auto;
@@ -711,7 +723,7 @@ const changeConf = async (key: string) => {
             width: 100%;
             height: 0;
             overflow: hidden;
-            border-radius: 7px;
+            border-radius: var(--td-radius-default);
             padding-top: 139.9%;
 
             .card-tag-orange {

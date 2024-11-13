@@ -94,7 +94,7 @@ const changeClassEvent = (item: string) => {
   .content {
     min-width: 750px;
     position: relative;
-    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    padding: var(--td-pop-padding-l);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;

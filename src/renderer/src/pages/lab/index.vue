@@ -1,5 +1,5 @@
 <template>
-  <div class="lab view-container">
+  <div class="lab-container">
     <common-nav :title="$t('pages.lab.name')" :list="settingSet.list" :active="settingSet.select" @change-key="changeConf" />
     <div class="content">
       <div class="container">
@@ -61,7 +61,7 @@ const changeConf = (key: string) => {
 </script>
 
 <style lang="less" scoped>
-.view-container {
+.lab-container {
   height: 100%;
   display: flex;
   flex-direction: row;
@@ -72,7 +72,7 @@ const changeConf = (key: string) => {
   .content {
     min-width: 750px;
     position: relative;
-    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    padding: var(--td-pop-padding-l);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;

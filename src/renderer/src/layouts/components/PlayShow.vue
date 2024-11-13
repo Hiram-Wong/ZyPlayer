@@ -5,8 +5,8 @@
         <div class="mini-box-video">
           <video-library-icon size="large" class="video" />
         </div>
-        <div class="mini-box-title-warp">
-          <span class="mini-box-title">{{ playerStutus.title }}</span>
+        <div class="mini-box-title-warp" ref="marqueeContainerRef">
+          <span class="mini-box-title" ref="marqueeTextRef">{{ playerStutus.title }}</span>
         </div>
         <div class="mini-box-close" @click.stop="destroyPlayerWindowEvent">
           <close-icon size="large" class="close" />
@@ -18,12 +18,14 @@
 
 <script setup lang="ts">
 import { CloseIcon, VideoLibraryIcon } from 'tdesign-icons-vue-next';
-import { computed } from 'vue';
+import { computed, watch, useTemplateRef, nextTick, onMounted } from 'vue';
 
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
 
 const playerStore = usePlayStore();
+const marqueeContainerRef = useTemplateRef('marqueeContainerRef');
+const marqueeTextRef = useTemplateRef('marqueeTextRef');
 
 const playerStutus = computed(() => {
   return {
@@ -32,6 +34,35 @@ const playerStutus = computed(() => {
     title: playerStore.type === 'film' ? playerStore.data.info.vod_name : playerStore.data.info.name || t('pages.playShow.noPlayTitle')
   }
 });
+
+watch(() => playerStutus.value.title,
+  async () => {
+    await nextTick(() => {
+      setMarqueeAnimation();
+    })
+  }
+);
+
+onMounted(async () => {
+  await nextTick(() => {
+    setMarqueeAnimation();
+  })
+});
+
+const setMarqueeAnimation = () => {
+  const containerRef = marqueeContainerRef.value;
+  const textRef = marqueeTextRef.value;
+  if (containerRef && textRef) {
+    const containerWidth = containerRef.getBoundingClientRect().width;
+    const textWidth = textRef.getBoundingClientRect().width;
+
+    // 计算动画持续时间，这里假设动画速度为文本宽度的2倍
+    const duration = (textWidth / containerWidth) * 10;
+
+    // 设置动画持续时间
+    marqueeTextRef.value.style.animationDuration = `${duration}s`;
+  }
+}
 
 const focusPlayerWindowEvent = () => {
   window.electron.ipcRenderer.send('manage-win', 'play', 'focus');
@@ -90,7 +121,7 @@ const destroyPlayerWindowEvent = () => {
         .mini-box-title {
           display: inline-block;
           white-space: nowrap;
-          animation: marquee 10s linear infinite;
+          animation: marquee linear infinite;
           color: var(--td-text-color-placeholder);
           font-weight: 500;
         }

@@ -511,10 +511,9 @@ const htmlSourceEvent = (data: string) => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+  gap: var(--td-size-4);
 
   .header {
-    margin: var(--td-comp-margin-s) 0;
     display: flex;
     justify-content: space-between;
     align-content: center;

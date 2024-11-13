@@ -691,7 +691,8 @@ const refreshSetting = () => {
 <style lang="less" scoped>
 .setting-base-container {
   height: 100%;
-  padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-xxl);
+  padding: 0 var(--td-comp-paddingLR-xxl);
+  overflow: auto;
 
   :deep(.t-radio-group.t-size-m .t-radio-button) {
     height: auto;

@@ -16,7 +16,7 @@
       </header>
       <div class="container">
         <div class="content-wrapper" id="back-top">
-          <t-row :gutter="[16, 16]" style="margin: 0;">
+          <t-row :gutter="[16, 4]" style="margin-left: -8px; margin-right: -8px">
             <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in channelList" :key="item.id" class="card"
               @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
               <div class="card-main">
@@ -488,17 +488,17 @@ const copyChannelEvent = async () => {
     // width: calc(100% - 170px);
     min-width: 750px;
     position: relative;
-    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    padding: var(--td-pop-padding-l);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;
     display: flex;
     flex-direction: column;
+    gap: var(--td-size-4);
 
     .header {
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
       justify-content: space-between;
       white-space: nowrap;
       flex-shrink: 0;
@@ -512,8 +512,9 @@ const copyChannelEvent = async () => {
 
     .container {
       flex: 1;
-      height: calc(100% - 58px);
+      height: 100%;
       width: 100%;
+      overflow: hidden;
 
       .content-wrapper {
         overflow-y: auto;
@@ -527,7 +528,20 @@ const copyChannelEvent = async () => {
           width: inherit;
           position: relative;
           cursor: pointer;
-          border-radius: var(--td-radius-medium);
+          border-radius: var(--td-radius-default);
+
+
+          &:hover {
+            .card-main {
+              border-color: var(--td-brand-color);
+            }
+
+            .card-footer {
+              .card-footer-title {
+                color: var(--td-brand-color);
+              }
+            }
+          }
 
           .text-hide {
             overflow: hidden;
@@ -541,11 +555,12 @@ const copyChannelEvent = async () => {
             width: 100%;
             height: 0;
             overflow: hidden;
-            border-radius: 7px;
+            border-radius: var(--td-radius-default);
             padding-top: 62%;
             box-shadow: var(--td-shadow-1);
-            border: 5px solid #211f20;
+            border: var(--td-size-1) solid #211f20;
             background-color: #373536;
+            transition: all 0.2s linear;
 
             .card-delay-tag {
               z-index: 15;
@@ -557,7 +572,7 @@ const copyChannelEvent = async () => {
               width: 40px;
               height: 15px;
               background-color: rgb(0 0 0 / 60%);
-              border-radius: 5px;
+              border-radius: var(--td-radius-default);
               box-shadow: var(--td-shadow-1);
               position: absolute;
               top: 5px;
@@ -586,7 +601,7 @@ const copyChannelEvent = async () => {
               width: 40px;
               height: 15px;
               background-color: rgb(0 0 0 / 60%);
-              border-radius: 5px;
+              border-radius: var(--td-radius-default);
               box-shadow: var(--td-shadow-1);
               position: absolute;
               bottom: 5px;
@@ -612,25 +627,20 @@ const copyChannelEvent = async () => {
               display: block;
               width: 100%;
               height: 100%;
-              border-radius: 5px;
+              border-radius: var(--td-radius-default);
             }
           }
 
           .card-footer {
             position: relative;
-            padding-top: var(--td-comp-paddingTB-s);
+            padding: 0 var(--td-comp-paddingLR-xs);
 
             .card-footer-title {
               font-weight: 700;
               line-height: var(--td-line-height-title-medium);
               height: 22px;
+              transition: all 0.2s linear;
             }
-          }
-        }
-
-        .card:hover {
-          .card-footer-title {
-            color: var(--td-brand-color);
           }
         }
       }

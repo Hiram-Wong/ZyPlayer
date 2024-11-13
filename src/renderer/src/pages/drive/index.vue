@@ -23,30 +23,28 @@
         </div>
       </header>
       <div class="container">
-        <div class="content-wrapper">
-          <div class="container-flow-wrap">
-            <div v-for="item in driveContent" :key="item.path" class="card-wrap">
-              <div class="card" @click="getFileOrFolder(item)">
-                <div class="cover">
-                  <div class="folder-cover">
-                    <t-image
-                      class="card-main-item"
-                      fit="contain"
-                      shape="round"
-                      :src="item.thumb"
-                      :style="{ width: '115px', height: '90px', background: 'none' }"
-                      :lazy="true"
-                      :loading="renderLoading"
-                      :error="renderError">
-                    </t-image>
-                  </div>
+        <div class="content-wrapper" id="back-top">
+          <t-row :gutter="[16, 4]" style="margin-left: -8px; margin-right: -8px">
+            <t-col :md="2" :lg="2" :xl="2" :xxl="1" v-for="item in driveContent" :key="item.id" class="card" @click="getFileOrFolder(item)">
+              <div class="card-container">
+                <div class="card-main">
+                  <t-image
+                    class="card-main-item"
+                    fit="contain"
+                    shape="round"
+                    :src="item.thumb"
+                    :style="{ width: '100px', height: '90px', background: 'none' }"
+                    :lazy="true"
+                    :loading="renderLoading"
+                    :error="renderError"
+                  />
                 </div>
-                <div class="info">
-                  {{ item.name }}
+                <div class="card-footer">
+                  <span class="card-footer-title">{{ item.name }}</span>
                 </div>
               </div>
-            </div>
-          </div>
+            </t-col>
+          </t-row>
 
           <div>
             <infinite-loading
@@ -356,17 +354,18 @@ const refreshConf = async () => {
     // width: calc(100% - 170px);
     min-width: 750px;
     position: relative;
-    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+    padding: var(--td-pop-padding-l);
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--td-size-4);
 
     .header {
-      height: 40px;
-      padding: 0 40px;
+      height: 32px;
       display: flex;
       align-items: center;
-      margin-bottom: 10px;
       justify-content: space-between;
       white-space: nowrap;
       flex-shrink: 0;
@@ -398,95 +397,65 @@ const refreshConf = async () => {
     }
 
     .container {
-      height: calc(100% - 45px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      overflow-y: auto;
+      flex: 1;
+      height: 100%;
       width: 100%;
+      overflow: hidden;
 
       .content-wrapper {
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
         height: 100%;
-        padding: 0 40px;
-        display: flex;
-        flex-direction: column;
         position: relative;
-        flex-grow: 1;
 
-        .container-flow-wrap {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, 115px);
-          grid-column-gap: 10px;
-          grid-row-gap: 10px;
-          justify-content: center;
+        .card {
+          box-sizing: border-box;
           width: inherit;
+          position: relative;
+          cursor: pointer;
 
-          .card-wrap {
-            flex-direction: column;
-            position: relative;
-
-            .card {
-              position: relative;
-              width: 115px;
-              border-radius: 10px;
-              transition: background-color .3s ease;
-              user-select: none;
-              display: -ms-flexbox;
-              display: flex;
-              flex-direction: column;
-              justify-content: flex-start;
-              align-items: stretch;
-              padding: 8px 4px 10px;
-
-              .cover {
-                margin-bottom: 12px;
-                position: relative;
-
-                .folder-cover {
-                  position: relative;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  flex-shrink: 0;
-                  flex-grow: 0;
-
-                  :deep(.t-image__wrapper) {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .t-image {
-                      max-width: 100%;
-                      max-height: 100%;
-                      width: fit-content;
-                      height: fit-content;
-                      border-radius: var(--td-radius-default);
-                    }
-                  }
-                }
-              }
-
-              .info {
-                width: 100%;
-                text-align: center;
-                font-size: 14px;
-                line-height: 1.5;
-                max-width: 100%;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                overflow-wrap: break-word;
-                margin-bottom: 2px;
-                transition: color .3s ease;
-              }
+          &:hover {
+            .card-container {
+              background-color: var(--td-bg-color-container-hover);
             }
+          }
 
-            .card:hover {
-              background-color: rgba(132, 133, 141, 0.16);
+          .card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: var(--td-comp-paddingLR-xs) var(--td-comp-paddingTB-s);
+            border-radius: var(--td-radius-default);
+          }
+
+          .card-main {
+            .card-main-item {
+              width: 100px;
+              height: 90px;
+              border-radius: var(--td-radius-default);
+              overflow: hidden;
+            }
+          }
+
+          .card-footer {
+            width: 100%;
+
+            .card-footer-title {
+              width: 100%;
+              text-align: center;
+              font-size: 14px;
+              line-height: 1.5;
+              max-width: 100%;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              overflow-wrap: break-word;
+              margin-bottom: 2px;
+              -webkit-transition: color .3s ease;
+              transition: color .3s ease;
             }
           }
         }

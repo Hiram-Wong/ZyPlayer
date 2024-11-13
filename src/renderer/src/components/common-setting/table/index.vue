@@ -99,10 +99,9 @@ const handleSelectChange = (val: any[]) => {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingTB-s);
+  gap: var(--td-size-4);
 
   .operation-container {
-    margin: var(--td-comp-margin-s) 0;
     display: flex;
     justify-content: space-between;
 
