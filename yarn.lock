@@ -2180,10 +2180,10 @@
   resolved "https://registry.npmmirror.com/@types/web-bluetooth/-/web-bluetooth-0.0.20.tgz#f066abfcd1cbe66267cdbbf0de010d8a41b41597"
   integrity sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==
 
-"@types/web@^0.0.178":
-  version "0.0.178"
-  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.178.tgz#03a3464f92f59d0df6bcae044dfb49e027a65c42"
-  integrity sha512-+lV0ucKXG4sQuaa9dJRyTUjEA7q2RSOwsAvh28luoJfAKPFqR5KfCtisEdGR/WoY4x4+qcmInqCvMjrR6E8f6A==
+"@types/web@^0.0.179":
+  version "0.0.179"
+  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.179.tgz#419581ef4dc22119f67a46c3643360db921ed1f7"
+  integrity sha512-D8qZf0ieLzA8GtWAu455R65PB491G8clIpDBgPD8KjGnq3enhV95uk4ADqxCC5ZVMH97ywwWOHEOZ5qS1DZT2Q==
 
 "@types/yauzl@^2.9.1":
   version "2.10.3"
@@ -2282,10 +2282,10 @@
     "@babel/plugin-transform-typescript" "^7.25.9"
     "@vue/babel-plugin-jsx" "^1.2.5"
 
-"@vitejs/plugin-vue@^5.1.5":
-  version "5.1.5"
-  resolved "https://registry.npmmirror.com/@vitejs/plugin-vue/-/plugin-vue-5.1.5.tgz#ef1d7e19f8cecb0d1301c987dc0bdf8b778e3c82"
-  integrity sha512-dlnib73G05CDBAUR/YpuZcQQ47fpjihnnNouAAqN62z+oqSsWJ+kh52GRzIxpkgFG3q11eXK7Di7RMmoCwISZA==
+"@vitejs/plugin-vue@^5.2.0":
+  version "5.2.0"
+  resolved "https://registry.npmmirror.com/@vitejs/plugin-vue/-/plugin-vue-5.2.0.tgz#994f3b4f12d3590c5a6895df4cbd270d9a6d5e17"
+  integrity sha512-7n7KdUEtx/7Yl7I/WVAMZ1bEb0eVvXF3ummWTeLcs/9gvo9pJhuLdouSXGjdZ/MKD1acf1I272+X0RMua4/R3g==
 
 "@volar/language-core@2.4.8", "@volar/language-core@~2.4.8":
   version "2.4.8"
@@ -3938,10 +3938,10 @@ detect-node@^2.0.4:
   resolved "https://registry.npmmirror.com/detect-node/-/detect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
   integrity sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==
 
-devtools-protocol@0.0.1354347:
-  version "0.0.1354347"
-  resolved "https://registry.npmmirror.com/devtools-protocol/-/devtools-protocol-0.0.1354347.tgz#5cb509610b8f61fc69a31e5c810d5bed002d85ea"
-  integrity sha512-BlmkSqV0V84E2WnEnoPnwyix57rQxAM5SKJjf4TbYOCGLAWtz8CDH8RIaGOjPgPCXo2Mce3kxSY497OySidY3Q==
+devtools-protocol@0.0.1367902:
+  version "0.0.1367902"
+  resolved "https://registry.npmmirror.com/devtools-protocol/-/devtools-protocol-0.0.1367902.tgz#7333bfc4466c5a54a4c6de48a9dfbcb4b811660c"
+  integrity sha512-XxtPuC3PGakY6PD7dG66/o8KwJ/LkH2/EKe19Dcw58w53dv4/vSQEkn/SzuyhHE2q4zPgCkxQBxus3VV4ql+Pg==
 
 diff@^5.1.0:
   version "5.2.0"
@@ -7051,9 +7051,9 @@ npm-bundled@^4.0.0:
     npm-normalize-package-bin "^4.0.0"
 
 npm-check-updates@^17.1.11:
-  version "17.1.10"
-  resolved "https://registry.npmmirror.com/npm-check-updates/-/npm-check-updates-17.1.10.tgz#936f6d7741b226ae5aaed8661551c54e8b6c932f"
-  integrity sha512-GnN6KbUzC8BpwsRYJntuumgCiagZ0+xxorvUJM9m06d7AlyK9lm3iFsAsnXF3VAZZzpD5QjZvWBwNze61Vywkw==
+  version "17.1.11"
+  resolved "https://registry.npmmirror.com/npm-check-updates/-/npm-check-updates-17.1.11.tgz#f6d48ca6a9adc0df990f6cd11de3bcd1e48e5c54"
+  integrity sha512-TR2RuGIH7P3Qrb0jfdC/nT7JWqXPKjDlxuNQt3kx4oNVf1Pn5SBRB7KLypgYZhruivJthgTtfkkyK4mz342VjA==
 
 npm-install-checks@^7.1.0:
   version "7.1.0"
@@ -7301,10 +7301,10 @@ open@^10.1.0:
     is-inside-container "^1.0.0"
     is-wsl "^3.1.0"
 
-openai@^4.71.1:
-  version "4.71.1"
-  resolved "https://registry.npmmirror.com/openai/-/openai-4.71.1.tgz#f26bf5db00d75703676d80bf0ae7cb7674e41eac"
-  integrity sha512-C6JNMaQ1eijM0lrjiRUL3MgThVP5RdwNAghpbJFdW0t11LzmyqON8Eh8MuUuEZ+CeD6bgYl2Fkn2BoptVxv9Ug==
+openai@^4.72.0:
+  version "4.72.0"
+  resolved "https://registry.npmmirror.com/openai/-/openai-4.72.0.tgz#61630553157a0c9bb1c304b1dd4d2f90e9ec4cf7"
+  integrity sha512-hFqG9BWCs7L7ifrhJXw7mJXmUBr7d9N6If3J9563o0jfwVA4wFANFDDaOIWFdgDdwgCXg5emf0Q+LoLCGszQYA==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -7941,15 +7941,15 @@ punycode@^2.1.0:
   resolved "https://registry.npmmirror.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@^23.7.1:
-  version "23.7.1"
-  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-23.7.1.tgz#b1c313f1d3572ed772d82178b012f7c046cb53bb"
-  integrity sha512-Om/qCZhd+HLoAr7GltrRAZpS3uOXwHu7tXAoDbNcJADHjG2zeAlDArgyIPXYGG4QB/EQUHk13Q6RklNxGM73Pg==
+puppeteer-core@^23.8.0:
+  version "23.8.0"
+  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-23.8.0.tgz#745be0a509734c65bd678c08bc9418b0f142cf36"
+  integrity sha512-c2ymGN2M//We7pC+JhP2dE/g4+qnT89BO+EMSZyJmecN3DN6RNqErA7eH7DrWoNIcU75r2nP4VHa4pswAL6NVg==
   dependencies:
     "@puppeteer/browsers" "2.4.1"
     chromium-bidi "0.8.0"
     debug "^4.3.7"
-    devtools-protocol "0.0.1354347"
+    devtools-protocol "0.0.1367902"
     typed-query-selector "^2.12.0"
     ws "^8.18.0"
 
@@ -8384,10 +8384,10 @@ shaka-player@^2.4.0:
   dependencies:
     eme-encryption-scheme-polyfill "^2.0.1"
 
-shaka-player@^4.11.12:
-  version "4.11.12"
-  resolved "https://registry.npmmirror.com/shaka-player/-/shaka-player-4.11.12.tgz#e1c02112a608b4b4501713748e999014e2f9fcc1"
-  integrity sha512-QMORSyNi/jvBDWA8VxzzmyLfRihcfzGj+op0exQ6E1iegxpyM0TmdwyXotNMREdZDsiJsKxnNDxDzVxAkhGZQw==
+shaka-player@^4.12.0:
+  version "4.12.0"
+  resolved "https://registry.npmmirror.com/shaka-player/-/shaka-player-4.12.0.tgz#84e53bebce01a75b87fdcb3c3d8266b9c03ca1ce"
+  integrity sha512-Ih1kT/C+hC2kP+Jb9JQnQKhJFL4kLMLlJwQqDRr6IEgt1CIuVDDATUaNAKgvFdzdP/oRr9YTgkbZ1c+kySBz4g==
   dependencies:
     eme-encryption-scheme-polyfill "^2.1.5"
 
