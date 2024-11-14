@@ -23,7 +23,7 @@ export default {
   },
   date: {
     today: 'Today',
-    week: 'Within seven days',
+    week: 'Weekly',
     ago: 'Earlier',
   },
   progress: {
