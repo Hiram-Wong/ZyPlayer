@@ -78,12 +78,7 @@
                   </template>
                 </t-button>
                 <t-dropdown-menu>
-                  <t-dropdown-item
-                    v-for="item in analyzeData.list"
-                    :key="item.id"
-                    :value="item.id"
-                    @click="switchAnalyzeEvent(item.id)"
-                  >
+                  <t-dropdown-item v-for="item in analyzeData.list" :key="item.id" :value="item.id" @click="switchAnalyzeEvent(item.id)">
                     <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
                   </t-dropdown-item>
                 </t-dropdown-menu>
