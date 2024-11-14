@@ -1,4 +1,4 @@
-import { and, eq, like, inArray } from 'drizzle-orm';
+import { and, desc, eq, like, inArray } from 'drizzle-orm';
 import { db, schema } from '../common';
 
 export default {
@@ -47,7 +47,10 @@ export default {
     }
 
     const query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
-    query.limit(pageSize).offset((page - 1) * pageSize);
+    query
+      .limit(pageSize)
+      .offset((page - 1) * pageSize)
+      .orderBy(desc(schema.history.date));
     const list = await query;
 
     const countQuery = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
