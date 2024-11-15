@@ -1,7 +1,7 @@
 # see config at https://www.electron.build/configuration/configuration
 
 # 应用程序的唯一标识符
-appId: com.hiram.zyfun
+appId: com.zyfun.player
 # 应用程序的产品名称
 productName: zyfun
 copyright: Copyright © 2023 zyfun Team Inc.
@@ -19,7 +19,8 @@ files:
 # 哪些文件将不会被压缩，而是解压到构建目录
 asarUnpack:
   - resources/**
-afterSign: build/notarize.js
+afterPack: build/hook/removeLocales.js
+afterSign: build/hook/notarize.js
 # Windows 平台配置
 win:
   # 可执行文件名
@@ -102,7 +103,7 @@ linux:
         - x64
         - arm64
   # 维护者信息
-  maintainer: hiram.top
+  maintainer: zyfun team
   # 应用程序类别
   category: Audio;Video
 # AppImage 配置
