@@ -98,7 +98,7 @@ export function createOpenAI(config: CreateOpenAIConfig = {}): OpenAIApp {
           model,
           messages: [
             { role: 'system', content: context },
-            { role: 'user', name: 'zyplayer', content: HTMLContent },
+            { role: 'user', name: 'zyfun', content: HTMLContent },
             { role: 'user', name: 'coder', content: userContent },
           ],
           response_format: { type: responseFormatType },

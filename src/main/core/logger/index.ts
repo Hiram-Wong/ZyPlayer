@@ -1,8 +1,8 @@
 /**  By default, it writes logs to the following locations:
- * Linux: ~/.config/{app name}/logs/main.log                        ~/.config/zyplayer/logs/main.log
- * Linux: $XDG_CONFIG_HOME/{app name}/logs/main.log                 $XDG_CONFIG_HOME/zyplayer/logs/main.log
- * macOS: ~/Library/Logs/{app name}/main.log                        ~/Library/Logs/zyplayer/main.log
- * Windows: %USERPROFILE%\AppData\Roaming\{app name}\logs\main.log  %USERPROFILE%\AppData\Roaming\zyplayer\logs\main.log
+ * Linux: ~/.config/{app name}/logs/main.log                        ~/.config/zyfun/logs/main.log
+ * Linux: $XDG_CONFIG_HOME/{app name}/logs/main.log                 $XDG_CONFIG_HOME/zyfun/logs/main.log
+ * macOS: ~/Library/Logs/{app name}/main.log                        ~/Library/Logs/zyfun/main.log
+ * Windows: %USERPROFILE%\AppData\Roaming\{app name}\logs\main.log  %USERPROFILE%\AppData\Roaming\zyfun\logs\main.log
  * @see https://www.npmjs.com/package/electron-log
  */
 import { app } from 'electron';

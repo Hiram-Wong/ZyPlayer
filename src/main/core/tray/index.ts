@@ -52,7 +52,7 @@ const createSystemTray = () => {
   const colorIcon = path.join(app.getAppPath(), 'resources', 'img/icons/', 'logo.png');
 
   // Create tray icon
-  const icon = nativeImage.createFromPath(platform.isWindows ? colorIcon : darkIcon);
+  const icon = nativeImage.createFromPath(platform.isMacOS ? darkIcon : colorIcon);
   const trayIcon = icon.resize({ width: 16, height: 16 });
   if (platform.isMacOS) trayIcon.setTemplateImage(true);
   const mainTray = new Tray(trayIcon);
@@ -64,7 +64,7 @@ const createSystemTray = () => {
 
   // Set application menu
   Menu.setApplicationMenu(createTrayMenu());
-  mainTray.setToolTip('zyplayer');
+  mainTray.setToolTip('zyfun');
 
   // Left-click event
   mainTray.on('click', () => {

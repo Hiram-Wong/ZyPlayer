@@ -7,7 +7,7 @@ import logger from '@main/core/logger';
 
 import { getWin } from '@main/core/winManger';
 
-const updaterCacheDirName = 'zyplayer-updater';
+const updaterCacheDirName = 'zyfun-updater';
 const updatePath = join(app.getAppPath(), updaterCacheDirName, 'pending');
 logger.info(`[update][init] path:${updatePath}`);
 

@@ -10,7 +10,7 @@ const createMenu = () => {
   }
   const menuBar: Array<MenuItemConstructorOptions | MenuItem> = [
     {
-      label: 'zyplayer',
+      label: 'zyfun',
       submenu: [
         {
           label: '关于',
@@ -19,7 +19,7 @@ const createMenu = () => {
         { type: 'separator' },
         {
           label: '重启',
-          click() {
+          click: () => {
             logger.info('[menu] restart app');
             app.relaunch();
             app.quit();
@@ -28,7 +28,7 @@ const createMenu = () => {
         {
           label: '退出',
           accelerator: platform.isMacOS ? 'Cmd+Q' : 'Alt+F4',
-          click() {
+          click: () => {
             logger.info('[menu] quit app');
             app.quit();
           },
@@ -53,7 +53,7 @@ const createMenu = () => {
         {
           label: '刷新',
           accelerator: platform.isMacOS ? 'Cmd+R' : 'Ctrl+R',
-          click() {
+          click: () => {
             logger.info('[menu] refresh view');
             const focusedWindow = BrowserWindow.getFocusedWindow();
             if (focusedWindow) {
@@ -87,7 +87,7 @@ const createMenu = () => {
         {
           label: '打开控制台',
           accelerator: platform.isMacOS ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
-          click() {
+          click: () => {
             logger.info('[menu] open devlop tool');
             const focusedWindow = BrowserWindow.getFocusedWindow();
             if (focusedWindow) {
@@ -98,7 +98,7 @@ const createMenu = () => {
         },
         {
           label: '访问Github',
-          click() {
+          click: () => {
             logger.info('[menu] visit official github, url is https://github.com/Hiram-Wong/ZyPlayer');
             const url = 'https://github.com/Hiram-Wong/ZyPlayer';
             shell.openExternal(url);
@@ -107,7 +107,7 @@ const createMenu = () => {
         {
           label: '打开日志',
           accelerator: process.platform === 'darwin' ? 'Cmd+Shift+T' : 'Ctrl+Shift+T',
-          click() {
+          click: () => {
             const fileName = '/logs/';
             const url = join(app.getPath('userData'), fileName);
             logger.info(`[menu] visit local log, path is ${url}`);

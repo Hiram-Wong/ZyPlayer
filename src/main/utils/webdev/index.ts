@@ -24,9 +24,9 @@ class webdev {
 
       this.clientWebdev = await createClient(this.url, { username: this.username, password: this.password });
 
-      const remoteDirectoryExists = await this.clientWebdev.exists('/zyplayer');
+      const remoteDirectoryExists = await this.clientWebdev.exists('/zyfun');
       if (!remoteDirectoryExists) {
-        await this.clientWebdev.createDirectory('/zyplayer');
+        await this.clientWebdev.createDirectory('/zyfun');
       }
       return true;
     } catch (err) {
@@ -43,7 +43,7 @@ class webdev {
         if (!status) return false;
       }
       const formattedJson = JSON.stringify(doc);
-      await this.clientWebdev!.putFileContents('/zyplayer/config.json', formattedJson, { overwrite: false });
+      await this.clientWebdev!.putFileContents('/zyfun/config.json', formattedJson, { overwrite: false });
       return true;
     } catch (err) {
       console.error(`[webdev][sync][error]${err}`);
@@ -57,7 +57,7 @@ class webdev {
         const status = await this.initializeWebdavClient();
         if (!status) return false;
       }
-      const str = (await this.clientWebdev!.getFileContents('/zyplayer/config.json', {
+      const str = (await this.clientWebdev!.getFileContents('/zyfun/config.json', {
         format: 'text',
       })) as unknown as string;
       const formattedJson = JSON.parse(str);

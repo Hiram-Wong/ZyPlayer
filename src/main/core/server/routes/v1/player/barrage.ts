@@ -8,7 +8,7 @@ const API_PREFIX = 'api/v1/barrage';
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post(`/${API_PREFIX}/:version`, async (req: FastifyRequest<{ Body: { [key: string]: string | number } }>) => {
     const dbResBarrage = await setting.get('barrage');
-    // { "id": "http://www.iqiyi.com/v_14za0ot37y8.html", "author": "ZyPlayer", "time": 46.032141, "text": "111", "type": 0 }
+    // { "id": "http://www.iqiyi.com/v_14za0ot37y8.html", "author": "zyfun", "time": 46.032141, "text": "111", "type": 0 }
     const { id, author, time, text, color, type } = req.body;
     const doc = {
       player: id,
