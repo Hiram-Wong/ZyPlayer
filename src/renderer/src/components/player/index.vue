@@ -87,15 +87,12 @@ defineExpose({
   position: relative;
   width: 100%;
   height: 100%;
-  background: url(@/assets/bg-player.jpg) center center;
-  // .comm-player-bg {
-  //   height: 100%;
-  //   width: 100%;
-  //   background: url(@/assets/bg-player.jpg) center center;
-  // };
+  background: url(@/assets/bg-player.jpg) center center no-repeat;
+  background-size: cover;
+
   .comm-player-mse {
     width: 100%;
-  height: 100%;
+    height: 100%;
   };
 }
 </style>
