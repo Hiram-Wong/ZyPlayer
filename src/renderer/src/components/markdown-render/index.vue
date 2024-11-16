@@ -7,7 +7,6 @@ import { watchEffect, ref } from 'vue';
 import MarkdownIt from 'markdown-it';
 import markdownItHighlightjs from 'markdown-it-highlightjs';
 import markdownItMathjax3 from 'markdown-it-mathjax3';
-import 'github-markdown-css';
 import './index.less';
 
 const props = defineProps({
