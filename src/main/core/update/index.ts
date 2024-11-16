@@ -1,7 +1,6 @@
 import { is } from '@electron-toolkit/utils';
 import { app, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
-import fs from 'fs-extra';
 import { resolve, join } from 'path';
 import logger from '@main/core/logger';
 
@@ -31,40 +30,24 @@ export default () => {
   };
 
   // 下载更新的函数，包含错误处理逻辑
-  const downloadUpdate = async () => {
-    try {
-      await autoUpdater.downloadUpdate();
-    } catch (e: any) {
-      if (e.message && e.message.includes('file already exists') && e.path) {
-        fs.emptyDirSync(e.path);
-        logger.info('[update] error: old version file already exists');
-        downloadUpdate();
-      } else {
-        logger.error(`[update] error: ${e}`);
-        sendUpdateMessage('update-error', e);
-      }
-    }
+  const downloadUpdate = () => {
+    autoUpdater.downloadUpdate();
   };
 
   // 主进程监听检查更新事件
-  ipcMain.on('checkForUpdate', async () => {
+  ipcMain.on('check-for-update', () => {
     logger.info('checkForUpdate');
-    try {
-      await autoUpdater.checkForUpdates();
-    } catch (e: any) {
-      logger.error(`[update] error: ${e}`);
-      sendUpdateMessage('update-error', e);
-    }
+    autoUpdater.checkForUpdates();
   });
 
   // 主进程监听开始下载事件
-  ipcMain.on('downloadUpdate', () => {
+  ipcMain.on('download-update', () => {
     logger.info('[update] download update');
     downloadUpdate();
   });
 
   // 主进程监听退出并安装事件
-  ipcMain.on('quitAndInstall', () => {
+  ipcMain.on('quit-and-install', () => {
     logger.info('[update] quit and install');
     autoUpdater.quitAndInstall();
   });
@@ -77,27 +60,27 @@ export default () => {
 
   autoUpdater.on('update-available', (info: any) => {
     logger.info(`[update] available: ${info}`);
-    sendUpdateMessage('update-available', info);
+    sendUpdateMessage('update-available', { code: 0, msg: 'ok', data: info });
   });
 
   autoUpdater.on('update-not-available', () => {
     logger.info('[update] not available');
-    sendUpdateMessage('update-not-available');
+    sendUpdateMessage('update-not-available', { code: 0, msg: 'ok', data: { available: false } });
   });
 
-  autoUpdater.on('error', (e: Error) => {
-    logger.error(`[update] error: ${e}`);
-    sendUpdateMessage('error', e);
+  autoUpdater.on('error', (err: any) => {
+    logger.error(`[update] error: ${err.message}`);
+    sendUpdateMessage('update-error', { code: -1, msg: err.message, data: null });
   });
 
   autoUpdater.on('download-progress', (progress: any) => {
     const percent = Math.trunc(progress.percent);
     logger.info(`[update] download progress: ${percent}%`);
-    sendUpdateMessage('download-progress', percent);
+    sendUpdateMessage('download-progress', { code: 0, msg: 'ok', data: { percent } });
   });
 
   autoUpdater.on('update-downloaded', () => {
     logger.info('[update] downloaded');
-    sendUpdateMessage('update-downloaded');
+    sendUpdateMessage('update-downloaded', { code: 0, msg: 'ok', data: { downloaded: true } });
   });
 };

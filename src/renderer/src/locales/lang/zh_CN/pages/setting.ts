@@ -323,13 +323,17 @@ export default {
   update: {
     title: '检查更新',
     noUpdate: '你当前使用的是最新版本',
-    checkWait: '请等待，检查更新中...',
+    checkWait: '请等待, 检查更新中...',
     foundNewVersion: '发现新版本',
-    systemTip: 'Tips: 仅windwos支持在线更新; mac需签名(没钱); linux不支持。',
-    macAndLinuxTip: 'mac和linux用户请前往',
+    changelog: '更新日志',
+    errorlog: '出错日志',
+    reCheck: '尝试重新检查更新',
+    tip: 'win在线更新, mac和linux前往',
     install: '安装',
     download: '下载',
     downloading: '下载中',
-    downloaded: '安装包下载完成',
+    message: {
+      downloaded: '安装包下载完成',
+    },
   },
 };
