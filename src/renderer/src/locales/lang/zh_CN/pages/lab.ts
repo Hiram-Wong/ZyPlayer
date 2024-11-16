@@ -334,18 +334,15 @@ export default {
     runScript: '运行参数',
     customRegex: '正则匹配',
     snifferExclude: '正则排除',
-    placeholder: {
-      classNameTip: '补充类名(如 电影&剧集)',
-      classUrlTip: '补充类标识(如 movie&plot)',
-      classParseTip: '选择器(如 list;title;url;match)',
-      cateExcludeTip: '排除(如 首页｜留言｜APP)',
-      linkTip: '拼接fyclass(如 /id/fyclass.html)',
-      filterTip: '选择器(如 body&&.scroll-content) 同一类型用;分割 不同类型换行',
-      filterInfoTip: '详细筛选(key;name;type;title;url) 一行对应一个',
-    },
+    headers: '请求头',
     message: {
       playerNoUrl: '播放地址为空',
       snifferNoUrl: '嗅探地址为空',
+      headersNoJson: '请求头不是字典格式',
+      mediaNoType: '媒体类型获取失败, 请手动选择',
+    },
+    tooltip: {
+      playHeaders: '仅Hls支持支持请求头',
     },
   },
 };

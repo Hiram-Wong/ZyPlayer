@@ -40,7 +40,7 @@
       </div>
       <div class="dialog-item">
         <p>{{ $t('pages.lab.staticFilter.dialog.request.reqHeader') }}</p>
-        <t-textarea v-model="formData.header" placeholder='{ "User-Agent": "Mozilla/5.0 zyfun" }' />
+        <t-textarea v-model="formData.header" placeholder='{ "User-Agent": "Mozilla/5.0" }' />
       </div>
       <div v-if="formData.method !== 'GET'" class="dialog-item">
         <p>{{ $t('pages.lab.staticFilter.dialog.request.reqBody') }}</p>

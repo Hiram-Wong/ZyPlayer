@@ -334,9 +334,15 @@ export default {
     runScript: 'RunScript',
     customRegex: 'CustomRegex',
     snifferExclude: 'SnifferExclude',
+    headers: 'Headers',
     message: {
       playerNoUrl: 'The play url is empty',
       snifferNoUrl: 'The sniffer url is empty',
+      headersNoJson: 'The headers is not in dictionary format',
+      mediaNoType: 'Media type acquisition failed, please select manually',
+    },
+    tooltip: {
+      playHeaders: 'Only hls support request headers',
     },
   },
 };

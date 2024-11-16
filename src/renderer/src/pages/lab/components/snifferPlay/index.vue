@@ -15,16 +15,16 @@
                 <t-input v-model="formData.sniffer.url"></t-input>
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.initScript')">
-                <t-textarea v-model="formData.sniffer.initScript" :autosize="{ minRows: 3, maxRows: 5 }"></t-textarea>
+                <t-textarea v-model="formData.sniffer.initScript" :autosize="{ minRows: 3, maxRows: 5 }" />
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.runScript')">
-                <t-textarea v-model="formData.sniffer.runScript" :autosize="{ minRows: 3, maxRows: 5 }"></t-textarea>
+                <t-textarea v-model="formData.sniffer.runScript" :autosize="{ minRows: 3, maxRows: 5 }" />
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.customRegex')">
-                <t-textarea v-model="formData.sniffer.customRegex" :autosize="{ minRows: 3, maxRows: 5 }"></t-textarea>
+                <t-textarea v-model="formData.sniffer.customRegex" :autosize="{ minRows: 3, maxRows: 5 }" />
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.snifferExclude')">
-                <t-textarea v-model="formData.sniffer.snifferExclude" :autosize="{ minRows: 3, maxRows: 5 }"></t-textarea>
+                <t-textarea v-model="formData.sniffer.snifferExclude" :autosize="{ minRows: 3, maxRows: 5 }" />
               </t-form-item>
             </t-form>
             <t-button theme="primary" block @click="sniiferEvent">{{ $t('pages.lab.snifferPlay.sniffer') }}</t-button>
@@ -32,7 +32,7 @@
         </t-badge>
         <t-badge :count="$t('pages.lab.snifferPlay.result')" color="var(--td-success-color)" shape="round">
           <div class="result card">
-            <t-textarea v-model="formData.sniffer.result" :autosize="{ minRows: 3, maxRows: 5 }" readonly></t-textarea>
+            <t-textarea v-model="formData.sniffer.result" :autosize="{ minRows: 3, maxRows: 5 }" readonly />
           </div>
         </t-badge>
       </div>
@@ -44,8 +44,18 @@
               <t-form-item :label="$t('pages.lab.snifferPlay.playUrl')" name="url">
                 <t-input v-model="formData.player.url"></t-input>
               </t-form-item>
+              <t-form-item  name="headers">
+                <template #label>
+                  <span>{{ $t('pages.lab.snifferPlay.headers') }}</span>
+                  <t-tooltip :content="$t('pages.lab.snifferPlay.tooltip.playHeaders')">
+                    <info-circle-icon />
+                  </t-tooltip>
+                </template>
+                <t-textarea v-model="formData.player.headers" :autosize="{ minRows: 3, maxRows: 5 }" placeholder='{ "User-Agent": "Mozilla/5.0" }' />
+              </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.mediaType')" name="url">
                 <t-select v-model="formData.player.type">
+                  <t-option label="Auto" value="auto" />
                   <t-option label="Hls" value="m3u8" />
                   <t-option label="Flv" value="flv" />
                   <t-option label="Mp4" value="mp4" />
@@ -74,7 +84,9 @@ import { ref, useTemplateRef } from 'vue';
 import sniffer from '@/utils/sniffer';
 import PlayerView from '@/components/player/index.vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { InfoCircleIcon } from 'tdesign-icons-vue-next';
 import { t } from '@/locales';
+import { checkMediaType } from '@/utils/tool';
 
 const formData = ref({
   sniffer: {
@@ -88,7 +100,8 @@ const formData = ref({
   },
   player: {
     url: '',
-    type: 'm3u8',
+    headers: '',
+    type: 'auto',
   }
 });
 const playerRef = useTemplateRef('playerRef');
@@ -109,16 +122,37 @@ const sniiferEvent = async () => {
 };
 const playerPlayEvent = async () => {
   if (!playerRef.value) return;
-  if (!formData.value.player.url) {
-    MessagePlugin.warning(t('pages.lab.snifferPlay.message.playerNoUrl'))
+  if (!formData.value.player.url || !formData.value.player.url.startsWith('http')) {
+    MessagePlugin.warning(t('pages.lab.snifferPlay.message.playerNoUrl'));
     return;
+  };
+  const headers = formData.value.player.headers || '{}';
+  try {
+    const formatHeaders = JSON.parse(headers);
+    if (typeof formatHeaders === 'object' && formatHeaders !== null && !Array.isArray(formatHeaders)) {
+    } else {
+      MessagePlugin.warning(t('pages.lab.snifferPlay.message.headersNoJson'));
+      return;
+    };
+  } catch {
+    MessagePlugin.warning(t('pages.lab.snifferPlay.message.headersNoJson'));
+    return;
+  }
+  let mediaType = formData.value.player.type;
+  if (formData.value.player.type === 'auto') {
+    const checkType = await checkMediaType(formData.value.player.url);
+    if (checkType === 'unknown' && !checkType) {
+      MessagePlugin.warning(t('pages.lab.snifferPlay.message.mediaNoType'));
+      return;
+    }
+    mediaType = checkType;
   };
   await playerRef.value.init();
   await playerRef.value.create({
     url: formData.value.player.url,
     isLive: false,
-    headers: {},
-    type: formData.value.player.type,
+    headers: headers,
+    type: mediaType,
     container: 'lab-mse'
   });
   MessagePlugin.success(t('pages.setting.form.success'));
