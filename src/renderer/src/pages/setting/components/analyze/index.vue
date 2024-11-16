@@ -305,6 +305,7 @@ const handleDialogUpdate = async (type: string, doc: object) => {
 
 const handleOpSearch = (value: string) => {
   searchValue.value = value;
+  pagination.current = 1;
   refreshTable();
 };
 
