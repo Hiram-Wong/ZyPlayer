@@ -13,7 +13,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       } else {
         url = decodeURI(url);
         headers = JSON.parse(headers);
-        const content = (await fixAdM3u8Ai(url, headers as any)) || '';
+        const content = (await fixAdM3u8Ai.v2(url, headers as any)) || '';
         if (content.includes('.ts')) {
           reply.code(200).header('Content-Type', 'application/vnd.apple.mpegurl').send(content);
         } else {
