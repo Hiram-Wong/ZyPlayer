@@ -240,7 +240,7 @@ ps:
       "name": "xx9影视", // 名称[string]
       "api": "https://www.xxx.com/api.php/provide/vod/", // 站点源地址[string]
       "playUrl": "", // 配合解析去url地址[string]
-      "search": false, // 是否支持搜索[boolean | true启用-false禁用]
+      "search": 0, // 是否支持搜索[number | 0关闭-1聚合搜索-2仅搜索]
       "group": "切片", // 分组[string]
       "type": 1, // 数据源类型[number | 0:T0(xml)-1:T1(json)-2:drpy(js0)-6:T4(hipy)-7:T3(js)-8:catvod(nodejs)-9:csp(XBPQ)-10:csp(XYQ)-11:csp(AppYsV2)]
       "ext": "", // 扩展参数[string]

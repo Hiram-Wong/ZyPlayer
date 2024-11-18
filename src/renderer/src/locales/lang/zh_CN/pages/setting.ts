@@ -61,8 +61,8 @@ export default {
     skip: '跳过',
     site: {
       close: '关闭',
-      together: '聚合',
-      local: '本地',
+      onlySearch: '仅搜索',
+      gatherSearch: '聚能搜',
     },
     iptv: {
       remote: '远程',

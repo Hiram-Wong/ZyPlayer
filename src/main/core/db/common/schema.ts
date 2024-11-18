@@ -14,7 +14,7 @@ const site = pgTable('site', {
   name: varchar('name', { length: 255 }),
   api: varchar('api', { length: 255 }),
   playUrl: varchar('playUrl', { length: 255 }),
-  search: boolean('search'),
+  search: integer('search'),
   group: varchar('group', { length: 255 }),
   type: integer('type'),
   ext: text('ext'),

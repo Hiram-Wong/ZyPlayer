@@ -60,9 +60,9 @@ export default {
     notSupport: 'NotSupport',
     skip: 'Skip',
     site: {
-      close: 'close',
-      together: 'together',
-      local: 'lcoal',
+      close: 'Close',
+      onlySearch: 'Only',
+      gatherSearch: 'Gather',
     },
     iptv: {
       remote: 'Remote',

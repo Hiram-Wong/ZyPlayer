@@ -16,7 +16,7 @@ const update = async () => {
       key varchar(255) not null,
       api varchar(255) not null,
       "playUrl" varchar(255),
-      search boolean not null default true,
+      search integer not null default 0,
       "group" varchar(255),
       type integer not null,
       ext text,

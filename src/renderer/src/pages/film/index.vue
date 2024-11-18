@@ -2,7 +2,7 @@
   <div class="film view-container">
     <common-nav
       :title="$t('pages.film.name')"
-      :list="siteConfig.data"
+      :list="siteConfig.filterOnlySearchData"
       :active="active.nav"
       search
       @change-key="changeConf"
@@ -161,6 +161,7 @@ const siteConfig = ref({
   search: '',
   filter: false,
   data: [],
+  filterOnlySearchData: [],
   searchGroup: []
 }) as any;
 
@@ -209,7 +210,7 @@ const changeFilterEvent = (key, item) => {
 };
 
 const searchGroup = (type: string, defaultConfig:{ [key: string]: string }) => {
-  let query = siteConfig.value.data.filter((item) => item["search"] === true);
+  let query = siteConfig.value.data.filter((item) => item["search"] !== 0);
   if (type === 'site') query = query.filter((item) => item["id"] === defaultConfig["id"]);
   if (type === 'group') query = query.filter((item) => item["group"] === defaultConfig["group"]);
 
@@ -228,6 +229,7 @@ const getSetting = async () => {
     }
     if (Array.isArray(data['data']) && data["data"].length > 0) {
       siteConfig.value.data = data["data"];
+      siteConfig.value.filterOnlySearchData = data["data"].filter((item) => item["search"] !== 2);
     }
     if (data.hasOwnProperty('filter')) {
       siteConfig.value.filter = data["filter"];
@@ -403,7 +405,7 @@ const getSearchList = async () => {
     };
 
     // 2. 请求数据
-    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, page: pg });
+    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, page: pg === 1 ? '' : pg });
     const resultSearch = res?.list;
 
     if (!Array.isArray(resultSearch) || resultSearch.length === 0) {

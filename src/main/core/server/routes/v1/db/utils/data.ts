@@ -46,6 +46,12 @@ const easyConfig = async (config, url, type) => {
     }
   };
 
+  const formatSearch = (searchable: number = 0, quickSearch: number = 0) => {
+    if (quickSearch === 1) return 2;
+    if (searchable === 1) return 1;
+    return 0;
+  };
+
   const formatUrl = (relativeUrl: string, baseUrl: string): string => {
     if (!relativeUrl) return '';
     if (typeof relativeUrl === 'object') return JSON.stringify(relativeUrl);
@@ -74,7 +80,7 @@ const easyConfig = async (config, url, type) => {
         type: formatType(type, item.type, item.api),
         api: formatUrl(item.api, url),
         group: formatGroup(type),
-        search: item.hasOwnProperty('searchable') && item?.searchable !== 0 ? true : false,
+        search: formatSearch(item?.searchable || 0, item?.quickSearch || 0),
         categories: item.hasOwnProperty('categories')
           ? Array.isArray(item.categories)
             ? item.categories.join(',')
@@ -235,7 +241,7 @@ const commonDelImportData = (data) => {
             type: item?.type || 0,
             api: item?.api || '',
             group: item?.group || '',
-            search: item?.searchable !== 0 ? true : false,
+            search: item?.search || 0,
             categories: item.hasOwnProperty('categories')
               ? Array.isArray(item.categories)
                 ? item.categories.join(',')
