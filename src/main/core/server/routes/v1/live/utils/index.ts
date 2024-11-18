@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 const m3u = (text: string) => {
   const GROUP = /.*group-title="(.?|.+?)".*/i;
   const LOGO = /.*tvg-logo="(.?|.+?)".*/i;
-  const NAME = /.*,(.+?)(?:$|\n|\s)/i;
+  const NAME = /.*,\s*(.+)/i;
 
   const docs: any[] = [];
   let doc: { name?: any; logo?: any; group?: any; url?: any };
