@@ -1,6 +1,6 @@
 {
   "name": "zyfun",
-  "version": "3.3.8",
+  "version": "3.3.9-beta1119",
   "description": "a video client",
   "main": "./out/main/index.js",
   "repository": {
@@ -48,7 +48,8 @@
     "@electron/remote": "^2.1.2",
     "puppeteer-core": "^23.8.0",
     "puppeteer-in-electron": "^3.0.5",
-    "sync-request": "^6.1.0"
+    "sync-request": "^6.1.0",
+    "trtc-electron-sdk": "^12.1.608"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",
@@ -70,7 +71,7 @@
     "@types/lodash": "^4.17.13",
     "@types/node": "^22.9.0",
     "@types/uuid": "^10.0.0",
-    "@types/web": "^0.0.179",
+    "@types/web": "^0.0.180",
     "@vitejs/plugin-vue": "^5.2.0",
     "@vitejs/plugin-vue-jsx": "^4.1.0",
     "@vueuse/core": "11.2.0",
@@ -93,7 +94,7 @@
     "electron-notarize": "^1.2.2",
     "electron-updater": "^6.3.9",
     "electron-vite": "^2.3.0",
-    "eslint": "^9.14.0",
+    "eslint": "^9.15.0",
     "fast-xml-parser": "^4.5.0",
     "fastify": "^5.1.0",
     "fastify-logger": "^1.0.1",
@@ -101,7 +102,7 @@
     "fix-path": "^4.0.0",
     "flv.js": "^1.6.2",
     "fs-extra": "^11.2.0",
-    "github-markdown-css": "^5.7.0",
+    "github-markdown-css": "^5.8.0",
     "he": "^1.2.0",
     "hls-parser": "^0.13.3",
     "hls.js": "^1.5.17",
@@ -110,7 +111,7 @@
     "is-ip": "^5.0.1",
     "js-beautify": "^1.15.1",
     "json5": "^2.2.3",
-    "jsonpath-plus": "^10.1.0",
+    "jsonpath-plus": "^10.2.0",
     "less": "^4.2.0",
     "lodash": "^4.17.21",
     "markdown-it": "^14.1.0",
@@ -135,7 +136,7 @@
     "prettier": "^3.3.3",
     "qrcode.vue": "^3.6.0",
     "querystring": "^0.2.1",
-    "shaka-player": "^4.12.0",
+    "shaka-player": "^4.12.1",
     "smooth-scrollbar": "^8.8.4",
     "stylelint": "^16.10.0",
     "tdesign-icons-vue-next": "^0.3.3",
