@@ -1,44 +1,58 @@
 import { FastifyReply, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { hash, base64 } from '@main/utils/crypto';
+import request from '@main/utils/request';
+
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(
     `/proxy`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
       const { url } = req.query;
+
       try {
         const cacheKey = `/proxy/${hash['md5-16'](url)}`;
         // @ts-ignore
         const resCacheData = await req.server.db.getData(cacheKey).catch(() => null);
-
-        if (!resCacheData) {
-          throw new Error('缓存读取失败');
-        }
-
-        const [status, contentType, message, ...rest] = resCacheData;
-        const headers = rest.length > 0 ? rest[0] : null;
-        const to_bytes = rest.length > 1 ? rest[1] : null;
-
-        reply.header('Content-Type', contentType);
-        if (headers) {
-          Object.keys(headers).forEach((key) => {
-            reply.header(key, headers[key]);
-          });
-        }
-
-        let content = message;
-        if (to_bytes) {
-          try {
+        if (resCacheData) {
+          const [status, contentType, message, ...rest] = resCacheData;
+          const headers = rest.length > 0 ? rest[0] : null;
+          const to_bytes = rest.length > 1 ? rest[1] : null;
+          let content = message;
+          if (headers) {
+            Object.keys(headers).forEach((key) => {
+              reply.header(key, headers[key]);
+            });
+          }
+          if (to_bytes) {
             if (content.includes('base64,')) {
               content = decodeURIComponent(content.split('base64,')[1]);
             }
             content = base64.decode(content);
-          } catch (e) {
-            throw new Error('解密失败');
           }
+          reply
+            .code(Number.isInteger(status) ? status : parseInt(status))
+            .header('Content-Type', contentType)
+            .send(content);
         }
-        reply.code(Number.isInteger(status) ? status : parseInt(status)).send(content);
-      } catch (err) {
-        reply.code(500).send(err);
+
+        if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp'].some((ext) => url.toLowerCase().includes(ext))) {
+          const resReqContent = await request({
+            url: url,
+            method: 'GET',
+            headers: {
+              'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82',
+            },
+          });
+          const parts = resReqContent.split(';base64,');
+          const imageType = parts[0].split(':')[1];
+          const imageBuffer = Buffer.from(parts[1], 'base64');
+
+          reply.type(imageType).send(imageBuffer);
+        }
+
+        reply.redirect(url);
+      } catch (err: any) {
+        reply.code(500).send({ code: -1, msg: err.message, data: err });
       }
     },
   );
