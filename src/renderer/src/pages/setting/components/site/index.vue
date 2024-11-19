@@ -241,7 +241,7 @@ const handleOpChange = async (type, doc) => {
       api: '',
       playUrl: '',
       group: '',
-      search: true,
+      search: 1,
       isActive: true,
       type: 1,
       ext: '',
