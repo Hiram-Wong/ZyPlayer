@@ -91,7 +91,7 @@
       </div>
       <div class="ai-item result" v-if="formData.result && !active.loading">
         <t-card :title="$t('pages.lab.aiBrain.result')">
-          <md-render v-html:markdownText="formData.contentHtml" class="chat-msg-content pa-3" />
+          <md-render :markdownText="formData.contentHtml" class="chat-msg-content pa-3" />
           <template #actions>
             <t-button size="small" shape="round" @click.stop="copyAiAnswer">{{
               $t('pages.lab.aiBrain.copy') }}</t-button>
@@ -319,5 +319,11 @@ const copyAiAnswer = async () => {
 
 :deep(.t-card__body) {
   padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-l) var(--td-comp-paddingTB-l);
+}
+
+:deep(.markdown-custom) {
+  pre {
+    background-color: var(--td-bg-color-secondarycontainer-active);
+  }
 }
 </style>
