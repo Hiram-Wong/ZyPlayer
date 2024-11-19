@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import find from 'lodash/find';
+import JSON5 from 'json5';
 import { v4 as uuidv4, validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { resolve } from 'url';
 import request from '@main/utils/request';
@@ -395,11 +396,11 @@ const commonDelImportData = (data) => {
 const readData = async (path: string) => {
   let content: string = '';
   if (path.startsWith('http://') || path.startsWith('https://')) {
-    content = await request({ url: path, method: 'GET' });
+    content = await request({ url: path, method: 'GET', responseType: 'text' });
   } else {
-    const resTxt: string = await fs.readFileSync(path, 'utf-8');
-    content = JSON.parse(resTxt);
+    content = await fs.readFileSync(path, 'utf-8');
   }
+  content = JSON5.parse(content);
   return content;
 };
 
