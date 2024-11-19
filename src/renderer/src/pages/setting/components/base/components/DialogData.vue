@@ -302,10 +302,24 @@ const refreshEmitter = (arryList: string[]) => {
 // 配置导入
 const importData = async (importType) => {
   try {
+    let url, type;
+    if (importType === 'easy') {
+      url = formData.value.easyConfig.url;
+      type = formData.value.easyConfig.type;
+    } else {
+      url = formData.value.importData.url;
+      type = formData.value.importData.type;
+    };
+
+    if (!url) {
+      MessagePlugin.warning(t('pages.setting.data.noData'));
+      return;
+    };
+
     const res = await initDb({
-      url: importType === 'easy' ? formData.value.easyConfig.url : formData.value.importData.url,
+      url: url,
       importType,
-      remoteType: importType === 'easy' ? formData.value.easyConfig.type : formData.value.importData.type,
+      remoteType: type,
     });
     refreshEmitter(res?.table);
     MessagePlugin.success(t('pages.setting.data.success'));
