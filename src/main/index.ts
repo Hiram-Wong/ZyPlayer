@@ -4,7 +4,7 @@ import { registerContextMenuListener } from '@electron-uikit/contextmenu';
 import { registerTitleBarListener } from '@electron-uikit/titlebar';
 import { app, BrowserWindow, globalShortcut, nativeTheme, session } from 'electron';
 import fixPath from 'fix-path';
-import { setup as dbInit } from './core/db';
+import { setup as dbInit, webdev } from './core/db';
 import createMenu from './core/menu';
 import { ipcListen } from './core/ipc';
 import logger from './core/logger';
@@ -150,6 +150,7 @@ const ready = () => {
     createMenu(); // 菜单
     protocolResgin(); // 协议注册
     bossShortcutResgin(); // 快捷键
+    webdev.cronSyncWebdev(); // 同步webdev
 
     defaultSession.webRequest.onHeadersReceived((details, callback) => {
       const { id, responseHeaders, statusCode } = details;

@@ -2,7 +2,7 @@ import { compare } from 'compare-versions';
 import { eq } from 'drizzle-orm';
 import { app } from 'electron';
 import { join } from 'path';
-import { db, schema } from './common';
+import { db, schema, webdev } from './common';
 import migration from './migration';
 import * as service from './service';
 import logger from '@main/core/logger';
@@ -55,4 +55,4 @@ const setup = async () => {
   logger.info(`[db][init] path:${DB_PATH}`);
 };
 
-export { db, schema, setup, magrite, service };
+export { db, schema, setup, magrite, service, webdev };
