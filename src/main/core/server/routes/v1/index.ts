@@ -3,7 +3,6 @@ import history from './history';
 import setting from './setting';
 import { db } from './db';
 import proxy from './proxy';
-// import catbox from './catbox';
 import { ad, ai, jsEdit, staticFilter } from './lab';
 import file from './file';
 import { barrage } from './player';
@@ -30,7 +29,6 @@ const routesModules = {
   channel,
   db,
   proxy,
-  // catbox,
   ad,
   ai,
   jsEdit,

@@ -9,7 +9,6 @@ import { JsonDB, Config } from 'node-json-db';
 import { join } from 'path';
 import logger from '@main/core/logger';
 import routesV1Modules from './routes/v1';
-import initConfig from './routes/v1/catbox/config';
 import webdev from '@main/utils/webdev';
 import { setting, db } from '@main/core/db/service';
 
@@ -57,7 +56,6 @@ const setup = async () => {
       });
     });
 
-    server.decorate('config', initConfig);
     server.register(wrappedJsonDbPlugin);
     server.register(fastifyMultipart);
     server.register(fastifyCors);

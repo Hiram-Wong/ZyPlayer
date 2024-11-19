@@ -4,42 +4,59 @@ import { buildUrl } from '@main/utils/hiker/base';
 class CatvodAdapter {
   api: string = '';
   ext: object = {};
+  categoryfilter: any[] = [];
+
   constructor(source) {
     this.api = source.api;
-    this.ext = source.ext ? JSON.parse(source.ext) : {};
+    this.categoryfilter = source.categories.split(/[,，]/).map((category) => category.trim());
   }
 
   async init() {
     await request({
       url: buildUrl(this.api, '/init'),
       method: 'POST',
-      data: this.ext,
+      data: {},
     });
   }
   async home() {
     const response = await request({
       url: buildUrl(this.api, '/home'),
       method: 'POST',
+      data: {},
     });
     let classes: any[] = [];
-    const categories: any[] = [];
-    for (const cls of response.class) {
-      const n = cls.type_name.toString().trim();
-      if (categories && categories.length > 0) {
-        if (categories.indexOf(n) < 0) continue;
+    let filters: object = {};
+    // 分类
+    if (response?.class) {
+      const seenTypeIds = new Set();
+      for (const cls of response.class) {
+        const n = cls.type_name.toString().trim();
+        if (!seenTypeIds.has(cls.type_id)) {
+          seenTypeIds.add(cls.type_id.toString());
+          classes.push({
+            type_id: cls.type_id.toString(),
+            type_name: n,
+          });
+        }
       }
-      classes.push({
-        type_id: cls.type_id.toString(),
-        type_name: n,
-      });
+      if (
+        Array.isArray(classes) &&
+        classes.length > 0 &&
+        Array.isArray(this.categoryfilter) &&
+        this.categoryfilter.length > 0
+      ) {
+        classes = classes.filter((v) => !this.categoryfilter.includes(v.type_name));
+      }
     }
-    if (categories && categories.length > 0) {
-      classes = classes.sort((a, b) => {
-        return categories.indexOf(a.type_name) - categories.indexOf(b.type_name);
-      });
+
+    // 筛选
+    if (typeof response?.filters === 'object' && Object.keys(response?.filters).length > 0) {
+      filters = response.filters;
     }
+
     return {
       class: classes,
+      filters: filters,
     };
   }
   async homeVod() {
@@ -83,7 +100,7 @@ class CatvodAdapter {
       url: buildUrl(this.api, `/detail`),
       method: 'POST',
       data: {
-        id: !Array.isArray(id) ? [id] : id,
+        id: Array.isArray(id) ? id[0] : id,
       },
     });
     const videos: any[] = [];
@@ -98,7 +115,7 @@ class CatvodAdapter {
         vod_remarks: vod.vod_remarks,
         vod_actor: vod.vod_actor,
         vod_director: vod.vod_director,
-        vod_content: vod.vod_content.trim(),
+        vod_content: vod.vod_content?.trim(),
         vod_play_from: vod.vod_play_from,
         vod_play_url: vod.vod_play_url,
       });
@@ -146,9 +163,17 @@ class CatvodAdapter {
         id: input,
       },
     });
-    return {
-      res: response,
-    };
+    let res = response;
+    if (response?.url && response.url.startsWith('js2p')) {
+      const match = response.url.match(/\/proxy\/([^\/]+)\/([^\/]+)\/([^\/]+)\//);
+      if (match) {
+        const what = match[1];
+        const ids = match[2];
+        const end = match[3];
+        res.url = ids;
+      }
+    }
+    return res;
   }
   runMain() {
     return '';

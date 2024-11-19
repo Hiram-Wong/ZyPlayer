@@ -6,8 +6,24 @@ import request from '@main/utils/request';
 import { base64 } from '@main/utils/crypto';
 import initSettingData from '@main/core/db/migration/modules/init/tbl_setting.json';
 
-// 一键配置
-const easyConfig = async (config, url, type) => {
+const easy2catvod = (config, url) => {
+  let data = {};
+  if (config?.video && config.video?.sites && config.video?.sites.length > 0) {
+    data['tbl_site'] = config.video.sites.map((item) => ({
+      id: item?.id || uuidv4(),
+      key: item?.key || uuidv4(),
+      name: item.name,
+      type: 8,
+      api: resolve(url, item.api),
+      group: 'catvod',
+      search: 1,
+      categories: '',
+    }));
+  }
+  return data;
+};
+
+const easy2tvbox = async (config, url, type) => {
   let data = {};
   let content = config;
 
@@ -390,7 +406,8 @@ const readData = async (path: string) => {
 const importData = async (importType: string, remoteType: string, path: string) => {
   let content: any = await readData(path);
   if (importType === 'easy') {
-    content = easyConfig(content, path, remoteType);
+    if (remoteType === 'catvod') content = await easy2catvod(content, path);
+    else content = easy2tvbox(content, path, remoteType);
   }
 
   const formatData = commonDelImportData(content);

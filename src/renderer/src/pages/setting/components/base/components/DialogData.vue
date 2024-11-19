@@ -11,9 +11,11 @@
                 <t-radio-group v-model="formData.easyConfig.type" class="input-item">
                   <t-radio value="drpy">{{ $t('pages.setting.data.easyConfig.drpy') }}</t-radio>
                   <t-radio value="tvbox">{{ $t('pages.setting.data.easyConfig.tvbox') }}</t-radio>
+                  <t-radio value="catvod">{{ $t('pages.setting.data.easyConfig.catvod') }}</t-radio>
                 </t-radio-group>
                 <p v-if="formData.easyConfig.type === 'drpy'" class="tip">{{ $t('pages.setting.data.easyConfig.drpyTip') }}</p>
                 <p v-else-if="formData.easyConfig.type === 'tvbox'" class="tip">{{ $t('pages.setting.data.easyConfig.tvboxTip') }}</p>
+                <p v-else-if="formData.easyConfig.type === 'catvod'" class="tip">{{ $t('pages.setting.data.easyConfig.catvodTip') }}</p>
                 <t-input :label="$t('pages.setting.data.easyConfig.address')" v-model="formData.easyConfig.url"
                   class="input-item" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
                 <t-popconfirm :content="$t('pages.setting.data.easyConfig.confirmTip')" placement="bottom"
