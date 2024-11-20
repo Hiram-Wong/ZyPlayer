@@ -443,7 +443,7 @@ const confirmTemplate = () => {
     form.value.content.edit = `var rule = ${JSON5.stringify(text, null, 2)}`;
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err) {
-    console.log(err);
+    console.error(`[confirmTemplate][Error]:`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}`);
   }
   active.value.template = false;
@@ -451,65 +451,77 @@ const confirmTemplate = () => {
 
 const importFileEvent = async () => {
   try {
-    // @ts-ignore
-    const [fileHandle] = await window.showOpenFilePicker();
-    if (!fileHandle) return;
+    const readFile = async(filePath: string) =>{
+      const fs = remote.require('fs').promises;
+      return await fs.readFile(filePath, 'utf-8');
+    }
 
-    const file = await fileHandle.getFile();
-    const content = await file.text();
-    form.value.content.edit = content;
-    MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (err) {
-    console.log(`[setting][editSource][importFileEvent][err]`, err);
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+    const { canceled, filePaths } = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
+      title: 'Select a file to read',
+      filters: [
+        { name: 'JavaScript Files', extensions: ['js'] },
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+      properties: ['openFile'],
+    });
+
+    if (!canceled && filePaths) {
+      const filePath = filePaths[0];
+      const content = await readFile(filePath);
+      form.value.content.edit = content;
+      MessagePlugin.success(t('pages.setting.data.success'));
+    };
+  } catch (err: any) {
+    console.error(`[exportFileEvent][Error]:`, err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
 };
 
 const exportFileEvent = async () => {
-  const content = form.value.content.edit || '';
-  if (!content.trim()) {
+  const content = (form.value.content.edit || '').trim();
+
+  if (!content) {
     MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
     return;
-  }
+  };
 
-  let title = '';
+  const title = (() => {
+    try {
+      return (
+        content.match(/title:(.*?),/)?.[1].replace(/['"]/g, '').trim() || 'source'
+      );
+    } catch {
+      return 'source';
+    }
+  })();
 
-  try {
-    title =
-      content
-        .match(/title:(.*?),/)?.[1]
-        .replace(/['"]/g, '')
-        .trim() || 'source';
-  } catch (error) {
-    console.error('[EditSource][exportFileEvent][error] 文件名匹配错误', error);
-    title = 'source';
-  }
+  const writeFile = async (filePath: string, data: any) => {
+    const fs = remote.require('fs').promises;
+    await fs.writeFile(filePath, data, 'utf-8');
+  };
 
   try {
     await window.electron.ipcRenderer.send('tmpdir-manage', 'make', 'file');
-
     const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
     const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/${title}.js`);
-    // const defaultPath = `${userDataPath}/file/js/${title}.js`;
-    console.log(`[EditSource][exportFileEvent]path:${defaultPath}`);
-
     const { canceled, filePath } = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
       defaultPath,
       filters: [
         { name: 'JavaScript Files', extensions: ['js'] },
+        { name: 'Text Files', extensions: ['txt'] },
         { name: 'All Files', extensions: ['*'] },
       ],
     });
 
-    if (!canceled) {
-      const fs = remote.require('fs').promises;
-      await fs.writeFile(filePath, content, 'utf-8');
+    if (!canceled && filePath) {
+      await writeFile(filePath, content);
       MessagePlugin.success(t('pages.setting.data.success'));
-    }
-  } catch (err) {
-    console.log(`[setting][editSource][exportFileEvent][err]`, err);
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  }
+    };
+  } catch (err: any) {
+    console.error(`[exportFileEvent][Error]:`, err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
+  };
 };
 
 const debugEvent = async () => {
