@@ -404,7 +404,7 @@ const getDebugData = async () => {
         key: 'debug',
         type: 7,
         api: 'csp_DRPY',
-        search: true,
+        search: 1,
         playUrl: '',
         group: 'debug',
         category: '',
