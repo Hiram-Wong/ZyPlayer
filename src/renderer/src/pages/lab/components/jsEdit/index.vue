@@ -1266,7 +1266,7 @@ const handleMonacoObject = (monaco) => {
             overflow: hidden;
             :deep(.monaco-edito) {
               width: 100% !important;
-            height: 100% !important;
+              height: 100% !important;
             }
           }
         }
@@ -1284,27 +1284,6 @@ const handleMonacoObject = (monaco) => {
   border-color: transparent;
   box-shadow: none;
 }
-
-// :deep(.code-toolbar) {
-//   height: 100%;
-//   border-radius: var(--td-radius-default);
-
-//   pre[class*='language-'] {
-//     margin: 0;
-//     height: 100%;
-//     box-shadow: none;
-//     padding: 1em 0.5em 0 3.8em;
-//     background-color: var(--td-bg-content-input-2);
-//   }
-
-//   .toolbar {
-//     padding-right: var(--td-comp-paddingTB-xxs);
-
-//     .toolbar-item {
-//       margin-right: var(--td-comp-margin-xs);
-//     }
-//   }
-// }
 
 :deep(.t-input-adornment) {
   width: 100%;
