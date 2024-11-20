@@ -47,6 +47,7 @@ const drive = pgTable('drive', {
   headers: varchar('headers', { length: 255 }),
   params: varchar('params', { length: 255 }),
   search: integer('search'),
+  showAll: boolean('showAll'),
   isActive: boolean('isActive'),
 });
 

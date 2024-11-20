@@ -15,9 +15,9 @@
         <t-form-item :label="$t('pages.setting.iptv.config')" name="url">
           <div class="input-vertical-item">
             <t-radio-group v-model="formData.data.type" variant="default-filled" >
-              <t-radio-button value="remote">{{ $t('pages.setting.table.iptv.remote') }}</t-radio-button>
-              <t-radio-button value="local">{{ $t('pages.setting.table.iptv.local') }}</t-radio-button>
-              <t-radio-button value="batches">{{ $t('pages.setting.table.iptv.manual') }}</t-radio-button>
+              <t-radio-button value="remote">{{ $t('pages.setting.iptv.apiRemote') }}</t-radio-button>
+              <t-radio-button value="local">{{ $t('pages.setting.iptv.apiLocal') }}</t-radio-button>
+              <t-radio-button value="batches">{{ $t('pages.setting.iptv.apiManual') }}</t-radio-button>
             </t-radio-group>
             <div class="input-horizontal-item">
               <t-input v-if="formData.data.type !== 'batches'" v-model="formData.data.url" class="input-item" style="flex: 1" :placeholder="$t('pages.setting.placeholder.general')" />

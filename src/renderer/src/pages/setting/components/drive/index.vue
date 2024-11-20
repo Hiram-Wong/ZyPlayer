@@ -16,6 +16,14 @@
         </t-badge>
         <span v-else>{{ row.name }}</span>
       </template>
+      <template #showAll="{ row }">
+        <t-tag v-if="row.showAll" theme="success" shape="round" variant="light-outline">
+          {{ $t('pages.setting.drive.all') }}
+        </t-tag>
+        <t-tag v-else theme="warning" shape="round" variant="light-outline">
+          {{ $t('pages.setting.drive.video') }}
+        </t-tag>
+      </template>
       <template #isActive="{ row }">
         <t-switch v-model="row.isActive" :disabled="row.key === 'debug'"  @change="handleOpDefault(row.id)" />
       </template>
@@ -223,6 +231,7 @@ const handleOpChange = async (type, doc) => {
       search: false,
       headers: null,
       params: null,
+      showAll: false,
       isActive: true
     };
     active.dialogForm = true;

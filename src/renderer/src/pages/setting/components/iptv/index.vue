@@ -18,13 +18,13 @@
       </template>
       <template #type="{ row }">
         <t-tag v-if="row.type === 'remote'" theme="success" shape="round" variant="light-outline">
-          {{ $t('pages.setting.table.iptv.remote') }}
+          {{ $t('pages.setting.iptv.apiRemote') }}
         </t-tag>
         <t-tag v-else-if="row.type === 'local'" theme="warning" shape="round" variant="light-outline">
-          {{ $t('pages.setting.table.iptv.local') }}
+          {{ $t('pages.setting.iptv.apiLocal') }}
         </t-tag>
         <t-tag v-else-if="row.type === 'batches'" theme="danger" shape="round" variant="light-outline">
-          {{ $t('pages.setting.table.iptv.manual') }}
+          {{ $t('pages.setting.iptv.apiManual') }}
         </t-tag>
       </template>
       <template #isActive="{ row }">

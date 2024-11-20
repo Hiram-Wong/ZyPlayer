@@ -172,6 +172,7 @@ const easy2tvbox = async (config, url, type) => {
         id: item?.id || uuidv4(),
         name: item.name,
         server: item.server,
+        showAll: item.showAll || false,
         startPage: item.startPage || '',
         search: !!item.search,
         headers: item.headers || null,
@@ -268,7 +269,7 @@ const commonDelImportData = (data) => {
             isActive: true,
           }));
         break;
-      case 'iptv':
+      case 'tbl_iptv':
         data[key] = data[key]
           .filter((item) => item?.name && item?.url)
           .map((item) => {
@@ -303,6 +304,7 @@ const commonDelImportData = (data) => {
               id: item?.id || uuidv4(),
               name: item?.name || '',
               server: item?.server || '',
+              showAll: item.showAll || false,
               startPage: item?.startPage || '',
               search: !!item.search,
               headers: item.headers || null,

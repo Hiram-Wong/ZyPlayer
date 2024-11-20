@@ -8,6 +8,8 @@ const update = async () => {
     UPDATE tbl_site SET search_new = CASE WHEN search = TRUE THEN 1 ELSE 0 END;
     ALTER TABLE tbl_site DROP COLUMN search;
     ALTER TABLE tbl_site rename search_new to search;
+
+    ALTER TABLE tbl_drive ADD COLUMN "showAll" boolean default false;
   `);
 
   const old_version = await db.select().from(schema.setting).where(eq(schema.setting.key, 'version'));

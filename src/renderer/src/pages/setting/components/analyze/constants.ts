@@ -11,13 +11,8 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     fixed: 'left',
     ellipsis: true,
   },
-  {
-    title: t('pages.setting.table.header.type'),
-    align: 'left',
-    colKey: 'type',
-    width: 100,
-  },
-  { title: t('pages.setting.table.header.status'), align: 'left', colKey: 'isActive', width: 80 },
+  { title: t('pages.setting.table.header.type'), align: 'center', colKey: 'type', width: 100 },
+  { title: t('pages.setting.table.header.status'), align: 'center', colKey: 'isActive', width: 80 },
   {
     align: 'center',
     fixed: 'right',

@@ -18,10 +18,10 @@
       </template>
       <template #type="{ row }">
         <t-tag v-if="row.type === 0" shape="round" theme="danger" variant="light-outline">
-          {{ $t('pages.setting.table.analyze.web') }}
+          {{ $t('pages.setting.analyze.apiWeb') }}
         </t-tag>
         <t-tag v-else-if="row.type === 1" shape="round" theme="success" variant="light-outline">
-          {{ $t('pages.setting.table.analyze.json') }}
+          {{ $t('pages.setting.analyze.apiJson') }}
         </t-tag>
       </template>
       <template #isActive="{ row }">

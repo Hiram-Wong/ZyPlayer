@@ -16,6 +16,12 @@
           <t-input v-model="formData.data.server" class="input-item"
             :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
+        <t-form-item :label="$t('pages.setting.drive.showAll')" name="showAll">
+          <t-radio-group v-model="formData.data.showAll" variant="default-filled" >
+            <t-radio-button :value="true">{{ $t('pages.setting.drive.all') }}</t-radio-button>
+            <t-radio-button :value="false">{{ $t('pages.setting.drive.video') }}</t-radio-button>
+          </t-radio-group>
+        </t-form-item>
         <t-form-item :label="$t('pages.setting.drive.startPage')" name="startPage">
           <t-input v-model="formData.data.startPage" class="input-item"
             :placeholder="$t('pages.setting.placeholder.startPage')" />

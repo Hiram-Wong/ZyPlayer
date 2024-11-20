@@ -59,20 +59,6 @@ export default {
     noData: '无数据',
     notSupport: '不支持',
     skip: '跳过',
-    site: {
-      close: '关闭',
-      onlySearch: '仅搜索',
-      gatherSearch: '聚能搜',
-    },
-    iptv: {
-      remote: '远程',
-      local: '本地',
-      manual: '手动',
-    },
-    analyze: {
-      web: 'Web',
-      json: 'Json',
-    },
     header: {
       name: '名称',
       resource: '资源数',
@@ -103,6 +89,9 @@ export default {
     ext: '扩展',
     group: '分组',
     category: '类别',
+    searchClose: '关闭',
+    searchOnly: '仅搜索',
+    searchGather: '聚能搜',
   },
   iptv: {
     name: '名称',
@@ -110,17 +99,25 @@ export default {
     api: '接口',
     epg: '节目单',
     logo: '台标',
-    upload: '点我上传',
+    upload: '上传',
+    apiRemote: '远程',
+    apiLocal: '本地',
+    apiManual: '手动',
   },
   analyze: {
     name: '名称',
     type: '类型',
     api: '接口',
+    apiWeb: 'Web',
+    apiJson: 'Json',
   },
   drive: {
     name: '名称',
     server: '接口',
-    startPage: '起始页',
+    showAll: '展示',
+    video: '视频',
+    all: '全部',
+    startPage: '起始',
     params: '加密',
   },
   base: {

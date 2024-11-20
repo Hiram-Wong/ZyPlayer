@@ -14,8 +14,8 @@
         </t-form-item>
         <t-form-item :label="$t('pages.setting.analyze.type')" name="type">
           <t-radio-group v-model="formData.data.type" variant="default-filled" >
-            <t-radio-button :value="0">{{ $t('pages.setting.table.analyze.web') }}</t-radio-button>
-            <t-radio-button :value="1">{{ $t('pages.setting.table.analyze.json') }}</t-radio-button>
+            <t-radio-button :value="0">{{ $t('pages.setting.analyze.apiWeb') }}</t-radio-button>
+            <t-radio-button :value="1">{{ $t('pages.setting.analyze.apiJson') }}</t-radio-button>
           </t-radio-group>
         </t-form-item>
         <t-form-item :label="$t('pages.setting.analyze.api')" name="url">

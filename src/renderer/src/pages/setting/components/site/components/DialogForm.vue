@@ -29,9 +29,9 @@
           </t-form-item>
           <t-form-item :label="$t('pages.setting.site.search')" name="search">
             <t-radio-group v-model="formData.data.search" variant="default-filled" >
-              <t-radio-button :value="0">{{ $t('pages.setting.table.site.close') }}</t-radio-button>
-              <t-radio-button :value="1">{{ $t('pages.setting.table.site.gatherSearch') }}</t-radio-button>
-              <t-radio-button :value="2">{{ $t('pages.setting.table.site.onlySearch') }}</t-radio-button>
+              <t-radio-button :value="0">{{ $t('pages.setting.site.searchClose') }}</t-radio-button>
+              <t-radio-button :value="1">{{ $t('pages.setting.site.searchGather') }}</t-radio-button>
+              <t-radio-button :value="2">{{ $t('pages.setting.site.searchOnly') }}</t-radio-button>
             </t-radio-group>
           </t-form-item>
           <t-form-item :label="$t('pages.setting.site.playUrl')" name="playUrl">

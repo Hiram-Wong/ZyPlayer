@@ -50,6 +50,7 @@ const update = async () => {
       search boolean not null default false,
       headers varchar(255),
       params varchar(255),
+      "showAll" boolean default false,
       "isActive" boolean not null default true
     );
 
