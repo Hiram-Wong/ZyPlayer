@@ -19,7 +19,8 @@ files:
 # 哪些文件将不会被压缩，而是解压到构建目录
 asarUnpack:
   - resources/**
-afterPack: build/hook/removeLocales.js
+electronLanguages: ['en', 'zh-TW', 'zh-CN', 'en-US', 'en-GB']
+# afterPack: build/hook/removeLocales.js
 afterSign: build/hook/notarize.js
 # Windows 平台配置
 win:
