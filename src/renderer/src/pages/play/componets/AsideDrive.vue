@@ -88,7 +88,7 @@ watch(
 );
 onMounted(() => {
   seasonList.value = extConf.value.files;
-  emits('play', infoConf.value);
+  emits('play', { url: infoConf.value.url, headers: infoConf.value?.header || {} });
 });
 
 const renderError = () => {

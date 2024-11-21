@@ -131,7 +131,7 @@ watch(
 );
 onMounted(()=>{
   getEpgList(formData.value.title, moment().format('YYYY-MM-DD'));
-  emits('play', infoConf.value);
+  emits('play', { url: infoConf.value.url, isLive: true });
 })
 
 /**

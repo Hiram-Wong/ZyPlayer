@@ -157,6 +157,8 @@
 
 .nplayer_control_time-live:before {
   background: #00d157 !important;
+  width: 6px !important;
+  height: 6px !important;
 }
 
 .nplayer_tooltip_content {
