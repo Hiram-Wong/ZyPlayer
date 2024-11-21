@@ -15,7 +15,7 @@ import globalVariable from './core/global';
 import serverInit from './core/server';
 import { createMain } from './core/winManger';
 import { bossShortcutResgin } from './core/shortcut';
-import { parseCustomUrl } from './utils/tool';
+import { parseCustomUrl, isLocalhostRef } from './utils/tool';
 
 const setup = async () => {
   /**
@@ -80,13 +80,16 @@ const ready = () => {
         return;
       }
 
+      // 不处理本地地址
+      if (isLocalhostRef(url)) {
+        callback({});
+        return;
+      }
+
       // http://bfdsr.hutu777.com/upload/video/2024/03/20/c6b8e67e75131466cfcbb18ed75b8c6b.JPG@Referer=www.jianpianapp.com@User-Agent=jianpian-version353
       const { redirectURL, headers } = parseCustomUrl(url);
-      if (
-        !url.includes('//localhost') &&
-        !url.includes('//127.0.0.1') &&
-        ['Referer', 'Cookie', 'User-Agent', 'Origin', 'Host', 'Connection'].some((str) => url.includes(str))
-      ) {
+
+      if (headers && Object.keys(headers).length > 0) {
         reqIdMethod[`${id}`] = headers;
         callback({ cancel: false, redirectURL });
       } else {
@@ -95,7 +98,7 @@ const ready = () => {
     });
 
     defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-      const { requestHeaders, url, id } = details;
+      let { requestHeaders, url, id } = details;
       const headers = reqIdMethod[details.id] || {};
       const isLocalhostRef = (url: string) => `${url}`.includes('//localhost') || `${url}`.includes('//127.0.0.1');
 
@@ -104,6 +107,7 @@ const ready = () => {
         callback({ requestHeaders });
         return;
       }
+
       // 处理Origin
       const origin = headers?.['Origin'] || requestHeaders['Origin'];
       if (origin && !isLocalhostRef(origin)) {

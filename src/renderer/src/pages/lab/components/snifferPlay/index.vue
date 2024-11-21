@@ -44,13 +44,7 @@
               <t-form-item :label="$t('pages.lab.snifferPlay.playUrl')" name="url">
                 <t-input v-model="formData.player.url"></t-input>
               </t-form-item>
-              <t-form-item  name="headers">
-                <template #label>
-                  <span>{{ $t('pages.lab.snifferPlay.headers') }}</span>
-                  <t-tooltip :content="$t('pages.lab.snifferPlay.tooltip.playHeaders')">
-                    <info-circle-icon />
-                  </t-tooltip>
-                </template>
+              <t-form-item :label="$t('pages.lab.snifferPlay.headers')" name="headers">
                 <t-textarea v-model="formData.player.headers" :autosize="{ minRows: 3, maxRows: 5 }" placeholder='{ "User-Agent": "Mozilla/5.0" }' />
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.mediaType')" name="url">
@@ -84,7 +78,6 @@ import { ref, useTemplateRef } from 'vue';
 import sniffer from '@/utils/sniffer';
 import PlayerView from '@/components/player/index.vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { InfoCircleIcon } from 'tdesign-icons-vue-next';
 import { t } from '@/locales';
 import { checkMediaType } from '@/utils/tool';
 
@@ -120,16 +113,18 @@ const sniiferEvent = async () => {
     MessagePlugin.success(t('pages.setting.form.fail'));
   };
 };
+
 const playerPlayEvent = async () => {
   if (!playerRef.value) return;
   if (!formData.value.player.url || !formData.value.player.url.startsWith('http')) {
     MessagePlugin.warning(t('pages.lab.snifferPlay.message.playerNoUrl'));
     return;
   };
-  const headers = formData.value.player.headers || '{}';
+
+  let headers = formData.value.player.headers || '{}';
   try {
-    const formatHeaders = JSON.parse(headers);
-    if (typeof formatHeaders === 'object' && formatHeaders !== null && !Array.isArray(formatHeaders)) {
+    headers = JSON.parse(headers);
+    if (typeof headers === 'object' && headers !== null && !Array.isArray(headers)) {
     } else {
       MessagePlugin.warning(t('pages.lab.snifferPlay.message.headersNoJson'));
       return;
@@ -139,7 +134,7 @@ const playerPlayEvent = async () => {
     return;
   }
   let mediaType = formData.value.player.type;
-  if (formData.value.player.type === 'auto') {
+  if (mediaType === 'auto') {
     const checkType = await checkMediaType(formData.value.player.url);
     if (checkType === 'unknown' && !checkType) {
       MessagePlugin.warning(t('pages.lab.snifferPlay.message.mediaNoType'));
@@ -157,6 +152,7 @@ const playerPlayEvent = async () => {
   });
   MessagePlugin.success(t('pages.setting.form.success'));
 };
+
 const playerClearEvent = async () => {
   if (!playerRef.value) return;
   await playerRef.value.destroy();

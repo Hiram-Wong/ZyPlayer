@@ -58,7 +58,6 @@
 import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { TransformIcon } from 'tdesign-icons-vue-next';
-import JSON5 from 'json5';
 import { t } from '@/locales';
 import { fetchHtml } from '@/api/setting';
 
@@ -149,8 +148,8 @@ const active = ref({
 });
 
 const prepareRequestOptions = (method, header, body, contentType) => {
-  const parsedHeader = JSON5.parse(header || '{}');
-  let parsedBody = JSON5.parse(body || '{}');
+  const parsedHeader = JSON.parse(header || '{}');
+  let parsedBody = JSON.parse(body || '{}');
 
   if (method !== 'GET' && parsedBody) {
     parsedHeader['Content-Type'] = contentType;

@@ -16,7 +16,7 @@ const emits = defineEmits(['updateTime']);
 const store = usePlayStore();
 const adapter = shallowRef();
 const mseRef = useTemplateRef('mseRef');
-const playerType = computed(() => store.setting.playerMode.type);
+const playerMode = computed(() => store.setting.playerMode);
 const adapterRelation = {
   artplayer: ArtPlayerAdapter,
   dplayer: DPlayerAdapter,
@@ -24,21 +24,35 @@ const adapterRelation = {
   xgplayer: XgPlayerAdapter,
 };
 
+const formatUrlHeaders = (url: string, headers: { [key: string]: string }) => {
+  if (headers) {
+    for (const key in headers) {
+      url += `@${key}=${headers[key]}`;
+    }
+  }
+  return url;
+};
+
 const init = async () => {
+  if (playerMode.value.type === 'custom') return;
   await destroy();
-  const singleAdapter = singleton(adapterRelation?.[playerType.value]);
+  const singleAdapter = singleton(adapterRelation?.[playerMode.value.type]);
   adapter.value = await new singleAdapter();
 };
 
 const create = async (doc: { [key: string]: any }) => {
-  if (!adapter.value) return;
-  if (!doc.url) return;
+  if (playerMode.value.type === 'custom') {
+    window.electron.ipcRenderer.send('call-player', playerMode.value.external, doc.url);
+    return;
+  }
+  if (!adapter.value || !doc.url) return;
   if (mseRef.value) mseRef.value.id = doc.container;
   if (!doc.type) {
     const checkType = await checkMediaType(doc.url);
     if (checkType === 'unknown' && !checkType) return;
     doc.type = checkType;
   };
+  doc.url = formatUrlHeaders(doc.url, doc.headers);
   doc.type = mapVideoTypeToPlayerType(doc.type);
   await adapter.value.create(doc);
 };

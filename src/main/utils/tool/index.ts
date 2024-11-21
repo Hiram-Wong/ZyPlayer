@@ -40,6 +40,8 @@ const parseCustomUrl = (url) => {
   return { redirectURL, headers };
 };
 
+const isLocalhostRef = (url: string) => `${url}`.includes('//localhost') || `${url}`.includes('//127.0.0.1');
+
 const getIP = async () => {
   const urls = ['https://ipv6.icanhazip.com', 'https://ipv4.icanhazip.com'];
   const res: any = {
@@ -83,4 +85,4 @@ const findWinByName = async (name: string) => {
   return source;
 };
 
-export { parseCustomUrl, toggleWindowVisibility, getIP, getConfig, singleton, findWinByName };
+export { isLocalhostRef, parseCustomUrl, toggleWindowVisibility, getIP, getConfig, singleton, findWinByName };

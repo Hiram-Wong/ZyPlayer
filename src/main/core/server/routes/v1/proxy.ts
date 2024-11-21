@@ -1,10 +1,12 @@
 import { FastifyReply, FastifyPluginAsync, FastifyRequest } from 'fastify';
+import { pipeline } from 'stream';
 import { hash, base64 } from '@main/utils/crypto';
-import request from '@main/utils/request';
+import request, { completeRequest } from '@main/utils/request';
 
+const API_PREFIX = 'proxy';
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(
-    `/proxy`,
+    `/${API_PREFIX}`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
       const { url } = req.query;
 
@@ -56,7 +58,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       }
     },
   );
-  fastify.post(`/proxy`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
+  fastify.post(`/${API_PREFIX}`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
     const { text, url } = req.body;
     // @ts-ignore
     const res = await req.server.db.push(`/proxy/${hash['md5-16'](url)}`, text);
@@ -66,6 +68,35 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       data: `http://127.0.0.1:9978/proxy?do=js&url=${url}`,
     };
   });
+  fastify.get(
+    `/${API_PREFIX}/video`,
+    async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>, reply: FastifyReply) => {
+      const { url, headers } = req.query;
+      const response = await completeRequest({
+        method: 'get',
+        url: url,
+        responseType: 'stream', // 重要：设置响应类型为流
+        // headers: { 'Custom-Header': 'Custom Value' }
+      });
+      reply.raw.on('close', () => {
+        console.log('Client disconnected, stopping stream.');
+        response.data.destroy(); // 销毁目标流
+      });
+      reply.status(response.code);
+      for (const [key, value] of Object.entries(response.headers)) {
+        reply.header(key, value);
+      }
+      // response.pipe(reply.raw);
+      pipeline(response.data, reply.raw, (err) => {
+        if (err) {
+          console.error('Pipeline error:', err);
+          if (!reply.raw.headersSent) {
+            reply.code(500).send({ error: 'Streaming error' });
+          }
+        }
+      });
+    },
+  );
 };
 
 export default api;
