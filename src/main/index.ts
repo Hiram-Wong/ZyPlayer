@@ -207,14 +207,27 @@ const ready = () => {
       app.quit();
     }
   });
+
+  // second-instance
+  app.on('second-instance', () => {
+    const windows = BrowserWindow.getAllWindows();
+    if (windows.length === 0) return;
+    windows.forEach((win) => win.show());
+  });
 };
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
 const main = async () => {
-  await setup();
-  await ready();
+  const gotTheLock = app.requestSingleInstanceLock();
+  logger.info(`[main][lock] status: ${gotTheLock}`);
+  if (!gotTheLock) {
+    app.quit();
+  } else {
+    await setup();
+    ready();
+  }
 };
 
 main();
