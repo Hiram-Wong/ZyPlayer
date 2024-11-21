@@ -24,21 +24,10 @@ import * as 模板 from './template';
 import cheerio from './utils/cheerio.min';
 import nodeRsaModule from 'node-rsa';
 import jinja from '../../utils/jinja';
-import {
-  base64 as base64Module,
-  hash as hashModule,
-  gzip as gzipModule,
-  rsa as rsaModule,
-  crypto as cryptoModule,
-} from '@main/utils/crypto';
-import {
-  MOBILE_UA as MOBILEUAModule,
-  PC_UA as PCUAModule,
-  UA as UAModule,
-  UC_UA as UCUAModule,
-  IOS_UA as IOSUAModule,
-} from '@main/utils/hiker/ua';
-import { encodeStr as encodeStrModule, decodeStr as decodeStrModule } from '@main/utils/hiker/crypto';
+import pako from 'pako';
+import WxmpRsa from 'wxmp-rsa';
+import gbkTool from './utils/gbk';
+import cryptoModule from 'crypto-js';
 import { urljoin as urljoinModule } from '@main/utils/hiker/base';
 import { batchFetch as batchFetchModule } from '@main/utils/hiker/request';
 import { pdfh as pdfhModule, pdfa as pdfaModule, pd as pdModule } from '@main/utils/hiker/htmlParser';
@@ -48,6 +37,9 @@ var pdfh = pdfhModule;
 var pdfa = pdfaModule;
 var pd = pdModule;
 var CryptoJS = cryptoModule;
+var JSEncrypt = WxmpRsa;
+JSEncrypt.decryptUnicodeLong = JSEncrypt.decryptLong;
+JSEncrypt.encryptUnicodeLong = JSEncrypt.encryptLong;
 var JSON5 = JSON5Module;
 var batchFetch = batchFetchModule;
 var NODERSA = { NodeRSA: nodeRsaModule, ...nodeRsaModule };
@@ -395,11 +387,15 @@ let rule: any = {};
  * **/
 
 /*** 以下是内置变量和解析方法 **/
-const MOBILE_UA = MOBILEUAModule; // zy-use-hiker-module
-const PC_UA = PCUAModule; // zy-use-hiker-module
-const UA = UAModule; // zy-use-hiker-module
-const UC_UA = UCUAModule; // zy-use-hiker-module
-const IOS_UA = IOSUAModule; // zy-use-hiker-module
+const MOBILE_UA =
+  'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36';
+const PC_UA =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36';
+const UA = 'Mozilla/5.0';
+const UC_UA =
+  'Mozilla/5.0 (Linux; U; Android 9; zh-CN; MI 9 Build/PKQ1.181121.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 UCBrowser/12.5.5.1035 Mobile Safari/537.36';
+const IOS_UA =
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1';
 const RULE_CK = 'cookie'; // 源cookie的key值
 // const KEY = typeof(key)!=='undefined'&&key?key:'drpy_' + (rule.title || rule.host); // 源的唯一标识
 const CATE_EXCLUDE = '首页|留言|APP|下载|资讯|新闻|动态';
@@ -648,8 +644,7 @@ function window_b64() {
  */
 // @ts-ignore  // add-ts-mark
 if (typeof atob !== 'function' || typeof btoa !== 'function') {
-  // var { atob, btoa } = window_b64();
-  var { atob, btoa } = base64Module; // zy-use-hiker-module
+  var { atob, btoa } = window_b64();
 }
 
 if (typeof Object.assign !== 'function') {
@@ -1005,20 +1000,17 @@ function encodeUrl(str) {
 }
 
 function base64Encode(text) {
-  return base64Module.encode(text);
-  // return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
+  return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(text));
   // return text
-} // zy-use-hiker-module
+}
 
 function base64Decode(text) {
-  return base64Module.decode(text);
-  // return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
+  return CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(text));
   // return text
-} // zy-use-hiker-module
+}
 
 function md5(text) {
-  // return CryptoJS.MD5(text).toString();
-  return hashModule['md5-32'](text); // zy-use-hiker-module
+  return CryptoJS.MD5(text).toString();
 }
 
 function uint8ArrayToBase64(uint8Array) {
@@ -1065,18 +1057,27 @@ function Utf8ArrayToStr(array) {
  * @param str
  * @returns {string}
  */
-const gzip = (text: string) => {
-  return gzipModule.encode(text);
-}; // zy-use-hiker-module
+const gzip = (str: string) => {
+  let arr = pako.gzip(str, {
+    // to: 'string'
+  });
+  return uint8ArrayToBase64(arr);
+};
 
 /**
  * gzip解压base64数据
  * @param b64Data
  * @returns {string}
  */
-const ungzip = (text: string) => {
-  return gzipModule.decode(text);
-}; // zy-use-hiker-module
+const ungzip = (b64Data: string) => {
+  let strData = atob(b64Data);
+  const charData = strData.split('').map(function (x) {
+    return x.charCodeAt(0);
+  });
+  const binData = new Uint8Array(charData);
+  const data = pako.inflate(binData);
+  return Utf8ArrayToStr(data);
+};
 
 /**
  * 字符串按指定编码
@@ -1085,14 +1086,13 @@ const ungzip = (text: string) => {
  * @returns {*}
  */
 function encodeStr(input, encoding) {
-  return encodeStrModule(input, encoding);
-  // encoding = encoding || 'gbk';
-  // if (encoding.startsWith('gb')) {
-  //   const strTool = gbkTool();
-  //   input = strTool.encode(input);
-  // }
-  // return input;
-} // zy-use-hiker-module
+  encoding = encoding || 'gbk';
+  if (encoding.startsWith('gb')) {
+    const strTool = gbkTool();
+    input = strTool.encode(input);
+  }
+  return input;
+}
 
 /**
  * 字符串指定解码
@@ -1101,14 +1101,13 @@ function encodeStr(input, encoding) {
  * @returns {*}
  */
 function decodeStr(input, encoding) {
-  return decodeStrModule(input, encoding);
-  // encoding = encoding || 'gbk';
-  // if (encoding.startsWith('gb')) {
-  //   const strTool = gbkTool();
-  //   input = strTool.decode(input);
-  // }
-  // return input;
-} // zy-use-hiker-module
+  encoding = encoding || 'gbk';
+  if (encoding.startsWith('gb')) {
+    const strTool = gbkTool();
+    input = strTool.decode(input);
+  }
+  return input;
+}
 
 function getCryptoJS() {
   // return request('https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/crypto-hiker.js');
@@ -1117,20 +1116,44 @@ function getCryptoJS() {
 
 // 封装的RSA加解密类
 const RSA = {
-  decode(data: string, key: string, _option = {}) {
-    if (typeof rsaModule.decode === 'function') {
-      const privateKey = this.getPrivateKey(key);
-      return rsaModule.decode(data, privateKey, 'PKCS1', 'base64', 1, 1, true);
+  decode: function (data, key, option) {
+    option = option || {};
+    if (typeof JSEncrypt === 'function') {
+      let chunkSize = option.chunkSize || 117; // 默认分段长度为117
+      let privateKey = this.getPrivateKey(key); // 获取私钥
+      const decryptor = new JSEncrypt(); //创建解密对象实例
+      decryptor.setPrivateKey(privateKey); //设置秘钥
+      let uncrypted = '';
+      // uncrypted = decryptor.decrypt(data);
+      uncrypted = decryptor.decryptUnicodeLong(data);
+      return uncrypted;
+    } else {
+      return false;
     }
-    return false;
-  }, // zy-use-hiker-module
-  encode(data: string, key: string, _option = {}) {
-    if (typeof rsaModule.decode === 'function') {
-      const publicKey = this.getPublicKey(key);
-      return rsaModule.encode(data, publicKey, 'PKCS1', 'base64', 1, 1, true);
+  },
+  encode: function (data, key, option) {
+    option = option || {};
+    if (typeof JSEncrypt === 'function') {
+      let chunkSize = option.chunkSize || 117; // 默认分段长度为117
+      let publicKey = this.getPublicKey(key); // 获取公钥
+      const encryptor = new JSEncrypt();
+      encryptor.setPublicKey(publicKey); // 设置公钥
+      let encrypted = ''; // 加密结果
+      // const textLen = data.length; // 待加密文本长度
+      // let offset = 0; // 分段偏移量
+      // // 分段加密
+      // while (offset < textLen) {
+      //     let chunk = data.slice(offset, chunkSize); // 提取分段数据
+      //     let enc = encryptor.encrypt(chunk); // 加密分段数据
+      //     encrypted += enc; // 连接加密结果
+      //     offset += chunkSize; // 更新偏移量
+      // }
+      encrypted = encryptor.encryptUnicodeLong(data);
+      return encrypted;
+    } else {
+      return false;
     }
-    return false;
-  }, // zy-use-hiker-module
+  },
   fixKey(key, prefix, endfix) {
     if (!key.includes(prefix)) {
       key = prefix + key;
@@ -3040,7 +3063,7 @@ function detailParse(detailObj) {
           let tt1 = new Date().getTime();
           // print('pdfl:'+typeof (pdfl));
           if (typeof pdfl === 'function') {
-            // @ts-ignore  // zy-use-hiker-module
+            // @ts-ignore
             new_vod_list = pdfl(html, p1, list_text, list_url, MY_URL);
             if (list_url_prefix) {
               new_vod_list = new_vod_list.map(
@@ -3379,8 +3402,7 @@ function getOriginalJs(js_code) {
     },
     (text) => {
       try {
-        // return RSA.decode(text, rsa_private_key, null);
-        return rsaModule.decode(text, rsa_private_key, 'PKCS1', 'base64', 1, 1, true); // zy-use-hiker-module
+        return RSA.decode(text, rsa_private_key, null);
       } catch (e: any) {
         logger('非rsa加密');
         return '';
