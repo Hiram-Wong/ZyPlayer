@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onActivated, onMounted, ref, reactive, watch, computed } from 'vue';
+import { onActivated, onMounted, ref, reactive, computed } from 'vue';
 
 import { t } from '@/locales';
 import { fetchAnalyzePage, putAnalyze, delAnalyze, addAnalyze, putAnalyzeDefault } from '@/api/analyze';
@@ -115,17 +115,6 @@ const tableConfig = ref({
   group: [],
   flag: []
 });
-
-watch(
-  () => tableConfig.value.rawData,
-  (_, oldValue) => {
-    if (oldValue.length > 0) {
-      emitter.emit('refreshAnalyzeConfig');
-    }
-  }, {
-    deep: true
-  }
-);
 
 onMounted(() => {
   reqFetch(pagination.current, pagination.pageSize, searchValue.value);
@@ -284,9 +273,8 @@ const handleOpChange = async (type, doc) => {
 
   if (['enable', 'disable', 'delete', 'default'].includes(type)) {
     refreshTable();
+    emitter.emit('refreshAnalyzeConfig');
   };
-
-  emitter.emit('refreshAnalyzeConfig');
 };
 
 const handleDialogUpdate = async (type: string, doc: object) => {
@@ -301,6 +289,7 @@ const handleDialogUpdate = async (type: string, doc: object) => {
   };
 
   refreshTable();
+  emitter.emit('refreshAnalyzeConfig');
 };
 
 const handleOpSearch = (value: string) => {

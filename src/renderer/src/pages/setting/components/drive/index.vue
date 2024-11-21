@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onActivated, onMounted, ref, reactive, watch, computed } from 'vue';
+import { onActivated, onMounted, ref, reactive, computed } from 'vue';
 
 import { t } from '@/locales';
 import { fetchDrivePage, putDrive, delDrive, addDrive, putDriveDefault } from '@/api/drive';
@@ -102,17 +102,6 @@ const tableConfig = ref({
   select: [],
   default: ''
 });
-
-watch(
-  () => tableConfig.value.rawData,
-  (_, oldValue) => {
-    if (oldValue.length > 0) {
-      emitter.emit('refreshDriveConfig');
-    }
-  }, {
-    deep: true
-  }
-);
 
 onMounted(() => {
   reqFetch(pagination.current, pagination.pageSize, searchValue.value);
@@ -258,9 +247,8 @@ const handleOpChange = async (type, doc) => {
 
   if (['enable', 'disable', 'delete', 'default'].includes(type)) {
     refreshTable();
+    emitter.emit('refreshDriveConfig');
   };
-
-  emitter.emit('refreshDriveConfig');
 };
 
 const handleDialogUpdate = async (type: string, doc: object) => {
@@ -273,6 +261,7 @@ const handleDialogUpdate = async (type: string, doc: object) => {
   };
 
   refreshTable();
+  emitter.emit('refreshDriveConfig');
 };
 
 const handleOpSearch = (value: string) => {

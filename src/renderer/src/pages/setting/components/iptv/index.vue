@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onActivated, onMounted, ref, reactive, watch, computed } from 'vue';
+import { onActivated, onMounted, ref, reactive, computed } from 'vue';
 
 import { t } from '@/locales';
 import { fetchIptvPage, putIptvDefault, putIptv, delIptv, addIptv } from '@/api/iptv';
@@ -105,17 +105,6 @@ const tableConfig = ref({
   select: [],
   default: ''
 });
-
-watch(
-  () => tableConfig.value.rawData,
-  (_, oldValue) => {
-    if (oldValue.length > 0) {
-      emitter.emit('refreshIptvConfig');
-    }
-  }, {
-   deep: true
-  }
-);
 
 onMounted(() => {
   reqFetch(pagination.current, pagination.pageSize, searchValue.value);
@@ -259,9 +248,8 @@ const handleOpChange = async (type, doc) => {
 
   if (['enable', 'disable', 'delete', 'default'].includes(type)) {
     refreshTable();
+    emitter.emit('refreshIptvConfig');
   };
-
-  emitter.emit('refreshIptvConfig');
 };
 
 const handleDialogUpdate = async (type: string, doc: object) => {
@@ -274,6 +262,7 @@ const handleDialogUpdate = async (type: string, doc: object) => {
   };
 
   refreshTable();
+  emitter.emit('refreshIptvConfig');
 };
 
 const handleOpSearch = (value: string) => {
