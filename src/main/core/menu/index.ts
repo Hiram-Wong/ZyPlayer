@@ -1,6 +1,5 @@
 import { platform } from '@electron-toolkit/utils';
 import { shell, app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
-import { join } from 'path';
 import logger from '@main/core/logger';
 
 const createMenu = () => {
@@ -20,7 +19,6 @@ const createMenu = () => {
         {
           label: '重启',
           click: () => {
-            logger.info('[menu] restart app');
             app.relaunch();
             app.quit();
           },
@@ -29,7 +27,6 @@ const createMenu = () => {
           label: '退出',
           accelerator: platform.isMacOS ? 'Cmd+Q' : 'Alt+F4',
           click: () => {
-            logger.info('[menu] quit app');
             app.quit();
           },
         },
@@ -88,7 +85,6 @@ const createMenu = () => {
           label: '打开控制台',
           accelerator: platform.isMacOS ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
           click: () => {
-            logger.info('[menu] open devlop tool');
             const focusedWindow = BrowserWindow.getFocusedWindow();
             if (focusedWindow) {
               const webContents = focusedWindow.webContents;
@@ -99,19 +95,15 @@ const createMenu = () => {
         {
           label: '访问Github',
           click: () => {
-            logger.info('[menu] visit official github, url is https://github.com/Hiram-Wong/ZyPlayer');
             const url = 'https://github.com/Hiram-Wong/ZyPlayer';
             shell.openExternal(url);
           },
         },
         {
-          label: '打开日志',
+          label: '打开数据目录',
           accelerator: process.platform === 'darwin' ? 'Cmd+Shift+T' : 'Ctrl+Shift+T',
           click: () => {
-            const fileName = '/logs/';
-            const url = join(app.getPath('userData'), fileName);
-            logger.info(`[menu] visit local log, path is ${url}`);
-            shell.openPath(url);
+            shell.openPath(app.getPath('userData'));
           },
         },
       ],

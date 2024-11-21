@@ -1,39 +1,30 @@
 import { platform } from '@electron-toolkit/utils';
-import { BrowserWindow, Tray, Menu, app, nativeImage } from 'electron';
-import path from 'path';
+import { BrowserWindow, Tray, Menu, app, shell, nativeImage } from 'electron';
+import { join } from 'path';
 import logger from '@main/core/logger';
 
-const showOrHideAllWindows = () => {
+const showWindows = () => {
   const windows = BrowserWindow.getAllWindows();
   if (windows.length === 0) return;
-
-  const anyVisible = windows.some((win) => win.isVisible());
-
-  windows.forEach((win) => {
-    if (!win.isDestroyed()) {
-      if (anyVisible) {
-        win.hide();
-      } else {
-        win.show();
-      }
-    }
-  });
+  windows.forEach((win) => win.show());
 };
 
 const createTrayMenu = () => {
   return Menu.buildFromTemplate([
     {
-      label: '显示',
+      label: '打开zyfun',
       click() {
-        showOrHideAllWindows();
+        showWindows();
       },
     },
-    { type: 'separator' },
+    {
+      label: '打开数据目录',
+      click: () => shell.openPath(app.getPath('userData')),
+    },
     {
       label: '关于',
       role: 'about',
     },
-    { type: 'separator' },
     {
       label: '退出',
       click: () => {
@@ -47,9 +38,9 @@ const createTrayMenu = () => {
  * Create system tray
  */
 const createSystemTray = () => {
-  // const lightIcon = path.join(app.getAppPath(), 'resources', 'img/icons/', 'tray_light.png');
-  const darkIcon = path.join(app.getAppPath(), 'resources', 'img/icons/', 'tray_dark.png');
-  const colorIcon = path.join(app.getAppPath(), 'resources', 'img/icons/', 'logo.png');
+  // const lightIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_light.png');
+  const darkIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_dark.png');
+  const colorIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'logo.png');
 
   // Create tray icon
   const icon = nativeImage.createFromPath(platform.isMacOS ? darkIcon : colorIcon);
@@ -67,9 +58,7 @@ const createSystemTray = () => {
   mainTray.setToolTip('zyfun');
 
   // Left-click event
-  mainTray.on('click', () => {
-    showOrHideAllWindows();
-  });
+  mainTray.on('click', () => showWindows());
 
   // Tray menu
   if (!platform.isMacOS) mainTray.setContextMenu(createTrayMenu());
