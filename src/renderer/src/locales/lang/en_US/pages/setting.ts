@@ -181,6 +181,7 @@ export default {
     dataMange: 'DataMange',
     checkUpdate: 'CheckUpdate',
     disclaimer: 'Disclaimer',
+    license: 'License',
   },
   message: {
     reboot: 'Reset successfully, application will be restarted',
