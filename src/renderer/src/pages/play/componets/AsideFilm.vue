@@ -695,6 +695,8 @@ const setup = async () => {
     } else {
       videoData.value.skipTime = historyData.value.watchTime;
     };
+  } else {
+    videoData.value.skipTime = historyData.value.watchTime;
   };
 
   // 9. 播放
