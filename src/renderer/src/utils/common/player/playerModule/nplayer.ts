@@ -1,6 +1,6 @@
 import NPlayer, { EVENT as NPlayerEvent, Icon as NPlayerIcon } from 'nplayer';
 import nplayerDanmaku from '@nplayer/danmaku';
-import { publicIcons, publicBarrageSend, publicStream, publicStorage } from './components';
+import { publicIcons, publicBarrageSend, publicStream, playerStorage } from './components';
 
 const elementDeal = {
   createIcon: (html: string, noCls = false) => {
@@ -129,8 +129,9 @@ class NPlayerAdapter {
       delete options.isLive;
     }
 
-    const player: any = new NPlayer(options);
-    player.storage = new publicStorage('player_settings');
+    let player;
+    player = new NPlayer(options);
+    player.storage = playerStorage;
 
     const headers = options.headers || {};
     switch (options.type) {

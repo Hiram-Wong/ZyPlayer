@@ -1,5 +1,5 @@
 import DPlayer from 'dplayer';
-import { publicIcons, publicStream, publicStorage } from './components';
+import { publicIcons, publicStream, playerStorage } from './components';
 
 const elementDeal = {
   replace: (el: string, newEle: string) => {
@@ -16,6 +16,7 @@ const elementDeal = {
     controlSetting!.insertAdjacentHTML('afterend', newEle);
   },
 };
+
 class CustomDPlayer extends DPlayer {
   instances: any[] = [];
   constructor(options) {
@@ -87,7 +88,7 @@ class CustomDPlayer extends DPlayer {
    * @returns {CustomDPlayer} 返回当前实例，支持链式调用。
    */
   once(name: string, callback?: Function) {
-    const self = this;
+    const self: any = this;
     function listener(...args) {
       setTimeout(() => {
         self.off(name, listener);
@@ -95,7 +96,6 @@ class CustomDPlayer extends DPlayer {
       if (callback) callback.apply(self, args);
     }
 
-    // @ts-ignore
     self.events.on(name, listener);
     return this;
   }
@@ -106,11 +106,20 @@ class CustomDPlayer extends DPlayer {
    * @returns
    */
   muted(status: boolean) {
+    const self: any = this;
     if (typeof status === 'boolean') {
-      this.video.muted = status;
-      this.switchVolumeIcon();
+      self.video.muted = status;
+      if (status) {
+        self.template.volumeIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 21 32">
+    <path d="M13.728 6.272v19.456q0 0.448-0.352 0.8t-0.8 0.32-0.8-0.32l-5.952-5.952h-4.672q-0.48 0-0.8-0.352t-0.352-0.8v-6.848q0-0.48 0.352-0.8t0.8-0.352h4.672l5.952-5.952q0.32-0.32 0.8-0.32t0.8 0.32 0.352 0.8z"></path>
+</svg>`;
+        self.bar.set('volume', 0, 'width');
+      } else {
+        self.switchVolumeIcon();
+        self.bar.set('volume', self.volume(), 'width');
+      }
     }
-    return this.video.muted;
+    return self.video.muted;
   }
 }
 
@@ -205,8 +214,14 @@ class DPlayerAdapter {
     const startTime = options?.startTime || 0;
     delete options.startTime;
 
-    const player: any = new CustomDPlayer({ ...options });
-    player.storage = new publicStorage('player_settings');
+    let player;
+    options.volume =
+      playerStorage.get('volume') === null || playerStorage.get('volume') === undefined
+        ? 1
+        : playerStorage.get('volume');
+    const muted = playerStorage.get('muted') || false;
+    player = new CustomDPlayer({ ...options });
+    player.storage = playerStorage;
 
     // 元素替换，原生太丑
     elementDeal.replace('.dplayer-comment-icon', publicIcons.danmu);
@@ -272,13 +287,7 @@ class DPlayerAdapter {
 
     player.once('canplay', () => {
       if (!options.live) player.speed(player.storage.get('playrate') || 1);
-      const volume =
-        player.storage.get('volume') === null || player.storage.get('volume') === undefined
-          ? 1
-          : player.storage.get('volume');
-      player.volume(volume, true, false);
-      player.muted(player.storage.get('muted') || false); // 必须在volume之后设置,不然会被覆盖
-
+      player.muted(muted);
       if (!options.live && startTime && startTime > 0) player.seek(startTime);
     });
 

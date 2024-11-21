@@ -9,7 +9,7 @@ import Mp4Plugin from 'xgplayer-mp4';
 import ShakaPlugin from 'xgplayer-shaka';
 // import DashPlugin from 'xgplayer-dash';
 
-import { publicColor, publicIcons, publicStorage } from './components';
+import { publicColor, publicIcons, playerStorage } from './components';
 
 class XgPlayerAdapter {
   player: XgPlayer | null = null;
@@ -134,6 +134,13 @@ class XgPlayerAdapter {
     delete options.type;
     delete options.headers;
     let player;
+    options.volume =
+      playerStorage.get('volume') === null || playerStorage.get('volume') === undefined
+        ? 1
+        : playerStorage.get('volume');
+    if (playerStorage.get('muted') || false) {
+      options.autoplayMuted = true;
+    }
     if (options.isLive) {
       delete options.startTime;
       SimplePlayer.defaultPreset = LivePreset;
@@ -142,16 +149,10 @@ class XgPlayerAdapter {
       options.plugins = [...options.plugins, Danmu];
       player = new XgPlayer({ ...options });
     }
-
-    player.storage = new publicStorage('player_settings');
+    player.storage = playerStorage;
 
     player.once(Events.READY, () => {
       if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
-      player.muted = player.storage.get('muted') || false;
-      player.volume =
-        player.storage.get('volume') === null || player.storage.get('volume') === undefined
-          ? 1
-          : player.storage.get('volume');
     });
 
     this.publicListener.playrateUpdate = () => {

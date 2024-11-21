@@ -57,4 +57,6 @@ class publicStorage {
   }
 }
 
-export { publicBarrageSend, publicStorage };
+const playerStorage = new publicStorage('player_settings');
+
+export { publicBarrageSend, publicStorage, playerStorage };

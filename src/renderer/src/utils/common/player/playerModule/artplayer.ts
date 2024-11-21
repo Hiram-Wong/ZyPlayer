@@ -1,6 +1,6 @@
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
-import { publicBarrageSend, publicColor, publicIcons, publicStream, publicStorage } from './components';
+import { publicBarrageSend, publicColor, publicIcons, publicStream, playerStorage } from './components';
 
 class ArtPlayerAdapter {
   player: Artplayer | null = null;
@@ -131,24 +131,22 @@ class ArtPlayerAdapter {
   create = (options: any): Artplayer => {
     options = { ...this.options, ...options };
     options.container = `#${options.container}`;
-    if (options.isLive) {
-      delete options?.plugins;
-    }
+    if (options.isLive) delete options?.plugins;
     const startTime = options?.startTime || 0;
     delete options.startTime;
 
-    Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
     let player;
+    options.volume =
+      playerStorage.get('volume') === null || playerStorage.get('volume') === undefined
+        ? 1
+        : playerStorage.get('volume');
+    options.muted = playerStorage.get('muted') || false;
+    Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
     player = new Artplayer({ ...options });
-    player.storage = new publicStorage('player_settings');
+    player.storage = playerStorage;
 
     player.once('ready', () => {
       if (!options.isLive) player.playbackRate = player.storage.get('playrate') || 1;
-      player.muted = player.storage.get('muted') || false;
-      player.volume =
-        player.storage.get('volume') === null || player.storage.get('volume') === undefined
-          ? 1
-          : player.storage.get('volume');
       if (!options.isLive && startTime && startTime > 0) player.seek = startTime;
     });
 
