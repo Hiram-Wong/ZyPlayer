@@ -267,7 +267,7 @@ export default {
     },
     table: {
       site: '影视',
-      iptv: '直播',
+      iptv: '电视',
       channel: '频道',
       analyze: '解析',
       drive: '网盘',
