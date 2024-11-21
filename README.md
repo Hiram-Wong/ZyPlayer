@@ -253,6 +253,7 @@ ps:
       "id": "3293dc45-cf14-9c66-3028-5b7765b240b7",// id唯一值不可重复[uuidv4]
       "name": "alist", // 名称[string]
       "server": "http://alist.xxx.pro/", // 网盘地址[string]
+      "showAll": false, // 是否启用[boolean | true显示全部-false显示video]
       "startPage": "", // 开始页路径[string]
       "search": false, // 是否支持搜索[boolean | true启用-false禁用] 未启用预留
       "headers": "{}", // 请求头[string] 未启用预留

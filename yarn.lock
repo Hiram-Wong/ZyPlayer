@@ -2189,10 +2189,10 @@
   resolved "https://registry.npmmirror.com/@types/web-bluetooth/-/web-bluetooth-0.0.20.tgz#f066abfcd1cbe66267cdbbf0de010d8a41b41597"
   integrity sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==
 
-"@types/web@^0.0.180":
-  version "0.0.180"
-  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.180.tgz#8398024655ff6acf3913e087876f2d59f61e4a5d"
-  integrity sha512-G4sAw9smNoDTMBQtNupDd+2v9SWlqJfdOSRXbMg/KFLmYYhq+RI5oK98kXubfLB/49LKMN7eEzBaGtLMSEAy9A==
+"@types/web@^0.0.181":
+  version "0.0.181"
+  resolved "https://registry.npmmirror.com/@types/web/-/web-0.0.181.tgz#0b9fd751dfd1718fe1a205a0a4bf99751aa30d7d"
+  integrity sha512-ga9inc6ImSB69vxn9uyOiodBxYCRmBQpicRP1yF9MPnpQktbQrZ0L6NsFcx3BSZLVYE8cZwScSkME/EoXw7vVA==
 
 "@types/yauzl@^2.9.1":
   version "2.10.3"
@@ -2535,25 +2535,25 @@
   resolved "https://registry.npmmirror.com/@vue/shared/-/shared-3.5.13.tgz#87b309a6379c22b926e696893237826f64339b6f"
   integrity sha512-/hnE/qP5ZoGpol0a5mDi45bOd7t3tjYJBjsgCsivow7D48cJeV5l05RD82lPqi7gRiphZM37rnhW1l6ZoCNNnQ==
 
-"@vueuse/core@11.2.0":
-  version "11.2.0"
-  resolved "https://registry.npmmirror.com/@vueuse/core/-/core-11.2.0.tgz#3fc6c0963051bb154dc4c08061889405e3fc745d"
-  integrity sha512-JIUwRcOqOWzcdu1dGlfW04kaJhW3EXnnjJJfLTtddJanymTL7lF1C0+dVVZ/siLfc73mWn+cGP1PE1PKPruRSA==
+"@vueuse/core@11.3.0":
+  version "11.3.0"
+  resolved "https://registry.npmmirror.com/@vueuse/core/-/core-11.3.0.tgz#bb0bd1f0edd5435d20694dbe51091cf548653a4d"
+  integrity sha512-7OC4Rl1f9G8IT6rUfi9JrKiXy4bfmHhZ5x2Ceojy0jnd3mHNEvV4JaRygH362ror6/NZ+Nl+n13LPzGiPN8cKA==
   dependencies:
     "@types/web-bluetooth" "^0.0.20"
-    "@vueuse/metadata" "11.2.0"
-    "@vueuse/shared" "11.2.0"
+    "@vueuse/metadata" "11.3.0"
+    "@vueuse/shared" "11.3.0"
     vue-demi ">=0.14.10"
 
-"@vueuse/metadata@11.2.0":
-  version "11.2.0"
-  resolved "https://registry.npmmirror.com/@vueuse/metadata/-/metadata-11.2.0.tgz#fd02cbbc7d08cb4592fceea0486559b89ae38643"
-  integrity sha512-L0ZmtRmNx+ZW95DmrgD6vn484gSpVeRbgpWevFKXwqqQxW9hnSi2Ppuh2BzMjnbv4aJRiIw8tQatXT9uOB23dQ==
+"@vueuse/metadata@11.3.0":
+  version "11.3.0"
+  resolved "https://registry.npmmirror.com/@vueuse/metadata/-/metadata-11.3.0.tgz#be7ac12e3016c0353a3667b372a73aeeee59194e"
+  integrity sha512-pwDnDspTqtTo2HwfLw4Rp6yywuuBdYnPYDq+mO38ZYKGebCUQC/nVj/PXSiK9HX5otxLz8Fn7ECPbjiRz2CC3g==
 
-"@vueuse/shared@11.2.0":
-  version "11.2.0"
-  resolved "https://registry.npmmirror.com/@vueuse/shared/-/shared-11.2.0.tgz#7fb2f3cade6b6c00ef97e613f187ee9bdcfb9a3a"
-  integrity sha512-VxFjie0EanOudYSgMErxXfq6fo8vhr5ICI+BuE3I9FnX7ePllEsVrRQ7O6Q1TLgApeLuPKcHQxAXpP+KnlrJsg==
+"@vueuse/shared@11.3.0":
+  version "11.3.0"
+  resolved "https://registry.npmmirror.com/@vueuse/shared/-/shared-11.3.0.tgz#086a4f35bf5bcec5655a03b80eae582605a4b21d"
+  integrity sha512-P8gSSWQeucH5821ek2mn/ciCk+MS/zoRKqdQIM3bHq6p7GXDAJLmnRRKmF5F65sAVJIfzQlwR3aDzwCn10s8hA==
   dependencies:
     vue-demi ">=0.14.10"
 
@@ -7372,10 +7372,10 @@ open@^10.1.0:
     is-inside-container "^1.0.0"
     is-wsl "^3.1.0"
 
-openai@^4.72.0:
-  version "4.72.0"
-  resolved "https://registry.npmmirror.com/openai/-/openai-4.72.0.tgz#61630553157a0c9bb1c304b1dd4d2f90e9ec4cf7"
-  integrity sha512-hFqG9BWCs7L7ifrhJXw7mJXmUBr7d9N6If3J9563o0jfwVA4wFANFDDaOIWFdgDdwgCXg5emf0Q+LoLCGszQYA==
+openai@^4.73.0:
+  version "4.73.0"
+  resolved "https://registry.npmmirror.com/openai/-/openai-4.73.0.tgz#b8f8a4793d4db91e7eeab7235446d2cfe3aa0e9c"
+  integrity sha512-NZstV77w3CEol9KQTRBRQ15+Sw6nxVTicAULSjYO4wn9E5gw72Mtp3fAVaBFXyyVPws4241YmFG6ya4L8v03tA==
   dependencies:
     "@types/node" "^18.11.18"
     "@types/node-fetch" "^2.6.4"
@@ -8026,10 +8026,10 @@ punycode@^2.1.0:
   resolved "https://registry.npmmirror.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@^23.8.0:
-  version "23.8.0"
-  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-23.8.0.tgz#745be0a509734c65bd678c08bc9418b0f142cf36"
-  integrity sha512-c2ymGN2M//We7pC+JhP2dE/g4+qnT89BO+EMSZyJmecN3DN6RNqErA7eH7DrWoNIcU75r2nP4VHa4pswAL6NVg==
+puppeteer-core@^23.9.0:
+  version "23.9.0"
+  resolved "https://registry.npmmirror.com/puppeteer-core/-/puppeteer-core-23.9.0.tgz#24add69fb58dde4ac49d165872b44a30d2bf5b32"
+  integrity sha512-hLVrav2HYMVdK0YILtfJwtnkBAwNOztUdR4aJ5YKDvgsbtagNr6urUJk9HyjRA9e+PaLI3jzJ0wM7A4jSZ7Qxw==
   dependencies:
     "@puppeteer/browsers" "2.4.1"
     chromium-bidi "0.8.0"
@@ -9099,10 +9099,10 @@ tdesign-icons-vue-next@^0.3.3:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.10.3:
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.10.3.tgz#5850e12c3d61db202cb93d81422cdc90a534a7e9"
-  integrity sha512-5CiK3Ov3s0NmhxreTYuN6OVh1MxGXAsFVFb3LD95iQegfnbe9vzt2/aoBSrKo6o3c6qeF1jBdLGMmyOhgDpR3w==
+tdesign-vue-next@^1.10.4:
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.10.4.tgz#15db82f6b477d2fe7c259a42baab46f34b18950d"
+  integrity sha512-DdRf2WZKNwDVZ3y9+xxJi9XJmYyZjSnkJDDlDsUopPhg3jiUiJEdyUuAkAJIljgda6GZk+scrg8b8Am+kySbrw==
   dependencies:
     "@babel/runtime" "^7.22.6"
     "@popperjs/core" "^2.11.8"
