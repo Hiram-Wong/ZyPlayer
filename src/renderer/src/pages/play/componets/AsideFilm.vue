@@ -281,10 +281,11 @@ const shareFormData = ref({
 });
 const downloadFormData = ref({ season: {}, current: '' });
 const settingFormData = ref({
-  skipStartEnd: false,
+  skipHeadAndEnd: false,
   skipTimeInStart: 30,
   skipTimeInEnd: 30,
-  preloadNext: false,
+  playNextPreload: false,
+  playNextEnabled: true,
   skipAd: false
 });
 const active = ref({
@@ -455,12 +456,14 @@ const downloadEvent = () => {
 };
 
 const settingEvent = () => {
+  const playConf = extConf.value.setting.playConf;
   settingFormData.value = {
-    skipStartEnd: extConf.value.setting.skipStartEnd,
+    skipHeadAndEnd: playConf.skipHeadAndEnd,
+    playNextPreload: playConf.playNextPreload,
+    playNextEnabled: playConf.playNextEnabled,
+    skipAd: playConf.skipAd,
     skipTimeInStart: videoData.value.skipTimeInStart,
-    skipTimeInEnd: videoData.value.skipTimeInEnd,
-    preloadNext: extConf.value.setting.preloadNext,
-    skipAd: extConf.value.setting.skipAd
+    skipTimeInEnd: videoData.value.skipTimeInEnd
   };
   active.value.setting = true;
 };
@@ -487,7 +490,7 @@ const callPlay = async (item) => {
     } else {
       analyzeType = -1;
     }
-    response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.skipAd);
+    response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.playConf.skipAd);
   };
 
   if (response?.url) {
@@ -566,7 +569,7 @@ const switchSeasonEvent = async (item) => {
     videoData.value.playEnd = false;
   };
   videoData.value.skipTime = videoData.value.watchTime;
-  if (extConf.value.setting.skipStartEnd) {
+  if (extConf.value.setting.playConf.skipHeadAndEnd) {
     if (videoData.value.skipTime < videoData.value.skipTimeInStart) {
       videoData.value.skipTime = videoData.value.skipTimeInStart;
     }
@@ -590,9 +593,10 @@ const settingUpdateEvent = (item) => {
   historyData.value.skipTimeInEnd = item.skipTimeInEnd;
   videoData.value.skipTimeInStart = item.skipTimeInStart;
   videoData.value.skipTimeInEnd = item.skipTimeInEnd;
-  extConf.value.setting.skipAd = item.skipAd;
-  extConf.value.setting.preloadNext = item.preloadNext;
-  extConf.value.setting.skipStartEnd = item.skipStartEnd;
+  extConf.value.setting.playConf.skipHeadAndEnd = item.skipHeadAndEnd;
+  extConf.value.setting.playConf.playNextPreload = item.playNextPreload;
+  extConf.value.setting.playConf.playNextEnabled = item.playNextEnabled;
+  extConf.value.setting.playConf.skipAd = item.skipAd;
 
   emits('update', {
     type: 'film',
@@ -689,7 +693,7 @@ const setup = async () => {
   fetchBinge();
 
   // 8. 获取跳过时间
-  if (extConf.value.setting.skipStartEnd) {
+  if (extConf.value.setting.playConf.skipHeadAndEnd) {
     if (historyData.value.watchTime < videoData.value.skipTimeInStart) {
       videoData.value.skipTime = videoData.value.skipTimeInStart;
     } else {
@@ -720,7 +724,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   };
 
   // 2.获取跳过时间
-  const { preloadNext, skipStartEnd, skipAd, barrage } = extConf.value.setting;
+  const { preloadNext, skipStartEnd, playConf, barrage } = extConf.value.setting;
   const watchTime = skipStartEnd ? currentTime + videoData.value.skipTimeInEnd : currentTime;
   // console.log(
   //   `[player][timeUpdate] - current:${currentTime}; watch:${watchTime}; duration:${duration}; percentage:${Math.trunc((currentTime / duration) * 100)}%`,
@@ -760,7 +764,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
         } else {
           analyzeType = -1;
         }
-        const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, skipAd);
+        const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, playConf.skipAd);
         if (response?.url) {
           tmp.value.preloadNext.url = response.url;
           tmp.value.preloadNext.headers = response.headers;

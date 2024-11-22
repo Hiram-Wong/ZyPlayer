@@ -10,13 +10,13 @@
       <div class="setting-dialog-container dialog-container-padding">
         <div class="data-item top">
           <t-form ref="form" :label-width="70" :data="formData" @submit="onSubmit">
-            <t-form-item :label="$t('pages.player.setting.autoSkip')" name="skipStartEnd">
-              <t-radio-group variant="default-filled" v-model="formData.skipStartEnd">
+            <t-form-item :label="$t('pages.player.setting.skipHeadAndEnd')" name="skipHeadAndEnd">
+              <t-radio-group variant="default-filled" v-model="formData.skipHeadAndEnd">
                 <t-radio-button :value="true">{{ $t('pages.setting.form.open') }}</t-radio-button>
                 <t-radio-button :value="false">{{ $t('pages.setting.form.close') }}</t-radio-button>
               </t-radio-group>
             </t-form-item>
-            <div v-if="formData.skipStartEnd" class="auto-skip-warp">
+            <div v-if="formData.skipHeadAndEnd" class="auto-skip-warp">
               <t-form-item name="skipTimeInStart">
                 <t-input-number v-model="formData.skipTimeInStart" theme="normal">
                   <template #label>{{ $t('pages.player.setting.skipStart') }}</template>
@@ -30,8 +30,14 @@
                 </t-input-number>
               </t-form-item>
             </div>
-            <t-form-item :label="$t('pages.player.setting.autoNext')" name="preloadNext">
-              <t-radio-group variant="default-filled" v-model="formData.preloadNext">
+            <t-form-item :label="$t('pages.player.setting.playNextEnabled')" name="playNextEnabled">
+              <t-radio-group variant="default-filled" v-model="formData.playNextEnabled">
+                <t-radio-button :value="true">{{ $t('pages.setting.form.open') }}</t-radio-button>
+                <t-radio-button :value="false">{{ $t('pages.setting.form.close') }}</t-radio-button>
+              </t-radio-group>
+            </t-form-item>
+            <t-form-item :label="$t('pages.player.setting.playNextPreload')" name="playNextPreload">
+              <t-radio-group variant="default-filled" v-model="formData.playNextPreload">
                 <t-radio-button :value="true">{{ $t('pages.setting.form.open') }}</t-radio-button>
                 <t-radio-button :value="false">{{ $t('pages.setting.form.close') }}</t-radio-button>
               </t-radio-group>
@@ -69,10 +75,11 @@ const props = defineProps({
   data: {
     type: Object,
     default: {
-      skipStartEnd: false,
+      skipHeadAndEnd: false,
       skipTimeInStart: 30,
       skipTimeInEnd: 30,
-      preloadNext: false,
+      playNextPreload: false,
+      playNextEnabled: true,
       skipAd: false
     },
   },

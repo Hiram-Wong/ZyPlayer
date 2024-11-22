@@ -49,12 +49,13 @@ export default {
   },
   setting: {
     title: '设置',
-    autoSkip: '跳进度',
-    autoNext: '预加载',
+    skipHeadAndEnd: '跳进度',
+    playNextEnabled: '续下集',
+    playNextPreload: '预加载',
     skipStart: '开始',
     skipEnd: '结束',
     skipSeconds: '秒',
-    skipAd: '跳广告',
+    skipAd: '过广告',
     tip: '开关全局生效',
   },
   download: {

@@ -49,12 +49,13 @@ export default {
   },
   setting: {
     title: 'Setting',
-    autoSkip: 'Skip Time',
-    autoNext: 'Preload',
+    skipHeadAndEnd: 'SkipTime',
+    playNextEnabled: 'AutoNext',
+    playNextPreload: 'Preload',
     skipStart: 'Start',
     skipEnd: 'End',
     skipSeconds: 'S',
-    skipAd: 'Skip Ads',
+    skipAd: 'SkipAd',
     tip: 'The switch takes effect globally.',
   },
   download: {

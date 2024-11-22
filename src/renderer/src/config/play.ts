@@ -3,16 +3,19 @@ export default {
   status: false,
   setting: {
     playerMode: {
-      type: 'dplayer',
-      external: ''
+      type: 'artplayer',
+      external: '',
     },
     snifferMode: {
       type: 'pie',
-      url: ''
+      url: '',
     },
-    skipStartEnd: false,
-    preloadNext: false,
-    skipAd: false,
+    playConf: {
+      skipHeadAndEnd: false,
+      playNextPreload: false,
+      playNextEnabled: true,
+      skipAd: false,
+    },
     barrage: {
       url: '',
       key: '',
@@ -20,8 +23,8 @@ export default {
       start: '',
       mode: '',
       color: '',
-      content: ''
-    }
+      content: '',
+    },
   },
   data: {
     info: {},
