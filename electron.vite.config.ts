@@ -87,7 +87,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
               artplayer: ['artplayer', 'artplayer-plugin-danmuku'],
               dplayer: ['dplayer'],
               nplayer: ['nplayer', '@nplayer/danmaku'],
-              videoDecoder: ['flv.js', 'hls.js', 'shaka-player', 'mpegts.js'],
+              'video-decoder': ['flv.js', 'hls.js', 'shaka-player', 'mpegts.js'],
               tdesign: ['tdesign-vue-next', 'tdesign-icons-vue-next'],
               md: ['github-markdown-css', 'markdown-it', 'markdown-it-highlightjs', 'markdown-it-mathjax3'],
               crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa'],
