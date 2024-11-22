@@ -145,9 +145,9 @@
       font-size: 14px;
       height: 40px;
       position: relative;
-      background: hsla(0, 0%, 100%, 0.06);
-      box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.16);
-      border-radius: 8px;
+      box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+      background-image: linear-gradient(hsla(0, 0%, 100%, 0.04), hsla(0, 0%, 100%, 0.06));
+      border-radius: var(--td-radius-default);
 
       .func-item {
         align-items: center;
@@ -192,12 +192,7 @@
         height: 24px;
         width: 1px;
         border-right: 1px solid;
-        border-image-source: linear-gradient(
-          180deg,
-          hsla(0, 0%, 100%, 0),
-          hsla(0, 0%, 100%, 0.1) 53%,
-          hsla(0, 0%, 100%, 0)
-        );
+        border-image-source: var(--td-bg-dot);
         border-image-slice: 1;
       }
     }
