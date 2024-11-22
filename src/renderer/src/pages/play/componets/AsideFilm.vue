@@ -737,7 +737,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   throttlePutHistory();
 
   // 4.播放下集  不是最后一集 & 时间>尾部跳过时间+观看时间
-  if (!isLast() && watchTime >= duration && duration !== 0 && !tmp.value.end) {
+  if (!isLast() && playConf.playNextEnabled && watchTime >= duration && duration !== 0 && !tmp.value.end) {
     tmp.value.end = true;
     const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
     const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
