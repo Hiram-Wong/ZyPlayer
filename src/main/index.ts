@@ -51,7 +51,7 @@ const setup = async () => {
   await serverInit(); // 后端服务
 };
 
-let reqIdMethod = {}; // 请求id与header列表
+let reqIdMethod = {}; // 请求id与headers列表
 let reqIdRedirect = {}; // 请求id与重定向地址
 
 const ready = () => {
@@ -100,7 +100,6 @@ const ready = () => {
     defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
       let { requestHeaders, url, id } = details;
       const headers = reqIdMethod[details.id] || {};
-      const isLocalhostRef = (url: string) => `${url}`.includes('//localhost') || `${url}`.includes('//127.0.0.1');
 
       // 不处理本地地址
       if (isLocalhostRef(url)) {
