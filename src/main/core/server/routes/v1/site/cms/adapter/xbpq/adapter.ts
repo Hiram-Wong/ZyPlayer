@@ -1901,7 +1901,8 @@ class XbpqAdapter {
       url: input,
       js: this.rule.js,
       header: headers,
-      parse_extra: parse_extra,
+      // parse_extra: parse_extra,
+      parse_extra: p_exrta, // zy-use-hiker-module
     };
     // console.log(playobj);
 
