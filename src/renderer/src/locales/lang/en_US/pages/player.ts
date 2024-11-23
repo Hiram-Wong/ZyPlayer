@@ -1,4 +1,6 @@
 export default {
+  noApi: 'NoApi',
+  noData: 'NoData',
   header: {
     backMain: 'BackToMain',
   },

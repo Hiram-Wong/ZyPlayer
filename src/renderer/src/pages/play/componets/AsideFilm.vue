@@ -78,9 +78,10 @@
                   </template>
                 </t-button>
                 <t-dropdown-menu>
-                  <t-dropdown-item v-for="item in analyzeData.list" :key="item.id" :value="item.id" @click="switchAnalyzeEvent(item.id)">
-                    <span :class="[item.id === active.analyzeId ? 'active' : '']">{{ item.name }}</span>
+                  <t-dropdown-item v-for="item in analyzeData.list" :key="item.id" :active="item.id === active.analyzeId" @click="switchAnalyzeEvent(item.id)">
+                    <span>{{ item.name }}</span>
                   </t-dropdown-item>
+                  <t-dropdown-item v-if="analyzeData.list.length === 0">{{ $t('pages.player.noApi') }}</t-dropdown-item>
                 </t-dropdown-menu>
               </t-dropdown>
             </div>

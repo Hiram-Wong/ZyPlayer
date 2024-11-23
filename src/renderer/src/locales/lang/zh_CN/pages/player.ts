@@ -1,4 +1,6 @@
 export default {
+  noApi: '无接口',
+  noData: '无数据',
   header: {
     backMain: '回到主界面',
   },
