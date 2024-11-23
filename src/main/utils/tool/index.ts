@@ -28,7 +28,7 @@ const toggleWindowVisibility = () => {
   });
 };
 
-const parseCustomUrl = (url) => {
+const parseCustomUrl = (url: string) => {
   const [redirectURL, ...headerParts] = url.split('@');
 
   const headers = headerParts.reduce((acc, part) => {
