@@ -68,14 +68,14 @@ class CatvodAdapter {
     };
   }
   async category(doc: { [key: string]: string }) {
-    const { page, tid, f } = doc;
+    const { page, tid, f = '{}' } = doc;
     const response = await request({
       url: buildUrl(this.api, `/category`),
       method: 'POST',
       data: {
         id: tid,
         page: page,
-        filters: f,
+        filters: JSON.parse(f),
       },
     });
     const videos: any[] = [];
