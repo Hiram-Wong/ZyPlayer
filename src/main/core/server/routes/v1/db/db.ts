@@ -84,28 +84,40 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     };
   });
   fastify.post(`/${API_PREFIX}/init`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
-    const { url, importType, remoteType } = req.body;
+    const { url, importType, remoteType, importMode } = req.body;
 
     const data = await importData(importType, remoteType, url);
 
-    const tableSetters = {
-      site: site.set,
-      iptv: iptv.set,
-      channel: channel.set,
-      analyze: analyze.set,
-      drive: drive.set,
-      history: history.set,
-      star: star.set,
-      setting: setting.set,
+    const createTableMethodMap = (suffix: 'set' | 'add') => {
+      return {
+        site: site[suffix],
+        iptv: iptv[suffix],
+        channel: channel[suffix],
+        analyze: analyze[suffix],
+        drive: drive[suffix],
+        history: history[suffix],
+        star: star[suffix],
+        setting: setting[suffix],
+      };
     };
+    const tableMethod = importMode === 'additional' ? createTableMethodMap('add') : createTableMethodMap('set');
 
-    TABLES.forEach(async (table) => {
+    if (importMode === 'additional') {
+      delete data.tbl_setting;
+      for (const key in data) {
+        for (let i = 0; i < data[key].length; i++) {
+          delete data[key][i].id;
+        }
+      }
+    }
+
+    for (const table of TABLES) {
       const prefix = table.substring(4);
       // Object.keys 支持同时检查 array 和 object
-      if (data.hasOwnProperty(table) && tableSetters[prefix] && Object.keys(data[table]).length > 0) {
-        await tableSetters[prefix](data[table]);
+      if (data.hasOwnProperty(table) && tableMethod[prefix] && Object.keys(data[table]).length > 0) {
+        await tableMethod[prefix](data[table]);
       }
-    });
+    }
 
     if (data.hasOwnProperty('tbl_setting')) {
       await magrite();
@@ -136,7 +148,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         const res = await instance.rsyncLocal();
         instance = null; // 释放内存
         if (res) {
-          db.source(res);
+          await db.source(res);
           return {
             code: 0,
             msg: 'ok',

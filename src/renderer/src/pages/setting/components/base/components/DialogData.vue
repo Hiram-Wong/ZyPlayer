@@ -18,16 +18,23 @@
                 <p v-else-if="formData.easyConfig.type === 'catvod'" class="tip">{{ $t('pages.setting.data.easyConfig.catvodTip') }}</p>
                 <t-input :label="$t('pages.setting.data.easyConfig.address')" v-model="formData.easyConfig.url"
                   class="input-item" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
-                <t-popconfirm :content="$t('pages.setting.data.easyConfig.confirmTip')" placement="bottom"
-                  @confirm="importData('easy')">
-                  <t-button block>{{ $t('pages.setting.data.easyConfig.confirm') }}</t-button>
-                </t-popconfirm>
+                <div class="button-group-item">
+                  <t-popconfirm :content="$t('pages.setting.data.additionalTip')" placement="bottom"
+                    @confirm="importData('easy', 'additional')">
+                    <t-button block variant="outline">{{ $t('pages.setting.data.additional') }}</t-button>
+                  </t-popconfirm>
+                  <t-popconfirm :content="$t('pages.setting.data.overrideTip')" placement="bottom"
+                    @confirm="importData('easy', 'override')">
+                    <t-button block>{{ $t('pages.setting.data.override') }}</t-button>
+                  </t-popconfirm>
+                </div>
               </t-collapse-panel>
               <t-collapse-panel value="remoteImport" :header="$t('pages.setting.data.configImport.title')">
                 <t-radio-group v-model="formData.importData.type" class="input-item">
                   <t-radio value="remote">{{ $t('pages.setting.data.configImport.remote') }}</t-radio>
                   <t-radio value="local">{{ $t('pages.setting.data.configImport.local') }}</t-radio>
                 </t-radio-group>
+                <p class="tip">{{ $t('pages.setting.data.configImport.tip') }}</p>
                 <div class="input-group-item">
                   <t-input :label="$t('pages.setting.data.configImport.address')"
                     v-model="formData.importData.url"
@@ -37,10 +44,16 @@
                     {{ $t('pages.setting.upload') }}
                   </t-button>
                 </div>
-                <t-popconfirm :content="$t('pages.setting.data.configImport.importTip')" placement="bottom"
-                  @confirm="importData('complete')">
-                  <t-button block  style="margin-top: var(--td-comp-margin-s);">{{ $t('pages.setting.data.configImport.import') }}</t-button>
-                </t-popconfirm>
+                <div class="button-group-item">
+                  <t-popconfirm :content="$t('pages.setting.data.additionalTip')" placement="bottom"
+                    @confirm="importData('complete', 'additional')">
+                    <t-button block variant="outline">{{ $t('pages.setting.data.additional') }}</t-button>
+                  </t-popconfirm>
+                  <t-popconfirm :content="$t('pages.setting.data.overrideTip')" placement="bottom"
+                      @confirm="importData('complete', 'override')">
+                      <t-button block>{{ $t('pages.setting.data.override') }}</t-button>
+                    </t-popconfirm>
+                </div>
               </t-collapse-panel>
               <t-collapse-panel value="exportData" :header="$t('pages.setting.data.configExport.title')">
                 <div class="t-radio-group">
@@ -300,7 +313,7 @@ const refreshEmitter = (arryList: string[]) => {
 };
 
 // 配置导入
-const importData = async (importType) => {
+const importData = async (importType, importMode) => {
   try {
     let url, type;
     if (importType === 'easy') {
@@ -320,6 +333,7 @@ const importData = async (importType) => {
       url: url,
       importType,
       remoteType: type,
+      importMode
     });
     refreshEmitter(res?.table);
     MessagePlugin.success(t('pages.setting.data.success'));
@@ -523,6 +537,10 @@ const rsyncLocalEvent = async () => {
             background-color: var(--td-bg-color-component-hover);
           }
         }
+      }
+      .button-group-item {
+        display: flex;
+        gap: 6px;
       }
     }
 
