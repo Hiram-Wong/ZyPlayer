@@ -34,7 +34,7 @@ const init = async (id: string, debug: boolean = false) => {
   const dbResSource = await site.get(id);
 
   // 检查 dbResSource.type 是否存在
-  if (!dbResSource.type) {
+  if (typeof dbResSource.type !== 'number') {
     throw new Error('dbResSource.type is undefined');
   }
 
