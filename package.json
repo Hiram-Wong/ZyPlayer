@@ -1,13 +1,18 @@
 {
   "name": "zyfun",
-  "version": "3.3.9-beta1122",
+  "version": "3.3.9-beta1123",
   "description": "zyfun video client",
   "main": "./out/main/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Hiram-Wong/ZyPlayer.git"
   },
-  "keywords": ["zyplayer", "zyfun", "electron-app", "video"],
+  "keywords": [
+    "zyplayer",
+    "zyfun",
+    "electron-app",
+    "video"
+  ],
   "author": {
     "name": "Hiram-Wong",
     "email": "admin@catni.cn"
@@ -44,6 +49,7 @@
     "@electron/remote": "^2.1.2",
     "puppeteer-core": "^23.9.0",
     "puppeteer-in-electron": "^3.0.5",
+    "sync-fetch": "^0.6.0-2",
     "sync-request": "^6.1.0"
   },
   "devDependencies": {
@@ -64,7 +70,7 @@
     "@types/electron-localshortcut": "^3.1.3",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.17.13",
-    "@types/node": "^22.9.1",
+    "@types/node": "^22.9.3",
     "@types/uuid": "^10.0.0",
     "@types/web": "^0.0.182",
     "@vitejs/plugin-vue": "^5.2.0",
@@ -93,6 +99,7 @@
     "fastify": "^5.1.0",
     "fastify-logger": "^1.0.1",
     "fastify-plugin": "^5.0.1",
+    "form-data": "^4.0.1",
     "fix-path": "^4.0.0",
     "flv.js": "^1.6.2",
     "fs-extra": "^11.2.0",
@@ -135,7 +142,7 @@
     "tdesign-icons-vue-next": "^0.3.3",
     "tdesign-vue-next": "^1.10.4",
     "tree-kill": "^1.2.2",
-    "typescript": "^5.6.3",
+    "typescript": "^5.7.2",
     "unplugin-auto-import": "^0.18.5",
     "unplugin-vue-components": "^0.27.4",
     "uuid": "^11.0.3",
