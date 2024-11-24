@@ -129,9 +129,8 @@ const handleSelectChange = (val: any[]) => {
   };
 
   .table-container {
-    height: 100%;
+    height: calc(100% - 32px - 2 * var(--td-size-4));
     flex: 1;
-    overflow: hidden;
 
     .table-custom {
       height: 100%;
@@ -140,10 +139,12 @@ const handleSelectChange = (val: any[]) => {
       justify-content: space-between;
     }
 
-
-
     :deep(.t-table) {
       background-color: var(--td-bg-color-container);
+
+      > div:first-child {
+        position: absolute;
+      }
 
       .t-badge {
         padding-left: var(--td-comp-paddingLR-xxs);
@@ -168,7 +169,7 @@ const handleSelectChange = (val: any[]) => {
 
       .t-table__pagination-wrap {
         .t-table__pagination {
-          padding: var(--td-comp-paddingTB-s) 0;
+          padding: var(--td-comp-paddingTB-s) 0 0;
 
           .t-pagination__total {
             color: var(--td-text-color-primary);
