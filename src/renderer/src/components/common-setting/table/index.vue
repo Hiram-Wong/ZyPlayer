@@ -29,6 +29,7 @@
         lazy-load
         :pagination="pagination"
         :loading="dataLoading"
+        header-affixed-top
         @select-change="handleSelectChange"
         @page-change="handlePageChange"
       >
