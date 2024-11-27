@@ -166,7 +166,6 @@ const siteConfig = ref({
 }) as any;
 
 const active = ref({
-  site: '',
   nav: null,
   class: 'homeVod',
   tmpClass: '',
@@ -462,7 +461,12 @@ const playEvent = async (item) => {
   isVisible.loading = true;
 
   try {
-    let site = siteConfig.value.default;
+    let site = item?.relateSite ? item.relateSite: siteConfig.value.default;
+
+    if (!active.value.tmpId || active.value.tmpId !== site.id) {
+      await fetchCmsInit({ sourceId: site.id });
+      active.value.tmpId = site.id;
+    };
 
     // folder模式
     if (item.hasOwnProperty('vod_tag') && item['vod_tag'] === 'folder') {
