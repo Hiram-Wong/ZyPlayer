@@ -47,7 +47,7 @@ class AppYsV2Adapter {
   randomPrefix: string;
   constructor(source) {
     this.source = source;
-    this.type = String(source.ext).includes('v1.vod') ? 1 : 2;
+    this.type = String(source.ext).includes('.vod') ? 1 : 2;
     this.api = source.ext.endsWith('/') ? source.ext.replace(/\/$/, '') : source.ext;
 
     this.rule = {
