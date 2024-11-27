@@ -1,7 +1,7 @@
 <template>
   <div class="code-conversion view-container">
     <div class="header">
-      <title-menu :list="codeConversionList" :active="active.action" class="nav" @change-key="changeNavEvent" />
+      <title-menu :list="navList" :active="active.action" class="nav" @change-key="changeNavEvent" />
     </div>
     <div class="content">
       <div class="input">
@@ -38,7 +38,7 @@ const formData = ref({
 const active = ref({
   action: 'html'
 });
-const codeConversionList = computed(() => {
+const navList = computed(() => {
   return [
     {
       type_name: t('pages.lab.dataCrypto.codeConversion.html'),

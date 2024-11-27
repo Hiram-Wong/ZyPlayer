@@ -3,6 +3,7 @@ import crypto from 'crypto-js';
 import * as he from 'he';
 import pako from 'pako';
 import WxmpRsa from 'wxmp-rsa';
+import smCrypto from 'sm-crypto';
 
 const base64 = (() => {
   const b64map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -214,6 +215,19 @@ const hash = {
   sha3: (val: string) => crypto.SHA3(val).toString(),
   sha384: (val: string) => crypto.SHA384(val).toString(),
   sha512: (val: string) => crypto.SHA512(val).toString(),
+  ripemd160: (val: string) => crypto.RIPEMD160(val).toString(),
+};
+
+const hmac = {
+  'md5-16': (val: string, key: string) => crypto.HmacMD5(val, key).toString().substr(8, 16),
+  'md5-32': (val: string, key: string) => crypto.HmacMD5(val, key).toString(),
+  sha1: (val: string, key: string) => crypto.HmacSHA1(val, key).toString(),
+  sha224: (val: string, key: string) => crypto.HmacSHA224(val, key).toString(),
+  sha256: (val: string, key: string) => crypto.HmacSHA256(val, key).toString(),
+  sha3: (val: string, key: string) => crypto.HmacSHA3(val, key).toString(),
+  sha384: (val: string, key: string) => crypto.HmacSHA384(val, key).toString(),
+  sha512: (val: string, key: string) => crypto.HmacSHA512(val, key).toString(),
+  ripemd160: (val: string, key: string) => crypto.HmacRIPEMD160(val, key).toString(),
 };
 
 const html = {
@@ -265,184 +279,456 @@ const hex = {
   encode: (val: string) => Buffer.from(val, 'utf-8').toString('hex'),
 };
 
-const rc4 = {
-  encode: (val: string, key: string = '') => crypto.RC4.encrypt(val, key).toString(),
-  decode: (val: string, key: string = '') => crypto.RC4.decrypt(val, key).toString(crypto.enc.Utf8),
+const parseEncode = (value: string, encoding: string) => {
+  switch (encoding) {
+    case 'base64':
+      return crypto.enc.Base64.parse(value);
+    case 'hex':
+      return crypto.enc.Hex.parse(value);
+    case 'latin1':
+      return crypto.enc.Latin1.parse(value);
+    case 'utf8':
+      return crypto.enc.Utf8.parse(value);
+    default:
+      return crypto.enc.Utf8.parse(value);
+  }
+};
+const formatEncode = (value: any, encoding: string) => {
+  switch (encoding.toLowerCase()) {
+    case 'base64':
+      return value.toString(); // 整个CipherParams对象(含原数据), 默认输出 Base64
+    case 'hex':
+      return value.ciphertext.toString(); // ciphertext属性(仅密文), 默认输出 Hex
+  }
+};
+const formatDecode = (value: any, encoding: string) => {
+  switch (encoding.toLowerCase()) {
+    case 'utf8':
+      return value.toString(crypto.enc.Utf8);
+    case 'base64':
+      return value.toString(crypto.enc.Base64);
+    case 'hex':
+      return value.toString(crypto.enc.Hex);
+    default:
+      return value.toString(crypto.enc.Utf8);
+  }
+};
+const getMode = (mode: string) => {
+  switch (mode.toLowerCase()) {
+    case 'cbc':
+      return crypto.mode.CBC;
+    case 'cfb':
+      return crypto.mode.CFB;
+    case 'ofb':
+      return crypto.mode.OFB;
+    case 'ctr':
+      return crypto.mode.CTR;
+    case 'ecb':
+      return crypto.mode.ECB;
+    default:
+      return crypto.mode.CBC;
+  }
+};
+const getPad = (padding: string) => {
+  switch (padding.toLowerCase()) {
+    case 'zeropadding':
+      return crypto.pad.ZeroPadding;
+    case 'pkcs5padding':
+    case 'pkcs7padding':
+      return crypto.pad.Pkcs7;
+    case 'ansix923':
+      return crypto.pad.AnsiX923;
+    case 'iso10126':
+      return crypto.pad.Iso10126;
+    case 'iso97971':
+      return crypto.pad.Iso97971;
+    case 'nopadding':
+      return crypto.pad.NoPadding;
+    default:
+      return crypto.pad.ZeroPadding;
+  }
 };
 
-const aes = (() => {
-  const getMode = (mode: string) => {
-    switch (mode) {
-      case 'cbc':
-        return crypto.mode.CBC;
-      case 'cfb':
-        return crypto.mode.CFB;
-      case 'ofb':
-        return crypto.mode.OFB;
-      case 'ctr':
-        return crypto.mode.CTR;
-      case 'ecb':
-        return crypto.mode.ECB;
-      default:
-        return crypto.mode.CBC;
+const rc4 = {
+  encode: (
+    val: string,
+    key: string,
+    encoding: string = 'utf8',
+    keyEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
+    if (!key || !val) return '';
+
+    let plaintext = parseEncode(val, encoding);
+    let v = parseEncode(key, keyEncoding);
+
+    return formatEncode(crypto.RC4.encrypt(plaintext, v), outputEncode);
+  },
+  decode: (
+    val: string,
+    key: string,
+    encoding: string = 'utf8',
+    keyEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
+    if (!key || !val) return '';
+
+    let plaintext = parseEncode(val, encoding);
+    let v = parseEncode(key, keyEncoding);
+
+    return formatDecode(crypto.RC4.toString(plaintext, v), outputEncode);
+  },
+};
+
+const aes = {
+  encode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (![16, 24, 32].includes(k.sigBytes)) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 16) return '';
+
+    let plaintext = parseEncode(src, encoding);
+    let encrypted = crypto.AES.encrypt(plaintext, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    return formatEncode(encrypted, outputEncode);
+  },
+  decode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (![16, 24, 32].includes(k.sigBytes)) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 16) return '';
+
+    let result: string = '';
+    let ciphertext = parseEncode(src, encoding);
+    let cipherParams = crypto.lib.CipherParams.create({
+      ciphertext: ciphertext,
+    });
+    let decrypted = crypto.AES.decrypt(cipherParams, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    try {
+      result = formatDecode(decrypted, outputEncode);
+    } catch {
+      result = '';
     }
-  };
-  const getPadding = (padding: string) => {
-    switch (padding) {
-      case 'ZeroPadding':
-        return crypto.pad.ZeroPadding;
-      case 'Pkcs5Padding':
-        return crypto.pad.Pkcs7;
-      case 'Pkcs7Padding':
-        return crypto.pad.Pkcs7;
-      case 'AnsiX923':
-        return crypto.pad.AnsiX923;
-      case 'Iso10126':
-        return crypto.pad.Iso10126;
-      case 'Iso97971':
-        return crypto.pad.Iso97971;
-      case 'NoPadding':
-        return crypto.pad.NoPadding;
-      default:
-        return crypto.pad.ZeroPadding;
+    return result;
+  },
+};
+
+const des = {
+  encode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (k.sigBytes !== 8) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let plaintext = parseEncode(src, encoding);
+    const encrypted = crypto.DES.encrypt(plaintext, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    return formatEncode(encrypted, outputEncode);
+  },
+  decode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (k.sigBytes !== 8) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let ciphertext = encoding === 'base64' ? crypto.enc.Base64.parse(src) : crypto.enc.Hex.parse(src);
+    let cipherParams = crypto.lib.CipherParams.create({
+      ciphertext: ciphertext,
+    });
+
+    let decrypted = crypto.DES.decrypt(cipherParams, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    let result: string = '';
+    try {
+      result = formatDecode(decrypted, outputEncode);
+    } catch {
+      result = '';
     }
-  };
-  return {
-    encode: (src: string, key: string, mode: string, padding: string, encoding: string, iv: string) => {
-      if (key === '' || src === '' || (mode !== 'ecb' && iv === '')) {
-        return '';
-      }
-      if (key.length !== 16 && key.length !== 24 && key.length !== 32) {
-        return '';
-      }
-      if (mode !== 'ecb' && iv.length !== 16) {
-        return '';
-      }
 
-      let k = crypto.enc.Utf8.parse(key);
-      let plaintext = crypto.enc.Utf8.parse(src);
-      let encrypted = crypto.AES.encrypt(plaintext, k, {
-        iv: mode !== 'ecb' ? crypto.enc.Utf8.parse(iv) : undefined,
-        mode: getMode(mode),
-        padding: getPadding(padding),
-      });
-      const result = encoding === 'base64' ? encrypted.toString() : encrypted.ciphertext.toString();
-      return result;
-    },
-    decode: (src: string, key: string, mode: string, padding: string, encoding: string, iv: string) => {
-      if (key === '' || src === '' || (mode !== 'ecb' && iv === '')) {
-        return '';
-      }
-      if (key.length !== 16 && key.length !== 24 && key.length !== 32) {
-        return '';
-      }
-      if (mode !== 'ecb' && iv.length !== 16) {
-        return '';
-      }
+    return result;
+  },
+};
 
-      let k = crypto.enc.Utf8.parse(key);
-      let result: string = '';
-      let ciphertext = encoding === 'base64' ? crypto.enc.Base64.parse(src) : crypto.enc.Hex.parse(src);
-      let cipherParams = crypto.lib.CipherParams.create({
-        ciphertext: ciphertext,
-      });
-      let decrypted = crypto.AES.decrypt(cipherParams, k, {
-        iv: mode !== 'ecb' ? crypto.enc.Utf8.parse(iv) : undefined,
-        mode: getMode(mode),
-        padding: getPadding(padding),
-      });
-      try {
-        result = decrypted.toString(crypto.enc.Utf8);
-      } catch {
-        result = '';
-      }
-      return result;
-    },
-  };
-})();
+const tripleDES = {
+  encode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
 
-const des = (() => {
-  const getMode = (mode: string) => {
-    switch (mode) {
-      case 'cbc':
-        return crypto.mode.CBC;
-      case 'cfb':
-        return crypto.mode.CFB;
-      case 'ofb':
-        return crypto.mode.OFB;
-      case 'ctr':
-        return crypto.mode.CTR;
-      case 'ecb':
-        return crypto.mode.ECB;
-      default:
-        return crypto.mode.CBC;
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (k.sigBytes !== 24) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let plaintext = parseEncode(src, encoding);
+    const encrypted = crypto.TripleDES.encrypt(plaintext, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    return formatEncode(encrypted, outputEncode);
+  },
+  decode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (k.sigBytes !== 24) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let ciphertext = encoding === 'base64' ? crypto.enc.Base64.parse(src) : crypto.enc.Hex.parse(src);
+    let cipherParams = crypto.lib.CipherParams.create({
+      ciphertext: ciphertext,
+    });
+
+    let decrypted = crypto.TripleDES.decrypt(cipherParams, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    let result: string = '';
+    try {
+      result = formatDecode(decrypted, outputEncode);
+    } catch {
+      result = '';
     }
-  };
-  const getPadding = (padding: string) => {
-    switch (padding) {
-      case 'ZeroPadding':
-        return crypto.pad.ZeroPadding;
-      case 'Pkcs5Padding':
-        return crypto.pad.Pkcs7;
-      case 'Pkcs7Padding':
-        return crypto.pad.Pkcs7;
-      case 'AnsiX923':
-        return crypto.pad.AnsiX923;
-      case 'Iso10126':
-        return crypto.pad.Iso10126;
-      case 'Iso97971':
-        return crypto.pad.Iso97971;
-      case 'NoPadding':
-        return crypto.pad.NoPadding;
-      default:
-        return crypto.pad.ZeroPadding;
+
+    return result;
+  },
+};
+
+const rabbit = {
+  encode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (k.sigBytes !== 16) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let plaintext = parseEncode(src, encoding);
+    const encrypted = crypto.Rabbit.encrypt(plaintext, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    return formatEncode(encrypted, outputEncode);
+  },
+  decode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (k.sigBytes !== 16) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let ciphertext = encoding === 'base64' ? crypto.enc.Base64.parse(src) : crypto.enc.Hex.parse(src);
+    let cipherParams = crypto.lib.CipherParams.create({
+      ciphertext: ciphertext,
+    });
+
+    let decrypted = crypto.Rabbit.decrypt(cipherParams, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    let result: string = '';
+    try {
+      result = formatDecode(decrypted, outputEncode);
+    } catch {
+      result = '';
     }
-  };
-  return {
-    encode: (src: string, key: string, mode: string, padding: string, encoding: string, iv: string) => {
-      if (key === '' || src === '' || (mode !== 'ecb' && iv === '')) {
-        return '';
-      }
 
-      if (key.length !== 8) {
-        return '';
-      }
+    return result;
+  },
+};
 
-      if (mode !== 'ecb' && iv.length !== 8) {
-        return '';
-      }
+const rabbitLegacy = {
+  encode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
 
-      let k = crypto.enc.Utf8.parse(key);
-      let plaintext = crypto.enc.Utf8.parse(src);
-      let encrypted = crypto.DES.encrypt(plaintext, k, {
-        iv: mode !== 'ecb' ? crypto.enc.Utf8.parse(iv) : undefined,
-        mode: getMode(mode),
-        padding: getPadding(padding),
-      });
-      return encoding === 'base64' ? encrypted.toString() : encrypted.ciphertext.toString();
-    },
-    decode: (src: string, key: string, mode: string, padding: string, encoding: string, iv: string) => {
-      let ciphertext = encoding === 'base64' ? crypto.enc.Base64.parse(src) : crypto.enc.Hex.parse(src);
-      let cipherParams = crypto.lib.CipherParams.create({
-        ciphertext: ciphertext,
-      });
-      let k = crypto.enc.Utf8.parse(key);
-      let decrypted = crypto.DES.decrypt(cipherParams, k, {
-        iv: mode !== 'ecb' ? crypto.enc.Utf8.parse(iv) : undefined,
-        mode: getMode(mode),
-        padding: getPadding(padding),
-      });
-      let result: string = '';
-      try {
-        result = decrypted.toString(crypto.enc.Utf8);
-      } catch {
-        result = '';
-      }
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
 
-      return result;
-    },
-  };
-})();
+    if (k.sigBytes !== 16) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let plaintext = parseEncode(src, encoding);
+    const encrypted = crypto.RabbitLegacy.encrypt(plaintext, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    return formatEncode(encrypted, outputEncode);
+  },
+  decode: (
+    src: string,
+    key: string,
+    mode: string,
+    padding: string,
+    encoding: string,
+    iv: string,
+    keyEncoding: string = 'utf8',
+    ivEncoding: string = 'utf8',
+    outputEncode: string = 'base64',
+  ) => {
+    if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
+    if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+    let k = parseEncode(key, keyEncoding);
+    let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+    if (k.sigBytes !== 16) return '';
+    if (mode !== 'ecb' && v.sigBytes !== 8) return '';
+
+    let ciphertext = encoding === 'base64' ? crypto.enc.Base64.parse(src) : crypto.enc.Hex.parse(src);
+    let cipherParams = crypto.lib.CipherParams.create({
+      ciphertext: ciphertext,
+    });
+
+    let decrypted = crypto.RabbitLegacy.decrypt(cipherParams, k, {
+      iv: v,
+      mode: getMode(mode),
+      padding: getPad(padding),
+    });
+    let result: string = '';
+    try {
+      result = formatDecode(decrypted, outputEncode);
+    } catch {
+      result = '';
+    }
+
+    return result;
+  },
+};
 
 const rsa = (() => {
   const isValidHex = (str: string) => {
@@ -534,4 +820,141 @@ const rsa = (() => {
   };
 })();
 
-export { aes, base64, crypto, des, gzip, hash, html, rc4, rsa, unicode, url, hex };
+const sm4 = (() => {
+  const getMode = (mode: string) => {
+    switch (mode.toLowerCase()) {
+      case 'cbc':
+        return 'cbc';
+      case 'ecb':
+        return 'ecb';
+      default:
+        return 'cbc';
+    }
+  };
+  const getPad = (padding: string) => {
+    switch (padding.toLowerCase()) {
+      case 'pkcs5padding':
+      case 'pkcs7padding':
+        return 'pkcs#7';
+      case 'nopadding':
+        return 'none';
+      default:
+        return 'pkcs#7';
+    }
+  };
+  const parseEncode = (value: string | bytes, encoding: string) => {
+    switch (encoding.toLowerCase()) {
+      case 'base64':
+        return Buffer.from(value, 'base64');
+      case 'hex':
+        return Buffer.from(value, 'hex');
+      case 'utf8':
+        return Buffer.from(value, 'utf-8');
+      case 'latin1':
+        return Buffer.from(value, 'latin1');
+      case 'bytes':
+        Buffer.from(value);
+      default:
+        return Buffer.from(value, 'utf-8');
+    }
+  };
+  const formatDecode = (value, encoding) => {
+    switch (encoding.toLowerCase()) {
+      case 'utf8':
+        return value.toString('utf8');
+      case 'base64':
+        return value.toString('base64');
+      case 'hex':
+        return value.toString('hex');
+      case 'bytes':
+        return Array.from(value);
+      default:
+        return value.toString('base64');
+    }
+  };
+  return {
+    encode: (
+      src: string,
+      key: string,
+      mode: string,
+      padding: string,
+      encoding: string,
+      iv: string,
+      keyEncoding: string = 'utf8',
+      ivEncoding: string = 'utf8',
+      outputEncode: string = 'base64',
+    ) => {
+      if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
+      if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+      let k = parseEncode(key, keyEncoding);
+      let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+      if (k.length !== 16) return '';
+      if (mode !== 'ecb' && v?.length !== 16) return '';
+      let plaintext = parseEncode(src, encoding);
+      let encrypted = smCrypto.sm4.encrypt(plaintext, k, {
+        iv: v,
+        mode: getMode(mode),
+        padding: getPad(padding),
+        output: 'array',
+      });
+      return formatDecode(Buffer.from(encrypted), outputEncode);
+    },
+    decode: (
+      src: string,
+      key: string,
+      mode: string,
+      padding: string,
+      encoding: string,
+      iv: string,
+      keyEncoding: string = 'utf8',
+      ivEncoding: string = 'utf8',
+      outputEncode: string = 'base64',
+    ) => {
+      if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
+      if (key === '' || src === '' || (mode.toLowerCase() !== 'ecb' && iv === '')) return '';
+
+      let k = parseEncode(key, keyEncoding);
+      let v = mode.toLowerCase() !== 'ecb' ? parseEncode(iv, ivEncoding) : undefined;
+
+      if (k.length !== 16) return '';
+      if (mode !== 'ecb' && v?.length !== 16) return '';
+
+      let result: string = '';
+      let ciphertext = parseEncode(src, encoding);
+      let decrypted = smCrypto.sm4.decrypt(ciphertext, k, {
+        iv: v,
+        mode: getMode(mode),
+        padding: getPad(padding),
+        output: 'array',
+      });
+      try {
+        result = formatDecode(Buffer.from(decrypted), outputEncode);
+      } catch {
+        result = '';
+      }
+      return result;
+    },
+  };
+})();
+
+export {
+  aes,
+  base64,
+  crypto,
+  des,
+  tripleDES,
+  gzip,
+  hash,
+  hmac,
+  html,
+  rabbit,
+  rabbitLegacy,
+  rc4,
+  rsa,
+  sm4,
+  unicode,
+  url,
+  hex,
+};
