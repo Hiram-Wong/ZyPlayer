@@ -51,13 +51,18 @@ class T1Adapter {
     };
   }
   async homeVod() {
-    const response = await request({
+    let response;
+    response = await request({
       url: this.api,
       method: 'GET',
       params: {
         ac: 'class',
       },
     });
+    if (Array.isArray(response?.list) && response.list.length > 0 && !response.list[0].vod_pic) {
+      const ids = response.list.map((item) => item.vod_id);
+      response = await this.detail({ id: ids });
+    }
     const videos: any[] = [];
     for (const vod of response.list) {
       videos.push({
@@ -80,7 +85,7 @@ class T1Adapter {
       url: this.api,
       method: 'GET',
       params: {
-        ac: 'detail',
+        ac: 'videolist',
         t: tid,
         pg: page,
       },
@@ -108,7 +113,7 @@ class T1Adapter {
       method: 'GET',
       params: {
         ac: 'detail',
-        ids: !Array.isArray(id) ? [id] : id,
+        ids: Array.isArray(id) ? id.join(',') : id,
       },
     });
     const videos: any[] = [];
@@ -137,14 +142,19 @@ class T1Adapter {
   }
   async search(doc: { [key: string]: string }) {
     const { wd } = doc;
-    const response = await request({
+    let response;
+    response = await request({
       url: this.api,
       method: 'GET',
       params: {
-        ac: 'detail',
+        ac: 'list',
         wd: encodeURIComponent(wd),
       },
     });
+    if (Array.isArray(response?.list) && response.list.length > 0 && !response.list[0].vod_pic) {
+      const ids = response.list.map((item) => item.vod_id);
+      response = await this.detail({ id: ids });
+    }
     const videos: any[] = [];
     for (const vod of response.list) {
       videos.push({

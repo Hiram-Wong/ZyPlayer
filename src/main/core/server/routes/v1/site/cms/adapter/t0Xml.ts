@@ -65,7 +65,8 @@ class T0Adapter {
     };
   }
   async homeVod() {
-    const response = await request({
+    let response;
+    response = await request({
       url: this.api,
       method: 'GET',
       params: {
@@ -76,6 +77,10 @@ class T0Adapter {
     const xml2json = parser.parse(response);
     const data = xml2json?.rss?.list;
     const videoList = Array.isArray(data?.video) ? data.video : [data?.video];
+    if (Array.isArray(videoList) && videoList.length > 0 && !videoList[0].vod_pic) {
+      const ids = response.list.map((item) => item.vod_id);
+      response = await this.detail({ id: ids });
+    }
     const videos: any[] = [];
     for (const vod of videoList) {
       videos.push({
@@ -98,7 +103,7 @@ class T0Adapter {
       url: this.api,
       method: 'GET',
       params: {
-        ac: 'detail',
+        ac: 'videolist',
         t: tid,
         pg: page,
       },
@@ -130,7 +135,7 @@ class T0Adapter {
       method: 'GET',
       params: {
         ac: 'detail',
-        ids: !Array.isArray(id) ? [id] : id,
+        ids: Array.isArray(id) ? id.join(',') : id,
       },
     });
 
@@ -179,11 +184,12 @@ class T0Adapter {
   }
   async search(doc: { [key: string]: string }) {
     const { wd } = doc;
-    const response = await request({
+    let response;
+    response = await request({
       url: this.api,
       method: 'GET',
       params: {
-        ac: 'detail',
+        ac: 'list',
         wd: encodeURIComponent(wd),
       },
     });
@@ -191,6 +197,10 @@ class T0Adapter {
     const xml2json = parser.parse(response);
     const data = xml2json?.rss?.list;
     const videoList = Array.isArray(data?.video) ? data.video : [data?.video];
+    if (Array.isArray(videoList) && videoList.length > 0 && !videoList[0].vod_pic) {
+      const ids = response.list.map((item) => item.vod_id);
+      response = await this.detail({ id: ids });
+    }
     const videos: any[] = [];
     for (const vod of videoList) {
       videos.push({
