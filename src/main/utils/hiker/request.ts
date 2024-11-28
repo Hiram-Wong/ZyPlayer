@@ -7,3 +7,4 @@ export { module };
 
 // 导出 `syncFetch` 中的所有内容
 export * from './syncFetch';
+// export * from './syncRequest';

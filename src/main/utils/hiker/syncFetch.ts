@@ -29,6 +29,44 @@ const toTitleCase = (str: string) => {
     .join('-');
 };
 
+const toString = (val: any): string => {
+  switch (typeof val) {
+    case 'undefined':
+      return '';
+    case 'number':
+      return String(val);
+    case 'bigint':
+      return `${String(val)}n`;
+    case 'string':
+      return val;
+    case 'boolean':
+      return val ? 'true' : 'false';
+    case 'symbol':
+    case 'function':
+      return val.toString();
+    case 'object':
+      if (val === null) return 'null';
+      if (val instanceof Date) return val.toISOString();
+      if (val instanceof Map) return JSON.stringify(Object.fromEntries(val));
+      if (val instanceof Set) return JSON.stringify(Array.from(val));
+      try {
+        return JSON.stringify(val);
+      } catch {
+        return '[object Object]';
+      }
+    default:
+      return val?.toString?.() || '';
+  }
+};
+
+const serialize2dict = (headers) => {
+  const headersDict = {};
+  for (const [key, value] of headers.entries()) {
+    headersDict[key] = value;
+  }
+  return headersDict;
+};
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
 
 interface RequestOptions {
@@ -106,28 +144,28 @@ const fetch = (url: string, options: RequestOptions = {}) => {
     console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
     let res = syncFetch(url, config);
-    res.formatHeaders = JSON.parse(JSON.stringify(res.headers));
+    res.formatHeaders = serialize2dict(res.headers);
     res.getBody = function (encoding: BufferEncoding | undefined) {
       return encoding ? Buffer.from(res.buffer()).toString(encoding) : res.buffer();
     };
 
     if (options?.onlyHeaders) {
-      return res.formatHeaders;
+      return toString(res.formatHeaders);
     }
     if (options?.withHeaders) {
-      return { headers: res.formatHeaders, body: res.getBody(charset) };
+      return toString({ headers: res.formatHeaders, body: res.getBody(charset) });
     }
     if (options?.withStatusCode) {
-      return { headers: res.formatHeaders, body: res.getBody(charset), statusCode: res.status };
+      return toString({ headers: res.formatHeaders, body: res.getBody(charset), statusCode: res.status });
     }
     if (options?.toHex) {
-      return {
+      return toString({
         headers: res.formatHeaders,
         body: Buffer.from(res.getBody()).toString('hex'),
         statusCode: res.status,
-      };
+      });
     }
-    return res.getBody(charset);
+    return toString(res.getBody(charset));
   } catch (err: any) {
     console.log(err);
     return null;
@@ -141,9 +179,10 @@ const fetchCookie = (url: string, options: RequestOptions = {}) => {
   if (options?.withStatusCode) delete options.withStatusCode;
   if (options?.toHex) delete options.toHex;
   options = Object.assign(options, { onlyHeaders: true });
-  const header = fetch(url, options) as { [key: string]: string };
-  const setCk = Object.keys(header).find((it) => it.toLowerCase() === 'set-cookie');
-  const cookie = setCk ? header[setCk] : '';
+  let header = fetch(url, options) || '{}';
+  const formatHeader = JSON.parse(header);
+  const setCk = Object.keys(formatHeader).find((it) => it.toLowerCase() === 'set-cookie');
+  const cookie = setCk ? formatHeader[setCk] : '';
   return cookie;
 };
 
@@ -177,8 +216,9 @@ const convertBase64Image = (url: string, options: RequestOptions = {}) => {
     if (options?.toHex) delete options.toHex;
     if (options?.onlyHeaders) delete options.onlyHeaders;
     options = Object.assign(options, { toHex: true });
-    const res = fetch(url, options) as { body: string };
-    const hexStr = res.body;
+    const res = fetch(url, options) || '{"body":""}';
+    const formatRes = JSON.parse(res);
+    const hexStr = formatRes.body;
     const base64String = Buffer.from(hexStr, 'hex').toString('base64');
     return `data:${mime.lookup(url)};base64,${base64String}`;
   } catch (err) {
