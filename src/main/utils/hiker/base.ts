@@ -80,14 +80,25 @@ const $ = {
   },
 };
 
-const urljoin = (fromPath: string = '', nowPath: string = '') => {
-  if (/^(?:[a-z]+:)?\/\//i.test(fromPath)) {
-    return new URL(nowPath, fromPath).href;
+const resolve = (from: string, to: string) => {
+  const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
+  if (resolvedUrl.protocol === 'resolve:') {
+    const { pathname, search, hash } = resolvedUrl;
+    return pathname + search + hash;
   }
-  if (/^(?:[a-z]+:)?\/\//i.test(nowPath)) {
-    return nowPath;
-  }
-  return new URL(nowPath, new URL(fromPath, 'resolve://')).href;
+  return resolvedUrl.href;
+};
+
+/**
+ *  url拼接
+ * @param fromPath 初始当前页面url
+ * @param nowPath 相对当前页面url
+ * @returns {*}
+ */
+const urljoin = (fromPath: string, nowPath: string) => {
+  fromPath = fromPath || '';
+  nowPath = nowPath || '';
+  return resolve(fromPath, nowPath);
 };
 
 export { urljoin, getHome, keysToLowerCase, parseQueryString, buildUrl, copy, $ };

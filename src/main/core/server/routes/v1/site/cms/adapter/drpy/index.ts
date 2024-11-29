@@ -5,81 +5,74 @@ import { v4 as uuidv4 } from 'uuid';
 import treeKill from 'tree-kill';
 import logger from '@main/core/logger';
 
-let child: ChildProcess | null = null;
-const restart = async () => {
-  logger.warn(`[t3][worker][restart] worker id:${uuidv4()}`);
-  if (child) {
-    child.removeAllListeners();
-    treeKill(child.pid!, 'SIGTERM');
-  }
-  child = null;
-  const TIMEOUT = globalThis.variable.timeout;
-  child = fork(resolve(__dirname, 'worker.js'), [`T3DrpyWorker-${uuidv4()}`, TIMEOUT]);
-};
-
-const doWork = (data: { [key: string]: string | object | null }): Promise<{ [key: string]: any }> => {
-  return new Promise((resolve, reject) => {
-    // 使用 once 来确保监听器只会被触发一次，并且之后自动移除
-    child!.once('message', (message: { [key: string]: any }) => {
-      resolve(message.data);
-    });
-
-    child!.once('close', (code) => {
-      logger.error(`[t3][worker][exit] code ${code}`);
-      reject(new Error('Worker closed unexpectedly'));
-    });
-
-    child!.once('error', (err) => {
-      logger.error(`[t3][worker][error] ${err.message}`);
-      reject(err);
-    });
-
-    child!.send(data);
-  });
-};
-const terminateWork = (): Promise<{ msg: string; code: number }> => {
-  return new Promise((resolve, reject) => {
-    if (child) {
-      child.removeAllListeners();
-      treeKill(child.pid!, 'SIGTERM');
-      resolve({ msg: 'Worker terminated successfully.', code: 0 });
-    } else {
-      reject(new Error('Worker is not defined or already terminated.'));
-    }
-  });
-};
-
-export { doWork, terminateWork };
-
 class T3Adapter {
   ext: string = '';
   categoryfilter: any[] = [];
-  private instance: any = null;
+  private timeout: number = 5000;
+  isolatedContext: any;
+  child: ChildProcess | null = null;
+
   constructor(source) {
     this.ext = source.ext;
     this.categoryfilter = source.categories;
+    this.isolatedContext = {
+      logRecord: [],
+      MY_URL: null,
+      HOST: null,
+      rule: null,
+      rule_fetch_params: null,
+      fetch_params: null,
+      oheaders: null,
+    };
+    this.timeout = globalThis.variable.timeout || 5000;
   }
 
-  private async getInstance() {
-    if (!this.instance) {
-      await restart();
-      this.instance = await doWork({ type: 'init', data: this.ext });
-    }
-    return this.instance;
+  private doWork = (
+    child: ChildProcess | null,
+    data: { [key: string]: string | object | null },
+  ): Promise<{ [key: string]: any }> => {
+    return new Promise((resolve, reject) => {
+      child!.once('message', (message: { [key: string]: any }) => {
+        resolve(message);
+      });
+
+      child!.once('close', (code) => {
+        logger.error(`[t3][worker][exit] code ${code}`);
+        reject(new Error('Worker closed unexpectedly'));
+      });
+
+      child!.once('error', (err) => {
+        logger.error(`[t3][worker][error] ${err.message}`);
+        reject(err);
+      });
+
+      child!.send(data);
+    });
+  };
+
+  private async execCtx(options: { [key: string]: any }): Promise<any> {
+    this.child = fork(resolve(__dirname, 'worker.js'), [`T3Fork-execCtx-${uuidv4()}`, this.timeout.toString()]);
+    const res = await this.doWork(this.child!, { ...options, ctx: { ...this.isolatedContext } });
+    this.isolatedContext = res.ctx;
+    this.child.removeAllListeners();
+    treeKill(this.child.pid!, 'SIGTERM');
+    this.child = null;
+    return res.data;
   }
 
   async init() {
-    return await this.getInstance();
+    const res = await this.execCtx({ type: 'init', data: this.ext });
+    return res;
   }
   async home() {
-    await this.getInstance();
-    const response: any = await doWork({ type: 'home', data: null });
+    const res = await this.execCtx({ type: 'home', data: null });
+
     let classes: any[] = [];
 
     // 分类
-    if (response?.class) {
+    if (res?.class) {
       let categories: any[] = [];
-      for (const cls of response?.class) {
+      for (const cls of res?.class) {
         const n = cls.type_name.toString().trim();
         if (categories && categories.length > 0) {
           if (categories.indexOf(n) < 0) continue;
@@ -101,36 +94,36 @@ class T3Adapter {
 
     return {
       class: classes,
-      filters: response?.filters || {},
+      filters: res?.filters || {},
     };
   }
   async homeVod() {
-    await this.getInstance();
-    return await doWork({ type: 'homeVod', data: null });
+    const res = await this.execCtx({ type: 'homeVod', data: null });
+    return res;
   }
   async category(doc: { [key: string]: string }) {
-    await this.getInstance();
-    return await doWork({ type: 'category', data: doc });
+    const res = this.execCtx({ type: 'category', data: doc });
+    return res;
   }
   async detail(doc: { [key: string]: string }) {
-    await this.getInstance();
-    return await doWork({ type: 'detail', data: doc });
+    const res = this.execCtx({ type: 'detail', data: doc });
+    return res;
   }
   async search(doc: { [key: string]: string }) {
-    await this.getInstance();
-    return await doWork({ type: 'search', data: doc });
+    const res = this.execCtx({ type: 'search', data: doc });
+    return res;
   }
   async play(doc: { [key: string]: string }) {
-    await this.getInstance();
-    return await doWork({ type: 'play', data: doc });
+    const res = this.execCtx({ type: 'play', data: doc });
+    return res;
   }
   async proxy(doc: { [key: string]: string }) {
-    await this.getInstance();
-    return await doWork({ type: 'proxy', data: doc });
+    const res = this.execCtx({ type: 'proxy', data: doc });
+    return res;
   }
   async runMain(doc: { [key: string]: string }) {
-    await this.getInstance();
-    return await doWork({ type: 'runMain', data: doc });
+    const res = this.execCtx({ type: 'runMain', data: doc });
+    return res;
   }
 }
 

@@ -38,32 +38,20 @@ const init = async (id: string, debug: boolean = false) => {
     throw new Error('dbResSource.type is undefined');
   }
 
-  if (debug) {
+  if (debug) lruCache.delete(id);
+
+  if (lruCache.has(id)) {
+    return lruCache.get(id);
+  } else {
     try {
       const singleAdapter = singleton(adapterRelation[dbResSource.type]);
       const adapter = new singleAdapter(dbResSource);
       await adapter.init();
       lruCache.put(id, adapter);
-      console.log(`Adapter for ${id} initialized successfully in debug mode.`);
       return adapter;
     } catch (err: any) {
       console.error(`Error init cms adapter: ${err.message}`);
       throw err;
-    }
-  } else {
-    if (lruCache.has(id)) {
-      return lruCache.get(id);
-    } else {
-      try {
-        const singleAdapter = singleton(adapterRelation[dbResSource.type]);
-        const adapter = new singleAdapter(dbResSource);
-        await adapter.init();
-        lruCache.put(id, adapter);
-        return adapter;
-      } catch (err: any) {
-        console.error(`Error init cms adapter: ${err.message}`);
-        throw err;
-      }
     }
   }
 };
@@ -73,8 +61,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     `/${API_PREFIX}/init`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string | boolean } }>) => {
       let { sourceId, debug = false } = req.query;
-      const dbResSource = await site.get(sourceId);
-      if (dbResSource.type === 7) debug = true;
       const res = await init(sourceId as string, debug as boolean);
       return {
         code: 0,

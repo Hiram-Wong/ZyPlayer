@@ -608,12 +608,19 @@ const changeNav = async (nav = '', action = '') => {
       return;
     };
     const res = await fetchCmsRunMain({
-      func: "function main() {return getConsoleHistory()}",
+      func: "function main() {return getLogRecord()}",
       arg: "",
       sourceId: debugId.value
     });
-
-    form.value.content[nav] = res;
+    let logText = res.map(([time, content]) => {
+      try {
+        content = JSON5.parse(content);
+        content = JSON.stringify(content, null, 2);
+      } catch {}
+      return `${time}: ${content}`;
+    })
+    .join('\n');
+    form.value.content[nav] = logText;
   };
 
   const contentText =
@@ -834,7 +841,7 @@ const logEvent = async () => {
       return;
     };
     await fetchCmsRunMain({
-      func: "function main() { clearConsoleHistory(); return 'ok'}",
+      func: "function main() { clearLogRecord(); return 'ok'}",
       arg: "",
       sourceId: debugId.value
     });

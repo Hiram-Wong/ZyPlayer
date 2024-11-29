@@ -45,20 +45,34 @@ var batchFetch = batchFetchModule;
 var NODERSA = { NodeRSA: nodeRsaModule, ...nodeRsaModule };
 
 // history部分为zy需要
-let consoleHistory: any[] = [];
-const _console = console.log;
-console.log = (str: string) => {
-  _console(str);
-  consoleHistory.push(str); // 将所有参数作为一个数组推入
+let logRecord: any[] = [];
+Object.defineProperty(globalThis, 'logRecord', {
+  get() {
+    return logRecord;
+  },
+  set(value) {
+    logRecord = value;
+  },
+});
+console.log = (function (oriLogFunc) {
+  return function (...args) {
+    let currentDate = new Date();
+    let hours = currentDate.getHours();
+    let minutes = currentDate.getMinutes();
+    let seconds = currentDate.getSeconds();
+    let timeStamp = `${hours.toString().padStart(2, '0')}:${minutes
+      .toString()
+      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; // 格式化时分秒
+    logRecord.push([timeStamp, ...args]); // 记录日志内容
+    oriLogFunc(timeStamp, ...args); // 保持原来的输出功能
+  };
+})(console.log);
+const getLogRecord = () => {
+  return logRecord;
 };
-
-const getConsoleHistory = () => {
-  return consoleHistory;
-};
-
-const clearConsoleHistory = () => {
-  consoleHistory = [];
-  return consoleHistory;
+const clearLogRecord = () => {
+  logRecord = [];
+  return logRecord;
 };
 
 const _jinja2 = cheerio.jinja2;
@@ -364,6 +378,14 @@ function pre() {
 }
 
 let rule: any = {};
+Object.defineProperty(globalThis, 'rule', {
+  get() {
+    return rule;
+  },
+  set(value) {
+    rule = value;
+  },
+});
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -405,6 +427,14 @@ const OCR_RETRY = 3; //ocr验证重试次数
 const OCR_API = 'https://api.nn.ci/ocr/b64/text'; //ocr在线识别接口
 if (typeof MY_URL === 'undefined') {
   var MY_URL; // 全局注入变量,pd函数需要
+  Object.defineProperty(globalThis, 'MY_URL', {
+    get() {
+      return MY_URL;
+    },
+    set(value) {
+      MY_URL = value;
+    },
+  });
 }
 var HOST;
 var RKEY; // 源的唯一标识
@@ -414,6 +444,38 @@ var log;
 var rule_fetch_params;
 var fetch_params; // 每个位置单独的
 var oheaders;
+Object.defineProperty(globalThis, 'HOST', {
+  get() {
+    return HOST;
+  },
+  set(value) {
+    HOST = value;
+  },
+});
+Object.defineProperty(globalThis, 'rule_fetch_params', {
+  get() {
+    return rule_fetch_params;
+  },
+  set(value) {
+    rule_fetch_params = value;
+  },
+});
+Object.defineProperty(globalThis, 'fetch_params', {
+  get() {
+    return fetch_params;
+  },
+  set(value) {
+    fetch_params = value;
+  },
+});
+Object.defineProperty(globalThis, 'oheaders', {
+  get() {
+    return oheaders;
+  },
+  set(value) {
+    oheaders = value;
+  },
+});
 // var play_url; // 二级详情页注入变量,为了适配js模式0 (不在这里定义了,直接二级里定义了个空字符串)
 var _pdfh;
 var _pdfa;
@@ -3969,73 +4031,6 @@ function cut(text, start, end, method, All) {
   //console.log(result);
   return result;
 }
-
-// [重要]防止树摇
-// const keepUnUse = {
-//   useful: (): void => {
-//     const _ = {
-//       batchFetch,
-//       UA,
-//       UC_UA,
-//       IOS_UA, // UA
-//       pdfa,
-//       pdfh,
-//       pd, // html parser
-//       log,
-//       oheaders, // global parms
-//       NOADD_INDEX,
-//       URLJOIN_ATTR,
-//       SELECT_REGEX,
-//       SELECT_REGEX_A, // REGEX
-//       getUpdateInfo,
-//       urlDeal,
-//       setResult2,
-//       setHomeResult,
-//       rc,
-//       maoss,
-//       getProxyUrl,
-//       urljoin2,
-//       urlencode,
-//       encodeUrl,
-//       stringify,
-//       jsp,
-//       jq,
-//       buildUrl,
-//       $require,
-//       proxy,
-//       sniffer,
-//       isVideo,
-//       getRule,
-//       runMain,
-//       gzip,
-//       readFile,
-//       fixAdM3u8,
-//       fixAdM3u8Ai, // ad
-//       base64Encode,
-//       NODERSA,
-//       md5,
-//       decodeStr,
-//       RSA, // encryption and decryption
-//       clearItem, // cache
-//       $js, // $工具
-//       reqCookie, // cookie获取
-//       ocr_demo_test,
-//       rsa_demo_test,
-//       JSON5, // json5.js的库
-//       window_b64,
-//       Utf8ArrayToStr,
-//       uint8ArrayToBase64,
-//       parseQueryString,
-//       objectToQueryString,
-//       cut,
-//       clearConsoleHistory,
-//       getConsoleHistory,
-//     };
-//     let temp = _;
-//     temp.stringify({});
-//   },
-// };
-// keepUnUse.useful();
 
 function DRPY() {
   //导出函数

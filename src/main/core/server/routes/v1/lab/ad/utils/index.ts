@@ -1,4 +1,5 @@
 import request from '@main/utils/request';
+import { urljoin } from '@main/utils/hiker/base';
 import logger from '@main/core/logger';
 
 if (typeof Array.prototype.toReversed !== 'function') {
@@ -12,27 +13,6 @@ if (typeof Array.prototype.toReversed !== 'function') {
     enumerable: false,
   });
 }
-
-const resolve = (from, to) => {
-  const resolvedUrl = new URL(to, new URL(from, 'resolve://'));
-  if (resolvedUrl.protocol === 'resolve:') {
-    const { pathname, search, hash } = resolvedUrl;
-    return pathname + search + hash;
-  }
-  return resolvedUrl.href;
-};
-
-/**
- *  url拼接
- * @param fromPath 初始当前页面url
- * @param nowPath 相对当前页面url
- * @returns {*}
- */
-const urljoin = (fromPath, nowPath) => {
-  fromPath = fromPath || '';
-  nowPath = nowPath || '';
-  return resolve(fromPath, nowPath);
-};
 
 /**
  *  智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
