@@ -68,9 +68,9 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         assetsInlineLimit: 4096, // 小于4kb的图片会转成base64
         rollupOptions: {
           output: {
-            entryFileNames: `assets/entry/[name][hash].js`, // 引入文件名的名称
-            chunkFileNames: `assets/chunk/[name][hash].js`, // 包的入口文件名称
-            assetFileNames: `assets/static/[ext]/[name][hash].[ext]`, // 资源文件像 字体，图片等
+            entryFileNames: `assets/entry/[name]_[hash].js`, // 引入文件名的名称
+            chunkFileNames: `assets/chunk/[name]_[hash].js`, // 包的入口文件名称
+            assetFileNames: `assets/static/[ext]/[name]_[hash].[ext]`, // 资源文件像 字体，图片等
             manualChunks: {
               'monaco-editor': ['monaco-editor'],
               lodash: ['lodash'],
@@ -88,7 +88,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
               dplayer: ['dplayer'],
               nplayer: ['nplayer', '@nplayer/danmaku'],
               'video-decoder': ['flv.js', 'hls.js', 'shaka-player', 'mpegts.js'],
-              tdesign: ['tdesign-vue-next', 'tdesign-icons-vue-next'],
+              tdesign: ['tdesign-vue-next', 'tdesign-icons-vue-next', '@tdesign-vue-next/chat'],
               md: ['github-markdown-css', 'markdown-it', 'markdown-it-highlightjs', 'markdown-it-mathjax3'],
               crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa'],
               vue: [

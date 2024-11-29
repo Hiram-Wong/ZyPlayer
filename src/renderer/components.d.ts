@@ -17,6 +17,7 @@ declare module 'vue' {
     Table: typeof import('./src/components/common-setting/table/index.vue')['default']
     TagNav: typeof import('./src/components/tag-nav/index.vue')['default']
     TAside: typeof import('tdesign-vue-next')['Aside']
+    TAvatar: typeof import('tdesign-vue-next')['Avatar']
     TBackTop: typeof import('tdesign-vue-next')['BackTop']
     TBadge: typeof import('tdesign-vue-next')['Badge']
     TBreadcrumb: typeof import('tdesign-vue-next')['Breadcrumb']
