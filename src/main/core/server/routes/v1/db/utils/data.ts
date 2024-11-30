@@ -64,7 +64,7 @@ const easy2tvbox = async (config, url, type) => {
   };
 
   const formatSearch = (searchable: number = 0, quickSearch: number = 0) => {
-    if (quickSearch === 1) return 2;
+    // if (quickSearch === 1) return 2;
     if (searchable === 1) return 1;
     return 0;
   };
