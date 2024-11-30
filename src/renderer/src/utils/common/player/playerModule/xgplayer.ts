@@ -1,10 +1,10 @@
 import XgPlayer, { Events, SimplePlayer } from 'xgplayer';
 import Danmu from 'xgplayer/es/plugins/danmu';
 import LivePreset from 'xgplayer/es/presets/live';
-// import FlvPlugin from 'xgplayer-flv';
-import FlvPlugin from 'xgplayer-flv.js';
-// import HlsPlugin from 'xgplayer-hls';
-import HlsPlugin from 'xgplayer-hls.js';
+import FlvPlugin from 'xgplayer-flv';
+// import FlvPlugin from 'xgplayer-flv.js';
+import HlsPlugin from 'xgplayer-hls';
+// import HlsPlugin from 'xgplayer-hls.js';
 import Mp4Plugin from 'xgplayer-mp4';
 import ShakaPlugin from 'xgplayer-shaka';
 // import DashPlugin from 'xgplayer-dash';
@@ -103,24 +103,22 @@ class XgPlayerAdapter {
         if (Object.keys(headers).length > 0)
           options.mp4plugin = {
             reqOptions: {
-              headers,
+              headers: { ...headers },
             },
           };
         break;
       case 'customFlv':
         options.plugins = [...plugins, FlvPlugin];
-        if (Object.keys(headers).length > 0) options.flvJsPlugin = {};
+        if (Object.keys(headers).length > 0)
+          options.flv = {
+            fetchOptions: { headers: { ...headers } },
+          };
         break;
       case 'customHls':
         options.plugins = [...plugins, HlsPlugin];
         if (Object.keys(headers).length > 0)
-          options.hlsJsPlugin = {
-            xhrSetup: function (xhr, _url) {
-              xhr.withCredentials = true; // do send cookies
-              for (const key in headers) {
-                xhr.setRequestHeader(key, headers[key]);
-              }
-            },
+          options.hls = {
+            fetchOptions: { headers: { ...headers } },
           };
         break;
       case 'customDash':
