@@ -368,12 +368,12 @@ class Jsoup {
   }
 }
 
-const pdfh = (html: string, parse: string, base_url: string = '') => {
+const pdfh = (html: string, parse: string, base_url: string = globalThis?.MY_URL || '') => {
   const jsp = new Jsoup(base_url);
   return jsp.pdfh(html, parse, base_url);
 };
 
-const pd = (html: string, parse: string, base_url: string = '') => {
+const pd = (html: string, parse: string, base_url: string = globalThis?.MY_URL || '') => {
   const jsp = new Jsoup(base_url);
   return jsp.pd(html, parse);
 };
