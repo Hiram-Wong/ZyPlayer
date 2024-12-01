@@ -276,7 +276,7 @@ const handleOpChange = async (type, doc) => {
       // @ts-ignore
       tableConfig.value.data[rowIndex].check = true;
       active.checkLoad = true;
-      const activeItem: any = tableConfig.value.data.find((item:any) => item.id === doc);
+      const activeItem: any = { ...row };
       const status = activeItem?.isActive;
       await fetchCmsInit({ sourceId: row.id });
       const res = await fetchCmsHome({ sourceId: row.id });
