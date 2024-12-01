@@ -6,6 +6,7 @@ export default {
     aiBrain: '人工智脑',
     dataCrypto: '数据编码',
     snifferPlay: '嗅探播放',
+    pluginCenter: '插件中心',
   },
   jsEdit: {
     import: '导入',
@@ -356,5 +357,20 @@ export default {
     tooltip: {
       playHeaders: '仅Hls支持支持请求头',
     },
+  },
+  pluginCenter: {
+    title: '插件中心',
+    search: '搜索',
+    install: '安装',
+    uninstall: '卸载',
+    update: '更新',
+    detail: '详情',
+    installed: '已安装',
+    uninstalled: '未安装',
+    updateAll: '全部更新',
+    updateSuccess: '更新成功',
+    updateFail: '更新失败',
+    installSuccess: '安装成功',
+    installFail: '安装失败',
   },
 };

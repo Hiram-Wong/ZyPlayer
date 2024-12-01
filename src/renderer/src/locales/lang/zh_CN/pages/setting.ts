@@ -191,6 +191,7 @@ export default {
     noSelectData: '请先选择数据',
     checking: '状态批量检测中, 请等待完成',
     defaultDisable: '启用后设置默认源',
+    checkLoading: '存在检测中数据, 请等待完成',
   },
   ad: {
     title: '与Hipy更配哦',

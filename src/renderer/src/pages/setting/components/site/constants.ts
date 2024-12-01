@@ -7,7 +7,6 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
     type: 'multiple',
     width: 64,
     fixed: 'left',
-    disabled: ({ row }) => row.key === 'debug',
   },
   {
     title: t('pages.setting.table.header.name'),
@@ -39,7 +38,7 @@ export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
   {
     align: 'center',
     fixed: 'right',
-    width: 180,
+    width: 220,
     colKey: 'op',
     title: t('pages.setting.table.header.operate'),
   },

@@ -193,6 +193,7 @@ export default {
     networkCheckError: 'Network status detection failed',
     checking: 'Please wait for the completion of status batch detection',
     defaultDisable: 'Set default source when enabled',
+    checkLoading: 'Please wait for the completion of the test',
   },
   ad: {
     title: 'Better on Hipy',

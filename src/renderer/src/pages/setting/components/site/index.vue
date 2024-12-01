@@ -17,7 +17,7 @@
         <span v-else>{{ row.name }}</span>
       </template>
       <template #isActive="{ row }">
-        <t-switch v-model="row.isActive" :disabled="row.key === 'debug'"  @change="handleOpDefault(row.id)" />
+        <t-switch v-model="row.isActive" @change="handleOpDefault(row.id)" />
       </template>
       <template #type="{ row }">
         <span v-if="row.type === 0">T0[xml]</span>
@@ -34,12 +34,17 @@
       </template>
       <template #op="slotProps">
         <t-space>
+          <t-link theme="primary" @click="handleOpChange('check', slotProps)">
+            {{ $t('pages.setting.table.check') }}
+            <template #prefix-icon v-if="slotProps.row.check">
+              <loading-icon />
+            </template>
+          </t-link>
           <t-link theme="primary" @click="handleOpChange('default', slotProps.row.id)">{{ $t('pages.setting.table.default') }}</t-link>
           <t-link theme="primary" @click="handleOpChange('edit', slotProps.row)">{{ $t('pages.setting.table.edit') }}</t-link>
-          <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="handleOpChange('delete', [slotProps.row.id])" v-if="slotProps.row.key !== 'debug'">
+          <t-popconfirm :content="$t('pages.setting.table.deleteTip')" @confirm="handleOpChange('delete', [slotProps.row.id])">
             <t-link theme="danger">{{ $t('pages.setting.table.delete') }}</t-link>
           </t-popconfirm>
-          <t-link theme="danger" :disabled="slotProps.row.key === 'debug'" v-else>{{ $t('pages.setting.table.delete') }}</t-link>
         </t-space>
       </template>
     </common-setting>
@@ -50,10 +55,11 @@
 
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
+import { LoadingIcon } from 'tdesign-icons-vue-next';
 import { onActivated, onMounted, ref, reactive, computed } from 'vue';
 
 import { t } from '@/locales';
-import { fetchSitePage, putSite, delSite, addSite, putSiteDefault } from '@/api/site';
+import { fetchSitePage, putSite, delSite, addSite, putSiteDefault, fetchCmsInit, fetchCmsHome } from '@/api/site';
 import emitter from '@/utils/emitter';
 
 import { COLUMNS } from './constants';
@@ -85,7 +91,8 @@ const op = computed(() => {
 const active = reactive({
   dialogForm: false,
   formType: 'add',
-  opId: ''
+  opId: '',
+  checkLoad: false,
 });
 const formData = ref({});
 const formGroup = ref<any[]>([]);
@@ -258,7 +265,40 @@ const handleOpChange = async (type, doc) => {
     formData.value = doc;
     formGroup.value = tableConfig.value.group;
     active.dialogForm = true;
-  };
+  } else if (type === 'check') {
+    if (active.checkLoad) {
+      MessagePlugin.warning(t('pages.setting.message.checkLoading'));
+      return;
+    }
+    const { rowIndex, row } = doc;
+
+    try {
+      // @ts-ignore
+      tableConfig.value.data[rowIndex].check = true;
+      active.checkLoad = true;
+      const activeItem: any = tableConfig.value.data.find((item:any) => item.id === doc);
+      const status = activeItem?.isActive;
+      await fetchCmsInit({ sourceId: row.id });
+      const res = await fetchCmsHome({ sourceId: row.id });
+      if (res && Array.isArray(res?.class) && res.class.length > 0) {
+        if (!status) {
+          await reqPut([row.id], { isActive: true });
+          // @ts-ignore
+          tableConfig.value.data[rowIndex].isActive = true;
+        }
+      } else {
+        if (status) {
+          await reqPut([row.id], { isActive: false });
+          // @ts-ignore
+          tableConfig.value.data[rowIndex].isActive = false;
+        }
+      }
+    } finally {
+      // @ts-ignore
+      tableConfig.value.data[rowIndex].check = false;
+      active.checkLoad = false;
+    }
+  }
 
   if (['enable', 'disable', 'delete', 'default'].includes(type)) {
     refreshTable();

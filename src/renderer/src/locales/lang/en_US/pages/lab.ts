@@ -6,6 +6,7 @@ export default {
     aiBrain: 'AiBrain',
     dataCrypto: 'DataCrypto',
     snifferPlay: 'SnifferPlay',
+    pluginCenter: 'PluginCenter',
   },
   jsEdit: {
     import: 'Import',
@@ -356,5 +357,20 @@ export default {
     tooltip: {
       playHeaders: 'Only hls support request headers',
     },
+  },
+  pluginCenter: {
+    title: 'PluginCenter',
+    search: 'Search',
+    install: 'Install',
+    uninstall: 'Uninstall',
+    update: 'Update',
+    detail: 'Detail',
+    author: 'Author',
+    version: 'Version',
+    size: 'Size',
+    download: 'Download',
+    installed: 'Installed',
+    uninstalled: 'Uninstalled',
+    updateAvailable: 'Update Available',
   },
 };
