@@ -46,14 +46,6 @@ var NODERSA = { NodeRSA: nodeRsaModule, ...nodeRsaModule };
 
 // history部分为zy需要
 let logRecord: any[] = [];
-Object.defineProperty(globalThis, 'logRecord', {
-  get() {
-    return logRecord;
-  },
-  set(value) {
-    logRecord = value;
-  },
-});
 console.log = (function (oriLogFunc) {
   return function (...args) {
     let currentDate = new Date();
@@ -378,14 +370,6 @@ function pre() {
 }
 
 let rule: any = {};
-Object.defineProperty(globalThis, 'rule', {
-  get() {
-    return rule;
-  },
-  set(value) {
-    rule = value;
-  },
-});
 /** 已知问题记录
  * 1.影魔的jinjia2引擎不支持 {{fl}}对象直接渲染 (有能力解决的话尽量解决下，支持对象直接渲染字符串转义,如果加了|safe就不转义)[影魔牛逼，最新的文件发现这问题已经解决了]
  * Array.prototype.append = Array.prototype.push; 这种js执行后有毛病,for in 循环列表会把属性给打印出来 (这个大毛病需要重点排除一下)
@@ -427,14 +411,6 @@ const OCR_RETRY = 3; //ocr验证重试次数
 const OCR_API = 'https://api.nn.ci/ocr/b64/text'; //ocr在线识别接口
 if (typeof MY_URL === 'undefined') {
   var MY_URL; // 全局注入变量,pd函数需要
-  Object.defineProperty(globalThis, 'MY_URL', {
-    get() {
-      return MY_URL;
-    },
-    set(value) {
-      MY_URL = value;
-    },
-  });
 }
 var HOST;
 var RKEY; // 源的唯一标识
@@ -444,38 +420,6 @@ var log;
 var rule_fetch_params;
 var fetch_params; // 每个位置单独的
 var oheaders;
-Object.defineProperty(globalThis, 'HOST', {
-  get() {
-    return HOST;
-  },
-  set(value) {
-    HOST = value;
-  },
-});
-Object.defineProperty(globalThis, 'rule_fetch_params', {
-  get() {
-    return rule_fetch_params;
-  },
-  set(value) {
-    rule_fetch_params = value;
-  },
-});
-Object.defineProperty(globalThis, 'fetch_params', {
-  get() {
-    return fetch_params;
-  },
-  set(value) {
-    fetch_params = value;
-  },
-});
-Object.defineProperty(globalThis, 'oheaders', {
-  get() {
-    return oheaders;
-  },
-  set(value) {
-    oheaders = value;
-  },
-});
 // var play_url; // 二级详情页注入变量,为了适配js模式0 (不在这里定义了,直接二级里定义了个空字符串)
 var _pdfh;
 var _pdfa;

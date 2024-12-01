@@ -3,9 +3,40 @@ import { fork, ChildProcess } from 'child_process';
 import { resolve } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import treeKill from 'tree-kill';
+import LruCache from '@main/utils/lrucache';
 import logger from '@main/core/logger';
 
+class workerLruCache extends LruCache {
+  constructor(capacity: number) {
+    super(capacity);
+  }
+  async put(key: string, value: any) {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.capacity) {
+      const firstKey = this.cache.keys().next().value;
+      const child = this.cache.get(firstKey);
+      child.removeAllListeners();
+      treeKill(child.pid, 'SIGTERM');
+      this.cache.delete(this.cache.keys().next().value);
+    }
+    this.cache.set(key, value);
+    return value;
+  }
+  delete(key: string) {
+    if (this.cache.has(key)) {
+      const child = this.cache.get(key);
+      child.removeAllListeners();
+      treeKill(child.pid, 'SIGTERM');
+    }
+    return this.cache.delete(key);
+  }
+}
+
+const lruCache = new workerLruCache(3);
+
 class T3Adapter {
+  id: string = '';
   ext: string = '';
   categoryfilter: any[] = [];
   private timeout: number = 5000;
@@ -13,17 +44,9 @@ class T3Adapter {
   child: ChildProcess | null = null;
 
   constructor(source) {
+    this.id = source.id;
     this.ext = source.ext;
     this.categoryfilter = source.categories;
-    this.isolatedContext = {
-      logRecord: [],
-      MY_URL: null,
-      HOST: null,
-      rule: null,
-      rule_fetch_params: null,
-      fetch_params: null,
-      oheaders: null,
-    };
     this.timeout = globalThis.variable.timeout || 5000;
   }
 
@@ -51,12 +74,14 @@ class T3Adapter {
   };
 
   private async execCtx(options: { [key: string]: any }): Promise<any> {
-    this.child = fork(resolve(__dirname, 'worker.js'), [`T3Fork-execCtx-${uuidv4()}`, this.timeout.toString()]);
-    const res = await this.doWork(this.child!, { ...options, ctx: { ...this.isolatedContext } });
-    this.isolatedContext = res.ctx;
-    this.child.removeAllListeners();
-    treeKill(this.child.pid!, 'SIGTERM');
-    this.child = null;
+    if (lruCache.get(this.id)) {
+      this.child = lruCache.get(this.id);
+    } else {
+      this.child = fork(resolve(__dirname, 'worker.js'), [`T3Fork-execCtx-${uuidv4()}`, this.timeout.toString()]);
+      lruCache.put(this.id, this.child);
+      if (options.type !== 'init') await this.doWork(this.child!, { type: 'init', data: this.ext });
+    }
+    const res = await this.doWork(this.child!, { ...options });
     return res.data;
   }
 

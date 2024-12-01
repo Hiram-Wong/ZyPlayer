@@ -8,15 +8,9 @@
 
 import { category, detail, home, homeVod, init, play, proxy, search, runMain } from './drpy3';
 
-const drpyWork = (parms) => {
-  const { type, data, ctx } = parms;
+const drpyWork = (parms: { [key: string]: any }) => {
+  const { type, data } = parms;
   let res = { type, data };
-
-  if (Object.keys(ctx).length > 0) {
-    for (const key in ctx) {
-      globalThis[key] = ctx[key];
-    }
-  }
 
   switch (type) {
     case 'init':
@@ -83,12 +77,8 @@ process.on('message', (message: { [key: string]: any }) => {
       data: null,
     };
     console.log(`[t3][worker][child][error]${err.message}`);
+    console.error(err);
   }
-  const globalParmKeys = ['logRecord', 'MY_URL', 'HOST', 'rule', 'rule_fetch_params', 'fetch_params', 'oheaders'];
-  const cloneCtx = {};
-  for (const key of globalParmKeys) {
-    cloneCtx[key] = globalThis[key];
-  }
-  res.ctx = cloneCtx;
+
   process.send!(res);
 });
