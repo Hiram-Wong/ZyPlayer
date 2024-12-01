@@ -118,8 +118,9 @@ const ready = () => {
       }
 
       // 处理 User-Agent
-      requestHeaders['User-Agent'] =
-        headers?.['User-Agent'] || requestHeaders?.['User-Agent'] || globalThis.variable.ua;
+      requestHeaders['User-Agent'] = headers?.['User-Agent'] || requestHeaders?.['User-Agent'];
+      if (!requestHeaders['User-Agent'] || requestHeaders['User-Agent']?.includes('zyfun'))
+        requestHeaders['User-Agent'] = globalThis.variable.ua;
       // 处理 Host
       requestHeaders['Host'] = headers?.['Host'] || requestHeaders?.['Host'] || new URL(url).host;
       // 处理 Cookie
