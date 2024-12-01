@@ -35,7 +35,7 @@ const iptv = pgTable('iptv', {
 const channel = pgTable('channel', {
   id: uuid().defaultRandom(),
   name: varchar('name', { length: 255 }),
-  url: varchar('url', { length: 255 }),
+  url: varchar('url', { length: 510 }),
   group: varchar('group', { length: 255 }),
 });
 

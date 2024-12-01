@@ -10,6 +10,8 @@ const update = async () => {
     ALTER TABLE tbl_site rename search_new to search;
 
     ALTER TABLE tbl_drive ADD COLUMN "showAll" boolean default false;
+
+    ALTER TABLE tbl_channel ALTER COLUMN url TYPE varchar(510);
   `);
 
   const old_version = await db.select().from(schema.setting).where(eq(schema.setting.key, 'version'));
