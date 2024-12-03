@@ -55,7 +55,7 @@
       <template #complete>{{ $t('pages.chase.infiniteLoading.noMore') }}</template>
       <template #error>{{ $t('pages.chase.infiniteLoading.error') }}</template>
     </infinite-loading>
-    <detail-view v-model:visible="isVisible.detail" :site="siteData" :data="formDetailData" />
+    <detail-view v-model:visible="isVisible.detail" :ext="detailFormData.ext" :info="detailFormData.info" />
     <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')"
       :loading="isVisible.loading" />
     <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
@@ -85,7 +85,8 @@ import emitter from '@/utils/emitter';
 
 import DetailView from '@/pages/film/components/Detail.vue';
 
-const store = usePlayStore();
+const storePlayer = usePlayStore();
+
 const renderError = () => {
   return (
     <div class="renderIcon" style="width: 100%;">
@@ -119,12 +120,10 @@ const pagination = ref({
   pageSize: 32,
   count: 0,
 });
-const formDetailData = ref({
-  neme: '',
-  key: '',
-  type: 1,
+const detailFormData = ref({
+  info: {},
+  ext: { site: {}, setting: {} },
 }); //  详情组件源传参
-const siteData = ref();
 const isVisible = reactive({
   detail: false,
   loading: false
@@ -183,34 +182,34 @@ const playEvent = async (item) => {
   isVisible.loading = true;
 
   try {
-    const { videoName, videoId, relateSite } = item;
-    siteData.value = relateSite;
-    await fetchCmsInit({ sourceId: relateSite.id })
+    const { videoName, videoImage, videoId, relateSite } = item;
+
+    await fetchCmsInit({ sourceId: relateSite.id });
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const res = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
       const detailItem = res?.list[0];
-      if (relateSite.type === 9) {
-        detailItem.vod_name = item.vod_name;
-        detailItem.vod_pic = item.vod_pic;
-      };
+      detailItem.vod_name = videoName;
+      detailItem.vod_pic = videoImage;
       item = detailItem;
     };
-    console.log('[film][playEvent]', item);
+    console.log('[history][playEvent]', item);
 
-    const playerMode = store.getSetting.playerMode;
+    const playerMode = storePlayer.getSetting.playerMode;
+    const doc = {
+      info: item,
+      ext: { site: relateSite, setting: storePlayer.setting },
+    }
 
     if (playerMode.type === 'custom') {
-      formDetailData.value = item;
+      detailFormData.value = doc;
       isVisible.detail = true;
     } else {
-      store.updateConfig({
+      storePlayer.updateConfig({
         type: 'film',
         status: true,
-        data: {
-          info: item,
-          ext: { site: relateSite, setting: store.setting },
-        }
+        data: doc
       });
+
       window.electron.ipcRenderer.send('open-play-win', videoName);
     }
   } catch (err) {
