@@ -63,6 +63,7 @@ const setup = async () => {
       server.register(routesV1Modules[key]);
     });
 
+    await server.ready();
     await server.listen({ port: 9978, host: '0.0.0.0' });
     logger.info('[server][init] listen: http://0.0.0.0:9978');
   } catch (err) {
