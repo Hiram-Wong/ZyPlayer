@@ -137,23 +137,23 @@ onActivated(() => {
 
 const getHistoryList = async () => {
   let length = 0;
+  const { pageIndex, pageSize } = pagination.value;
   try {
-    const { pageIndex, pageSize } = pagination.value;
-    const history_res = await fetchHistoryPage({ page: pageIndex, pageSize, type: 'film' });
+    const res = await fetchHistoryPage({ page: pageIndex, pageSize, type: 'film' });
 
-    for (const item of history_res?.list) {
-      const timeDiff = filterDate(item.date);
-      let timeKey;
-      if (timeDiff === 0) timeKey = 'today';
-      else if (timeDiff < 7) timeKey = 'week';
-      else timeKey = 'ago';
-      options.value[timeKey].push(item);
+    if (res?.list && Array.isArray(res?.list) && res?.list?.length > 0) {
+      for (const item of res.list) {
+        const timeDiff = filterDate(item.date);
+        let timeKey;
+        if (timeDiff === 0) timeKey = 'today';
+        else if (timeDiff < 7) timeKey = 'week';
+        else timeKey = 'ago';
+        options.value[timeKey].push(item);
+      };
+      pagination.value.count = res.total;
+      pagination.value.pageIndex++;
+      length = res.list.length || 0;
     }
-
-    pagination.value.count = history_res.total;
-    pagination.value.pageIndex++;
-
-    length = history_res.list.length;
     return length;
   } catch (err) {
     console.error(err);

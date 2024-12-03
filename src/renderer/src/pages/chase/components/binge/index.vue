@@ -127,17 +127,15 @@ onActivated(() => {
 
 const getBingeList = async () => {
   let length = 0;
+  const { pageIndex, pageSize } = pagination.value;
   try {
-    const { pageIndex, pageSize } = pagination.value;
-
-    const star_res = await fetchStarPage({ page: pageIndex, pageSize });
-
-    bingeConfig.value.data = _.unionWith(bingeConfig.value.data, star_res.list, _.isEqual) as any;
-
-    pagination.value.count = star_res.total;
-    pagination.value.pageIndex++;
-
-    length = star_res.data.length;
+    const res = await fetchStarPage({ page: pageIndex, pageSize });
+    if (res?.list && Array.isArray(res?.list) && res?.list?.length > 0) {
+      bingeConfig.value.data = bingeConfig.value.data.concat(res.list);
+      pagination.value.count = res.total;
+      pagination.value.pageIndex++;
+      length = res.list.length;
+    }
     return length;
   } catch (err) {
     console.error(err);
