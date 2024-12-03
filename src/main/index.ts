@@ -1,10 +1,10 @@
 import { initialize as remoteInit } from '@electron/remote/main';
-import { electronApp, platform, optimizer } from '@electron-toolkit/utils';
+import { electronApp, is, optimizer, platform } from '@electron-toolkit/utils';
 import { registerContextMenuListener } from '@electron-uikit/contextmenu';
 import { registerTitleBarListener } from '@electron-uikit/titlebar';
 import { app, BrowserWindow, globalShortcut, nativeTheme, session } from 'electron';
 import fixPath from 'fix-path';
-import { setup as dbInit, webdev } from './core/db';
+import { setup as dbInit, server as dbServer, webdev } from './core/db';
 import createMenu from './core/menu';
 import { ipcListen } from './core/ipc';
 import logger from './core/logger';
@@ -48,6 +48,7 @@ const setup = async () => {
   remoteInit(); // 主进程初始化
   await dbInit(); // 初始化数据库
   await globalVariable(); // 全局变量
+  if (globalThis.variable.debug || is.dev) await dbServer(); // 初始化数据库服务
   await serverInit(); // 后端服务
 };
 

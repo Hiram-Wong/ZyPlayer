@@ -2,7 +2,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
 // import { migrate } from 'drizzle-orm/pglite/migrator';
 import { app } from 'electron';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import * as schema from './schema';
 
 const DB_PATH = join(app.getPath('userData'), 'database');
@@ -19,4 +19,14 @@ const db = drizzle({ client, schema });
 //   });
 // };
 // migrateAfterClientReady();
-export { client, db };
+
+const server = async () => {
+  // @ts-ignore
+  const { createServer } = await import('pglite-server');
+  await client.waitReady;
+  const PORT = 5432;
+  const pgServer = createServer(client);
+  pgServer.listen(PORT, () => {});
+};
+
+export { client, db, server };
