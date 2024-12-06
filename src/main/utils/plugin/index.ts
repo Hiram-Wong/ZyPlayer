@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { ipcRenderer } from 'electron';
 import fixPath from 'fix-path';
 import fs from 'fs-extra';
 import npm from 'npm';
@@ -33,18 +32,7 @@ class AdapterHandler {
     }
     this.baseDir = options.baseDir;
 
-    let register = options.registry || 'https://registry.npmmirror.com/';
-
-    try {
-      const dbdata = ipcRenderer.sendSync('msg-trigger', {
-        type: 'dbGet',
-        data: { id: 'rubick-localhost-config' },
-      });
-      register = dbdata.data.register;
-    } catch (e) {
-      // ignore
-    }
-    this.registry = register || 'https://registry.npmmirror.com/';
+    this.registry = options.registry || 'https://registry.npmmirror.com/';
   }
 
   async upgrade(name: string): Promise<void> {
