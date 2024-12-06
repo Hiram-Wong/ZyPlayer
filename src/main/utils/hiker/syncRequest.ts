@@ -21,7 +21,7 @@ const getTimeout = (timeout: number | undefined | null) => {
   return baseTimeout;
 };
 
-const toTitleCase = (str) => {
+const toTitleCase = (str: string) => {
   return str
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -56,6 +56,14 @@ const toString = (val: any): string => {
     default:
       return val?.toString?.() || '';
   }
+};
+
+const serialize2dict = (headers: { [key: string]: any } = {}) => {
+  const headersDict = {};
+  for (const [key, value] of Object.entries(headers)) {
+    headersDict[key] = value.split(';');
+  }
+  return headersDict;
 };
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
@@ -143,6 +151,8 @@ const fetch = (url: string, options: RequestOptions = {}) => {
     res.getBody = function (encoding: BufferEncoding | undefined) {
       return encoding ? this.body.toString(encoding) : this.body;
     };
+    // @ts-ignore 重写请求头
+    res.headers = serialize2dict(res.headers);
 
     if (options?.onlyHeaders) {
       return toString(res.headers);

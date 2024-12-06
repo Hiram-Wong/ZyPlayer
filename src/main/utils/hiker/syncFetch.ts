@@ -59,10 +59,10 @@ const toString = (val: any): string => {
   }
 };
 
-const serialize2dict = (headers) => {
+const serialize2dict = (headers: { [key: string]: any } = {}) => {
   const headersDict = {};
   for (const [key, value] of headers.entries()) {
-    headersDict[key] = value;
+    headersDict[key] = value.split(';');
   }
   return headersDict;
 };
