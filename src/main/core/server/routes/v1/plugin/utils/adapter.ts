@@ -1,8 +1,7 @@
 import npm from 'npm';
-import JSON5 from 'json5';
 import { join, resolve } from 'path';
 import workerpool from 'workerpool';
-import request from '@main/utils/request';
+import { JsonDB, Config } from 'node-json-db';
 import logger from '@main/core/logger';
 import { fileExist, fileState, readJson, readFile, saveJson, createDir } from '@main/utils/hiker/file';
 
@@ -28,6 +27,8 @@ class AdapterHandler {
   public pluginPath: string; // 插件信息配置文件路径
   public pluginList: any[] = []; // 插件列表
   public syncModules = new Map();
+  public dbTable: string = '/plugin';
+  public db: JsonDB;
   private pluginCaches: Record<string, string> = {}; // 缓存插件版本
   readonly registry: string; // 插件源地址
 
@@ -40,19 +41,19 @@ class AdapterHandler {
     this.baseDir = options.baseDir;
     this.pkgPath = join(this.baseDir, 'package.json');
     this.pluginPath = join(this.baseDir, 'plugin.json');
-    this.registry = options.registry || 'https://registry.npmmirror.com/';
+    this.registry = options?.registry || 'https://registry.npmmirror.com/';
 
     // 初始化插件目录
     if (!fileExist(this.baseDir)) createDir(this.baseDir);
-    if (!fileExist(this.pkgPath) || fileState(this.pkgPath) !== 'file')
-      saveJson(this.pkgPath, { dependencies: {}, devDependencies: {} });
-    if (!fileExist(this.pluginPath) || fileState(this.pluginPath) !== 'file') saveJson(this.pluginPath, []);
+    if (!fileExist(this.pkgPath) || fileState(this.pkgPath) !== 'file') saveJson(this.pkgPath, { dependencies: {} });
+    if (!fileExist(this.pluginPath) || fileState(this.pluginPath) !== 'file') saveJson(this.pluginPath, { plugin: [] });
 
     // 初始化插件列表
-    this.pluginList = this.readJsonFile(this.pluginPath) || [];
+    this.db = new JsonDB(new Config(this.pluginPath, true, true, '/'));
 
+    // 启动插件程序
     (async () => {
-      let plugins = this.fetchList();
+      let plugins = await this.fetchList();
       plugins = plugins.filter((p) => p.status === 'RUNNING');
       try {
         await this.start(plugins);
@@ -91,47 +92,24 @@ class AdapterHandler {
     }
   }
 
-  /**
-   * 深度克隆对象
-   * @private
-   * @param {*} obj
-   * @returns {*}
-   */
-  private deepClone<T>(obj: T): T {
+  async fetchList(plugins: any[] = []) {
+    let infoList: AdapterInfo[] = [];
+
     try {
-      return JSON5.parse(JSON5.stringify(obj));
-    } catch (err: any) {
-      logger.error(`[plugin][deepClone][error] ${err.message}`);
-      throw new Error(`Failed to deepClone`);
-    }
-  }
+      if (plugins.length === 0) {
+        infoList = await this.db.getData(`${this.dbTable}`);
+      } else {
+        for (let plugin of plugins) {
+          const index = await this.db.getIndex(`${this.dbTable}`, plugin, 'name');
+          if (index === -1) continue;
 
-  fetchList(plugins: any[] = []) {
-    const infoList: AdapterInfo[] = [];
-    const currentPlugins = this.pluginList;
-    const namePlugins = plugins.map((plugin) => plugin.name);
-
-    for (let plugin of currentPlugins) {
-      const readmePath = join(this.baseDir, 'node_modules', plugin.name, 'README.md');
-      if (fileExist(readmePath) && fileState(readmePath) === 'file') plugin.readme = readFile(readmePath);
-      const pluginInfo: AdapterInfo = {
-        type: plugin?.pluginType || 'system',
-        name: plugin?.name || '',
-        pluginName: plugin?.pluginName || '',
-        author: plugin?.author || '',
-        description: plugin?.description || '',
-        readme: plugin?.readme || '',
-        main: plugin?.main || '',
-        version: plugin?.version || '0.0.0',
-        logo: plugin?.logo || '',
-        status: plugin?.status || 'STOPED',
-      };
-
-      if (plugins.length > 0) {
-        if (namePlugins.includes(plugin.name)) {
+          const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
           infoList.push(pluginInfo);
         }
-      } else infoList.push(pluginInfo);
+      }
+    } catch (err: any) {
+      infoList = [];
+      logger.error(`[plugin][fetchList][error] ${err.message}`);
     }
 
     return infoList;
@@ -143,13 +121,13 @@ class AdapterHandler {
    * @memberof PluginHandler
    */
   async info(plugins: any[]) {
-    let infoList: AdapterInfo[] = [];
     try {
-      infoList = this.fetchList(plugins);
+      const res = await this.fetchList([...new Set(plugins.map((p) => p.name))]);
+      return res;
     } catch (err: any) {
       logger.error(`[plugin][getAdapterInfo][error] ${err.message}`);
     } finally {
-      return infoList;
+      return [];
     }
   }
 
@@ -159,36 +137,61 @@ class AdapterHandler {
    * @memberof AdapterHandler
    */
   async install(plugins: any[]) {
-    const currentPlugins = this.deepClone(this.pluginList);
+    plugins = plugins.map((plugin) => {
+      const updatedPlugin = { ...plugin };
+      updatedPlugin.pluginName = plugin.name;
+      return updatedPlugin;
+    });
 
     for (let plugin of plugins) {
       try {
-        const cmd = plugin.isDev ? 'link' : 'install';
-        const module = resolve(this.baseDir, 'modules', plugin.name);
+        // 1.默认参数
+        const pkgInfo = this.readJsonFile(join(this.baseDir, 'modules', plugin.pluginName, 'package.json'));
+        if (!pkgInfo) continue;
+        plugin.name = pkgInfo.name;
+
+        // 2.停止插件
+        const index = await this.db.getIndex(`${this.dbTable}`, plugin.name, 'name');
+        if (index > -1) await this.stop([plugin]);
+
+        // 3.安装插件
+        const module = resolve(this.baseDir, 'modules', plugin.pluginName);
         if (!fileExist(module) || fileState(module) !== 'dir') continue;
+        const cmd = plugin.isDev ? 'link' : 'install';
         await this.execCommand(cmd, [module]);
 
-        const pkg = this.readJsonFile(join(this.baseDir, 'modules', plugin.name, 'package.json'));
-        let info;
+        // 4.插件参数
         if (plugin.isDev) {
-          const pluginPath = resolve(this.baseDir, 'node_modules', pkg.name);
+          const pluginPath = join(this.baseDir, 'node_modules', plugin.name);
           const pluginInfo = this.readJsonFile(join(pluginPath, 'package.json'));
-          info = { ...plugin, ...pluginInfo, pluginName: pkg.name };
+          const readmePath = join(this.baseDir, 'node_modules', plugin.name, 'README.md');
+          if (fileExist(readmePath) && fileState(readmePath) === 'file') plugin.readme = readFile(readmePath);
+
+          plugin = { ...plugin, ...pluginInfo };
         }
 
-        const pluginIndex1 = plugins.findIndex((p) => p.name === plugin.name);
-        plugins[pluginIndex1].name = pkg.name;
-        const pluginIndex2 = currentPlugins.findIndex((p) => p.name === pkg.name);
-        if (pluginIndex2 === -1) currentPlugins.unshift(info);
+        const data = {
+          type: plugin?.pluginType || 'system',
+          name: plugin?.name || '',
+          pluginName: plugin?.pluginName || '',
+          author: plugin?.author || '',
+          description: plugin?.description || '',
+          readme: plugin?.readme || '',
+          main: plugin?.main || '',
+          version: plugin?.version || '0.0.0',
+          logo: plugin?.logo || '',
+          status: plugin?.status || 'STOPED',
+        };
+
+        if (index > -1) await this.db.push(`${this.dbTable}[${index}]`, data, true);
+        else await this.db.push(`${this.dbTable}[]`, data);
       } catch (err: any) {
         logger.error(`[plugin][install][error] ${err.message}`);
       }
     }
 
-    this.pluginList = currentPlugins;
-    this.writeJsonFile(this.pluginPath, this.pluginList);
-
-    return this.fetchList(plugins);
+    const res = await this.fetchList([...new Set(plugins.map((p) => p.name))]);
+    return res;
   }
 
   /**
@@ -197,96 +200,73 @@ class AdapterHandler {
    * @memberof AdapterHandler
    */
   async uninstall(plugins: any[]) {
-    const currentPlugins = this.deepClone(this.pluginList);
-
     for (const plugin of plugins) {
       try {
-        const cmd = plugin.isDev ? 'unlink' : 'uninstall';
+        const index = await this.db.getIndex(`${this.dbTable}`, plugin.name, 'name');
+        if (index === -1) continue;
+
+        // 停止插件
+        await this.stop([plugin]);
+
+        // 卸载插件
         const module = join(this.baseDir, 'node_modules', plugin.name);
         if (!fileExist(module) || fileState(module) !== 'dir') continue;
-
-        await this.stop([plugin]);
+        const cmd = plugin.isDev ? 'unlink' : 'uninstall';
         await this.execCommand(cmd, [module]);
 
-        const index = currentPlugins.findIndex((p) => p.name === plugin.name);
-        if (index > -1) currentPlugins.splice(index, 1);
+        // 插件参数
+        await this.db.delete(`${this.dbTable}[${index}]`);
       } catch (err: any) {
         logger.error(`[plugin][uninstall][error] ${err.message}`);
       }
     }
 
-    this.pluginList = currentPlugins;
-    this.writeJsonFile(this.pluginPath, this.pluginList);
-
-    return this.fetchList(plugins);
-  }
-
-  /**
-   * 更新指定插件
-   * @param plugins 插件名称
-   * @memberof AdapterHandler
-   */
-  async update(plugins: any[]) {
-    const currentPlugins = this.deepClone(this.pluginList);
-
-    for (const plugin of plugins) {
-      const module = join(this.baseDir, 'node_modules', plugin.name);
-      if (!fileExist(module) || fileState(module) !== 'dir') continue;
-      await this.execCommand('update', [module]);
-
-      const pluginPath = resolve(this.baseDir, 'node_modules', plugin.name);
-      const pluginInfo = this.readJsonFile(join(pluginPath, 'package.json'));
-      const pluginIndex = currentPlugins.findIndex((p) => `${p.name}` === `${plugin.name}`);
-      if (pluginIndex !== -1) currentPlugins[pluginIndex].version = pluginInfo.version || '0.0.0';
-    }
-
-    this.pluginList = currentPlugins;
-    this.writeJsonFile(this.pluginPath, this.pluginList);
-
-    return this.fetchList(plugins);
+    const res = await this.fetchList([...new Set(plugins.map((p) => p.name))]);
+    return res;
   }
 
   /**
    * 升级插件
-   * @param plugins
+   * @param plugins 插件名称
    * @memberof AdapterHandler
    */
-  async upgrade(plugins: any[]) {
-    for (let plugin of plugins) {
+  async update(plugins: any[]) {
+    for (const plugin of plugins) {
       try {
-        const pkg = await this.readJsonFile(join(this.baseDir, 'package.json'));
-        if (Object.keys(pkg.dependencies).length === 0 || !pkg.dependencies?.[plugin.name]) break;
-        const installedVersion = pkg.dependencies[plugin.name].replace('^', '');
-        let latestVersion = this.pluginCaches[plugin.name];
-        if (!latestVersion) {
-          const registryUrl = `${this.registry}${plugin.name}`;
-          const data = await request({
-            method: 'GET',
-            url: registryUrl,
-            timeout: 2000,
-          });
-          latestVersion = data['dist-tags'].latest;
-          this.pluginCaches[plugin.name] = latestVersion;
-        }
-        if (latestVersion > installedVersion) {
-          await this.install(plugin);
+        const module = join(this.baseDir, 'node_modules', plugin.name);
+        if (!fileExist(module) || fileState(module) !== 'dir') continue;
+
+        // await this.execCommand('update', [module]);
+
+        const index = await this.db.getIndex(`${this.dbTable}`, plugin.name, 'name');
+        if (index === -1) continue;
+        const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
+
+        const pkgPath = join(this.baseDir, 'node_modules', plugin.name);
+        const pkgInfo = this.readJsonFile(join(pkgPath, 'package.json'));
+        if (!pkgInfo) continue;
+
+        if (index > -1 && pkgInfo) {
+          const latestVersion = pkgInfo?.version || '0.0.0';
+          const installedVersion = pluginInfo?.version || '0.0.0';
+          if (latestVersion > installedVersion) await this.install([plugin]);
         }
       } catch (err: any) {
-        logger.error(`[plugin][upgrade][error] ${err.message}`);
+        logger.error(`[plugin][update][error] ${err.message}`);
       }
     }
 
-    return this.fetchList(plugins);
+    const res = await this.fetchList([...new Set(plugins.map((p) => p.name))]);
+    return res;
   }
 
   /**
    * 列出所有已安装插件
    * @memberof AdapterHandler
    */
-  list() {
+  async list() {
     try {
-      if (!this.pluginList.length) this.pluginList = this.readJsonFile(this.pluginPath) || [];
-      return this.fetchList();
+      return await this.fetchList();
     } catch (err: any) {
       logger.error(`[plugin][list][error] ${err.message}`);
       return [];
@@ -294,88 +274,79 @@ class AdapterHandler {
   }
 
   async start(plugins: any[]) {
-    const currentPlugins = this.deepClone(this.pluginList);
-
     for (const plugin of plugins) {
       const module = join(this.baseDir, 'node_modules', plugin.name);
       if (!fileExist(module) || fileState(module) !== 'dir') continue;
 
-      const pluginIndex = currentPlugins.findIndex((p) => `${p.name}` === `${plugin.name}`);
-      if (pluginIndex === -1) continue;
-
-      const pluginInfo = currentPlugins[pluginIndex];
+      const index = await this.db.getIndex(`${this.dbTable}`, plugin.name, 'name');
+      if (index === -1) continue;
+      const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
 
       if (pluginInfo?.main && pluginInfo?.main.endsWith('.js')) {
+        let status = pluginInfo?.status || 'STOPED';
         try {
           let pool = this.syncModules.get(`${plugin.name}`);
           if (!pool) {
             pool = workerpool.pool();
             this.syncModules.set(`${plugin.name}`, pool);
           }
+
           try {
             let entryModule = resolve(module, pluginInfo.main);
             if (process.platform === 'win32') entryModule = `file:///${entryModule}`;
             const res = await pool.exec(runModule, [entryModule, 'start']);
-            if (res.code === 0) currentPlugins[pluginIndex].status = 'RUNNING';
+            if (res.code === 0) status = 'RUNNING';
           } catch (err: any) {
-            currentPlugins[pluginIndex].status = 'STOPED';
+            status = 'STOPED';
             this.syncModules.delete(`${plugin.name}`);
             await pool.terminate();
             logger.error(`[plugin][run][error] ${err.message}`);
           }
         } catch (err: any) {
           logger.error(`[plugin][run][pool] ${err.message}`);
+        } finally {
+          await this.db.push(`${this.dbTable}[${index}]`, Object.assign({}, pluginInfo, { status }), true);
         }
       }
     }
 
-    this.pluginList = currentPlugins;
-    this.writeJsonFile(this.pluginPath, this.pluginList);
-
-    return this.fetchList(plugins);
+    const res = await this.fetchList([...new Set(plugins.map((p) => p.name))]);
+    return res;
   }
 
   async stop(plugins: any[]) {
-    const currentPlugins = this.deepClone(this.pluginList);
-
     for (const plugin of plugins) {
       const module = join(this.baseDir, 'node_modules', plugin.name);
       if (!fileExist(module) || fileState(module) !== 'dir') continue;
 
-      const pluginIndex = currentPlugins.findIndex((p) => `${p.name}` === `${plugin.name}`);
-      if (pluginIndex === -1) continue;
-
-      const pluginInfo = currentPlugins[pluginIndex];
+      const index = await this.db.getIndex(`${this.dbTable}`, plugin.name, 'name');
+      if (index === -1) continue;
+      const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
 
       if (pluginInfo?.main && pluginInfo?.main.endsWith('.js')) {
+        let status = pluginInfo?.status || 'STOPED';
         try {
           let pool = this.syncModules.get(`${plugin.name}`);
           try {
-            if (pool) {
-              // let entryModule = resolve(module, pluginInfo.main);
-              // if (process.platform === 'win32') entryModule = `file:///${entryModule}`;
-              // const res = await pool.exec(runModule, [entryModule, 'stop']);
-              // if (res.code === 0) currentPlugins[pluginIndex].status = 'STOPED';
-              await pool.terminate();
-              this.syncModules.delete(`${plugin.name}`);
-              currentPlugins[pluginIndex].status = 'STOPED';
-            }
+            status = 'STOPED';
+            this.syncModules.delete(`${plugin.name}`);
+            if (pool) await pool.terminate();
           } catch (err: any) {
-            currentPlugins[pluginIndex].status = 'STOPED';
+            status = 'STOPED';
             this.syncModules.delete(`${plugin.name}`);
             if (pool) await pool.terminate();
             logger.error(`[plugin][stop][error] ${err.message}`);
           }
         } catch (err: any) {
           logger.error(`[plugin][stop][pool] ${err.message}`);
+        } finally {
+          await this.db.push(`${this.dbTable}[${index}]`, Object.assign({}, pluginInfo, { status }), true);
         }
       }
     }
 
-    this.pluginList = currentPlugins;
-    this.writeJsonFile(this.pluginPath, this.pluginList);
-
-    return this.fetchList(plugins);
+    const res = await this.fetchList([...new Set(plugins.map((p) => p.name))]);
+    return res;
   }
 
   /**

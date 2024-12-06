@@ -53,15 +53,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       data: res,
     };
   });
-  fastify.post(`/${API_PREFIX}/upgrade`, async (req: FastifyRequest<{ Body: any[] }>) => {
-    const plugins = req.body;
-    const res = await pluginAdapter.upgrade(plugins);
-    return {
-      code: 0,
-      msg: 'ok',
-      data: res,
-    };
-  });
   fastify.post(`/${API_PREFIX}/start`, async (req: FastifyRequest<{ Body: any[] }>) => {
     const plugins = req.body;
     const res = await pluginAdapter.start(plugins);

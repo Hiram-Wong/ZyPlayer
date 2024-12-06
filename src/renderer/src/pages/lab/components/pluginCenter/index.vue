@@ -169,7 +169,7 @@ const handleControl = async (type: string, name: string) => {
       } else {
         const updateIndex = pluginList.value.findIndex(p => p.name === name);
         if (updateIndex > -1) {
-          pluginInfo.value[updateIndex] = updatedPluginList[0];
+          pluginList.value[updateIndex] = updatedPluginList[0];
           pluginInfo.value = updatedPluginList[0];
         }
       }
