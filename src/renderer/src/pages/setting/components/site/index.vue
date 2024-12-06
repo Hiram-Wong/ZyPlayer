@@ -34,6 +34,12 @@
       </template>
       <template #op="slotProps">
         <t-space>
+          <t-link theme="primary" @click="check_all_sites()">
+            {{ $t('pages.setting.table.check_all') }}
+            <template #prefix-icon v-if="slotProps.row.check">
+              <loading-icon />
+            </template>
+          </t-link>
           <t-link theme="primary" @click="handleOpChange('check', slotProps)">
             {{ $t('pages.setting.table.check') }}
             <template #prefix-icon v-if="slotProps.row.check">
@@ -217,6 +223,62 @@ const reqDel = async (index) => {
     MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err.message}`);
   }
 };
+
+const check_all_sites = async () => {
+  if (active.checkLoad) {
+    MessagePlugin.warning(t('pages.setting.message.checkLoading'));
+    return;
+  }
+
+  for (let row_cnt = 0; row_cnt < pagination.total; row_cnt++) {
+    let rowIndex = (row_cnt) % pagination.pageSize;
+    let tableItem : any = tableConfig.value.data[rowIndex];
+    try {
+      const current_page =  Math.ceil((row_cnt) / pagination.defaultPageSize);
+      // debug函数
+      // if (current_page != pagination.current) {
+      //   handlePageChange(current_page, pagination.defaultPageSize);
+      // }
+
+      if (rowIndex == 0 && row_cnt != 0) {
+        handlePageChange(current_page + 1, pagination.defaultPageSize);
+      }
+      console.log("row index ", pagination.current, rowIndex)
+      tableItem.check = true;
+      active.checkLoad = true;
+      const activeItem: any = { ...tableItem };
+      const status = activeItem?.isActive;
+      try {
+        await fetchCmsInit({ sourceId: tableItem.id });
+      } catch {
+        tableItem.isActive = false;
+        continue;
+      }
+      const res = await fetchCmsHome({ sourceId: tableItem.id });
+      if (res && Array.isArray(res?.class) && res.class.length > 0) {
+        if (!status) {
+          await reqPut([tableItem.id], { isActive: true });
+          tableItem.isActive = true;
+        }
+      } else {
+        if (status) {
+          await reqPut([tableItem.id], { isActive: false });
+          tableItem.isActive = false;
+        }
+      }
+    } finally {
+      // @ts-ignore
+      if (tableItem.hasOwnProperty("check")) {
+        tableItem.check = false;
+      } else if (tableItem.hasOwnProperty("isActive")) {
+        tableItem.isActive = false;
+      }
+      active.checkLoad = false;
+    }
+  }
+
+  
+}
 
 const handleOpDefault = async (id) => {
   const item: any = tableConfig.value.data.find((item: any) => item.id === id);

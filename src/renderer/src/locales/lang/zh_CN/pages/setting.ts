@@ -54,6 +54,7 @@ export default {
     default: '默认',
     edit: '编辑',
     check: '检测',
+    check_all: '全量检测',
     delete: '删除',
     deleteTip: '你确定要删除吗',
     noData: '无数据',
