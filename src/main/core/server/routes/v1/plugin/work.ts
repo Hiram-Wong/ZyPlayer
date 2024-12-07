@@ -1,7 +1,7 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { join } from 'path';
 import { APP_STORE_PATH } from '@main/utils/hiker/file';
-import adapter from './utils/adapter';
+import adapter from './utils/adapter_install';
 
 const API_PREFIX = 'api/v1/plugin';
 const APP_PLUGIN_PATH = join(APP_STORE_PATH, 'plugin');

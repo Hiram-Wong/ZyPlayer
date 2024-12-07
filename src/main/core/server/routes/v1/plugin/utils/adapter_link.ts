@@ -137,6 +137,7 @@ class AdapterHandler {
    * @memberof AdapterHandler
    */
   async install(plugins: any[]) {
+    // 赋值目录名
     plugins = plugins.map((plugin) => {
       const updatedPlugin = { ...plugin };
       updatedPlugin.pluginName = plugin.name;
