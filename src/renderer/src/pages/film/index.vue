@@ -404,10 +404,11 @@ const getSearchList = async () => {
     };
 
     // 2. 请求数据
-    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, page: pg === 1 ? '' : pg });
-    const resultSearch = res?.list;
+    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, page: pg === 1 ? null : pg });
+    const reSearch = res?.list;
 
-    if (!Array.isArray(resultSearch) || resultSearch.length === 0) {
+    // 2.1 数据为空
+    if (!Array.isArray(reSearch) || reSearch.length === 0) {
       console.log('[film][search] empty search results');
       // 聚搜过程中,如果某个站搜不出来结果，返回1让其他站继续搜索。单搜就返回0终止搜索
       if (isLastSite) {
@@ -420,26 +421,26 @@ const getSearchList = async () => {
       return length;
     }
 
-    let resultDetail = filterStatus ? resultSearch.filter((item) => item?.vod_name.includes(searchTxt.value)) : resultSearch;
+    // 2.2 数据去重
+    let resultDetail = filterStatus ? reSearch.filter((item) => item?.vod_name.includes(searchTxt.value)) : reSearch;
     let newFilms = differenceBy(resultDetail, filmData.value.list, 'vod_id'); // 去重
     if (newFilms.length > 0) {
       newFilms = resultDetail.map(item => ({ ...item, relateSite: currentSite }));
       filmData.value.list.push(...newFilms);
-    };
 
-    // 最后一个站点，并且是聚搜，参与搜索的站点数大于1的情况，正常搜完一个就结束。只有一个站点正常搜索还要继续搜
-    if (isLastSite) {
-      length = 0;
+      length = newFilms.length;
+      pagination.value.pageIndex++;
+      return length;
     } else {
-      if (newFilms.length > 0) {
-        length = newFilms.length;
-        pagination.value.pageIndex++;
+      if (isLastSite) {
+        length = 0;
       } else {
         length = 1;
         searchCurrentSite.value = searchGroup[index + 1];
-        pagination.value.pageIndex = 1;
       };
-    };
+      pagination.value.pageIndex = 1;
+      return length;
+    }
   } catch (err) {
     console.log(err)
     // 聚搜的某一个站点发生错误,返回1让其他站点能继续搜索。只有一个站点进行搜索的时候发生错误就返回0终止搜索
