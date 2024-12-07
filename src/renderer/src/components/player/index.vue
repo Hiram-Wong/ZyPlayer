@@ -33,6 +33,16 @@ const formatUrlHeaders = (url: string, headers: { [key: string]: string }) => {
   return url;
 };
 
+const formatRemoveUnSafeHeaders = (headers: { [key: string]: string }) => {
+  const unsafeHeads = ['host', 'referer', 'origin', 'user-agent', 'content-length', 'set-cookie'];
+
+  for (const key in headers) {
+    if (unsafeHeads.includes(key.toLowerCase())) delete headers[key];
+  }
+
+  return headers;
+};
+
 const init = async () => {
   if (playerMode.value.type === 'custom') return;
   await destroy();
@@ -54,6 +64,7 @@ const create = async (doc: { [key: string]: any }) => {
   };
   doc.url = formatUrlHeaders(doc.url, doc.headers);
   doc.type = mapVideoTypeToPlayerType(doc.type);
+  doc.headers = formatRemoveUnSafeHeaders(doc.headers);
   await adapter.value.create(doc);
 };
 
