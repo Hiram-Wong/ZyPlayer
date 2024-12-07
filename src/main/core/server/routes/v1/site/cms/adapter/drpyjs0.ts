@@ -169,9 +169,7 @@ class DrpyJs0Adapter {
         url: input,
       },
     });
-    return {
-      play: response,
-    };
+    return { ...response };
   }
   runMain() {
     return '';

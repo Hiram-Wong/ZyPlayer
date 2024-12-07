@@ -184,9 +184,7 @@ class HipyT4Adapter {
         play: play,
       },
     });
-    return {
-      play: response,
-    };
+    return { ...response };
   }
   runMain() {
     return '';
