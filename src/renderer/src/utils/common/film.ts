@@ -238,7 +238,10 @@ const playHelper = async (
   } finally {
     if (adFlag && data.url && !data.url.startsWith('http://127.0.0.1') && data.mediaType.includes('m3u8')) {
       console.log('[film_common][removeAd][start]开始移除广告流程');
-      data.url = `http://127.0.0.1:9978/api/v1/lab/ad?url=${encodeURI(data.url)}&type=m3u8&headers=${JSON.stringify(data.headers || {})}`;
+      // data.url = `http://127.0.0.1:9978/api/v1/lab/ad?url=${encodeURI(data.url)}&headers=${JSON.stringify(data.headers || {})}`;
+      const url = encodeURI(data.url);
+      const headers = JSON.stringify(data.headers || {});
+      data.url = `http://127.0.0.1:9978/api/v1/lab/ad?url=${url}&headers=${headers}`;
       console.log('[film_common][removeAd][end]结束移除广告流程');
     }
     console.log(`[film_common][playHelper][return]`, data);

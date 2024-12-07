@@ -81,8 +81,8 @@ const ready = () => {
         return;
       }
 
-      // 不处理本地地址
-      if (isLocalhostRef(url)) {
+      // 不处理本地地址 但lab/ad除外
+      if (isLocalhostRef(url) && !`${url}`.includes('lab/ad')) {
         callback({});
         return;
       }
