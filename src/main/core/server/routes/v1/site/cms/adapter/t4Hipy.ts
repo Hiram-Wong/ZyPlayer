@@ -83,7 +83,7 @@ class HipyT4Adapter {
   }
   async category(doc: { [key: string]: string }) {
     const { page, tid, f = '{}' } = doc;
-    console.log(page, tid, f);
+
     const response = await request({
       url: this.api,
       method: 'GET',
@@ -122,6 +122,7 @@ class HipyT4Adapter {
         extend: this.ext,
       },
     });
+
     const videos: any[] = [];
     for (const vod of response.list) {
       videos.push({
@@ -134,7 +135,7 @@ class HipyT4Adapter {
         vod_remarks: vod.vod_remarks,
         vod_actor: vod.vod_actor,
         vod_director: vod.vod_director,
-        vod_content: vod.vod_content.trim(),
+        vod_content: vod.vod_content?.trim(),
         vod_play_from: vod.vod_play_from,
         vod_play_url: vod.vod_play_url,
       });

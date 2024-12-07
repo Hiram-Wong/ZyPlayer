@@ -170,7 +170,7 @@ class T0Adapter {
         vod_remarks: vod.note,
         vod_actor: vod.actor,
         vod_director: vod.director,
-        vod_content: vod.des.trim(),
+        vod_content: vod.des?.trim(),
         vod_play_from: vodPlayFrom(dldd),
         vod_play_url: vodPlayUrl(dldd),
       });
