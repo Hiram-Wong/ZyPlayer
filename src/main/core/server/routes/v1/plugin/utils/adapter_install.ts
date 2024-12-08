@@ -3,7 +3,16 @@ import { join, resolve } from 'path';
 import workerpool from 'workerpool';
 import { JsonDB, Config } from 'node-json-db';
 import logger from '@main/core/logger';
-import { fileExist, fileState, readJson, readFile, saveJson, createDir } from '@main/utils/hiker/file';
+import {
+  deleteFile,
+  fileExist,
+  fileState,
+  readJson,
+  readFile,
+  saveJson,
+  createDir,
+  deleteDir,
+} from '@main/utils/hiker/file';
 
 import { AdapterHandlerOptions, AdapterInfo } from './types';
 
@@ -147,7 +156,8 @@ class AdapterHandler {
         if (index > -1) await this.stop([plugin]);
 
         // 3.安装插件
-        await this.execCommand('install', { prefix: pluginBasePath }, []);
+        const execRes = await this.execCommand('install', { prefix: pluginBasePath }, []);
+        if (execRes.code === -1) continue;
 
         // 4.插件参数
         const data = {
@@ -193,8 +203,11 @@ class AdapterHandler {
         if (index > -1) await this.stop([plugin]);
         else continue;
 
-        // 3.卸载插件
-        await this.execCommand('uninstall', { prefix: pluginBasePath }, []);
+        // 3.删除必要依赖
+        const pluginNodeModulesPath = join(pluginBasePath, 'node_modules');
+        if (fileExist(pluginNodeModulesPath) && fileState(pluginBasePath) === 'dir') deleteDir(pluginNodeModulesPath);
+        const pluginPkgLockPath = join(pluginBasePath, 'package-lock.json');
+        if (fileExist(pluginPkgLockPath) && fileState(pluginPkgLockPath) === 'file') deleteFile(pluginPkgLockPath);
 
         // 4.插件参数
         await this.db.delete(`${this.dbTable}[${index}]`);
@@ -376,16 +389,13 @@ class AdapterHandler {
   ): Promise<{ code: number; msg: string; data: any[] }> {
     return new Promise(async (resolve: any, reject: any) => {
       const config: { [key: string]: any } = {
-        prefix: this.baseDir,
         save: true,
         registry: this.registry,
-        ...options,
       };
-
-      console.log(npm.config.loaded);
 
       npm.load(config, (loadErr: any) => {
         npm.config.prefix = options?.prefix || this.baseDir; // 重要, 刷新项目工作路径
+        logger.info(`[plugin][execCommand][env][prefix] ${npm.config.prefix}`);
 
         if (loadErr) {
           logger.error(`[plugin][execCommand][load][error] ${loadErr.message}`);
