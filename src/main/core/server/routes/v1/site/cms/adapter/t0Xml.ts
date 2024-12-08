@@ -221,10 +221,10 @@ class T0Adapter {
     const { input } = doc;
     let parse_url = this.playurl || '';
     if (/\.(m3u8|mp4)/.test(input)) {
-      return JSON.stringify({
+      return {
         parse: 0,
         url: input,
-      });
+      };
     } else {
       if (parse_url.startsWith('json:')) {
         const purl = parse_url.replace('json:', '') + input;
