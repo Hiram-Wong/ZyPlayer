@@ -76,7 +76,12 @@ const putBingeData = async (action: string, id: any = null, doc: any = {}): Prom
   }
 };
 
-// History
+/**
+ * 获取历史数据
+ * @param relateId 关联ID
+ * @param videoId 视频ID
+ * @returns { status: boolean, data: any }
+ */
 const fetchHistoryData = async (relateId: string, videoId: number) => {
   console.log('[film_common][fetchHistoryData][start]历史获取流程开启');
   let data: any = {
@@ -108,6 +113,12 @@ const fetchHistoryData = async (relateId: string, videoId: number) => {
   }
 };
 
+/**
+ * 更新历史数据
+ * @param id 历史ID
+ * @param doc 更新数据
+ * @returns { status: boolean, data: any }
+ */
 const putHistoryData = async (id: any = null, doc: any = {}): Promise<void> => {
   console.log('[film_common][putHistoryData][start]历史更新流程开启');
   let data: any = {
@@ -324,19 +335,32 @@ const fetchRecommSearchHelper = async (site: { [key: string]: string | number },
   return data;
 };
 
-// 格式化剧集名称
+/**
+ * 格式化剧集名称
+ * @param item 剧集名称
+ * @returns 剧集名称
+ */
 const formatName = (item: string): string => {
   const [first] = item.split('$');
   return first.includes('http') ? '正片' : first;
 };
 
-// 格式化剧集集数
+/**
+ * 格式化剧集集数
+ * @param item 剧集集数
+ * @returns 剧集集数
+ */
 const formatIndex = (item: string): { index: string; url: string } => {
   const [index, url] = item.split('$');
   return { index, url };
 };
 
-// 格式化style
+/**
+ * 格式化style
+ * @param text 文本
+ * @param keyword 关键字
+ * @returns 文本
+ */
 const formatContent = (text: string | undefined | null, keyword: string): string => {
   if (!text) return '';
   let res = text;
@@ -360,7 +384,11 @@ const formatContent = (text: string | undefined | null, keyword: string): string
   return res.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
 };
 
-// 获取播放源及剧集
+/**
+ * 格式化剧集
+ * @param videoList 剧集信息
+ * @returns 剧集信息
+ */
 const formatSeason = (videoList: Record<string, any>) => {
   console.log('[film_common][formatSeason][start]剧集格式化流程开启');
   let data: { [key: string]: any[] } = {
@@ -400,7 +428,13 @@ const formatSeason = (videoList: Record<string, any>) => {
   }
 };
 
-// 格式化倒序集数
+/**
+ * 格式化倒序集数
+ * @param action 操作类型 positive:正序 negative:倒序
+ * @param current 当前集数
+ * @param total 总集数
+ * @returns 集数
+ */
 const formatReverseOrder = (action: 'positive' | 'negative', current: number, total: number) => {
   // 当前 0 总 37 正序 1 倒序 37
   // 当前 1 总 37 正序 2 倒序 36
@@ -409,25 +443,51 @@ const formatReverseOrder = (action: 'positive' | 'negative', current: number, to
   return 1;
 };
 
-const fetchBarrageData = async (realUrl: string, options, active): Promise<any> => {
+/**
+ * 获取弹幕
+ * @param realUrl 播放链接
+ * @param options 弹幕配置
+ * @param active 当前选中线路
+ * @returns 弹幕
+ */
+const fetchBarrageData = async (
+  realUrl: string,
+  options: { url: string, key: string, support: string[], start: number, mode: number, color: number, content: number },
+  active: { flimSource: string, filmIndex: string },
+): Promise<any[]> => {
   console.log('[film_common][fetchBarrageData][start]获取弹幕流程开启');
   let data: any = [];
+
   try {
+    if (!/^(http:\/\/|https:\/\/)/.test(realUrl)) return [];
+    // 去除参数
+    const { origin, pathname, hostname } = new URL(realUrl);
+    realUrl = `${origin}${pathname}`;
+  
+    const { flimSource } = active;
     const { url, key, support, start, mode, color, content } = options;
 
-    if (!(url && key && support && start && mode && color && content)) return;
-    if (!_.some(support, (source) => source === active.flimSource)) return;
+    // 分组条件
+    const isValidUrl = typeof url === 'string' && /^(http:\/\/|https:\/\/)/.test(url);
+    const hasValidKey = typeof key === 'string' && key.length > 0;
+    const hasValidSupport = (Array.isArray(support) && support.length > 0 && support.includes(flimSource)) || VIP_LIST.some((domain) => hostname.includes(domain));
+    const hasValidNumbers = [start, mode, color, content].every(value => typeof value === 'number');
+    // 综合判断
+    if (!(isValidUrl && hasValidKey && hasValidSupport && hasValidNumbers)) return [];
 
-    const sourceUrl = formatIndex(active.filmIndex).url;
-    if (sourceUrl.startsWith('http')) {
-      const { hostname } = new URL(sourceUrl);
-      if (VIP_LIST.some((item) => hostname.includes(item))) realUrl = sourceUrl;
-    }
+    const res = await fetchConfig({ url: `${url}${realUrl}`, method: 'GET' });
+    const barrageRes = res.data?.[key] || [];
+    if (!Array.isArray(barrageRes) || barrageRes.length === 0) return [];
 
-    const configRes = await fetchConfig({ url: `${url}${realUrl}`, method: 'GET' });
-    if (!configRes[key] || configRes[key].length === 0) return;
+    const formatBarrage: any[] = barrageRes.map((item) => ({
+      text: item[content],
+      time: parseInt(item[start]),
+      color: item[color],
+      border: false,
+      mode: item[mode],
+    }));
+    data = formatBarrage;
 
-    data = configRes.danmuku;
   } catch (err) {
     console.log(`[film_common][fetchBarrageData][error]`, err);
   } finally {
@@ -436,6 +496,12 @@ const fetchBarrageData = async (realUrl: string, options, active): Promise<any> 
   }
 };
 
+/**
+ * 获取解析
+ * @param url 播放链接
+ * @param type 解析类型
+ * @returns 解析
+ */
 const fetchAnalyzeHelper = async (url: string, type: number) => {
   console.log('[film_common][fetchAnalyzeHelper][start]获取解析流程开启');
   let data = { url: '', originalUrl: url, mediaType: '', headers: {} };

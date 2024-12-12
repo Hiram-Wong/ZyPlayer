@@ -207,6 +207,7 @@ import {
 } from 'tdesign-icons-vue-next';
 import {
   VIP_LIST,
+  fetchBarrageData,
   fetchBingeData,
   putBingeData,
   fetchHistoryData,
@@ -301,7 +302,7 @@ const active = ref({
   filmIndex: '',
   flimSource: '',
 });
-const tmp = ref({
+const tmp = ref<{ [key: string]: any }>({
   preloadNext: {
     url: '',
     headers: {},
@@ -473,7 +474,7 @@ const settingEvent = () => {
 const callPlay = async (item) => {
   let { url } = formatIndex(item);
   url = decodeURIComponent(url);
-  const originalUrl = url;
+  const originUrl = url;
   active.value.filmIndex = item;
   const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
   let response;
@@ -494,34 +495,22 @@ const callPlay = async (item) => {
     response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.playConf.skipAd);
   };
 
-  if (response?.url) {
+  if (response?.url &&/^(http:\/\/|https:\/\/)/.test(response.url)) {
     videoData.value.url = response.url;
     emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
   };
 
   let barrage: any[] = [];
-  const { url: barrageUrl, key, support, start, mode, color, content } = extConf.value.setting.barrage;
-  if (barrageUrl && key && support && start && mode && color && content && support.includes(active.value.flimSource)) {
-    if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
-      if (tmp.value.preloadNext.barrage.length > 0) barrage = tmp.value.preloadNext.barrage;
-    } else {
-      try {
-        const barrageRes = await fetchConfig({ url: `${barrageUrl}${originalUrl}`, method: 'GET'});
-        if (Array.isArray(barrageRes[key]) && barrageRes[key].length > 0) barrage = barrageRes[key];
-      } catch (err) {};
-    };
+  if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
+    if (tmp.value.preloadNext.barrage.length > 0) barrage = tmp.value.preloadNext.barrage;
+  } else {
+    barrage = await fetchBarrageData(originUrl, extConf.value.setting.barrage, active.value);
   };
-  if (response?.url && barrage.length > 0) {
-    const formatBarrage = barrage.map((item) => ({
-      text: item[content],
-      time: parseInt(item[start]),
-      color: item[color],
-      border: false,
-      mode: item[mode],
-    }));
-    emits('barrage', { comments: formatBarrage, url: barrageUrl, id: hash['md5-16'](originalUrl) });
+  if (/^(http:\/\/|https:\/\/)/.test(response?.url) && barrage.length > 0) {
+    emits('barrage', { comments: barrage, url: extConf.value.setting.barrage.url, id: hash['md5-16'](originUrl) });
   };
 
+  // 临时数据恢复默认
   tmp.value = {
     preloadNext: {
       url: '',
@@ -766,20 +755,18 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
           analyzeType = -1;
         }
         const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, playConf.skipAd);
-        if (response?.url) {
+        if (response?.url &&/^(http:\/\/|https:\/\/)/.test(response.url)) {
           tmp.value.preloadNext.url = response.url;
           tmp.value.preloadNext.headers = response.headers;
           tmp.value.preloadNext.mediaType = response.mediaType;
           tmp.value.preloadNext.init = true; // 标识是否预加载完毕
-          const { url: barrageUrl, key, support, start, mode, color, content } = barrage;
-          if (barrageUrl && key && support && start && mode && color && content && support.includes(active.value.flimSource)) {
-            try {
-              const barrageRes = await fetchConfig({ url: `${barrageUrl}${originUrl}`, method: 'GET'});
-              if (Array.isArray(barrageRes[key]) && barrageRes[key].length === 0) tmp.value.preloadNext.barrage = barrageRes[key] as any;
-            } catch(err) {}
-          }
+
+          const barrageRes: any[] = await fetchBarrageData(originUrl, barrage, active.value);
+          if (Array.isArray(barrageRes) && barrageRes.length === 0) tmp.value.preloadNext.barrage = barrageRes;
         }
-      } catch (err) {}
+      } catch (err: any) {
+        console.log(`[player][timeUpdate][preloadNext][error]`, err.message);
+      }
     }
   };
 };
