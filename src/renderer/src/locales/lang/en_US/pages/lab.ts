@@ -374,16 +374,22 @@ export default {
     },
     control: {
       title: 'Control',
-      start: 'Start',
-      stop: 'Stop',
+      start: 'StartServer',
+      stop: 'StopServer',
+      devtool: 'Devtool',
       upgrade: 'Upgrade',
       update: 'Update',
       install: 'Install',
       uninstall: 'UnInstall',
-      cancelTip: 'There is unfinished history. Please wait until it is finished',
+      cancelTip: 'The current plug-in has an incomplete command, please wait moment',
+      devtoolDomAttchErrTip: 'The DOM is not mounted on the page, and the developer Tool failed to open',
+      loadUiEntryError: 'Failed to load entry',
     },
     content: {
       title: 'README',
+    },
+    webview: {
+      title: 'ContentView',
     },
     installDialog: {
       tip: {

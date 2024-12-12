@@ -374,16 +374,22 @@ export default {
     },
     control: {
       title: '控制中心',
-      start: '启动',
-      stop: '停止',
+      start: '启动服务',
+      stop: '停止服务',
+      devtool: '开发者工具',
       upgrade: '升级',
       update: '更新',
       install: '安装',
       uninstall: '卸载',
-      cancelTip: '历史存在未执行完内容, 请等完成后执行',
+      cancelTip: '当前插件存在未执行完命令, 请稍后',
+      devtoolDomAttchErrTip: '打开开发者工具失败, DOM未挂载到页面上',
+      loadUiEntryError: '加载入口失败',
     },
     content: {
       title: 'README',
+    },
+    webview: {
+      title: '内容视图',
     },
     installDialog: {
       tip: {

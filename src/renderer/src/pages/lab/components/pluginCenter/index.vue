@@ -7,7 +7,6 @@
       <div class="right-operation-container">
         <t-radio-group variant="default-filled" v-model="active.nav" @change="handleOpChange">
           <t-radio-button value="install">{{ $t('pages.lab.pluginCenter.control.install') }}</t-radio-button>
-          <t-radio-button value="file">{{ $t('pages.lab.pluginCenter.file') }}</t-radio-button>
         </t-radio-group>
       </div>
 
@@ -28,7 +27,7 @@
         <div class="data-item">
           <p class="title-label mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.step') }}1</p>
           <p class="tip">{{ $t('pages.lab.pluginCenter.installDialog.tip.tip1') }}</p>
-          <t-button block @click="handleGoDir">{{ $t('pages.lab.pluginCenter.installDialog.goDir') }}</t-button>
+          <t-button block @click="handleGoDir" class="mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.goDir') }}</t-button>
         </div>
         <div class="data-item">
           <p class="title-label mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.step') }}2</p>
@@ -38,68 +37,100 @@
       </div>
       </t-dialog>
     </div>
+
     <div class="content" v-if="pluginList.length > 0">
-      <div class="aside left">
-        <t-list class="nav-menu" :scroll="{ type: 'virtual' }" style="height: 100%;">
-          <t-list-item v-for="(item, index) in pluginList" :key="index" :class="[active.aside === item.name ? 'is-active' : '']">
-            <t-tooltip :content="item.pluginName" destroy-on-close>
-              <t-list-item-meta :description="item.pluginName" @click="handleItemClick(item.name)" />
-            </t-tooltip>
-          </t-list-item>
-        </t-list>
+      <div class="nav">
+        <title-menu :list="navList" :active="active.aside" @change-key="handleItemClick" />
       </div>
-      <div class="main right">
-        <div class="plugin-header data-item">
-          <p class="title-label">{{ $t('pages.lab.pluginCenter.info.title') }}</p>
-          <div class="title txthide">
-            <span class="space">{{ pluginInfo.name }}</span>
-            <span>v{{ pluginInfo.version  || '0.0.0' }}</span>
+
+      <div class="main">
+        <div class="plugin-header">
+          <div class="icon_wrapper">
+            <div class="bg"></div>
+            <t-image
+              class="icon"
+              shape="round"
+              :src="pluginInfo.logo"
+              :style="{ width: '64px', height: '64px' }"
+              :lazy="true"
+              fit="cover"
+              :loading="renderLoading"
+              :error="renderError"
+            />
           </div>
-          <div class="author txthide">
-            <span class="space">{{ $t('pages.lab.pluginCenter.info.author') }}:</span>
-            <span>{{ pluginInfo.author || $t('pages.lab.pluginCenter.empty') }}</span>
+          <div class="details">
+            <h1 class="title">
+              <span class="name">{{ pluginInfo.pluginName || '' }}</span>
+              <span class="version">v{{ pluginInfo.version || '0.0.0' }}</span>
+            </h1>
+            <span class="desc txthide txthide2"> {{ pluginInfo.description || $t('pages.lab.pluginCenter.empty') }}</span>
+            <div class="info">
+              <div class="status info-item" v-if="pluginInfo.type === 'system'">
+                <application-icon class="icon" />
+                <t-loading size="small" :loading="active.controlLoad?.[pluginInfo.name] === true" v-if="active.controlLoad?.[pluginInfo.name]" />
+                <template v-else>
+                  <t-tag theme="success" size="small" v-if="pluginInfo.status === 'RUNNING'">{{ $t('pages.lab.pluginCenter.info.start') }}</t-tag>
+                  <t-tag theme="danger" size="small" v-else>{{ $t('pages.lab.pluginCenter.info.stop') }}</t-tag>
+                </template>
+              </div>
+              <div class="author info-item">
+                <verified-icon class="icon" />
+                <span>{{ pluginInfo.author || $t('pages.lab.pluginCenter.empty') }}</span>
+              </div>
+            </div>
           </div>
-          <div class="desc txthide txthide2">
-            <span class="space">{{ $t('pages.lab.pluginCenter.info.desc') }}:</span>
-            <span>{{ pluginInfo.description || $t('pages.lab.pluginCenter.empty') }}</span>
+          <div class="actions">
+            <t-button theme="default" class="uninstall_btn" @click="handleControlChange('uninstall', pluginInfo.name)">{{ $t('pages.lab.pluginCenter.control.uninstall') }}</t-button>
+            <t-dropdown theme="default" trigger="click" destroy-on-close>
+              <t-button theme="default" shape="square" variant="outline" class="control_btn">
+                <caret-down-small-icon />
+              </t-button>
+              <t-dropdown-menu>
+                <t-dropdown-item v-if="pluginInfo.type === 'system'" value="start" @click="handleControlChange('start', pluginInfo.name)"> {{ $t('pages.lab.pluginCenter.control.start') }}</t-dropdown-item>
+                <t-dropdown-item v-if="pluginInfo.type === 'system'" value="stop" @click="handleControlChange('stop', pluginInfo.name)"> {{ $t('pages.lab.pluginCenter.control.stop') }}</t-dropdown-item>
+                <t-dropdown-item v-if="pluginInfo.type === 'ui' "value="devtool" @click="handleOpenDevtool"> {{ $t('pages.lab.pluginCenter.control.devtool') }}</t-dropdown-item>
+              </t-dropdown-menu>
+            </t-dropdown>
           </div>
         </div>
-        <div class="plugin-control center">
-          <p class="title-label">{{ $t('pages.lab.pluginCenter.control.title') }}</p>
-          <div class="status txthide">
-            <span class="space">{{ $t('pages.lab.pluginCenter.info.status') }}:</span>
-            <span class="tag space">
-              <t-tag theme="success" size="small" v-if="pluginInfo.status === 'RUNNING'">{{ $t('pages.lab.pluginCenter.info.start') }}</t-tag>
-              <t-tag theme="danger" size="small" v-else-if="pluginInfo.status === 'STOPED'">{{ $t('pages.lab.pluginCenter.info.stop') }}</t-tag>
-            </span>
-            <t-loading size="small" :loading="active.controlLoad" />
-          </div>
-          <t-radio-group variant="default-filled" v-model="active.control" @change="handleControlChange(active.control, pluginInfo.name)">
-            <t-radio-button value="start">{{ $t('pages.lab.pluginCenter.control.start') }}</t-radio-button>
-            <t-radio-button value="stop">{{ $t('pages.lab.pluginCenter.control.stop') }}</t-radio-button>
-            <t-radio-button value="uninstall">{{ $t('pages.lab.pluginCenter.control.uninstall') }}</t-radio-button>
-          </t-radio-group>
-        </div>
-        <div class="plugin-readme data-item">
+
+        <div class="plugin-readme data-item" v-if="pluginInfo.type === 'system'">
           <p class="title-label">{{ $t('pages.lab.pluginCenter.content.title') }}</p>
           <div class="md">
             <md-render class="custom-md" :markdownText="pluginInfo.readme" />
           </div>
         </div>
+        <div class="plugin-webview data-item" v-if="pluginInfo.type === 'ui'">
+          <p class="title-label">{{ $t('pages.lab.pluginCenter.webview.title') }}</p>
+          <div class="plugin-content" >
+            <webview
+              class="custom-webview"
+              ref="webviewRef"
+              :src="pluginInfo.main"
+              disablewebsecurity
+              allowpopups
+              nodeIntegration
+            />
+          </div>
+        </div>
       </div>
     </div>
+
     <div class="empty" v-if="pluginList.length === 0">
       <t-empty />
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+<script lang="tsx" setup>
+import { computed, nextTick, onMounted, ref } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { ApplicationIcon, CaretDownSmallIcon, LoadingIcon, VerifiedIcon } from 'tdesign-icons-vue-next';
 import { t } from '@/locales';
 import { list, install, uninstall, start, stop} from '@/api/plugin';
 import MdRender from '@/components/markdown-render/index.vue';
+import TitleMenu from '@/components/title-menu/index.vue';
+import logoIcon from '@/assets/icon.png';
 
 const pluginList = ref<any[]>([]);
 const pluginInfo = ref<{ [key: string]: string }>({});
@@ -108,11 +139,34 @@ const active = ref({
   aside: '',
   install: false,
   control: '',
-  controlLoad: false
+  controlLoad: {}
 });
 const installFormData = ref({
   pluginName: '',
   loading: false,
+});
+const webviewRef = ref<any>(null);
+
+const renderError = () => {
+  return (
+    <div class="renderIcon">
+      <img src={logoIcon} style="width: 64px; height: 64px; margin-top: 4px;" />
+    </div>
+  );
+};
+const renderLoading = () => {
+  return (
+    <div class="renderIcon">
+      <LoadingIcon size="1.5em" stroke-width="2" />
+    </div>
+  );
+};
+
+const navList = computed(() => {
+  return pluginList.value.map(item => ({
+    type_name: item.pluginName,
+    type_id: item.name
+  }))
 });
 
 onMounted(()=>{
@@ -123,19 +177,38 @@ const fetchData = async () => {
   const res = await list();
   if (res && res.length > 0) {
     pluginList.value = res;
-    active.value.aside = res[0].name;
-    pluginInfo.value = res[0];
+    const item = res[0];
+    active.value.aside = item.name;
+    pluginInfo.value = item;
   }
-}
+};
 
-const handleItemClick = (name: string) => {
+const webviewLoadError = (err: any) => {
+  MessagePlugin.warning(`${t('pages.lab.pluginCenter.control.loadUiEntryError')}: ${err.errorDescription}`);
+  webviewRef.value.src = 'about:blank';
+};
+
+const handleItemClick = async(name: string) => {
   active.value.aside = name;
-  pluginInfo.value = pluginList.value.find(p => p.name === name);
-}
+  const item = pluginList.value.find(p => p.name === name);
+  pluginInfo.value = item;
+  if (pluginInfo.value.type === 'ui') nextTick(() => {
+    webviewRef.value.removeEventListener('did-fail-load', webviewLoadError);
+    webviewRef.value.addEventListener('did-fail-load', webviewLoadError);
+  });
+};
 
 const handleGoDir = async() => {
   window.electron.ipcRenderer.send('open-path', 'plugin', true);
 }
+
+const handleOpenDevtool = () => {
+  if (webviewRef.value) {
+    webviewRef.value?.openDevTools();
+  } else {
+    MessagePlugin.warning(`${t('pages.lab.pluginCenter.control.devtoolDomAttchErrTip')}`);
+  }
+};
 
 const handleControl = async (type: string, name: string) => {
   const methodMap = {
@@ -162,7 +235,7 @@ const handleControl = async (type: string, name: string) => {
       } else if (type === 'install') {
         const installIndex = pluginList.value.findIndex(p => p.name === updatedPluginList[0].name);
         if (installIndex > -1) pluginList.value[installIndex] = updatedPluginList[0];
-        else pluginList.value.unshift(updatedPluginList[0]);
+        else pluginList.value.push(updatedPluginList[0]);
         pluginInfo.value = updatedPluginList[0];
         active.value.aside = updatedPluginList[0].name;
       } else {
@@ -185,14 +258,14 @@ const handleControlChange = async (type: string, name: string) => {
   active.value.control = '';
 
   if (!['install','uninstall','start','stop','update','upgrade'].includes(type)) return;
-  if (active.value.controlLoad) {
+  if (active.value.controlLoad?.[name]) {
     MessagePlugin.warning(t('pages.lab.pluginCenter.control.cancelTip'));
     return;
   }
 
-  active.value.controlLoad = true;
+  active.value.controlLoad[name] = true;
   await handleControl(type, name);
-  active.value.controlLoad = false;
+  active.value.controlLoad[name] = false;
 }
 
 const handleInstall = async (type: string, name: string) => {
@@ -352,90 +425,136 @@ const handleOpChange = (type:string) => {
   .content {
     flex: 1;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
-    grid-gap: var(--td-comp-margin-s);
+    grid-gap: var(--td-size-4);
     width: 100%;
-    height: calc(100% - 32px);
+    height: calc(100% - 32px - var(--td-size-4));
 
-    .title-label {
-      font: var(--td-font-title-medium);
-      margin-bottom: var(--td-comp-margin-s);
+    .nav {
+      width: 100%;
     }
 
-    .aside {
-      width: 150px;
-      height: 100%;
+    .main {
+      flex: 1;
+      height: calc(100% - 32px - var(--td-size-4));
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--td-size-4);
 
-      :deep(.t-list-item) {
-        width: 146px;
-        cursor: pointer;
-        padding: 0;
-        transition: background-color .3s ease;
-        border-radius: var(--td-radius-medium);
+      .plugin-header {
+        display: flex;
+        flex-direction: row;
+        gap: var(--td-size-8);
+        align-items: center;
 
-        &:not(:first-child) {
-          margin-top: var(--td-comp-margin-xs);
-        }
+        .icon_wrapper {
+          position: relative;
+          width: 96px;
+          height: 96px;
 
-        &:hover {
-          background-color: var(--td-bg-content-hover-2);
-        }
-
-        .t-list-item-main {
-          .t-list-item__meta {
-            overflow: hidden;
-            display: block;
+          .bg {
+            background-color: var(--td-bg-content-input-2);
+            border-radius: var(--td-radius-extraLarge);
             width: 100%;
-            padding: var(--td-comp-paddingTB-s) 0 var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-m);
-            margin-right: var(--td-comp-paddingLR-m);
+            height: 100%;
+          }
 
-            .t-list-item__meta-description {
-              margin-right: 0;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
+          .icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 64px;
+            height: 64px;
+          }
+        }
+
+        .details {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          max-width: calc(100% - 96px - var(--td-size-8) - var(--td-size-8) - 108px);
+          height: 100%;
+          justify-content: space-around;
+
+          .title {
+            display: flex;
+            gap: var(--td-size-4);
+            align-items: flex-end;
+            flex-direction: row;
+
+            .name {
+              font-size: 20px;
+              font-weight: 600;
+              line-height: 30px;
+            }
+
+            .version {
+              font-size: 14px;
+              font-weight: 400;
+            }
+          }
+
+          .desc {
+            font-size: 14px;
+            line-height: 21px;
+            color: var(--td-text-color-secondary);
+            width: 100%;
+            white-space: wrap;
+          }
+
+          .info {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            line-height: 20px;
+
+            .info-item {
+              display: flex;
+              align-items: center;
+              gap: var(--td-size-2);
+
+              .icon {
+                width: 16px;
+                height: 16px;
+              }
+            }
+          }
+        }
+
+        .actions {
+          margin-left: auto;
+          display: flex;
+          gap: var(--td-size-4);
+
+          .control_btn, .uninstall_btn {
+            color: var(--td-text-color-secondary);
+            background-color: var(--td-bg-content-input-2);
+            --ripple-color: transparent;
+            border-color: transparent;
+
+            &:hover {
+              :deep(.t-button__text) {
+                color: var(--td-text-color-primary);
+              }
             }
           }
         }
       }
 
-      :deep(.is-active) {
-        background-color: var(--td-bg-content-active-2);
-      }
-    }
-
-    .main {
-      flex: 1;
-      height: 100%;
-      width: 100%;
-      max-width: calc(100% - 150px - var(--td-comp-margin-s));
-      display: flex;
-      flex-direction: column;
-      gap: var(--td-size-4);
-
-      span.space {
-        margin-right: var(--td-comp-margin-s);
-      }
-
-      .plugin-header {
-
-        .title {
-          font-size: 18px;
-          font-weight: 600;
-        }
-      }
-
-      .plugin-control {
-        .status {
-          margin-bottom: var(--td-comp-margin-s)
-        }
+      .title-label {
+        font: var(--td-font-title-medium);
+        margin-bottom: var(--td-comp-margin-s);
       }
 
       .plugin-readme {
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        flex: 1;
+        height: 100%;
 
         .md {
           overflow: auto;
@@ -443,6 +562,28 @@ const handleOpChange = (type:string) => {
           flex: 1;
 
           .custom-md {
+            :deep(a) {
+              pointer-events: none;
+            }
+          }
+        }
+      }
+
+      .plugin-webview {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        flex: 1;
+
+        .plugin-content {
+          overflow: auto;
+          height: 100%;
+          flex: 1;
+
+          .custom-webview {
+            height: 100%;
+            width: 100%;
+
             :deep(a) {
               pointer-events: none;
             }

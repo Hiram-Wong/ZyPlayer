@@ -2,6 +2,7 @@ import npm from 'npm';
 import { join, resolve } from 'path';
 import workerpool from 'workerpool';
 import { JsonDB, Config } from 'node-json-db';
+import { pathToFileURL } from 'url';
 import logger from '@main/core/logger';
 import {
   deleteFile,
@@ -60,7 +61,7 @@ class AdapterHandler {
 
     // 启动插件程序
     (async () => {
-      let plugins = await this.fetchList();
+      let plugins = await this.fetchList([], true);
       plugins = plugins.filter((p) => p.status === 'RUNNING');
       try {
         await this.start([...new Set(plugins.map((p) => p.name))]);
@@ -84,11 +85,11 @@ class AdapterHandler {
     }
   }
 
-  async fetchList(plugins: any[] = []) {
+  async fetchList(plugins: any[] = [], all: boolean = false) {
     let infoList: AdapterInfo[] = [];
 
     try {
-      if (plugins.length === 0) {
+      if (all) {
         infoList = await this.db.getData(`${this.dbTable}`);
       } else {
         for (let plugin of plugins) {
@@ -108,6 +109,19 @@ class AdapterHandler {
   }
 
   /**
+   * 列出所有已安装插件
+   * @memberof AdapterHandler
+   */
+  async list() {
+    try {
+      return await this.fetchList([], true);
+    } catch (err: any) {
+      logger.error(`[plugin][list][error] ${err.message}`);
+      return [];
+    }
+  }
+
+  /**
    * 获取插件信息
    * @param {plugins}
    * @memberof PluginHandler
@@ -120,7 +134,6 @@ class AdapterHandler {
       return res;
     } catch (err: any) {
       logger.error(`[plugin][getAdapterInfo][error] ${err.message}`);
-    } finally {
       return [];
     }
   }
@@ -132,9 +145,10 @@ class AdapterHandler {
    */
   async install(plugins: any[]) {
     plugins = [...new Set(plugins)];
+    const projects: any[] = [];
 
     for (const plugin of plugins) {
-      let info: { [key: string]: string } = { name: plugin, pluginName: plugin };
+      let info: { [key: string]: string } = {};
 
       try {
         // 1.判断项目存在
@@ -146,14 +160,25 @@ class AdapterHandler {
         if (!fileExist(pkgPath) || fileState(pkgPath) !== 'file') continue;
         const pkgInfo = this.readJsonFile(pkgPath);
         if (!pkgInfo || typeof pkgInfo !== 'object') continue;
+
+        info = { ...info, ...pkgInfo };
+
+        // 2.1 type
+        info.type = pkgInfo?.pluginType || 'system';
+        // 2.1 readme
         const readmePath = join(pluginBasePath, 'README.md');
         info.readme = `### empty`;
         if (fileExist(readmePath) && fileState(readmePath) === 'file') info.readme = readFile(readmePath);
-        info = { ...pkgInfo, ...info };
+        // 2.2 main
+        if (info.type === 'ui') {
+          info.main = info?.main ? pathToFileURL(resolve(pluginBasePath, info.main)).toString() : 'about:blank';
+        } else if (info?.type === 'system') {
+          info.main = info?.main ? pathToFileURL(resolve(pluginBasePath, info.main)).toString() : '';
+        }
 
         // 2.停止插件
         const index = await this.db.getIndex(`${this.dbTable}`, info.name, 'name');
-        if (index > -1) await this.stop([plugin]);
+        if (index > -1) await this.stop([info.name]);
 
         // 3.安装插件
         const execRes = await this.execCommand('install', { prefix: pluginBasePath }, []);
@@ -161,26 +186,29 @@ class AdapterHandler {
 
         // 4.插件参数
         const data = {
-          type: info?.pluginType || 'system',
+          type: info?.type || 'system',
           name: info?.name || '',
-          pluginName: info?.pluginName || '',
+          pluginName: info?.pluginName || info?.name || '',
+          pathName: plugin,
           author: info?.author || '',
           description: info?.description || '',
-          readme: info?.readme || `### empty`,
+          readme: info?.readme || '',
           main: info?.main || '',
           version: info?.version || '0.0.0',
           logo: info?.logo || '',
           status: info?.status || 'STOPED',
         };
+        logger.info(`[plugin][install][data]`, data);
 
         if (index > -1) await this.db.push(`${this.dbTable}[${index}]`, data, true);
         else await this.db.push(`${this.dbTable}[]`, data);
+        projects.push(data.name);
       } catch (err: any) {
         logger.error(`[plugin][install][error] ${err.message}`);
       }
     }
 
-    const res = await this.fetchList(plugins);
+    const res = await this.fetchList(projects, false);
     return res;
   }
 
@@ -194,29 +222,36 @@ class AdapterHandler {
 
     for (const plugin of plugins) {
       try {
-        // 1.判断项目存在
-        const pluginBasePath = join(this.baseDir, plugin);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') continue;
-
-        // 2.停止插件
+        // 1.获取插件信息
         const index = await this.db.getIndex(`${this.dbTable}`, plugin, 'name');
-        if (index > -1) await this.stop([plugin]);
-        else continue;
+        if (index === -1) continue;
+        const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
+        if (Object.keys(pluginInfo).length === 0) continue;
 
-        // 3.删除必要依赖
+        // 2.判断项目存在
+        const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
+        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+          if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
+          continue;
+        }
+
+        // 3.停止插件
+        if (index > -1) await this.stop([pluginInfo.name]);
+
+        // 4.删除必要依赖
         const pluginNodeModulesPath = join(pluginBasePath, 'node_modules');
         if (fileExist(pluginNodeModulesPath) && fileState(pluginBasePath) === 'dir') deleteDir(pluginNodeModulesPath);
         const pluginPkgLockPath = join(pluginBasePath, 'package-lock.json');
         if (fileExist(pluginPkgLockPath) && fileState(pluginPkgLockPath) === 'file') deleteFile(pluginPkgLockPath);
 
-        // 4.插件参数
+        // 5.插件参数
         await this.db.delete(`${this.dbTable}[${index}]`);
       } catch (err: any) {
         logger.error(`[plugin][uninstall][error] ${err.message}`);
       }
     }
 
-    const res = await this.fetchList(plugins);
+    const res = await this.fetchList(plugins, false);
     return res;
   }
 
@@ -230,16 +265,20 @@ class AdapterHandler {
 
     for (const plugin of plugins) {
       try {
-        // 1.判断项目存在
-        const pluginBasePath = join(this.baseDir, plugin);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') continue;
-
-        // 2.获取参数
+        // 1.获取插件信息
         const index = await this.db.getIndex(`${this.dbTable}`, plugin, 'name');
         if (index === -1) continue;
         const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
+        if (Object.keys(pluginInfo).length === 0) continue;
 
-        // 3.获取插件参数
+        // 2.判断项目存在
+        const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
+        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+          if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
+          continue;
+        }
+
+        // 3.获取pkg参数
         const pkgPath = join(pluginBasePath, 'package.json');
         if (!fileExist(pkgPath) || fileState(pkgPath) !== 'file') continue;
         const pkgInfo = this.readJsonFile(pkgPath);
@@ -247,27 +286,14 @@ class AdapterHandler {
 
         const latestVersion = pkgInfo?.version || '0.0.0';
         const installedVersion = pluginInfo?.version || '0.0.0';
-        if (latestVersion > installedVersion) await this.install([plugin]);
+        if (latestVersion > installedVersion) await this.install([pluginInfo.pathName]);
       } catch (err: any) {
         logger.error(`[plugin][update][error] ${err.message}`);
       }
     }
 
-    const res = await this.fetchList(plugins);
+    const res = await this.fetchList(plugins, false);
     return res;
-  }
-
-  /**
-   * 列出所有已安装插件
-   * @memberof AdapterHandler
-   */
-  async list() {
-    try {
-      return await this.fetchList();
-    } catch (err: any) {
-      logger.error(`[plugin][list][error] ${err.message}`);
-      return [];
-    }
   }
 
   /**
@@ -280,35 +306,38 @@ class AdapterHandler {
 
     for (const plugin of plugins) {
       try {
-        // 1.判断项目存在
-        const pluginBasePath = join(this.baseDir, plugin);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') continue;
-
-        // 2.获取参数
+        // 1.获取插件信息
         const index = await this.db.getIndex(`${this.dbTable}`, plugin, 'name');
         if (index === -1) continue;
         const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
+        if (Object.keys(pluginInfo).length === 0) continue;
+
+        // 2.判断项目存在
+        const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
+        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+          if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
+          continue;
+        }
 
         // 3.启动插件
-        if (pluginInfo?.main && pluginInfo?.main.endsWith('.js')) {
+        if (pluginInfo?.main && pluginInfo?.main.toString().endsWith('.js')) {
           let status = pluginInfo?.status || 'STOPED';
 
           try {
-            let pool = this.syncModules.get(`${plugin}`);
+            let pool = this.syncModules.get(`${pluginInfo.name}`);
             if (!pool) {
               pool = workerpool.pool();
-              this.syncModules.set(`${plugin}`, pool);
+              this.syncModules.set(`${pluginInfo.name}`, pool);
             }
 
             try {
-              let entryModule = resolve(pluginBasePath, pluginInfo.main);
-              if (process.platform === 'win32') entryModule = `file:///${entryModule}`;
-              const res = await pool.exec(runModule, [entryModule, 'start']);
+              logger.info(`[plugin][start][${pluginInfo.name}] 入口: ${pluginInfo.main}`);
+              const res = await pool.exec(runModule, [pluginInfo.main, 'start']);
               if (res.code === 0) status = 'RUNNING';
               else status = 'STOPED';
             } catch (err: any) {
               status = 'STOPED';
-              this.syncModules.delete(`${plugin}`);
+              this.syncModules.delete(`${pluginInfo.name}`);
               await pool.terminate();
               logger.error(`[plugin][start][exec][error] ${err.message}`);
             }
@@ -323,7 +352,7 @@ class AdapterHandler {
       }
     }
 
-    const res = await this.fetchList(plugins);
+    const res = await this.fetchList(plugins, false);
     return res;
   }
 
@@ -337,29 +366,33 @@ class AdapterHandler {
 
     for (const plugin of plugins) {
       try {
-        // 1.判断项目存在
-        const pluginBasePath = join(this.baseDir, plugin);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') continue;
-
-        // 2.获取参数
+        // 1.获取插件信息
         const index = await this.db.getIndex(`${this.dbTable}`, plugin, 'name');
         if (index === -1) continue;
         const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
+        if (Object.keys(pluginInfo).length === 0) continue;
+
+        // 2.判断项目存在
+        const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
+        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+          if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
+          continue;
+        }
 
         // 3.停止插件
-        if (pluginInfo?.main && pluginInfo?.main.endsWith('.js')) {
+        if (pluginInfo?.main && pluginInfo?.main.toString().endsWith('.js')) {
           let status = pluginInfo?.status || 'STOPED';
 
           try {
-            let pool = this.syncModules.get(`${plugin}`);
+            let pool = this.syncModules.get(`${pluginInfo.name}`);
 
             try {
               status = 'STOPED';
-              this.syncModules.delete(`${plugin}`);
+              this.syncModules.delete(`${pluginInfo.name}`);
               if (pool) await pool.terminate();
             } catch (err: any) {
               status = 'STOPED';
-              this.syncModules.delete(`${plugin}`);
+              this.syncModules.delete(`${pluginInfo.name}`);
               if (pool) await pool.terminate();
               logger.error(`[plugin][stop][exec][error] ${err.message}`);
             }
@@ -374,7 +407,7 @@ class AdapterHandler {
       }
     }
 
-    const res = await this.fetchList(plugins);
+    const res = await this.fetchList(plugins, false);
     return res;
   }
 
