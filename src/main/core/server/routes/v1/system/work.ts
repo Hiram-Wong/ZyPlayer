@@ -1,5 +1,5 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
-import request from '@main/utils/request';
+import request, { completeRequest } from '@main/utils/request';
 import { ipVersion } from 'is-ip';
 import iconv from 'iconv-lite';
 
@@ -27,7 +27,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   });
   fastify.post(`/${API_PREFIX}/config`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
     const options = req.body;
-    const res = await request({ ...options });
+    const res = await completeRequest({ ...options });
     return { code: 0, msg: 'ok', data: res };
   });
   fastify.post(`/${API_PREFIX}/html`, async (req: FastifyRequest<{ Body: { [key: string]: string } }>) => {
