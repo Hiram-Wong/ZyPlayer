@@ -11,7 +11,7 @@
     <div class="content">
       <header class="header" v-if="classConfig.data.length > 0">
         <div class="header-nav">
-          <TitleMenu :list="classConfig.data" :active="active.class" @change-key="changeClassEvent" />
+          <title-menu :list="classConfig.data" :active="active.class" @change-key="changeClassEvent" />
         </div>
         <t-button theme="default" shape="square" variant="text" v-if="filterData[active.class]" class="quick_filter">
           <root-list-icon @click="isVisible.toolbar = !isVisible.toolbar" />
