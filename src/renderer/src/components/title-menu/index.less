@@ -74,12 +74,12 @@
 
       .title-menu_content {
         border-radius: 4px 0 0 4px;
-        border-right: none !important;
+        border-right: none;
       }
 
       .title-menu_border {
         background-color: #000;
-        right: -13px
+        right: -13px;
       }
 
       &.title-menu_active {
@@ -91,7 +91,7 @@
         .title-menu_border {
           background-color: #000;
           right: -16px;
-          width: 16px
+          width: 16px;
         }
       }
     }
@@ -134,14 +134,14 @@
       margin-left: 8px;
 
       .title-menu_content {
-        border-left: none !important;
-        border-radius: 0 4px 4px 0
+        border-left: none;
+        border-radius: 0 4px 4px 0;
       }
 
       .title-menu_border {
         background-color: #000;
         left: -12px;
-        transform: rotate(180deg)
+        transform: rotate(180deg);
       }
 
       &.title-menu_active {
@@ -156,8 +156,24 @@
           -webkit-mask-image: url(../../assets/rectangle_common.svg);
           mask-image: url(../../assets/rectangle_common.svg);
           transform: rotate(180deg);
-          width: 16px
+          width: 16px;
         }
+      }
+    }
+
+    &:only-child {
+      margin-left: 0;
+
+      .title-menu_content {
+        border-color: #d4d4d4 !important;
+        border-style: solid !important;
+        border-radius: 4px 0 0 4px !important;
+        border-right: none !important;
+      }
+
+      .title-menu_border {
+        transform: none !important;
+        left: auto !important;
       }
     }
   }
@@ -206,7 +222,7 @@
     .title-menu_superItem {
 
       .title-menu_content {
-        border: 1px solid #ffffff14;
+        border-color: #ffffff14;
         color: #fff9;
       }
 
@@ -217,7 +233,7 @@
       &.title-menu_active {
         .title-menu_content {
           background: #ffffff14;
-          border: 1px solid #ffffff1a;
+          border-color: #ffffff1a;
           color: #fff
         }
       }
@@ -229,7 +245,7 @@
 
         &.title-menu_active {
           .title-menu_content {
-            border: 1px solid #ffffff14;
+            border-color: #ffffff14;
           }
 
           .title-menu_border {
@@ -241,7 +257,7 @@
       &:not(&:first-child):not(&:last-child) {
         .title-menu_border {
           background: #0000;
-          border: 1px solid #ffffff14;
+          border-color: #ffffff14;
         }
 
         &.title-menu_active {
@@ -261,12 +277,18 @@
 
         &.title-menu_active {
           .title-menu_content {
-            border: 1px solid #ffffff14;
+            border-color: #ffffff14;
           }
 
           .title-menu_border {
             background-color: #fff;
           }
+        }
+      }
+
+      &:only-child {
+        .title-menu_content {
+          border-color: #ffffff14 !important;
         }
       }
     }
@@ -279,7 +301,7 @@
       background-color: #232426;
 
       .menu_menu_btn {
-        border: 1px solid #ffffff14;
+        border-color: #ffffff14;
       }
     }
   }
