@@ -276,7 +276,7 @@ const getClassList = async (source) => {
     if (Object.keys(res.filters).length > 0) filterData.value = res.filters;
   } catch (err) {
     console.log(err);
-    active.value.infiniteType = 'netwotkError';
+    active.value.infiniteType = 'networkError';
   }
 };
 
@@ -319,11 +319,11 @@ const getFilmList = async (source) => {
       pagination.value.pageIndex++;
       length = newFilms.length;
     } else {
-      active.value.infiniteType = 'netwotkError';
+      active.value.infiniteType = 'networkError';
       length = 0;
     };
   } catch (err) {
-    active.value.infiniteType = 'netwotkError';
+    active.value.infiniteType = 'networkError';
     console.error(err);
     length = 0;
   } finally {
@@ -337,7 +337,7 @@ const load = async ($state: { complete: () => void; loaded: () => void; error: (
   console.log('[film] loading...');
   try {
     const checkComplete = () => {
-      const stopFlag = ['noData', 'netwotkError', 'categoryError']
+      const stopFlag = ['noData', 'networkError', 'categoryError']
       return stopFlag.includes(active.value.infiniteType)
     }
     if (checkComplete()) {
