@@ -297,7 +297,8 @@ const refreshBinge = () => {
   }
 
   .main {
-    height: calc(100% - 32px - 2 * var(--td-comp-margin-s));
+    // height: calc(100% - 32px - 2 * var(--td-comp-margin-s));
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
   }
