@@ -15,7 +15,7 @@ if (typeof Array.prototype.toReversed !== 'function') {
 }
 
 /**
- *  智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
+ * 智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
  * @param m3u8_url m3u8播放地址
  * @param headers 自定义访问m3u8的请求头,可以不传
  * @returns {string}
@@ -150,6 +150,12 @@ const fixAdM3u8AiV1 = async (m3u8_url: string, headers: object = {}) => {
   return m3u8;
 };
 
+/**
+ * 智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
+ * @param m3u8_url m3u8播放地址
+ * @param headers 自定义访问m3u8的请求头,可以不传
+ * @returns {string}
+ */
 const fixAdM3u8AiV2 = async (m3u8_url: string, headers: object = {}) => {
   let ts = new Date().getTime();
   let option = headers;
@@ -243,7 +249,10 @@ const fixAdM3u8AiV2 = async (m3u8_url: string, headers: object = {}) => {
         ss[i] = urljoin(m3u8_url, s);
       }
     } else {
-      ss[i] = s.replace(/URI=\"(.*)\"/, 'URI="' + urljoin(m3u8_url, '$1') + '"');
+      if (s.indexOf('URI')>0){
+        let s1=s.match(/URI=\"(.*)\"/)[1]
+        ss[i] = s.replace(/URI=\"(.*)\"/, 'URI="' + urljoin(m3u8_url, s1) + '"')
+      }
     }
   }
   logger.info('处理的m3u8地址:' + m3u8_url);
@@ -254,9 +263,164 @@ const fixAdM3u8AiV2 = async (m3u8_url: string, headers: object = {}) => {
   return m3u8;
 };
 
+/**
+ * 智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
+ * @param m3u8_url m3u8播放地址
+ * @param headers 自定义访问m3u8的请求头,可以不传
+ * @returns {string}
+ */
+const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
+  const startTime = Date.now();
+  const options = { method: 'get', ...headers };
+
+  logger.info(`处理地址: ${m3u8_url}`);
+
+  // 获取字符串公共前缀长度
+  const compareSameLen = (s1: string, s2: string): number => {
+    let length = 0;
+    while (length < s1.length && s1[length] === s2[length]) {
+      length++;
+    }
+    return length;
+  };
+
+  // 反转字符串
+  const reverseString = (str: string): string => str.split('').reverse().join('');
+
+  // 拉取 m3u8 内容
+  const fetchM3u8 = async (url: string): Promise<string> => {
+    const response = await request({ url, ...options });
+    return response.trim();
+  };
+
+  // 补全 URL 地址
+  const resolveUrls = (lines: string[], baseUrl: string): string[] =>
+    lines.map((line) => !line.startsWith('#') && !/^(http:\/\/|https:\/\/)/.test(line) ? urljoin(baseUrl, line) : line);
+
+  // 压缩多余的空行
+  const compressEmptyLines = (lines: string[]): string[] => {
+    const result: string[] = [];
+    let lastLineWasEmpty = false;
+  
+    for (const line of lines) {
+      const isEmpty = !!(typeof line === 'string' ? line.trim() : '');
+      if (isEmpty || lastLineWasEmpty) result.push(line);
+      lastLineWasEmpty = isEmpty;
+    }
+  
+    return result;
+  };
+
+  // 解析 m3u8 内容为数组
+  const parseM3u82Array = async (url: string): Promise<string[]> => {
+    let content = await fetchM3u8(url);
+    let lines = resolveUrls(content.split('\n'), m3u8_url);
+    lines = compressEmptyLines(lines);
+    return lines;
+  }
+
+  let lines = await parseM3u82Array(m3u8_url);
+
+  // 处理嵌套 m3u8
+  let last_url = lines.slice(-1)[0];
+  if (last_url.length < 5) last_url = lines.slice(-2)[0];
+  if (last_url.includes('.m3u8') && last_url !== m3u8_url) {
+    m3u8_url = last_url;
+    if (!/^(http:\/\/|https:\/\/)/.test(last_url)) m3u8_url = urljoin(m3u8_url, last_url);
+    logger.info(`嵌套地址: ${m3u8_url}`);
+    lines = await parseM3u82Array(m3u8_url);
+  }
+
+  // 疑似广告段处理
+  const findAdSegments = (segments: string[], m3u8_url: string) => {
+    const cleanSegments = [...segments];
+    let firstStr = "";
+    let secondStr = "";
+    let maxSimilarity = 0;
+    let primaryCount = 1;
+    let secondaryCount = 0;
+  
+    // 第一轮遍历：确定 `firstStr`
+    for (let i = 0; i < cleanSegments.length; i++) {
+      const segment = cleanSegments[i];
+      if (!segment.startsWith("#")) {
+        if (!firstStr) firstStr = segment;
+        else {
+          const similarity = compareSameLen(firstStr, segment);
+          if (maxSimilarity > similarity + 1) {
+            if (secondStr.length < 5) secondStr = segment;
+            secondaryCount++;
+          } else {
+            maxSimilarity = similarity;
+            primaryCount++;
+          }
+        }
+        if (secondaryCount + primaryCount >= 30) break;
+      }
+    }
+    if (secondaryCount > primaryCount) firstStr = secondStr;
+  
+    const firstStrLen = firstStr.length;
+    const maxIterations = Math.min(cleanSegments.length, 10);
+    const halfLength = Math.round(cleanSegments.length / 2).toString().length;
+  
+    // 第二轮遍历：找到 `lastStr`
+    let maxc = 0;
+    const lastStr = cleanSegments
+      .slice()
+      .reverse()
+      .find((x) => {
+        if (!x.startsWith("#")) {
+          const reversedFirststr = reverseString(firstStr);
+          const reversedX = reverseString(x);
+          const similarity = compareSameLen(reversedFirststr, reversedX);
+          maxSimilarity = compareSameLen(firstStr, x);
+          maxc++;
+          return (
+            firstStrLen - maxSimilarity <= halfLength + similarity || maxc > 10
+          );
+        }
+        return false;
+      });
+  
+    logger.info("最后切片: " + lastStr);
+  
+    const adSegments: string[] = [];
+  
+    // 第三轮遍历：处理 `ss`
+    for (let i = 0; i < cleanSegments.length; i++) {
+      const segment = cleanSegments[i];
+      if (!segment.startsWith("#")) {
+        if (compareSameLen(firstStr, segment) < maxSimilarity) {
+          adSegments.push(segment);
+          cleanSegments.splice(i - 1, 2); // 删除两个元素
+          i -= 2; // 更新索引
+        } else {
+          cleanSegments[i] = urljoin(m3u8_url, segment);
+        }
+      } else if (segment.includes("URI")) {
+        const match = segment.match(/URI=\"(.*)\"/);
+        if (match) {
+          const updatedUri = urljoin(m3u8_url, match[1]);
+          cleanSegments[i] = segment.replace(/URI=\"(.*)\"/, `URI="${updatedUri}"`);
+        }
+      }
+    }
+  
+    return { adSegments, cleanSegments };
+  }
+  
+  const { cleanSegments, adSegments } = findAdSegments(lines, m3u8_url);
+
+  logger.info('广告分片', adSegments);
+  logger.info(`处理耗时: ${Date.now() - startTime} ms`);
+  return cleanSegments.join('\n');
+};
+
 const fixAdM3u8Ai = {
   v1: fixAdM3u8AiV1,
   v2: fixAdM3u8AiV2,
+  latest: fixAdM3u8AiLatest,
 };
 
-export { fixAdM3u8Ai };
+export default fixAdM3u8Ai;

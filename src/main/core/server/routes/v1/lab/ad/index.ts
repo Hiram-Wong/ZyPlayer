@@ -1,6 +1,6 @@
 import { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
 import { completeRequest } from '@main/utils/request';
-import { fixAdM3u8Ai } from './utils';
+import fixAdM3u8Ai from './utils';
 
 const API_PREFIX = 'api/v1/lab/ad';
 
@@ -12,8 +12,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
 
       let { url, headers = '{}' } = req.query;
 
-      if (!url || !url.startsWith('http')) {
-        reply.code(500).send({ code: -1, msg: 'Invalid url provided' });
+      if (!url || !/^(http:\/\/|https:\/\/)/.test(url)) {
+        reply.code(500).send({ code: -1, msg: 'Invalid m3u8 url' });
         return;
       } else {
         url = decodeURI(url);
@@ -22,7 +22,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         const res = await completeRequest({ url, method: 'HEAD', headers } as any);
 
         if (res?.headers?.['content-type'] && m3u8ContentType.includes(res.headers['content-type'])) {
-          const content = (await fixAdM3u8Ai.v2(url, headers as any)) || '';
+          const content = (await fixAdM3u8Ai.latest(url, headers as any)) || '';
           if (content.includes('.ts')) {
             reply.code(200).header('Content-Type', 'application/vnd.apple.mpegurl').send(content);
             return;
