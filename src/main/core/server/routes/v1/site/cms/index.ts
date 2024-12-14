@@ -13,6 +13,7 @@ import {
 } from './adapter';
 import { singleton } from '@main/utils/tool';
 import LruCache from '@main/utils/lrucache';
+import { hash } from '@main/utils/crypto';
 
 const API_PREFIX = 'api/v1/cms';
 
@@ -38,16 +39,19 @@ const init = async (id: string, debug: boolean = false) => {
     throw new Error('dbResSource.type is undefined');
   }
 
-  if (debug) lruCache.delete(id);
+  // 局限性, 无法检测网络数据变化
+  const idHash = `${id}:${hash['md5-32'](JSON.stringify(dbResSource))}`;
 
-  if (lruCache.has(id)) {
-    return lruCache.get(id);
+  if (debug) lruCache.delete(idHash);
+
+  if (lruCache.has(idHash)) {
+    return lruCache.get(idHash);
   } else {
     try {
       const singleAdapter = singleton(adapterRelation[dbResSource.type]);
       const adapter = new singleAdapter(dbResSource);
       await adapter.init();
-      lruCache.put(id, adapter);
+      lruCache.put(idHash, adapter);
       return adapter;
     } catch (err: any) {
       console.error(`Error init cms adapter: ${err.message}`);
