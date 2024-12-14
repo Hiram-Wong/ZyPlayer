@@ -50,11 +50,10 @@ onMounted(() => {
 });
 
 const initConfig = async () => {
-  const { agreementMask, theme, playerMode, webdev, barrage, timeout, debug } = await fetchSetup();
+  const { agreementMask, theme, playerMode, barrage, timeout, debug } = await fetchSetup();
 
   storeSetting.updateConfig({
     mode: theme,
-    webdev: webdev,
     timeout: timeout || 5000
   });
   active.disclaimer = !agreementMask;

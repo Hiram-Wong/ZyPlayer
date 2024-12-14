@@ -305,7 +305,6 @@ watch(formData,
   (newValue, _) => {
     storeSetting.updateConfig({
       mode: formData.value.theme,
-      webdev: formData.value.webdev,
       timeout: formData.value.timeout < 5000 ? 5000 : formData.value.timeout
     });
     storePlayer.updateConfig({
