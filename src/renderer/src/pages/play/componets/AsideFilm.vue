@@ -247,7 +247,7 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(['update', 'play', 'barrage']);
+const emits = defineEmits(['update', 'play', 'barrage', 'pause']);
 const infoConf = ref(props.info);
 const extConf = ref(props.ext);
 const processConf = ref(props.process)
@@ -735,7 +735,23 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
   if (watchTime >= duration) videoData.value.playEnd = true;
   throttlePutHistory();
 
-  // 4.播放下集  不是最后一集 & 开启续集 & 观看时间+尾部跳过时间 >= 总时长
+  // 5.播放下集 观看时间+尾部跳过时间 >= 总时长
+  // 5.1 开启续集 & 不是最后一集 -> 播放下集
+  // 5.2 未触发下集 -> 暂停播放
+  if (watchTime >= duration && duration !== 0) {
+    if (!isLast() && playConf.playNextEnabled && !tmp.value.end) {
+      tmp.value.end = true; // 标识是否触发下集
+
+      const nextIndex = active.value.reverseOrder ? index + 1 : index - 1;
+      const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
+      await switchSeasonEvent(nextInfo);
+      return;
+    } else {
+      emits('pause');
+    }
+  }
+
+  // 6.播放下集  不是最后一集 & 开启续集 & 观看时间+尾部跳过时间 >= 总时长
   if (!isLast() && playConf.playNextEnabled && watchTime >= duration && duration !== 0 && !tmp.value.end) {
     tmp.value.end = true; // 标识是否触发下集
 

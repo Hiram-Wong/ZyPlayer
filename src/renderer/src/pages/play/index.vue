@@ -22,6 +22,7 @@
             @update="updateConf"
             @play="updatePlay"
             @barrage="updateBarrage"
+            @pause="updatePause"
           />
           <aside-iptv-view class="container-aside"
             v-if="storeConf.type === 'iptv'"
@@ -132,9 +133,15 @@ const updatePlay = async (item) => {
 
 const updateBarrage = async (item) => {
   if (playerRef.value) {
-    setTimeout(() => {
-      playerRef.value?.barrage(item.comments, item.url, item.id);
+    setTimeout(async () => {
+      await playerRef.value?.barrage(item.comments, item.url, item.id);
     }, 0);
+  }
+};
+
+const updatePause = async () => {
+  if (playerRef.value) {
+    playerRef.value?.pause();
   }
 };
 
