@@ -11,13 +11,15 @@ const publicBarrageSend = (url: string, options: any) => {
     return urlObj.toString();
   };
 
-  const fd = new FormData();
-  fd.append('player', options.id);
-  fd.append('text', options.text);
-  fd.append('time', options.time);
-  fd.append('color', options.color);
-  fd.append('type', options.type);
-  requestComplete({ url: removeEmptyParams(url), method: 'POST', data: fd, headers: { 'Content-Type': 'multipart/form-data' } });
+  const data = {
+    player: options.player,
+    text: options.text,
+    time: options.time,
+    color: options.color,
+    type: options.type,
+  };
+
+  requestComplete({ url: removeEmptyParams(url), method: 'POST', data });
 };
 
 class publicStorage {
@@ -124,7 +126,7 @@ const mediaUtils = (() => {
   // 根据URL直接匹配文件格式
   const supportedFormatsLookup = (url: string): string | undefined => {
     if (url.startsWith('magnet:')) return 'magnet';
-    else if (/^https?:\/\//.test(url)) {
+    else if (/^(https?:\/\/)/.test(url)) {
       try {
         const { pathname } = new URL(url);
         const parts = pathname.split('.');
@@ -162,7 +164,7 @@ const mediaUtils = (() => {
 
   // 检查媒体类型
   const checkMediaType = async (url: string): Promise<string | undefined> => {
-    if (!url || !(/^https?:\/\//.test(url) || url.startsWith('magnet:'))) return undefined; 
+    if (!url || !(/^(https?:\/\/)/.test(url) || url.startsWith('magnet:'))) return undefined; 
 
     const fileType = supportedFormatsLookup(url);
     return fileType || (await getMediaType(url));

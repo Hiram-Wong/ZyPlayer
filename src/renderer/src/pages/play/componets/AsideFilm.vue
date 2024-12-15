@@ -306,7 +306,7 @@ const tmp = ref<{ [key: string]: any }>({
     headers: {},
     load: false,
     init: false,
-    barrage: [],
+    barrage: { barrage: [], id: null },
     mediaType: '',
   },
   end: false,
@@ -494,7 +494,7 @@ const callPlay = async (item) => {
       response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, extConf.value.setting.playConf.skipAd);
     };
 
-    if (!response?.url || !/^(http:\/\/|https:\/\/)/.test(response.url)) {
+    if (!response?.url || !/^(https?:\/\/)/.test(response.url)) {
       MessagePlugin.warning(t('pages.player.message.noPlayUrl'));
       return;
     } else {
@@ -502,17 +502,14 @@ const callPlay = async (item) => {
       emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
     };
 
-    let barrage: any[] = [];
+    let barrageRes: { barrage: string[], id: string | number | null } = { barrage: [], id: null };
     if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
-      if (tmp.value.preloadNext.barrage.length > 0) barrage = tmp.value.preloadNext.barrage;
+      if (tmp.value.preloadNext.barrage.barrage.length > 0 && tmp.value.preloadNext.barrage.id) barrageRes = tmp.value.preloadNext.barrage;
     } else {
-      barrage = await fetchBarrageData(originUrl, extConf.value.setting.barrage, active.value);
+      barrageRes = await fetchBarrageData(originUrl, extConf.value.setting.barrage, active.value);
     };
-
-    if (barrage.length > 0) {
-      const { origin, pathname } = new URL(originUrl);
-      const formatBarrageUrl = `${origin}${pathname}`;
-      emits('barrage', { comments: barrage, url: extConf.value.setting.barrage.url, id: formatBarrageUrl });
+    if (Array.isArray(barrageRes.barrage) && barrageRes.barrage.length > 0 && barrageRes.id) {
+      emits('barrage', { comments: barrageRes.barrage, url: extConf.value.setting.barrage.url, id: barrageRes.id });
     };
   } finally {
     // 临时数据恢复默认
@@ -522,7 +519,7 @@ const callPlay = async (item) => {
         headers: {},
         load: false,
         init: false,
-        barrage: [],
+        barrage: { barrage: [], id: null },
         mediaType: '',
       },
       end: false,
@@ -762,14 +759,14 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
         analyzeType = -1;
       }
       const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, playConf.skipAd);
-      if (response?.url &&/^(http:\/\/|https:\/\/)/.test(response.url)) {
+      if (response?.url && /^(https?:\/\/)/.test(response.url)) {
         tmp.value.preloadNext.url = response.url;
         tmp.value.preloadNext.headers = response.headers;
         tmp.value.preloadNext.mediaType = response.mediaType;
         tmp.value.preloadNext.init = true; // 标识是否预加载完毕
 
-        const barrageRes: any[] = await fetchBarrageData(originUrl, barrage, active.value);
-        if (Array.isArray(barrageRes) && barrageRes.length > 0) tmp.value.preloadNext.barrage = barrageRes;
+        const barrageRes: { barrage: string[], id: string | number | null } = await fetchBarrageData(originUrl, barrage, active.value);
+        if (Array.isArray(barrageRes.barrage) && barrageRes.barrage.length > 0 && barrageRes.id) tmp.value.preloadNext.barrage = barrageRes;
       }
     } catch (err: any) {
       console.log(`[player][timeUpdate][preloadNext][error]`, err);

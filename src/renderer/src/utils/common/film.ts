@@ -1,12 +1,10 @@
-import _ from 'lodash';
 import { JSONPath } from 'jsonpath-plus';
 import { putHistory, findHistory, addHistory } from '@/api/history';
 import { setT3Proxy } from '@/api/proxy';
 import { fetchConfig } from '@/api/setting';
-
 import { findStar, addStar, delStar, putStar } from '@/api/star';
 import { fetchRecommPage, fetchCmsDetail, fetchCmsSearch, fetchCmsPlay, fetchCmsProxy } from '@/api/site';
-
+import { hash } from '@/utils/crypto';
 import sniffer from '@/utils/sniffer';
 import { mediaUtils } from '@/components/player';
 
@@ -462,40 +460,43 @@ const formatReverseOrder = (action: 'positive' | 'negative', current: number, to
  */
 const fetchBarrageData = async (
   realUrl: string,
-  options: { url: string, key: string, support: string[], start: number, mode: number, color: number, content: number },
+  options: { url: string, id: string | number, key: string, support: string[], start: number, mode: number, color: number, content: number },
   active: { flimSource: string, filmIndex: string },
-): Promise<any[]> => {
+): Promise<{ barrage: string[], id: string | number | null }> => {
   console.log('[film_common][fetchBarrageData][start]获取弹幕流程开启');
-  let data: any = [];
+  let data: any = { barrage: [], id: null };
 
   try {
-    if (!/^(http:\/\/|https:\/\/)/.test(realUrl)) return [];
+    if (!realUrl || !/^(https?:\/\/)/.test(realUrl)) return data;
     // 去除参数
     const { origin, pathname, hostname } = new URL(realUrl);
     realUrl = `${origin}${pathname}`;
   
     const { flimSource } = active;
-    const { url, key, support, start, mode, color, content } = options;
+    const { url, id, key, support, start, mode, color, content } = options;
 
     // 分组条件
-    const isValidUrl = typeof url === 'string' && /^(http:\/\/|https:\/\/)/.test(url);
-    const hasValidKey = typeof key === 'string' && key.length > 0;
-    const hasValidSupport = (Array.isArray(support) && support.length > 0 && support.includes(flimSource)) || VIP_LIST.some((domain) => hostname.includes(domain));
-    const hasValidNumbers = [start, mode, color, content].every(value => typeof value === 'number');
+    const isValidUrl = typeof url === 'string' && /^(https?:\/\/)/.test(url);
+    const isValidId = id && ['string', 'number'].includes(typeof id);
+    const isValidKey = typeof key === 'string' && key.length > 0;
+    const isValidSupport = (Array.isArray(support) && support.length > 0 && support.includes(flimSource)) || VIP_LIST.some((domain) => hostname.includes(domain));
+    const isValidNumbers = [start, mode, color, content].every(value => typeof value === 'number');
     // 综合判断
-    if (!(isValidUrl && hasValidKey && hasValidSupport && hasValidNumbers)) return [];
-
-    const res = await fetchConfig({ url: `${url}${realUrl}`, method: 'GET' });
-    const barrageRes = res.data?.[key] || [];
-    if (!Array.isArray(barrageRes) || barrageRes.length === 0) return [];
-
-    const formatBarrage: any[] = barrageRes.map((item) => ({
-      text: item[content],
-      time: parseInt(item[start]),
-      color: item[color],
-      mode: item[mode],
-    }));
-    data = formatBarrage;
+    if (isValidUrl && isValidId && isValidKey && isValidSupport && isValidNumbers) {
+      const res = await fetchConfig({ url: `${url}${realUrl}`, method: 'GET' });
+      let formatId = res.data?.[id] || null;
+      if (formatId && /^(https?:\/\/)/.test(formatId)) formatId = hash['md5-16'](formatId);
+      const barrageRes = res.data?.[key] || [];
+      if (Array.isArray(barrageRes) && barrageRes.length !== 0) {
+        const formatBarrage: any[] = barrageRes.map((item) => ({
+          text: item[content],
+          time: parseInt(item[start]),
+          color: item[color],
+          mode: item[mode],
+        }));
+        data = { barrage: formatBarrage, id: formatId };
+      }
+    }
     console.log(`[film_common][fetchBarrageData][return]`, data);
   } catch (err) {
     console.log(`[film_common][fetchBarrageData][error]`, err);

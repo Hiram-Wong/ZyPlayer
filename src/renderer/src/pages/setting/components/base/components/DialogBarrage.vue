@@ -9,6 +9,8 @@
             <div class="base">
               <t-input v-model="formData.url" :label="$t('pages.setting.barrage.api')"
                 :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '408px' }" />
+              <t-input v-model="formData.id" :label="$t('pages.setting.barrage.id')"
+                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '408px' }" />
               <t-input v-model="formData.key" :label="$t('pages.setting.barrage.key')"
                 :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '408px' }" />
               <t-tag-input v-model="formData.support" :label="$t('pages.setting.barrage.support')"
@@ -52,7 +54,7 @@ const props = defineProps({
   barrage: {
     type: Object,
     default: () => {
-      return { url: '', key: '', support: [], start: '', mode: '', color: '', content: '' }
+      return { url: '', id: '', key: '', support: [], start: '', mode: '', color: '', content: '' }
     }
   },
 });

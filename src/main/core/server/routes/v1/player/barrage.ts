@@ -31,29 +31,41 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     };
   });
   fastify.get(`/${API_PREFIX}/:version`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>) => {
-    const { id } = req.query;
+    let { id } = req.query;
     if (!id) return { code: 0, msg: 'no id', data: [] };
+    if (/^(http:\/\/|https:\/\/)/.test(id)) {
+      const { origin, pathname } = new URL(id);
+      id = `${origin}${pathname}`;
+    }
 
     const dbResBarrage = await setting.get('barrage');
-    let { url, key, support, start, mode, color, content } = dbResBarrage;
-    if (!(url && key && support && start && mode && color && content)) return { code: 0, msg: 'no config', data: [] };
-    url = url.replace('url=', 'id=');
+    let { url, id: barrageId, key, support, start, mode, color, content } = dbResBarrage;
+
+    // 分组条件
+    const isValidUrl = typeof url === 'string' && /^(https?:\/\/)/.test(url);
+    const isValidId = barrageId && ['string', 'number'].includes(typeof barrageId);
+    const isValidKey = typeof key === 'string' && key.length > 0;
+    const isValidSupport = (Array.isArray(support) && support.length > 0);
+    const isValidNumbers = [start, mode, color, content].every(value => typeof value === 'number');
+    // 综合判断
+    if (!(isValidUrl && isValidId && isValidKey && isValidSupport && isValidNumbers)) return { code: 0, msg: 'no config', data: [] };
+
     const reqRes = await request({
       url: `${url}${id}`,
       method: 'GET',
     });
-    if (!reqRes?.[key]) return { code: 0, msg: 'no comment', data: [] };
-    const cleanedData = reqRes[key];
+    const barrageRes = reqRes?.[key] || [];
+    if (!Array.isArray(barrageRes) || barrageRes.length === 0) return { code: 0, msg: 'no comment', data: [] };
 
     // { time: 230.523, type: "right", color: "#fff", author: "618c713c", text: "键盘妹子挺好看？" }
-    const comments = cleanedData.map((item: any) => [
+    const formatBarrage: any[] = barrageRes.map((item) => [
       parseFloat(item[start]),
       item[mode] === 'bottom' ? 2 : item[mode] === 'top' ? 1 : 0,
       item[color],
       uuidv4(),
       item[content],
     ]);
-    const res = comments.concat([]).sort((a, b) => a.time - b.time);
+    const res = formatBarrage.concat([]).sort((a, b) => a.time - b.time);
 
     return { code: 0, msg: 'ok', data: res };
   });
