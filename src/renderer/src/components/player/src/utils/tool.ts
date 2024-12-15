@@ -92,6 +92,7 @@ const mediaUtils = (() => {
     'application/vnd.apple.mpegurl': 'm3u8',
     'application/x-mpegURL': 'm3u8',
     'application/octet-stream': 'm3u8',
+    'application/dash+xml': 'mpd',
     'video/avi': 'avi',
     'video/x-msvideo': 'avi',
     'video/x-matroska': 'mkv',
