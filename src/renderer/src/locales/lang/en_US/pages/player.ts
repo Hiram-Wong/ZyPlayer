@@ -44,6 +44,7 @@ export default {
     official: 'Analyze completed, data is derived from {0}',
     noDefaultAnalyze: 'Not set default, Choose your own analysis line',
     noRecommendSearch: 'No recommendation found for this source,  Switch is not performed',
+    noPlayUrl: 'Play address acquisition failed, please change the source or line',
     next: 'One moment, Switching next',
   },
   placeholder: {

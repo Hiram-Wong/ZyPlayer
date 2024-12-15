@@ -138,11 +138,11 @@ const mediaUtils = (() => {
   };
 
   // 映射 Content-Type 到具体格式
-  const mapContentTypeToFormat = (contentType: string): string => {
+  const mapContentTypeToFormat = (contentType: string): string | undefined => {
     const entry = Object.entries(supportedFormats).find(([type]) =>
       contentType.includes(type)
     );
-    return entry ? entry[1] : 'unknown';
+    return entry ? entry[1] : undefined;
   };
 
   // 使用 fetch 获取媒体类型

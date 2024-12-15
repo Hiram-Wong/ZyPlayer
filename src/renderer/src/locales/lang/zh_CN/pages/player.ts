@@ -44,6 +44,7 @@ export default {
     sniiferError: '嗅探失败,请换源',
     noDefaultAnalyze: '未配置默认解析,自行选择解析线路',
     noRecommendSearch: '该源未找到相关推荐,不执行本次切换',
+    noPlayUrl: '播放地址获取失败,请换源或线路',
     next: '请稍候,正在切换下集',
   },
   placeholder: {

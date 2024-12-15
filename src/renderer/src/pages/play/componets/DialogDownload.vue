@@ -33,12 +33,11 @@
 
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core';
-import _ from 'lodash';
 import { ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 
 import { t } from '@/locales';
-import { supportedFormats } from '@/utils/tool';
+import { mediaUtils } from '@/components/player';
 
 const props = defineProps({
   visible: {
@@ -83,9 +82,8 @@ watch(
 );
 
 // 检查复制的复制
-const checkDownloadUrl = (url) => {
-  const urlExtension = url.match(/\.([^.]+)$/)?.[1]; // 使用正则表达式提取文件扩展名
-  const isValid = urlExtension && supportedFormats.includes(urlExtension); // 检查是否在允许的扩展名列表中
+const checkDownloadUrl = async (url) => {
+  const isValid = await mediaUtils.checkMediaType(url);
 
   if (!isValid) MessagePlugin.warning(t('pages.player.download.copyCheck'));
 };

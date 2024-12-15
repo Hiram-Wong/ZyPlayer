@@ -38,7 +38,7 @@
             </div>
           </div>
           <div class="player-content">
-            <player-view ref="playerRef" />
+            <multi-player ref="playerRef" />
           </div>
         </div>
         <div class="analyze-setting">
@@ -71,14 +71,14 @@ import { putHistory, addHistory, findHistory } from '@/api/history';
 import { fetchAnalyzeHelper } from '@/utils/common/film';
 import emitter from '@/utils/emitter';
 
+import { MultiPlayer } from '@/components/player';
 import DialogHistoryView from './components/DialogHistory.vue';
 import DialogIframemView from './components/DialogIframe.vue';
 import DialogSearchView from './components/DialogSearch.vue';
 import SharePopup from '@/components/share-popup/index.vue';
 import CommonNav from '@/components/common-nav/index.vue';
-import PlayerView from '@/components/player/index.vue';
 
-const store = usePlayStore();
+const storePlayer = usePlayStore();
 const searchText = ref('');
 const urlTitle = ref(''); // 播放地址的标题
 const analyzeUrl = ref<string>(''); // 输入需要解析地址
@@ -181,13 +181,12 @@ const getVideoInfo = async (url: string, title: string) => {
   playFormData.value.type = analyzeRes.mediaType;
   playFormData.value.url = analyzeRes.url;
   playFormData.value.headers = analyzeRes.headers;
-  const { playerMode } = store.setting;
+  const playerMode = storePlayer.setting.playerMode;
   if (playerMode.type === 'custom') {
     window.electron.ipcRenderer.send('call-player', playerMode.external, playFormData.value.url);
   } else {
     if (playerRef.value) {
-      await playerRef.value.init();
-      await playerRef.value.create(playFormData.value);
+      await playerRef.value.create(playFormData.value, playerMode.type);
     };
   }
 
