@@ -2,12 +2,15 @@
 import MpegTs from 'mpegts.js';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';
-import WebTorrent from './modules/webtorrent';
+import WebTorrent from '../modules/webtorrent';
 // @ts-ignore
 import shaka from 'shaka-player/dist/shaka-player.compiled';
 
 const publicOptions = {
-  hls: {},
+  hls: {
+    maxBufferLength: 600, // 缓冲区最大长度
+    liveSyncDurationCount: 10, // 直播同步持续时间计数
+  },
   flv: {
     mediaDataSource: {
       type: 'flv',
@@ -35,7 +38,7 @@ const publicStream = {
       if (Hls.isSupported()) {
         const options: any = Object.assign({}, { ...publicOptions.hls });
         if (Object.keys(headers).length > 0) {
-          options.xhrSetup = function (xhr, _url) {
+          options.xhrSetup = function (xhr: any, _url: string) {
             xhr.withCredentials = true; // do send cookies
             for (const key in headers) {
               xhr.setRequestHeader(key, headers[key]);
@@ -70,8 +73,6 @@ const publicStream = {
         const options = publicOptions.webtorrent;
         const client = new WebTorrent(options);
         const torrentId = url;
-        video.src = '';
-        video.preload = 'metadata';
         client.add(torrentId, (torrent) => {
           const file = torrent.files.find((file) => file.name.endsWith('.mp4') || file.name.endsWith('.mkv'));
           file.renderTo(video, {
@@ -197,30 +198,27 @@ const publicStream = {
   },
   destroy: {
     customHls: (player: any) => {
-      player.hls.destroy();
+      if (player?.hls) player.hls.destroy();
       delete player.hls;
     },
     customFlv: (player: any) => {
-      player.flv.pause();
-      player.flv.unload();
-      player.flv.detachMediaElement();
-      player.flv.destroy();
+      if (player?.flv) player.flv.destroy();
       delete player.flv;
     },
     customDash: (player: any) => {
-      player.mpd.destroy();
+      if (player?.mpd) player.mpd.destroy();
       delete player.mpd;
     },
     customTorrent: (player: any) => {
       // player.torrent.remove(player.video.src);
-      player.torrent.destroy();
+      if (player?.torrent) player.torrent.destroy();
       delete player.torrent;
     },
     customMpegts: (player: any) => {
-      player.mpegts.destroy();
+      if (player?.mpegts) player.mpegts.destroy();
       delete player.mpegts;
     },
   },
 };
 
-export { publicStream };
+export default publicStream;
