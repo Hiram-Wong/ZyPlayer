@@ -302,6 +302,7 @@ const active = ref({
 });
 const tmp = ref<{ [key: string]: any }>({
   preloadNext: {
+    id: '',
     url: '',
     headers: {},
     load: false,
@@ -468,6 +469,21 @@ const settingEvent = () => {
   active.value.setting = true;
 };
 
+const defaultEmpConf = () => {
+  tmp.value = {
+    preloadNext: {
+      id: '',
+      url: '',
+      headers: {},
+      load: false,
+      init: false,
+      barrage: { barrage: [], id: null },
+      mediaType: '',
+    },
+    end: false,
+  };
+};
+
 // 调用播放器
 const callPlay = async (item) => {
   try {
@@ -477,7 +493,7 @@ const callPlay = async (item) => {
     active.value.filmIndex = item;
     const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
     let response;
-    if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
+    if (tmp.value.preloadNext.init && tmp.value.preloadNext.load && tmp.value.preloadNext.id === item) {
       response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
     } else {
       let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
@@ -503,7 +519,7 @@ const callPlay = async (item) => {
     };
 
     let barrageRes: { barrage: string[], id: string | number | null } = { barrage: [], id: null };
-    if (tmp.value.preloadNext.init  && tmp.value.preloadNext.load) {
+    if (tmp.value.preloadNext.init && tmp.value.preloadNext.load && tmp.value.preloadNext.id === item) {
       if (tmp.value.preloadNext.barrage.barrage.length > 0 && tmp.value.preloadNext.barrage.id) barrageRes = tmp.value.preloadNext.barrage;
     } else {
       barrageRes = await fetchBarrageData(originUrl, extConf.value.setting.barrage, active.value);
@@ -513,17 +529,7 @@ const callPlay = async (item) => {
     };
   } finally {
     // 临时数据恢复默认
-    tmp.value = {
-      preloadNext: {
-        url: '',
-        headers: {},
-        load: false,
-        init: false,
-        barrage: { barrage: [], id: null },
-        mediaType: '',
-      },
-      end: false,
-    };
+    defaultEmpConf();
   }
 };
 
@@ -760,6 +766,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
       }
       const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, playConf.skipAd);
       if (response?.url && /^(https?:\/\/)/.test(response.url)) {
+        tmp.value.preloadNext.id = nextInfo;
         tmp.value.preloadNext.url = response.url;
         tmp.value.preloadNext.headers = response.headers;
         tmp.value.preloadNext.mediaType = response.mediaType;
