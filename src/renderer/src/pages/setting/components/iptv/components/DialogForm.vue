@@ -17,14 +17,14 @@
             <t-radio-group v-model="formData.data.type" variant="default-filled" >
               <t-radio-button value="remote">{{ $t('pages.setting.iptv.apiRemote') }}</t-radio-button>
               <t-radio-button value="local">{{ $t('pages.setting.iptv.apiLocal') }}</t-radio-button>
-              <t-radio-button value="batches">{{ $t('pages.setting.iptv.apiManual') }}</t-radio-button>
+              <t-radio-button value="manual">{{ $t('pages.setting.iptv.apiManual') }}</t-radio-button>
             </t-radio-group>
             <div class="input-horizontal-item">
-              <t-input v-if="formData.data.type !== 'batches'" v-model="formData.data.url" class="input-item" style="flex: 1" :placeholder="$t('pages.setting.placeholder.general')" />
+              <t-input v-if="formData.data.type !== 'manual'" v-model="formData.data.url" class="input-item" style="flex: 1" :placeholder="$t('pages.setting.placeholder.general')" />
               <t-button v-if="formData.data.type === 'local'" class="upload-item" theme="default" @click="uploadFileEvent">
                 {{ $t('pages.setting.upload') }}
               </t-button>
-              <t-textarea v-if="formData.data.type === 'batches'" v-model="formData.data.url" class="input-item input-textarea"
+              <t-textarea v-if="formData.data.type === 'manual'" v-model="formData.data.url" class="input-item input-textarea"
                 :placeholder="$t('pages.setting.placeholder.manualTip')" :autosize="{ minRows: 7, maxRows: 7 }" />
             </div>
           </div>

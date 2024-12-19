@@ -23,7 +23,7 @@
         <t-tag v-else-if="row.type === 'local'" theme="warning" shape="round" variant="light-outline">
           {{ $t('pages.setting.iptv.apiLocal') }}
         </t-tag>
-        <t-tag v-else-if="row.type === 'batches'" theme="danger" shape="round" variant="light-outline">
+        <t-tag v-else-if="row.type === 'manual'" theme="danger" shape="round" variant="light-outline">
           {{ $t('pages.setting.iptv.apiManual') }}
         </t-tag>
       </template>

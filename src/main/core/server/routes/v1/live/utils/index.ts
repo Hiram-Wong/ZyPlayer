@@ -45,7 +45,7 @@ const txt = (text: string) => {
   return docs;
 };
 
-const parseChannel = async (type: 'local' | 'remote' | 'url', path: string) => {
+const parseChannel = async (type: 'local' | 'remote' | 'manual', path: string) => {
   let fileContent: string;
   if (type === 'local') {
     fileContent = await fs.readFileSync(path, 'utf-8');
