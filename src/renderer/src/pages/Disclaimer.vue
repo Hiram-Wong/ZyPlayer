@@ -14,7 +14,7 @@
         {{ $t('pages.md.privacyPolicy.title') }}
       </template>
       <template #content>
-        <md-render :markdownText="$t('pages.md.privacyPolicy.content')" />
+        <md-render :text="$t('pages.md.privacyPolicy.content')" />
       </template>
     </common-dialog>
   </div>

@@ -91,7 +91,7 @@
       </div>
       <div class="ai-item result" v-if="formData.result && !active.loading">
         <t-card :title="$t('pages.lab.aiBrain.result')">
-          <md-render :markdownText="formData.contentHtml" class="chat-msg-content pa-3" />
+          <md-render :text="formData.contentHtml" class="chat-msg-content pa-3" />
           <template #actions>
             <t-button size="small" shape="round" @click.stop="copyAiAnswer">{{
               $t('pages.lab.aiBrain.copy') }}</t-button>

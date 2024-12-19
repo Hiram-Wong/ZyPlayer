@@ -10,7 +10,7 @@
         {{ $t('pages.md.thumbanilFfmpeg.title') }}
       </template>
       <template #content>
-        <md-render :markdownText="$t('pages.md.thumbanilFfmpeg.content')" />
+        <md-render :text="$t('pages.md.thumbanilFfmpeg.content')" />
       </template>
     </common-dialog>
   </div>

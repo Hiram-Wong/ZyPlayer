@@ -97,7 +97,7 @@
         <div class="plugin-readme data-item" v-if="pluginInfo.type === 'system'">
           <p class="title-label">{{ $t('pages.lab.pluginCenter.content.title') }}</p>
           <div class="md">
-            <md-render class="custom-md" :markdownText="pluginInfo.readme" />
+            <md-render class="custom-md" :text="pluginInfo.readme" />
           </div>
         </div>
         <div class="plugin-webview data-item" v-if="pluginInfo.type === 'ui'">

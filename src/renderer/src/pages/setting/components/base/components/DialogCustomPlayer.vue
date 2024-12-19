@@ -9,7 +9,7 @@
         {{ $t('pages.md.customPlayer.title') }}
       </template>
       <template #content>
-        <md-render :markdownText="$t('pages.md.customPlayer.content')" />
+        <md-render :text="$t('pages.md.customPlayer.content')" />
       </template>
     </common-dialog>
   </div>

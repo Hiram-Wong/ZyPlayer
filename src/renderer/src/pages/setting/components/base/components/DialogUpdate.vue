@@ -19,7 +19,11 @@
                 </div>
                 <div class="data-item">
                   <p class="title-label mg-b">{{ $t('pages.setting.update.changelog') }}</p>
-                  <div class="content markdown-custom" v-html="updateInfo.releaseNotes"></div>
+                  <div class="text-black content">
+                    <div ref="textRef" class="leading-relaxed break-words">
+                      <div class="markdown-body" v-html="updateInfo.releaseNotes"></div>
+                    </div>
+                  </div>
                 </div>
                 <p class="tip bottom-tip">
                   {{ $t('pages.setting.update.tip') }}
@@ -51,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import '@/components/markdown-render/index.less';
+import '@/components/markdown-render/style/index.less';
 
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
