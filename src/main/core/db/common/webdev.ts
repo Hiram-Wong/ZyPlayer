@@ -1,6 +1,7 @@
 import logger from '@main/core/logger';
 import webdev from '@main/utils/webdev';
 import { setting, db } from '@main/core/db/service';
+import { registerSchedule, runSchedule } from '@main/utils/schedule';
 
 const syncWebdev = async () => {
   logger.info('[webdev][sync][start] try');
@@ -39,7 +40,12 @@ const syncWebdev = async () => {
 };
 
 const cronSyncWebdev = () => {
-  setInterval(syncWebdev, 5 * 60 * 1000);
+  registerSchedule({
+    name: 'syncWebdev',
+    fun: syncWebdev,
+    interval: 5 * 60 * 1000
+  });
+  runSchedule('syncWebdev');
 };
 
 export { syncWebdev, cronSyncWebdev };
