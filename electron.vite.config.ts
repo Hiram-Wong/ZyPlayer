@@ -89,7 +89,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
               nplayer: ['nplayer', '@nplayer/danmaku'],
               'video-decoder': ['flv.js', 'hls.js', 'shaka-player', 'mpegts.js'],
               tdesign: ['tdesign-vue-next', 'tdesign-icons-vue-next', '@tdesign-vue-next/chat'],
-              md: ['github-markdown-css', 'markdown-it', 'markdown-it-highlightjs', 'markdown-it-mathjax3'],
+              md: ['markdown-it', 'highlight.js', 'markdown-it-mathjax3'],
               crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa'],
               vue: [
                 'vue',
