@@ -9,7 +9,7 @@ import { setting } from '@main/core/db/service';
 import logger from '@main/core/logger';
 
 const winPool = {};
-const DEFAULT_WIDTH_MAIN = 1200;
+const DEFAULT_WIDTH_MAIN = 1000;
 const DEFAULT_HEIGHT_MAIN = 640;
 const DEFAULT_WIDTH_PLAY = 875;
 const DEFAULT_HEIGHT_PLAY = 550;

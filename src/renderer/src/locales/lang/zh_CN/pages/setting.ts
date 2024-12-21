@@ -72,6 +72,7 @@ export default {
     },
   },
   header: {
+    check_all : '全量检测',
     add: '添加',
     enable: '启用',
     disable: '禁用',

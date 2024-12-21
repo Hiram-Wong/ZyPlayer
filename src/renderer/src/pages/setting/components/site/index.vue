@@ -34,12 +34,6 @@
       </template>
       <template #op="slotProps">
         <t-space>
-          <t-link theme="primary" @click="check_all_sites()">
-            {{ $t('pages.setting.table.check_all') }}
-            <template #prefix-icon v-if="slotProps.row.check">
-              <loading-icon />
-            </template>
-          </t-link>
           <t-link theme="primary" @click="handleOpChange('check', slotProps)">
             {{ $t('pages.setting.table.check') }}
             <template #prefix-icon v-if="slotProps.row.check">
@@ -76,6 +70,10 @@ import CommonSetting from '@/components/common-setting/table/index.vue';
 
 const op = computed(() => {
   return[
+    {
+      label: t('pages.setting.header.check_all'),
+      value: 'check_all'
+    },
     {
       label: t('pages.setting.header.add'),
       value: 'add'
@@ -235,10 +233,6 @@ const check_all_sites = async () => {
     let tableItem : any = tableConfig.value.data[rowIndex];
     try {
       const current_page =  Math.ceil((row_cnt) / pagination.defaultPageSize);
-      // debug函数
-      // if (current_page != pagination.current) {
-      //   handlePageChange(current_page, pagination.defaultPageSize);
-      // }
 
       if (rowIndex == 0 && row_cnt != 0) {
         handlePageChange(current_page + 1, pagination.defaultPageSize);
@@ -249,7 +243,8 @@ const check_all_sites = async () => {
       const activeItem: any = { ...tableItem };
       const status = activeItem?.isActive;
       try {
-        await fetchCmsInit({ sourceId: tableItem.id });
+        await fetchCmsInit({ sourceId: tableItem.id, check_init: true });
+        // await fetchCmsInit({ sourceId: tableItem.id});
       } catch {
         tableItem.isActive = false;
         continue;
@@ -360,6 +355,8 @@ const handleOpChange = async (type, doc) => {
       tableConfig.value.data[rowIndex].check = false;
       active.checkLoad = false;
     }
+  } else if (type === 'check_all') {
+    await check_all_sites();
   }
 
   if (['enable', 'disable', 'delete', 'default'].includes(type)) {

@@ -34,6 +34,8 @@ class workerLruCache extends LruCache {
 }
 
 const lruCache = new workerLruCache(3);
+var check_init_child: ChildProcess | null = null;
+var check_id: string = '';
 
 class T3Adapter {
   id: string = '';
@@ -74,7 +76,22 @@ class T3Adapter {
   };
 
   private async execCtx(options: { [key: string]: any }): Promise<any> {
-    if (lruCache.get(this.id)) {
+    var lru_flag: boolean = lruCache.get(this.id);
+    if (!lru_flag && options.type == 'check_init') {
+      if (check_init_child && typeof check_init_child.pid === 'number') {
+        check_init_child.removeAllListeners();
+        treeKill(check_init_child.pid, 'SIGTERM');
+      }
+      check_id = this.id;
+      check_init_child = fork(resolve(__dirname, 'worker.js'), [`T3Fork-execCtx-${uuidv4()}`, this.timeout.toString()]);
+      const res = await this.doWork(check_init_child!, { ...options });
+      return res.data;
+    } else if (!lru_flag && this.id == check_id) {
+      const res = await this.doWork(check_init_child!, { ...options });
+      return res.data;
+    }
+
+    if (lru_flag) {
       this.child = lruCache.get(this.id);
     } else {
       this.child = fork(resolve(__dirname, 'worker.js'), [`T3Fork-execCtx-${uuidv4()}`, this.timeout.toString()]);
@@ -89,6 +106,12 @@ class T3Adapter {
     const res = await this.execCtx({ type: 'init', data: this.ext });
     return res;
   }
+
+  async check_init() {
+    const res = await this.execCtx({ type: 'check_init', data: this.ext });
+    return res;
+  }
+
   async home() {
     const res = await this.execCtx({ type: 'home', data: null });
 

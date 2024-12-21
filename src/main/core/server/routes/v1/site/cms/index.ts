@@ -30,7 +30,7 @@ const adapterRelation = {
 
 const lruCache = new LruCache(10);
 
-const init = async (id: string, debug: boolean = false) => {
+const init = async (id: string, check_init: boolean = false, debug: boolean = false) => {
   const dbResSource = await site.get(id);
 
   // 检查 dbResSource.type 是否存在
@@ -46,7 +46,10 @@ const init = async (id: string, debug: boolean = false) => {
     try {
       const singleAdapter = singleton(adapterRelation[dbResSource.type]);
       const adapter = new singleAdapter(dbResSource);
-      await adapter.init();
+      if (check_init && dbResSource.type == 7)
+        await adapter.check_init();
+      else
+        await adapter.init();
       lruCache.put(id, adapter);
       return adapter;
     } catch (err: any) {
@@ -60,8 +63,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(
     `/${API_PREFIX}/init`,
     async (req: FastifyRequest<{ Querystring: { [key: string]: string | boolean } }>) => {
-      let { sourceId, debug = false } = req.query;
-      const res = await init(sourceId as string, debug as boolean);
+      let { sourceId, check_init = false, debug = false } = req.query;
+      const res = await init(sourceId as string, check_init as boolean, debug as boolean);
       return {
         code: 0,
         msg: 'ok',
