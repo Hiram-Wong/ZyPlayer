@@ -71,8 +71,8 @@ import CommonSetting from '@/components/common-setting/table/index.vue';
 const op = computed(() => {
   return[
     {
-      label: t('pages.setting.header.check_all'),
-      value: 'check_all'
+      label: t('pages.setting.header.check_selected'),
+      value: 'check_selected'
     },
     {
       label: t('pages.setting.header.add'),
@@ -222,59 +222,6 @@ const reqDel = async (index) => {
   }
 };
 
-const check_all_sites = async () => {
-  if (active.checkLoad) {
-    MessagePlugin.warning(t('pages.setting.message.checkLoading'));
-    return;
-  }
-
-  for (let row_cnt = 0; row_cnt < pagination.total; row_cnt++) {
-    let rowIndex = (row_cnt) % pagination.pageSize;
-    let tableItem : any = tableConfig.value.data[rowIndex];
-    try {
-      const current_page =  Math.ceil((row_cnt) / pagination.defaultPageSize);
-
-      if (rowIndex == 0 && row_cnt != 0) {
-        handlePageChange(current_page + 1, pagination.defaultPageSize);
-      }
-      console.log("row index ", pagination.current, rowIndex)
-      tableItem.check = true;
-      active.checkLoad = true;
-      const activeItem: any = { ...tableItem };
-      const status = activeItem?.isActive;
-      try {
-        await fetchCmsInit({ sourceId: tableItem.id, check_init: true });
-        // await fetchCmsInit({ sourceId: tableItem.id});
-      } catch {
-        tableItem.isActive = false;
-        continue;
-      }
-      const res = await fetchCmsHome({ sourceId: tableItem.id });
-      if (res && Array.isArray(res?.class) && res.class.length > 0) {
-        if (!status) {
-          await reqPut([tableItem.id], { isActive: true });
-          tableItem.isActive = true;
-        }
-      } else {
-        if (status) {
-          await reqPut([tableItem.id], { isActive: false });
-          tableItem.isActive = false;
-        }
-      }
-    } finally {
-      // @ts-ignore
-      if (tableItem.hasOwnProperty("check")) {
-        tableItem.check = false;
-      } else if (tableItem.hasOwnProperty("isActive")) {
-        tableItem.isActive = false;
-      }
-      active.checkLoad = false;
-    }
-  }
-
-  
-}
-
 const handleOpDefault = async (id) => {
   const item: any = tableConfig.value.data.find((item: any) => item.id === id);
   handleOpChange(item.isActive ? 'enable' : 'disable', [id]);
@@ -355,8 +302,52 @@ const handleOpChange = async (type, doc) => {
       tableConfig.value.data[rowIndex].check = false;
       active.checkLoad = false;
     }
-  } else if (type === 'check_all') {
-    await check_all_sites();
+  } else if (type === 'check_selected') {
+    if (active.checkLoad) {
+      MessagePlugin.warning(t('pages.setting.message.checkLoading'));
+      return;
+    }
+
+    if (doc.length == 0) {
+      MessagePlugin.warning(t('pages.setting.message.checkUnSelect'));
+      return;
+    }
+
+    for (const rowIndex in doc) {
+      let tableItem : any = tableConfig.value.data[rowIndex];
+      try {
+        tableItem.check = true;
+        active.checkLoad = true;
+        const activeItem: any = { ...tableItem };
+        const status = activeItem?.isActive;
+        try {
+          await fetchCmsInit({ sourceId: tableItem.id, check_init: true });
+        } catch {
+          tableItem.isActive = false;
+          continue;
+        }
+        const res = await fetchCmsHome({ sourceId: tableItem.id });
+        if (res && Array.isArray(res?.class) && res.class.length > 0) {
+          if (!status) {
+            await reqPut([tableItem.id], { isActive: true });
+            tableItem.isActive = true;
+          }
+        } else {
+          if (status) {
+            await reqPut([tableItem.id], { isActive: false });
+            tableItem.isActive = false;
+          }
+        }
+      } finally {
+        // @ts-ignore
+        if (tableItem.hasOwnProperty("check")) {
+          tableItem.check = false;
+        } else if (tableItem.hasOwnProperty("isActive")) {
+          tableItem.isActive = false;
+        }
+        active.checkLoad = false;
+      }
+    }
   }
 
   if (['enable', 'disable', 'delete', 'default'].includes(type)) {

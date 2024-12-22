@@ -194,6 +194,7 @@ export default {
     checking: 'Please wait for the completion of status batch detection',
     defaultDisable: 'Set default source when enabled',
     checkLoading: 'Please wait for the completion of the test',
+    checkUnSelect: 'No tableItem selected, please retry.',
   },
   ad: {
     title: 'Better on Hipy',
