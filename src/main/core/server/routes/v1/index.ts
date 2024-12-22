@@ -1,41 +1,42 @@
-import star from './star';
-import history from './history';
-import setting from './setting';
 import { db } from './db';
-import proxy from './proxy';
-import { ad, ai, jsEdit, staticFilter } from './lab';
-import file from './file';
-import { barrage } from './player';
-import system from './system';
-
 import { db as driveDb, work as driveWork } from './drive';
+import { work as fileWork } from './file';
+import { work as historyWork } from './history';
+import { ad, ai, jsEdit, staticFilter } from './lab';
 import { channel, iptv } from './live';
 import { db as analyzeDb, work as analyzeWork } from './parse';
+import { barrage } from './player';
+import { work as pluginWork } from './plugin';
+import { work as proxyWork } from './proxy';
+import { work as settingWork } from './setting';
 import { cms, hot, db as sietDb, recomm } from './site';
+import { work as systemWork } from './system';
+import { work as starWork } from './star';
 
 const routesModules = {
   analyzeDb,
   analyzeWork,
   cms,
   sietDb,
-  star,
-  history,
+  starWork,
+  historyWork,
   hot,
   recomm,
   driveDb,
   driveWork,
-  setting,
+  settingWork,
   iptv,
   channel,
   db,
-  proxy,
+  proxyWork,
   ad,
   ai,
   jsEdit,
   staticFilter,
-  file,
+  fileWork,
   barrage,
-  system,
+  systemWork,
+  pluginWork,
 };
 
 export default routesModules;

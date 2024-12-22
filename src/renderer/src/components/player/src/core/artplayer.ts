@@ -1,6 +1,10 @@
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
-import { publicBarrageSend, publicColor, publicIcons, publicStream, playerStorage } from './components';
+import publicStream from '../utils/media-stream';
+import { publicBarrageSend, playerStorage } from '../utils/tool';
+import { publicColor, publicIcons } from '../utils/static';
+
+
 
 class ArtPlayerAdapter {
   player: Artplayer | null = null;
@@ -22,9 +26,8 @@ class ArtPlayerAdapter {
       artplayerPluginDanmuku({
         speed: 5,
         danmuku: [],
-        // useWorker: true, // 5.0.1 版本参数
-        synchronousPlayback: true, // 5.1.0 版本参数
-        emitter: false, // 5.1.0 版本参数
+        synchronousPlayback: true,
+        emitter: false,
       }),
     ],
     icons: {
@@ -45,50 +48,42 @@ class ArtPlayerAdapter {
     customType: {
       customHls: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
-        if (art.hls) publicStream.destroy.customHls(art);
+        if (art.hls) art.hls.destroy();
         // @ts-ignore
         const headers = art.option.headers || {};
         const hls = publicStream.create.customHls(video, url, headers);
         art.hls = hls;
-        art.on('destroy', () => {
-          publicStream.destroy.customHls(art);
-        });
+        art.on('destroy', () => hls?.destroy());
         art.loading.show = false;
       },
       customFlv: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
-        if (art.flv) publicStream.destroy.customFlv(art);
+        if (art.flv) art.flv.destroy();
         // @ts-ignore
         const headers = art.option.headers || {};
         const flv = publicStream.create.customFlv(video, url, headers);
         art.flv = flv;
-        art.on('destroy', () => {
-          publicStream.destroy.customFlv(art);
-        });
+        art.on('destroy', () => flv?.destroy());
         art.loading.show = false;
       },
       customDash: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
-        if (art.mpd) publicStream.destroy.customDash(art);
+        if (art.mpd) art.mpd.destroy();
         // @ts-ignore
         const headers = art.option.headers || {};
         const mpd = publicStream.create.customDash(video, url, headers);
         art.mpd = mpd;
-        art.on('destroy', () => {
-          publicStream.destroy.customDash(art);
-        });
+        art.on('destroy', () => mpd?.destroy());
         art.loading.show = false;
       },
       customWebTorrent: (video: HTMLVideoElement, url: string, art: Artplayer) => {
         art.loading.show = true;
-        if (art.torrent) publicStream.destroy.customTorrent(art);
+        if (art.torrent) art.torrent.destroy();
         // @ts-ignore
         const headers = art.option.headers || {};
         const torrent = publicStream.create.customTorrent(video, url, headers);
         art.torrent = torrent;
-        art.on('destroy', () => {
-          publicStream.destroy.customTorrent(art);
-        });
+        art.on('destroy', () => torrent?.destroy());
         art.loading.show = false;
       },
     },
@@ -109,11 +104,11 @@ class ArtPlayerAdapter {
       time: item.time,
       mode: item.mode === 'scroll' ? 1 : 0,
       border: false,
+      style: {}
     }));
-    this.player.plugins.artplayerPluginDanmuku.config({
-      danmuku: comments,
-    });
+    this.player.plugins.artplayerPluginDanmuku.config({ danmuku: comments });
     this.player.plugins.artplayerPluginDanmuku.load();
+
     this.publicListener.sendDanmu = (danmu: any) => {
       const options = {
         player: id,

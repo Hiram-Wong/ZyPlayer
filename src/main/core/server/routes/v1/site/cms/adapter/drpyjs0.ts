@@ -121,7 +121,7 @@ class DrpyJs0Adapter {
         vod_remarks: vod.vod_remarks,
         vod_actor: vod.vod_actor,
         vod_director: vod.vod_director,
-        vod_content: vod.vod_content.trim(),
+        vod_content: vod.vod_content?.trim(),
         vod_play_from: vod.vod_play_from,
         vod_play_url: vod.vod_play_url,
       });
@@ -169,9 +169,7 @@ class DrpyJs0Adapter {
         url: input,
       },
     });
-    return {
-      play: response,
-    };
+    return { ...response };
   }
   runMain() {
     return '';

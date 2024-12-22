@@ -1,5 +1,7 @@
 import DPlayer from 'dplayer';
-import { publicIcons, publicStream, playerStorage } from './components';
+import publicStream from '../utils/media-stream';
+import { playerStorage } from '../utils/tool';
+import { publicIcons } from '../utils/static';
 
 const elementDeal = {
   replace: (el: string, newEle: string) => {
@@ -135,40 +137,32 @@ class DPlayerAdapter {
       type: '',
       customType: {
         customHls: (video: HTMLVideoElement, dp: DPlayer) => {
-          if (dp.hls) publicStream.destroy.customHls(dp);
+          if (dp.hls) dp.hls.destroy();
           const headers = dp.options.headers || {};
           const hls = publicStream.create.customHls(video, video.src, headers);
           dp.hls = hls;
-          dp.on('destroy', () => {
-            publicStream.destroy.customHls(dp);
-          });
+          dp.on('destroy', () => hls?.destroy());
         },
         customFlv: (video: HTMLVideoElement, dp: DPlayer) => {
-          if (dp.flv) publicStream.destroy.customFlv(dp);
+          if (dp.flv) dp.flv.destroy();
           const headers = dp.options.headers || {};
           const flv = publicStream.create.customFlv(video, video.src, headers);
           dp.flv = flv;
-          dp.on('destroy', () => {
-            publicStream.destroy.customFlv(dp);
-          });
+          dp.on('destroy', () => flv?.destroy());
         },
         customDash: (video: HTMLVideoElement, dp: DPlayer) => {
-          if (dp.mpd) publicStream.destroy.customDash(dp);
+          if (dp.mpd) dp.mpd.destroy();
           const headers = dp.options.headers || {};
           const mpd = publicStream.create.customDash(video, video.src, headers);
           dp.mpd = mpd;
-          dp.on('destroy', () => {
-            publicStream.destroy.customDash(dp);
-          });
+          dp.on('destroy', () => mpd?.destroy());
         },
         customWebTorrent: (video: HTMLVideoElement, dp: DPlayer) => {
-          if (dp.torrent) publicStream.destroy.customTorrent(dp);
+          if (dp.torrent) dp.torrent.destroy();
           const headers = dp.options.headers || {};
           const torrent = publicStream.create.customTorrent(video, video.src, headers);
           dp.torrent = torrent;
-          dp.on('destroy', () => {
-            publicStream.destroy.customTorrent(dp);
-          });
+          dp.on('destroy', () => torrent?.destroy());
         },
       },
     },

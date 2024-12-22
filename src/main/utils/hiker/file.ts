@@ -5,7 +5,7 @@ import { gzip } from '@main/utils/crypto';
 
 const APP_MARK = 'zy';
 const APP_MARK_PATH = `${APP_MARK}://`;
-const APP_STORE_PATH = join(app.getPath('userData'), 'file');
+const APP_STORE_PATH = app.getPath('userData');
 const isCheckAppMark = (url: string) => url.startsWith(APP_MARK_PATH);
 const isCheckAppStore = (url: string) => url.startsWith(APP_STORE_PATH);
 const relative2absolute = (path: string) => {
@@ -34,10 +34,18 @@ const joinPath = (path: string) => {
 const saveFile = (fileName: string, content: string, crypto: number = 0) => {
   try {
     if (!content || !fileName) return false;
-    if (crypto !== 0) {
-      content = gzip.encode(content);
-    }
+    if (crypto !== 0) content = gzip.encode(content);
     fs.writeFileSync(joinPath(fileName), content, 'utf8');
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const saveJson = (fileName: string, content: object, crypto: number = 0) => {
+  try {
+    if (!content || !fileName) return false;
+    fs.writeJsonSync(joinPath(fileName), content, 'utf8');
     return true;
   } catch {
     return false;
@@ -46,16 +54,27 @@ const saveFile = (fileName: string, content: string, crypto: number = 0) => {
 
 const readFile = (fileName: string, crypto: number = 0) => {
   try {
-    if (!fileName) return false;
+    if (!fileName) return '';
     let content = fs.readFileSync(joinPath(fileName), 'utf8');
-    if (crypto !== 0) {
-      content = gzip.decode(content);
-    }
+    if (crypto !== 0) content = gzip.encode(content);
     return content;
   } catch {
     return '';
   }
 };
+
+const readJson = (fileName: string, crypto: number = 0) => {
+  const defaultData = JSON.parse(JSON.stringify(''));
+  try {
+    if (!fileName) return defaultData;
+    let content = fs.readJSONSync(joinPath(fileName), 'utf8');
+    if (crypto !== 0) content = gzip.encode(content);
+    return content;
+  } catch {
+    return defaultData;
+  }
+};
+
 const deleteFile = (fileName: string) => {
   try {
     if (!fileName) return false;
@@ -69,8 +88,7 @@ const deleteFile = (fileName: string) => {
 const fileExist = (fileName: string) => {
   try {
     if (!fileName) return false;
-    fs.existsSync(joinPath(fileName));
-    return true;
+    return fs.existsSync(joinPath(fileName));
   } catch {
     return false;
   }
@@ -98,10 +116,21 @@ const readDir = (path: string) => {
 
 const deleteDir = (path: string) => {
   try {
-    if (!path) return [];
-    return fs.rmdirSync(joinPath(path), { recursive: true });
+    if (!path) return false;
+    fs.rmdirSync(joinPath(path), { recursive: true });
+    return true;
   } catch {
-    return [];
+    return false;
+  }
+};
+
+const createDir = (path: string) => {
+  try {
+    if (!path) return false;
+    fs.mkdirSync(joinPath(path), { recursive: true });
+    return true;
+  } catch {
+    return false;
   }
 };
 
@@ -112,8 +141,11 @@ export {
   deleteFile,
   readFile,
   saveFile,
+  saveJson,
   readDir,
+  readJson,
   deleteDir,
+  createDir,
   relative2absolute,
   absolute2relative,
 };

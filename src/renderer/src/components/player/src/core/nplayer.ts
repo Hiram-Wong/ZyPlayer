@@ -1,6 +1,8 @@
 import NPlayer, { EVENT as NPlayerEvent, Icon as NPlayerIcon } from 'nplayer';
 import nplayerDanmaku from '@nplayer/danmaku';
-import { publicIcons, publicBarrageSend, publicStream, playerStorage } from './components';
+import publicStream from '../utils/media-stream';
+import { publicBarrageSend, playerStorage } from '../utils/tool';
+import { publicIcons } from '../utils/static';
 
 const elementDeal = {
   createIcon: (html: string, noCls = false) => {
@@ -138,28 +140,28 @@ class NPlayerAdapter {
       case 'customMp4':
         break;
       case 'customHls':
-        if (player.hls) publicStream.destroy.customHls(player);
+        if (player.hls) player.hls.destroy();
         const hls = publicStream.create.customHls(player.video, options.src, headers);
         player.hls = hls;
-        player.on('destroy', () => publicStream.destroy.customHls(player));
+        player.on('destroy', () => hls?.destroy());
         break;
       case 'customFlv':
-        if (player.flv) publicStream.destroy.customFlv(player);
+        if (player.flv) player.flv.destroy();
         const flv = publicStream.create.customFlv(player.video, options.src, headers);
         player.flv = flv;
-        player.on('destroy', () => publicStream.destroy.customFlv(player));
+        player.on('destroy', () => flv?.destroy());
         break;
       case 'customDash':
-        if (player.mpd) publicStream.destroy.customDash(player);
+        if (player.mpd) player.mpd.destroy();
         const mpd = publicStream.create.customDash(player.video, options.src, headers);
         player.mpd = mpd;
-        player.on('destroy', () => publicStream.destroy.customDash(player));
+        player.on('destroy', () => mpd?.destroy());
         break;
       case 'customWebTorrent':
-        if (player.torrent) publicStream.destroy.customTorrent(player);
+        if (player.torrent) player.torrent.destroy();
         const torrent = publicStream.create.customTorrent(player.video, options.src, headers);
         player.torrent = torrent;
-        player.on('destroy', publicStream.destroy.customTorrent(player));
+        player.on('destroy', () => torrent?.destroy());
         break;
       default:
         break;
@@ -250,25 +252,33 @@ class NPlayerAdapter {
   };
 
   playNext = (options: any) => {
-    if (this.player?.hls) publicStream.destroy.customHls(this.player);
-    if (this.player?.flv) publicStream.destroy.customFlv(this.player);
-    if (this.player?.mpd) publicStream.destroy.customDash(this.player);
-    if (this.player?.torrent) publicStream.destroy.customTorrent(this.player);
+    // @ts-ignore
+    if (this.player?.hls) this.player.hls.destroy();
+    // @ts-ignore
+    if (this.player?.flv) this.player.flv.destroy();
+    // @ts-ignore
+    if (this.player?.mpd) this.player.mpd.destroy();
+    // @ts-ignore
+    if (this.player?.torrent) this.player.torrent.destroy();
 
     switch (options.type) {
       case 'customMp4':
         this.player!.video.src = options.url;
         break;
       case 'customHls':
+        // @ts-ignore
         this.player.hls = publicStream.create.customHls(this.player!.video, options.url);
         break;
       case 'customFlv':
+        // @ts-ignore
         this.player.flv = publicStream.create.customFlv(this.player!.video, options.url);
         break;
       case 'customDash':
+        // @ts-ignore
         this.player.mpd = publicStream.create.customDash(this.player!.video, options.url);
         break;
       case 'customWebTorrent':
+        // @ts-ignore
         this.player.torrent = publicStream.create.customTorrent(this.player!.video, options.url);
         break;
       default:

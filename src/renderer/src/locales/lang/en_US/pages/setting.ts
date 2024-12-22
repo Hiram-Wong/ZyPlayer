@@ -213,6 +213,7 @@ export default {
   barrage: {
     title: 'Barrage',
     header: 'Enable param requires preprocess data, which will increase the seeding time',
+    id: 'Return id',
     key: 'Return field',
     api: 'Api',
     support: 'Line',

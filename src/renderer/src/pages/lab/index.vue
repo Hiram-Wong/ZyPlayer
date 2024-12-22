@@ -23,6 +23,7 @@ const componentMap = {
   'jsEdit': defineAsyncComponent(() => import('./components/jsEdit/index.vue')),
   'staticFilter': defineAsyncComponent(() => import('./components/staticFilter/index.vue')),
   'snifferPlay': defineAsyncComponent(() => import('./components/snifferPlay/index.vue')),
+  'pluginCenter': defineAsyncComponent(() => import('./components/pluginCenter/index.vue')),
 };
 
 const currentComponent = shallowRef(componentMap['dataCrypto']);
@@ -45,6 +46,10 @@ const settingNav = computed(() => {
     }, {
       id: 'snifferPlay',
       name: t('pages.lab.nav.snifferPlay')
+    },
+    {
+      id: 'pluginCenter',
+      name: t('pages.lab.nav.pluginCenter')
     }
   ]
 });

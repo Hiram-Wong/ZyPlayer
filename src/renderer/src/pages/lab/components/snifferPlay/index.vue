@@ -54,6 +54,7 @@
                   <t-option label="Flv" value="flv" />
                   <t-option label="Mp4" value="mp4" />
                   <t-option label="Dash" value="mpd" />
+                  <t-option label="Torrent" value="magnet" />
                 </t-select>
               </t-form-item>
             </t-form>
@@ -65,7 +66,7 @@
         </t-badge>
         <t-badge :count="$t('pages.lab.snifferPlay.preview')" style="flex: 1;" color="var(--td-success-color)" shape="round">
           <div class="result card" style="height: 100%; width: 100%;">
-            <player-view ref="playerRef" style="border-radius: var(--td-radius-default); overflow: hidden;" />
+            <multi-player ref="playerRef" style="border-radius: var(--td-radius-default); overflow: hidden;" />
           </div>
         </t-badge>
       </div>
@@ -75,11 +76,13 @@
 
 <script lang="ts" setup>
 import { ref, useTemplateRef } from 'vue';
-import sniffer from '@/utils/sniffer';
-import PlayerView from '@/components/player/index.vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import sniffer from '@/utils/sniffer';
 import { t } from '@/locales';
-import { checkMediaType } from '@/utils/tool';
+import { usePlayStore } from '@/store';
+import { MultiPlayer, mediaUtils } from '@/components/player';
+
+const storePlayer = usePlayStore();
 
 const formData = ref({
   sniffer: {
@@ -115,13 +118,13 @@ const sniiferEvent = async () => {
 };
 
 const playerPlayEvent = async () => {
-  if (!playerRef.value) return;
-  if (!formData.value.player.url || !formData.value.player.url.startsWith('http')) {
+  let { url, headers, type } = formData.value.player;
+  if (!headers) headers = '{}';
+  if (!url || !(/^(http:\/\/|https:\/\/)/.test(url) || url.includes('magnet:'))) {
     MessagePlugin.warning(t('pages.lab.snifferPlay.message.playerNoUrl'));
     return;
   };
 
-  let headers = formData.value.player.headers || '{}';
   try {
     headers = JSON.parse(headers);
     if (typeof headers === 'object' && headers !== null && !Array.isArray(headers)) {
@@ -133,23 +136,32 @@ const playerPlayEvent = async () => {
     MessagePlugin.warning(t('pages.lab.snifferPlay.message.headersNoJson'));
     return;
   }
-  let mediaType = formData.value.player.type;
-  if (mediaType === 'auto') {
-    const checkType = await checkMediaType(formData.value.player.url);
-    if (checkType === 'unknown' && !checkType) {
-      MessagePlugin.warning(t('pages.lab.snifferPlay.message.mediaNoType'));
-      return;
+
+  const playerMode = storePlayer.setting.playerMode;
+
+  if (playerMode.type === 'custom') {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, url);
+  } else {
+    let mediaType = type;
+    if (mediaType === 'auto') {
+      const checkType = await mediaUtils.checkMediaType(url);
+      if (checkType === 'unknown' && !checkType) {
+        MessagePlugin.warning(t('pages.lab.snifferPlay.message.mediaNoType'));
+        return;
+      }
+      mediaType = checkType;
+    };
+    if (playerRef.value) {
+      await playerRef.value.create({
+        url: url,
+        isLive: false,
+        headers: headers,
+        type: mediaType,
+        container: 'lab-mse'
+      }, playerMode.type);
     }
-    mediaType = checkType;
-  };
-  await playerRef.value.init();
-  await playerRef.value.create({
-    url: formData.value.player.url,
-    isLive: false,
-    headers: headers,
-    type: mediaType,
-    container: 'lab-mse'
-  });
+  }
+
   MessagePlugin.success(t('pages.setting.form.success'));
 };
 

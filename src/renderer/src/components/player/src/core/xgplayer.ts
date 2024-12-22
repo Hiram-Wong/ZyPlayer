@@ -9,7 +9,8 @@ import Mp4Plugin from 'xgplayer-mp4';
 import ShakaPlugin from 'xgplayer-shaka';
 // import DashPlugin from 'xgplayer-dash';
 
-import { publicColor, publicIcons, playerStorage } from './components';
+import { playerStorage } from '../utils/tool';
+import { publicColor, publicIcons } from '../utils/static';
 
 class XgPlayerAdapter {
   player: XgPlayer | null = null;
@@ -67,7 +68,7 @@ class XgPlayerAdapter {
     if (!this.player) return;
     comments = comments.map((item, index) => ({
       duration: 5000,
-      id: String(index + 1),
+      id: (index + 1).toString(),
       txt: item.text,
       start: item.time * 1000,
       mode: ['left', 'right'].includes(item.mode) ? 'scroll' : item.mode,

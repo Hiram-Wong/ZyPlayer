@@ -6,7 +6,7 @@
       </t-header>
       <t-layout>
         <t-content :class="`${prefix}-content`">
-          <player-view ref="playerRef" :class='["subject", active.aside ? "subject-ext": "" ]' @update-time="handleTimeUpdate"/>
+          <multi-player ref="playerRef" :class='["subject", active.aside ? "subject-ext": "" ]' @update-time="handleTimeUpdate"/>
           <div class="btn-box dock-show" @click="toggleAside">
             <chevron-left-icon v-if="active.aside" class="btn-icon" />
             <chevron-right-icon v-else class="btn-icon" />
@@ -22,6 +22,7 @@
             @update="updateConf"
             @play="updatePlay"
             @barrage="updateBarrage"
+            @pause="updatePause"
           />
           <aside-iptv-view class="container-aside"
             v-if="storeConf.type === 'iptv'"
@@ -53,7 +54,8 @@ import HeaderView from './componets/Header.vue';
 import AsideFilmView from './componets/AsideFilm.vue';
 import AsideIptvView from './componets/AsideIptv.vue';
 import AsideDriveView from './componets/AsideDrive.vue';
-import PlayerView from '@/components/player/index.vue';
+import { MultiPlayer } from '@/components/player';
+import type { MultiPlayerInstance } from '@/components/player';
 
 
 const store: { [key: string]: any } = usePlayStore();
@@ -87,7 +89,7 @@ const processFormData = ref({
   currentTime: 0,
   duration: 0
 });
-const playerRef = useTemplateRef('playerRef');
+const playerRef = useTemplateRef<MultiPlayerInstance | null>('playerRef');
 
 onMounted(() => {
   setupConf();
@@ -117,15 +119,30 @@ const updateConf = (item) => {
 
 const updatePlay = async (item) => {
   playerFormData.value = { ...playerFormData.value, ...item };
-  await playerRef.value?.init();
-  await playerRef.value?.create({ ...playerFormData.value });
-  if (storeConf.value.type === 'film') {
-    await playerRef.value?.onTimeUpdate();
+
+  const playerMode = storeConf.value.setting.playerMode;
+  if (playerMode.type === 'custom') {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, playerFormData.value.url);
+  } else {
+    await playerRef.value?.create({ ...playerFormData.value }, playerMode.type);
+    if (storeConf.value.type === 'film') {
+      await playerRef.value?.onTimeUpdate();
+    }
   }
 };
 
 const updateBarrage = async (item) => {
-  if (playerRef.value) await playerRef.value?.barrage(item.comments, item.url, item.id);
+  if (playerRef.value) {
+    setTimeout(async () => {
+      await playerRef.value?.barrage(item.comments, item.url, item.id);
+    }, 0);
+  }
+};
+
+const updatePause = async () => {
+  if (playerRef.value) {
+    playerRef.value?.pause();
+  }
 };
 
 const handleTimeUpdate = (time) => {
@@ -133,9 +150,7 @@ const handleTimeUpdate = (time) => {
 };
 
 window.electron.ipcRenderer.on('destroy-playerWindow', () => {
-  store.updateConfig({
-    status: false,
-  });
+  store.updateConfig({ status: false });
 });
 
 window.electron.ipcRenderer.on('media-control', async (_, status) => {

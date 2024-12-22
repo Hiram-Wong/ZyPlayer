@@ -52,7 +52,7 @@
       </infinite-loading>
     </div>
 
-    <detail-view v-model:visible="isVisible.detail" :site="siteData" :data="formDetailData" />
+    <detail-view v-model:visible="isVisible.detail" :ext="detailFormData.ext" :info="detailFormData.info" />
     <t-loading :attach="`.${prefix}-content`" size="medium" :text="$t('pages.setting.loading')"
       :loading="isVisible.loading" />
   </div>
@@ -79,7 +79,7 @@ import emitter from '@/utils/emitter';
 
 import DetailView from '@/pages/film/components/Detail.vue';
 
-const store = usePlayStore();
+const storePlayer = usePlayStore();
 
 const renderError = () => {
   return (
@@ -103,12 +103,10 @@ const pagination = ref({
   pageSize: 32,
   count: 0,
 });
-const formDetailData = ref({
-  neme: '',
-  key: '',
-  type: 1,
+const detailFormData = ref({
+  info: {},
+  ext: { site: {}, setting: {} },
 }); //  详情组件源传参
-const siteData = ref();
 const isVisible = reactive({
   detail: false,
   loading: false
@@ -129,17 +127,15 @@ onActivated(() => {
 
 const getBingeList = async () => {
   let length = 0;
+  const { pageIndex, pageSize } = pagination.value;
   try {
-    const { pageIndex, pageSize } = pagination.value;
-
-    const star_res = await fetchStarPage({ page: pageIndex, pageSize });
-
-    bingeConfig.value.data = _.unionWith(bingeConfig.value.data, star_res.list, _.isEqual) as any;
-
-    pagination.value.count = star_res.total;
-    pagination.value.pageIndex++;
-
-    length = star_res.data.length;
+    const res = await fetchStarPage({ page: pageIndex, pageSize });
+    if (res?.list && Array.isArray(res?.list) && res?.list?.length > 0) {
+      bingeConfig.value.data = bingeConfig.value.data.concat(res.list);
+      pagination.value.count = res.total;
+      pagination.value.pageIndex++;
+      length = res.list.length;
+    }
     return length;
   } catch (err) {
     console.error(err);
@@ -166,33 +162,34 @@ const playEvent = async (item) => {
   isVisible.loading = true;
 
   try {
-    const { videoName, videoId, relateSite } = item;
-    siteData.value = relateSite;
+    const { videoName, videoImage, videoId, relateSite } = item;
+
     await fetchCmsInit({ sourceId: relateSite.id })
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const res = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
       const detailItem = res?.list[0];
-      if (relateSite.type === 9) {
-        detailItem.vod_name = item.vod_name;
-        detailItem.vod_pic = item.vod_pic;
-      };
+      detailItem.vod_name = videoName;
+      detailItem.vod_pic = videoImage;
       item = detailItem;
     };
+    console.log('[binge][playEvent]', item);
 
-    const playerMode = store.getSetting.playerMode;
+    const playerMode = storePlayer.getSetting.playerMode;
+    const doc = {
+      info: item,
+      ext: { site: relateSite, setting: storePlayer.setting },
+    }
 
     if (playerMode.type === 'custom') {
-      formDetailData.value = item;
+      detailFormData.value = doc;
       isVisible.detail = true;
     } else {
-      store.updateConfig({
+      storePlayer.updateConfig({
         type: 'film',
         status: true,
-        data: {
-          info: item,
-          ext: { site: relateSite, setting: store.setting },
-        }
+        data: doc
       });
+
       window.electron.ipcRenderer.send('open-play-win', videoName);
     }
   } catch (err) {
@@ -300,7 +297,8 @@ const refreshBinge = () => {
   }
 
   .main {
-    height: calc(100% - 32px - 2 * var(--td-comp-margin-s));
+    // height: calc(100% - 32px - 2 * var(--td-comp-margin-s));
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
   }

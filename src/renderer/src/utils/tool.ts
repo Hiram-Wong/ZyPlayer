@@ -1,84 +1,6 @@
 import ipaddr from 'ipaddr.js';
-import request, { requestComplete } from '@/utils/request';
+import request from '@/utils/request';
 import { usePlayStore, useSettingStore } from '@/store';
-
-const supportedFormats: string[] = [
-  'mp4',
-  'mkv',
-  'flv',
-  'm3u8',
-  'avi',
-  'magnet',
-  'mpd',
-  'mpd',
-  'mp3',
-  'm4a',
-  'wav',
-  'flac',
-  'aac',
-  'ogg',
-  'wma',
-];
-
-// 判断媒体类型
-const checkMediaType = async (url: string): Promise<string> => {
-  if (url && (url.startsWith('http') || url.startsWith('magnet'))) {
-    const fileType: any = supportedFormats.find((format) => url.includes(format));
-    if (fileType) {
-      return fileType;
-    } else {
-      const getMediaType: any = await getMeadiaType(url);
-      return getMediaType;
-    }
-  } else {
-    return ''; // 如果 URL 不以 http 开头，返回 null
-  }
-};
-
-const getMeadiaType = async (url: string): Promise<string> => {
-  let mediaType: string = 'unknown';
-  try {
-    const response = await requestComplete({
-      url,
-      method: 'HEAD',
-    });
-    if (response.status === 200) {
-      const contentType = response.headers['content-type'];
-      const supportedFormats: Record<string, string> = {
-        'video/mp4': 'mp4',
-        'video/x-flv': 'flv',
-        'video/ogg': 'ogx',
-        'application/vnd.apple.mpegurl': 'm3u8',
-        'application/x-mpegURL': 'm3u8',
-        'application/octet-stream': 'm3u8',
-        'video/avi': 'avi',
-        'video/x-msvideo': 'avi',
-        'video/x-matroska': 'mkv',
-        'video/quicktime': 'mov',
-        'video/x-ms-wmv': 'wmv',
-        'video/3gpp': '3gp',
-        'audio/mpeg': 'mp3',
-        'audio/wav': 'mav',
-        'audio/aac': 'aac',
-        'audio/ogg': 'oga',
-      };
-
-      for (const format in supportedFormats) {
-        if (contentType.includes(format)) {
-          mediaType = supportedFormats[format];
-        }
-      }
-    } else {
-      mediaType = 'error';
-    }
-  } catch (err) {
-    mediaType = 'error';
-    throw err;
-  } finally {
-    console.log(`媒体播放类型：${mediaType}`);
-    return mediaType;
-  }
-};
 
 const checkIpVersion = async (ip: string) => {
   let version = -1;
@@ -216,45 +138,7 @@ const loadExternalResource = (url: string, type: 'css' | 'js' | 'font') => {
   });
 };
 
-const singleton = <T extends new (...args: any[]) => any>(className: T): T => {
-  let instance: InstanceType<T> | null = null;
-  const proxy = new Proxy(className, {
-    construct(target, args) {
-      if (!instance) {
-        instance = Reflect.construct(target, args);
-      }
-      return instance as InstanceType<T>;
-    },
-  });
-  proxy.prototype.construct = proxy;
-  return proxy;
-};
-const mapVideoTypeToPlayerType = (videoType: string): string | undefined => {
-  const audioTypes = ['mp3', 'm4a', 'wav', 'flac', 'aac', 'ogg', 'wma'];
-  if (audioTypes.includes(videoType)) return 'customMpegts';
-
-  switch (videoType) {
-    case 'mp4':
-      return 'customMp4';
-    case 'flv':
-      return 'customFlv';
-    case 'm3u8':
-      return 'customHls';
-    case 'mpd':
-      return 'customDash';
-    case 'magnet':
-      return 'customWebTorrent';
-    default:
-      return 'customHls';
-  }
-};
-
 export {
-  mapVideoTypeToPlayerType,
-  singleton,
-  supportedFormats,
-  getMeadiaType,
-  checkMediaType,
   checkIpVersion,
   checkLiveM3U8,
   copyToClipboardApi,

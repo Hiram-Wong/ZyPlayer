@@ -11,7 +11,7 @@
     <div class="content">
       <header class="header" v-if="classList.length > 0">
         <div class="header-nav">
-          <TitleMenu :list="classList" :active="active.class" @change-key="changeClassEvent" />
+          <title-menu :list="classList" :active="active.class" @change-key="changeClassEvent" />
         </div>
       </header>
       <div class="container">

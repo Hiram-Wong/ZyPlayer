@@ -21,7 +21,7 @@ const getTimeout = (timeout: number | undefined | null) => {
   return baseTimeout;
 };
 
-const toTitleCase = (str) => {
+const toTitleCase = (str: string) => {
   return str
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -56,6 +56,19 @@ const toString = (val: any): string => {
     default:
       return val?.toString?.() || '';
   }
+};
+
+const serialize2dict = (headers: { [key: string]: any } = {}) => {
+  const headersDict = {};
+
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === 'set-cookie') {
+      headersDict[key] = Array.isArray(value) ? value : [value];
+    } else {
+      headersDict[key] = [value];
+    }
+  }
+  return headersDict;
 };
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
@@ -143,9 +156,11 @@ const fetch = (url: string, options: RequestOptions = {}) => {
     res.getBody = function (encoding: BufferEncoding | undefined) {
       return encoding ? this.body.toString(encoding) : this.body;
     };
+    // @ts-ignore 重写请求头
+    res.headers = serialize2dict(res.headers);
 
     if (options?.onlyHeaders) {
-      return toString(res.headers);
+      return res.headers;
     }
     if (options?.withHeaders) {
       return toString({ headers: res.headers, body: res.getBody(charset) });
@@ -174,11 +189,10 @@ const fetchCookie = (url: string, options: RequestOptions = {}) => {
   if (options?.withStatusCode) delete options.withStatusCode;
   if (options?.toHex) delete options.toHex;
   options = Object.assign(options, { onlyHeaders: true });
-  let header = fetch(url, options) || '{}';
-  const formatHeader = JSON.parse(header);
-  const setCk = Object.keys(formatHeader).find((it) => it.toLowerCase() === 'set-cookie');
-  const cookie = setCk ? formatHeader[setCk] : '';
-  return cookie;
+  const header = fetch(url, options) || '{}';
+  const setCk = Object.keys(header).find((it) => it.toLowerCase() === 'set-cookie');
+  const cookie = setCk ? header[setCk] : '[]';
+  return toString(cookie);
 };
 
 const post = (url: string, options: RequestOptions = {}) => {
@@ -211,7 +225,7 @@ const convertBase64Image = (url: string, options: RequestOptions = {}) => {
     if (options?.toHex) delete options.toHex;
     if (options?.onlyHeaders) delete options.onlyHeaders;
     options = Object.assign(options, { toHex: true });
-    const res = fetch(url, options) || '{"body":""}';
+    const res = (fetch(url, options) as string) || '{"body":""}';
     const formatRes = JSON.parse(res);
     const hexStr = formatRes.body;
     const base64String = Buffer.from(hexStr, 'hex').toString('base64');

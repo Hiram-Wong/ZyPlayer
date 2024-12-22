@@ -59,14 +59,6 @@ const toString = (val: any): string => {
   }
 };
 
-const serialize2dict = (headers) => {
-  const headersDict = {};
-  for (const [key, value] of headers.entries()) {
-    headersDict[key] = value;
-  }
-  return headersDict;
-};
-
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD';
 
 interface RequestOptions {
@@ -144,23 +136,22 @@ const fetch = (url: string, options: RequestOptions = {}) => {
     console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
     let res = syncFetch(url, config);
-    res.formatHeaders = serialize2dict(res.headers);
     res.getBody = function (encoding: BufferEncoding | undefined) {
       return encoding ? Buffer.from(res.buffer()).toString(encoding) : res.buffer();
     };
 
     if (options?.onlyHeaders) {
-      return toString(res.formatHeaders);
+      return res.headers.raw();
     }
     if (options?.withHeaders) {
-      return toString({ headers: res.formatHeaders, body: res.getBody(charset) });
+      return toString({ headers: res.headers.raw(), body: res.getBody(charset) });
     }
     if (options?.withStatusCode) {
-      return toString({ headers: res.formatHeaders, body: res.getBody(charset), statusCode: res.status });
+      return toString({ headers: res.headers.raw(), body: res.getBody(charset), statusCode: res.status });
     }
     if (options?.toHex) {
       return toString({
-        headers: res.formatHeaders,
+        headers: res.headers.raw(),
         body: Buffer.from(res.getBody()).toString('hex'),
         statusCode: res.status,
       });
@@ -179,11 +170,10 @@ const fetchCookie = (url: string, options: RequestOptions = {}) => {
   if (options?.withStatusCode) delete options.withStatusCode;
   if (options?.toHex) delete options.toHex;
   options = Object.assign(options, { onlyHeaders: true });
-  let header = fetch(url, options) || '{}';
-  const formatHeader = JSON.parse(header);
-  const setCk = Object.keys(formatHeader).find((it) => it.toLowerCase() === 'set-cookie');
-  const cookie = setCk ? formatHeader[setCk] : '';
-  return cookie;
+  const header = fetch(url, options) || {};
+  const setCk = Object.keys(header).find((it) => it.toLowerCase() === 'set-cookie');
+  const cookie = setCk ? header[setCk] : '[]';
+  return toString(cookie);
 };
 
 const post = (url: string, options: RequestOptions = {}) => {
