@@ -304,6 +304,7 @@ const tmp = ref<{ [key: string]: any }>({
   preloadNext: {
     id: '',
     url: '',
+    quality: [],
     headers: {},
     load: false,
     init: false,
@@ -474,6 +475,7 @@ const defaultEmpConf = () => {
     preloadNext: {
       id: '',
       url: '',
+      quality: [],
       headers: {},
       load: false,
       init: false,
@@ -494,7 +496,7 @@ const callPlay = async (item) => {
     const analyzeInfo = analyzeData.value.list.find(item => item.id === active.value.analyzeId);
     let response;
     if (tmp.value.preloadNext.init && tmp.value.preloadNext.load && tmp.value.preloadNext.id === item) {
-      response = { url: tmp.value.preloadNext.url, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
+      response = { url: tmp.value.preloadNext.url, quality: tmp.value.preloadNext.quality, headers: tmp.value.preloadNext.headers, mediaType: tmp.value.preloadNext.mediaType };
     } else {
       let analyzeType = analyzeInfo?.type !== undefined ? analyzeInfo?.type : -1;
       if (active.value.official) {
@@ -515,7 +517,7 @@ const callPlay = async (item) => {
       return;
     } else {
       videoData.value.url = response.url;
-      emits('play', { url: response.url, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
+      emits('play', { url: response.url, quality: response.quality, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
     };
 
     let barrageRes: { barrage: string[], id: string | number | null } = { barrage: [], id: null };
@@ -784,6 +786,7 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
       if (response?.url && /^(https?:\/\/)/.test(response.url)) {
         tmp.value.preloadNext.id = nextInfo;
         tmp.value.preloadNext.url = response.url;
+        tmp.value.preloadNext.quality = response.quality;
         tmp.value.preloadNext.headers = response.headers;
         tmp.value.preloadNext.mediaType = response.mediaType;
         tmp.value.preloadNext.init = true; // 标识是否预加载完毕

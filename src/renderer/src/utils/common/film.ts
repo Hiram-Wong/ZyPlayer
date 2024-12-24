@@ -192,7 +192,7 @@ const playHelper = async (
   console.log(`[film_common][playHelper][before_start]准备处理地址:${url}`);
   console.log(`[film_common][playHelper][start]播放处理流程开始`);
 
-  let data: { [key: string]: any } = { url: '', originalUrl: url, mediaType: '', headers: {} };
+  let data: { [key: string]: any } = { url: '', originalUrl: url, mediaType: '', headers: {}, quality: [] };
 
   try {
     // 1. 解析
@@ -207,6 +207,7 @@ const playHelper = async (
       headers: {},
       parse: 0,
       url,
+      quality: [],
       sniffer: {
         run_script: '',
         init_script: '',
@@ -223,6 +224,18 @@ const playHelper = async (
     if (playRes?.parse_extra?.custom_regex) play.sniffer.custom_regex = playRes.parse_extra.custom_regex;
     if (playRes?.parse_extra?.sniffer_exclude) play.sniffer.sniffer_exclude = playRes.parse_extra.sniffer_exclude;
 
+    if (play.url && Array.isArray(play.url)) {
+      play.quality = play.url.reduce((acc, currentValue, index) => {
+        // 检查索引的奇偶性
+        if (index % 2 === 0) {
+          // 奇数索引，当前值是 name
+          acc.push({ name: currentValue, url: play.url[index + 1] });
+        }
+        return acc;
+      }, []);
+      play.url = play.quality[0].url;
+    }
+
     // 直链直接获取数据类型
     if (play.url && play.parse === 0) {
       // 设置代理
@@ -233,9 +246,9 @@ const playHelper = async (
         await setT3Proxy({ text: proxyData, url: proxyParams.url });
       }
 
-      const mediaType = await mediaUtils.checkMediaType(play.url);
+      const mediaType = await mediaUtils.checkMediaType(play.url, play.headers);
       if (mediaType !== 'unknown' && mediaType !== 'error') {
-        data = { ...data, url: play.url, mediaType, headers: play.headers };
+        data = { ...data, url: play.url, mediaType, headers: play.headers, quality: play.quality };
         return data;
       }
     }
@@ -251,7 +264,8 @@ const playHelper = async (
     );
     data.headers = snifferResult.headers;
     data.url = snifferResult.url;
-    data.mediaType = (await mediaUtils.checkMediaType(snifferResult.url)) || 'm3u8';
+    data.mediaType = (await mediaUtils.checkMediaType(snifferResult.url, snifferResult.headers)) || 'm3u8';
+    data.quality = play.quality || [];
   } catch (err) {
     console.error(`[film_common][playHelper][error]`, err);
   } finally {
@@ -471,7 +485,7 @@ const fetchBarrageData = async (
     // 去除参数
     const { origin, pathname, hostname } = new URL(realUrl);
     realUrl = `${origin}${pathname}`;
-  
+
     const { flimSource } = active;
     const { url, id, key, support, start, mode, color, content } = options;
 
@@ -535,7 +549,7 @@ const fetchAnalyzeHelper = async (url: string, type: number) => {
     }
 
     if (play.playUrl) {
-      const mediaType = await mediaUtils.checkMediaType(play.playUrl);
+      const mediaType = await mediaUtils.checkMediaType(play.playUrl, play.headers);
       if (mediaType !== 'unknown' && mediaType !== 'error') {
         data = { url: play.playUrl, originalUrl: url, mediaType, headers: play.headers };
       }

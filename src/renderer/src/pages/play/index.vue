@@ -75,6 +75,7 @@ const headerFormData = ref({
 });
 const playerFormData = ref({
   url: '',
+  quality: [],
   isLive: false,
   headers: {},
   type: '',
