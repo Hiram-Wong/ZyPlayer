@@ -17,43 +17,24 @@ const MultiPlayer = defineComponent({
       xgplayer: XgPlayerAdapter,
     };
 
-    const formatUrlHeaders = (url: string, headers: { [key: string]: string }) => {
-      if (headers) {
-        for (const key in headers) {
-          let valye = headers[key];
-          if (valye.includes('=')) valye = valye.replaceAll('=', '$*&');
-          url += `@${key}=${valye}`;
-        }
-      }
-      return url;
-    };
-
-    const formatRemoveUnSafeHeaders = (headers: { [key: string]: string }) => {
-      const unsafeHeads = ['host', 'referer', 'origin', 'user-agent', 'content-length', 'set-cookie'];
-
-      for (const header in headers) {
-        if (unsafeHeads.includes(header.toLowerCase())) delete headers[header];
-      }
-
-      return headers;
-    };
-
     const create = async (doc: { [key: string]: any }, type: string = 'artplayer') => {
       if (!doc?.url) return;
       if (!Object.keys(adapterRelation).includes(type)) return;
+
       if (adapter.value) await destroy();
       const singleAdapter = singleton(adapterRelation?.[type]);
       adapter.value = new singleAdapter();
 
       if (mseRef.value) mseRef.value.id = doc.container;
+      if (!doc.headers) doc.headers = {};
       if (!doc.type) {
-        const checkType = await mediaUtils.checkMediaType(doc.url);
+        const checkType = await mediaUtils.checkMediaType(doc.url, doc.headers);
         if (checkType === 'unknown' && !checkType) return;
         doc.type = checkType;
       }
-      doc.url = formatUrlHeaders(doc.url, doc.headers);
+      doc.url = mediaUtils.formatUrlHeaders(doc.url, doc.headers);
       doc.type = mediaUtils.mediaType2PlayerType(doc.type);
-      doc.headers = formatRemoveUnSafeHeaders(doc.headers);
+      doc.headers = mediaUtils.formatRemoveUnSafeHeaders(doc.headers);
       await adapter.value.create(toRaw(doc));
     };
 

@@ -129,6 +129,12 @@ class ArtPlayerAdapter {
     if (options.isLive) delete options?.plugins;
     const startTime = options?.startTime || 0;
     delete options.startTime;
+    if (options.quality && Array.isArray(options.quality) && options.quality.length > 0) {
+      options.quality = options.quality.map(item => {
+        return { html: item.name, url: item.url };
+      });
+      options.quality[0].default = true;
+    }
 
     let player;
     options.volume =

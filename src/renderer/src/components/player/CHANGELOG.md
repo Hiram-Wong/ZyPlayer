@@ -55,3 +55,8 @@
   - dp播放器销毁监听会触发多次摧毁导致报错
   - 集成媒体类型类工具(检测|映射)
   - 修复webtorrent摧毁失败
+- 2024.12.24:
+  - 视频质量(dplayer切换会丢失视频原有属性, nplayer 不支持)
+  - 提取formatRemoveUnSafeHeaders, formatUrlHeaders方法
+  - headers前端剔除不安全请求头, 拦截符遇=改为$*&
+  - getMediaType方法加入请求头

@@ -205,6 +205,15 @@ class DPlayerAdapter {
       delete options?.danmaku;
       delete options.isLive;
     }
+    if (options.quality && Array.isArray(options.quality) && options.quality.length > 0) {
+      options.video.quality = options.quality.map(item => {
+        return { name: item.name, url: item.url, type: options.video.type };
+      });
+      options.video.defaultQuality = 0;
+      delete options.quality;
+      delete options.video.url;
+      delete options.video.type;
+    }
     const startTime = options?.startTime || 0;
     delete options.startTime;
 

@@ -86,6 +86,27 @@ const singleton = <T extends new (...args: any[]) => any>(className: T): T => {
 };
 
 const mediaUtils = (() => {
+  const formatUrlHeaders = (url: string, headers: { [key: string]: string } = {}) => {
+    if (headers && Object.keys(headers).length > 0) {
+      for (const key in headers) {
+        let valye = headers[key];
+        if (valye.includes('=')) valye = valye.replaceAll('=', '$*&');
+        url += `@${key}=${valye}`;
+      }
+    }
+    return url;
+  };
+
+  const formatRemoveUnSafeHeaders = (headers: { [key: string]: string }) => {
+    const unsafeHeads = ['host', 'referer', 'origin', 'user-agent', 'content-length', 'set-cookie', 'cookie'];
+
+    for (const header in headers) {
+      if (unsafeHeads.includes(header.toLowerCase())) delete headers[header];
+    }
+
+    return headers;
+  };
+
   // 支持的媒体格式映射
   const supportedFormats: Record<string, string> = {
     'video/mp4': 'mp4',
@@ -115,6 +136,7 @@ const mediaUtils = (() => {
     mpd: 'customDash',
     magnet: 'customWebTorrent',
     mp3: 'customMpegts',
+    mkv: 'customMp4',
     m4a: 'customMpegts',
     wav: 'customMpegts',
     flac: 'customMpegts',
@@ -148,8 +170,9 @@ const mediaUtils = (() => {
   };
 
   // 使用 fetch 获取媒体类型
-  const getMediaType = async (url: string): Promise<string | undefined> => {
+  const getMediaType = async (url: string, headers: { [key: string]: any }): Promise<string | undefined> => {
     try {
+      url = formatUrlHeaders(url, headers);
       const response = await requestComplete({ url, method: 'HEAD', timeout: 5000 });
       if (response.status === 200) {
         const contentType = response.headers['content-type'] || '';
@@ -163,11 +186,11 @@ const mediaUtils = (() => {
   };
 
   // 检查媒体类型
-  const checkMediaType = async (url: string): Promise<string | undefined> => {
-    if (!url || !(/^(https?:\/\/)/.test(url) || url.startsWith('magnet:'))) return undefined; 
+  const checkMediaType = async (url: string, headers: { [key: string]: any }): Promise<string | undefined> => {
+    if (!url || !(/^(https?:\/\/)/.test(url) || url.startsWith('magnet:'))) return undefined;
 
     const fileType = supportedFormatsLookup(url);
-    return fileType || (await getMediaType(url));
+    return fileType || (await getMediaType(url, headers));
   };
 
   // 映射视频类型到播放器类型
@@ -179,6 +202,8 @@ const mediaUtils = (() => {
   return {
     checkMediaType,
     mediaType2PlayerType,
+    formatRemoveUnSafeHeaders,
+    formatUrlHeaders,
   };
 })();
 

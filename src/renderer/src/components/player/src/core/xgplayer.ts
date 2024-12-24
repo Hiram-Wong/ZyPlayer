@@ -148,6 +148,13 @@ class XgPlayerAdapter {
       options.plugins = [...options.plugins, Danmu];
       player = new XgPlayer({ ...options });
     }
+    if (options.quality && Array.isArray(options.quality) && options.quality.length > 0) {
+      options.quality = options.quality.map(item => {
+        return { name: item.name, url: item.url };
+      });
+      player.emit("resourceReady", options.quality);
+    }
+
     player.storage = playerStorage;
 
     player.once(Events.READY, () => {
