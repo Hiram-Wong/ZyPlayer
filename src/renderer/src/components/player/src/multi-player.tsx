@@ -20,7 +20,9 @@ const MultiPlayer = defineComponent({
     const formatUrlHeaders = (url: string, headers: { [key: string]: string }) => {
       if (headers) {
         for (const key in headers) {
-          url += `@${key}=${headers[key]}`;
+          let valye = headers[key];
+          if (valye.includes('=')) valye = valye.replaceAll('=', '$*&');
+          url += `@${key}=${valye}`;
         }
       }
       return url;
@@ -29,8 +31,8 @@ const MultiPlayer = defineComponent({
     const formatRemoveUnSafeHeaders = (headers: { [key: string]: string }) => {
       const unsafeHeads = ['host', 'referer', 'origin', 'user-agent', 'content-length', 'set-cookie'];
 
-      for (const key in headers) {
-        if (unsafeHeads.includes(key.toLowerCase())) delete headers[key];
+      for (const header in headers) {
+        if (unsafeHeads.includes(header.toLowerCase())) delete headers[header];
       }
 
       return headers;

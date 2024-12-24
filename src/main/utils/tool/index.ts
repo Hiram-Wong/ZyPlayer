@@ -29,10 +29,12 @@ const toggleWindowVisibility = () => {
 };
 
 const parseCustomUrl = (url: string) => {
+  url = decodeURIComponent(url);
   const [redirectURL, ...headerParts] = url.split('@');
 
   const headers = headerParts.reduce((acc, part) => {
-    const [key, value] = part.split('=');
+    let [key, value] = part.split('=');
+    value = value.replaceAll('$*&', '=');
     acc[key] = value;
     return acc;
   }, {});
