@@ -1,0 +1,8 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+if [[ "$OS" == "Windows_NT" ]]; then
+  npx.cmd --no-install commitlint -e $GIT_PARAMS
+else
+  npx --no-install commitlint -e $GIT_PARAMS
+fi
