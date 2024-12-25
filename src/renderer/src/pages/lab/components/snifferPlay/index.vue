@@ -144,12 +144,12 @@ const playerPlayEvent = async () => {
   } else {
     let mediaType = type;
     if (mediaType === 'auto') {
-      const checkType = await mediaUtils.checkMediaType(url);
+      const checkType = await mediaUtils.checkMediaType(url, headers);
       if (checkType === 'unknown' && !checkType) {
         MessagePlugin.warning(t('pages.lab.snifferPlay.message.mediaNoType'));
         return;
       }
-      mediaType = checkType;
+      mediaType = checkType as string;
     };
     if (playerRef.value) {
       await playerRef.value.create({
