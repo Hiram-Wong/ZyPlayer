@@ -233,6 +233,7 @@ const playHelper = async (
         }
         return acc;
       }, []);
+      // @ts-ignore
       play.url = play.quality[0].url;
     }
 

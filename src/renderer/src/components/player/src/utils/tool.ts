@@ -107,6 +107,28 @@ const mediaUtils = (() => {
     return headers;
   };
 
+  const formatWeb2electronHeaders = (headers: { [key: string]: string }) => {
+    const unsafeHeads = new Set(['Host', 'Referer', 'Origin', 'User-Agent', 'Content-Length', 'Set-Cookie', 'Cookie']);
+
+    const capitalizeHeader = (header: string) =>
+      header
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('-');
+
+    return Object.entries(headers).reduce((formattedHeaders, [key, value]) => {
+      const capitalizedHeader = capitalizeHeader(key);
+
+      // 检查是否为不安全头并进行重命名
+      const finalHeader = unsafeHeads.has(capitalizedHeader) ? `Electron-${capitalizedHeader}` : capitalizedHeader;
+
+      // 添加到结果对象
+      formattedHeaders[finalHeader] = value;
+      return formattedHeaders;
+    }, {} as { [key: string]: string });
+  };
+
+
   // 支持的媒体格式映射
   const supportedFormats: Record<string, string> = {
     'video/mp4': 'mp4',
@@ -130,13 +152,13 @@ const mediaUtils = (() => {
 
   // 视频类型与播放器映射
   const videoTypeMap: Record<string, string> = {
-    mp4: 'customMp4',
+    mp4: 'customMpegts',
     flv: 'customFlv',
     m3u8: 'customHls',
     mpd: 'customDash',
     magnet: 'customWebTorrent',
     mp3: 'customMpegts',
-    mkv: 'customMp4',
+    mkv: 'customMpegts',
     m4a: 'customMpegts',
     wav: 'customMpegts',
     flac: 'customMpegts',
@@ -172,8 +194,7 @@ const mediaUtils = (() => {
   // 使用 fetch 获取媒体类型
   const getMediaType = async (url: string, headers: { [key: string]: any }): Promise<string | undefined> => {
     try {
-      url = formatUrlHeaders(url, headers);
-      const response = await requestComplete({ url, method: 'HEAD', timeout: 5000 });
+      const response = await requestComplete({ url, method: 'HEAD', timeout: 5000, headers: formatWeb2electronHeaders(headers) });
       if (response.status === 200) {
         const contentType = response.headers['content-type'] || '';
         return mapContentTypeToFormat(contentType);
@@ -204,6 +225,7 @@ const mediaUtils = (() => {
     mediaType2PlayerType,
     formatRemoveUnSafeHeaders,
     formatUrlHeaders,
+    formatWeb2electronHeaders,
   };
 })();
 

@@ -34,7 +34,7 @@ const setup = async () => {
   process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'; // 关闭安全警告
   app.commandLine.appendSwitch(
     'disable-features',
-    'OutOfBlinkCors, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process',
+    'OutOfBlinkCors, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process, StandardCompliantNonSpecialSchemeURLParsing',
   ); // 禁用
   app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport, HardwareAccelerationModeDefault'); // 启用
   app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书错误
@@ -109,7 +109,7 @@ const ready = () => {
       }
 
       // 处理Origin
-      const origin = headers?.['Origin'] || requestHeaders['Origin'];
+      const origin = requestHeaders?.['Electron-Origin'] || headers?.['Origin'] || requestHeaders['Origin'];
       if (origin && !isLocalhostRef(origin)) {
         if (requestHeaders['Origin'] === new URL(url).origin) {
           delete requestHeaders['Origin'];
@@ -117,25 +117,35 @@ const ready = () => {
       } else {
         delete requestHeaders['Origin'];
       }
-
+      if (!requestHeaders['Origin']) delete requestHeaders['Origin'];
+      delete requestHeaders['Electron-Origin'];
       // 处理 User-Agent
-      requestHeaders['User-Agent'] = headers?.['User-Agent'] || requestHeaders?.['User-Agent'];
+      requestHeaders['User-Agent'] = requestHeaders?.['Electron-User-Agent'] || headers?.['User-Agent'] || requestHeaders?.['User-Agent'];
       if (!requestHeaders['User-Agent'] || requestHeaders['User-Agent']?.includes('zyfun'))
         requestHeaders['User-Agent'] = globalThis.variable.ua;
+      if (!requestHeaders['User-Agent']) delete requestHeaders['User-Agent'];
+      delete requestHeaders['Electron-User-Agent'];
       // 处理 Host
-      requestHeaders['Host'] = headers?.['Host'] || requestHeaders?.['Host'] || new URL(url).host;
+      requestHeaders['Host'] = requestHeaders?.['Electron-Host'] || headers?.['Host'] || requestHeaders?.['Host'] || new URL(url).host;
+      if (!requestHeaders['Host']) delete requestHeaders['Host'];
+      delete requestHeaders['Electron-Host'];
       // 处理 Cookie
-      requestHeaders['Cookie'] = headers?.['Cookie'] || requestHeaders?.['Cookie'];
+      requestHeaders['Cookie'] = requestHeaders?.['Electron-Cookie'] || headers?.['Cookie'] || requestHeaders?.['Cookie'];
+      if (!requestHeaders['Cookie']) delete requestHeaders['Cookie'];
+      delete requestHeaders['Electron-Cookie'];
       // 处理 Referer
-      const referer = headers?.['Referer'] || requestHeaders['Referer'];
+      const referer = requestHeaders?.['Electron-Referer'] || headers?.['Referer'] || requestHeaders['Referer'];
       if (referer && !isLocalhostRef(referer)) {
         requestHeaders['Referer'] = referer;
       } else {
         delete requestHeaders['Referer'];
       }
+      if (!requestHeaders['Referer']) delete requestHeaders['Referer'];
+      delete requestHeaders['Electron-Referer'];
       if (requestHeaders['Redirect'] === 'manual') {
         reqIdRedirect[`${id}`] = headers;
       }
+
       // 清理不再需要的记录
       delete reqIdMethod[`${id}`];
       callback({ requestHeaders });

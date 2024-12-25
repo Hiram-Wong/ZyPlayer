@@ -39,7 +39,7 @@ const publicStream = {
         const options: any = Object.assign({}, { ...publicOptions.hls });
         if (Object.keys(headers).length > 0) {
           options.xhrSetup = function (xhr: any, _url: string) {
-            xhr.withCredentials = true; // do send cookies
+            // xhr.withCredentials = true; // do send cookies
             for (const key in headers) {
               xhr.setRequestHeader(key, headers[key]);
             }
@@ -113,7 +113,7 @@ const publicStream = {
             type: 'mp4', // could also be mpegts, m2ts, flv
             isLive: false,
             url,
-            withCredentials: true,
+            // withCredentials: true,
           },
           { referrerPolicy: 'no-referrer', headers },
         );

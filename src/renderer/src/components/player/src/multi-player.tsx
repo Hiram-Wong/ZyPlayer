@@ -32,9 +32,14 @@ const MultiPlayer = defineComponent({
         if (checkType === 'unknown' && !checkType) return;
         doc.type = checkType;
       }
-      doc.url = mediaUtils.formatUrlHeaders(doc.url, doc.headers);
       doc.type = mediaUtils.mediaType2PlayerType(doc.type);
-      doc.headers = mediaUtils.formatRemoveUnSafeHeaders(doc.headers);
+      // hls 使用 Electron标识 拦截 其他 使用 url @kay 拦截
+      if (doc.type !== 'customHls') {
+        doc.url = mediaUtils.formatUrlHeaders(doc.url, doc.headers);
+        doc.headers = mediaUtils.formatRemoveUnSafeHeaders(doc.headers);
+      } else {
+        doc.headers = mediaUtils.formatWeb2electronHeaders(doc.headers);
+      }
       await adapter.value.create(toRaw(doc));
     };
 

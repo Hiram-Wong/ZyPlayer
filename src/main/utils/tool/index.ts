@@ -34,6 +34,10 @@ const parseCustomUrl = (url: string) => {
 
   const headers = headerParts.reduce((acc, part) => {
     let [key, value] = part.split('=');
+    key = key
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('-');
     value = value.replaceAll('$*&', '=');
     acc[key] = value;
     return acc;
