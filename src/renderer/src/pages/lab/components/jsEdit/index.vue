@@ -14,7 +14,7 @@
           </t-select>
           <t-radio-button value="debug">{{ $t('pages.lab.jsEdit.bug') }}</t-radio-button>
           <t-radio-button value="file">{{ $t('pages.lab.jsEdit.file') }}</t-radio-button>
-          <t-radio-button value="doc">{{ $t('pages.lab.jsEdit.doc') }}</t-radio-button>
+          <!-- <t-radio-button value="doc">{{ $t('pages.lab.jsEdit.doc') }}</t-radio-button> -->
         </t-radio-group>
 
         <t-dialog
