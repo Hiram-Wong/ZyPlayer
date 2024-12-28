@@ -229,6 +229,7 @@ const copyAiAnswer = async () => {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    height: 36px;
 
     .left-operation-container {
       display: flex;

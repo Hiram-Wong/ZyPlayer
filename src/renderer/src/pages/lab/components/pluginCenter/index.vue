@@ -310,6 +310,7 @@ const handleOpChange = (type:string) => {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    height: 36px;
 
     .left-operation-container {
       display: flex;
@@ -429,7 +430,7 @@ const handleOpChange = (type:string) => {
     justify-content: space-between;
     grid-gap: var(--td-size-4);
     width: 100%;
-    height: calc(100% - 32px - var(--td-size-4));
+    height: calc(100% - 36px - var(--td-size-4));
 
     .nav {
       width: 100%;

@@ -111,15 +111,18 @@ const copyStrEvent = async (val: string) => {
 <style lang="less" scoped>
 .view-container {
   padding: 0;
+  gap: var(--td-size-4);
+
   .header {
-    margin-bottom: 16px;
   };
+
   .content {
     display: flex;
     flex-direction: column;
     gap: 16px;
     padding: 0 var(--td-comp-paddingLR-xxs);
   }
+
   .input, .output, .action {
     display: flex;
     flex-direction: column;
@@ -131,6 +134,7 @@ const copyStrEvent = async (val: string) => {
       border-radius: var(--td-radius-medium);
     }
   }
+
   .action {
     .btn {
       display: flex;

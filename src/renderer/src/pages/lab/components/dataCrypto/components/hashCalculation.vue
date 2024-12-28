@@ -145,9 +145,9 @@ const copyStrEvent = async (val: string) => {
 <style lang="less" scoped>
 .view-container {
   padding: 0;
+  gap: var(--td-size-4);
 
   .header {
-    margin-bottom: 16px;
   };
 
   .content {

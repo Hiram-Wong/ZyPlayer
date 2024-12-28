@@ -21,26 +21,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineAsyncComponent, shallowRef } from 'vue';
+import { ref, defineAsyncComponent, shallowRef } from 'vue';
 import { t } from '@/locales';
 
 const active = ref({
   nav: 'encodeDecode'
-});
-
-const cryptoList = computed(() => {
-  return [
-    {
-      type_id: 'encodeDecode',
-      type_name: t('pages.lab.dataCrypto.nav.encodeDecode')
-    }, {
-      type_id: 'hashCalculation',
-      type_name: t('pages.lab.dataCrypto.nav.hashCalculation')
-    }, {
-      type_id: 'codeConversion',
-      type_name: t('pages.lab.dataCrypto.nav.codeConversion')
-    }
-  ]
 });
 
 const componentMap = {
@@ -70,6 +55,7 @@ const handleOpChange = (key: string) => {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    height: 36px;
 
     .left-operation-container {
       display: flex;
