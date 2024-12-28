@@ -19,6 +19,7 @@ import CommonNav from '@/components/common-nav/index.vue';
 // 异步加载组件，也可以直接导入组件
 const componentMap = {
   'dataCrypto': defineAsyncComponent(() => import('./components/dataCrypto/index.vue')),
+  'fileDiff': defineAsyncComponent(() => import('./components/fileDiff/index.vue')),
   'aiBrain': defineAsyncComponent(() => import('./components/aiBrain/index.vue')),
   'jsEdit': defineAsyncComponent(() => import('./components/jsEdit/index.vue')),
   'staticFilter': defineAsyncComponent(() => import('./components/staticFilter/index.vue')),
@@ -33,6 +34,10 @@ const settingNav = computed(() => {
     {
       id: 'dataCrypto',
       name: t('pages.lab.nav.dataCrypto')
+    },
+    {
+      id: 'fileDiff',
+      name: t('pages.lab.nav.fileDiff')
     },
     {
       id: 'aiBrain',

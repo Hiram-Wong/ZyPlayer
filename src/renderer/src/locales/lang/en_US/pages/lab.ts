@@ -2,6 +2,7 @@ export default {
   name: 'Lab',
   nav: {
     staticFilter: 'StaticFilter',
+    fileDiff: 'FileDiff',
     jsEdit: 'JsEdit',
     aiBrain: 'AiBrain',
     dataCrypto: 'DataCrypto',
@@ -400,5 +401,11 @@ export default {
       goDir: 'Go to Specified Directory',
       confirm: 'Install',
     },
+  },
+  fileDiff: {
+    file: 'File',
+    origin: 'Origin',
+    target: 'Target',
+    diff: 'Diff',
   },
 };

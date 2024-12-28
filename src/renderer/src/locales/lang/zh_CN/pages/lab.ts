@@ -2,6 +2,7 @@ export default {
   name: '实验室',
   nav: {
     staticFilter: '静态筛选',
+    fileDiff: '文件对比',
     jsEdit: '写源工具',
     aiBrain: '人工智脑',
     dataCrypto: '数据编码',
@@ -400,5 +401,11 @@ export default {
       goDir: '前往指定目录',
       confirm: '安装',
     },
+  },
+  fileDiff: {
+    file: '文件',
+    origin: '原始',
+    target: '目标',
+    diff: '对比',
   },
 };
