@@ -18,5 +18,6 @@ export default {
   message: {
     formatSeasonError: '数据源格式化剧集错误, 确认数据源是否正常',
     notSelectAnalyze: '识别到官解数据, 但未选择解析线路',
+    notSelectSourceBeforeSearch: '未选择数据源或本站模式数据源搜索状态为关闭',
   },
 };

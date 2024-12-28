@@ -17,6 +17,7 @@ export default {
   },
   message: {
     formatSeasonError: 'Data source formatting episode error, check if the data source is normal',
-    notSelectAnalyze: 'Recognized official data, but no analyze selected.',
+    notSelectAnalyze: 'Recognized official data, but no analyze selected',
+    notSelectSourceBeforeSearch: 'No data source selected or Site Mode data source search status is off',
   },
 };

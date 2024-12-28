@@ -209,10 +209,11 @@ const changeFilterEvent = (key, item) => {
 };
 
 const searchGroup = (type: string, defaultConfig:{ [key: string]: string }) => {
+  if (!defaultConfig || !defaultConfig?.id ) return [];
+
   let query = siteConfig.value.data.filter((item) => item["search"] !== 0);
   if (type === 'site') query = query.filter((item) => item["id"] === defaultConfig["id"]);
   if (type === 'group') query = query.filter((item) => item["group"] === defaultConfig["group"]);
-
   return query;
 };
 
@@ -235,7 +236,6 @@ const getSetting = async () => {
     }
     if (data.hasOwnProperty('search')) {
       siteConfig.value.search = data["search"];
-      siteConfig.value.searchGroup = searchGroup(data["search"], data["default"]);
     }
   } catch (err) {
     active.value.infiniteType = 'noData';
@@ -516,10 +516,17 @@ const playEvent = async (item) => {
 emitter.on('searchFilm', (data: any) => {
   console.log('[film][bus][receive]', data);
   const { kw, group, filter } = data;
+
   searchTxt.value = kw;
   siteConfig.value.filter = filter;
-  if (siteConfig.value.search !== group)  siteConfig.value.search = group;
+  if (siteConfig.value.search !== group) siteConfig.value.search = group;
   siteConfig.value.searchGroup = searchGroup(group, siteConfig.value.default);
+
+  if (siteConfig.value.searchGroup.length === 0) {
+    MessagePlugin.warning(t('pages.film.message.notSelectSourceBeforeSearch'));
+    return;
+  };
+
   searchEvent();
 });
 
