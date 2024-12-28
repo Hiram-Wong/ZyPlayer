@@ -13,13 +13,21 @@ class T1Adapter {
 
   async init() {}
   async home() {
-    const response = await request({
-      url: this.api,
-      method: 'GET',
-      params: {
-        ac: 'class',
-      },
-    });
+    let response;
+    try {
+      response = await request({
+        url: this.api,
+        method: 'GET',
+        params: {
+          ac: 'class',
+        },
+      });
+    } catch {
+      response = await request({
+        url: this.api,
+        method: 'GET',
+      });
+    };
     let classes: any[] = [];
 
     // 分类
@@ -52,13 +60,21 @@ class T1Adapter {
   }
   async homeVod() {
     let response;
-    response = await request({
-      url: this.api,
-      method: 'GET',
-      params: {
-        ac: 'class',
-      },
-    });
+    try {
+      response = await request({
+        url: this.api,
+        method: 'GET',
+        params: {
+          ac: 'class',
+        },
+      });
+    } catch {
+      response = await request({
+        url: this.api,
+        method: 'GET',
+      });
+    };
+
     if (Array.isArray(response?.list) && response.list.length > 0 && !response.list[0].vod_pic) {
       const ids = response.list.map((item) => item.vod_id);
       response = await this.detail({ id: ids });
