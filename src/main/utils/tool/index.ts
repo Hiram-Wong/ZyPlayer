@@ -30,16 +30,21 @@ const toggleWindowVisibility = () => {
 
 const parseCustomUrl = (url: string) => {
   url = decodeURIComponent(url);
-  const [redirectURL, ...headerParts] = url.split('@');
 
-  const headers = headerParts.reduce((acc, part) => {
+  const [redirectURL, ...headersParts] = url.split('@');
+
+  if (!headersParts) return { redirectURL, headers: {} };
+
+  const headers = headersParts.reduce((acc, part) => {
     let [key, value] = part.split('=');
-    key = key
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('-');
-    value = value.replaceAll('$*&', '=');
-    acc[key] = value;
+    if (key && value) {
+      key = key
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('-');
+      value = value.replaceAll('$*&', '=');
+      acc[key] = value;
+    }
     return acc;
   }, {});
 
