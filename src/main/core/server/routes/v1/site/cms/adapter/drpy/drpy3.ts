@@ -55,12 +55,14 @@ console.log = (function (oriLogFunc) {
     let timeStamp = `${hours.toString().padStart(2, '0')}:${minutes
       .toString()
       .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; // 格式化时分秒
-    logRecord.push([timeStamp, ...args]); // 记录日志内容
+    logRecord.push(['log', timeStamp, ...args]); // 记录日志内容
     oriLogFunc(timeStamp, ...args); // 保持原来的输出功能
   };
 })(console.log);
 const getLogRecord = () => {
-  return logRecord;
+  const res = logRecord;
+  logRecord = [];
+  return res;
 };
 const clearLogRecord = () => {
   logRecord = [];
