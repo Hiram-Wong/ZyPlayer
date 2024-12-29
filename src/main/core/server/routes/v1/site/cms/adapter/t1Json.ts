@@ -8,7 +8,7 @@ class T1Adapter {
   constructor(source) {
     this.api = source.api;
     this.playurl = source.playurl;
-    this.categoryfilter = source.categories.split(/[,，]/).map((category) => category.trim());
+    this.categoryfilter = source.categories ? source.categories.split(/[,，]/).map((category) => category.trim()) : [];
   }
 
   async init() {}

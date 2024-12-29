@@ -8,7 +8,7 @@ class HipyT4Adapter {
   constructor(source) {
     this.api = source.api;
     this.ext = source.ext;
-    this.categoryfilter = source.categories.split(/[,，]/).map((category) => category.trim());
+    this.categoryfilter = source.categories ? source.categories.split(/[,，]/).map((category) => category.trim()) : [];
   }
 
   async init() {}
