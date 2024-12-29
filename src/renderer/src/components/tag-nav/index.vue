@@ -33,14 +33,14 @@ watch(
   },
 );
 
-const emit = defineEmits(['changeKey']);
+const emit = defineEmits(['change']);
 
 const tagFlag = ref(props.active);
 const uniqueList = computed(() => uniqBy(props.list, 'type_id'));
 
 const handleItemClick = (key: string | number) => {
   console.log(key)
-  emit('changeKey', key);
+  emit('change', key);
 };
 </script>
 
