@@ -1,27 +1,27 @@
 <template>
   <div class="get-html">
-    <t-input-adornment>
-      <template #prepend>
-        <t-select v-model="formData.method" auto-width>
-          <t-option v-for="item in reqMethods" :key="item.value" :value="item.value" :label="item.label" />
-        </t-select>
-      </template>
-      <template #append>
-        <t-button class="button" theme="default" @click="getSource()">
-          {{ $t('pages.lab.staticFilter.action.source') }}</t-button>
-      </template>
+    <div class="input-group">
+      <t-input
+        v-model="formData.url"
+        :placeholder="$t('pages.setting.placeholder.general')"
+        class="input w-100%"
+      >
+        <template #label>
+          <t-select v-model="formData.method" auto-width>
+            <t-option v-for="item in reqMethods" :key="item.value" :value="item.value" :label="item.label" />
+          </t-select>
+        </template>
+        <template #suffix>
+          <t-button theme="default" size="small" @click="active.reqDialog = true">
+            <transform-icon />
+          </t-button>
+        </template>
 
-      <div class="input-container">
-        <t-input
-          v-model="formData.url"
-          :placeholder="$t('pages.setting.placeholder.general')"
-          class="input"
-        />
-        <div class="method" @click="active.reqDialog = true">
-          <transform-icon />
-        </div>
-      </div>
-    </t-input-adornment>
+      </t-input>
+      <t-button class="button w-btn" theme="default" @click="getSource()">
+        {{ $t('pages.lab.staticFilter.action.source') }}
+      </t-button>
+    </div>
 
     <t-dialog
       v-model:visible="active.reqDialog"
@@ -29,6 +29,7 @@
       :header="$t('pages.lab.staticFilter.dialog.request.title')"
       :cancel-btn="$t('pages.lab.staticFilter.dialog.request.cancel')"
       show-in-attached-element
+      attach=".view-container"
       @confirm="active.reqDialog = false"
       @cancel="reqCancel()"
     >
@@ -203,35 +204,13 @@ const reqCancel = () => {
 </script>
 
 <style lang="less" scoped>
-:deep(.t-input-adornment) {
-  width: 100%;
-
-  .input-container {
-    width: inherit;
-    background-color: var(--td-bg-content-input-2) !important;
+.get-html {
+  .input-group {
     display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
     justify-content: space-between;
-
-    .method {
-      margin-right: 5px;
-      width: 24px;
-      height: 24px;
-      border-radius: var(--td-radius-default);
-      background-color: var(--td-bg-color-component);
-      display: flex;
-      flex-direction: row;
-      align-content: center;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .contentType {
-      margin-bottom: 5px;
-    }
+    align-items: center;
+    width: 100%;
+    grid-gap: var(--td-comp-margin-s);
   }
 }
 </style>

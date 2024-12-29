@@ -7,14 +7,13 @@
       <div class="right-operation-container">
         <t-radio-group variant="default-filled" v-model="active.nav" @change="handleOpChange">
           <t-radio-button value="template">{{ $t('pages.lab.jsEdit.template') }}</t-radio-button>
-          <t-select v-model="tmp.file" @change="fileEvent()" auto-width>
-            <t-option :label="$t('pages.lab.jsEdit.import')" value="import" @click="importFileEvent" />
-            <t-option :label="$t('pages.lab.jsEdit.export')" value="export" @click="exportFileEvent" />
-            <t-option :label="$t('pages.lab.jsEdit.decode')" value="decode" @click="decodeEvent" />
+          <t-select v-model="tmp.file" auto-width @change="handleOpFileChange">
+            <t-option :label="$t('pages.lab.jsEdit.file')" value="file" />
+            <t-option :label="$t('pages.lab.jsEdit.import')" value="import" />
+            <t-option :label="$t('pages.lab.jsEdit.export')" value="export" />
+            <t-option :label="$t('pages.lab.jsEdit.decode')" value="decode" />
           </t-select>
           <t-radio-button value="debug">{{ $t('pages.lab.jsEdit.bug') }}</t-radio-button>
-          <t-radio-button value="file">{{ $t('pages.lab.jsEdit.file') }}</t-radio-button>
-          <!-- <t-radio-button value="doc">{{ $t('pages.lab.jsEdit.doc') }}</t-radio-button> -->
         </t-radio-group>
 
         <t-dialog
@@ -26,232 +25,270 @@
         >
           <p>{{ $t('pages.lab.jsEdit.templateTip') }}</p>
           <t-select v-model="form.template">
-            <t-option v-for="item in templates" :key="item.label" :value="item.value" :label="item.label" />
+            <t-option v-for="(item, index) in Object.keys(mubanData)" :key="index" :value="item" :label="item" />
           </t-select>
         </t-dialog>
       </div>
     </div>
     <div class="content">
-      <div class="left">
-        <div class="edit">
-          <div class="code-op">
-            <div class="code-op-item">
-              <div class="item source">
-                <reqHtml class="item source" v-model:data="form.req" @source="htmlSourceEvent"/>
+      <t-split
+        direction="vertical"
+        default-size="0.7"
+        class="split-pane"
+      >
+        <template #first>
+          <t-split class="split-pane">
+            <template #first>
+              <div class="editor-pane">
+                <t-tabs v-model="active.editor" theme="card" lazy class="editor-pane-tabs">
+                  <t-tab-panel :label="$t('pages.lab.jsEdit.editor.js')" value="js">
+                    <code-editor
+                      v-model="form.content.js"
+                      :options="jsEditConf"
+                      @drop.prevent="handleMonacoDrop('js', $event)"
+                      @monaco-object="handleMonacoObject"
+                      class="code-box"
+                    />
+                  </t-tab-panel>
+                  <t-tab-panel :label="$t('pages.lab.jsEdit.editor.html')" value="html">
+                    <code-editor
+                      v-model="form.content.html"
+                      :options="htmlEditConf"
+                      @drop.prevent="handleMonacoDrop('html', $event)"
+                      @monaco-object="handleMonacoObject"
+                      class="code-box"
+                    />
+                  </t-tab-panel>
+                </t-tabs>
               </div>
+            </template>
+            <template #second>
+              <t-tabs v-model="active.action" theme="card" lazy>
+                <t-tab-panel :label="$t('pages.lab.jsEdit.debug.dom')" value="dom">
+                  <div class="dom_debug">
+                    <div class="item">
+                      <reqHtml class="item source" v-model:data="form.req" @source="handleSourceFetch"/>
+                    </div>
+                    <div class="item">
+                      <t-input
+                        v-model="form.rule.pdfa"
+                        :label="$t('pages.lab.jsEdit.rule.pdfa')"
+                        :placeholder="$t('pages.setting.placeholder.pdfaTip')"
+                        class="input w-100%"
+                      />
+                      <t-button class="button w-btn" theme="default" @click="handleDomDebugPdfa">
+                        {{ $t('pages.lab.jsEdit.rule.try') }}
+                      </t-button>
+                    </div>
+                    <div class="item">
+                      <t-input
+                        v-model="form.rule.pdfh"
+                        :label="$t('pages.lab.jsEdit.rule.pdfh')"
+                        :placeholder="$t('pages.setting.placeholder.pdfaTip')"
+                        class="input w-100%"
+                      />
+                      <t-button class="button w-btn" theme="default" @click="handleDomDebugPdfh">
+                        {{ $t('pages.lab.jsEdit.rule.try') }}
+                      </t-button>
+                    </div>
+                  </div>
+                </t-tab-panel>
+                <t-tab-panel :label="$t('pages.lab.jsEdit.debug.data')" value="data">
+                  <div class="data_debug">
+                    <div class="item">
+                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugInit">
+                        <div class="status">
+                          <span class="title">{{ $t('pages.lab.jsEdit.action.init') }}</span>
+                          <span class="desc">
+                            {{ $t('pages.lab.jsEdit.action.currentStatus') }}:
+                            {{
+                              form.init.auto
+                                ? $t('pages.lab.jsEdit.action.auto')
+                                : $t('pages.lab.jsEdit.action.manual')
+                            }}
+                          </span>
+                        </div>
+                        <div class="click" @click.stop="form.init.auto = !form.init.auto">
+                          <gesture-click-icon />
+                        </div>
+                      </t-button>
+
+                      <t-button class="button init w-btn" theme="default" @click="handleModeToggle">
+                        <div class="status">
+                          <span class="title">{{ $t('pages.lab.jsEdit.action.mode') }}</span>
+                          <span class="desc">
+                            {{ $t('pages.lab.jsEdit.action.currentStatus') }}:
+                            {{
+                              form.init.mode === 't3'
+                                ? $t('pages.lab.jsEdit.action.t3')
+                                : $t('pages.lab.jsEdit.action.t4')
+                            }}
+                          </span>
+                        </div>
+                      </t-button>
+
+                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugLog">日志</t-button>
+                    </div>
+                    <div class="item">
+                      <t-button class="button w-btn" theme="default" @click="handleDataDebugHome">
+                        {{ $t('pages.lab.jsEdit.action.classify') }}
+                      </t-button>
+                      <t-button class="button w-btn" theme="default" @click="handleDataDebugHomeVod">
+                        {{ $t('pages.lab.jsEdit.action.home') }}
+                      </t-button>
+                    </div>
+                    <div class="item">
+                      <t-input
+                        v-model="form.category.t"
+                        :label="$t('pages.lab.jsEdit.rule.t')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-33-30%"
+                      />
+                      <t-input
+                        v-model="form.category.f"
+                        :label="$t('pages.lab.jsEdit.rule.f')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-33-40%"
+                      />
+                      <t-input-number
+                        theme="column"
+                        :min="0"
+                        v-model="form.category.pg"
+                        :label="$t('pages.lab.jsEdit.rule.pg')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-33-30%"
+                      />
+                      <t-button class="button w-btn" theme="default" @click="handleDataDebugCategory()">
+                        {{ $t('pages.lab.jsEdit.action.list') }}
+                      </t-button>
+                    </div>
+                    <div class="item">
+                      <t-input
+                        v-model="form.detail.ids"
+                        :label="$t('pages.lab.jsEdit.rule.ids')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-100%"
+                      />
+                      <t-button class="button w-btn" theme="default" @click="handleDataDebugDetail()">
+                        {{ $t('pages.lab.jsEdit.action.detail') }}
+                      </t-button>
+                    </div>
+                    <div class="item">
+                      <t-input
+                        v-model="form.search.wd"
+                        :label="$t('pages.lab.jsEdit.rule.wd')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-50-70%"
+                      />
+                      <t-input-number
+                        theme="column"
+                        :min="0"
+                        v-model="form.search.pg"
+                        :label="$t('pages.lab.jsEdit.rule.pg')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-50-30%"
+                      />
+                      <t-button class="button w-btn" theme="default" @click="handleDataDebugSearch()">
+                        {{ $t('pages.lab.jsEdit.action.search') }}
+                      </t-button>
+                    </div>
+                    <div class="item">
+                      <t-input
+                        v-model="form.play.flag"
+                        :label="$t('pages.lab.jsEdit.rule.flag')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-50-30%"
+                      />
+                      <t-input
+                        v-model="form.play.play"
+                        :label="$t('pages.lab.jsEdit.rule.play')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-50-70%"
+                      />
+                      <t-button class="button w-btn" theme="default" @click="handleDataDebugPlay()">
+                        {{ $t('pages.lab.jsEdit.action.play') }}
+                      </t-button>
+                    </div>
+                    <div class="item">
+                      <t-input
+                        v-model="form.proxy.url"
+                        :label="$t('pages.lab.jsEdit.rule.url')"
+                        :placeholder="$t('pages.setting.placeholder.general')"
+                        class="input w-100%"
+                      />
+                      <t-button class="button w-btn" theme="default" @click="handleDataDebugProxy()">
+                        {{ $t('pages.lab.jsEdit.action.proxy') }}
+                      </t-button>
+                    </div>
+                    <div class="item">
+                      <t-textarea
+                        v-model="form.proxy.upload"
+                        :placeholder="$t('pages.lab.jsEdit.placeholder.proxyUpload')"
+                        :autosize="{ minRows: 3, maxRows: 5 }"
+                        class="input proxy-upload-textarea"
+                      />
+                      <t-button class="button proxy-upload-btn" theme="default" @click="handleDataDebugProxyUpload()">
+                        {{ $t('pages.lab.jsEdit.action.proxyUpload') }}
+                      </t-button>
+                    </div>
+                  </div>
+                </t-tab-panel>
+                <t-tab-panel :label="$t('pages.lab.jsEdit.debug.preview')" value="preview">
+                  <div class="html_preview">
+                    <div class="urlbar-root">
+                      <div class="urlbar-control">
+                        <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('back')">
+                          <arrow-left-icon />
+                        </t-button>
+                        <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('forward')">
+                          <arrow-right-icon />
+                        </t-button>
+                        <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('reload')">
+                          <rotate-icon />
+                        </t-button>
+                      </div>
+                      <t-input class="urlbar-url" v-model="webview.url" @enter="handleWebviewLoad"></t-input>
+                      <t-button variant="text" class="urlbar-devtool" @click="handleWebviewControl('devtools')">F12</t-button>
+                    </div>
+                    <webview ref="webviewRef" class="webview-box" :src="webview.route" disablewebsecurity allowpopups nodeIntegration style="height: 100%; width: 100%;"/>
+                  </div>
+                </t-tab-panel>
+              </t-tabs>
+            </template>
+          </t-split>
+        </template>
+        <template #second>
+          <div class="console-pane">
+            <div class="console-root">
+              <div class="header-name">{{ $t('pages.lab.jsEdit.console.title') }}</div>
+              <div class="header-clear" @click="handleConsoleClear">{{ $t('pages.lab.jsEdit.console.clear') }}</div>
             </div>
-            <div class="code-op-item">
-              <t-input-adornment :prepend="$t('pages.lab.jsEdit.rule.pdfa')">
-                <template #append>
-                  <t-button theme="default" @click="actionRule('pdfa')">
-                    {{ $t('pages.lab.jsEdit.rule.try') }}
-                  </t-button>
-                </template>
-                <t-input v-model="form.rule.pdfa" :placeholder="$t('pages.setting.placeholder.pdfaTip')" />
-              </t-input-adornment>
-            </div>
-            <div class="code-op-item">
-              <t-input-adornment :prepend="$t('pages.lab.jsEdit.rule.pdfh')">
-                <template #append>
-                  <t-button theme="default" @click="actionRule('pdfh')">
-                    {{ $t('pages.lab.jsEdit.rule.try') }}
-                  </t-button>
-                </template>
-                <t-input v-model="form.rule.pdfh" :placeholder="$t('pages.setting.placeholder.pdfhTip')" />
-              </t-input-adornment>
+            <div class="log-pane-content">
+              <div class="log-box" ref="logRef"></div>
             </div>
           </div>
-          <code-editor
-            v-model="form.content.edit"
-            :options="codeEditConf"
-            @drop.prevent="handleDrop"
-            @monaco-object="handleMonacoObject"
-            class="code-box"
-          />
-        </div>
-      </div>
-      <div class="right">
-        <div class="action">
-          <div class="item">
-            <t-button class="button init" theme="default" @click="actionInit">
-              <div class="status">
-                <span class="title">{{ $t('pages.lab.jsEdit.action.init') }}</span>
-                <span class="desc"
-                  >{{ $t('pages.lab.jsEdit.action.initStatus') }}:
-                  {{
-                    form.init.auto
-                      ? $t('pages.lab.jsEdit.action.initAuto')
-                      : $t('pages.lab.jsEdit.action.initManual')
-                  }}</span
-                >
-              </div>
-              <div class="click" @click.stop="form.init.auto = !form.init.auto">
-                <gesture-click-icon />
-              </div>
-            </t-button>
-            <t-button class="button" theme="default" @click="actionHome">{{
-              $t('pages.lab.jsEdit.action.classify')
-            }}</t-button>
-            <t-button class="button" theme="default" @click="actionHomeVod">{{
-              $t('pages.lab.jsEdit.action.home')
-            }}</t-button>
-          </div>
-          <div class="item">
-            <t-input
-              v-model="form.category.t"
-              :label="$t('pages.lab.jsEdit.rule.t')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33-30%"
-            />
-            <t-input
-              v-model="form.category.f"
-              :label="$t('pages.lab.jsEdit.rule.f')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33-40%"
-            />
-            <t-input-number
-              theme="column"
-              :min="0"
-              v-model="form.category.pg"
-              :label="$t('pages.lab.jsEdit.rule.pg')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-33-30%"
-            />
-            <t-button class="button w-btn" theme="default" @click="actionCategory()">{{
-              $t('pages.lab.jsEdit.action.list')
-            }}</t-button>
-          </div>
-          <div class="item">
-            <t-input
-              v-model="form.detail.ids"
-              :label="$t('pages.lab.jsEdit.rule.ids')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-100%"
-            />
-            <t-button class="button w-btn" theme="default" @click="actionDetail()">{{
-              $t('pages.lab.jsEdit.action.detail')
-            }}</t-button>
-          </div>
-          <div class="item">
-            <t-input
-              v-model="form.search.wd"
-              :label="$t('pages.lab.jsEdit.rule.wd')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-70%"
-            />
-            <t-input-number
-              theme="column"
-              :min="0"
-              v-model="form.search.pg"
-              :label="$t('pages.lab.jsEdit.rule.pg')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-30%"
-            />
-            <t-button class="button w-btn" theme="default" @click="actionSearch()">{{
-              $t('pages.lab.jsEdit.action.search')
-            }}</t-button>
-          </div>
-          <div class="item">
-            <t-input
-              v-model="form.play.flag"
-              :label="$t('pages.lab.jsEdit.rule.flag')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-30%"
-            />
-            <t-input
-              v-model="form.play.play"
-              :label="$t('pages.lab.jsEdit.rule.play')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-50-70%"
-            />
-            <t-button class="button w-btn" theme="default" @click="actionPlay()">{{
-              $t('pages.lab.jsEdit.action.play')
-            }}</t-button>
-          </div>
-          <div class="item">
-            <t-input
-              v-model="form.proxy.url"
-              :label="$t('pages.lab.jsEdit.rule.url')"
-              :placeholder="$t('pages.setting.placeholder.general')"
-              class="input w-100%"
-            />
-            <t-button class="button w-btn" theme="default" @click="actionProxy()">{{
-              $t('pages.lab.jsEdit.action.proxy')
-            }}</t-button>
-          </div>
-        </div>
-        <div class="log-container">
-          <div class="log-nav">
-            <div class="nav-left">
-              <t-radio-group variant="default-filled" size="small" v-model="form.nav" @change="changeNav()">
-                <t-radio-button value="debug">{{ $t('pages.lab.jsEdit.select.debug') }}</t-radio-button>
-                <t-radio-button value="source">{{
-                  $t('pages.lab.jsEdit.select.source')
-                }}</t-radio-button>
-                <t-radio-button value="rule">{{ $t('pages.lab.jsEdit.select.rule') }}</t-radio-button>
-                <t-radio-button value="log">{{ $t('pages.lab.jsEdit.select.log') }}</t-radio-button>
-              </t-radio-group>
-            </div>
-            <div class="nav-right">
-              <t-radio-group
-                variant="default-filled"
-                size="small"
-                v-model="form.clickType.log"
-                @change="logEvent()"
-                v-if="form.nav === 'log'"
-              >
-                <t-radio-button value="f12">{{ $t('pages.lab.jsEdit.select.f12') }}</t-radio-button>
-                <t-radio-button value="clear">{{ $t('pages.lab.jsEdit.select.clear') }}</t-radio-button>
-              </t-radio-group>
-              <t-radio-group
-                variant="default-filled"
-                size="small"
-                v-model="form.clickType.proxy"
-                @change="proxyEvent()"
-                v-if="form.nav === 'debug' && form.action === 'proxy'"
-              >
-                <t-radio-button value="upload">{{ $t('pages.lab.jsEdit.select.upload') }}</t-radio-button>
-                <t-radio-button value="copy">{{ $t('pages.lab.jsEdit.select.copy') }}</t-radio-button>
-              </t-radio-group>
-              <t-radio-group
-                variant="default-filled"
-                size="small"
-                v-model="form.clickType.source"
-                @change="sourceEvent()"
-                v-if="form.nav === 'source'"
-              >
-                <t-radio-button value="format">{{
-                  $t('pages.lab.jsEdit.select.format')
-                }}</t-radio-button>
-                <t-radio-button value="reset">{{ $t('pages.lab.jsEdit.select.reset') }}</t-radio-button>
-              </t-radio-group>
-            </div>
-          </div>
-          <div class="log-text">
-            <code-editor
-              v-model="form.content.text"
-              :options="logEditConf"
-              class="log-box"
-            />
-          </div>
-        </div>
-      </div>
+        </template>
+      </t-split>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import 'luna-object-viewer/luna-object-viewer.css';
+import 'luna-data-grid/luna-data-grid.css';
+import 'luna-dom-viewer/luna-dom-viewer.css';
+import 'luna-console/luna-console.css';
+
 import moment from 'moment';
-import jsBeautify from 'js-beautify';
 import JSON5 from 'json5';
-import { computed, ref, onMounted, watch } from 'vue';
+import LunaConsole from 'luna-console';
+import { computed, ref, onMounted, watch, useTemplateRef, nextTick, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { GestureClickIcon } from 'tdesign-icons-vue-next';
+import { GestureClickIcon, ArrowLeftIcon, ArrowRightIcon, RotateIcon } from 'tdesign-icons-vue-next';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import emitter from '@/utils/emitter';
-import { copyToClipboardApi } from '@/utils/tool';
 import { CodeEditor } from '@/components/code-editor';
 import { setT3Proxy } from '@/api/proxy';
 import { addSite, putSite } from '@/api/site'
@@ -260,26 +297,22 @@ import { fetchCmsHome, fetchCmsHomeVod, fetchCmsDetail, fetchCmsCategory, fetchC
 import reqHtml from '../reqHtml/index.vue';
 import drpySuggestions from './utils/drpy_suggestions';
 import drpyObjectInner from './utils/drpy_object_inner.ts?raw';
+import TSplit from '@/components/split/index.vue';
 
 const remote = window.require('@electron/remote');
 const router = useRouter();
-const store = useSettingStore();
+const storeSetting = useSettingStore();
+const logRef = useTemplateRef('logRef');
 const form = ref({
   content: {
-    edit: '',
-    log: '',
-    text: '',
-    debug: '',
-    source: '',
-    rule: '',
+    js: '',
+    html: '',
   },
   rule: {
-    type: '',
     pdfa: '',
     pdfh: '',
   },
   template: 'mxpro',
-  nav: 'debug',
   req: {
     method: 'GET',
     encode: 'UTF-8',
@@ -306,51 +339,51 @@ const form = ref({
   },
   proxy: {
     url: '',
+    upload: '',
   },
   log: {
     nav: '',
   },
   action: '',
-  clickType: {
-    log: '',
-    proxy: '',
-    source: '',
-  },
   lastEditTime: {
     edit: 0,
     init: 0,
   },
   init: {
     auto: false,
+    mode: 't3',
+    log: false,
   },
 });
-const codeEditConf = ref({
-  language: 'javascript',
+const EDIT_CONF = {
   readOnly: false,
-  theme: store.displayMode === 'light' ? 'vs' : 'vs-dark',
+  theme: storeSetting.displayMode === 'light' ? 'vs' : 'vs-dark',
   wordWrap: 'on',
   automaticLayout: true,
   folding: true,
   roundedSelection: false,
   overviewRulerBorder: false,
-  scrollBeyondLastLine: false,
-  fixedOverflowWidgets: true
-});
-const logEditConf = ref({
-  language: 'javascript',
-  readOnly: true,
-  theme: store.displayMode === 'light' ? 'vs' : 'vs-dark',
-  wordWrap: 'on',
-  automaticLayout: true,
-  folding: true,
-  roundedSelection: false,
-  overviewRulerBorder: false,
-  scrollBeyondLastLine: false,
+  tabSize: 2,
+  insertSpaces: true,
   minimap: {
     enabled: false,
   },
   fixedOverflowWidgets: true
+}
+const jsEditConf = ref({
+  ...EDIT_CONF,
+  language: 'javascript',
 });
+const htmlEditConf = ref({
+  ...EDIT_CONF,
+  language: 'html',
+});
+const webviewRef = ref<any>(null);
+const webview = ref({
+  url: 'about:blank',
+  route: 'about:blank',
+});
+const log = shallowRef<any>(null);
 const tmp = computed(() => {
   return {
     file: t('pages.lab.jsEdit.fileManage'),
@@ -359,30 +392,21 @@ const tmp = computed(() => {
 const active = ref({
   nav: '',
   template: false,
-  encode: false,
-  player: false,
-  help: false,
-  reqParam: false,
-  snifferParam: false,
-  ai: false,
-  tool: false,
+  action: 'dom',
+  editor: 'js'
 });
 const mubanData = ref({});
-const templates = computed(() => {
-  const keysAsObjects = Object.keys(mubanData.value).map((key) => ({ label: key, value: key }));
-  return keysAsObjects;
-});
 const debugId = ref('');
 
 watch(
-  () => store.displayMode,
+  () => storeSetting.displayMode,
   (val) => {
-    codeEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
-    logEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
+    jsEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
+    htmlEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
   }
 );
 watch(
-  () => form.value.content.edit,
+  () => form.value.content.js,
   () => {
     const currentTime = moment().unix();
     form.value.lastEditTime.edit = currentTime;
@@ -390,59 +414,120 @@ watch(
 );
 
 onMounted(() => {
-  getMuban();
-  getDebugData();
+  setupConsole();
+  getTemplate();
+  setupData();
 });
 
-const getDebugData = async () => {
-  if (!debugId.value) {
-    const debugRes = await fetchJsEditDebug();
-    if (debugRes?.id) {
-      debugId.value = debugRes.id;
-      form.value.content.edit = debugRes.ext;
+// common
+const utilsReadFile = async(filePath: string) =>{
+  const fs = remote.require('fs').promises;
+  return await fs.readFile(filePath, 'utf-8');
+};
+
+const utilsWriteFile = async (filePath: string, val: string) => {
+  const fs = remote.require('fs').promises;
+  await fs.writeFile(filePath, val, 'utf-8');
+};
+
+const utilsT3BasePath = async () => {
+  const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
+  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/drpy_dzlive/drpy_js/`);
+  return defaultPath;
+};
+
+const utilsT4BasePath = async () => {
+  const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
+  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `plugin/drpy-node/js/`);
+  return defaultPath;
+};
+
+const utilsBasePath = async () => {
+  const type = form.value.init.mode;
+  if (type === 't3') {
+    return await utilsT3BasePath();
+  } else if (type === 't4') {
+    return await utilsT4BasePath();
+  }
+};
+
+const utilsReadT4File = async () =>{
+  try {
+    const basePath = await utilsT4BasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.js`);
+    const content = await utilsReadFile(defaultPath);
+    return content;
+  } catch (err) {
+    console.error(`[utilsReadT4File][Error]:`, err);
+    return '';
+  }
+};
+
+const utilsWriteT4File = async (val: string) =>{
+  try {
+    const basePath = await utilsT4BasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.js`);
+    await utilsWriteFile(defaultPath, val);
+    return true;
+  } catch (err) {
+    console.error(`[utilsWriteT4File][Error]:`, err);
+    return false;
+  }
+};
+
+const sitePutJs = async () => {
+  const type = form.value.init.mode;
+  const content = form.value.content.js;
+
+  if (type === 't3') {
+    await putSite({ ids: [debugId.value], doc: { ext: content, type: 7, api: 'csp_DRPY' } });
+  } else if (type === 't4') {
+    await utilsWriteT4File(content);
+    await putSite({ ids: [debugId.value], doc: { type: 6, api: 'http://127.0.0.1:5757/api/debug' } });
+  }
+};
+
+const setupData = async () => {
+  const debugRes = await fetchJsEditDebug();
+  if (debugRes?.id) {
+    debugId.value = debugRes.id;
+    const type = debugRes.type;
+    form.value.init.mode = type === 7 ? 't3' : 't4';
+    if (type === 7) {
+      form.value.content.js = debugRes.ext;
     } else {
-      const siteRes = await addSite({
-        name: 'debug',
-        key: 'debug',
-        type: 7,
-        api: 'csp_DRPY',
-        search: 1,
-        playUrl: '',
-        group: 'debug',
-        category: '',
-        ext: '',
-      });
-      if (Array.isArray(siteRes) && siteRes.length > 0 && siteRes[0].hasOwnProperty('id')) {
-        debugId.value = siteRes[0].id;
-      } else return;
-    };
+      form.value.content.js = await utilsReadT4File();
+    }
+  } else {
+    const siteRes = await addSite({
+      name: 'debug',
+      key: 'debug',
+      type: form.value.init.mode === 't3' ? 7 : 6,
+      api: form.value.init.mode === 't3' ? 'csp_DRPY' : 'http://127.0.0.1:5757/api/debug',
+      search: 1,
+      playUrl: '',
+      group: 'debug',
+      category: '',
+      ext: '',
+    });
+    if (Array.isArray(siteRes) && siteRes.length > 0 && siteRes[0].hasOwnProperty('id')) {
+      debugId.value = siteRes[0].id;
+    } else return;
   };
 };
 
-const getMuban = async  () => {
+// op
+const getTemplate = async () => {
   const res = await fetchJsEditMuban();
   if (typeof res === 'object' && Object.keys(res).length > 0) {
     mubanData.value = res;
   }
 };
 
-const handleDrop = (e: DragEvent) => {
-  e.preventDefault();
-  const file = e.dataTransfer?.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      form.value.content.edit = content;
-    };
-    reader.readAsText(file);
-  }
-};
-
 const confirmTemplate = () => {
   try {
     const text = mubanData.value[form.value.template];
-    form.value.content.edit = `var rule = ${JSON5.stringify(text, null, 2)}`;
+    form.value.content.js = `var rule = ${JSON5.stringify(text, null, 2)}`;
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err) {
     console.error(`[confirmTemplate][Error]:`, err);
@@ -451,15 +536,11 @@ const confirmTemplate = () => {
   active.value.template = false;
 };
 
-const importFileEvent = async () => {
+const handleImportFile = async () => {
   try {
-    const readFile = async(filePath: string) =>{
-      const fs = remote.require('fs').promises;
-      return await fs.readFile(filePath, 'utf-8');
-    }
-
+    const basePath = await utilsBasePath();
     const { canceled, filePaths } = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-      title: 'Select a file to read',
+      defaultPath: basePath,
       filters: [
         { name: 'JavaScript Files', extensions: ['js'] },
         { name: 'Text Files', extensions: ['txt'] },
@@ -470,8 +551,8 @@ const importFileEvent = async () => {
 
     if (!canceled && filePaths) {
       const filePath = filePaths[0];
-      const content = await readFile(filePath);
-      form.value.content.edit = content;
+      const content = await utilsReadFile(filePath);
+      form.value.content.js = content;
       MessagePlugin.success(t('pages.setting.data.success'));
     };
   } catch (err: any) {
@@ -480,8 +561,8 @@ const importFileEvent = async () => {
   }
 };
 
-const exportFileEvent = async () => {
-  const content = (form.value.content.edit || '').trim();
+const handleexportFile = async () => {
+  const content = (form.value.content.js || '').trim();
 
   if (!content) {
     MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
@@ -498,15 +579,9 @@ const exportFileEvent = async () => {
     }
   })();
 
-  const writeFile = async (filePath: string, data: any) => {
-    const fs = remote.require('fs').promises;
-    await fs.writeFile(filePath, data, 'utf-8');
-  };
-
   try {
-    await window.electron.ipcRenderer.send('tmpdir-manage', 'make', 'file');
-    const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
-    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/${title}.js`);
+    const basePath = await utilsBasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `${title}.js`);
     const { canceled, filePath } = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
       defaultPath,
       filters: [
@@ -517,7 +592,7 @@ const exportFileEvent = async () => {
     });
 
     if (!canceled && filePath) {
-      await writeFile(filePath, content);
+      await utilsWriteFile(filePath, content);
       MessagePlugin.success(t('pages.setting.data.success'));
     };
   } catch (err: any) {
@@ -526,14 +601,14 @@ const exportFileEvent = async () => {
   };
 };
 
-const debugEvent = async () => {
+const handleDebug = async () => {
   try {
-    const content = form.value.content.edit;
+    const content = form.value.content.js;
     if (!content || content.trim().length === 0) {
       MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
       return;
     };
-    await putSite({ ids: [debugId.value], doc: { ext: content } });
+    await sitePutJs();
     await putSiteDefault(debugId.value);
     emitter.emit('refreshFilmConfig');
     router.push({ name: 'FilmIndex' });
@@ -543,15 +618,13 @@ const debugEvent = async () => {
   }
 };
 
-const decodeEvent = async () => {
+const handleDecode = async () => {
+  active.value.editor = 'js';
+
   try {
-    const content = form.value.content.edit || '';
-    if (!content || content.trim().length === 0) {
+    const content = (form.value.content.js || '').trim();
+    if (!content) {
       MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
-      return;
-    };
-    if (!debugId.value) {
-      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
       return;
     };
 
@@ -560,7 +633,7 @@ const decodeEvent = async () => {
       arg: content,
       sourceId: debugId.value
     });
-    form.value.content.edit = res;
+    form.value.content.js = res;
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
     console.log(`[setting][editSource][decodeEvent][err]`, err);
@@ -568,345 +641,9 @@ const decodeEvent = async () => {
   }
 };
 
-const fileEvent = () => {
-  tmp.value.file = t('pages.lab.jsEdit.fileManage');
-};
-
-const changeNav = async (nav = '', action = '') => {
-  nav = nav || form.value.nav;
-  action = action || form.value.action;
-  form.value.nav = nav;
-
-  switch (nav) {
-    case 'source':
-      logEditConf.value.language = 'html';
-      logEditConf.value.readOnly = true;
-      break;
-    case 'rule':
-      logEditConf.value.language = form.value.rule.type === 'pdfa' ? 'json' : 'html';
-      logEditConf.value.readOnly = true;
-      break;
-    case 'debug':
-      logEditConf.value.language = 'json';
-      logEditConf.value.readOnly = action === 'proxy' ? false : true;
-      break;
-    case 'log':
-      logEditConf.value.language = 'json';
-      logEditConf.value.readOnly = true;
-      break;
-    default:
-      break;
-  }
-
-
-  if (nav === 'log') {
-    const content = form.value.content.edit;
-    if (!content || content.trim().length === 0) {
-      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
-      return;
-    };
-    if (!debugId.value) {
-      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
-      return;
-    };
-    const res = await fetchCmsRunMain({
-      func: "function main() {return getLogRecord()}",
-      arg: "",
-      sourceId: debugId.value
-    });
-    let logText = res.map(([time, content]) => {
-      try {
-        content = JSON5.parse(content);
-        content = JSON.stringify(content, null, 2);
-      } catch {}
-      return `${time}: ${content}`;
-    })
-    .join('\n');
-    form.value.content[nav] = logText;
-  };
-
-  const contentText =
-      typeof form.value.content[nav] === 'object'
-        ? JSON5.stringify(form.value.content[nav], null, 2)
-        : form.value.content[nav];
-  form.value.content.text = contentText;
-};
-
-const performAction = async (type, requestData = {}) => {
-  try {
-    const content = form.value.content.edit;
-    // 1. 判断是否为空
-    if (!content || content.trim().length === 0) {
-      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
-      return;
-    };
-    // 2. 判断是否存在debugid
-    if (!debugId.value && type !== 'init') {
-      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
-      return;
-    };
-    // 3. 不存在泽获取
-    if (!debugId.value && type === 'init') {
-      const debugRes = await fetchJsEditDebug();
-      if (debugRes?.id) {
-        debugId.value = debugRes.id;
-      } else {
-        const siteRes = await addSite({
-          name: 'debug',
-          key: 'debug',
-          type: 7,
-          api: 'csp_DRPY',
-          search: true,
-          playUrl: '',
-          group: 'debug',
-          category: '',
-          ext: content,
-        });
-        if (Array.isArray(siteRes) && siteRes.length > 0 && siteRes[0].hasOwnProperty('id')) {
-          debugId.value = siteRes[0].id;
-          await fetchCmsInit({ sourceId: siteRes[0].id, debug: true });
-        } else return;
-      };
-    };
-    // 4.自动初始化则上传并初始化
-    if (type === 'init' || (form.value.lastEditTime.edit > form.value.lastEditTime.init && form.value.init.auto)) {
-      const currentTime = moment().unix();
-      form.value.lastEditTime.init = currentTime;
-      await putSite({ ids: [debugId.value], doc: { ext: content } });
-      if (type !== 'init') {
-        await fetchCmsInit({ sourceId: debugId.value, debug: true });
-      };
-    };
-    const methodMap = {
-      'init': fetchCmsInit,
-      'home': fetchCmsHome,
-      'homeVod': fetchCmsHomeVod,
-      'detail': fetchCmsDetail,
-      'category': fetchCmsCategory,
-      'search': fetchCmsSearch,
-      'play': fetchCmsPlay,
-      'proxy': fetchCmsProxy,
-      'log': fetchCmsRunMain,
-    };
-    const res = await methodMap[type](Object.assign({}, requestData, {sourceId: debugId.value}));
-    form.value.content.debug = res;
-    form.value.action = type;
-    changeNav('debug', type);
-    MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (err) {
-    console.log(`[setting][editSource][performAction][err]`, err);
-    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
-  }
-};
-
-const actionRule = async (type) => {
-  form.value.rule.type = type;
-  const rule = form.value.rule[type];
-  const html = form.value.content.source;
-
-  if (!rule) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.ruleNoRule'));
-    return;
-  }
-  if (!html) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.ruleNoHtml'));
-    return;
-  }
-
-  try {
-    let res;
-    if (type === 'pdfa') {
-      res = await fetchJsEditPdfa({ html, rule });
-    } else if (type === 'pdfh') {
-      res = await fetchJsEditPdfh({ html, rule });
-    }
-    form.value.content.rule = res;
-    changeNav('rule', type);
-
-    MessagePlugin.success(`${t('pages.setting.data.success')}`);
-  } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  }
-};
-
-const actionInit = async () => {
-  await performAction('init', { debug:true });
-};
-
-const actionHome = async () => {
-  await performAction('home');
-};
-
-const actionHomeVod = async () => {
-  await performAction('homeVod');
-};
-
-const actionCategory = async () => {
-  const { t: tid, f, pg: page } = form.value.category;
-
-  if (!tid) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.listNoT'));
-    return;
-  }
-
-  const data = {
-    tid,
-    page: page || 1,
-    filter: f ? true : false,
-    extend: f ? JSON5.parse(f) : {},
-  };
-  await performAction('category', data);
-};
-
-const actionDetail = async () => {
-  const { ids } = form.value.detail;
-
-  if (!ids) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.detailNoIds'));
-    return;
-  };
-
-  await performAction('detail', { id: ids });
-};
-
-const actionSearch = async () => {
-  const { wd, pg: page } = form.value.search;
-
-  if (!wd) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.searchNoWd'));
-    return;
-  }
-
-  const data = {
-    wd,
-    quick: false,
-    page: page || 1,
-  };
-  await performAction('search', data);
-};
-
-const actionPlay = async () => {
-  const { flag, play } = form.value.play;
-
-  if (!flag) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.playNoFlag'));
-    return;
-  }
-
-  if (!play) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.playNoPlay'));
-    return;
-  }
-
-  const data = {
-    flag: flag,
-    input: play,
-  };
-  await performAction('play', data);
-};
-
-const actionProxy = async () => {
-  let { url } = form.value.proxy;
-
-  if (!url) {
-    MessagePlugin.warning(t('pages.lab.jsEdit.message.proxyNoUrl'));
-    return;
-  }
-
-  if (url && url.startsWith('http')) {
-    if (!url.startsWith('http://127.0.0.1:9978/')) {
-      const formatUrl = `http://127.0.0.1:9978/proxy?do=js&url=${url}`;
-      form.value.proxy.url = formatUrl;
-      url = formatUrl;
-    };
-    const formatUrl = new URL(url);
-    const params = Object.fromEntries(formatUrl.searchParams.entries());
-    await performAction('proxy', params);
-  }
-};
-
-const logEvent = async () => {
-  const type = form.value.clickType.log;
-  if (type === 'f12') {
-    const webContents = remote.getCurrentWebContents();
-    if (!webContents.isDevToolsOpened()) {
-      webContents.openDevTools();
-    }
-  } else if (type === 'clear') {
-    const content = form.value.content.edit;
-    if (!content || content.trim().length === 0) {
-      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
-      return;
-    };
-    if (!debugId.value) {
-      MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoDebugId'));
-      return;
-    };
-    await fetchCmsRunMain({
-      func: "function main() { clearLogRecord(); return 'ok'}",
-      arg: "",
-      sourceId: debugId.value
-    });
-    form.value.content.log = '';
-    form.value.content.text = '';
-    console.clear();
-  }
-
-  form.value.clickType.log = '';
-};
-
-const proxyEvent = async () => {
-  try {
-    const type = form.value.clickType.proxy;
-    const str: any = form.value.content.text || '';
-    const formatStr = str
-      .split('\n')
-      .filter((s) => !!s.trim())
-      .join('');
-    const jsonStr = JSON5.parse(formatStr);
-
-    if (type === 'copy') {
-      await copyToClipboardApi(form.value.proxy.url);
-    } else if (type === 'upload') {
-      const url = form.value.proxy.url;
-      const formatUrl = new URL(url);
-      const params = Object.fromEntries(formatUrl.searchParams.entries());
-      await setT3Proxy({ text: jsonStr, url: params.url });
-    };
-
-    MessagePlugin.info(`${t('pages.setting.data.success')}`);
-  } catch (err) {
-    console.log(`[editSource][proxyEvent][err]${err}`);
-    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
-  } finally {
-    form.value.clickType.proxy = '';
-  }
-};
-
-const sourceEvent = () => {
-  try {
-    const type = form.value.clickType.source;
-    const html = form.value.content.source;
-    if (type === 'reset') {
-      form.value.content.text = html;
-    } else if (type === 'format') {
-      const formattedHtml: any = jsBeautify.html(html, {
-        preserve_newlines: false,
-      });
-      form.value.content.text = formattedHtml;
-    }
-
-    MessagePlugin.info(`${t('pages.setting.data.success')}`);
-  } catch (err) {
-    console.log(`[editSource][sourceEvent][err]${err}`);
-    MessagePlugin.error(`${t('pages.setting.data.fail')}`);
-  } finally {
-    form.value.clickType.source = '';
-  }
-};
-
 const handleOpChange = (type: string) => {
   active.value.nav = '';
+
   switch (type) {
     case 'template':
       active.value.template = true;
@@ -914,19 +651,44 @@ const handleOpChange = (type: string) => {
     case 'doc':
       window.electron.ipcRenderer.send('open-url', 'https://github.com/Hiram-Wong/ZyPlayer/wiki/%E5%86%99%E6%BA%90%E5%B7%A5%E5%85%B7');
       break;
-    case 'file':
-      window.electron.ipcRenderer.send('open-path', 'file', true);
-      break;
     case 'debug':
-      debugEvent();
+      handleDebug();
       break;
   };
 };
 
-const htmlSourceEvent = (data: string) => {
-  changeNav('source', 'html');
-  form.value.content.source = data;
-  form.value.content.text = data;
+const handleOpFileChange = (type: string) => {
+  tmp.value.file = t('pages.lab.jsEdit.fileManage');
+
+  switch (type) {
+    case 'file':
+      window.electron.ipcRenderer.send('open-path', 'file', true);
+      break;
+    case 'import':
+      handleImportFile();
+      break;
+    case 'export':
+      handleexportFile();
+      break;
+    case 'decode':
+      handleDecode();
+      break;
+  };
+};
+
+// monaco
+const handleMonacoDrop = (type: string, e: DragEvent) => {
+  e.preventDefault();
+
+  const file = e.dataTransfer?.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      form.value.content[type] = content;
+    };
+    reader.readAsText(file);
+  }
 };
 
 const handleMonacoObject = (monaco) => {
@@ -959,6 +721,337 @@ const handleMonacoObject = (monaco) => {
     },
   });
   monaco.languages.typescript.javascriptDefaults.addExtraLib(drpyObjectInner);
+};
+
+// source
+const handleSourceFetch = (data: string) => {
+  active.value.editor = 'html';
+  form.value.content.html = data;
+};
+
+// dom
+const handleDomDebugPdfa = async () => {
+  const rule = form.value.rule.pdfa;
+  if (!rule) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.ruleNoRule'));
+    return;
+  }
+
+  await handleDomDebug('pdfa', rule);
+};
+
+const handleDomDebugPdfh = async () => {
+  const rule = form.value.rule.pdfh;
+  if (!rule) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.ruleNoRule'));
+    return;
+  }
+
+  await handleDomDebug('pdfh', rule);
+};
+
+const handleDomDebug = async (type: string, rule: string) => {
+  const content = (form.value.content.html || '').trim();
+  if (!content) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.ruleNoHtml'));
+    return;
+  };
+
+  const methodMap = {
+    'pdfa': fetchJsEditPdfa,
+    'pdfh': fetchJsEditPdfh,
+  };
+
+  const _console = log.value;
+  try {
+    const res = await methodMap[type]({ html: content, rule });
+    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    _console.log(res);
+    MessagePlugin.success(`${t('pages.setting.data.success')}`);
+  } catch (err: any) {
+    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    _console.error(err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
+  }
+};
+
+// btn
+const handleModeToggle = async () => {
+  const status = form.value.init.mode === 't3' ? 't4' : 't3';
+  form.value.init.mode = status;
+  if (status === 't4') {
+    MessagePlugin.info(t('pages.lab.jsEdit.message.modeT4'));
+  };
+  await sitePutJs();
+};
+
+const handleDataDebugLog = async () => {
+  const res = await fetchCmsRunMain({
+    func: "function main() {return getLogRecord()}",
+    arg: "",
+    sourceId: debugId.value
+  });
+
+  const _console = log.value;
+
+  _console.warn(`server log: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+  res.forEach(([type, time, content]) => {
+    try {
+      content = JSON5.parse(content);
+    } catch {
+
+    } finally {
+      console.log(content);
+      _console[type](`server log: ${time}`, content);
+    }
+  });
+};
+
+// data
+const handleDataDebugInit = async () => {
+  await handleDataDebug('init', { debug:true });
+};
+
+const handleDataDebugHome = async () => {
+  await handleDataDebug('home');
+};
+
+const handleDataDebugHomeVod = async () => {
+  await handleDataDebug('homeVod');
+};
+
+const handleDataDebugCategory = async () => {
+  const { t: tid, f, pg: page } = form.value.category;
+
+  if (!tid) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.listNoT'));
+    return;
+  }
+
+  const data = {
+    tid,
+    page: page || 1,
+    filter: !!f,
+    extend: f ? JSON5.parse(f) : {},
+  };
+  await handleDataDebug('category', data);
+};
+
+const handleDataDebugDetail = async () => {
+  const { ids } = form.value.detail;
+
+  if (!ids) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.detailNoIds'));
+    return;
+  };
+
+  await handleDataDebug('detail', { id: ids });
+};
+
+const handleDataDebugSearch = async () => {
+  const { wd, pg: page } = form.value.search;
+
+  if (!wd) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.searchNoWd'));
+    return;
+  }
+
+  const data = {
+    wd,
+    quick: false,
+    page: page || 1,
+  };
+  await handleDataDebug('search', data);
+};
+
+const handleDataDebugPlay = async () => {
+  const { flag, play } = form.value.play;
+
+  if (!flag) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.playNoFlag'));
+    return;
+  }
+
+  if (!play) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.playNoPlay'));
+    return;
+  }
+
+  const data = {
+    flag: flag,
+    input: play,
+  };
+  await handleDataDebug('play', data);
+};
+
+const handleDataDebugProxy = async () => {
+  let { url } = form.value.proxy;
+
+  if (!url) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.proxyNoUrl'));
+    return;
+  }
+
+  if (url && url.startsWith('http')) {
+    if (!url.startsWith('http://127.0.0.1:9978/')) {
+      const formatUrl = `http://127.0.0.1:9978/proxy?do=js&url=${url}`;
+      form.value.proxy.url = formatUrl;
+      url = formatUrl;
+    };
+    const formatUrl = new URL(url);
+    const params = Object.fromEntries(formatUrl.searchParams.entries());
+    await handleDataDebug('proxy', params);
+  }
+};
+
+const handleDataDebugProxyUpload = async () => {
+  try {
+    const { upload, url } = form.value.proxy;
+    let content: any[] = [];
+
+    if (!url) {
+      MessagePlugin.warning(t('pages.lab.jsEdit.message.proxyNoUrl'));
+      return;
+    }
+
+    if (!upload) {
+      MessagePlugin.warning(t('pages.lab.jsEdit.message.proxyUploadNoData'));
+      return;
+    } else {
+      try {
+        const jsonStr = JSON5.parse(upload);
+        if (jsonStr && Array.isArray(jsonStr) && jsonStr.length === 3) {
+          content = jsonStr;
+        } else {
+          MessagePlugin.warning(t('pages.lab.jsEdit.message.proxyUploadNoJson'));
+          return;
+        }
+      } catch {
+        MessagePlugin.warning(t('pages.lab.jsEdit.message.proxyUploadNoJson'));
+        return;
+      }
+    }
+
+    const formatUrl = new URL(url);
+    const params = Object.fromEntries(formatUrl.searchParams.entries());
+    await setT3Proxy({ text: content, url: params.url });
+
+    MessagePlugin.info(`${t('pages.setting.data.success')}`);
+  } catch (err: any) {
+    console.error('[editSource][proxyUpload][err]', err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
+  }
+};
+
+const handleDataDebug = async (type: string, data: { [key: string]: any } = {}) => {
+  // 1. 判断编辑器内容是否为空
+  const content = (form.value.content.js || '').trim();
+  if (!content) {
+    MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
+    return;
+  };
+
+  // 2.自动初始化则上传并初始化
+  const { edit, init } = form.value.lastEditTime;
+  const auto = form.value.init.auto;
+  if (type === 'init' || (edit > init && auto)) {
+    const currentTime = moment().unix();
+    form.value.lastEditTime.init = currentTime;
+    await sitePutJs();
+    if (type !== 'init') {
+      await fetchCmsInit({ sourceId: debugId.value, debug: true });
+    };
+  };
+
+  // 3.执行
+  const methodMap = {
+    'init': fetchCmsInit,
+    'home': fetchCmsHome,
+    'homeVod': fetchCmsHomeVod,
+    'detail': fetchCmsDetail,
+    'category': fetchCmsCategory,
+    'search': fetchCmsSearch,
+    'play': fetchCmsPlay,
+    'proxy': fetchCmsProxy,
+    'log': fetchCmsRunMain,
+  };
+
+  const _console = log.value;
+  try {
+    const res = await methodMap[type]({ ...data, sourceId: debugId.value });
+    if (type === 'proxy') form.value.proxy.upload = JSON5.stringify(res);
+    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    _console.log(res);
+    MessagePlugin.success(`${t('pages.setting.data.success')}`);
+  } catch (err: any) {
+    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    _console.error(err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
+  }
+};
+
+// console
+const setupConsole = () => {
+  if (!logRef.value) return;
+
+  const _console = new LunaConsole(logRef.value, {
+    theme: storeSetting.displayMode === 'light' ? 'light' : 'dark',
+  });
+  log.value = _console;
+  _console.log('%c console setup success, welcome use zyfun js edit series tools ', 'background: var(--td-bg-content-input-1); color: var(--td-success-color)');
+};
+
+const handleConsoleClear = () => {
+  if (!log.value) return;
+
+  log.value.clear();
+};
+
+// webview
+const handleWebviewControl = (type: string) => {
+  if (!webviewRef.value) return;
+
+  switch (type) {
+    case 'back':
+    if (webviewRef.value.canGoBack()) webviewRef.value.goBack();
+      break;
+    case 'forward':
+    if (webviewRef.value.canGoForward()) webviewRef.value.goForward();
+      break;
+    case 'reload':
+      webviewRef.value.reload();
+      break;
+    case 'devtools':
+      webviewRef.value.openDevTools();
+      break;
+  }
+}
+
+const handleWebviewLoad = (url: string) => {
+  if (!url) return;
+
+  if (!/^(https?:\/\/)/.test(url)) {
+    url = `http://${url}`;
+    webview.value.url = url;
+  }
+  webview.value.route = url;
+
+  const webviewLoadError = (err: any) => {
+    MessagePlugin.warning(`${t('pages.lab.pluginCenter.control.loadUiEntryError')}: ${err.errorDescription}`);
+    webviewRef.value.src = 'about:blank';
+  };
+
+  const webviewRoute = (event: any) => {
+    console.log('webviewRoute', event);
+    webview.value.url = event.url;
+  };
+
+  nextTick(() => {
+    webviewRef.value.removeEventListener('did-fail-load', webviewLoadError);
+    webviewRef.value.addEventListener('did-fail-load', webviewLoadError);
+    webviewRef.value.addEventListener('did-navigate-in-page', webviewRoute);
+    webviewRef.value.addEventListener('did-navigate', webviewRoute);
+  });
 };
 </script>
 
@@ -1092,12 +1185,16 @@ const handleMonacoObject = (monaco) => {
 
   .content {
     flex: 1;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    grid-gap: var(--td-comp-margin-s);
+    // display: flex;
+    // flex-direction: row;
+    // justify-content: space-between;
+    // grid-gap: var(--td-comp-margin-s);
     width: 100%;
-    height: 100%;
+    // height: 100%;
+    height: calc(100% - 36px - var(--td-size-4));
+    // overflow: hidden;
+
+    border-radius: var(--td-radius-default);
     overflow: hidden;
 
     .left {
@@ -1333,5 +1430,302 @@ const handleMonacoObject = (monaco) => {
   --vscode-editorStickyScroll-background: var(--td-bg-content-input-2);
   --vscode-editorStickyScroll-shadow: var(--td-bg-content-input-1);
   --vscode-scrollbar-shadow: var(--td-bg-content-input-1);
+}
+
+:deep(.t-tabs) {
+  height: 100%;
+
+  .t-tabs__header {
+    .t-tabs__nav-container.t-is-top {
+      background-color: var(--td-bg-content-input-1);
+    }
+  }
+
+  .t-tabs__nav--card.t-tabs__nav-item.t-is-active {
+    background-color: var(--td-bg-content-input-2);
+    border-bottom-color: transparent;
+  }
+
+  .t-tabs__content {
+    padding: var(--td-pop-padding-s);
+    background-color: var(--td-bg-content-input-2);
+    height: calc(100% - var(--td-comp-size-l));
+    width: 100%;
+    overflow: auto;
+
+    .t-tab-panel {
+      height: 100%;
+      width: 100%;
+    }
+  }
+
+  .t-tabs__nav-item.t-size-m {
+    height: var(--td-comp-size-l);
+    line-height: var(--td-comp-size-l);
+    background-color: var(--td-bg-content-input-1);
+    border-color: transparent;
+  }
+
+  .t-tabs__nav-item-text-wrapper {
+    color: var(--td-text-color-secondary);
+    font-size: var(--td-font-size-link-small);
+    font-weight: normal;
+  }
+
+}
+
+.data_debug, .dom_debug {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  grid-gap: var(--td-comp-margin-s);
+  overflow-y: auto;
+
+  .item {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+
+    .init {
+      width: auto !important;
+
+      :deep(.t-button__text) {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .click {
+        margin-left: var(--td-comp-margin-s);
+        border: 2px solid rgba(132, 133, 141, 0.7);
+        border-radius: var(--td-radius-circle);
+        width: 24px;
+        height: 24px;
+      }
+
+      .status {
+        display: flex;
+        flex-direction: column;
+        font-size: 12px;
+        line-height: 14px;
+        align-content: flex-start;
+
+        .title {
+          font-weight: 500;
+          text-align: left;
+        }
+
+        .desc {
+          font-size: 10px;
+          text-align: left;
+        }
+      }
+    }
+
+    .source {
+      :deep(.input-group) {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        overflow: hidden;
+        gap: 0;
+
+        .input {
+          flex: 1;
+          width: 100%;
+          margin-right: var(--td-comp-margin-s);
+
+          .t-input {
+            background-color: var(--td-bg-content-input-1) !important;
+          }
+        }
+
+        .w-btn {
+          width: 50px !important;
+          background-color: var(--td-bg-content-input-1);
+        }
+      }
+    }
+
+    .input {
+      width: 100%;
+      margin-right: var(--td-comp-margin-s);
+
+      :deep(.t-input), :deep(.t-textarea__inner) {
+        background-color: var(--td-bg-content-input-1) !important;
+      }
+    }
+
+    .proxy-upload-textarea {
+      margin-right: 0;
+
+      :deep(.t-textarea__inner) {
+        padding-bottom: calc(var(--td-size-3) + var(--td-comp-size-m));
+      }
+    }
+
+    .proxy-upload-btn {
+      position: absolute;
+      right: var(--td-size-4);
+      bottom: var(--td-size-3);
+    }
+
+    .w-btn {
+      width: 50px;
+      background-color: var(--td-bg-content-input-1);
+    }
+
+    .w-100\% {
+      width: calc((100% - 50px - (var(--td-comp-margin-s))));
+    }
+
+    .w-50\% {
+      width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 2);
+    }
+
+    .w-50-30\% {
+      width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 3);
+    }
+
+    .w-50-70\% {
+      width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 7);
+    }
+
+    .w-33-30\% {
+      width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 3);
+    }
+
+    .w-33-40\% {
+      width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 4);
+    }
+
+    .w-33\% {
+      width: calc((100% - 50px - (var(--td-comp-margin-s) * 3)) / 3);
+    }
+  }
+}
+
+.html_preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--td-comp-margin-s);
+  height: 100%;
+
+  .urlbar-root {
+    display: flex;
+    gap: var(--td-comp-margin-s);
+
+    .urlbar-control {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: var(--td-bg-content-input-1);
+      border-radius: var(--td-radius-default);
+      height: 100%;
+      width: 100px;
+
+      :deep(.t-button) {
+        &:not(.t-is-disabled):not(.t-button--ghost) {
+          --ripple-color: transparent;
+        }
+      }
+
+      :deep(.t-button__text) {
+        svg {
+          color: var(--td-text-color-placeholder);
+        }
+      }
+
+      :deep(.t-button--variant-text) {
+        &:hover {
+          border-color: transparent;
+          background-color: transparent;
+
+          .t-button__text {
+            svg {
+              color: var(--td-primary-color);
+            }
+          }
+        }
+      }
+    }
+
+    .urlbar-url {
+      :deep(.t-input) {
+        background-color: var(--td-bg-content-input-1) !important;
+      }
+    }
+
+    .urlbar-devtool {
+      background-color: var(--td-bg-content-input-1);
+      --ripple-color: transparent;
+      color: var(--td-text-color-placeholder);
+
+      &:hover {
+        color: var(--td-primary-color);
+      }
+    }
+  }
+
+  .webview-box {
+    flex: 1;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.split-pane {
+  height: 100%;
+  width: 100%;
+
+  .editor-pane {
+    height: 100%;
+    width: 100%;
+  }
+
+  .console-pane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+
+    .console-root {
+      display: flex;
+      justify-content: space-between;
+      background-color: var(--td-bg-content-input-1);
+      padding: 0 var(--td-comp-paddingLR-xs);
+
+      .header-name {
+        color: var(--td-text-color-secondary);
+        font-size: var(--td-font-size-link-small);
+      }
+
+      .header-clear {
+        color: var(--td-text-color-secondary);
+        cursor: pointer;
+
+        &:hover {
+          color: var(--td-text-color-primary);
+        }
+      }
+    }
+
+    .log-pane-content {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
+
+      .log-box {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        background-color: var(--td-bg-content-input-2);
+      }
+    }
+  }
 }
 </style>

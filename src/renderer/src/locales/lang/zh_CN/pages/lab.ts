@@ -17,7 +17,7 @@ export default {
     cache: '缓存',
     encode: '编码',
     decode: '解码',
-    file: '服务',
+    file: '目录',
     help: '帮助',
     other: '其他',
     doc: '文档',
@@ -34,6 +34,7 @@ export default {
     placeholder: {
       reqHeader: '{ "User-Agent": "Mozilla/5.0 zyfun" }',
       reqBody: '{ "key": "01b9b7" }',
+      proxyUpload: '请输入三元组, [响应吗, 响应头, 响应体]',
     },
     rule: {
       pdfa: '列表',
@@ -60,9 +61,12 @@ export default {
     },
     action: {
       init: '初始化',
-      initStatus: '当前状态',
-      initManual: '手动',
-      initAuto: '自动',
+      mode: '模式',
+      currentStatus: '当前状态',
+      manual: '手动',
+      auto: '自动',
+      t3: 'T3',
+      t4: 'T4',
       source: '源码',
       obtain: '获取',
       classify: '分类',
@@ -72,10 +76,12 @@ export default {
       search: '搜索',
       play: '播放',
       proxy: '代理',
+      proxyUpload: '代理上传',
       player: '播放器',
       sniffer: '嗅探',
     },
     select: {
+      control: '控制',
       log: '日志',
       debug: '调试',
       source: '源码',
@@ -88,8 +94,22 @@ export default {
       play: '播放',
       upload: '上传',
     },
+    console: {
+      title: '控制台',
+      clear: '清理',
+    },
+    editor: {
+      js: '编辑器',
+      html: '源码',
+    },
+    debug: {
+      preview: '预览',
+      dom: '节点',
+      data: '数据',
+    },
     message: {
       openDevTools: '目前只能通过开发者工具->控制台查看日志',
+      modeT4: 'T4模式需配合插件使用, 请先确认已安装插件, 且插件目录为drpy-node, 并启动运行状态',
       htmlNoUrl: '地址为空',
       ruleNoHtml: '必须先获取源代码',
       ruleNoRule: '规则为空',
@@ -101,27 +121,9 @@ export default {
       playNoFlag: '参数flag为空',
       playNoPlay: '参数play为空',
       proxyNoUrl: '参数url为空',
+      proxyUploadNoData: '参数uplpad为空',
+      proxyUploadNoJson: '参数不是三元组',
       playerNoUrl: '参数url为空',
-    },
-    dialog: {
-      player: {
-        title: '播放测试',
-      },
-      request: {
-        title: '请求参数',
-        reqEncode: '响应编码',
-        reqHeader: '请求头',
-        reqBody: '请求体',
-        cancel: '重置',
-      },
-      sniffer: {
-        title: '嗅探参数',
-        ua: '用户代理',
-        auxiliaryRegex: '辅助规则',
-        initScript: '初始化脚本',
-        runScript: '执行脚本',
-        cancel: '重置',
-      },
     },
   },
   staticFilter: {
