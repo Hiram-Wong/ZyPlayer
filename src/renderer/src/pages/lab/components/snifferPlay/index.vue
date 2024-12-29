@@ -77,6 +77,7 @@
 <script lang="ts" setup>
 import { ref, useTemplateRef } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import JSON5 from 'json5';
 import sniffer from '@/utils/sniffer';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
@@ -110,7 +111,7 @@ const sniiferEvent = async () => {
   };
   const res = await sniffer(url, runScript, initScript, customRegex, snifferExclude);
   if (res?.url) {
-    formData.value.sniffer.result = JSON.stringify(res);
+    formData.value.sniffer.result = JSON5.stringify(res);
     MessagePlugin.success(t('pages.setting.form.success'));
   } else {
     MessagePlugin.success(t('pages.setting.form.fail'));
@@ -126,7 +127,7 @@ const playerPlayEvent = async () => {
   };
 
   try {
-    headers = JSON.parse(headers);
+    headers = JSON5.parse(headers);
     if (typeof headers === 'object' && headers !== null && !Array.isArray(headers)) {
     } else {
       MessagePlugin.warning(t('pages.lab.snifferPlay.message.headersNoJson'));
