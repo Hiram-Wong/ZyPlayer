@@ -368,10 +368,10 @@
   resolved "https://registry.npmmirror.com/@electron-uikit/contextmenu/-/contextmenu-1.0.0.tgz#d3a2176331f844c3f34c1fd40308ed234515948e"
   integrity sha512-dXYAz6zLWHvfu8C2Dwa5C8xantZSC5eXm4VLkOeBhDuVxGL4PHnCq9q5F1ljoW8/KbybLDYzqLzj1yzICWHjCA==
 
-"@electron-uikit/titlebar@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.npmmirror.com/@electron-uikit/titlebar/-/titlebar-1.1.0.tgz#9ce52e67f835b2fada383bebf3bface8e127f7c0"
-  integrity sha512-zBkckyjAmlj7VR4zLtHDagbGaeldUTVi0gcOsG6HxKnXetT5YmH6KJ0gtzV8b7+Uw8l01kduMBh7/KBlUH/N3Q==
+"@electron-uikit/titlebar@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.npmmirror.com/@electron-uikit/titlebar/-/titlebar-1.2.0.tgz#c73592fbac3ff195f3802eb39acb9e643bfa31e0"
+  integrity sha512-qxPD+UydsSN9eZCasLLW6LCdf5E/mLMHpqjZiVSbjYIFZDD1UDBdoknnu/J4La5a7LhccjkihPRZdUhA0Le2cw==
 
 "@electron/asar@^3.2.7":
   version "3.2.17"
@@ -1444,74 +1444,74 @@
   resolved "https://registry.npmmirror.com/@sindresorhus/merge-streams/-/merge-streams-4.0.0.tgz#abb11d99aeb6d27f1b563c38147a72d50058e339"
   integrity sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==
 
-"@swc/core-darwin-arm64@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-darwin-arm64/-/core-darwin-arm64-1.10.3.tgz#d84f19e12a0cc1a1c0ebffdaffd3650d318842c0"
-  integrity sha512-LFFCxAUKBy69AUE+01rgazQcafIXrYs6tBa9SyKPR51ft6Tp66dAVrWg9MTykaWskuXEe80LPUvUw1ga3bOH3A==
+"@swc/core-darwin-arm64@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-darwin-arm64/-/core-darwin-arm64-1.10.4.tgz#86e1998f91af210b3475054aa02f6a16dd8590f6"
+  integrity sha512-sV/eurLhkjn/197y48bxKP19oqcLydSel42Qsy2zepBltqUx+/zZ8+/IS0Bi7kaWVFxerbW1IPB09uq8Zuvm3g==
 
-"@swc/core-darwin-x64@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-darwin-x64/-/core-darwin-x64-1.10.3.tgz#2632a331c2d78f720426aa7e658242a8499f4231"
-  integrity sha512-yZNv1+yPg0GvYdThsMI8WpaPRAPuw2gQDMdgijLFfRcRlr2l1sTWsDHqGd7QMTx+acYM3uB537gyd31WjUAwlQ==
+"@swc/core-darwin-x64@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-darwin-x64/-/core-darwin-x64-1.10.4.tgz#fa9c48aeb8ba2c84263e4027283a10984efabc58"
+  integrity sha512-gjYNU6vrAUO4+FuovEo9ofnVosTFXkF0VDuo1MKPItz6e2pxc2ale4FGzLw0Nf7JB1sX4a8h06CN16/pLJ8Q2w==
 
-"@swc/core-linux-arm-gnueabihf@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-arm-gnueabihf/-/core-linux-arm-gnueabihf-1.10.3.tgz#467aa5b2ee72f4b2d1359103da9fddb2c046dc79"
-  integrity sha512-Qa6hu5ASoKV4rcYUBGG3y3z+9UT042KAG4A7ivqqYQFcMfkB4NbZb5So2YWOpUc0/5YlSVkgL22h3Mbj5EXy7A==
+"@swc/core-linux-arm-gnueabihf@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-arm-gnueabihf/-/core-linux-arm-gnueabihf-1.10.4.tgz#4ee8c1dfc95040e265db542ac80d3d7cba6b8b22"
+  integrity sha512-zd7fXH5w8s+Sfvn2oO464KDWl+ZX1MJiVmE4Pdk46N3PEaNwE0koTfgx2vQRqRG4vBBobzVvzICC3618WcefOA==
 
-"@swc/core-linux-arm64-gnu@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.10.3.tgz#f721e57f8ddc11c4f6b5e798e57fb16958b740a0"
-  integrity sha512-BGnoZrmo0nlkXrOxVHk5U3j9u4BuquFviC+LvMe+HrDc5YLVe1gSXMUSBKhIz9MY9uFgxXW977TnB1XjLSKe5Q==
+"@swc/core-linux-arm64-gnu@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.10.4.tgz#3b3fc11bb29afa0e79693080d0f0fdf6eb198643"
+  integrity sha512-+UGfoHDxsMZgFD3tABKLeEZHqLNOkxStu+qCG7atGBhS4Slri6h6zijVvf4yI5X3kbXdvc44XV/hrP/Klnui2A==
 
-"@swc/core-linux-arm64-musl@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.10.3.tgz#45848528e653fd6d8976f30f98c5cd6e067558a5"
-  integrity sha512-L07/4zKnIY2S/00bE+Yn3oEHkyGjWmGGE8Ta4luVCL+00s04EIwMoE1Hc8E8xFB5zLew5ViKFc5kNb5YZ/tRFQ==
+"@swc/core-linux-arm64-musl@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-arm64-musl/-/core-linux-arm64-musl-1.10.4.tgz#e84c67d5870e0dc1d7c607aebea8b26ea2380dd6"
+  integrity sha512-cDDj2/uYsOH0pgAnDkovLZvKJpFmBMyXkxEG6Q4yw99HbzO6QzZ5HDGWGWVq/6dLgYKlnnmpjZCPPQIu01mXEg==
 
-"@swc/core-linux-x64-gnu@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-gnu/-/core-linux-x64-gnu-1.10.3.tgz#1e62072cda6226297bd1497f056ed9f61a3ea2e8"
-  integrity sha512-cvTCekY4u0fBIDNfhv/2UxcOXqH4XJE2iNxKuQejS5KIapFJwrZ+fRQ2lha3+yopI/d2p96BlBEWTAcBzeTntw==
+"@swc/core-linux-x64-gnu@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-gnu/-/core-linux-x64-gnu-1.10.4.tgz#79a211fa10a33e471cd4a488d4ace50bed79ab02"
+  integrity sha512-qJXh9D6Kf5xSdGWPINpLGixAbB5JX8JcbEJpRamhlDBoOcQC79dYfOMEIxWPhTS1DGLyFakAx2FX/b2VmQmj0g==
 
-"@swc/core-linux-x64-musl@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-musl/-/core-linux-x64-musl-1.10.3.tgz#452ee7745aafe5cff5eeee5ee7c5cd748285451d"
-  integrity sha512-h9kUOTrSSpY9JNc41a+NMAwK62USk/pvNE9Fi/Pfoklmlf9j9j8gRCitqvHpmZcEF4PPIsoMdiGetDipTwvWlw==
+"@swc/core-linux-x64-musl@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-linux-x64-musl/-/core-linux-x64-musl-1.10.4.tgz#e8cb9f27cc7baa1c0d9857491b14dc6479389f44"
+  integrity sha512-A76lIAeyQnHCVt0RL/pG+0er8Qk9+acGJqSZOZm67Ve3B0oqMd871kPtaHBM0BW3OZAhoILgfHW3Op9Q3mx3Cw==
 
-"@swc/core-win32-arm64-msvc@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.10.3.tgz#461f88d5ef8af95a5462acb8371e41d7b9718d13"
-  integrity sha512-iHOmLYkZYn3r1Ff4rfyczdrYGt/wVIWyY0t8swsO9o1TE+zmucGFZuYZzgj3ng8Kp4sojJrydAGz8TINQZDBzQ==
+"@swc/core-win32-arm64-msvc@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-win32-arm64-msvc/-/core-win32-arm64-msvc-1.10.4.tgz#86e77b35c192ef0a2672c68297685a450c9810cf"
+  integrity sha512-e6j5kBu4fIY7fFxFxnZI0MlEovRvp50Lg59Fw+DVbtqHk3C85dckcy5xKP+UoXeuEmFceauQDczUcGs19SRGSQ==
 
-"@swc/core-win32-ia32-msvc@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-win32-ia32-msvc/-/core-win32-ia32-msvc-1.10.3.tgz#18268542f1becc79fce13c22c964763128d10fed"
-  integrity sha512-4SqLSE4Ozh8SxuVuHIZhkSyJQru5+WbQMRs5ggLRqeUy3vkUPHOAFAY3oMwDJUN6BwbAr8+664TmdrMwaWh8Ng==
+"@swc/core-win32-ia32-msvc@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-win32-ia32-msvc/-/core-win32-ia32-msvc-1.10.4.tgz#974025ce064066512a036be1f9886cb42e9c99e4"
+  integrity sha512-RSYHfdKgNXV/amY5Tqk1EWVsyQnhlsM//jeqMLw5Fy9rfxP592W9UTumNikNRPdjI8wKKzNMXDb1U29tQjN0dg==
 
-"@swc/core-win32-x64-msvc@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.10.3.tgz#235c62f53fdc74c84ed6cb41e8e43ef3960b2032"
-  integrity sha512-jTyf/IbNq7NVyqqDIEDzgjALjWu1IMfXKLXXAJArreklIMzkfHU1sV32ZJLOBmRKPyslCoalxIAU+hTx4reUTQ==
+"@swc/core-win32-x64-msvc@1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core-win32-x64-msvc/-/core-win32-x64-msvc-1.10.4.tgz#d68117581947b08015cda617086b36c9a65e983e"
+  integrity sha512-1ujYpaqfqNPYdwKBlvJnOqcl+Syn3UrQ4XE0Txz6zMYgyh6cdU6a3pxqLqIUSJ12MtXRA9ZUhEz1ekU3LfLWXw==
 
-"@swc/core@^1.10.3":
-  version "1.10.3"
-  resolved "https://registry.npmmirror.com/@swc/core/-/core-1.10.3.tgz#d263db1f6575568ba2e85fda6b6f2a7e369f0e1e"
-  integrity sha512-2yjqCcsBx6SNBQZIYNlwxED9aYXW/7QBZyr8LYAxTx5bzmoNhKiClYbsNLe1NJ6ccf5uSbcInw12PjXLduNEdQ==
+"@swc/core@^1.10.4":
+  version "1.10.4"
+  resolved "https://registry.npmmirror.com/@swc/core/-/core-1.10.4.tgz#046237f1d207f6f113c724941c148c8f3d40c806"
+  integrity sha512-ut3zfiTLORMxhr6y/GBxkHmzcGuVpwJYX4qyXWuBKkpw/0g0S5iO1/wW7RnLnZbAi8wS/n0atRZoaZlXWBkeJg==
   dependencies:
     "@swc/counter" "^0.1.3"
     "@swc/types" "^0.1.17"
   optionalDependencies:
-    "@swc/core-darwin-arm64" "1.10.3"
-    "@swc/core-darwin-x64" "1.10.3"
-    "@swc/core-linux-arm-gnueabihf" "1.10.3"
-    "@swc/core-linux-arm64-gnu" "1.10.3"
-    "@swc/core-linux-arm64-musl" "1.10.3"
-    "@swc/core-linux-x64-gnu" "1.10.3"
-    "@swc/core-linux-x64-musl" "1.10.3"
-    "@swc/core-win32-arm64-msvc" "1.10.3"
-    "@swc/core-win32-ia32-msvc" "1.10.3"
-    "@swc/core-win32-x64-msvc" "1.10.3"
+    "@swc/core-darwin-arm64" "1.10.4"
+    "@swc/core-darwin-x64" "1.10.4"
+    "@swc/core-linux-arm-gnueabihf" "1.10.4"
+    "@swc/core-linux-arm64-gnu" "1.10.4"
+    "@swc/core-linux-arm64-musl" "1.10.4"
+    "@swc/core-linux-x64-gnu" "1.10.4"
+    "@swc/core-linux-x64-musl" "1.10.4"
+    "@swc/core-win32-arm64-msvc" "1.10.4"
+    "@swc/core-win32-ia32-msvc" "1.10.4"
+    "@swc/core-win32-x64-msvc" "1.10.4"
 
 "@swc/counter@^0.1.3":
   version "0.1.3"
@@ -8021,10 +8021,10 @@ npm-cache-filename@~1.0.2:
   resolved "https://registry.npmmirror.com/npm-cache-filename/-/npm-cache-filename-1.0.2.tgz#ded306c5b0bfc870a9e9faf823bc5f283e05ae11"
   integrity sha512-5v2y1KG06izpGvZJDSBR5q1Ej+NaPDO05yAAWBJE6+3eiId0R176Gz3Qc2vEmJnE+VGul84g6Qpq8fXzD82/JA==
 
-npm-check-updates@^17.1.12:
-  version "17.1.12"
-  resolved "https://registry.npmmirror.com/npm-check-updates/-/npm-check-updates-17.1.12.tgz#c0c8a10960e45852e03d1865f78844b065ab6e7a"
-  integrity sha512-j1+ln9wXDNLgTSMrEF9ja4KyYq4yBF8FuuU3irFtMSnss4pYjvYfQESz8CV82Rk1daXjbtaAWF9pZZKzujhoBA==
+npm-check-updates@^17.1.13:
+  version "17.1.13"
+  resolved "https://registry.npmmirror.com/npm-check-updates/-/npm-check-updates-17.1.13.tgz#93e1c5fa5b8e11bca0bd143650b14ffcf9fc6b5a"
+  integrity sha512-m9Woo2J5XVab0VcQpYvrQ0hx3ySI1mGbiHR595mc6Lr1/FIaTWvv+oU+T1WKSfXRiluKC/V5P6Bdk5agaYpqqg==
 
 npm-install-checks@^3.0.2:
   version "3.0.2"
