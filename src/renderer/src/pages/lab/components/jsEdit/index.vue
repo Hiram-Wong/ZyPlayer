@@ -127,7 +127,7 @@
                         </div>
                       </t-button>
 
-                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugLog">日志</t-button>
+                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugLog" v-show="form.init.mode === 't3'">日志</t-button>
                     </div>
                     <div class="item">
                       <t-button class="button w-btn" theme="default" @click="handleDataDebugHome">
