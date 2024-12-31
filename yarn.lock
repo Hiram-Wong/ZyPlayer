@@ -10603,10 +10603,10 @@ tdesign-icons-vue-next@^0.3.3:
   dependencies:
     "@babel/runtime" "^7.16.3"
 
-tdesign-vue-next@^1.10.5:
-  version "1.10.5"
-  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.10.5.tgz#6b0741958941e13c7a6f0e5ba4809ebabbc1f1c9"
-  integrity sha512-z00HyuKI3xnXSzkBMPjjl87FnXrkxmF1MPJbEzys2Eh80ofRC+Pc+iPQbcbEOxJhJ0yeQYf2jzwgl/wmKesSrg==
+tdesign-vue-next@^1.10.6:
+  version "1.10.6"
+  resolved "https://registry.npmmirror.com/tdesign-vue-next/-/tdesign-vue-next-1.10.6.tgz#c4e029d616ef7b2bd79c332f8a8287dc7b0f2655"
+  integrity sha512-EXMEiWlfH250Th0vZBfesoxozGrsuiV7doF34wmitDZk5KiMMyaXymKLN7832G4F/c9DIRW8DCKjxqqaHABGYA==
   dependencies:
     "@babel/runtime" "^7.22.6"
     "@popperjs/core" "^2.11.8"

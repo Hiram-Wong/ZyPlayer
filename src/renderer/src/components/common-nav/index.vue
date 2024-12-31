@@ -1,16 +1,21 @@
 <template>
-  <div :class="['common-nav', isVisible.show ? 'show' : 'hidden']">
-    <div v-show="isVisible.show" class="nav-sub">
+  <div :class="['common-nav', active.show ? 'show' : 'hidden']">
+    <div v-show="active.show" class="nav-sub">
       <div class="nav-sub-tab nav-sub-tab-header">
-        <div class="header" v-if="!isVisible.search">
+        <div class="header" v-if="!active.search">
           <p class="title">{{ title }}</p>
           <t-popup :content="$t('pages.search.searchSource')">
-            <data-search-icon size="large" class="icon" v-if="search" @click="isVisible.search = true" />
+            <data-search-icon size="large" class="icon" v-if="search" @click="active.search = true" />
           </t-popup>
         </div>
-        <div class="search" v-if="isVisible.search" ref="headerOutsideRef">
-          <t-input :placeholder="$t('pages.setting.placeholder.general')" autofocus clearable v-model="searchText"
-            @change="searchEvent">
+        <div class="search" v-if="active.search" ref="headerOutsideRef">
+          <t-input
+            v-model="searchText"
+            autofocus
+            clearable
+            :placeholder="$t('pages.setting.placeholder.general')"
+            @change="handleSearch"
+          >
             <template #suffixIcon>
               <search-icon :style="{ cursor: 'pointer' }" />
             </template>
@@ -18,8 +23,17 @@
         </div>
       </div>
       <div class="nav-sub-tab nav-sub-tab-content">
-        <div class="nav-sub-tab-top" ref="contentRef">
-          <t-list class="nav-menu" :scroll="{ type: 'virtual' }" style="height: 100%;">
+        <div class="nav-sub-tab-top">
+          <t-list
+            ref="listRef"
+            :scroll="{
+              type: 'virtual',
+              bufferSize: 10,
+              rowHeight: 42,
+              threshold: 12
+            }"
+            class="nav-menu"
+          >
             <t-list-item v-for="(item, index) in listData" :key="index" :class="[activeData === item.id ? 'is-active' : '']">
               <t-tooltip :content="item.name" destroy-on-close>
                 <t-list-item-meta :description="item.name" @click="handleItemClick(item.id)" @contextmenu="conButtonClick(item, $event)" />
@@ -33,12 +47,12 @@
       </div>
     </div>
 
-    <div class="nav-sub-tab-line" @click="isVisible.show = !isVisible.show">
+    <div class="nav-sub-tab-line" @click="active.show = !active.show">
       <div class="nav-sub-tab-line-0"></div>
       <div class="nav-sub-tab-line-1"></div>
     </div>
 
-    <context-menu v-model:show="isVisible.contentMenu" :options="optionsComponent" v-if="contextMenuItems">
+    <context-menu v-model:show="active.contentMenu" :options="optionsComponent" v-if="contextMenuItems">
       <template v-for="(menuItem, index) in contextMenuItems" :key="index">
         <context-menu-item v-if="menuItem.type === 'item'" :label="menuItem.label" @click="menuItem.handler" />
         <context-menu-separator v-if="menuItem.type === 'separator'" />
@@ -58,10 +72,11 @@ import '@imengyu/vue3-context-menu/lib/vue3-context-menu.css';
 
 import { ContextMenu, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup } from '@imengyu/vue3-context-menu';
 import { onClickOutside } from '@vueuse/core';
+import { ListInstanceFunctions } from 'tdesign-vue-next';
 import { DataSearchIcon, SearchIcon } from 'tdesign-icons-vue-next';
-import { computed, reactive, ref, watch } from 'vue';
-
+import { computed, ref, watch, useTemplateRef, onActivated } from 'vue';
 import { useSettingStore } from '@/store';
+
 const storeSetting = useSettingStore();
 
 const props = withDefaults(defineProps<{
@@ -89,10 +104,10 @@ const props = withDefaults(defineProps<{
 const activeData = ref(props.active);
 const listData = ref(props.list);
 const contextMenuItems = ref(props.contextMenuItems);
-const contentRef = ref(null);
+const listRef = useTemplateRef<ListInstanceFunctions>('listRef');
 const headerOutsideRef = ref(null);
 const searchText = ref('');
-const isVisible = reactive({
+const active = ref({
   contentMenu: false,
   search: false,
   show: true
@@ -108,10 +123,13 @@ const optionsComponent = ref({
   theme: mode.value === 'light' ? 'default' : 'mac dark',
 });
 
+const emit = defineEmits(['changeKey', 'contextMenu']);
+
 watch(
   () => props.active,
   (val) => {
     activeData.value = val;
+    handleScroll();
   },
 );
 
@@ -119,6 +137,7 @@ watch(
   () => props.list,
   (val) => {
     listData.value = val;
+    handleScroll();
   },
 );
 
@@ -129,28 +148,42 @@ watch(
   },
 );
 
-const emit = defineEmits(['changeKey', 'contextMenu']);
+onActivated(() => {
+  handleScroll();
+});
+
 
 if (props.search) {
   onClickOutside(headerOutsideRef, () => {
-    isVisible.search = false;
+    active.value.search = false;
   })
 }
 
 const conButtonClick = (item: any, { x, y }: any) => {
-  isVisible.contentMenu = true;
+  active.value.contentMenu = true;
   Object.assign(optionsComponent.value, { x, y });
   emit('contextMenu', { ...item });
 };
 
 const handleItemClick = (key: string | number) => {
-  console.log(`[nav] clicked key: ${key}`);
+  console.log(`[common-nav] active key: ${key}`);
   emit('changeKey', key);
 };
 
-const searchEvent = () => {
-  listData.value = props.list.filter((item) => {
-    return item.name.toLowerCase().includes(searchText.value.toLowerCase());
+const handleSearch = () => {
+  listData.value = props.list.filter(item => item.name.toLowerCase().includes(searchText.value.toLowerCase()));
+};
+
+const handleScroll = () => {
+  if (!listRef.value || !activeData.value || listData.value.length === 0) return;
+
+  let index = listData.value.findIndex((item) => item.id === activeData.value) - 1;
+  if (index < 0) return;
+  console.log(`[common-nav] scroll to index: ${index}`);
+
+  listRef.value?.scrollTo({
+    index,
+    behavior: 'smooth',
   });
 };
 </script>
