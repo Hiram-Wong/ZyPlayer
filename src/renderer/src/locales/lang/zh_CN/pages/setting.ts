@@ -71,6 +71,7 @@ export default {
     },
   },
   header: {
+    check_selected : '检测',
     add: '添加',
     enable: '启用',
     disable: '禁用',
@@ -192,6 +193,7 @@ export default {
     checking: '状态批量检测中, 请等待完成',
     defaultDisable: '启用后设置默认源',
     checkLoading: '存在检测中数据, 请等待完成',
+    checkUnSelect: '未选中数据，请重试',
   },
   ad: {
     title: '与Hipy更配哦',
