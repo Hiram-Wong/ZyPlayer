@@ -67,9 +67,9 @@ const update = async () => {
     CREATE TABLE IF NOT EXISTS tbl_star (
       id uuid DEFAULT gen_random_uuid(),
       "relateId" varchar(255) not null,
-      "videoId" varchar(255) not null,
-      "videoImage" varchar(255),
-      "videoName" varchar(255),
+      "videoId" varchar(510) not null,
+      "videoImage" varchar(510),
+      "videoName" varchar(510),
       "videoType" varchar(255),
       "videoRemarks" varchar(255)
     );
@@ -82,10 +82,10 @@ const update = async () => {
       "relateId" varchar(255),
       "siteSource" varchar(255),
       "playEnd" boolean,
-      "videoId" varchar(255),
-      "videoImage" varchar(255),
-      "videoName" varchar(255),
-      "videoIndex" varchar(255),
+      "videoId" varchar(510),
+      "videoImage" varchar(510),
+      "videoName" varchar(510),
+      "videoIndex" varchar(510),
       "watchTime" real,
       "duration" real,
       "skipTimeInEnd" real,
