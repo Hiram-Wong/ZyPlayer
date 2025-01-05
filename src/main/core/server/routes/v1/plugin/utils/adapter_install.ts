@@ -1,8 +1,8 @@
 import npm from 'npm';
-import { join, resolve } from 'path';
+import { dirname, join, resolve } from 'path';
 import workerpool from 'workerpool';
 import { JsonDB, Config } from 'node-json-db';
-import { pathToFileURL } from 'url';
+import { pathToFileURL, fileURLToPath } from 'url';
 import logger from '@main/core/logger';
 import {
   deleteFile,
@@ -17,10 +17,13 @@ import {
 
 import { AdapterHandlerOptions, AdapterInfo } from './types';
 
-const runModule = async (modulePath: string, method: 'stop' | 'start') => {
+const runModule = async (entryBasePath: string, modulePath: string, method: 'stop' | 'start') => {
   try {
+    process.chdir(entryBasePath);
+
     const entry = await import(modulePath);
     const res = await entry?.[method]();
+
     return { code: 0, msg: 'ok', data: res };
   } catch (err: any) {
     throw err;
@@ -180,11 +183,15 @@ class AdapterHandler {
         const index = await this.db.getIndex(`${this.dbTable}`, info.name, 'name');
         if (index > -1) await this.stop([info.name]);
 
-        // 3.安装插件
+        // 3.删除lock文件
+        const pluginPkgLockPath = join(pluginBasePath, 'package-lock.json');
+        if(fileExist(pluginPkgLockPath)) deleteFile(pluginPkgLockPath);
+
+        // 4.安装插件
         const execRes = await this.execCommand('install', { prefix: pluginBasePath }, []);
         if (execRes.code === -1) continue;
 
-        // 4.插件参数
+        // 5.插件参数
         const data = {
           type: info?.type || 'system',
           name: info?.name || '',
@@ -326,13 +333,14 @@ class AdapterHandler {
           try {
             let pool = this.syncModules.get(`${pluginInfo.name}`);
             if (!pool) {
-              pool = workerpool.pool();
+              pool = workerpool.pool({ workerType: 'process' });
               this.syncModules.set(`${pluginInfo.name}`, pool);
             }
 
             try {
               logger.info(`[plugin][start][${pluginInfo.name}] 入口: ${pluginInfo.main}`);
-              const res = await pool.exec(runModule, [pluginInfo.main, 'start']);
+              const entryBasePath = fileURLToPath(dirname(pluginInfo.main));
+              const res = await pool.exec(runModule, [entryBasePath, pluginInfo.main, 'start']);
               if (res.code === 0) status = 'RUNNING';
               else status = 'STOPED';
             } catch (err: any) {
