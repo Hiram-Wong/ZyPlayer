@@ -15,7 +15,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: zyplayer 版本
+      label: zyfun 版本
       description: 请检查在最新项目版本中能否重现此 issue。
       placeholder: 请填写
     validations:
