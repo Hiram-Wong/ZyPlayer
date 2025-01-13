@@ -134,15 +134,17 @@ class DrpyJs0Adapter {
     };
   }
   async search(doc: { [key: string]: string }) {
-    const { wd } = doc;
+    const { wd, pg } = doc;
     const response = await request({
       url: this.api,
       method: 'GET',
       params: {
         ac: 'detail',
-        wd: encodeURIComponent(wd),
+        wd,
+        pg,
       },
     });
+
     const videos: any[] = [];
     for (const vod of response.list) {
       videos.push({
@@ -152,6 +154,7 @@ class DrpyJs0Adapter {
         vod_remarks: vod.vod_remarks,
       });
     }
+
     return {
       page: 1,
       pagecount: 1,

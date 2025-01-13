@@ -133,10 +133,11 @@ class CatvodAdapter {
       url: buildUrl(this.api, `/search`),
       method: 'POST',
       data: {
-        pg: pg,
-        wd: encodeURIComponent(wd),
+        pg,
+        wd,
       },
     });
+
     const videos: any[] = [];
     for (const vod of response.list) {
       videos.push({

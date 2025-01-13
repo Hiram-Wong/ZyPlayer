@@ -198,14 +198,15 @@ class T0Adapter {
     };
   }
   async search(doc: { [key: string]: string }) {
-    const { wd } = doc;
+    const { wd, pg } = doc;
     let response;
     response = await request({
       url: this.api,
       method: 'GET',
       params: {
         ac: 'list',
-        wd: encodeURIComponent(wd),
+        wd,
+        pg,
       },
     });
 
@@ -216,6 +217,7 @@ class T0Adapter {
       const ids = response.list.map((item) => item.vod_id);
       response = await this.detail({ id: ids });
     }
+
     const videos: any[] = [];
     for (const vod of videoList) {
       videos.push({
@@ -225,6 +227,7 @@ class T0Adapter {
         vod_remarks: vod.note,
       });
     }
+
     return {
       page: parseInt(data.page),
       pagecount: parseInt(data.pagecount),

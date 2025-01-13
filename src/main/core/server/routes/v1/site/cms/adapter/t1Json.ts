@@ -157,20 +157,22 @@ class T1Adapter {
     };
   }
   async search(doc: { [key: string]: string }) {
-    const { wd } = doc;
+    const { wd, pg } = doc;
     let response;
     response = await request({
       url: this.api,
       method: 'GET',
       params: {
         ac: 'list',
-        wd: encodeURIComponent(wd),
+        wd,
+        pg,
       },
     });
     if (Array.isArray(response?.list) && response.list.length > 0 && !response.list[0].vod_pic) {
       const ids = response.list.map((item) => item.vod_id);
       response = await this.detail({ id: ids });
     }
+
     const videos: any[] = [];
     for (const vod of response.list) {
       videos.push({
@@ -180,6 +182,7 @@ class T1Adapter {
         vod_remarks: vod.vod_remarks,
       });
     }
+
     return {
       page: parseInt(response.page),
       pagecount: parseInt(response.pagecount),

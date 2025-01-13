@@ -148,13 +148,14 @@ class HipyT4Adapter {
     };
   }
   async search(doc: { [key: string]: string }) {
-    const { wd } = doc;
+    const { wd, pg } = doc;
     const response = await request({
       url: this.api,
       method: 'GET',
       params: {
         extend: this.ext,
-        wd: encodeURIComponent(wd),
+        wd,
+        pg
       },
     });
     const videos: any[] = [];
