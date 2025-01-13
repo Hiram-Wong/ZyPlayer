@@ -42,6 +42,27 @@
           </t-list>
         </div>
         <div class="nav-sub-tab-bottom">
+          <t-swiper
+            class="nav-swiper"
+            :duration="300"
+            :interval="5000"
+            :stopOnHover="false"
+            :navigation="{ showSlideBtn: 'never' }"
+          >
+            <t-swiper-item v-for="item in AD_LIST">
+              <t-image
+                :src="item.img"
+                fit="cover"
+                :style="{
+                  width: '100%',
+                  height: '80px',
+                  borderRadius: 'var(--td-radius-default)',
+                  cursor: 'pointer'
+                }"
+                @click="handleOpenUrl(item.url)"
+              />
+            </t-swiper-item>
+          </t-swiper>
           <slot name="customize"></slot>
         </div>
       </div>
@@ -77,7 +98,24 @@ import { DataSearchIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, ref, watch, useTemplateRef, onActivated } from 'vue';
 import { useSettingStore } from '@/store';
 
+import spAdImg from '@/assets/ad/sp.png';
+import rainCloudAdImg from '@/assets/ad/raincloud.png';
+
+
 const storeSetting = useSettingStore();
+
+const AD_LIST = [
+  {
+    id: 'rainCloud',
+    url: 'https://www.rainyun.com/hiram_?s=zyfun',
+    img: rainCloudAdImg,
+  },
+  {
+    id: 'sp',
+    url: 'https://www.sourcepower.top',
+    img: spAdImg,
+  }
+];
 
 const props = withDefaults(defineProps<{
   title: string;
@@ -186,6 +224,11 @@ const handleScroll = () => {
     behavior: 'smooth',
   });
 };
+
+const handleOpenUrl = (url: string) => {
+  if (!/^(https?:\/\/)/.test(url)) return;
+  window.electron.ipcRenderer.send('open-url', url);
+};
 </script>
 
 <style lang="less" scoped>
@@ -257,7 +300,7 @@ const handleScroll = () => {
         overflow-x: hidden;
         width: 100%;
         height: 100%;
-        padding-left: var(--td-comp-paddingTB-s);
+        padding-left: var(--td-comp-paddingLR-s);
 
         .nav-menu {
           width: 100%;
@@ -307,7 +350,18 @@ const handleScroll = () => {
         display: flex;
         align-items: center;
         flex-direction: column;
-        padding-top: var(--td-comp-paddingTB-xs);
+        padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-s) 0;
+
+        .nav-swiper {
+          border-radius: var(--td-radius-default);
+          overflow: hidden;
+
+          :deep(.t-swiper__navigation-bars) {
+            .t-swiper__navigation-item{
+              padding: var(--td-comp-paddingTB-xxs) 0;
+            }
+          }
+        }
       }
     }
   }
