@@ -206,7 +206,7 @@ const base64 = (() => {
 })();
 
 const hash = {
-  'md5-16': (val: string) => crypto.MD5(val).toString().substr(8, 16),
+  'md5-16': (val: string) => crypto.MD5(val).toString().slice(8, 24),
   'md5-32': (val: string) => crypto.MD5(val).toString(),
   sha1: (val: string) => crypto.SHA1(val).toString(),
   sha224: (val: string) => crypto.SHA224(val).toString(),
@@ -214,6 +214,18 @@ const hash = {
   sha3: (val: string) => crypto.SHA3(val).toString(),
   sha384: (val: string) => crypto.SHA384(val).toString(),
   sha512: (val: string) => crypto.SHA512(val).toString(),
+};
+
+const hmac = {
+  'md5-16': (val: string, key: string) => crypto.HmacMD5(val, key).toString().slice(8, 24),
+  'md5-32': (val: string, key: string) => crypto.HmacMD5(val, key).toString(),
+  sha1: (val: string, key: string) => crypto.HmacSHA1(val, key).toString(),
+  sha224: (val: string, key: string) => crypto.HmacSHA224(val, key).toString(),
+  sha256: (val: string, key: string) => crypto.HmacSHA256(val, key).toString(),
+  sha3: (val: string, key: string) => crypto.HmacSHA3(val, key).toString(),
+  sha384: (val: string, key: string) => crypto.HmacSHA384(val, key).toString(),
+  sha512: (val: string, key: string) => crypto.HmacSHA512(val, key).toString(),
+  ripemd160: (val: string, key: string) => crypto.HmacRIPEMD160(val, key).toString(),
 };
 
 const html = {
@@ -530,4 +542,4 @@ const rsa = (() => {
   };
 })();
 
-export { aes, base64, crypto, des, gzip, hash, html, rc4, rsa, unicode, url, hex };
+export { aes, base64, crypto, des, gzip, hash, hmac, html, rc4, rsa, unicode, url, hex };

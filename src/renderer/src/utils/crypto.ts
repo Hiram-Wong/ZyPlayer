@@ -207,7 +207,7 @@ const base64 = (() => {
 })();
 
 const hash = {
-  'md5-16': (val: string) => crypto.MD5(val).toString().substr(8, 16),
+  'md5-16': (val: string) => crypto.MD5(val).toString().slice(8, 24),
   'md5-32': (val: string) => crypto.MD5(val).toString(),
   sha1: (val: string) => crypto.SHA1(val).toString(),
   sha224: (val: string) => crypto.SHA224(val).toString(),
@@ -219,7 +219,7 @@ const hash = {
 };
 
 const hmac = {
-  'md5-16': (val: string, key: string) => crypto.HmacMD5(val, key).toString().substr(8, 16),
+  'md5-16': (val: string, key: string) => crypto.HmacMD5(val, key).toString().slice(8, 24),
   'md5-32': (val: string, key: string) => crypto.HmacMD5(val, key).toString(),
   sha1: (val: string, key: string) => crypto.HmacSHA1(val, key).toString(),
   sha224: (val: string, key: string) => crypto.HmacSHA224(val, key).toString(),
