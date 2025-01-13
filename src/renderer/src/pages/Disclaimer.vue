@@ -1,5 +1,5 @@
 <template>
-  <div class="disclaimer view-container" style="display: flex;">
+  <div class="disclaimer view-container">
     <common-dialog
       v-model:visible="formVisible"
       :close-on-esc-keydown="false"
@@ -11,7 +11,7 @@
       :on-close="cancelDisclaimer"
     >
       <template #title>
-        {{ $t('pages.md.privacyPolicy.title') }}
+        <h1>{{ $t('pages.md.privacyPolicy.title') }}</h1>
       </template>
       <template #content>
         <md-render :text="$t('pages.md.privacyPolicy.content')" />

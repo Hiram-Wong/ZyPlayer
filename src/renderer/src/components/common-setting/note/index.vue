@@ -1,9 +1,6 @@
 <template>
   <div class="common-dialog">
-    <t-dialog
-      v-model:visible="formVisible"
-      v-bind="attrsCustom"
-    >
+    <t-dialog v-model:visible="formVisible" v-bind="attrsCustom">
       <template #body>
         <div class="container">
           <div class="header">
@@ -22,7 +19,6 @@
 import { computed, ref, watch, useAttrs } from 'vue';
 
 import { t } from '@/locales';
-
 
 const attrs = useAttrs();
 
@@ -66,38 +62,67 @@ watch(
 <style lang="less" scoped>
 .common-dialog {
   :deep(.t-dialog) {
-    .t-dialog__footer {
-      display: flex;
-      justify-content: space-around;
-      padding: 0 !important;
+    border: none;
+    overflow: hidden;
 
-      .t-button {
-        width: 180px;
-        height: 45px;
-        border-radius: 25px;
-        font-weight: 700;
-        font-size: 15px;
-        line-height: 45px;
+    .t-dialog__body {
+      padding: 0;
+    }
+
+    .t-dialog__footer {
+      padding: var(--td-comp-paddingTB-m) 0 0;
+
+      div {
+        display: flex;
+        justify-content: space-around;
+        padding: 0;
+
+        .t-button {
+          font-weight: 700;
+          font-size: 15px;
+          line-height: 45px;
+          height: 45px;
+          border-radius: var(--td-radius-round);
+          width: 50%;
+        }
+
+        &:only-child {
+          .t-button {
+            width: 100%;
+          }
+        }
       }
     }
   }
 
   .container {
     opacity: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--td-size-5);
 
-    .header {
-      margin-top: 45px;
-      font-weight: 700;
-      font-size: 28px;
-      text-align: center;
-      color: var(--td-text-color-primary);
+    :deep(.header) {
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      p,
+      span {
+        font-weight: 700;
+        font-size: 28px;
+        line-height: 28px;
+        text-align: center;
+        color: var(--td-text-color-primary);
+      }
     }
 
     .content {
-      height: 220px;
-      margin: var(--td-comp-margin-xxl) auto var(--td-comp-margin-l);
+      max-height: 340px;
+      padding: 0 var(--td-comp-paddingLR-xs);
       overflow-x: hidden;
-      overflow-y: scroll;
+      overflow-y: auto;
     }
   }
 }

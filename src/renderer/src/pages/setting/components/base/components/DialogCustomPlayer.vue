@@ -6,7 +6,7 @@
       :cancel-btn="$t('pages.md.customPlayer.confirm')"
     >
       <template #title>
-        {{ $t('pages.md.customPlayer.title') }}
+        <h1>{{ $t('pages.md.customPlayer.title') }}</h1>
       </template>
       <template #content>
         <md-render :text="$t('pages.md.customPlayer.content')" />
@@ -20,7 +20,6 @@ import { ref, watch } from 'vue';
 
 import CommonDialog from '@/components/common-setting/note/index.vue';
 import MdRender from '@/components/markdown-render/index.vue';
-
 
 const props = defineProps({
   visible: {

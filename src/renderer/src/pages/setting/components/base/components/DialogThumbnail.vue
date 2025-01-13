@@ -7,7 +7,7 @@
       :on-confirm="dialogCheckFfmpeg"
     >
       <template #title>
-        {{ $t('pages.md.thumbanilFfmpeg.title') }}
+        <h1>{{ $t('pages.md.thumbanilFfmpeg.title') }}</h1>
       </template>
       <template #content>
         <md-render :text="$t('pages.md.thumbanilFfmpeg.content')" />
