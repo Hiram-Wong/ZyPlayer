@@ -404,7 +404,7 @@ const getSearchList = async () => {
     };
 
     // 2. 请求数据
-    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, page: pg === 1 ? null : pg });
+    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, pg: pg === 1 ? null : pg });
     const reSearch = res?.list;
 
     // 2.1 数据为空
