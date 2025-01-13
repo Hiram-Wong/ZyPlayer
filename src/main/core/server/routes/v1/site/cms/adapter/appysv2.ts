@@ -210,7 +210,7 @@ class AppYsV2Adapter {
     return { list };
   }
   async detail(doc) {
-    let { id: vod_id } = doc;
+    let { id: vod_id, pg } = doc;
     try {
       let url;
       let res;
@@ -218,14 +218,22 @@ class AppYsV2Adapter {
         let wd = String(vod_id).replace(this.randomPrefix, '');
         if (this.type === 1) {
           res = await request({
-            url: buildUrl(this.api, `?wd=${wd}`),
+            url: this.api,
             method: 'GET',
+            params: {
+              wd,
+              pg,
+            }
           });
           vod_id = res.data.list[0].vod_id;
         } else {
           res = await request({
-            url: buildUrl(this.api, `/search?text=${wd}`),
+            url: buildUrl(this.api, '/search'),
             method: 'GET',
+            params: {
+              text: wd,
+              pg,
+            }
           });
           vod_id = (res.list || res.data)[0].vod_id;
         }
