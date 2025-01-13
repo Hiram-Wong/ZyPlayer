@@ -2,7 +2,8 @@
   <img width="128" src="https://s2.loli.net/2024/02/29/7Q1nVbhkHdSmo5D.png" >
 </p>
 <p align="center">
-  <a href="https://github.com/Hiram-Wong/ZyPlayer/wiki" target="_blank">文档</a>
+  <a href="https://zy.catni.cn" target="_blank">文档</a>
+  <a href="https://github.com/Hiram-Wong/ZyPlayer/wiki" target="_blank">维基</a>
   <a href="https://github.com/Hiram-Wong/ZyPlayer/issues" target="_blank">反馈</a>
   <a href="https://github.com/Hiram-Wong/ZyPlayer/releases" target="_blank">下载</a>
 </p>
@@ -18,8 +19,6 @@
 **重要提醒**: 请务必支持正版版权，我们不提倡盗版!
 
 **重要提醒**: 在开始使用前，请务必详读并同意用户协议，确保遵守相关规定!
-
-雨云id: 555409
 
 <details>
 <summary>展开查看用户协议及免责申明</summary>
@@ -95,14 +94,20 @@
   - 提供 arm64(苹果芯)、x64(英特尔芯) 及 universal(通用) 三种架构安装包
   - 日志路径: `~/Library/Logs/{appname}/`
   - 数据库路径: `~/Library/Application\ Support/{appname}/database/`
+  - 插件路径: `~/Library/Application\ Support/{appname}/plugin/`
+  - 文件路径: `~/Library/Application\ Support/{appname}/file/`
 - **Linux**:
   - 针对 arm64、x64 架构发行 image、deb、rpm 安装包
   - 日志路径: `~/.config/{appname}/logs/`
   - 数据库路径: `~/.config/{appname}/database/`
+  - 插件路径: `~/.config/{appname}/plugin/`
+  - 文件路径: `~/.config/{appname}/file/`
 - **Windows**:
   - 支持 arm64、x64、ia32，以及通用版本
   - 日志路径: `%USERPROFILE%\AppData\Roaming\{appname}\logs\`
   - 数据库路径: `%USERPROFILE%\AppData\Roaming\{appname}\database\`
+  - 插件路径: `%USERPROFILE%\AppData\Roaming\{appname}\plugin\`
+  - 文件路径: `%USERPROFILE%\AppData\Roaming\{appname}\file\`
 
 ## 🛠️ 下载与安装
 
@@ -121,45 +126,18 @@
     sudo spctl --master-disable
 [2] 执行下面命令放行软件 :
     sudo xattr -cr /Applications/{appname}.app
-
-完成上面两个步骤，大多数情况下都能正常打开应用。
-
-ps:
-如果提示以下内容：
-option -r not recognized
-
-usage: xattr [-slz] file [file ...]
-       xattr -p [-slz] attr_name file [file ...]
-       xattr -w [-sz] attr_name attr_value file [file ...]
-       xattr -d [-s] attr_name file [file ...]
-       xattr -c [-s] file [file ...]
-
-The first form lists the names of all xattrs on the given file(s).
-The second form (-p) prints the value of the xattr attr_name.
-The third form (-w) sets the value of the xattr attr_name to attr_value.
-The fourth form (-d) deletes the xattr attr_name.
-The fifth form (-c) deletes (clears) all xattrs.
-
-options:
-  -h: print this help
-  -s: act on symbolic links themselves rather than their targets
-  -l: print long format (attr_name: attr_value)
-  -z: compress or decompress (if compressed) attribute value in zip format
-
-则执行命令
-xattr -c /Applications/{appname}.app/*
-如果上述命令依然没有效果，可以尝试下面的命令：
-sudo xattr -d com.apple.quarantine /Applications/{appname}.app/
 ```
 
 ### Linux Appimage桌面快捷方式设置
 
 ```bash
+> {appname}为软件名
+
 [1] 选择一张icon图标下载
 [2] 在任意位置新建一个名为{appname}.desktop的文件，并写入如下内容
     [Desktop Entry]
     Name={appname}
-    Exec=/home/xxx/Downloads/{appname}-3.3.8.AppImage  # AppImage程序路径
+    Exec=/home/xxx/Downloads/{appname}.AppImage  # AppImage程序路径
     Icon=/home/xxx/Downloads/{appname}.png  # 图标路径
     Type=Application
     StartupNotify=true
@@ -183,7 +161,7 @@ sudo xattr -d com.apple.quarantine /Applications/{appname}.app/
 [7] 全局安装electron-vite框架
     yarn add electron-vite -D
 [8] 打包编译发布
-    yarn build:win[mac/linux]
+    yarn build:win[mac|linux]
 
 ps:
   - 同步库说明
