@@ -46,7 +46,7 @@ const drpyWork = (parms: { [key: string]: any }) => {
       res.data = JSON.parse(res.data);
       break;
     case 'search':
-      const { wd, quick, page: searchPg } = data;
+      const { wd, quick, pg: searchPg } = data;
       res.data = search(wd, quick || false, searchPg);
       res.data = JSON.parse(res.data);
       break;
