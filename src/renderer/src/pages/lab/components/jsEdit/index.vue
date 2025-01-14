@@ -291,11 +291,12 @@ import { useSettingStore } from '@/store';
 import emitter from '@/utils/emitter';
 import { CodeEditor } from '@/components/code-editor';
 import { setT3Proxy } from '@/api/proxy';
-import { addSite, putSite } from '@/api/site'
-import { fetchConfig } from '@/api/setting';
+import { addSite, putSite } from '@/api/site';
 import { fetchJsEditPdfa, fetchJsEditPdfh, fetchJsEditMuban, fetchJsEditDebug } from '@/api/lab';
 import { fetchCmsHome, fetchCmsHomeVod, fetchCmsDetail, fetchCmsCategory, fetchCmsPlay, fetchCmsSearch, fetchCmsInit, fetchCmsRunMain, putSiteDefault, fetchCmsProxy } from '@/api/site';
-import { aes } from '@/utils/crypto';
+// import { aes } from '@/utils/crypto';
+// import { fetchConfig } from '@/api/setting';
+import { getOriginalJs } from './utils/crypto';
 import reqHtml from '../reqHtml/index.vue';
 import drpySuggestions from './utils/drpy_suggestions';
 import drpyObjectInner from './utils/drpy_object_inner.ts?raw';
@@ -453,39 +454,44 @@ const utilsBasePath = async () => {
   }
 };
 
-const utilsT3decode = async (content: string) => {
-  const res = await fetchCmsRunMain({
-    func: `function main(str) { return getOriginalJs(str) }`,
-    arg: content,
-    sourceId: debugId.value
-  });
-  return res || content;
-};
+// const utilsT3decode = async (content: string) => {
+//   const res = await fetchCmsRunMain({
+//     func: `function main(str) { return getOriginalJs(str) }`,
+//     arg: content,
+//     sourceId: debugId.value
+//   });
+//   return res || content;
+// };
 
-const utilsT4decode = async (content: string) => {
-  const src = 'DM8U8pJ0qw0O5YK/a9FfWRh7mj3m+j9WtKTfOMvdDFUrbU1kT+yeBvoxwGdrZ1KXVfDJ/Smh4LSq3+A07ebBNwfxy7V3aRJuEAJQ9gLETBJ1oYahMY2WOwmxl8yeqUcBzcbaI45HpFKzqYnsZrV34ddBzRIac11sammtk4UbppFzfoSSOY0HdcLahBWc7UOBV+t/CSl1y5ut5qXdbKorYOK+t789Ifb7fTrhzpmG21l4y+AqwGLKyDiHAWQA76nMVBWyJSdNRu9EQ8CtRPBnpTi03h8eQNWopr8KUs8ghbTLEndyn/q/mBkrQ5i05DilDexDN3DRq4p3UpNli00piWSwTm+P8OnYiENoOVMAMc3F87CQkdTwTxmnPCZsrIM5VM7Dgaea4KCsIwsLxnZ9o5lZ02AWPB/3a9GPEBwOEQeuOW2sz7LD7nuSWxOA4fujjSTQogdfrMzyUtJbSNr/iTBm6XhFAlokvJpNX7HzjDXanq9CVhp1bOw3qQ7WsOloke95ITC6Ou89n+qg6A/2oMzvms94E9CZ1JzoR7EG2WM6djeAugx79Sd3+jH6uSkfYP1qiSUK48mtrQUooxJ7SzEVGHkD33Q3bxX2K2rnX5SdtgYlS99JsoMmjOPaSHsnaK6Y7OTi1hZl1jPcwYT54UutJwAc2XgWhgmOXRpI7RU9qFvPbYnLvplCIjAtsSnRdrJTOIjkDwm3IoNaevIdHZ2y9/lR/u2WH2gFJEzOLuqLS8rSY7uBSq3tzpay8hPqo6KB1eOos7hp3/zdOlABVUaJHkZ+WSCWPmzXUW0WTKKQiOOrIFXeFmccnmljR33iKPecMVugHxr3+2xgDY487Qt9F1EUHZwcVJ6CeVYhpsZUSnsyyJ6iNfNiG33+KA9q5/+pMKQgf2iaB0uJmeI+/pwmfd8hZrDxskRYy23wPVv5fz/GOoTk7ply/keZpF4iJHW/hI5wbhgjhq4kgvkcA8vY7nKhhTvlPStZ8o+jDqB3lOxyzpCzrfd2mwdOCDRDUF7Jy6ljB2ABizIYDMlyPMaiV2QjIAUGv+va0k1E2EKsPgefezQ9q7io+RNY6vUHcILCFw2duBixZnBGZPIJ70srGS6UsLN+AmMkeTCMH1j4k6q/JnQFE1qQGL+m2kM5BYun+pFvwHwrBw3SmQVq2ProW2LLFw/5nuNTePHXpJSc3kQNZ0RDCn202HRG6495DHS3q9cFF74RP+PpJmlYnxuGgjGUqkyg3Fro37fgW2m1Etqprs9ZIuDxvOGhz5DkqIf9swzMpW8VUU+qQD2TB/nRncHLA/qhmReh87YyyMHzxLsMt3A5Q+LdFnBxlGAFjpL2+2FnsSalgf2jwVGKecO1iyzePzvJWM+pQQTrt6RW6Y7PWEZQlLwTZd5US8RI4EprbhS7sVFwyH6MnbaiIM0BJekVk0PGbcIqSbFjdLQNNcdAt6Zvh2s0mSQwIcAjZ2f3/ZA31RrNS76lGUEI0A==';
-  const iv = '686A64686E780A0A0A0A0A0A0A0A0A0A';
-  const key = '686A64686E780A0A0A0A0A0A0A0A0A0A';
-  const authCodes = aes.decode(src, key, 'cbc', 'pkcs7padding','base64', iv, 'hex', 'hex', 'utf8');
-  const authCodes2array = authCodes.split('\n');
-  const randomAuthIndex = Math.floor(Math.random() * authCodes2array.length);
-  const randomAuthCode = authCodes2array[randomAuthIndex].trim();
+// const utilsT4decode = async (content: string) => {
+//   const src = 'DM8U8pJ0qw0O5YK/a9FfWRh7mj3m+j9WtKTfOMvdDFUrbU1kT+yeBvoxwGdrZ1KXVfDJ/Smh4LSq3+A07ebBNwfxy7V3aRJuEAJQ9gLETBJ1oYahMY2WOwmxl8yeqUcBzcbaI45HpFKzqYnsZrV34ddBzRIac11sammtk4UbppFzfoSSOY0HdcLahBWc7UOBV+t/CSl1y5ut5qXdbKorYOK+t789Ifb7fTrhzpmG21l4y+AqwGLKyDiHAWQA76nMVBWyJSdNRu9EQ8CtRPBnpTi03h8eQNWopr8KUs8ghbTLEndyn/q/mBkrQ5i05DilDexDN3DRq4p3UpNli00piWSwTm+P8OnYiENoOVMAMc3F87CQkdTwTxmnPCZsrIM5VM7Dgaea4KCsIwsLxnZ9o5lZ02AWPB/3a9GPEBwOEQeuOW2sz7LD7nuSWxOA4fujjSTQogdfrMzyUtJbSNr/iTBm6XhFAlokvJpNX7HzjDXanq9CVhp1bOw3qQ7WsOloke95ITC6Ou89n+qg6A/2oMzvms94E9CZ1JzoR7EG2WM6djeAugx79Sd3+jH6uSkfYP1qiSUK48mtrQUooxJ7SzEVGHkD33Q3bxX2K2rnX5SdtgYlS99JsoMmjOPaSHsnaK6Y7OTi1hZl1jPcwYT54UutJwAc2XgWhgmOXRpI7RU9qFvPbYnLvplCIjAtsSnRdrJTOIjkDwm3IoNaevIdHZ2y9/lR/u2WH2gFJEzOLuqLS8rSY7uBSq3tzpay8hPqo6KB1eOos7hp3/zdOlABVUaJHkZ+WSCWPmzXUW0WTKKQiOOrIFXeFmccnmljR33iKPecMVugHxr3+2xgDY487Qt9F1EUHZwcVJ6CeVYhpsZUSnsyyJ6iNfNiG33+KA9q5/+pMKQgf2iaB0uJmeI+/pwmfd8hZrDxskRYy23wPVv5fz/GOoTk7ply/keZpF4iJHW/hI5wbhgjhq4kgvkcA8vY7nKhhTvlPStZ8o+jDqB3lOxyzpCzrfd2mwdOCDRDUF7Jy6ljB2ABizIYDMlyPMaiV2QjIAUGv+va0k1E2EKsPgefezQ9q7io+RNY6vUHcILCFw2duBixZnBGZPIJ70srGS6UsLN+AmMkeTCMH1j4k6q/JnQFE1qQGL+m2kM5BYun+pFvwHwrBw3SmQVq2ProW2LLFw/5nuNTePHXpJSc3kQNZ0RDCn202HRG6495DHS3q9cFF74RP+PpJmlYnxuGgjGUqkyg3Fro37fgW2m1Etqprs9ZIuDxvOGhz5DkqIf9swzMpW8VUU+qQD2TB/nRncHLA/qhmReh87YyyMHzxLsMt3A5Q+LdFnBxlGAFjpL2+2FnsSalgf2jwVGKecO1iyzePzvJWM+pQQTrt6RW6Y7PWEZQlLwTZd5US8RI4EprbhS7sVFwyH6MnbaiIM0BJekVk0PGbcIqSbFjdLQNNcdAt6Zvh2s0mSQwIcAjZ2f3/ZA31RrNS76lGUEI0A==';
+//   const iv = '686A64686E780A0A0A0A0A0A0A0A0A0A';
+//   const key = '686A64686E780A0A0A0A0A0A0A0A0A0A';
+//   const authCodes = aes.decode(src, key, 'cbc', 'pkcs7padding','base64', iv, 'hex', 'hex', 'utf8');
+//   const authCodes2array = authCodes.split('\n');
+//   const randomAuthIndex = Math.floor(Math.random() * authCodes2array.length);
+//   const randomAuthCode = authCodes2array[randomAuthIndex].trim();
 
-  const res = await fetchConfig({
-    url: 'http://127.0.0.1:5757/decoder',
-    method: 'POST',
-    data: { code: content, auth_code: randomAuthCode },
-  })
-  return res?.data?.result || content;
+//   const res = await fetchConfig({
+//     url: 'http://127.0.0.1:5757/decoder',
+//     method: 'POST',
+//     data: { code: content, auth_code: randomAuthCode },
+//   })
+//   return res?.data?.result || content;
+// };
+
+const utilsLocal = async (content: string) => {
+  return await getOriginalJs(content);
 };
 
 const utilsDecode = async (content: string) => {
-  const type = form.value.init.mode;
-  if (type === 't3') {
-    return await utilsT3decode(content);
-  } else if (type === 't4') {
-    return await utilsT4decode(content);
-  }
+  // const type = form.value.init.mode;
+  // if (type === 't3') {
+  //   return await utilsT3decode(content);
+  // } else if (type === 't4') {
+  //   return await utilsT4decode(content);
+  // }
+  return await utilsLocal(content);
 };
 
 const utilsReadT4File = async () =>{
