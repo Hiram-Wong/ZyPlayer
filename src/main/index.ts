@@ -1,5 +1,5 @@
 import { initialize as remoteInit } from '@electron/remote/main';
-import { electronApp, is, optimizer, platform } from '@electron-toolkit/utils';
+import { electronApp, optimizer, platform } from '@electron-toolkit/utils';
 import { registerContextMenuListener } from '@electron-uikit/contextmenu';
 import { registerTitleBarListener } from '@electron-uikit/titlebar';
 import { app, BrowserWindow, globalShortcut, nativeTheme, session } from 'electron';
@@ -48,7 +48,7 @@ const setup = async () => {
   remoteInit(); // 主进程初始化
   await dbInit(); // 初始化数据库
   await globalVariable(); // 全局变量
-  if (globalThis.variable.debug || is.dev) await dbServer(); // 初始化数据库服务
+  if (globalThis.variable.debug) await dbServer(); // 初始化数据库服务
   await serverInit(); // 后端服务
 };
 
