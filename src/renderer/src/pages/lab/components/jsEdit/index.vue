@@ -1721,6 +1721,9 @@ const handleWebviewLoad = (url: string) => {
     flex: 1;
     height: 100%;
     width: 100%;
+    background-color: var(--td-bg-content-input-1);
+    border-radius: var(--td-radius-default);
+    overflow: hidden;
   }
 }
 
