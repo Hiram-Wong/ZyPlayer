@@ -891,7 +891,7 @@ const handleDataDebugDetail = async () => {
 };
 
 const handleDataDebugSearch = async () => {
-  const { wd, pg: page } = form.value.search;
+  const { wd, pg } = form.value.search;
 
   if (!wd) {
     MessagePlugin.warning(t('pages.lab.jsEdit.message.searchNoWd'));
@@ -901,7 +901,7 @@ const handleDataDebugSearch = async () => {
   const data = {
     wd,
     quick: false,
-    page: page || 1,
+    pg: pg === 1 ? null : pg,
   };
   await handleDataDebug('search', data);
 };
