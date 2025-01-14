@@ -66,6 +66,7 @@ const drpyWork = (parms: { [key: string]: any }) => {
 process.on('message', (message: { [key: string]: any }) => {
   const variable = {
     timeout: parseInt(process.argv?.[3]) || 5000,
+    debug: JSON.parse((process.argv?.[4] || 'false')),
   };
   globalThis.variable = variable;
   let res;

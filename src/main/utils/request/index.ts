@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import https from 'https';
 import PQueue from 'p-queue';
 
 const getTimeout = (timeout: number | undefined | null) => {
@@ -17,10 +18,19 @@ const getTimeout = (timeout: number | undefined | null) => {
 
 const service: AxiosInstance = axios.create({
   timeout: 5000,
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false,
+  }),
 });
 
 // @ts-ignore
 service.interceptors.request.use((config: AxiosRequestConfig) => {
+  if (globalThis.variable?.debug) {
+    config.proxy = {
+      host: '127.0.0.1',
+      port: 9979,
+    };
+  }
   return config;
 });
 

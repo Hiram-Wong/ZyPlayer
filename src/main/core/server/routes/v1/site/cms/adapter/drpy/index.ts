@@ -40,6 +40,7 @@ class T3Adapter {
   ext: string = '';
   categoryfilter: any[] = [];
   private timeout: number = 5000;
+  private debug: boolean = false;
   isolatedContext: any;
   child: ChildProcess | null = null;
 
@@ -48,6 +49,7 @@ class T3Adapter {
     this.ext = source.ext;
     this.categoryfilter = source.categories;
     this.timeout = globalThis.variable.timeout || 5000;
+    this.debug = globalThis.variable.debug || false;
   }
 
   private doWork = (
@@ -77,7 +79,14 @@ class T3Adapter {
     if (lruCache.get(this.id)) {
       this.child = lruCache.get(this.id);
     } else {
-      this.child = fork(resolve(__dirname, 'worker.js'), [`T3Fork-execCtx-${uuidv4()}`, this.timeout.toString()]);
+      this.child = fork(
+        resolve(__dirname, 'worker.js'),
+        [
+          `T3Fork-execCtx-${uuidv4()}`,
+          this.timeout.toString(),
+          this.debug.toString()
+        ]
+      );
       lruCache.put(this.id, this.child);
       if (options.type !== 'init') await this.doWork(this.child!, { type: 'init', data: this.ext });
     }
