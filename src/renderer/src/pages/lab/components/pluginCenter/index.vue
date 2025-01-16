@@ -449,6 +449,7 @@ const handleOpChange = (type:string) => {
         flex-direction: row;
         gap: var(--td-size-8);
         align-items: center;
+        margin: auto 0;
 
         .icon_wrapper {
           position: relative;
@@ -485,6 +486,7 @@ const handleOpChange = (type:string) => {
             gap: var(--td-size-4);
             align-items: flex-end;
             flex-direction: row;
+            margin: 0;
 
             .name {
               font-size: 20px;
