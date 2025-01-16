@@ -22,9 +22,8 @@ const runModule = async (entryBasePath: string, modulePath: string, method: 'sto
     process.chdir(entryBasePath);
 
     const entry = await import(modulePath);
-    const res = await entry?.[method]();
-
-    return { code: 0, msg: 'ok', data: res };
+    if (entry?.method) await entry[method]();
+    return { code: 0, msg: 'ok', data: null };
   } catch (err: any) {
     throw err;
   }
