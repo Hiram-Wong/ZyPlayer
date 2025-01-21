@@ -332,6 +332,7 @@ const handleOpChange = (type:string) => {
           background-color: var(--td-bg-content-input-2);
           border-color: transparent;
         }
+
         .t-select__wrap {
           width: fit-content;
           position: relative;
@@ -419,6 +420,13 @@ const handleOpChange = (type:string) => {
             background-color: var(--td-bg-color-container-hover);
           }
         }
+      }
+    }
+
+    .data-dialog-container {
+      :deep(.t-input) {
+        background-color: var(--td-bg-content-input-2);
+        border-color: transparent;
       }
     }
   }
