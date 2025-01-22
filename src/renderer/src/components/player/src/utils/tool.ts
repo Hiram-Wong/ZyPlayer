@@ -193,23 +193,34 @@ const mediaUtils = (() => {
 
   // 使用 fetch 获取媒体类型
   const getMediaType = async (url: string, headers: { [key: string]: any }): Promise<string | undefined> => {
-    try {
-      const response = await requestComplete({ url, method: 'HEAD', timeout: 5000, headers: formatWeb2electronHeaders(headers) });
-      if (response.status === 200) {
-        const contentType = response.headers['content-type'] || '';
-        return mapContentTypeToFormat(contentType);
+    const methods = ['HEAD', 'GET'];
+    const timeout = 5000;
+
+    for (const method of methods) {
+      try {
+        const response = await requestComplete({
+          url,
+          method,
+          timeout,
+          headers: formatWeb2electronHeaders(headers),
+        });
+
+        if (response.status === 200) {
+          const contentType = response.headers['content-type'] || '';
+          return mapContentTypeToFormat(contentType);
+        }
+      } catch (err: any) {
+        console.log(`[mediaUtils][getMediaType][error] (${method}): ${err.message}`);
       }
-      return undefined;
-    } catch (err: any) {
-      console.log(`[mediaUtils][getMediaType][error]: ${err.message}`);
-      return undefined;
     }
+
+    return undefined; // 如果所有方法都失败，返回 undefined
   };
 
   // 检查媒体类型
   const checkMediaType = async (url: string, headers: { [key: string]: any }): Promise<string | undefined> => {
     if (!url || !(/^(https?:\/\/)/.test(url) || url.startsWith('magnet:'))) return undefined;
-
+    console.log(`[mediaUtils][checkMediaType][url]: ${url}`);
     const fileType = supportedFormatsLookup(url);
     return fileType || (await getMediaType(url, headers));
   };
