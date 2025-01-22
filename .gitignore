@@ -1,9 +1,40 @@
-node_modules
-dist
-out
-thumbnail
+# OS specific files
 .DS_Store
-*.log*
+
+# dependencies manager
+node_modules/
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# build files
+es/
+lib/
+dist/
+out/
+typings/
+
+_site
+package
+tmp*
+temp*
+coverage
+test-report.html
+.idea/
+yarn-error.log
+*.zip
+.history
+.stylelintcache
+
+.env.local
+.env.*.local
+
+# dev files
+thumbnail/
 
 # lock文件
 yarn.lock
