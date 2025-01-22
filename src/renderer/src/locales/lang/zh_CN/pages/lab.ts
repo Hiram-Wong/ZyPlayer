@@ -192,8 +192,8 @@ export default {
   },
   aiBrain: {
     title: 'Ai-创想无限',
-    declare: '服务容由人工智能模型生成，其内容的准确性和完整性无法保证，不代表软件的态度或观点。',
-    parms: 'OpenAI参数',
+    declare: '内容由 AI 大模型生成，请仔细甄别',
+    params: 'OpenAI参数',
     server: '服务器',
     key: '密钥',
     model: '模型',
@@ -211,10 +211,24 @@ export default {
     fetch: '发送',
     fetchTip: '输入一些需求...',
     codeSnippetTip: '输入html代码片段',
+    setting: '设置',
     message: {
       contentEmpty: '内容为空',
       aiParmsEmpty: 'AI参数为空',
     },
+    placeholder: {
+      send: '给 AI 发送消息',
+    },
+    platform: {
+      title: '平台',
+      openai: 'OpenAI',
+      deepseek: '深度',
+      kimi: '月之暗面',
+      free: '免费',
+    },
+    chat: {
+      modelChange: '由 {model} 模型提供服务'
+    }
   },
   dataCrypto: {
     nav: {
