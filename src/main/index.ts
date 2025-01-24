@@ -34,12 +34,18 @@ const setup = async () => {
   process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'; // 关闭安全警告
   app.commandLine.appendSwitch(
     'disable-features',
-    'OutOfBlinkCors, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process, StandardCompliantNonSpecialSchemeURLParsing',
+    'OutOfBlinkCors, SameSiteByDefaultCookies, CookiesWithoutSameSiteMustBeSecure, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process, StandardCompliantNonSpecialSchemeURLParsing',
   ); // 禁用
   app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport, HardwareAccelerationModeDefault'); // 启用
   app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书错误
   app.commandLine.appendSwitch('disable-web-security'); // 禁用安全
+  app.commandLine.appendSwitch('disable-renderer-backgrounding'); // 禁用渲染器后台化
+  app.commandLine.appendSwitch('disable-site-isolation-trials'); // 禁用站点隔离试验
   app.commandLine.appendSwitch('gpu-memory-buffer-compositor-resources'); // GPU内存缓冲
+  app.commandLine.appendSwitch("ignore-gpu-blacklist"); // 忽略GPU黑名单
+  app.commandLine.appendSwitch("no-sandbox"); // 禁用沙盒
+  app.commandLine.appendSwitch('proxy-bypass-list', '<local>'); // 代理白名单
+  app.commandLine.appendSwitch('wm-window-animations-disabled'); // 禁用窗口动画
 
   if (platform.isLinux) {
     app.disableHardwareAcceleration();
