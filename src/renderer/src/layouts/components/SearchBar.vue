@@ -174,8 +174,7 @@ const getSearchTypeSet = async () => {
 
 const getFilterTypeSet = async () => {
   const filterRes = await fetchSettingDetail('defaultFilterType');
-  if (filterRes) active.value.filmFilterType = filterRes ;
-  else active.value.filmFilterType = 'off';
+  active.value.filmFilterType = filterRes || false;
 };
 
 const getHotSet = async () => {

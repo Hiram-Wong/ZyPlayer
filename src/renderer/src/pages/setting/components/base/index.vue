@@ -62,8 +62,8 @@
               </t-select>
               <t-select v-model="formData.defaultFilterType" :placeholder="$t('pages.setting.placeholder.general')"
                 :label="$t('pages.setting.base.filter')" :style="{ width: '120px' }">
-                <t-option value="on" :label="$t('pages.setting.base.on')"></t-option>
-                <t-option value="off" :label="$t('pages.setting.base.off')"></t-option>
+                <t-option :value="true" :label="$t('pages.setting.base.on')"></t-option>
+                <t-option :value="false" :label="$t('pages.setting.base.off')"></t-option>
               </t-select>
             </t-space>
           </t-space>
@@ -244,7 +244,7 @@ const formData = ref({
   lang: 'zh_CN',
   defaultHot: 'kylive',
   defaultSearchType: 'site',
-  defaultFilterType: 'off',
+  defaultFilterType: false,
   defaultIptvEpg: 'https://epg.112114.eu.org/?ch={name}&date={date}',
   defaultIptvLogo: 'https://epg.112114.eu.org/logo/{name}.png',
   timeout: 5000,

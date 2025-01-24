@@ -394,7 +394,7 @@ const getSearchList = async () => {
 
   const index = searchGroup.indexOf(currentSite);
   const isLastSite = index + 1 >= searchGroup.length;
-  const filterStatus = siteConfig.value.filter === 'on';
+  const filterStatus = siteConfig.value.filter;
 
   try {
     // 1. 判断当前搜索的站点是否为空 || 超出站点

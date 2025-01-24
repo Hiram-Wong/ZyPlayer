@@ -89,7 +89,7 @@
   },
   {
     "key": "defaultFilterType",
-    "value": "off"
+    "value": false
   },
   {
     "key": "debug",
