@@ -11,12 +11,21 @@ const baseURL = String(
 const service: AxiosInstance = axios.create({
   baseURL,
   // timeout: TIMEOUT,
+  headers: {
+    "Content-Type": "application/json;charset=utf-8",
+  },
+  withCredentials: false,
 });
 
-// @ts-ignore
-service.interceptors.request.use((config: AxiosRequestConfig) => {
-  return config;
-});
+service.interceptors.request.use(
+  // @ts-ignore
+  (config: AxiosRequestConfig) => {
+    return config;
+  },
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  },
+)
 
 service.interceptors.response.use(
   (response: AxiosResponse) => {
