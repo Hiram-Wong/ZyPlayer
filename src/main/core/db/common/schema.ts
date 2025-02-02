@@ -78,6 +78,7 @@ const history = pgTable('history', {
 
 const star = pgTable('star', {
   id: uuid().defaultRandom(),
+  date: integer('date'),
   relateId: varchar('relateId', { length: 255 }),
   videoId: varchar('videoId', { length: 1024 }),
   videoImage: varchar('videoImage', { length: 1024 }),

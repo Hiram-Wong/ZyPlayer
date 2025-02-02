@@ -36,8 +36,8 @@ export default {
       conditions.push(like(schema.channel.name, `%${kw}%`));
     }
 
-    const query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
-    query
+    let query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
+    query = query
       .limit(pageSize)
       .offset((page - 1) * pageSize)
       .orderBy(asc(schema.channel.name));

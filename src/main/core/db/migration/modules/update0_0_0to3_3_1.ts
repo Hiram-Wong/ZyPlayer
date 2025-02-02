@@ -24,7 +24,6 @@ const update = async () => {
       "isActive" boolean not null default true
     );
 
-
     CREATE TABLE IF NOT EXISTS tbl_iptv (
       id uuid DEFAULT gen_random_uuid(),
       name varchar(255) not null,
@@ -54,7 +53,6 @@ const update = async () => {
       "isActive" boolean not null default true
     );
 
-
     CREATE TABLE IF NOT EXISTS tbl_analyze (
       id uuid DEFAULT gen_random_uuid(),
       name varchar(255) not null,
@@ -63,9 +61,9 @@ const update = async () => {
       "isActive" boolean not null default true
     );
 
-
     CREATE TABLE IF NOT EXISTS tbl_star (
       id uuid DEFAULT gen_random_uuid(),
+      "date" integer,
       "relateId" varchar(255) not null,
       "videoId" varchar(510) not null,
       "videoImage" varchar(510),
@@ -73,7 +71,6 @@ const update = async () => {
       "videoType" varchar(255),
       "videoRemarks" varchar(255)
     );
-
 
     CREATE TABLE IF NOT EXISTS tbl_history (
       id uuid DEFAULT gen_random_uuid(),
