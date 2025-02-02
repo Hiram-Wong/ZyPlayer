@@ -12,19 +12,19 @@
           <div class="op card">
             <t-form :data="formData.sniffer">
               <t-form-item :label="$t('pages.lab.snifferPlay.snifferUrl')" name="url">
-                <t-input v-model="formData.sniffer.url"></t-input>
+                <t-input v-model="formData.sniffer.url" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.initScript')">
-                <t-textarea v-model="formData.sniffer.initScript" :autosize="{ minRows: 3, maxRows: 5 }" />
+                <t-textarea v-model="formData.sniffer.initScript" :autosize="{ minRows: 3, maxRows: 5 }" :placeholder="$t('pages.setting.placeholder.general')"/>
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.runScript')">
-                <t-textarea v-model="formData.sniffer.runScript" :autosize="{ minRows: 3, maxRows: 5 }" />
+                <t-textarea v-model="formData.sniffer.runScript" :autosize="{ minRows: 3, maxRows: 5 }" :placeholder="$t('pages.setting.placeholder.general')"/>
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.customRegex')">
-                <t-textarea v-model="formData.sniffer.customRegex" :autosize="{ minRows: 3, maxRows: 5 }" />
+                <t-textarea v-model="formData.sniffer.customRegex" :autosize="{ minRows: 3, maxRows: 5 }" :placeholder="$t('pages.setting.placeholder.general')"/>
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.snifferExclude')">
-                <t-textarea v-model="formData.sniffer.snifferExclude" :autosize="{ minRows: 3, maxRows: 5 }" />
+                <t-textarea v-model="formData.sniffer.snifferExclude" :autosize="{ minRows: 3, maxRows: 5 }" :placeholder="$t('pages.setting.placeholder.general')"/>
               </t-form-item>
             </t-form>
             <t-button theme="primary" block @click="sniiferEvent">{{ $t('pages.lab.snifferPlay.sniffer') }}</t-button>
@@ -42,7 +42,7 @@
           <div class="player card">
             <t-form :data="formData.sniffer">
               <t-form-item :label="$t('pages.lab.snifferPlay.playUrl')" name="url">
-                <t-input v-model="formData.player.url"></t-input>
+                <t-input v-model="formData.player.url" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
               </t-form-item>
               <t-form-item :label="$t('pages.lab.snifferPlay.headers')" name="headers">
                 <t-textarea v-model="formData.player.headers" :autosize="{ minRows: 3, maxRows: 5 }" placeholder='{ "User-Agent": "Mozilla/5.0" }' />
