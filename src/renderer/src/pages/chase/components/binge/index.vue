@@ -164,19 +164,18 @@ const playEvent = async (item) => {
   try {
     const { videoName, videoImage, videoId, relateSite } = item;
 
-    await fetchCmsInit({ sourceId: relateSite.id })
-    if (!('vod_play_from' in item && 'vod_play_url' in item)) {
-      const res = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
-      const detailItem = res?.list[0];
-      detailItem.vod_name = videoName;
-      detailItem.vod_pic = videoImage;
-      item = detailItem;
-    };
+    await fetchCmsInit({ sourceId: relateSite.id });
+    const res = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
+    const detailItem = res?.list[0];
+    if (!detailItem.vod_name) detailItem.vod_name = videoName;
+    if (!detailItem.vod_pic) detailItem.vod_pic = videoImage;
+    if (!detailItem.vod_id) detailItem.vod_id = videoId;
+    item = detailItem;
     console.log('[binge][playEvent]', item);
 
     const playerMode = storePlayer.getSetting.playerMode;
     const doc = {
-      info: item,
+      info: { ...item, name: item.vod_name },
       ext: { site: relateSite, setting: storePlayer.setting },
     }
 

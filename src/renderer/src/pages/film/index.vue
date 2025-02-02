@@ -481,16 +481,16 @@ const playEvent = async (item) => {
     if (!('vod_play_from' in item && 'vod_play_url' in item)) {
       const res = await fetchCmsDetail({ sourceId: site.id, id: item.vod_id });
       const detailItem = res?.list[0];
-      detailItem.vod_name = item.vod_name;
-      detailItem.vod_pic = item.vod_pic;
+      if (!detailItem.vod_name) detailItem.vod_name = item.vod_name;
+      if (!detailItem.vod_pic) detailItem.vod_pic = item.vod_pic;
+      if (!detailItem.vod_id) detailItem.vod_id = item.vod_id;
       item = detailItem;
     };
-
     console.log('[film][playEvent]', item);
 
     const playerMode = storePlayer.getSetting.playerMode;
     const doc = {
-      info: item,
+      info: { ...item, name: item.vod_name },
       ext: { site, setting: storePlayer.setting },
     }
     if (playerMode.type === 'custom') {
