@@ -1,6 +1,7 @@
 import { defineComponent, onUnmounted, ref, shallowRef, toRaw } from 'vue';
 import type { SetupContext } from 'vue';
-import { ArtPlayerAdapter, DPlayerAdapter, NPlayerAdapter, XgPlayerAdapter } from './core';
+import { ArtPlayerAdapter, XgPlayerAdapter } from './core';
+// import { ArtPlayerAdapter, DPlayerAdapter, NPlayerAdapter, XgPlayerAdapter } from './core';
 import { singleton, mediaUtils } from './utils/tool';
 import './assets/css/index.less';
 
@@ -12,8 +13,8 @@ const MultiPlayer = defineComponent({
     const mseRef = ref<HTMLDivElement | null>();
     const adapterRelation = {
       artplayer: ArtPlayerAdapter,
-      dplayer: DPlayerAdapter,
-      nplayer: NPlayerAdapter,
+      // dplayer: DPlayerAdapter,
+      // nplayer: NPlayerAdapter,
       xgplayer: XgPlayerAdapter,
     };
 

@@ -60,3 +60,7 @@
   - 提取formatRemoveUnSafeHeaders, formatUrlHeaders方法
   - headers前端剔除不安全请求头, 拦截符遇=改为$*&
   - getMediaType方法加入请求头
+- 2024.1.25:
+  - 精简集成(移除nplayer｜dplayer)
+  - artplayer|xgplayer i18n支持
+  - artplayer|xgplayer 下集emitter

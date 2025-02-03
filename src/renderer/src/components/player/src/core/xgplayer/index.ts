@@ -9,8 +9,9 @@ import Mp4Plugin from 'xgplayer-mp4';
 import ShakaPlugin from 'xgplayer-shaka';
 // import DashPlugin from 'xgplayer-dash';
 
-import { playerStorage } from '../utils/tool';
-import { publicColor, publicIcons } from '../utils/static';
+import playNextPlugin from './plugins/playNext';
+import { playerStorage } from '../../utils/tool';
+import { publicColor, publicIcons } from '../../utils/static';
 
 class XgPlayerAdapter {
   player: XgPlayer | null = null;
@@ -24,7 +25,7 @@ class XgPlayerAdapter {
       list: [2, 1.5, 1.25, { rate: 1, iconText: { zh: '倍速' } }, 0.75, 0.5],
       index: 3,
     },
-    time: { index: 0 },
+    time: { index: 2 },
     icons: {
       play: publicIcons.play,
       pause: publicIcons.pause,
@@ -43,6 +44,17 @@ class XgPlayerAdapter {
       playedColor: publicColor.theme, // 播放完成部分进度条底色
       volumeColor: publicColor.theme, // 音量颜色
     },
+    lang: (() => {
+      const locale = localStorage.getItem('zy-locale');
+      switch (locale) {
+        case 'zh_CN':
+          return 'zh-cn';
+        case 'en_US':
+          return 'en';
+        default:
+          return 'zh-cn';
+      }
+    })(),
     width: 'auto',
     height: '100%',
     type: '',
@@ -92,15 +104,21 @@ class XgPlayerAdapter {
 
   create = (options: any): XgPlayer => {
     options = { ...this.options, ...options };
-    const plugins = options.plugins;
+    // 容器
     options.id = options.container;
     delete options.container;
+    // 起始时间
     options.startTime = options?.startTime || 0;
-
+    // 下集
+    if (options?.next) {
+      options.plugins = [...options.plugins, playNextPlugin];
+    }
+    delete options.next;
+    // 适配器
     const headers = options?.headers || {};
     switch (options.type) {
       case 'customMp4':
-        options.plugins = [...plugins, Mp4Plugin];
+        options.plugins = [...options.plugins, Mp4Plugin];
         if (Object.keys(headers).length > 0)
           options.mp4plugin = {
             reqOptions: {
@@ -109,21 +127,21 @@ class XgPlayerAdapter {
           };
         break;
       case 'customFlv':
-        options.plugins = [...plugins, FlvPlugin];
+        options.plugins = [...options.plugins, FlvPlugin];
         if (Object.keys(headers).length > 0)
           options.flv = {
             fetchOptions: { headers: { ...headers } },
           };
         break;
       case 'customHls':
-        options.plugins = [...plugins, HlsPlugin];
+        options.plugins = [...options.plugins, HlsPlugin];
         if (Object.keys(headers).length > 0)
           options.hls = {
             fetchOptions: { headers: { ...headers } },
           };
         break;
       case 'customDash':
-        options.plugins = [...plugins, ShakaPlugin];
+        options.plugins = [...options.plugins, ShakaPlugin];
         if (Object.keys(headers).length > 0) options.shakaPlugin = {};
       case 'customWebTorrent':
         break;
@@ -132,7 +150,7 @@ class XgPlayerAdapter {
     }
     delete options.type;
     delete options.headers;
-    let player;
+    // 音量
     options.volume =
       playerStorage.get('volume') === null || playerStorage.get('volume') === undefined
         ? 1
@@ -140,6 +158,8 @@ class XgPlayerAdapter {
     if (playerStorage.get('muted') || false) {
       options.autoplayMuted = true;
     }
+    let player;
+    // 直播
     if (options.isLive) {
       delete options.startTime;
       SimplePlayer.defaultPreset = LivePreset;
@@ -148,6 +168,7 @@ class XgPlayerAdapter {
       options.plugins = [...options.plugins, Danmu];
       player = new XgPlayer({ ...options });
     }
+    // 清晰度
     if (options.quality && Array.isArray(options.quality) && options.quality.length > 0) {
       options.quality = options.quality.map(item => {
         return { name: item.name, url: item.url };

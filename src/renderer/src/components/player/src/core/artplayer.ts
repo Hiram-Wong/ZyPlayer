@@ -3,7 +3,7 @@ import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
 import publicStream from '../utils/media-stream';
 import { publicBarrageSend, playerStorage } from '../utils/tool';
 import { publicColor, publicIcons } from '../utils/static';
-
+import emitter from '@/utils/emitter';
 
 
 class ArtPlayerAdapter {
@@ -22,6 +22,40 @@ class ArtPlayerAdapter {
     hotkey: true,
     isLive: false,
     aspectRatio: true,
+    lang: (() => {
+      const locale = localStorage.getItem('zy-locale');
+      switch (locale) {
+        case 'zh_CN':
+          return 'zh-cn';
+        case 'en_US':
+          return 'en';
+        default:
+          return 'zh-cn';
+      }
+    })(),
+    controls: [
+      {
+        name: "playNext",
+        index: 11,
+        position: "left",
+        html: `<i class="art-icon art-icon-play-next" style="display: flex;">${publicIcons.playNext}</i>`,
+        tooltip: (() => {
+          const locale = localStorage.getItem('zy-locale');
+          switch (locale) {
+            case 'zh_CN':
+              return '下一集';
+            case 'en_US':
+              return 'Next';
+            default:
+              return '下一集';
+          }
+        })(),
+        disable: true,
+        click: () => {
+          emitter.emit('nextVideo');
+        },
+      },
+    ],
     plugins: [
       artplayerPluginDanmuku({
         speed: 5,
@@ -125,25 +159,34 @@ class ArtPlayerAdapter {
 
   create = (options: any): Artplayer => {
     options = { ...this.options, ...options };
+    // 容器
     options.container = `#${options.container}`;
+    // 直播
     if (options.isLive) delete options?.plugins;
+    // 起始时间
     const startTime = options?.startTime || 0;
     delete options.startTime;
+    // 下集
+    const playNextIndex = options.controls.findIndex((item: any) => item.name === 'playNext');
+    options.controls[playNextIndex].disable = !options?.next || false;
+    // 清晰度
     if (options.quality && Array.isArray(options.quality) && options.quality.length > 0) {
       options.quality = options.quality.map(item => {
         return { html: item.name, url: item.url };
       });
       options.quality[0].default = true;
     }
-
-    let player;
+    // 音量
     options.volume =
       playerStorage.get('volume') === null || playerStorage.get('volume') === undefined
         ? 1
         : playerStorage.get('volume');
     options.muted = playerStorage.get('muted') || false;
+    // 倍速
     Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    let player: Artplayer;
     player = new Artplayer({ ...options });
+    // @ts-ignore
     player.storage = playerStorage;
 
     player.once('ready', () => {
