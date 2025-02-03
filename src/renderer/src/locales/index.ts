@@ -10,7 +10,7 @@ const langModuleMap = new Map<string, Object>();
 
 export const langCode: Array<string> = [];
 
-export const localeConfigKey = 'zy-starter-locale';
+export const localeConfigKey = 'zy-locale';
 
 // 获取浏览器默认语言环境
 const languages = usePreferredLanguages();
