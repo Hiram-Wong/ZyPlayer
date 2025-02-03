@@ -262,6 +262,7 @@ const playHelper = async (
       play.sniffer.init_script,
       play.sniffer.custom_regex,
       play.sniffer.sniffer_exclude,
+      play.headers,
     );
     data.headers = snifferResult.headers;
     data.url = snifferResult.url;

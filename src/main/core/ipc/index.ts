@@ -126,8 +126,8 @@ const ipcListen = () => {
 
   ipcMain.handle(
     'sniffer-media',
-    async (_, url, run_script, init_script, custom_regex, sniffer_exclude, is_pc = false) => {
-      const res = await puppeteerInElectron(url, run_script, init_script, custom_regex, sniffer_exclude, is_pc);
+    async (_, url, run_script, init_script, custom_regex, sniffer_exclude, headers = {}) => {
+      const res = await puppeteerInElectron(url, run_script, init_script, custom_regex, sniffer_exclude, headers);
       return res;
     },
   );

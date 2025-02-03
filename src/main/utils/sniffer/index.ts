@@ -47,10 +47,12 @@ const puppeteerInElectron = async (
   init_script: string,
   custom_regex: string,
   sniffer_exclude: string,
-  is_pc: boolean = false,
+  // is_pc: boolean = false,
+  headers: Record<string, string> = {},
 ): Promise<PieResponse> => {
   logger.info(`[sniffer] sniffer url: ${url}`);
-  logger.info(`[sniffer] sniffer is_pc: ${is_pc}`);
+  // logger.info(`[sniffer] sniffer is_pc: ${is_pc}`);
+  logger.info(`[sniffer] sniffer headers: ${JSON.stringify(headers)}`);
   logger.info(`[sniffer] sniffer init_script: ${init_script}`);
   logger.info(`[sniffer] sniffer run_script: ${run_script}`);
 
@@ -69,7 +71,8 @@ const puppeteerInElectron = async (
     const pageRecord = { page, browser, timestamp: Date.now() / 1000, timerId: null };
     pageStore[pageId] = pageRecord; // 存储页面
 
-    await page.setUserAgent(is_pc ? PC_UA : IOS_UA); // 设置ua
+    // await page.setUserAgent(is_pc ? PC_UA : IOS_UA); // 设置ua
+    if (Object.keys(headers).length > 0) await page.setExtraHTTPHeaders(headers); // 设置请求头
     if (init_script && init_script.trim()) {
       try {
         await page.evaluateOnNewDocument(init_script);

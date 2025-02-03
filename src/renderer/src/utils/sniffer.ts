@@ -10,6 +10,7 @@ const snifferPie = async (
   init_script: string,
   custom_regex: string,
   sniffer_exclude: string,
+  headers: object = {},
 ): Promise<{ url: string; headers: object }> => {
   console.log('[sniffer][pie][start]: pie嗅探流程开始');
   const data: { url: string; headers: object } = {
@@ -25,6 +26,7 @@ const snifferPie = async (
       init_script,
       custom_regex,
       sniffer_exclude,
+      headers,
     );
 
     if (res.code === 0) {
@@ -50,6 +52,7 @@ const snifferCustom = async (
   init_script: string,
   sniffer_exclude: string,
   custom_regex: string,
+  headers: object = {},
 ): Promise<{ url: string; headers: object }> => {
   console.log('[sniffer][snifferCustom][start]: pie嗅探流程开始');
   const data: { url: string; headers: object } = {
@@ -92,6 +95,7 @@ const sniffer = async (
   init_script: string = '',
   custom_regex: string = '',
   sniffer_exclude: string = '',
+  headers: object = {},
 ): Promise<{ headers: object; url: string; orgin: string }> => {
   const runScript = encodeURIComponent(base64.encode(run_script));
   const initScript = encodeURIComponent(base64.encode(init_script));
@@ -112,7 +116,7 @@ const sniffer = async (
 
   const type = storePlayer.setting.snifferMode.type;
   if (type === 'pie') {
-    const res = await snifferPie(url, runScript, initScript, format_rule(custom_regex), format_rule(sniffer_exclude));
+    const res = await snifferPie(url, runScript, initScript, format_rule(custom_regex), format_rule(sniffer_exclude), headers);
     data.url = res['url'];
     data.headers = res['headers'];
   } else if (type === 'custom') {
