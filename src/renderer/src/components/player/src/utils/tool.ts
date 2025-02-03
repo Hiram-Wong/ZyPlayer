@@ -86,6 +86,42 @@ const singleton = <T extends new (...args: any[]) => any>(className: T): T => {
 };
 
 const mediaUtils = (() => {
+  /**
+   * 获取文件扩展名
+   * @param t
+   * @returns
+   */
+  const getFileExtension = (t: string) => {
+    if (t && "string" == typeof t) {
+      if (t.startsWith("magnet:")) return "magnet";
+
+      const e = /(?:\.([^.]+))?$/;
+      return e.exec(t)?.[1] ? e.exec(t)![1].split("?")[0].toLowerCase() : "";
+    }
+    return "";
+  }
+
+  /**
+   * 获取文件类型
+   * @param t
+   * @returns
+   */
+  const getMimetype = (t: string) =>  {
+    const EXT_MIME = {
+      m3u8: "application/x-mpegURL",
+      flv: "video/flv",
+      mp4: "video/mp4",
+      webm: "video/webm",
+      rtmp: "rtmp/flv",
+      mpd: "application/dash+xml",
+      mp3: "audio/mpeg",
+      m4a: "audio/mp4"
+    }
+
+    const e = getFileExtension(t);
+    return EXT_MIME[e.toLowerCase()] || "";
+  }
+
   const formatUrlHeaders = (url: string, headers: { [key: string]: string } = {}) => {
     if (headers && Object.keys(headers).length > 0) {
       for (const key in headers) {
@@ -127,7 +163,6 @@ const mediaUtils = (() => {
       return formattedHeaders;
     }, {} as { [key: string]: string });
   };
-
 
   // 支持的媒体格式映射
   const supportedFormats: Record<string, string> = {
@@ -202,7 +237,10 @@ const mediaUtils = (() => {
           url,
           method,
           timeout,
-          headers: formatWeb2electronHeaders(headers),
+          headers: {
+            ...formatWeb2electronHeaders(headers),
+            'Range': 'bytes=0-7'
+          },
         });
 
         if (response.status === 200) {
