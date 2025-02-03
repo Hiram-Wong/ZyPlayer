@@ -83,7 +83,7 @@ const setSystemMediaInfo = () => {
   if ('mediaSession' in navigator) {
     const doc = {
       title: formTitle.value,
-      // artist: 'zyfun',
+      artist: 'zyfun',
       artwork: [{ src: logoIcon, sizes: '128x128', type: 'image/png' }],
     };
 

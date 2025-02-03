@@ -75,6 +75,7 @@ const headerFormData = ref({
 });
 const playerFormData = ref({
   url: '',
+  next: false,
   quality: [],
   isLive: false,
   headers: {},
@@ -101,16 +102,8 @@ const toggleAside = () => {
 };
 
 const setupConf = () => {
-  if (storeConf.value.type === 'iptv') {
-    headerFormData.value.title = storeConf.value.info.name;
-    asideFormData.value = { info: storeConf.value.info, ext: storeConf.value.ext };
-  } else if (storeConf.value.type === 'drive') {
-    headerFormData.value.title = storeConf.value.info.name;
-    asideFormData.value = { info: storeConf.value.info, ext: storeConf.value.ext };
-  } else if (storeConf.value.type === 'film') {
-    headerFormData.value.title = storeConf.value.info.vod_name;
-    asideFormData.value = { info: storeConf.value.info, ext: storeConf.value.ext };
-  }
+  headerFormData.value.title = storeConf.value.info.name;
+  asideFormData.value = { info: storeConf.value.info, ext: storeConf.value.ext };
 };
 
 const updateConf = (item) => {

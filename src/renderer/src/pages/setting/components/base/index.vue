@@ -211,9 +211,9 @@ const MODE_OPTIONS = computed(() => {
 const PLAYER_OPTIONS = computed(() => {
   return [
     { label: t('pages.setting.base.xgplayer'), value: 'xgplayer' },
-    { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
+    // { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
     { label: t('pages.setting.base.artplayer'), value: 'artplayer' },
-    { label: t('pages.setting.base.nplayer'), value: 'nplayer' },
+    // { label: t('pages.setting.base.nplayer'), value: 'nplayer' },
     { label: t('pages.setting.base.custom'), value: 'custom' }
   ]
 });

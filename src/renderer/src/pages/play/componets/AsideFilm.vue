@@ -224,6 +224,7 @@ import {
 import { fetchRecommPage } from '@/api/site';
 import { fetchAnalyzeActive } from '@/api/analyze';
 import { t } from '@/locales';
+import emitter from '@/utils/emitter';
 import DialogDownloadView from './DialogDownload.vue';
 import DialogSettingView from './DialogSetting.vue';
 import SharePopup from '@/components/share-popup/index.vue';
@@ -360,6 +361,7 @@ const fetchBinge = async () => {
 // 更新收藏
 const putBinge = async (update: boolean = false) => {
   const constructDoc = () => ({
+    date: moment().unix(),
     relateId: extConf.value.site.key,
     videoId: infoConf.value.vod_id,
     videoImage: infoConf.value.vod_pic,
@@ -517,7 +519,8 @@ const callPlay = async (item) => {
       return;
     } else {
       videoData.value.url = response.url;
-      emits('play', { url: response.url, quality: response.quality, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
+      emits('update', { type: 'film', data: Object.assign({ info: { ...infoConf.value, name: `${infoConf.value.vod_name} ${formatIndex(active.value.filmIndex).index}` }, ext: extConf.value }) });
+      emits('play', { url: response.url, next: !handleSeasonActive()?.isLast, quality: response.quality, type: response.mediaType! || '', headers: response.headers, startTime: videoData.value.skipTime });
     };
 
     let barrageRes: { barrage: string[], id: string | number | null } = { barrage: [], id: null };
@@ -602,7 +605,7 @@ const settingUpdateEvent = (item) => {
   emits('update', {
     type: 'film',
     setting: extConf.value.setting,
-    data: Object.assign({}, { info: infoConf, ext: extConf })
+    data: Object.assign({}, { info: infoConf.value, ext: extConf.value })
   });
 };
 
@@ -644,9 +647,10 @@ const recommendEvent = async (item) => {
       filmIndex: '',
       flimSource: '',
     };
+
     emits('update', {
       type: 'film',
-      data: Object.assign({ info: item, ext: extConf })
+      data: Object.assign({}, { info: item, ext: extConf.value })
     });
     setup();
   } else {
@@ -799,6 +803,39 @@ const timerUpdatePlayProcess = async(currentTime: number, duration: number) => {
     }
   };
 };
+
+const handleSeasonActive = () => {
+  const { flimSource, filmIndex, reverseOrder } = active.value;
+
+  if (!['number', 'string'].includes(typeof flimSource)) return undefined;
+  if (!['number', 'string'].includes(typeof filmIndex)) return undefined;
+  if (typeof reverseOrder !== 'boolean') return undefined;
+
+  const seasonList = seasonData.value?.[flimSource];
+  if (!Array.isArray(seasonList) || seasonList.length === 0) return undefined;
+
+  const index = seasonList.indexOf(filmIndex);
+  if (index === -1) return undefined;
+
+  const isLast: boolean = reverseOrder ? index === seasonList.length - 1 : index === 0;
+  let nextIndex: number | undefined = undefined;
+  if (!isLast) nextIndex = reverseOrder ? index + 1 : index - 1;
+
+  return { isLast, currIndex: index, nextIndex, reverseOrder, seasonList };
+};
+
+emitter.on('nextVideo', () => {
+  console.log('[player][bus][nextVideo]');
+
+  const seasonIndex = handleSeasonActive();
+  if (!seasonIndex) return;
+  const { isLast, nextIndex } = seasonIndex;
+
+  if (!isLast && nextIndex !== undefined) {
+    const nextInfo = seasonData.value[active.value.flimSource][nextIndex];
+    switchSeasonEvent(nextInfo);
+  }
+});
 </script>
 
 <style lang="less" scoped>
