@@ -158,11 +158,11 @@
     code .
 [5] 修改代码
 [6] 安装依赖包
-    yarn
+    pnpm install
 [7] 全局安装electron-vite框架
-    yarn add electron-vite -D
+    pnpm add electron-vite -D
 [8] 打包编译发布
-    yarn build:win[mac|linux]
+    pnpm run build:win[mac|linux]
 
 ps:
   - 同步库说明

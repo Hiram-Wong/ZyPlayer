@@ -1,4 +1,4 @@
-const { notarize } = require('electron-notarize')
+const { notarize } = require('@electron/notarize')
 
 module.exports = async (context) => {
   if (process.platform !== 'darwin') return
