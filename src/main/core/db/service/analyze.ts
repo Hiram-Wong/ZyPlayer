@@ -1,4 +1,4 @@
-import { asc, eq, like, inArray } from 'drizzle-orm';
+import { asc, eq, ilike, inArray } from 'drizzle-orm';
 import { db, schema } from '../common';
 
 export default {
@@ -37,8 +37,8 @@ export default {
     let count = db.$count(schema.analyze);
 
     if (kw) {
-      query = query.where(like(schema.analyze.name, `%${kw}%`));
-      count = db.$count(schema.analyze, like(schema.analyze.name, `%${kw}%`));
+      query = query.where(ilike(schema.analyze.name, `%${kw}%`));
+      count = db.$count(schema.analyze, ilike(schema.analyze.name, `%${kw}%`));
     }
     query = query
       .limit(pageSize)
