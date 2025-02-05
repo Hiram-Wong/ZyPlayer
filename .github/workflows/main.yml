@@ -20,20 +20,15 @@ jobs:
         with:
           submodules: "recursive"
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'latest'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        run: |
-          npm install -g pnpm
-
-      - name: Verify pnpm installation
-        run: |
-          which pnpm
-          pnpm --version
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
