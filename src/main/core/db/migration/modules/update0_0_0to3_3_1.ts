@@ -37,7 +37,7 @@ const update = async () => {
     CREATE TABLE IF NOT EXISTS tbl_channel (
       id uuid DEFAULT gen_random_uuid(),
       name varchar(255) not null,
-      url varchar(510) not null,
+      url varchar(1024) not null,
       "group" varchar(255)
     );
 

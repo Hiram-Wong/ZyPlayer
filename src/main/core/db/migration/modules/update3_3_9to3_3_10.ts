@@ -14,6 +14,8 @@ const update = async () => {
     ALTER TABLE tbl_star ALTER COLUMN "videoName" TYPE varchar(510);
     ALTER TABLE tbl_star ADD COLUMN date INTEGER;
     UPDATE tbl_star SET date = EXTRACT(EPOCH FROM now())::INTEGER;
+
+    ALTER TABLE tbl_channel ALTER COLUMN url TYPE varchar(1024);
   `);
 
   const old_defaultFilterType = await db.select().from(schema.setting).where(eq(schema.setting.key, 'defaultFilterType'));
