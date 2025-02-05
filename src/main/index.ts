@@ -6,7 +6,7 @@ import { app, BrowserWindow, globalShortcut, nativeTheme, session } from 'electr
 import fixPath from 'fix-path';
 import { setup as dbInit, server as dbServer, webdev } from './core/db';
 import createMenu from './core/menu';
-import { ipcListen } from './core/ipc';
+import ipcListen from './core/ipc';
 import logger from './core/logger';
 import autoUpdater from './core/update';
 import createTray from './core/tray';

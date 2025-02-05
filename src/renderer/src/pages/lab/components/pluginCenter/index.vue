@@ -199,7 +199,7 @@ const handleItemClick = async(name: string) => {
 };
 
 const handleGoDir = async() => {
-  window.electron.ipcRenderer.send('open-path', 'plugin', true);
+  window.electron.ipcRenderer.send('open-path', 'plugin');
 }
 
 const handleOpenDevtool = () => {

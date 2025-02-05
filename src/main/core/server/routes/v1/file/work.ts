@@ -1,5 +1,4 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
-import fs from 'fs-extra';
 import { v4 as uuidv4 } from 'uuid';
 import { join, relative, basename, extname, dirname } from 'path';
 import {
@@ -11,6 +10,9 @@ import {
   deleteFile,
   readDir,
   deleteDir,
+  readDirSync,
+  fileStateSync,
+  readFileSync,
 } from '@main/utils/hiker/file';
 
 const API_PREFIX = 'api/v1/file';
@@ -42,9 +44,9 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     const pathLib = {
       join,
       dirname,
-      readDir: readDir,
-      readFile: readFile,
-      stat: fs.statSync,
+      readDir: readDirSync,
+      readFile: readFileSync,
+      stat: fileStateSync,
     }; // 注入给index.js文件main函数里使用
 
     const fileName = req.params['*'];
@@ -100,6 +102,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const stat = await fileState(directoryPath);
       if (stat === 'dir') {
         const files = await readDir(directoryPath);
+        if (!files || files.length === 0) return;
 
         for (const file of files) {
           const filePath = join(directoryPath, file);

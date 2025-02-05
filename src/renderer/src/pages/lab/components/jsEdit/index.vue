@@ -434,13 +434,13 @@ const utilsWriteFile = async (filePath: string, val: string) => {
 };
 
 const utilsT3BasePath = async () => {
-  const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
+  const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
   const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/drpy_dzlive/drpy_js/`);
   return defaultPath;
 };
 
 const utilsT4BasePath = async () => {
-  const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
+  const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
   const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `plugin/drpy-node/js/`);
   return defaultPath;
 };
@@ -700,7 +700,7 @@ const handleOpFileChange = (type: string) => {
 
   switch (type) {
     case 'file':
-      window.electron.ipcRenderer.send('open-path', 'file', true);
+      window.electron.ipcRenderer.send('open-path', 'file');
       break;
     case 'import':
       handleImportFile();

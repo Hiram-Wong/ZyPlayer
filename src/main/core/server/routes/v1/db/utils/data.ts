@@ -1,9 +1,9 @@
-import fs from 'fs-extra';
 import find from 'lodash/find';
 import JSON5 from 'json5';
 import { v4 as uuidv4, validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { resolve } from 'url';
 import request from '@main/utils/request';
+import { readFile } from '@main/utils/hiker/file';
 import { base64 } from '@main/utils/crypto';
 import initSettingData from '@main/core/db/migration/modules/init/tbl_setting.json';
 
@@ -400,7 +400,7 @@ const readData = async (path: string) => {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     content = await request({ url: path, method: 'GET', responseType: 'text' });
   } else {
-    content = await fs.readFileSync(path, 'utf-8');
+    content = (await readFile(path)) || '';
   }
   content = JSON5.parse(content);
   return content;

@@ -40,7 +40,7 @@ class AdapterHandler {
   public pluginList: any[] = []; // 插件列表
   public syncModules = new Map();
   public dbTable: string = '/plugin';
-  public db: JsonDB;
+  public db: JsonDB = {} as JsonDB;
   readonly registry: string; // 插件源地址
 
   /**
@@ -54,21 +54,23 @@ class AdapterHandler {
     this.pluginPath = join(this.baseDir, 'plugin.json');
     this.registry = options?.registry || 'https://registry.npmmirror.com/';
 
+    (async () => await this.init())();
+  }
+
+  private async init() {
     // 初始化插件目录
-    if (!fileExist(this.baseDir)) createDir(this.baseDir);
-    if (!fileExist(this.pluginPath) || fileState(this.pluginPath) !== 'file') saveJson(this.pluginPath, { plugin: [] });
+    if (!await fileExist(this.baseDir)) await createDir(this.baseDir);
+    if (!await fileExist(this.pluginPath) || await fileState(this.pluginPath) !== 'file') await saveJson(this.pluginPath, { plugin: [] });
 
     // 初始化插件列表
     this.db = new JsonDB(new Config(this.pluginPath, true, true, '/'));
 
     // 启动插件程序
-    (async () => {
-      let plugins = await this.fetchList([], true);
-      plugins = plugins.filter((p) => p.status === 'RUNNING');
-      try {
-        await this.start([...new Set(plugins.map((p) => p.name))]);
-      } catch {}
-    })();
+    let plugins = await this.fetchList([], true);
+    plugins = plugins.filter((p) => p.status === 'RUNNING');
+    try {
+      await this.start([...new Set(plugins.map((p) => p.name))]);
+    } catch {}
   }
 
   /**
@@ -77,9 +79,9 @@ class AdapterHandler {
    * @param {string} filePath 文件路径
    * @returns {json} JSON对象
    */
-  private readJsonFile(filePath: string) {
+  private async readJsonFile(filePath: string) {
     try {
-      const content = readJson(filePath);
+      const content = await readJson(filePath);
       return content;
     } catch (err: any) {
       logger.error(`[plugin][readJsonFile][error] ${err.message}`);
@@ -155,12 +157,12 @@ class AdapterHandler {
       try {
         // 1.判断项目存在
         const pluginBasePath = join(this.baseDir, plugin);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') continue;
+        if (!await fileExist(pluginBasePath) || await fileState(pluginBasePath) !== 'dir') continue;
 
         // 2.设置默认参数
         const pkgPath = join(pluginBasePath, 'package.json');
-        if (!fileExist(pkgPath) || fileState(pkgPath) !== 'file') continue;
-        const pkgInfo = this.readJsonFile(pkgPath);
+        if (!await fileExist(pkgPath) || await fileState(pkgPath) !== 'file') continue;
+        const pkgInfo = await this.readJsonFile(pkgPath);
         if (!pkgInfo || typeof pkgInfo !== 'object') continue;
 
         info = { ...info, ...pkgInfo };
@@ -170,7 +172,7 @@ class AdapterHandler {
         // 2.1 readme
         const readmePath = join(pluginBasePath, 'README.md');
         info.readme = `### empty`;
-        if (fileExist(readmePath) && fileState(readmePath) === 'file') info.readme = readFile(readmePath);
+        if (await fileExist(readmePath) && await fileState(readmePath) === 'file') info.readme = (await readFile(readmePath)) || '';
         // 2.2 main
         if (info.type === 'ui') {
           info.main = info?.main ? pathToFileURL(resolve(pluginBasePath, info.main)).toString() : 'about:blank';
@@ -184,7 +186,7 @@ class AdapterHandler {
 
         // 3.删除lock文件
         const pluginPkgLockPath = join(pluginBasePath, 'package-lock.json');
-        if(fileExist(pluginPkgLockPath)) deleteFile(pluginPkgLockPath);
+        if (await fileExist(pluginPkgLockPath)) await deleteFile(pluginPkgLockPath);
 
         // 4.安装插件
         const execRes = await this.execCommand('install', { prefix: pluginBasePath }, []);
@@ -236,7 +238,7 @@ class AdapterHandler {
 
         // 2.判断项目存在
         const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+        if (!await fileExist(pluginBasePath) || await fileState(pluginBasePath) !== 'dir') {
           if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
           continue;
         }
@@ -246,9 +248,9 @@ class AdapterHandler {
 
         // 4.删除必要依赖
         const pluginNodeModulesPath = join(pluginBasePath, 'node_modules');
-        if (fileExist(pluginNodeModulesPath) && fileState(pluginBasePath) === 'dir') deleteDir(pluginNodeModulesPath);
+        if (await fileExist(pluginNodeModulesPath) && await fileState(pluginBasePath) === 'dir') await deleteDir(pluginNodeModulesPath);
         const pluginPkgLockPath = join(pluginBasePath, 'package-lock.json');
-        if (fileExist(pluginPkgLockPath) && fileState(pluginPkgLockPath) === 'file') deleteFile(pluginPkgLockPath);
+        if (await fileExist(pluginPkgLockPath) && await fileState(pluginPkgLockPath) === 'file') await deleteFile(pluginPkgLockPath);
 
         // 5.插件参数
         await this.db.delete(`${this.dbTable}[${index}]`);
@@ -279,15 +281,15 @@ class AdapterHandler {
 
         // 2.判断项目存在
         const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+        if (!await fileExist(pluginBasePath) || await fileState(pluginBasePath) !== 'dir') {
           if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
           continue;
         }
 
         // 3.获取pkg参数
         const pkgPath = join(pluginBasePath, 'package.json');
-        if (!fileExist(pkgPath) || fileState(pkgPath) !== 'file') continue;
-        const pkgInfo = this.readJsonFile(pkgPath);
+        if (!await fileExist(pkgPath) || await fileState(pkgPath) !== 'file') continue;
+        const pkgInfo = await this.readJsonFile(pkgPath);
         if (!pkgInfo || typeof pkgInfo !== 'object') continue;
 
         const latestVersion = pkgInfo?.version || '0.0.0';
@@ -320,7 +322,7 @@ class AdapterHandler {
 
         // 2.判断项目存在
         const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+        if (!await fileExist(pluginBasePath) || await fileState(pluginBasePath) !== 'dir') {
           if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
           continue;
         }
@@ -381,7 +383,7 @@ class AdapterHandler {
 
         // 2.判断项目存在
         const pluginBasePath = join(this.baseDir, pluginInfo.pathName);
-        if (!fileExist(pluginBasePath) || fileState(pluginBasePath) !== 'dir') {
+        if (!await fileExist(pluginBasePath) || await fileState(pluginBasePath) !== 'dir') {
           if (index > -1) await this.db.delete(`${this.dbTable}[${index}]`);
           continue;
         }

@@ -1,5 +1,5 @@
 import request from '@main/utils/request';
-import fs from 'fs-extra';
+import { readFile } from '@main/utils/hiker/file';
 
 const m3u = (text: string) => {
   const GROUP = /.*group-title="(.?|.+?)".*/i;
@@ -46,9 +46,9 @@ const txt = (text: string) => {
 };
 
 const parseChannel = async (type: 'local' | 'remote' | 'manual', path: string) => {
-  let fileContent: string;
+  let fileContent;
   if (type === 'local') {
-    fileContent = await fs.readFileSync(path, 'utf-8');
+    fileContent = await readFile(path);
   } else if (type === 'remote') {
     const response = await request({
       url: path,

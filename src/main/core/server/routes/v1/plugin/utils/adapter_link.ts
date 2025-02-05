@@ -28,7 +28,7 @@ class AdapterHandler {
   public pluginList: any[] = []; // 插件列表
   public syncModules = new Map();
   public dbTable: string = '/plugin';
-  public db: JsonDB;
+  public db: JsonDB = {} as JsonDB;
   private pluginCaches: Record<string, string> = {}; // 缓存插件版本
   readonly registry: string; // 插件源地址
 
@@ -43,22 +43,24 @@ class AdapterHandler {
     this.pluginPath = join(this.baseDir, 'plugin.json');
     this.registry = options?.registry || 'https://registry.npmmirror.com/';
 
+    this.init();
+  }
+
+  private async init() {
     // 初始化插件目录
-    if (!fileExist(this.baseDir)) createDir(this.baseDir);
-    if (!fileExist(this.pkgPath) || fileState(this.pkgPath) !== 'file') saveJson(this.pkgPath, { dependencies: {} });
-    if (!fileExist(this.pluginPath) || fileState(this.pluginPath) !== 'file') saveJson(this.pluginPath, { plugin: [] });
+    if (await !fileExist(this.baseDir)) await createDir(this.baseDir);
+    if (await !fileExist(this.pkgPath) || await fileState(this.pkgPath) !== 'file') await saveJson(this.pkgPath, { dependencies: {} });
+    if (await !fileExist(this.pluginPath) || await fileState(this.pluginPath) !== 'file') await saveJson(this.pluginPath, { plugin: [] });
 
     // 初始化插件列表
     this.db = new JsonDB(new Config(this.pluginPath, true, true, '/'));
 
     // 启动插件程序
-    (async () => {
-      let plugins = await this.fetchList();
-      plugins = plugins.filter((p) => p.status === 'RUNNING');
-      try {
-        await this.start(plugins);
-      } catch {}
-    })();
+    let plugins = await this.fetchList();
+    plugins = plugins.filter((p) => p.status === 'RUNNING');
+    try {
+      await this.start(plugins);
+    } catch {}
   }
 
   /**
@@ -67,9 +69,9 @@ class AdapterHandler {
    * @param {string} filePath 文件路径
    * @returns {json} JSON对象
    */
-  private readJsonFile(filePath: string) {
+  private async readJsonFile(filePath: string) {
     try {
-      const content = readJson(filePath);
+      const content = await readJson(filePath);
       return content;
     } catch (err: any) {
       logger.error(`[plugin][readJsonFile][error] ${err.message}`);
@@ -83,9 +85,9 @@ class AdapterHandler {
    * @param {string} filePath 文件路径
    * @param {json} content JSON对象
    */
-  private writeJsonFile(filePath: string, content: object) {
+  private async writeJsonFile(filePath: string, content: object) {
     try {
-      saveJson(filePath, content);
+      await saveJson(filePath, content);
     } catch (err: any) {
       logger.error(`[plugin][writeJsonFile][error] ${err.message}`);
       throw new Error(`Failed to write JSON file: ${filePath}`);
@@ -147,7 +149,7 @@ class AdapterHandler {
     for (let plugin of plugins) {
       try {
         // 1.默认参数
-        const pkgInfo = this.readJsonFile(join(this.baseDir, 'modules', plugin.pluginName, 'package.json'));
+        const pkgInfo = await this.readJsonFile(join(this.baseDir, 'modules', plugin.pluginName, 'package.json'));
         if (!pkgInfo) continue;
         plugin.name = pkgInfo.name;
 
@@ -157,16 +159,16 @@ class AdapterHandler {
 
         // 3.安装插件
         const module = resolve(this.baseDir, 'modules', plugin.pluginName);
-        if (!fileExist(module) || fileState(module) !== 'dir') continue;
+        if (!await fileExist(module) || await fileState(module) !== 'dir') continue;
         const cmd = plugin.isDev ? 'link' : 'install';
         await this.execCommand(cmd, [module]);
 
         // 4.插件参数
         if (plugin.isDev) {
           const pluginPath = join(this.baseDir, 'node_modules', plugin.name);
-          const pluginInfo = this.readJsonFile(join(pluginPath, 'package.json'));
+          const pluginInfo = await this.readJsonFile(join(pluginPath, 'package.json'));
           const readmePath = join(this.baseDir, 'node_modules', plugin.name, 'README.md');
-          if (fileExist(readmePath) && fileState(readmePath) === 'file') plugin.readme = readFile(readmePath);
+          if (await fileExist(readmePath) && await fileState(readmePath) === 'file') plugin.readme = (await readFile(readmePath));
 
           plugin = { ...plugin, ...pluginInfo };
         }
@@ -211,7 +213,7 @@ class AdapterHandler {
 
         // 卸载插件
         const module = join(this.baseDir, 'node_modules', plugin.name);
-        if (!fileExist(module) || fileState(module) !== 'dir') continue;
+        if (!await fileExist(module) || await fileState(module) !== 'dir') continue;
         const cmd = plugin.isDev ? 'unlink' : 'uninstall';
         await this.execCommand(cmd, [module]);
 
@@ -235,7 +237,7 @@ class AdapterHandler {
     for (const plugin of plugins) {
       try {
         const module = join(this.baseDir, 'node_modules', plugin.name);
-        if (!fileExist(module) || fileState(module) !== 'dir') continue;
+        if (!await fileExist(module) || await fileState(module) !== 'dir') continue;
 
         // await this.execCommand('update', [module]);
 
@@ -244,7 +246,7 @@ class AdapterHandler {
         const pluginInfo = await this.db.getData(`${this.dbTable}[${index}]`);
 
         const pkgPath = join(this.baseDir, 'node_modules', plugin.name);
-        const pkgInfo = this.readJsonFile(join(pkgPath, 'package.json'));
+        const pkgInfo = await this.readJsonFile(join(pkgPath, 'package.json'));
         if (!pkgInfo) continue;
 
         if (index > -1 && pkgInfo) {
@@ -277,7 +279,7 @@ class AdapterHandler {
   async start(plugins: any[]) {
     for (const plugin of plugins) {
       const module = join(this.baseDir, 'node_modules', plugin.name);
-      if (!fileExist(module) || fileState(module) !== 'dir') continue;
+      if (!await fileExist(module) || await fileState(module) !== 'dir') continue;
 
       const index = await this.db.getIndex(`${this.dbTable}`, plugin.name, 'name');
       if (index === -1) continue;
@@ -318,7 +320,7 @@ class AdapterHandler {
   async stop(plugins: any[]) {
     for (const plugin of plugins) {
       const module = join(this.baseDir, 'node_modules', plugin.name);
-      if (!fileExist(module) || fileState(module) !== 'dir') continue;
+      if (!await fileExist(module) || await fileState(module) !== 'dir') continue;
 
       const index = await this.db.getIndex(`${this.dbTable}`, plugin.name, 'name');
       if (index === -1) continue;

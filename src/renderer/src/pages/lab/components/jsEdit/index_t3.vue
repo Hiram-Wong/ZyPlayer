@@ -505,7 +505,7 @@ const exportFileEvent = async () => {
 
   try {
     await window.electron.ipcRenderer.send('tmpdir-manage', 'make', 'file');
-    const userDataPath = await window.electron.ipcRenderer.invoke('read-path', 'userData');
+    const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
     const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/${title}.js`);
     const { canceled, filePath } = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
       defaultPath,
@@ -915,7 +915,7 @@ const handleOpChange = (type: string) => {
       window.electron.ipcRenderer.send('open-url', 'https://github.com/Hiram-Wong/ZyPlayer/wiki/%E5%86%99%E6%BA%90%E5%B7%A5%E5%85%B7');
       break;
     case 'file':
-      window.electron.ipcRenderer.send('open-path', 'file', true);
+      window.electron.ipcRenderer.send('open-path', 'file');
       break;
     case 'debug':
       debugEvent();

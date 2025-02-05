@@ -1,38 +1,22 @@
 import { electronApp, is, platform } from '@electron-toolkit/utils';
 import { exec } from 'child_process';
-import { app, BrowserWindow, globalShortcut, ipcMain, nativeTheme, shell } from 'electron';
-import fs from 'fs-extra';
+import { app, globalShortcut, ipcMain, nativeTheme, shell } from 'electron';
 import { join } from 'path';
 import logger from '@main/core/logger';
 import puppeteerInElectron from '@main/utils/sniffer';
 import { toggleWindowVisibility } from '@main/utils/tool';
-import { createMain, createPlay, getWin } from '@main/core/winManger';
+import { readFile, fileExist, fileSize, fileState, deleteDir, deleteFile, createDir } from '@main/utils/hiker/file';
+import { createMain, createPlay, getWin, getAllWin } from '@main/core/winManger';
 
-const tmpDir = async (path: string) => {
-  try {
-    const pathExists = await fs.pathExistsSync(path);
-    logger.info(`[ipcMain] tmpDir: ${path}-exists-${pathExists}`);
-    if (pathExists) {
-      await fs.removeSync(path); // 删除文件, 不存在不会报错
-    }
-    await fs.emptyDirSync(path); // 清空目录, 不存在自动创建
-    logger.info(`[ipcMain] tmpDir: ${path}-created-success`);
-  } catch (err) {
-    logger.error(err);
-  }
-};
 
 const ipcListen = () => {
-  ipcMain.on('uninstall-shortcut', () => {
-    logger.info(`[ipcMain] globalShortcut unregisterAll`);
-    globalShortcut.unregisterAll();
-  });
-
+  // 设置开机自启
   ipcMain.on('toggle-selfBoot', (_, status) => {
     logger.info(`[ipcMain] set-selfBoot: ${status}`);
     electronApp.setAutoLaunch(status);
   });
 
+  // 打开系统代理设置
   ipcMain.on('open-proxy-setting', () => {
     logger.info(`[ipcMain] open-proxy-setting`);
     if (platform.isWindows) shell.openPath('ms-settings:network-proxy');
@@ -40,6 +24,7 @@ const ipcListen = () => {
     if (platform.isLinux) shell.openPath('gnome-control-center network');
   });
 
+  // 打开播放器
   ipcMain.on('call-player', (_, path: string, url: string) => {
     if (url && path) {
       const command = `${path} "${url}"`;
@@ -48,39 +33,39 @@ const ipcListen = () => {
     }
   });
 
-  const getFolderSize = (folderPath: string): number => {
-    let totalSize = 0;
-
-    if (fs.existsSync(folderPath)) {
-      const entries = fs.readdirSync(folderPath);
-
-      for (const entry of entries) {
-        const entryPath = join(folderPath, entry);
-        const entryStats = fs.statSync(entryPath);
-
-        if (entryStats.isFile()) {
-          totalSize += entryStats.size;
-        } else if (entryStats.isDirectory()) {
-          totalSize += getFolderSize(entryPath);
-        }
-      }
-    }
-
-    return totalSize;
-  };
-
-  ipcMain.on('tmpdir-manage', (event, action, trails) => {
+  ipcMain.on('tmpdir-manage', async (event, action, trails) => {
     let formatPath = join(app.getPath('userData'), trails);
-    if (action === 'rmdir' || action === 'mkdir' || action === 'init') tmpDir(formatPath);
-    if (action === 'make') fs.ensureDirSync(formatPath);
-    if (action === 'size') event.reply('tmpdir-manage-size', getFolderSize(formatPath));
+    switch (action) {
+      case 'rmdir':
+      case 'mkdir':
+      case 'init':
+        try {
+          const pathExists = await fileExist(formatPath);
+          logger.info(`[ipcMain] tmpDir: ${formatPath}-exists-${pathExists}`);
+          if (pathExists) {
+            if (await fileState(formatPath) === 'file') await deleteFile(formatPath)
+            else if (await fileState(formatPath) === 'dir') await deleteDir(formatPath);
+          }
+          await createDir(formatPath);
+          logger.info(`[ipcMain] tmpDir: ${formatPath}-created-success`);
+        } catch (err) {
+          logger.error(err);
+        }
+        break;
+      case 'make':
+        await createDir(formatPath);
+        break;
+      case 'size':
+        event.reply('tmpdir-manage-size', await fileSize(formatPath));
+        break;
+    };
   });
 
   ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
     const ua = globalThis.variable.ua;
-    const formatPath = is.dev
-      ? join(process.cwd(), 'thumbnail', `${key}.jpg`)
-      : join(app.getPath('userData'), 'thumbnail', `${key}.jpg`);
+    const basePath = is.dev ? join(process.cwd(), 'thumbnail') : join(app.getPath('userData'), 'thumbnail');
+    await createDir(basePath);
+    const formatPath = join(basePath, `${key}.jpg`);
 
     const ffmpegCommand = 'ffmpeg'; // ffmpeg 命令
     const inputOptions = ['-i', url]; // 输入选项，替换为实际视频流 URL
@@ -98,7 +83,7 @@ const ipcListen = () => {
 
     try {
       await exec(command);
-      const isGenerat = fs.existsSync(formatPath);
+      const isGenerat = await fileExist(formatPath);
       logger.info(`[ipcMain] ffmpeg-thumbnail status:${isGenerat} command:${command}`);
       return {
         key,
@@ -113,6 +98,7 @@ const ipcListen = () => {
     }
   });
 
+  // 检查ffmpeg是否安装
   ipcMain.handle('ffmpeg-installed-check', async () => {
     try {
       const { stdout } = await exec('ffmpeg -version');
@@ -124,6 +110,7 @@ const ipcListen = () => {
     }
   });
 
+  // 获取嗅探数据
   ipcMain.handle(
     'sniffer-media',
     async (_, url, run_script, init_script, custom_regex, sniffer_exclude, headers = {}) => {
@@ -132,32 +119,40 @@ const ipcListen = () => {
     },
   );
 
+  // 读取文件
   ipcMain.handle('read-file', async (_, path) => {
-    const fileContent = await fs.readFileSync(path, 'utf8').toString();
-    const res = fileContent ? fileContent : '';
-    logger.info(res);
-
-    return res;
+    logger.info(`[ipcMain] read-file: ${path}`);
+    const fileContent = (await readFile(path)) || '';
+    return fileContent;
   });
 
+  // 打开外部链接
   ipcMain.on('open-url', async (_, url) => {
-    shell.openExternal(url);
+    logger.info(`[ipcMain] open-url: ${url}`);
+    if (url && /^(https?:\/\/)/.test(url)) {
+      shell.openExternal(url);
+    }
   });
 
-  ipcMain.on('open-path', async (_, file, create) => {
+  ipcMain.on('open-path', async (_, file) => {
     const path = join(app.getPath('userData'), file);
-    // 查看目录是否存在，如果不存在，就创建一个
-    if (create) fs.ensureDirSync(path);
+    await createDir(path);
     shell.openPath(path);
   });
 
-  ipcMain.handle('read-path', async (_, type) => {
+  // 获取app路径
+  ipcMain.handle('get-app-path', async (_, type) => {
+    logger.info(`[ipcMain] read-path: ${type}`);
+    const types = ['home', 'appData', 'userData', 'sessionData', 'temp', 'exe', 'module', 'desktop', 'documents', 'downloads', 'music', 'pictures', 'videos', 'recent', 'logs', 'crashDumps'];
+    if (!types.includes(type)) return '';
     const path = app.getPath(type);
     return path;
   });
 
-  ipcMain.handle('path-join', (_, fromPath, toPath) => {
-    return join(fromPath, toPath);
+  // path join方法
+  ipcMain.handle('path-join', (_, ...args) => {
+    logger.info(`[ipcMain] path-join: ${args}`);
+    return join(...args);
   });
 
   // 重启app
@@ -177,6 +172,7 @@ const ipcListen = () => {
     createPlay();
   });
 
+  // 更新快捷键
   ipcMain.on('update-shortcut', (_, shortcut) => {
     logger.info(`[ipcMain] storage-shortcuts: ${shortcut}`);
     globalShortcut.unregisterAll();
@@ -187,9 +183,17 @@ const ipcListen = () => {
     globalThis.variable.recordShortcut = shortcut;
   });
 
+  // 取消注册全局快捷键
+  ipcMain.on('uninstall-shortcut', () => {
+    logger.info(`[ipcMain] globalShortcut unregisterAll`);
+    globalShortcut.unregisterAll();
+  });
+
+  // 窗口管理
   ipcMain.on('manage-win', (_, winName, action) => {
     logger.info(`[ipcMain] ${winName} action is ${action}`);
     const win = getWin(winName);
+    if (!win || win.isDestroyed()) return;
 
     switch (action) {
       case 'min':
@@ -225,6 +229,7 @@ const ipcListen = () => {
     }
   });
 
+  // 显示主窗口
   ipcMain.on('show-main-win', () => {
     logger.info(`[ipcMain] show main windows`);
     const win = getWin('main');
@@ -236,6 +241,7 @@ const ipcListen = () => {
     }
   });
 
+  // 更新dns
   ipcMain.on('update-dns', (_, item) => {
     logger.info(`[ipcMain] new dns: ${item}`);
     if (item) {
@@ -250,6 +256,7 @@ const ipcListen = () => {
     }
   });
 
+  // 更新全局变量
   ipcMain.on('update-global', (_, key, value) => {
     logger.info(`[ipcMain] update-global: key: ${key} - value: ${value}`);
     if (Object.keys(globalThis.variable).includes(key)) {
@@ -259,28 +266,26 @@ const ipcListen = () => {
 
   // 事件广播通知
   ipcMain.handle('event-broadcast', (event, eventInfo) => {
-    // 遍历window执行
-    for (const currentWin of BrowserWindow.getAllWindows()) {
+    const windows = getAllWin();
+    if (windows.length === 0) return;
+    for (const win of windows) {
       // 注意，这里控制了发送广播的窗口，不触发对应事件，如果需要自身也触发的话，删除if内的逻辑即可
       if (event) {
-        const webContentsId = currentWin.webContents.id;
-        if (webContentsId === event.sender.id) {
-          continue;
-        }
+        const webContentsId = win.webContents.id;
+        if (webContentsId === event.sender.id) continue;
       }
-      currentWin.webContents.send(eventInfo.channel, eventInfo.body);
+      win.webContents.send(eventInfo.channel, eventInfo.body);
     }
   });
 
   // 主题更新事件
   nativeTheme.on('updated', () => {
+    const windows = getAllWin();
+    if (windows.length === 0) return;
     const isDarkMode = nativeTheme.shouldUseDarkColors;
-    const mainWin = getWin('main');
-    const playWin = getWin('play');
-    if (mainWin) mainWin.webContents.send('system-theme-updated', `${isDarkMode ? 'dark' : 'light'}`);
-    if (playWin) playWin.webContents.send('system-theme-updated', `${isDarkMode ? 'dark' : 'light'}`);
+    windows.forEach((win) => win.webContents.send('system-theme-updated', `${isDarkMode ? 'dark' : 'light'}`));
     logger.info(`[nativeTheme] System-theme-updated: ${isDarkMode ? 'dark' : 'light'} ; send to vue app`);
   });
 };
 
-export { ipcListen, tmpDir };
+export default ipcListen;
