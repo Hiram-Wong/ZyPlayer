@@ -29,13 +29,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 'latest'
-          cache: 'pnpm'
+          # cache: 'pnpm'
 
-      - name: Install dependencies
-        run: |
-          pnpm install
-        env:
-          PNPM_LOCKFILE_DIR: ""
+      # - name: Install dependencies
+      #   run: |
+      #     pnpm install
+      #   env:
+      #     PNPM_LOCKFILE_DIR: ""
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
