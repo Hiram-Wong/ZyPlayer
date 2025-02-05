@@ -70,11 +70,12 @@ const active = ref({
   transformValue: 0,
 });
 const tagFlag = ref(props.active);
-const uniqueList = computed(() => uniqBy(props.list, 'type_id'));
+const uniqueList = computed(() => uniqBy(props.list, 'type_id').filter(item => ![null, undefined, ''].includes(item.type_name)));
 
 onMounted(() => {
   redrawEl();
 });
+
 const redrawEl = () => {
   let selectedIdx = -1;
   selectedIdx = uniqueList.value.findIndex(item => item.type_id === tagFlag.value);
