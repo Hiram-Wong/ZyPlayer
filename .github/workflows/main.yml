@@ -20,22 +20,11 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Setup Node.js
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
-
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'latest'
-          # cache: 'pnpm'
-
-      # - name: Install dependencies
-      #   run: |
-      #     pnpm install
-      #   env:
-      #     PNPM_LOCKFILE_DIR: ""
+          cache: 'yarn'
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
