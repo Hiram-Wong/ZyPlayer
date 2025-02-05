@@ -26,6 +26,15 @@ jobs:
           node-version: 'latest'
           cache: 'pnpm'
 
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm
+
+      - name: Verify pnpm installation
+        run: |
+          which pnpm
+          pnpm --version
+
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1.6.0
         with:
