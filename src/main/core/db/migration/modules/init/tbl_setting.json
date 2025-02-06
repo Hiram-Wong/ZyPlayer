@@ -1,5 +1,5 @@
 [
-  { "key": "version", "value": "3.3.9" },
+  { "key": "version", "value": "3.3.10" },
   { "key": "theme", "value": "auto" },
   { "key": "lang", "value": "zh_CN" },
   { "key": "defaultHot", "value": "kylive" },
@@ -87,12 +87,6 @@
       "model": ""
     }
   },
-  {
-    "key": "defaultFilterType",
-    "value": false
-  },
-  {
-    "key": "debug",
-    "value": false
-  }
+  { "key": "defaultFilterType", "value": false },
+  { "key": "debug", "value": false }
 ]

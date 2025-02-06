@@ -1,6 +1,6 @@
 {
   "name": "zyfun",
-  "version": "3.3.10-beta.20250206",
+  "version": "3.3.10",
   "description": "zyfun client",
   "main": "./out/main/index.js",
   "repository": {
