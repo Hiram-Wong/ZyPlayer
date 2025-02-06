@@ -18,6 +18,15 @@ const update = async () => {
     ALTER TABLE tbl_channel ALTER COLUMN url TYPE varchar(1024);
   `);
 
+  const old_playerMode = await db.select().from(schema.setting).where(eq(schema.setting.key, 'playerMode'));
+  if (old_playerMode.length > 0) {
+    const old_playerModeValue: any = old_playerMode[0].value;
+    if (['dplayer', 'nplayer'].includes(old_playerModeValue.data.type)) {
+      old_playerModeValue.data.type = 'artplayer';
+      await db.update(schema.setting).set({ value: old_playerModeValue }).where(eq(schema.setting.key, 'playerMode'));
+    }
+  }
+
   const old_defaultFilterType = await db.select().from(schema.setting).where(eq(schema.setting.key, 'defaultFilterType'));
   if (old_defaultFilterType.length > 0) {
     // @ts-ignore
