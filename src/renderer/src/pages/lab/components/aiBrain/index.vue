@@ -4,117 +4,115 @@
       <div class="left-operation-container">
         <h3 class="title">{{ $t('pages.lab.nav.aiBrain') }}</h3>
       </div>
-      <div class="right-operation-container"></div>
+      <div class="right-operation-container">
+        <t-radio-group variant="default-filled" v-model="active.nav" @change="handleOpChange">
+          <t-radio-button value="setting">{{ $t('pages.lab.aiBrain.setting') }}</t-radio-button>
+        </t-radio-group>
+
+        <t-dialog
+          v-model:visible="active.setting"
+          :header="$t('pages.lab.aiBrain.setting')"
+          show-in-attached-element
+          placement="center"
+          :footer="false"
+        >
+        <div class="ai-dialog-container dialog-container-padding">
+          <t-form ref="form" :data="formData" @submit="onSubmitAiSave">
+            <div class="data-item top">
+              <p class="title-label mg-b">{{ $t('pages.lab.aiBrain.platform.title') }}</p>
+              <div class="platforms">
+                <template v-for="item in AI_PLATFORMS">
+                  <t-link theme="default" @click="handleOpenUrl(item.url)">{{ item.name }}</t-link>
+                </template>
+              </div>
+            </div>
+            <div class="data-item">
+              <p class="title-label mg-tb">{{ $t('pages.lab.aiBrain.params') }}</p>
+              <div class="param">
+                <t-input
+                  v-model="formData.config.server"
+                  :label="$t('pages.lab.aiBrain.server')"
+                  class="input-item"
+                />
+                <t-input
+                  :label="$t('pages.lab.aiBrain.key')"
+                  v-model="formData.config.key"
+                  class="input-item"
+                  type="password"
+                />
+                <t-select
+                  v-model="formData.config.model"
+                  :label="$t('pages.lab.aiBrain.model')"
+                  creatable
+                  filterable
+                >
+                  <t-option v-for="item in AI_MODELS" :key="item.label" :value="item.value" :label="item.label" @create="handleAiModel"/>
+                </t-select>
+              </div>
+            </div>
+            <div class="optios">
+              <t-form-item style="float: right">
+                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
+                <t-button theme="primary" type="submit">确定</t-button>
+              </t-form-item>
+            </div>
+          </t-form>
+        </div>
+        </t-dialog>
+      </div>
     </div>
     <div class="content">
-      <p class="ai-item">{{ $t('pages.lab.aiBrain.declare') }}</p>
-      <div class="ai-item">
-        <t-collapse>
-          <t-collapse-panel :header="$t('pages.lab.aiBrain.params')">
-            <template #headerRightContent>
-              <t-space>
-                <t-link theme="primary" underline href="https://platform.openai.com/api-keys" target="_blank">
-                  1.{{ $t('pages.lab.aiBrain.tip1') }}
-                </t-link>
-                <t-link theme="primary" underline href="https://github.com/chatanywhere/GPT_API_free" target="_blank">
-                  2.{{ $t('pages.lab.aiBrain.tip2') }}
-                </t-link>
-              </t-space>
-            </template>
-            <div class="parms-bar">
-              <t-input
-                v-model="formData.config.server"
-                :label="$t('pages.lab.aiBrain.server')"
-                class="input-item"
-              />
-              <t-input
-                :label="$t('pages.lab.aiBrain.key')"
-                v-model="formData.config.key"
-                class="input-item"
-                type="password"
-              />
-              <t-select
-                v-model="formData.config.model"
-                :label="$t('pages.lab.aiBrain.model')"
-                creatable
-                filterable
-                @create="createModel"
-              >
-                <t-option v-for="item in AI_MODELS" :key="item.label" :value="item.value" :label="item.label" />
-              </t-select>
-              <t-button block class="input-item" style="margin-top: var(--td-comp-margin-s);" @click.stop="saveAi">
-                {{ $t('pages.lab.aiBrain.save') }}
-              </t-button>
-            </div>
-          </t-collapse-panel>
-        </t-collapse>
-      </div>
-      <div class="ai-item command-library">
-        <span class="ai-label">{{ $t('pages.lab.aiBrain.instructionLibrary') }}</span>
-        <t-radio-group variant="default-filled" v-model="formData.aiType" style="margin-bottom: 0;">
-          <t-radio-button value="qa">
-            {{ $t('pages.lab.aiBrain.qa') }}
-          </t-radio-button>
-          <t-radio-button value="filter">
-            {{ $t('pages.lab.aiBrain.filter') }}
-          </t-radio-button>
-          <t-radio-button value="cssSelector">
-            {{ $t('pages.lab.aiBrain.cssSelector') }}
-          </t-radio-button>
-        </t-radio-group>
-      </div>
-      <div class="ai-item demand">
-        <t-textarea
-          v-model="formData.demand"
-          class="textarea"
-          :autosize="{ minRows: 3, maxRows: 5 }"
-          :placeholder="$t('pages.lab.aiBrain.fetchTip')"
-        />
-      </div>
-      <div class="ai-item codeSnippet" v-if="formData.aiType !== 'qa'">
-        <t-textarea
-          v-model="formData.codeSnippet"
-          class="textarea"
-          :autosize="{ minRows: 3, maxRows: 5 }"
-          :placeholder="$t('pages.lab.aiBrain.codeSnippetTip')"
-        />
-      </div>
-      <div class="ai-item demand">
-        <t-button
-          :loading="active.loading"
-          block
-          class="send"
-          @click="AiAnswerEvent()"
-        >
-          {{ $t('pages.lab.aiBrain.fetch') }}
-        </t-button>
-      </div>
-      <div class="ai-item result" v-if="formData.result && !active.loading">
-        <t-card :title="$t('pages.lab.aiBrain.result')">
-          <md-render :text="formData.contentHtml" class="chat-msg-content pa-3" />
-          <template #actions>
-            <t-button size="small" shape="round" @click.stop="copyAiAnswer">{{
-              $t('pages.lab.aiBrain.copy') }}</t-button>
+      <t-chat ref="chatRef" :clear-history="chatList.length > 0 && !active.streamLoad" @clear="clearConfirm">
+        <template v-for="(item, index) in chatList" :key="index">
+          <t-chat-item
+            :avatar="item.avatar"
+            :role="item.role"
+            :content="item.content"
+            :text-loading="index === 0 && active.loading"
+          >
+          <template v-if="!active.streamLoad" #actions>
+            <t-chat-action
+              :is-good="actionStatus[chatList.length - index]?.good"
+              :is-bad="actionStatus[chatList.length - index]?.bad"
+              :content="item.content"
+              @operation="(type: string, { e }) => handleOperation(type, { e, index })"
+            />
           </template>
-        </t-card>
-      </div>
+          </t-chat-item>
+        </template>
+        <template #footer>
+          <t-chat-input
+            :placeholder="$t('pages.lab.aiBrain.placeholder.send')"
+            :stop-disabled="active.streamLoad"
+            @send="handleInputEnter"
+          />
+          <div class="chat-action-footer">{{ $t('pages.lab.aiBrain.declare') }}</div>
+        </template>
+      </t-chat>
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
+import clone from 'lodash/clone';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import JSON5 from "json5";
+import {
+  Chat as TChat,
+  ChatAction as TChatAction,
+  ChatContent as TChatContent,
+  ChatInput as TChatInput,
+  ChatItem as TChatItem,
+} from '@tdesign-vue-next/chat';
 
 import { t } from '@/locales';
 import { fetchAiAnswer } from '@/api/lab';
 import { fetchSettingDetail, putSetting } from '@/api/setting';
-import { copyToClipboardApi } from '@/utils/tool';
+import openaiIcon from '@/assets/ai/openai.png';
+import userIcon from '@/assets/ai/user.png';
+import '@/style/theme/index.less'; // 必须后引入, 不然样式冲突
 
-import MdRender from '@/components/markdown-render/index.vue';
 
-const AI_MODELS = [
+const AI_MODELS = ref([
   {
     label: 'gpt-3.5-turbo',
     value: 'gpt-3.5-turbo',
@@ -127,10 +125,41 @@ const AI_MODELS = [
     label: 'gpt-4o-mini',
     value: 'gpt-4o-mini',
   },
-];
+]);
+
+const AI_PLATFORMS = computed(() => {
+  return [
+    {
+      id: 'openai',
+      name: t('pages.lab.aiBrain.platform.openai'),
+      url: 'https://platform.openai.com/api-keys',
+    },
+    {
+      id: 'deepseek',
+      name: t('pages.lab.aiBrain.platform.deepseek'),
+      url: 'https://platform.deepseek.com/api_keys',
+    },
+    {
+      id: 'kimi',
+      name: t('pages.lab.aiBrain.platform.kimi'),
+      url: 'https://platform.moonshot.cn/console/api-keys',
+    },
+    {
+      id: 'free',
+      name: t('pages.lab.aiBrain.platform.free'),
+      url: 'https://github.com/chatanywhere/GPT_API_free',
+    },
+  ]
+});
+
 const formData = ref({
   aiType: 'qa',
   config: {
+    server: '',
+    key: '',
+    model: 'gpt-3.5-turbo',
+  },
+  rawConfig:  {
     server: '',
     key: '',
     model: 'gpt-3.5-turbo',
@@ -140,77 +169,177 @@ const formData = ref({
   result: '',
   contentHtml: ''
 });
+const chatRef = useTemplateRef('chatRef');
 const active = ref({
-  loading: false
+  nav: '',
+  setting: false,
+  loading: false,
+  streamLoad: false,
+  good: false,
+  bad: false,
 });
+const chatList = ref<any[]>([]);
+const actionStatus = ref({});
 
-onMounted(() => {
-  fetchAi();
-});
-
-const createModel = (val) => {
-  const targetIndex = AI_MODELS.findIndex((obj) => obj.label === val);
-  if (targetIndex === -1) AI_MODELS.push({ value: val, label: val });
+// 滚动到底部
+const backBottom = () => {
+  if (!chatRef.value) return;
+  // @ts-ignore
+  chatRef.value.scrollToBottom({
+    behavior: 'smooth',
+  });
 };
 
-const fetchAi = async () => {
+const clearConfirm = async () => {
+  chatList.value = [];
+  actionStatus.value = {};
+};
+
+onMounted(() => {
+  fetchAiConf();
+});
+
+const handleOpChange = (type: string) => {
+  active.value.nav = '';
+
+  switch (type) {
+    case 'setting':
+      formData.value.config = clone(formData.value.rawConfig);
+      active.value.setting = true;
+      break;
+  };
+};
+
+const handleOpenUrl = (url: string) => {
+  if (!/^(https?:\/\/)/.test(url)) return;
+  window.electron.ipcRenderer.send('open-url', url);
+};
+
+const handleAiModel = (val: string) => {
+  const targetIndex = AI_MODELS.value.findIndex((obj) => obj.label === val);
+  if (targetIndex === -1) AI_MODELS.value.push({ value: val, label: val });
+};
+
+const onClickCloseBtn = () => {
+  active.value.setting = false;
+};
+
+const onSubmitAiSave = async () => {
+  try {
+    await putSetting({ key: "ai", doc: formData.value.config });
+    if (formData.value.config.model !== formData.value.rawConfig.model) {
+      chatList.value.unshift({
+        content: t('pages.lab.aiBrain.chat.modelChange', { model: formData.value.config.model }),
+        role: 'model-change',
+      });
+    }
+    formData.value.rawConfig = clone(formData.value.config);
+    MessagePlugin.success(t('pages.setting.data.success'));
+    active.value.setting = false;
+  } catch (err) {
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+  };
+};
+
+const fetchAiConf = async () => {
   const res = await fetchSettingDetail('ai');
   if (res) {
     formData.value.config = res;
-    createModel(res.model || 'gpt-3.5-turbo');
+    formData.value.rawConfig = res;
+    const model = res.model || 'gpt-3.5-turbo';
+    handleAiModel(model);
+    chatList.value.unshift({
+      content: computed(() => t('pages.lab.aiBrain.chat.modelChange', { model })),
+      role: 'model-change',
+    });
   }
 };
 
-const saveAi = async () => {
-  try {
-    await putSetting({ key: "ai", doc: formData.value.config });
-    MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+const handleInputEnter = async (val: string) => {
+  if (!val) {
+    MessagePlugin.warning(t('pages.lab.aiBrain.message.contentEmpty'));
+    return;
   };
-};
+  if (!formData.value.config.server || !formData.value.config.key || !formData.value.config.model) {
+    MessagePlugin.warning(t('pages.lab.aiBrain.message.aiParmsEmpty'));
+    return;
+  };
+  if (active.value.streamLoad) {
+    return;
+  }
 
-const AiAnswerEvent = async () => {
+  chatList.value.unshift({
+    avatar: userIcon,
+    content: val,
+    role: 'user',
+  });
+
+  const response = await fetchAiReply(val);
+  if (response instanceof Error) {
+    chatList.value.unshift({
+      avatar: openaiIcon,
+      content: response.message,
+      role: 'error',
+    })
+  } else {
+    chatList.value.unshift({
+      avatar: openaiIcon,
+      content: response,
+      role: 'assistant',
+    });
+  }
+}
+
+const fetchAiReply = async (command: string) => {
+  active.value.loading = true;
+  active.value.streamLoad = true;
+  let response;
   try {
-    active.value.loading = true;
-    if (!formData.value.demand) {
-      MessagePlugin.warning(t('pages.lab.aiBrain.message.contentEmpty'));
-      return;
-    };
-    if (!formData.value.config.server || !formData.value.config.key || !formData.value.config.model) {
-      MessagePlugin.warning(t('pages.lab.aiBrain.message.aiParmsEmpty'));
-      return;
-    };
     const doc = {
       type: formData.value.aiType,
       codeSnippet: formData.value.codeSnippet,
-      demand: formData.value.demand,
+      demand: command,
     };
-    const response = await fetchAiAnswer(doc);
-    let content = response;
-    try {
-      const toObj = JSON5.parse(JSON5.stringify(content));
-      if (toObj && typeof toObj === 'object') {
-        content = JSON5.stringify(content);
-      }
-    } catch (err) {}
-    formData.value.result = content;
-    await nextTick();
+    response = await fetchAiAnswer(doc);
   } catch (err: any) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
+    response = err;
   } finally {
-    formData.value.contentHtml = formData.value.result;
     active.value.loading = false;
+    active.value.streamLoad = false;
+    return response;
   }
 };
 
-const copyAiAnswer = async () => {
-  try {
-    await copyToClipboardApi(formData.value.result);
-    MessagePlugin.success(t('pages.setting.data.success'));
-  } catch (err) {
-    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
-  };
+const handleOperation = (type: string, options: { e: MouseEvent, index: number }) => {
+  console.log('handleOperation', type, options);
+  const { index } = options;
+  if (type === 'good') {
+    const postion = chatList.value.length - index;
+    if (!actionStatus.value[postion]) {
+      actionStatus.value[postion] = {
+        good: false,
+        bad: false,
+      };
+    }
+    actionStatus.value[postion].good = !actionStatus.value[postion].good;
+    actionStatus.value[postion].bad = false;
+  } else if (type === 'bad') {
+    const postion = chatList.value.length - index;
+    if (!actionStatus.value[postion]) {
+      actionStatus.value[postion] = {
+        good: false,
+        bad: false,
+      };
+    }
+    actionStatus.value[postion].bad = !actionStatus.value[postion].bad;
+    actionStatus.value[postion].good = false;
+  } else if (type === 'replay') {
+    const userQuery = chatList.value[index + 1].content; // 获取用户输入
+    // delete chatList.value[index + 1]; // 删除机器回复
+    // delete chatList.value[index]; // 删除用户输入
+
+    handleInputEnter(userQuery);
+  }
 };
 </script>
 
@@ -252,79 +381,123 @@ const copyAiAnswer = async () => {
         }
       }
     }
+
+
+    .ai-dialog-container {
+      :deep(.t-tag--default) {
+        background-color: var(--td-bg-content-active-2);
+      }
+
+      .platforms {
+        display: flex;
+        flex-direction: row;
+        gap: var(--td-comp-margin-s);
+      }
+
+      .param {
+        display: flex;
+        flex-direction: column;
+        gap: var(--td-comp-margin-m);
+        align-items: stretch;
+
+        :deep(.t-input) {
+          background-color: var(--td-bg-content-input-2);
+          border-color: transparent;
+        }
+      }
+    }
   }
 
   .content {
     flex: 1;
     width: 100%;
-    height: 100%;
-    display: flex;
-    grid-gap: var(--td-comp-margin-s);
-    flex-direction: column;
+    max-width: 734px;
+    margin: 0 auto;
+    height: auto;
+    overflow: hidden;
 
-    .ai-item {
-      margin-bottom: var(--td-comp-margin-xs);
-    }
-
-    .parms-bar {
-      height: auto;
-
-      .input-item {
-        margin-bottom: var(--td-comp-margin-s);
-      }
-
-      .input-item:last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    .textarea {
-      :deep(textarea) {
-        border-color: transparent;
+    :deep(.t-chat__inner) {
+      .t-chat__notice {
+        color: var(--td-text-color-secondary);
         background-color: var(--td-bg-content-input-2);
-        border-radius: var(--td-radius-medium);
       }
     }
 
-    .command-library {
-      display: flex;
-      flex-direction: row;
-      align-content: center;
-      align-items: center;
-      justify-content: flex-start;
+    :deep(.t-chat__text) {
+      .t-chat__text__user {
+        pre {
+          background-color: transparent;
+          color: var(--td-text-color-primary);
+        }
+      }
 
-      .ai-label {
-        font: var(--td-font-link-medium);
-        margin-right: var(--td-comp-margin-s);
+      .t-chat__text__assistant {
+        a {
+          color: var(--td-text-color-primary);
+          pointer-events: none;
+        }
       }
     }
-  }
-}
 
-:deep(.chat-msg-content) {
-  a {
-    pointer-events: none;
-    cursor: not-allowed;
-    color: var(--td-brand-color);
-  }
-}
+    :deep(.t-chat__actions) {
+      border: none;
+      background-color: transparent;
 
-:deep(.t-card--bordered) {
-  border-color: transparent;
-  background-color: var(--td-bg-content-input-2);
-}
+      .t-button {
+        background-color: transparent;
 
-:deep(.t-card__header) {
-  padding: var(--td-comp-paddingTB-l) var(--td-comp-paddingLR-l) var(--td-comp-paddingTB-xs);
-}
+        &:hover {
+          background-color: var(--td-bg-content-input-2);
+        }
+      }
+    }
 
-:deep(.t-card__body) {
-  padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-l) var(--td-comp-paddingTB-l);
-}
+    :deep(.t-chat__refresh-line) {
+      display: none;
+    }
 
-:deep(.markdown-custom) {
-  pre {
-    background-color: var(--td-bg-color-secondarycontainer-active);
+    :deep(.t-chat__list) {
+      padding-right: var(--td-comp-paddingTB-s);
+    }
+
+    :deep(.t-chat__footer) {
+      padding: 2px;
+
+      .t-chat__footer__textarea {
+        border-radius: var(--td-radius-default);
+
+        .t-textarea {
+          .t-textarea__inner {
+            border-radius: var(--td-radius-default);
+            background-color: var(--td-bg-content-input-2);
+
+            &:hover {
+              box-shadow: none;
+            }
+          }
+        }
+
+        .t-chat__footer__textarea__icon {
+          .t-chat__footer__textarea__icon__default {
+            border-radius: var(--td-radius-default);
+          }
+        }
+      }
+
+      .t-chat__footer__stopbtn {
+        .t-button {
+          border-radius: var(--td-radius-default);
+          background-color: var(--td-bg-content-input-2);
+          // border-color: transparent;
+        }
+      }
+
+      .chat-action-footer {
+        text-align: center;
+        font-size: 12px;
+        color: var(--td-text-color-secondary);
+      }
+    }
   }
 }
 </style>
