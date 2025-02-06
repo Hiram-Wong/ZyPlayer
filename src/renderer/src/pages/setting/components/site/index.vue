@@ -71,6 +71,10 @@ import CommonSetting from '@/components/common-setting/table/index.vue';
 const op = computed(() => {
   return[
     {
+      label: t('pages.setting.header.check_selected'),
+      value: 'check_selected'
+    },
+    {
       label: t('pages.setting.header.add'),
       value: 'add'
     },
@@ -297,6 +301,52 @@ const handleOpChange = async (type, doc) => {
       // @ts-ignore
       tableConfig.value.data[rowIndex].check = false;
       active.checkLoad = false;
+    }
+  } else if (type === 'check_selected') {
+    if (active.checkLoad) {
+      MessagePlugin.warning(t('pages.setting.message.checkLoading'));
+      return;
+    }
+
+    if (doc.length == 0) {
+      MessagePlugin.warning(t('pages.setting.message.checkUnSelect'));
+      return;
+    }
+
+    for (const rowIndex in doc) {
+      let tableItem : any = tableConfig.value.data[rowIndex];
+      try {
+        tableItem.check = true;
+        active.checkLoad = true;
+        const activeItem: any = { ...tableItem };
+        const status = activeItem?.isActive;
+        try {
+          await fetchCmsInit({ sourceId: tableItem.id, check_init: true });
+        } catch {
+          tableItem.isActive = false;
+          continue;
+        }
+        const res = await fetchCmsHome({ sourceId: tableItem.id });
+        if (res && Array.isArray(res?.class) && res.class.length > 0) {
+          if (!status) {
+            await reqPut([tableItem.id], { isActive: true });
+            tableItem.isActive = true;
+          }
+        } else {
+          if (status) {
+            await reqPut([tableItem.id], { isActive: false });
+            tableItem.isActive = false;
+          }
+        }
+      } finally {
+        // @ts-ignore
+        if (tableItem.hasOwnProperty("check")) {
+          tableItem.check = false;
+        } else if (tableItem.hasOwnProperty("isActive")) {
+          tableItem.isActive = false;
+        }
+        active.checkLoad = false;
+      }
     }
   }
 
