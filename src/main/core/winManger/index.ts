@@ -59,6 +59,11 @@ const createWin = (name: string, options: { [key: string]: any } ) => {
 
     if (debug) {
       win.webContents.on('console-message', (_, level, message, line, file) => {
+        if (message === null || message === undefined) {
+          message = 'null';
+        } else if (typeof message === 'object') {
+          message = JSON.stringify(message, null, 2);
+        }
         logger[level < 3 ? 'info' : 'error'](
           `[vue][file: ${file}][line: ${line}]`, message,
         );
