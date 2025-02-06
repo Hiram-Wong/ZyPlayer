@@ -14,44 +14,57 @@ const DEFAULT_HEIGHT_MAIN = 640;
 const DEFAULT_WIDTH_PLAY = 875;
 const DEFAULT_HEIGHT_PLAY = 550;
 
-const setupMessageTools = (win) => {
-  if (is.dev) {
-    win.webContents.on('console-message', (_, level, message, line, sourceId) => {
-      logger.info(
-        `[vue][level: ${level}][file: ${sourceId}][line: ${line}] ${typeof message === 'object' ? JSON.stringify(message) : message}`,
-      );
-    });
-  }
-};
-
-const createWin = (name: string, options) => {
+const createWin = (name: string, options: { [key: string]: any } ) => {
+  const { debug } = globalThis.variable;
   const args = Object.assign({}, options);
 
-  let win = getWin(name);
+  let win: BrowserWindow | null = getWin(name);
 
   if (win && !win.isDestroyed()) {
     if (!win.isVisible()) win.show();
     win!.focus();
-    setTimeout(() => {
-      win!.reload();
-    }, 0);
+    setTimeout(() => win!.reload(), 0);
   } else {
     win = new BrowserWindow(args);
     renoteEnable(win.webContents);
     attachTitleBarToWindow(win);
+
     win.on('ready-to-show', () => {
+      // 开发者
       localshortcutRegister(win!, ['CommandOrControl+Shift+I', 'F12'], () => {
         if (win!.webContents.isDevToolsOpened()) {
           win!.webContents.closeDevTools();
         } else {
           win!.webContents.openDevTools({ mode: 'right' });
         }
+        win!.focus();
+      });
+      // 重载
+      localshortcutRegister(win!, ['CommandOrControl+R'], () => {
+        win!.reload();
+      });
+      // 粘贴
+      localshortcutRegister(win!, ['CommandOrControl+V'], () => {
+        win!.webContents.paste();
+      });
+      // 复制
+      localshortcutRegister(win!, ['CommandOrControl+C'], () => {
+        win!.webContents.copy();
       });
     });
+
     win.on('close', () => {
       localshortcutUnregisterAll(win!);
     });
-    setupMessageTools(win);
+
+    if (debug) {
+      win.webContents.on('console-message', (_, level, message, line, file) => {
+        logger[level < 3 ? 'info' : 'error'](
+          `[vue][file: ${file}][line: ${line}]`, message,
+        );
+      });
+    };
+
     winPool[name] = win.id;
   }
 

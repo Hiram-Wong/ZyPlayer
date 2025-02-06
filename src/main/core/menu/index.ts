@@ -11,10 +11,7 @@ const createMenu = () => {
     {
       label: 'zyfun',
       submenu: [
-        {
-          label: '关于',
-          role: 'about',
-        },
+        { label: '关于', role: 'about' },
         { type: 'separator' },
         {
           label: '重启',
@@ -41,57 +38,28 @@ const createMenu = () => {
         { label: '剪切', role: 'cut' },
         { label: '复制', role: 'copy' },
         { label: '粘贴', role: 'paste' },
+        { label: '粘贴并匹配样式', role: 'pasteAndMatchStyle' },
+        { label: '删除', role: 'delete' },
         { label: '全选', role: 'selectAll' },
       ],
     },
     {
-      label: '视图',
+      label: '显示',
       submenu: [
-        {
-          label: '刷新',
-          accelerator: platform.isMacOS ? 'Cmd+R' : 'Ctrl+R',
-          click: () => {
-            logger.info('[menu] refresh view');
-            const focusedWindow = BrowserWindow.getFocusedWindow();
-            if (focusedWindow) {
-              focusedWindow.reload();
-            }
-          },
-        },
+        { label: '重载', role: 'reload' },
+        { label: '强制重载', role: 'forceReload' },
+        { label: '切换开发者工具', role: 'toggleDevTools' },
         { type: 'separator' },
-        {
-          label: '放大',
-          accelerator: 'CmdOrCtrl+=',
-          role: 'zoomIn',
-        },
-        {
-          label: '缩小',
-          accelerator: 'CmdOrCtrl+-',
-          role: 'zoomOut',
-        },
-        {
-          label: '重置',
-          accelerator: 'CmdOrCtrl+0',
-          role: 'resetZoom',
-        },
+        { label: '放大', role: 'zoomIn' },
+        { label: '缩小', role: 'zoomOut' },
+        { label: '重置',  role: 'resetZoom' },
         { type: 'separator' },
-        { label: '全屏', role: 'togglefullscreen' },
+        { label: '切换全屏', role: 'togglefullscreen' },
       ],
     },
     {
       label: '帮助',
       submenu: [
-        {
-          label: '打开控制台',
-          accelerator: platform.isMacOS ? 'Cmd+Shift+I' : 'Ctrl+Shift+I',
-          click: () => {
-            const focusedWindow = BrowserWindow.getFocusedWindow();
-            if (focusedWindow) {
-              const webContents = focusedWindow.webContents;
-              webContents && webContents.toggleDevTools();
-            }
-          },
-        },
         {
           label: '访问Github',
           click: () => {
