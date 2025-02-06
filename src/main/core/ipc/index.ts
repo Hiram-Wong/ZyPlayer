@@ -1,5 +1,6 @@
 import { electronApp, is, platform } from '@electron-toolkit/utils';
 import { exec } from 'child_process';
+import util from 'util';
 import { app, globalShortcut, ipcMain, nativeTheme, shell } from 'electron';
 import { join } from 'path';
 import logger from '@main/core/logger';
@@ -8,6 +9,7 @@ import { toggleWindowVisibility } from '@main/utils/tool';
 import { readFile, fileExist, fileSize, fileState, deleteDir, deleteFile, createDir } from '@main/utils/hiker/file';
 import { createMain, createPlay, getWin, getAllWin } from '@main/core/winManger';
 
+const execAsync = util.promisify(exec);
 
 const ipcListen = () => {
   // 设置开机自启
@@ -62,50 +64,37 @@ const ipcListen = () => {
   });
 
   ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
-    const ua = globalThis.variable.ua;
-    const basePath = is.dev ? join(process.cwd(), 'thumbnail') : join(app.getPath('userData'), 'thumbnail');
+    const { ua, timeout } = globalThis.variable;
+    const basePath = join(app.getPath('userData'), 'thumbnail');
+
     await createDir(basePath);
     const formatPath = join(basePath, `${key}.jpg`);
 
-    const ffmpegCommand = 'ffmpeg'; // ffmpeg 命令
-    const inputOptions = ['-i', url]; // 输入选项，替换为实际视频流 URL
-    const outputOptions = [
-      '-y', // 使用 -y 选项强制覆盖输出文件
-      '-frames:v',
-      '1',
-      '-q:v',
-      '20', // 设置输出图片质量为5
-      '-user_agent',
-      `"${ua}"`,
-      `"${formatPath}"`,
-    ];
-    const command = [ffmpegCommand, ...outputOptions, ...inputOptions].join(' '); // 确保 -user_agent 选项位于输入 URL 之前
+    const ffmpegCommand = 'ffmpeg';
+    const inputOptions = ['-user_agent', `"${ua}"`, '-i', `"${url}"`];
+    const outputOptions = ['-y', '-frames:v', '1', '-q:v', '20', '-update', '1'];
+    const command = [ffmpegCommand, ...inputOptions, ...outputOptions, `"${formatPath}"`].join(' ');
 
     try {
-      await exec(command);
-      const isGenerat = await fileExist(formatPath);
-      logger.info(`[ipcMain] ffmpeg-thumbnail status:${isGenerat} command:${command}`);
-      return {
-        key,
-        url: `file://${formatPath}`,
-      };
-    } catch (err) {
-      logger.error(`[ipcMain] Error generating thumbnail: ${err}`);
-      return {
-        key,
-        url: '',
-      };
+      const { stdout, stderr } = await execAsync(command, { timeout });
+      logger.info(`[ipcMain] FFmpeg generated success. ${stderr || stdout}`);
+      return { key, url: `file://${formatPath}` };
+    } catch (err: any) {
+      logger.error(`[ipcMain] Error FFmpeg generating thumbnail: ${err.message}`);
+      return { key, url: '' };
     }
   });
 
   // 检查ffmpeg是否安装
   ipcMain.handle('ffmpeg-installed-check', async () => {
+    const { timeout } = globalThis.variable;
+
     try {
-      const { stdout } = await exec('ffmpeg -version');
-      logger.info(`[ipcMain] FFmpeg is installed. ${stdout}`);
+      const { stdout, stderr } = await execAsync('ffmpeg -version', { timeout });
+      logger.info(`[ipcMain] FFmpeg installed. ${stderr || stdout}`);
       return true;
     } catch (err) {
-      logger.error(`[ipcMain] Error Ffmpeg Installed Check: ${err}`);
+      logger.error(`[ipcMain] Error checking FFmpeg installation: ${err}`);
       return false;
     }
   });
