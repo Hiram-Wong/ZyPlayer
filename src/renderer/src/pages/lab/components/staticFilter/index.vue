@@ -14,7 +14,7 @@
       <div class="left">
         <div class="edit">
           <div class="code-op">
-            <div class="code-op-item">
+            <div class="code-op-item card">
               <reqHtml class="item source" v-model:data="reqFormData" @source="htmlSourceEvent"/>
             </div>
             <div class="code-op-item card">
@@ -29,10 +29,6 @@
               <t-input v-model="form.reurl" :label="$t('pages.lab.staticFilter.rule.link')"
                 :placeholder="$t('pages.lab.staticFilter.placeholder.linkTip')" class="input w-100%" />
               <t-button block @click="actionClass">{{ $t('pages.lab.staticFilter.rule.ctry') }}</t-button>
-            </div>
-            <div class="code-op-item card">
-              <t-button block :loading="active.batchFetchLoading" @click="batchResults">{{
-                $t('pages.lab.staticFilter.rule.br') }}</t-button>
             </div>
             <div class="code-op-item card">
               <t-textarea v-model="form.filter" :label="$t('pages.lab.staticFilter.rule.filter')"
@@ -50,6 +46,9 @@
               <t-input v-for="(_, key, index) in form.matchs" v-model="form.matchs[key]" :label="key" :key="index"
                 :placeholder="$t('pages.lab.staticFilter.rule.reg')" class="input w-100%" />
               <t-button block @click="actionFilter">{{ $t('pages.lab.staticFilter.rule.tf') }}</t-button>
+            </div>
+            <div class="code-op-item card">
+              <t-button block :loading="active.batchFetchLoading" @click="batchResults">{{ $t('pages.lab.staticFilter.rule.br') }}</t-button>
             </div>
           </div>
         </div>
@@ -174,15 +173,16 @@ const demoConfEvent = () => {
   reqFormData.value.url = "https://www.dianying101.xyz/index.php/vod/show/id/1.html";
   form.value.class_parse = String.raw`.myui-header__menu li.hidden-sm;a&&Text;a&&href;/type/id/(\d+).html`;
   form.value.reurl = "https://www.dianying101.xyz/index.php/vod/show/id/fyclass.html";
-  form.value.cate_exclude = "更新|热搜榜";
+  form.value.cate_exclude = "首页|更新|热搜榜";
   form.value.filter = "body&&.myui-screen__list";
   form.value.filterInfo = ";.text-muted&&Text;body&&a;a&&Text;a&&href";
   form.value.matchs = {
+    年份: '(/year.*?)\.html@@',
+    语言: '(/lang.*?)\.html@@',
+    字母: '(/letter.*?)\.html@@',
+    类型: '',
     剧情: 'show(.*?)/id',
     地区: 'show(.*?)/id',
-    语言: '(/lang.*?)\.html@@',
-    年份: '(/year.*?)\.html@@',
-    字母: '(/letter.*?)\.html@@',
     排序: '(/by.*?)/id'
   };
 };
