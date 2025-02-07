@@ -212,5 +212,15 @@ const reqCancel = () => {
     width: 100%;
     grid-gap: var(--td-comp-margin-s);
   }
+
+  :deep(.t-input) {
+    .t-input__prefix:not(:empty) {
+      margin-right: 0;
+    }
+
+    .t-input__suffix:not(:empty) {
+      margin-left: 0;
+    }
+  }
 }
 </style>
