@@ -20,13 +20,7 @@ const createMenu = () => {
             app.quit();
           },
         },
-        {
-          label: '退出',
-          accelerator: platform.isMacOS ? 'Cmd+Q' : 'Alt+F4',
-          click: () => {
-            app.quit();
-          },
-        },
+        { label: '退出', role: 'quit' },
       ],
     },
     {
@@ -37,7 +31,7 @@ const createMenu = () => {
         { type: 'separator' },
         { label: '剪切', role: 'cut' },
         { label: '复制', role: 'copy' },
-        { label: '粘贴', role: 'paste' },
+        // { label: '粘贴', role: 'paste' },
         { label: '粘贴并匹配样式', role: 'pasteAndMatchStyle' },
         { label: '删除', role: 'delete' },
         { label: '全选', role: 'selectAll' },
@@ -55,6 +49,14 @@ const createMenu = () => {
         { label: '重置',  role: 'resetZoom' },
         { type: 'separator' },
         { label: '切换全屏', role: 'togglefullscreen' },
+      ],
+    },
+    {
+      label: '窗口',
+      role: 'window',
+      submenu: [
+        { label: '最小化', role: 'minimize' },
+        { label: '关闭', role: 'close' },
       ],
     },
     {
