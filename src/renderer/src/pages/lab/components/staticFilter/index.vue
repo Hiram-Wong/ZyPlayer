@@ -171,12 +171,12 @@ watch(
   }
 );
 const demoConfEvent = () => {
-  reqFormData.value.url = "https://hapihd.com/index.php/vod/show/id/dianying.html";
-  form.value.class_parse = String.raw`.navbar-items li;a&&Text;a&&href;/(\w+).html`;
-  form.value.reurl = "https://hapihd.com/index.php/vod/show/id/fyclass.html";
+  reqFormData.value.url = "https://www.dianying101.xyz/index.php/vod/show/id/1.html";
+  form.value.class_parse = String.raw`.myui-header__menu li.hidden-sm;a&&Text;a&&href;/type/id/(\d+).html`;
+  form.value.reurl = "https://www.dianying101.xyz/index.php/vod/show/id/fyclass.html";
   form.value.cate_exclude = "更新|热搜榜";
-  form.value.filter = "body&&.scroll-box";
-  form.value.filterInfo = ";.module-item-title&&Text;body&&a;a&&Text;a&&href";
+  form.value.filter = "body&&.myui-screen__list";
+  form.value.filterInfo = ";.text-muted&&Text;body&&a;a&&Text;a&&href";
   form.value.matchs = {
     剧情: 'show(.*?)/id',
     地区: 'show(.*?)/id',
@@ -348,7 +348,7 @@ const batchResults = async () => {
     active.batchFetchLoading = true;
 
     const results = await batchFetch(classResult);
-    const rs = results.reduce(async (accumulator, item) => {
+    const promises = results.map(async (item) => {
       const response = await fetchStaticFilterFilter({
         html: item.body,
         ci: item.id,
@@ -357,11 +357,16 @@ const batchResults = async () => {
         matchs: matchs,
         exclude_keys: exclude_keys
       });
-      if (response && response.filters) {
-        accumulator[item.id] = response.filters;
+      return { id: item.id, filters: response?.filters };
+    });
+
+    const responses = await Promise.all(promises);
+    const rs = {};
+    responses.forEach((res) => {
+      if (res.filters) {
+        rs[res.id] = res.filters;
       }
-      return accumulator;
-    }, {});
+    });
 
     form.value.content.debug = JSON.stringify(rs, null, 2);
 
