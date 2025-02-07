@@ -44,13 +44,13 @@ const createWin = (name: string, options: { [key: string]: any } ) => {
         win!.reload();
       });
       // 粘贴
-      localshortcutRegister(win!, ['CommandOrControl+V'], () => {
+      localshortcutRegister(win!, ['CommandOrControl+B'], () => {
         win!.webContents.paste();
       });
-      // 复制
-      localshortcutRegister(win!, ['CommandOrControl+C'], () => {
-        win!.webContents.copy();
-      });
+      // // 复制
+      // localshortcutRegister(win!, ['CommandOrControl+C'], () => {
+      //   win!.webContents.copy();
+      // });
     });
 
     win.on('close', () => {

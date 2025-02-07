@@ -1,5 +1,5 @@
 import { platform } from '@electron-toolkit/utils';
-import { shell, app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
+import { shell, app, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
 import logger from '@main/core/logger';
 
 const createMenu = () => {
@@ -7,6 +7,7 @@ const createMenu = () => {
     Menu.setApplicationMenu(null);
     return;
   }
+
   const menuBar: Array<MenuItemConstructorOptions | MenuItem> = [
     {
       label: 'zyfun',
@@ -31,7 +32,7 @@ const createMenu = () => {
         { type: 'separator' },
         { label: '剪切', role: 'cut' },
         { label: '复制', role: 'copy' },
-        // { label: '粘贴', role: 'paste' },
+        { label: '粘贴', role: 'paste' },
         { label: '粘贴并匹配样式', role: 'pasteAndMatchStyle' },
         { label: '删除', role: 'delete' },
         { label: '全选', role: 'selectAll' },

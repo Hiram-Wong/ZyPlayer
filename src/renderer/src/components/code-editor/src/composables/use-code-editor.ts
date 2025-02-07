@@ -113,6 +113,24 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     if (!editor) {
       editor = monaco.editor.create(editorEl.value, options.value);
       editor.setModel(monaco.editor.createModel(modelValue.value, options.value['language']));
+      editor.addAction({
+        id: "editor.action.clipboardPasteAction",
+        label: "PasteCustom",
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV],
+        contextMenuGroupId: "9_cutcopypaste",
+        contextMenuOrder: 1.5,
+        run: async (editor) => {
+          const text = await navigator.clipboard.readText();
+          const selection = editor.getSelection();
+          const op = {
+            identifier: { major: 1, minor: 1 },
+            range: selection,
+            text: text,
+            forceMoveMarkers: true,
+          };
+          editor.executeEdits("customPaste", [op]);
+        },
+      });
       ctx.emit('afterEditorInit', editor);
       ctx.emit('monacoObject', monaco);
 
@@ -130,6 +148,29 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
       diffEditor.setModel({
         original: monaco.editor.createModel(originalText.value, options.value['language']),
         modified: monaco.editor.createModel(modelValue.value, options.value['language']),
+      });
+
+      const originalEditor = diffEditor.getOriginalEditor();
+      const modifiedEditor = diffEditor.getModifiedEditor();
+      [originalEditor, modifiedEditor].forEach((item) => {
+        item.addAction({
+          id: "editor.action.clipboardPasteAction",
+          label: "PasteCustom",
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV],
+          contextMenuGroupId: "9_cutcopypaste",
+          contextMenuOrder: 1.5,
+          run: async (editor) => {
+            const text = await navigator.clipboard.readText();
+            const selection = editor.getSelection();
+            const op = {
+              identifier: { major: 1, minor: 1 },
+              range: selection,
+              text: text,
+              forceMoveMarkers: true,
+            };
+            editor.executeEdits("customPaste", [op]);
+          },
+        });
       });
       ctx.emit('afterEditorInit', diffEditor);
       ctx.emit('monacoObject', monaco);
