@@ -33,7 +33,7 @@ class workerLruCache extends LruCache {
   }
 }
 
-const lruCache = new workerLruCache(3);
+const lruCache = new workerLruCache(6);
 
 class T3Adapter {
   id: string = '';

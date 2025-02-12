@@ -34,7 +34,7 @@
       </template>
       <template #op="slotProps">
         <t-space>
-          <t-link theme="primary" @click="handleOpChange('check', slotProps)">
+          <t-link theme="primary" @click="handleOpChange('check', [slotProps.row.id])">
             {{ $t('pages.setting.table.check') }}
             <template #prefix-icon v-if="slotProps.row.check">
               <loading-icon />
@@ -59,7 +59,7 @@ import { LoadingIcon } from 'tdesign-icons-vue-next';
 import { onActivated, onMounted, ref, reactive, computed } from 'vue';
 
 import { t } from '@/locales';
-import { fetchSitePage, putSite, delSite, addSite, putSiteDefault, fetchCmsInit, fetchCmsHome } from '@/api/site';
+import { fetchSitePage, putSite, delSite, addSite, putSiteDefault, fetchCmsInit, fetchCmsHome, fetchCmsCategory } from '@/api/site';
 import emitter from '@/utils/emitter';
 
 import { COLUMNS } from './constants';
@@ -85,6 +85,10 @@ const op = computed(() => {
     {
       label: t('pages.setting.header.delete'),
       value: 'delete'
+    },
+    {
+      label: t('pages.setting.header.check'),
+      value: 'check'
     }
   ]
 });
@@ -105,7 +109,7 @@ const pagination = reactive({
   current: 1,
   theme: "simple"
 });
-const tableConfig = ref({
+const tableConfig = ref<{ [key: string]: any }>({
   data: [],
   rawData: [],
   sort: {},
@@ -224,7 +228,7 @@ const handleOpDefault = async (id) => {
 };
 
 const handleOpChange = async (type, doc) => {
-  if (doc.length === 0 && ['enable', 'disable', 'delete'].includes(type)) {
+  if (doc.length === 0 && ['enable', 'disable', 'delete', 'check'].includes(type)) {
     MessagePlugin.warning(t('pages.setting.message.noSelectData'));
     return;
   };
@@ -266,41 +270,48 @@ const handleOpChange = async (type, doc) => {
     formGroup.value = tableConfig.value.group;
     active.dialogForm = true;
   } else if (type === 'check') {
-    if (active.checkLoad) {
-      MessagePlugin.warning(t('pages.setting.message.checkLoading'));
-      return;
-    }
-    const { rowIndex, row } = doc;
+    for (const id of doc) {
+      const rowIndex = tableConfig.value.data.findIndex((item: any) => item.id === id);
+      if (rowIndex === -1) continue;
 
-    try {
-      // @ts-ignore
+      const row = tableConfig.value.data[rowIndex];
       tableConfig.value.data[rowIndex].check = true;
-      active.checkLoad = true;
-      const activeItem: any = { ...row };
-      const status = activeItem?.isActive;
-      await fetchCmsInit({ sourceId: row.id });
-      const res = await fetchCmsHome({ sourceId: row.id });
-      if (res && Array.isArray(res?.class) && res.class.length > 0) {
-        if (!status) {
-          await reqPut([row.id], { isActive: true });
-          // @ts-ignore
-          tableConfig.value.data[rowIndex].isActive = true;
-        }
-      } else {
-        if (status) {
-          await reqPut([row.id], { isActive: false });
-          // @ts-ignore
-          tableConfig.value.data[rowIndex].isActive = false;
-        }
+
+      try {
+        await fetchCmsInit({ sourceId: id });
+        const resHome = await fetchCmsHome({ sourceId: id });
+
+        let isActive = false;
+
+        if (resHome && Array.isArray(resHome.class) && resHome.class.length !== 0) {
+          const resCategory = await fetchCmsCategory({
+            tid: resHome?.class[0].type_id,
+            sourceId: id
+          });
+
+          if (resCategory && Array.isArray(resCategory.list) && resCategory.list.length !== 0) {
+            isActive = true;
+          };
+        };
+
+        if (isActive !== row.isActive) {
+          await reqPut([id], { isActive });
+          MessagePlugin.closeAll();
+        };
+      } catch (err: any) {
+        console.error('[setting][site][check][error]', err);
+        if (row.isActive) {
+          await reqPut([id], { isActive: false });
+          MessagePlugin.closeAll();
+        };
+      } finally {
+        tableConfig.value.data[rowIndex].check = false;
       }
-    } finally {
-      // @ts-ignore
-      tableConfig.value.data[rowIndex].check = false;
-      active.checkLoad = false;
-    }
+    };
+    MessagePlugin.success(`${t('pages.setting.form.success')}`);
   }
 
-  if (['enable', 'disable', 'delete', 'default'].includes(type)) {
+  if (['enable', 'disable', 'delete', 'check', 'default'].includes(type)) {
     refreshTable();
     emitter.emit('refreshFilmConfig');
   };
