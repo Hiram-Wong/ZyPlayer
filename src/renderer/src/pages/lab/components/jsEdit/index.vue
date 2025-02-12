@@ -961,7 +961,8 @@ const handleDataDebugProxyUpload = async () => {
       return;
     } else {
       try {
-        const jsonStr = JSON5.parse(upload);
+        // const jsonStr = JSON5.parse(upload);
+        const jsonStr = new Function(`return ${upload}`)();
         if (jsonStr && Array.isArray(jsonStr) && jsonStr.length === 3) {
           content = jsonStr;
         } else {
