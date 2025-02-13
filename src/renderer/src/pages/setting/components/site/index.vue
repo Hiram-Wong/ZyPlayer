@@ -283,13 +283,13 @@ const handleOpChange = async (type, doc) => {
 
         let isActive = false;
 
-        if (resHome && Array.isArray(resHome.class) && resHome.class.length !== 0) {
+        if (resHome && Array.isArray(resHome.class) && resHome.class.length > 0) {
           const resCategory = await fetchCmsCategory({
             tid: resHome?.class[0].type_id,
             sourceId: id
           });
 
-          if (resCategory && Array.isArray(resCategory.list) && resCategory.list.length !== 0) {
+          if (resCategory && Array.isArray(resCategory.list) && resCategory.list.length > 0 && resCategory.list[0]?.vod_id !== "no_data") {
             isActive = true;
           };
         };
