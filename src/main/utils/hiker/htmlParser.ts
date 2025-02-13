@@ -12,6 +12,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { Cheerio, CheerioAPI } from 'cheerio';
 import { JSONPath } from 'jsonpath-plus';
 import { urljoin } from './base';
 
@@ -24,8 +25,8 @@ class Jsoup {
   MY_URL: string = '';
   pdfh_html = '';
   pdfa_html = '';
-  pdfh_doc = null;
-  pdfa_doc: cheerio.Root | null = null;
+  pdfh_doc: CheerioAPI | null = null;
+  pdfa_doc: CheerioAPI | null = null;
 
   constructor(MY_URL: string = '') {
     this.MY_URL = MY_URL;
@@ -190,7 +191,7 @@ class Jsoup {
     }
 
     const parses = parse.split(' ');
-    let ret: cheerio.Cheerio | null = null;
+    let ret: Cheerio<any> | null = null;
     for (const nparse of parses) {
       ret = this.parseOneRule(doc, nparse, ret);
       if (!ret) return [];
@@ -211,7 +212,7 @@ class Jsoup {
 
     const doc = cheerio.load(html);
     const parses: string[] = parse.split(' ');
-    let ret: cheerio.Cheerio | null = null;
+    let ret: Cheerio<any> | null = null;
     for (const pars of parses) {
       ret = this.parseOneRule(doc, pars, ret);
       if (!ret) return [];
@@ -235,7 +236,7 @@ class Jsoup {
   pdfh(html: string, parse: string, baseUrl: string = ''): string {
     if (!html || !parse) return '';
 
-    const doc: cheerio.Root = cheerio.load(html);
+    const doc: CheerioAPI = cheerio.load(html);
     if (PARSE_CACHE) {
       if (this.pdfa_html !== html) {
         this.pdfa_html = html;
@@ -258,7 +259,7 @@ class Jsoup {
     parse = this.parseHikerToJq(parse, true);
     const parses: string[] = parse.split(' ');
 
-    let ret: string | cheerio.Cheerio | null = null;
+    let ret: Cheerio<any> | string | null = null;
     for (const nparse of parses) {
       ret = this.parseOneRule(doc, nparse, ret);
       if (!ret) return '';
@@ -266,15 +267,15 @@ class Jsoup {
     if (option) {
       switch (option) {
         case 'Text':
-          ret = ret?.text() || '';
+          ret = (ret as Cheerio<any>)?.text() || '';
           ret = ret ? this.parseText(ret) : '';
           break;
         case 'Html':
-          ret = ret?.html() || '';
+          ret = (ret as Cheerio<any>)?.html() || '';
           break;
         default:
           // 保留原来的ret
-          let original_ret = ret?.clone();
+          let original_ret = (ret as Cheerio<any>)?.clone();
           let options = option.split('||');
           let opt_index = 0;
           for (let opt of options) {
@@ -308,7 +309,7 @@ class Jsoup {
       ret = `${ret}`;
     }
 
-    return ret;
+    return ret as string;
   }
 
   pd(html: string, parse: string, baseUrl: string = ''): string {
@@ -368,25 +369,24 @@ class Jsoup {
   }
 }
 
-const pdfh = (html: string, parse: string, base_url: string = globalThis?.MY_URL || '') => {
+const pdfh = (html: string, parse: string, base_url: string = globalThis?.MY_URL || ''): string => {
   const jsp = new Jsoup(base_url);
   return jsp.pdfh(html, parse, base_url);
 };
 
-const pd = (html: string, parse: string, base_url: string = globalThis?.MY_URL || '') => {
+const pd = (html: string, parse: string, base_url: string = globalThis?.MY_URL || ''): string => {
   const jsp = new Jsoup(base_url);
   return jsp.pd(html, parse);
 };
 
-const pdfa = (html: string, parse: string) => {
+const pdfa = (html: string, parse: string): string[] => {
   const jsp = new Jsoup();
   return jsp.pdfa(html, parse);
 };
 
-const pdfl = (html: string, parse: string, list_text: string, list_url: string, url_key: string) => {
+const pdfl = (html: string, parse: string, list_text: string, list_url: string, url_key: string): string[] => {
   const jsp = new Jsoup();
   return jsp.pdfl(html, parse, list_text, list_url, url_key);
 };
 
-export default Jsoup;
-export { pd, pdfa, pdfh, pdfl };
+export { Jsoup as default, pd, pdfa, pdfh, pdfl };
