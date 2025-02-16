@@ -413,7 +413,7 @@ const formatContent = (text: string | undefined | null): string => {
   }
 
   if (text.startsWith('/') || text.endsWith('/')) {
-    text = text.split('/').filter(Boolean).join(' | ');
+    text = text.split('/').filter(Boolean).join(', ');
   }
 
   return text;
