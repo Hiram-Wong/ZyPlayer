@@ -18,15 +18,18 @@
             </div>
             <div class="right">
               <div class="info">
-                <p class="name txthide">{{ infoConf.vod_name }}</p>
+                <p class="title txthide">{{ infoConf.vod_name }}</p>
                 <p class="info-item txthide">
-                  <span class="label">{{ $t('pages.film.info.release') }}: {{ infoConf?.vod_year || $t('pages.film.info.unknown') }}</span>
+                  <span class="name">{{ $t('pages.film.info.release') }}: </span>
+                  <span class="role">{{ formatContent(infoConf?.vod_year) || $t('pages.film.info.unknown') }}</span>
                 </p>
                 <p class="info-item txthide">
-                  <span class="label">{{ $t('pages.film.info.type') }}: {{ infoConf?.type_name || $t('pages.film.info.unknown') }}</span>
+                  <span class="name">{{ $t('pages.film.info.type') }}: </span>
+                  <span class="role">{{ formatContent(infoConf?.type_name) || $t('pages.film.info.unknown') }}</span>
                 </p>
                 <p class="info-item txthide">
-                  <span class="label">{{ $t('pages.film.info.area') }}: {{ infoConf?.vod_area || $t('pages.film.info.unknown') }}</span>
+                  <span class="name">{{ $t('pages.film.info.area') }}: </span>
+                  <span class="role">{{ formatContent(infoConf?.vod_area) || $t('pages.film.info.unknown') }}</span>
                 </p>
               </div>
               <div class="add-box" @click="putBinge(false)">
@@ -112,6 +115,7 @@ import {
   reverseOrderHelper,
   formatName,
   formatIndex,
+  formatContent,
   formatSeason,
   formatReverseOrder
 } from '@/utils/common/film';
@@ -501,7 +505,7 @@ const setup = async () => {
       }
 
       .info {
-        .name {
+        .title {
           margin-bottom: var(--td-comp-margin-s);
           color: var(--td-text-color-primary);
           font-weight: 700;

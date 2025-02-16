@@ -15,11 +15,11 @@
             {{ info['vod_score'] ? info['vod_score'] : '0.0' }}
           </span>
           <t-divider layout="vertical" v-show="info['type_name']" />
-          <span v-show="info['type_name']" class="txthide">{{ info['type_name'] }}</span>
+          <span v-show="info['type_name']" class="txthide">{{ formatContent(info['type_name']) }}</span>
           <t-divider layout="vertical" v-show="info['vod_area']" />
-          <span v-show="info['vod_area']" class="txthide">{{ info['vod_area'] }}</span>
+          <span v-show="info['vod_area']" class="txthide">{{ formatContent(info['vod_area']) }}</span>
           <t-divider layout="vertical" v-show="info['vod_year']" />
-          <span v-show="info['vod_year']" class="txthide">{{ info['vod_year'] }}</span>
+          <span v-show="info['vod_year']" class="txthide">{{ formatContent(info['vod_year']) }}</span>
         </div>
         <div class="function">
           <div class="func-item like" @click="putBinge(false)">
@@ -157,27 +157,27 @@
             />
           </div>
           <div class="content">
-            <div class="name">{{ info['vod_name'] }}</div>
-            <div class="type">{{ info['type_name'] }}</div>
-            <div class="num">{{ info['vod_remarks'] }}</div>
+            <div class="name" v-show="info['vod_name']">{{ formatContent(info['vod_name']) || $t('pages.film.info.unknown') }}</div>
+            <div class="type" v-show="info['type_name']">{{ formatContent(info['type_name']) }}</div>
+            <div class="num" v-show="info['vod_remarks']">{{ formatContent(info['vod_remarks']) }}</div>
           </div>
         </div>
         <div class="background">
           <div class="title">{{ $t('pages.player.film.background') }} </div>
           <div class="content">
-            <span class="txt" v-html="formatContent(info['vod_content'], '简介')"></span>
+            <span class="txt" v-html="formatContent(info['vod_content']) || $t('pages.film.info.unknown')"></span>
           </div>
         </div>
         <div class="case">
           <div class="title">{{ $t('pages.player.film.actors') }}</div>
           <div class="content">
-            <div v-show="info['vod_director']">
+            <div class="director">
               <span class="name">{{ $t('pages.player.film.director') }}: </span>
-              <span class="role">{{ formatContent(info['vod_director'], '导演') }}</span>
+              <span class="role">{{ formatContent(info['vod_director']) || $t('pages.film.info.unknown') }}</span>
             </div>
-            <div v-show="info['vod_actor']">
+            <div class="actor">
               <span class="name">{{ $t('pages.player.film.actor') }}: </span>
-              <span class="role">{{ formatContent(info['vod_actor'], '主演') }}</span>
+              <span class="role">{{ formatContent(info['vod_actor']) || $t('pages.film.info.unknown') }}</span>
             </div>
           </div>
         </div>

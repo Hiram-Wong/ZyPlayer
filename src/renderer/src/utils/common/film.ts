@@ -385,27 +385,38 @@ const formatIndex = (item: string): { index: string; url: string } => {
  * @param keyword 关键字
  * @returns 文本
  */
-const formatContent = (text: string | undefined | null, keyword: string): string => {
+const formatContent = (text: string | undefined | null): string => {
   if (!text) return '';
-  let res = text;
-  // 创建一个正则表达式来匹配关键字后面的内容
-  const regex = new RegExp(`${keyword}[：:]\\s*([^\\n]+)`, 'i');
-  // 执行匹配
-  const match = text.match(regex);
+  text = text.trim();
 
-  // 如果匹配成功，清理并返回结果
-  if (match && match[1]) {
-    // 去除可能的多余空格和换行符，并分割成数组
-    const names = match[1]
-      .split(/,\s*/)
-      .map((name) => name.trim())
-      .filter((name) => name);
-    res = names.join(' ');
-  } else {
-    // 如果没有匹配到关键字，返回空字符串
-    res = '';
+  const retainTextMap = [
+    '年份', '年代', '上映',
+    '地区', '类型', '语言', '更新', '更新至', '评分',
+    '导演', '编剧', '主演', '演员',
+    '简介', '背景', '详情',
+    '片长', '状态', '播放', '集数', '标签', '更新至',
+  ];
+  const retainCharMap = ['：', ':', ' '];
+
+  // 遍历关键词，处理匹配的文本
+  for (const keyword of retainTextMap) {
+    if (text.startsWith(keyword)) {
+      const remainingText = text.slice(keyword.length).trim();
+      for (const char of retainCharMap) {
+        if (remainingText.startsWith(char)) {
+          text = remainingText.slice(char.length).trim();
+          break;
+        }
+      }
+      break;
+    }
   }
-  return res.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '');
+
+  if (text.startsWith('/') || text.endsWith('/')) {
+    text = text.split('/').filter(Boolean).join(' | ');
+  }
+
+  return text;
 };
 
 /**
