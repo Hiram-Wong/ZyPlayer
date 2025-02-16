@@ -44,7 +44,7 @@ const createWin = (name: string, options: { [key: string]: any } ) => {
         win!.reload();
       });
       // 粘贴
-      localshortcutRegister(win!, ['CommandOrControl+B'], () => {
+      localshortcutRegister(win!, ['CommandOrControl+Shift+V'], () => {
         win!.webContents.paste();
       });
       // // 复制
