@@ -64,3 +64,5 @@
   - 精简集成(移除nplayer｜dplayer)
   - artplayer|xgplayer i18n支持
   - artplayer|xgplayer 下集emitter
+- 2024.2.24:
+  - 集成oplayer(下一集显示bug, 弹幕逻辑天坑)

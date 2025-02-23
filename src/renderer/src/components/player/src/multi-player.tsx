@@ -1,7 +1,7 @@
 import { defineComponent, onUnmounted, ref, shallowRef, toRaw } from 'vue';
 import type { SetupContext } from 'vue';
-import { ArtPlayerAdapter, XgPlayerAdapter } from './core';
-// import { ArtPlayerAdapter, DPlayerAdapter, NPlayerAdapter, XgPlayerAdapter } from './core';
+import { ArtPlayerAdapter, XgPlayerAdapter, OPlayerAdapter,  } from './core';
+// import { ArtPlayerAdapter, DPlayerAdapter, NPlayerAdapter, XgPlayerAdapter, OPlayerAdapter } from './core';
 import { singleton, mediaUtils } from './utils/tool';
 import './assets/css/index.less';
 
@@ -16,6 +16,7 @@ const MultiPlayer = defineComponent({
       // dplayer: DPlayerAdapter,
       // nplayer: NPlayerAdapter,
       xgplayer: XgPlayerAdapter,
+      oplayer: OPlayerAdapter,
     };
 
     const create = async (doc: { [key: string]: any }, type: string = 'artplayer') => {

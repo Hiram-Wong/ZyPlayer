@@ -214,6 +214,7 @@ const PLAYER_OPTIONS = computed(() => {
     // { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
     { label: t('pages.setting.base.artplayer'), value: 'artplayer' },
     // { label: t('pages.setting.base.nplayer'), value: 'nplayer' },
+    { label: t('pages.setting.base.oplayer'), value: 'oplayer' },
     { label: t('pages.setting.base.custom'), value: 'custom' }
   ]
 });

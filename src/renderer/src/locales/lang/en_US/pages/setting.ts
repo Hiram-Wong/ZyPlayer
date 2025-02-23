@@ -160,6 +160,7 @@ export default {
     aliplayer: 'AliPlayer',
     tcplayer: 'TcPlayer',
     artplayer: 'ArtPlayer',
+    oplayer: 'OPlayer',
     dplayer: 'DPlayer',
     nplayer: 'NPlayer',
     ckplayer: 'CkPlayer',
