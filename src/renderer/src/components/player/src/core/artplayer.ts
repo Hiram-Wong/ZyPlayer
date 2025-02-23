@@ -1,10 +1,10 @@
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
+
 import publicStream from '../utils/media-stream';
 import { publicBarrageSend, playerStorage } from '../utils/tool';
 import { publicColor, publicIcons } from '../utils/static';
 import emitter from '@/utils/emitter';
-
 
 class ArtPlayerAdapter {
   player: Artplayer | null = null;

@@ -1,5 +1,5 @@
 import OPlayer from '@oplayer/core';
-import { Chromecast, AirPlay, Playlist, ad, vttThumbnails } from '@oplayer/plugins';
+// import { Chromecast, AirPlay, Playlist, ad, vttThumbnails } from '@oplayer/plugins';
 import OUI from '@oplayer/ui';
 import ODanmaku from '@oplayer/danmaku';
 import OHls from '@oplayer/hls';
@@ -7,11 +7,9 @@ import ODash from '@oplayer/dash';
 import OMpegts from '@oplayer/mpegts';
 // import OTorrent from '@oplayer/torrent';
 
-
 import { publicBarrageSend, playerStorage } from '../utils/tool';
 import { publicColor, publicIcons } from '../utils/static';
 import emitter from '@/utils/emitter';
-
 
 class OPlayerAdapter {
   player: OPlayer | null = null;
