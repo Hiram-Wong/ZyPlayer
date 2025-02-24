@@ -40,9 +40,9 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           },
           output: {
             manualChunks: {
-              fastify: ['fastify', 'fastify-logger', 'fastify-plugin', '@fastify/cors', '@fastify/multipart'],
+              fastify: ['fastify', 'fastify-plugin', '@fastify/cors', '@fastify/multipart'],
               db: ['drizzle-kit', 'drizzle-orm'],
-              crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa'],
+              crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa', 'node-rsa'],
             },
           },
           external: [],
@@ -74,16 +74,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
             manualChunks: {
               'monaco-editor': ['monaco-editor'],
               lodash: ['lodash'],
-              xgplayer: [
-                'xgplayer',
-                'xgplayer-dash',
-                'xgplayer-flv',
-                'xgplayer-flv.js',
-                'xgplayer-hls',
-                'xgplayer-hls.js',
-                'xgplayer-mp4',
-                'xgplayer-shaka',
-              ],
+              xgplayer: ['xgplayer', 'xgplayer-flv', 'xgplayer-hls', 'xgplayer-mp4', 'xgplayer-shaka'],
               artplayer: ['artplayer', 'artplayer-plugin-danmuku'],
               dplayer: ['dplayer'],
               nplayer: ['nplayer', '@nplayer/danmaku'],
