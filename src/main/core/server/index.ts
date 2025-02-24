@@ -2,7 +2,6 @@ import { app } from 'electron';
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
-import fastifyLogger from 'fastify-logger';
 import fastifyPlugin from 'fastify-plugin';
 
 import { JsonDB, Config } from 'node-json-db';
@@ -20,25 +19,14 @@ const wrappedJsonDbPlugin = fastifyPlugin(jsonDbPlugin, {
   name: 'json-db-plugin',
 });
 
-let logOpt = {
-  console: true,
-  file: join(app.getPath('userData'), 'logs/fastify.log'), // 文件路径
-  maxBufferLength: 4096, // 日志写入缓存队列最大长度
-  flushInterval: 1000, // flush间隔
-  logrotator: {
-    byHour: false,
-    byDay: true,
-    hourDelimiter: '_',
-  },
-};
-const { opt } = fastifyLogger(logOpt);
-opt.stream = null;
-
 const setup = async () => {
   const server = fastify({
-    logger: opt, // 是否开启日志
-    forceCloseConnections: true, // 是否强制关闭连接
-    ignoreTrailingSlash: true, // 是否忽略斜杠
+    logger: {
+      level: 'info', // 日志级别（可选：trace, debug, info, warn, error, fatal）
+      file: join(app.getPath('userData'), 'logs/fastify.log') // 日志文件路径
+    }, // 日志
+    forceCloseConnections: true, // 强制关闭连接
+    ignoreTrailingSlash: true, // 忽略斜杠
     maxParamLength: 10240, // 参数长度限制
     bodyLimit: 1024 * 1024 * 3, // 限制请求体大小为 3MB
   });
