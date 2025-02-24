@@ -1,0 +1,28 @@
+.css-wb262f button {
+  background-color: transparent !important;
+}
+
+/* process */
+.css-njx1sw {
+  background-color: transparent;
+  background-image: linear-gradient(270deg, #00e038, #32ccff);
+}
+
+
+.css-fy6n4p, .css-1y41a61, .css-12rog9r {
+  border-radius: 8px !important;
+  backdrop-filter: saturate(180%) blur(20px);
+  background-color: #000000bf !important;
+}
+
+/* volume */
+.css-1jiyo3p {
+  background-color: transparent;
+  background-image: linear-gradient(90deg, #00e038, #32ccff);
+}
+
+/* danmuku */
+.css-xpnf3v {
+  display: flex;
+  margin: 0 10px;
+}

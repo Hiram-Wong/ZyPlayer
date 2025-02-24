@@ -1,10 +1,12 @@
 import Artplayer from 'artplayer';
 import artplayerPluginDanmuku from 'artplayer-plugin-danmuku';
 
-import publicStream from '../utils/media-stream';
-import { publicBarrageSend, playerStorage } from '../utils/tool';
-import { publicColor, publicIcons } from '../utils/static';
+import publicStream from '../../utils/media-stream';
+import { publicBarrageSend, playerStorage } from '../../utils/tool';
+import { publicColor, publicIcons } from '../../utils/static';
 import emitter from '@/utils/emitter';
+
+import './css/index.css';
 
 class ArtPlayerAdapter {
   player: Artplayer | null = null;
@@ -236,14 +238,15 @@ class ArtPlayerAdapter {
     this.player.play();
   };
 
-  playNext = (player: Artplayer, options: any) => {
+  playNext = (options: any) => {
+    if (!this.player) return;
     // player.switch = options.url;
-    player.switchUrl(options.url);
-    if (player.plugins?.artplayerPluginDanmuku) {
-      player.plugins.artplayerPluginDanmuku.config({
+    this.player.switchUrl(options.url);
+    if (this.player.plugins?.artplayerPluginDanmuku) {
+      this.player.plugins.artplayerPluginDanmuku.config({
         danmuku: [],
       });
-      player.plugins.artplayerPluginDanmuku.load();
+      this.player.plugins.artplayerPluginDanmuku.load();
     }
   };
 

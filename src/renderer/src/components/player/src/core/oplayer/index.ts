@@ -7,9 +7,11 @@ import ODash from '@oplayer/dash';
 import OMpegts from '@oplayer/mpegts';
 // import OTorrent from '@oplayer/torrent';
 
-import { publicBarrageSend, playerStorage } from '../utils/tool';
-import { publicColor, publicIcons } from '../utils/static';
+import { publicBarrageSend, playerStorage } from '../../utils/tool';
+import { publicColor, publicIcons } from '../../utils/static';
 import emitter from '@/utils/emitter';
+
+import './css/index.css';
 
 class OPlayerAdapter {
   player: OPlayer | null = null;
@@ -83,6 +85,11 @@ class OPlayerAdapter {
     this.player.context.danmaku.danmaku.comments = comments;
     this.player.context.danmaku.loaded = true;
 
+    // const config = { enable: true, displaySender: false, heatmap: false, source: comments || [] };
+    // console.log(this.player);
+    // this.player.context.danmaku.changeSource({ ...config }, true)
+    // console.log(this.player);
+
     // this.publicListener.sendDanmu = (danmu) => {
     //   const options = {
     //     player: id,
@@ -101,8 +108,6 @@ class OPlayerAdapter {
     const defaultUi = { ...this.options.ui };
     defaultOpt.source.src = options.url;
     switch (options.type) {
-      case 'customMp4':
-        break;
       case 'customFlv':
         defaultOpt.source.format = 'flv';
         break;
@@ -111,10 +116,13 @@ class OPlayerAdapter {
         break;
       case 'customDash':
         defaultOpt.source.format = 'dash';
+        break;
       case 'customWebTorrent':
         defaultOpt.source.format = 'torrent';
         break;
+      case 'customMp4':
       default:
+        defaultOpt.source.forma = 'auto';
         break;
     }
     // 直播
@@ -144,11 +152,13 @@ class OPlayerAdapter {
           }
         }
       ];
-    }
+    };
     // 下一集
     if (options.next) {
       defaultUi.icons.next = `<svg style="transform: scale(0.7);" viewBox="0 0 1024 1024"><path d="M743.36 427.52L173.76 119.04A96 96 0 0 0 32 203.52v616.96a96 96 0 0 0 141.76 84.48l569.6-308.48a96 96 0 0 0 0-168.96zM960 96a32 32 0 0 0-32 32v768a32 32 0 0 0 64 0V128a32 32 0 0 0-32-32z"></path></svg>`;
-    }
+    } else {
+      defaultUi.icons.next = null;
+    };
 
     const plugins = [
       {
@@ -156,8 +166,8 @@ class OPlayerAdapter {
         name: 'oplayer-plugin-next',
         apply(player) {
           player.locales.update({
-            en: { Next: 'Next' },
-            'zh-CN': { Next: '下一集' }
+            en: { Next: 'Next', Heatmap: 'Heatmap' },
+            'zh-CN': { Next: '下一集', Heatmap: '热力图' },
           });
           player.on(['next'], () => {
             emitter.emit('nextVideo');
@@ -166,7 +176,7 @@ class OPlayerAdapter {
         }
       },
       OUI({ ...defaultUi }),
-      new ODanmaku({ enable: true, heatmap: false, source: [] }),
+      new ODanmaku({ enable: true, displaySender: false, heatmap: false, source: [] }),
       OHls({ forceHLS: true }),
       ODash(),
       OMpegts(),
@@ -174,6 +184,7 @@ class OPlayerAdapter {
     ];
     let player: OPlayer;
     player = OPlayer.make(`#${options.container}`, { ...defaultOpt }).use(plugins).create();
+    // @ts-ignore
     player.storage = playerStorage;
 
     player.once('ready', () => {
@@ -182,12 +193,15 @@ class OPlayerAdapter {
     });
 
     this.publicListener.playrateUpdate = () => {
+      // @ts-ignore
       if (!player.isSourceChanging) player.storage.set('playrate', player.playbackRate);
     };
     player.on('ratechange',this.publicListener.playrateUpdate);
 
     this.publicListener.volumeUpdate = () => {
+      // @ts-ignore
       player.storage.set('volume', player.volume);
+      // @ts-ignore
       player.storage.set('muted', player.isMuted);
     };
     player.on('volumechange', this.publicListener.volumeUpdate);
@@ -221,8 +235,28 @@ class OPlayerAdapter {
     this.player.play();
   };
 
-  playNext = (player: OPlayer, options: any) => {
-    player.changeSource(options.url);
+  playNext = ( options: any) => {
+    if (!this.player) return;
+    const config = { src: options.url, format: 'auto' };
+    switch (options.type) {
+      case 'customFlv':
+        config.format = 'flv';
+        break;
+      case 'customHls':
+        config.format = 'hls';
+        break;
+      case 'customDash':
+        config.format = 'dash';
+        break;
+      case 'customWebTorrent':
+        config.format = 'torrent';
+        break;
+      case 'customMp4':
+      default:
+        config.format = 'auto';
+        break;
+    }
+    this.player.changeSource({ ...config }, true);
   };
 
   seek = (time: number) => {

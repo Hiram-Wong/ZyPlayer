@@ -61,8 +61,14 @@
   - headers前端剔除不安全请求头, 拦截符遇=改为$*&
   - getMediaType方法加入请求头
 - 2024.1.25:
-  - 精简集成(移除nplayer｜dplayer)
+  - 精简集成(移除nplayer|dplayer)
   - artplayer|xgplayer i18n支持
   - artplayer|xgplayer 下集emitter
 - 2024.2.24:
   - 集成oplayer(下一集显示bug, 弹幕逻辑天坑)
+- 2024.2.25:
+  - 修复oplayer下一集显示后无法摧毁
+  - 修复oplayer方法create类型switch缺失break
+  - 修复xgplayer多语言映射错误导致倍速显示undefined
+  - 修复artplayer|oplayer方法playNext入参错误
+  - 自定义播放器样式各自导入不再整体导入

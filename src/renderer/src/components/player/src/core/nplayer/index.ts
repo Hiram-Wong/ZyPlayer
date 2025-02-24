@@ -1,9 +1,11 @@
 import NPlayer, { EVENT as NPlayerEvent, Icon as NPlayerIcon } from 'nplayer';
 import nplayerDanmaku from '@nplayer/danmaku';
 
-import publicStream from '../utils/media-stream';
-import { publicBarrageSend, playerStorage } from '../utils/tool';
-import { publicIcons } from '../utils/static';
+import publicStream from '../../utils/media-stream';
+import { publicBarrageSend, playerStorage } from '../../utils/tool';
+import { publicIcons } from '../../utils/static';
+
+import './css/index.css';
 
 const elementDeal = {
   createIcon: (html: string, noCls = false) => {

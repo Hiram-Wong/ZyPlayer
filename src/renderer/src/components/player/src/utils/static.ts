@@ -22,6 +22,7 @@ const publicIcons = {
 
 const publicColor = {
   theme: '#00e038',
+  process: 'linear-gradient(270deg, #00e038, #32ccff)',
 };
 
 export { publicIcons, publicColor };

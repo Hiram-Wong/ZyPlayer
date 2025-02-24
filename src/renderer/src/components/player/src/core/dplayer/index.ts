@@ -1,8 +1,10 @@
 import DPlayer from 'dplayer';
 
-import publicStream from '../utils/media-stream';
-import { playerStorage } from '../utils/tool';
-import { publicIcons } from '../utils/static';
+import publicStream from '../../utils/media-stream';
+import { playerStorage } from '../../utils/tool';
+import { publicIcons } from '../../utils/static';
+
+import './css/index.css';
 
 const elementDeal = {
   replace: (el: string, newEle: string) => {

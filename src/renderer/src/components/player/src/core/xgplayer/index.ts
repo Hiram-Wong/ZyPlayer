@@ -13,6 +13,9 @@ import playNextPlugin from './plugins/playNext';
 import { playerStorage } from '../../utils/tool';
 import { publicColor, publicIcons } from '../../utils/static';
 
+import 'xgplayer/es/plugins/danmu/index.css';
+import './css/index.css';
+
 class XgPlayerAdapter {
   player: XgPlayer | null = null;
   options: { [key: string]: any } = {
@@ -22,7 +25,7 @@ class XgPlayerAdapter {
     cssFullscreen: false,
     startTime: 0,
     playbackRate: {
-      list: [2, 1.5, 1.25, { rate: 1, iconText: { zh: '倍速' } }, 0.75, 0.5],
+      list: [2, 1.5, 1.25, { rate: 1, iconText: { 'zh-cn': '倍速', en: 'Speed' } }, 0.75, 0.5],
       index: 3,
     },
     time: { index: 2 },
