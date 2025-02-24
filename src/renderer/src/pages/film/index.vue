@@ -298,6 +298,7 @@ const changeClassEvent = (key: string) => {
 const getFilmList = async (source) => {
   const pg = pagination.value.pageIndex;
   const t = active.value.tmpClass || active.value.class;
+  const f = active.value.filter || {};
 
   let length = 0;
   try {
@@ -307,9 +308,10 @@ const getFilmList = async (source) => {
     } else {
       res = await fetchCmsCategory({
         sourceId: source.id,
-        page: pg,
+        page: pg || 1,
         tid: t,
-        f: JSON.stringify(active.value.filter)
+        filter: !!f,
+        f: JSON.stringify(f)
       });
     };
     if (Array.isArray(res?.list) && res?.list.length > 0) {

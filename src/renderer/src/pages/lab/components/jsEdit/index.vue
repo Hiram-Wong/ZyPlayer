@@ -863,18 +863,18 @@ const handleDataDebugHomeVod = async () => {
 };
 
 const handleDataDebugCategory = async () => {
-  const { t: tid, f, pg: page } = form.value.category;
+  let { t: tid, f = '{}', pg } = form.value.category;
+  f = Function('return (' + f + ')')();
 
   if (!tid) {
     MessagePlugin.warning(t('pages.lab.jsEdit.message.listNoT'));
     return;
-  }
-
+  };
   const data = {
     tid,
-    page: page || 1,
+    page: pg || 1,
     filter: !!f,
-    extend: f ? JSON5.parse(f) : {},
+    f: JSON.stringify(f),
   };
   await handleDataDebug('category', data);
 };
