@@ -842,23 +842,23 @@ const sm4 = (() => {
         return 'pkcs#7';
     }
   };
-  const parseEncode = (value: string | bytes, encoding: string) => {
+  const parseEncode = (value: string | Uint8Array | Buffer, encoding: string) => {
     switch (encoding.toLowerCase()) {
       case 'base64':
-        return Buffer.from(value, 'base64');
+        return Buffer.from(value as string, 'base64');
       case 'hex':
-        return Buffer.from(value, 'hex');
+        return Buffer.from(value as string, 'hex');
       case 'utf8':
-        return Buffer.from(value, 'utf-8');
+        return Buffer.from(value as string, 'utf-8');
       case 'latin1':
-        return Buffer.from(value, 'latin1');
+        return Buffer.from(value as string, 'latin1');
       case 'bytes':
         Buffer.from(value);
       default:
-        return Buffer.from(value, 'utf-8');
+        return Buffer.from(value as string, 'utf-8');
     }
   };
-  const formatDecode = (value, encoding) => {
+  const formatDecode = (value: Buffer, encoding: string) => {
     switch (encoding.toLowerCase()) {
       case 'utf8':
         return value.toString('utf8');
@@ -866,6 +866,8 @@ const sm4 = (() => {
         return value.toString('base64');
       case 'hex':
         return value.toString('hex');
+      case 'latin1':
+        return value.toString('latin1');
       case 'bytes':
         return Array.from(value);
       default:
@@ -921,7 +923,7 @@ const sm4 = (() => {
       if (k.length !== 16) return '';
       if (mode !== 'ecb' && v?.length !== 16) return '';
 
-      let result: string = '';
+      let result: string | number[] = '';
       let ciphertext = parseEncode(src, encoding);
       let decrypted = smCrypto.sm4.decrypt(ciphertext, k, {
         iv: v,
