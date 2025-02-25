@@ -39,14 +39,22 @@ class OPlayerAdapter {
       theme: {
         primaryColor: publicColor.theme,
         controller: {
-          slideToSeek: 'always'
+          slideToSeek: 'always',
+          coverButton: false,
         }
       },
       speeds: ['2.0', '1.5', '1.25', '1.0', '0.75', '0.5'],
       keyboard: { global: true },
       pictureInPicture: true,
       fullscreen: true,
-      icons: {},
+      icons: {
+        volume: [publicIcons.volumeLarge, publicIcons.volumeMuted],
+        pip: [publicIcons.pipIcon, publicIcons.pipIconExit],
+        setting: publicIcons.setting,
+        fullscreen: [publicIcons.fullscreen, publicIcons.exitFullscreen],
+        play: publicIcons.play,
+        pause: publicIcons.pause,
+      },
     }
   };
   publicListener: { [key: string]: any } = {
@@ -80,27 +88,32 @@ class OPlayerAdapter {
         color: item.color,
       }
     }));
-    this.player.context.danmaku.options.source = comments;
-    this.player.context.danmaku.options.enable = true;
-    this.player.context.danmaku.danmaku.comments = comments;
-    this.player.context.danmaku.loaded = true;
 
-    // const config = { enable: true, displaySender: false, heatmap: false, source: comments || [] };
-    // console.log(this.player);
-    // this.player.context.danmaku.changeSource({ ...config }, true)
-    // console.log(this.player);
-
-    // this.publicListener.sendDanmu = (danmu) => {
-    //   const options = {
-    //     player: id,
-    //     text: danmu.text,
-    //     time: danmu.time,
-    //     color: danmu.color,
-    //     type: danmu.mode == 1 ? '5' : '0',
-    //   };
-    //   publicBarrageSend(url, options);
-    // };
-    // this.player.on('artplayerPluginDanmuku:emit', this.publicListener.sendDanmu);
+    this.publicListener.sendDanmu = (danmu) => {
+      const options = {
+        player: id,
+        text: danmu.text,
+        time: danmu.time,
+        color: danmu.style.color,
+        type: (() => {
+          switch (danmu.mode) {
+            case 'top':
+              return '5';
+            case 'bottom':
+              return '4';
+            case 'rtl':
+            case 'ltl':
+            default:
+              return '0';
+          }
+        })(),
+      };
+      publicBarrageSend(url, options);
+    };
+    this.player.context.danmaku.options.onEmit = (comment) => {
+      this.publicListener.sendDanmu(comment);
+    };
+    this.player.context.danmaku.changeSource([...comments]);
   };
 
   create = (options: any): OPlayer => {
@@ -155,7 +168,7 @@ class OPlayerAdapter {
     };
     // 下一集
     if (options.next) {
-      defaultUi.icons.next = `<svg style="transform: scale(0.7);" viewBox="0 0 1024 1024"><path d="M743.36 427.52L173.76 119.04A96 96 0 0 0 32 203.52v616.96a96 96 0 0 0 141.76 84.48l569.6-308.48a96 96 0 0 0 0-168.96zM960 96a32 32 0 0 0-32 32v768a32 32 0 0 0 64 0V128a32 32 0 0 0-32-32z"></path></svg>`;
+      defaultUi.icons.next = publicIcons.playNext;
     } else {
       defaultUi.icons.next = null;
     };

@@ -69,8 +69,8 @@ class ArtPlayerAdapter {
     icons: {
       play: publicIcons.play,
       pause: publicIcons.pause,
-      volume: publicIcons.volumeLarge,
-      volumeClose: publicIcons.volumeMuted,
+      volume: publicIcons.volumeLargeFill,
+      volumeClose: publicIcons.volumeMutedFill,
       pip: publicIcons.pipIcon,
       fullscreenOn: publicIcons.fullscreen,
       fullscreenOff: publicIcons.exitFullscreen,

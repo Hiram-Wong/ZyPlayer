@@ -8,8 +8,16 @@
   background-image: linear-gradient(270deg, #00e038, #32ccff);
 }
 
+.css-nyks6b .css-6ae98g, .css-nyks6b .css-njx1sw {
+  border-radius: 10px;
+}
 
-.css-fy6n4p, .css-1y41a61, .css-12rog9r {
+.css-f4aimg {
+  padding: 5px 0 !important;
+}
+
+/* volume setting tool-tip */
+.css-fy6n4p, .css-1y41a61, .css-12rog9r, .css-181s0gc::after {
   border-radius: 8px !important;
   backdrop-filter: saturate(180%) blur(20px);
   background-color: #000000bf !important;
@@ -25,4 +33,15 @@
 .css-xpnf3v {
   display: flex;
   margin: 0 10px;
+}
+
+/* button */
+.css-wb262f .css-rte19r {
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 16px !important;
+}
+
+.css-76twjl > .css-rte19r:last-child {
+  margin-right: 0px !important;
 }

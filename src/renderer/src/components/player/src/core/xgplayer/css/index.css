@@ -2393,13 +2393,13 @@ xg-loading-inner {
 }
 
 .xgplayer .xgplayer-value-label {
-  position: absolute;
+  /* position: absolute;
   left: 0;
   right: 0;
-  bottom: 100%;
+  bottom: 100%; */
   padding: 5px 0 0;
   font-size: 12px;
-  background-color: rgba(0, 0, 0, 0.54);
+  /* background-color: rgba(0, 0, 0, 0.54); */
   color: #fff;
   text-align: center;
 }
@@ -2916,7 +2916,7 @@ xg-loading-inner {
   background: rgba(17, 18, 20, 0.8);
   border-radius: 8px;
   width: 43px;
-  height: 125px;
+  height: 140px;
   left: 50%;
   transform: translate(-50%);
 }
