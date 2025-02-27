@@ -227,7 +227,7 @@ export default {
   data: {
     title: '数据管理',
     config: '配置',
-    configTip: '数据保存在数据库中, 为方便迁移可导出为json文件, 导入将覆盖原数据',
+    configTip: '数据保存在数据库中, 为方便迁移可导出为json文件',
     success: '成功',
     fail: '失败',
     noSelectData: '未选择数据',

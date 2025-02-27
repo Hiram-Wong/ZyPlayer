@@ -229,8 +229,7 @@ export default {
   data: {
     title: 'DataMange',
     config: 'Config',
-    configTip:
-      'The data is stored in the database and exported as a JSON file for ease of migration. The import overwrites the original data',
+    configTip: 'Data is stored in a database and exported to JSON files for easy migration',
     success: 'Success',
     fail: 'Fail',
     noSelectData: 'Not select data',
