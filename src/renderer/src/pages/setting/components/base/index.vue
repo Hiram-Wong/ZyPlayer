@@ -158,7 +158,7 @@
 <script setup lang="ts">
 import { CloseIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
-import { computed, onMounted, onActivated, ref, watch, reactive } from 'vue';
+import { computed, onMounted, onActivated, ref, watch, reactive, defineAsyncComponent, shallowRef } from 'vue';
 
 import { fetchSettingList, clearDb, sourceSetting } from '@/api/setting';
 import { usePlayStore, useSettingStore } from '@/store';
@@ -168,15 +168,25 @@ import emitter from '@/utils/emitter';
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
 import SettingLightIcon from '@/assets/assets-setting-light.svg';
-import DialogDataView from './components/DialogData.vue';
-import DialogUaView from './components/DialogUA.vue';
-import DialogDnsView from './components/DialogDns.vue';
-import DialogUpdateView from './components/DialogUpdate.vue';
-import DialogThumbnailView from './components/DialogThumbnail.vue';
-import DialogCustomPlayer from './components/DialogCustomPlayer.vue';
-import DialogSnifferView from './components/DialogSniffer.vue';
-import DialogBarrageView from './components/DialogBarrage.vue';
-import DialogDisclaimerView from '@/pages/Disclaimer.vue';
+// import DialogDataView from './components/DialogData.vue';
+// import DialogUaView from './components/DialogUA.vue';
+// import DialogDnsView from './components/DialogDns.vue';
+// import DialogUpdateView from './components/DialogUpdate.vue';
+// import DialogThumbnailView from './components/DialogThumbnail.vue';
+// import DialogCustomPlayer from './components/DialogCustomPlayer.vue';
+// import DialogSnifferView from './components/DialogSniffer.vue';
+// import DialogBarrageView from './components/DialogBarrage.vue';
+// import DialogDisclaimerView from '@/pages/Disclaimer.vue';
+
+const DialogDataView = shallowRef(defineAsyncComponent(() => import('./components/DialogData.vue')));
+const DialogUaView = shallowRef(defineAsyncComponent(() => import('./components/DialogUA.vue')));
+const DialogDnsView = shallowRef(defineAsyncComponent(() => import('./components/DialogDns.vue')));
+const DialogUpdateView = shallowRef(defineAsyncComponent(() => import('./components/DialogUpdate.vue')));
+const DialogThumbnailView = shallowRef(defineAsyncComponent(() => import('./components/DialogThumbnail.vue')));
+const DialogCustomPlayer = shallowRef(defineAsyncComponent(() => import('./components/DialogCustomPlayer.vue')));
+const DialogSnifferView = shallowRef(defineAsyncComponent(() => import('./components/DialogSniffer.vue')));
+const DialogBarrageView = shallowRef(defineAsyncComponent(() => import('./components/DialogBarrage.vue')));
+const DialogDisclaimerView = shallowRef(defineAsyncComponent(() => import('@/pages/Disclaimer.vue')));
 
 const remote = window.require('@electron/remote');
 const win = remote.getCurrentWindow();
