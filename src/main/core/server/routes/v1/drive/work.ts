@@ -55,6 +55,16 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       data: res,
     };
   });
+  fastify.get(`/${API_PREFIX}/search`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>) => {
+    const { sourceId, kw, pg = '1' } = req.query;
+    const adapter = await init(sourceId);
+    const res = await adapter!.search({ kw, pg: parseInt(pg) });
+    return {
+      code: 0,
+      msg: 'ok',
+      data: res,
+    };
+  });
 };
 
 export default api;

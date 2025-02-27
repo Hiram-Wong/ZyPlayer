@@ -41,7 +41,7 @@ class AListAdapter {
         //不同版本 接口不一样
         api.path = settings.v3 ? '/api/fs/list' : '/api/public/path';
         api.file = settings.v3 ? '/api/fs/get' : '/api/public/path';
-        api.search = settings.v3 ? '/api/public/search' : '/api/public/search';
+        api.search = settings.v3 ? '/api/fs/search' : '/api/public/search';
         api.other = settings.v3 ? '/api/fs/other' : null;
       }
       return this.drive;
