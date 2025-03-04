@@ -1,32 +1,36 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.ua.title')" placement="center" :footer="false">
+  <t-dialog
+    v-model:visible="formVisible"
+    show-in-attached-element
+    attach="#main-component"
+    placement="center"
+    width="50%"
+  >
+    <template #header>
+      {{ $t('pages.setting.ua.title') }}
+    </template>
     <template #body>
-      <div class="ua-dialog-container dialog-container-padding">
-        <div class="data-item top">
-          <t-form ref="form" :data="formData" @submit="onSubmit">
-            <t-textarea v-model="formData.data" class="text-input" :placeholder="$t('pages.setting.placeholder.general')"
-              autofocus :autosize="{ minRows: 2, maxRows: 4 }" @change="changeUatextarea" />
-            <t-radio-group v-model="active.select" variant="default-filled" size="small" class="mg-t" @change="changeUaSelect">
-              <t-radio-button v-for="item in UA_LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
-            </t-radio-group>
-            <p class="tip bottom-tip">{{ $t('pages.setting.ua.bottomTip') }}</p>
-            <div class="optios">
-              <t-form-item style="float: right">
-                <t-button variant="outline" @click="onClickCloseBtn">{{ $t('pages.setting.dialog.cancel') }}</t-button>
-                <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
-              </t-form-item>
-            </div>
-          </t-form>
-        </div>
-      </div>
+      <t-form ref="formRef" :data="formData.data" :rules="RULES" :label-width="60"  :requiredMark="false">
+        <t-form-item name="data" :label-width="0">
+          <t-textarea v-model="formData.data.data" :placeholder="$t('pages.setting.placeholder.general')" autofocus :autosize="{ minRows: 2, maxRows: 4 }" @change="handleMatchTag" />
+        </t-form-item>
+        <t-radio-group v-model="select" variant="default-filled" size="small" class="mg-t" @change="handleChangeSelect">
+          <t-radio-button v-for="item in LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
+        </t-radio-group>
+      </t-form>
+    </template>
+    <template #footer>
+      <t-button variant="outline" @click="onReset">{{ $t('pages.setting.dialog.reset') }}</t-button>
+      <t-button theme="primary" @click="onSubmit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
     </template>
   </t-dialog>
 </template>
 
 <script setup lang="ts">
-import findIndex from 'lodash/findIndex';
-import { reactive, ref, watch } from 'vue';
-
+import { reactive, ref, watch, useTemplateRef } from 'vue';
+import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
+import { findIndex, cloneDeep } from 'lodash-es';
+import { t } from '@/locales';
 import UA_CONFIG from '@/config/ua';
 
 const props = defineProps({
@@ -36,28 +40,24 @@ const props = defineProps({
   },
   data: {
     type: Object,
-    default: () => {
-      return {
-        data: '',
-        type: '',
-      };
-    },
+    default: { data: '',  type: '' },
   },
 });
-const formVisible = ref(false);
-const formData = ref(props.data);
-
-const UA_LIST = [...UA_CONFIG.ua];
-const active = reactive({
-  select: ''
+const formVisible = ref<Boolean>(false);
+const formData = ref({
+  data: cloneDeep(props.data),
+  raw: cloneDeep(props.data),
 });
+const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
+const LIST = reactive([...UA_CONFIG]);
+const select = ref('');
 
-const emit = defineEmits(['update:visible', 'submit']);
+const emits = defineEmits(['update:visible', 'submit']);
 
 watch(
   () => formVisible.value,
   (val) => {
-    emit('update:visible', val);
+    emits('update:visible', val);
   },
 );
 watch(
@@ -69,39 +69,46 @@ watch(
 watch(
   () => props.data,
   (val) => {
-    formData.value = val;
+    formData.value = { data: cloneDeep(val), raw: cloneDeep(val) };
 
-    const index = findIndex(UA_LIST, ['ua', val.data]);
-    if (index > -1) active.select = val.data;
+    handleMatchTag(val.data);
   },
 );
 
-const changeUatextarea = (item) => {
-  const index = findIndex(UA_LIST, ['ua', item]);
-  if (index === -1) active.select = '';
+const handleMatchTag = (item: string) => {
+  const index = findIndex(LIST, ['ua', item]);
+
+  if (index === -1) select.value = '';
+  else select.value = LIST[index].ua;
 };
 
-const changeUaSelect = (item) => {
-  formData.value.data = item;
+const handleChangeSelect = (item: string) => {
+  formData.value.data.data = item;
 };
 
-const onSubmit = async () => {
-  const { data, type } = formData.value;
-  emit('submit', {
-    data,
-    type,
+const onSubmit: FormProps['onSubmit'] = async () => {
+  formRef.value?.validate().then((validateResult) => {
+    if (validateResult && Object.keys(validateResult).length) {
+      const firstError = Object.values(validateResult)[0]?.[0]?.message;
+      MessagePlugin.warning(firstError);
+    } else {
+      const { data, type } = formData.value.data;
+      emits('submit', { data, type });
+      window.electron.ipcRenderer.send('update-global', 'ua', data);
+      formVisible.value = false;
+    }
   });
-  window.electron.ipcRenderer.send('update-global', 'ua', data);
-  formVisible.value = false;
 };
 
-const onClickCloseBtn = () => {
-  formVisible.value = false;
+const onReset: FormProps['onReset'] = () => {
+  formData.value.data = { ...formData.value.raw };
+
+  handleMatchTag(formData.value.raw.data);
+};
+
+const RULES = {
+  data: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 </script>
 
-<style lang="less" scoped>
-:deep(.t-radio-group) {
-  margin-bottom: 0 !important;
-}
-</style>
+<style lang="less" scoped></style>

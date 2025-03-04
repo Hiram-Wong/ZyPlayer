@@ -1,19 +1,21 @@
 <template>
-  <div class="thumbnail-dialog-container">
-    <common-dialog
-      v-model:visible="formVisible"
-      :confirm-btn="$t('pages.md.thumbanilFfmpeg.confirm')"
-      :cancel-btn="$t('pages.md.thumbanilFfmpeg.cancel')"
-      :on-confirm="dialogCheckFfmpeg"
-    >
-      <template #title>
-        <h1>{{ $t('pages.md.thumbanilFfmpeg.title') }}</h1>
-      </template>
-      <template #content>
-        <md-render :text="$t('pages.md.thumbanilFfmpeg.content')" />
-      </template>
-    </common-dialog>
-  </div>
+  <common-dialog
+    v-model:visible="formVisible"
+    show-in-attached-element
+    attach="#main-component"
+    placement="center"
+    width="50%"
+    :confirm-btn="$t('pages.md.thumbanilFfmpeg.confirm')"
+    :cancel-btn="$t('pages.md.thumbanilFfmpeg.cancel')"
+    :on-confirm="dialogCheckFfmpeg"
+  >
+    <template #title>
+      <h1>{{ $t('pages.md.thumbanilFfmpeg.title') }}</h1>
+    </template>
+    <template #content>
+      <md-render :text="$t('pages.md.thumbanilFfmpeg.content')" />
+    </template>
+  </common-dialog>
 </template>
 
 <script setup lang="ts">

@@ -110,8 +110,9 @@
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.security')" name="security">
         <t-space>
-          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">{{ $t('pages.setting.base.proxy')
-            }}</span>
+          <span v-if="platform !== 'linux'" class="title" @click="openProxySetting">
+            {{ $t('pages.setting.base.proxy') }}
+          </span>
           <span class="title" @click="safeEvnet('ua')">{{ $t('pages.setting.base.ua') }}</span>
           <span class="title" @click="safeEvnet('dns')">{{ $t('pages.setting.base.dns') }}</span>
         </t-space>
@@ -144,7 +145,7 @@
         </t-space>
 
         <dialog-custom-player v-model:visible="isVisible.customPlayer" />
-        <dialog-barrage-view v-model:visible="isVisible.barrage" :barrage="barrageDialogData" @submit="flushDialogData" />
+        <dialog-barrage-view v-model:visible="isVisible.barrage" :data="barrageDialogData" @submit="flushDialogData" />
         <dialog-data-view v-model:visible="isVisible.data" :webdev="webdevDialogData" @submit="flushDialogData" />
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-thumbnail-view v-model:visible="isVisible.iptvThumbnail" />
@@ -208,7 +209,7 @@ const isVisible = reactive({
 const safeDialogData = ref({ data: '', type: 'dns' });
 const webdevDialogData = ref({ sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } });
 const snifferDialogData = ref({ data: { type: '', url: '' }, type: 'snifferMode' });
-const barrageDialogData = ref({ url: '', key: '', support: [], start: '', mode: '', color: '', content: '' });
+const barrageDialogData = ref({ data: { url: '', key: '', support: [], start: '', mode: '', color: '', content: '' }, type: 'barrage' });
 
 const MODE_OPTIONS = computed(() => {
   return [
@@ -234,7 +235,7 @@ const placeholderShortcut = ref(t('pages.setting.placeholder.shortcutKeyTip'));
 const statusShortcut = ref('default');
 const tipShortcut = ref('');
 
-const getModeIcon = (mode) => {
+const getModeIcon = (mode: string) => {
   const modeIconMap = {
     light: SettingLightIcon,
     dark: SettingDarkIcon,
@@ -333,7 +334,6 @@ watch(formData,
     deep: true
   }
 );
-
 
 // 监听刷新hot
 watch(
@@ -635,12 +635,11 @@ const debugEvnet = () => {
 };
 
 
-const safeEvnet = (type) => {
+const safeEvnet = (type: string) => {
   safeDialogData.value = {
     data: formData.value[type],
-    type: type,
+    type,
   };
-
   isVisible[type] = true;
 };
 
@@ -656,7 +655,10 @@ const snifferEvent = () => {
 
 const barrageEvent = () => {
   const { barrage } = formData.value;
-  barrageDialogData.value = barrage;
+  barrageDialogData.value = {
+    data: { ...barrage },
+    type: 'barrage',
+  };
 
   isVisible.barrage = true;
 }
@@ -667,7 +669,6 @@ const dataMange = () => {
   isVisible.data = true
 };
 
-// 分类：刷新dialog 数据class 嗅探snifferMode
 const flushDialogData = (item) => {
   const { data, type } = item;
   formData.value[type] = data;

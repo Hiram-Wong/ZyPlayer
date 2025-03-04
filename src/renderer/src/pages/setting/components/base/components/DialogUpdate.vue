@@ -1,5 +1,17 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.update.title')" placement="center" :footer="false" :close-on-esc-keydown="false" :close-on-overlay-click="false">
+  <t-dialog
+    v-model:visible="formVisible"
+    show-in-attached-element
+    attach="#main-component"
+    placement="center"
+    width="50%"
+    :footer="false"
+    :close-on-esc-keydown="false"
+    :close-on-overlay-click="false"
+  >
+    <template #header>
+      {{ $t('pages.setting.update.title') }}
+    </template>
     <template #body>
       <div class="dialog-container-padding">
         <t-loading v-if="active.check" size="small" indicator :loading="active.check" :text="$t('pages.setting.update.checkWait')" style="min-height: 30px;" />

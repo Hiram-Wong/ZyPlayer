@@ -11,30 +11,35 @@
       </div>
 
       <t-dialog
-        :visible="active.install"
+        v-model:visible="active.installDialog"
         show-in-attached-element
-        :header="$t('pages.lab.pluginCenter.control.install')"
-        :confirm-btn="{
-          content: $t('pages.lab.pluginCenter.installDialog.confirm'),
-          theme: 'primary',
-          loading: installFormData.loading,
-        }"
-        @close="active.install = false"
-        @confirm="handleInstall('install', installFormData.pluginName)"
+        attach="#main-component"
+        placement="center"
+        width="50%"
       >
-      <div class="data-dialog-container dialog-container-padding">
-        <div class="data-item top"></div>
-        <div class="data-item">
-          <p class="title-label mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.step') }}1</p>
-          <p class="tip">{{ $t('pages.lab.pluginCenter.installDialog.tip.tip1') }}</p>
-          <t-button block @click="handleGoDir" class="mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.goDir') }}</t-button>
-        </div>
-        <div class="data-item">
-          <p class="title-label mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.step') }}2</p>
-          <p class="tip">{{ $t('pages.lab.pluginCenter.installDialog.tip.tip2') }}</p>
-          <t-input v-model="installFormData.pluginName" :placeholder="$t('pages.setting.placeholder.general')" class="mg-b-s"></t-input>
-        </div>
-      </div>
+        <template #header>
+          {{ $t('pages.lab.pluginCenter.control.install') }}
+        </template>
+        <template #body>
+          <t-form ref="formRef" :data="formData" :rules="RULES" :label-width="60"  :requiredMark="false">
+            <div class="data-item">
+              <p class="title-label mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.step') }}1</p>
+              <p class="t-tip mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.tip.tip1') }}</p>
+              <t-button block class="mg-b-s" @click="handleGoDir">{{ $t('pages.lab.pluginCenter.installDialog.goDir') }}</t-button>
+            </div>
+            <div class="data-item">
+              <p class="title-label mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.step') }}2</p>
+              <p class="t-tip mg-b-s">{{ $t('pages.lab.pluginCenter.installDialog.tip.tip2') }}</p>
+              <t-form-item name="pluginName" label-width="0px">
+                <t-input v-model="formData.pluginName" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
+              </t-form-item>
+            </div>
+          </t-form>
+        </template>
+        <template #footer>
+          <t-button variant="outline" @click="onCancel">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+          <t-button theme="primary" @click="onSubmit" :loading="active.installLoading">{{ $t('pages.setting.dialog.install') }}</t-button>
+        </template>
       </t-dialog>
     </div>
 
@@ -123,8 +128,8 @@
 </template>
 
 <script lang="tsx" setup>
-import { computed, nextTick, onMounted, ref } from 'vue';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { computed, nextTick, onMounted, ref, useTemplateRef } from 'vue';
+import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
 import { ApplicationIcon, CaretDownSmallIcon, LoadingIcon, VerifiedIcon } from 'tdesign-icons-vue-next';
 import { t } from '@/locales';
 import { list, install, uninstall, start, stop} from '@/api/plugin';
@@ -134,16 +139,15 @@ import logoIcon from '@/assets/icon.png';
 
 const pluginList = ref<any[]>([]);
 const pluginInfo = ref<{ [key: string]: string }>({});
+const formData = ref({ pluginName: '' });
+const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
 const active = ref({
   nav: '',
   aside: '',
-  install: false,
+  installDialog: false,
+  installLoading: false,
   control: '',
   controlLoad: {}
-});
-const installFormData = ref({
-  pluginName: '',
-  loading: false,
 });
 const webviewRef = ref<any>(null);
 
@@ -252,7 +256,7 @@ const handleControl = async (type: string, name: string) => {
     console.log(`[pluginCenter][install][error]`, err);
     MessagePlugin.error(`${t('pages.setting.form.fail')}: ${err.message}`);
   };
-}
+};
 
 const handleControlChange = async (type: string, name: string) => {
   active.value.control = '';
@@ -266,33 +270,52 @@ const handleControlChange = async (type: string, name: string) => {
   active.value.controlLoad[name] = true;
   await handleControl(type, name);
   active.value.controlLoad[name] = false;
-}
+};
 
 const handleInstall = async (type: string, name: string) => {
-  if (installFormData.value.loading) {
+  if (active.value.installLoading) {
     MessagePlugin.warning(t('pages.lab.pluginCenter.control.cancelTip'));
     return;
   }
 
-  installFormData.value.loading = true;
+  active.value.installLoading = true;
   await handleControl(type, name);
-  installFormData.value.loading = false;
+  active.value.installLoading = false;
 
-  active.value.install = false;
-}
+  active.value.installDialog = false;
+};
 
 const handleOpChange = (type:string) => {
   active.value.nav = '';
 
   switch (type) {
     case 'install':
-      active.value.install = true;
+      active.value.installDialog = true;
       break;
     case 'file':
       handleGoDir();
       break;
   }
-}
+};
+
+const onCancel = () => {
+  active.value.installDialog = false;
+};
+
+const onSubmit: FormProps['onSubmit'] = () => {
+  formRef.value?.validate().then((validateResult) => {
+    if (validateResult && Object.keys(validateResult).length) {
+      const firstError = Object.values(validateResult)[0]?.[0]?.message;
+      MessagePlugin.warning(firstError);
+    } else {
+      handleInstall('install', formData.value.pluginName);
+    }
+  });
+};
+
+const RULES = {
+  pluginName: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+};
 </script>
 
 <style lang="less" scoped>
@@ -422,13 +445,6 @@ const handleOpChange = (type:string) => {
         }
       }
     }
-
-    .data-dialog-container {
-      :deep(.t-input) {
-        background-color: var(--td-bg-content-input-2);
-        border-color: transparent;
-      }
-    }
   }
 
   .content {
@@ -553,11 +569,6 @@ const handleOpChange = (type:string) => {
             }
           }
         }
-      }
-
-      .title-label {
-        font: var(--td-font-title-medium);
-        margin-bottom: var(--td-comp-margin-s);
       }
 
       .plugin-readme {

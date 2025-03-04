@@ -217,15 +217,15 @@ export default {
   barrage: {
     title: 'Barrage',
     header: 'Enable param requires preprocess data, which will increase the seeding time',
-    id: 'Return id',
-    key: 'Return field',
-    api: 'Api',
+    id: 'Id',
+    key: 'Field',
+    url: 'Api',
     support: 'Line',
     start: 'Time',
     color: 'Color',
     mode: 'Mode',
     content: 'Text',
-    param: 'key-value Mapping',
+    param: 'Map Parameter',
     base: 'Basic Parameter',
     tip: 'Mapping Field position of the return, starting 0',
   },
@@ -310,6 +310,8 @@ export default {
   },
   sniffer: {
     title: 'Sniffing Scheme',
+    type: 'Mode',
+    url: 'Api',
     pie: {
       sign: 'Puppeteer',
       name: 'Intercept&Modify req',

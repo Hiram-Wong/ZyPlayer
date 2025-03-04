@@ -1,65 +1,80 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.barrage.title')" placement="center"
-    :footer="false">
+  <t-dialog
+    v-model:visible="formVisible"
+    show-in-attached-element
+    attach="#main-component"
+    placement="center"
+    width="50%"
+  >
+    <template #header>
+      {{ $t('pages.setting.barrage.title') }}
+    </template>
     <template #body>
-      <div class="doh-dialog-container dialog-container-padding">
-        <t-form ref="form" :data="formData" @submit="onSubmit">
-          <div class="data-item top">
-            <p class="title-label mg-b">{{ $t('pages.setting.barrage.base') }}</p>
-            <div class="base">
-              <t-input v-model="formData.url" :label="$t('pages.setting.barrage.api')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '408px' }" />
-              <t-input v-model="formData.id" :label="$t('pages.setting.barrage.id')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '408px' }" />
-              <t-input v-model="formData.key" :label="$t('pages.setting.barrage.key')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '408px' }" />
-              <t-tag-input v-model="formData.support" :label="$t('pages.setting.barrage.support')"
-                :placeholder="$t('pages.setting.placeholder.categoryTip')" clearable :style="{ width: '408px' }" />
-            </div>
-          </div>
-          <div class="data-item">
-            <p class="title-label mg-tb">{{ $t('pages.setting.barrage.param') }}</p>
-            <div class="param">
-              <t-input v-model="formData.start" :label="$t('pages.setting.barrage.start')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '90px' }" />
-              <t-input v-model="formData.color" :label="$t('pages.setting.barrage.color')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '90px' }" />
-              <t-input v-model="formData.mode" :label="$t('pages.setting.barrage.mode')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '90px' }" />
-              <t-input v-model="formData.content" :label="$t('pages.setting.barrage.content')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '90px' }" />
-            </div>
-          </div>
-          <p class="tip bottom-tip">{{ $t('pages.setting.barrage.tip') }}</p>
-          <div class="optios">
-            <t-form-item style="float: right">
-              <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-              <t-button theme="primary" type="submit">确定</t-button>
+      <t-form ref="formRef" :data="formData.data.data" :rules="RULES" :label-width="60">
+        <div class="data-item">
+          <p class="title-label mg-b-s">{{ $t('pages.setting.barrage.base') }}</p>
+          <t-form-item :label="$t('pages.setting.barrage.url')" name="url">
+            <t-input v-model="formData.data.data.url" :placeholder="$t('pages.setting.placeholder.general')" />
+          </t-form-item>
+          <t-form-item :label="$t('pages.setting.barrage.id')" name="id">
+            <t-input v-model="formData.data.data.id" :placeholder="$t('pages.setting.placeholder.general')" />
+          </t-form-item>
+          <t-form-item :label="$t('pages.setting.barrage.key')" name="key">
+            <t-input v-model="formData.data.data.key" :placeholder="$t('pages.setting.placeholder.general')" />
+          </t-form-item>
+          <t-form-item :label="$t('pages.setting.barrage.support')" name="support">
+            <t-tag-input v-model="formData.data.data.support" clearable excess-tags-display-type="scroll" :placeholder="$t('pages.setting.placeholder.general')" @change="handleFlagFilter" />
+          </t-form-item>
+        </div>
+        <div class="data-item">
+          <p class="title-label mg-b-s">{{ $t('pages.setting.barrage.param') }}</p>
+          <p class="t-tip mg-b-s">{{ $t('pages.setting.barrage.tip') }}</p>
+          <t-space break-line size="small">
+            <t-form-item :label="$t('pages.setting.barrage.start')" name="start">
+              <t-input-number theme="column" :min="0" v-model="formData.data.data.start" :placeholder="$t('pages.setting.placeholder.general')" />
             </t-form-item>
-          </div>
-        </t-form>
-      </div>
+            <t-form-item :label="$t('pages.setting.barrage.color')" name="color">
+              <t-input-number theme="column" :min="0" v-model="formData.data.data.color" :placeholder="$t('pages.setting.placeholder.general')" />
+            </t-form-item>
+            <t-form-item :label="$t('pages.setting.barrage.mode')" name="mode">
+              <t-input-number theme="column" :min="0" v-model="formData.data.data.mode" :placeholder="$t('pages.setting.placeholder.general')" />
+            </t-form-item>
+            <t-form-item :label="$t('pages.setting.barrage.content')" name="content">
+              <t-input-number theme="column" :min="0" v-model="formData.data.data.content" :placeholder="$t('pages.setting.placeholder.general')" />
+            </t-form-item>
+          </t-space>
+        </div>
+      </t-form>
+    </template>
+    <template #footer>
+      <t-button variant="outline" @click="onReset">{{ $t('pages.setting.dialog.reset') }}</t-button>
+      <t-button theme="primary" @click="onSubmit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
     </template>
   </t-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, useTemplateRef } from 'vue';
+import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
+import { cloneDeep, uniq } from 'lodash-es';
+import { t } from '@/locales';
 
 const props = defineProps({
   visible: {
     type: Boolean,
     default: false,
   },
-  barrage: {
+  data: {
     type: Object,
-    default: () => {
-      return { url: '', id: '', key: '', support: [], start: '', mode: '', color: '', content: '' }
-    }
+    default: { data: { url: '', key: '', support: [], start: '', mode: '', color: '', content: '' },  type: '' },
   },
 });
 const formVisible = ref(false);
-const formData = ref(props.barrage);
+const formData = ref({
+  data: cloneDeep(props.data),
+  raw: cloneDeep(props.data),
+});
+const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
 
 const emits = defineEmits(['update:visible', 'submit']);
 
@@ -76,44 +91,43 @@ watch(
   },
 );
 watch(
-  () => props.barrage,
+  () => props.data,
   (val) => {
-    formData.value = val;
+    formData.value = { data: cloneDeep(val), raw: cloneDeep(val) };
   },
 );
 
-const onSubmit = async () => {
-  emits('submit', {
-    data: formData.value,
-    type: 'barrage'
-  });
-
-  formVisible.value = false;
+const handleFlagFilter = (value: string[]) => {
+  formData.value.data.support = uniq(value);
 };
 
-const onClickCloseBtn = () => {
-  formVisible.value = false;
+const onSubmit: FormProps['onSubmit'] = async () => {
+  formRef.value?.validate().then((validateResult) => {
+    if (validateResult && Object.keys(validateResult).length) {
+      const firstError = Object.values(validateResult)[0]?.[0]?.message;
+      MessagePlugin.warning(firstError);
+    } else {
+      const { data, type } = formData.value.data;
+      emits('submit', { data, type });
+      formVisible.value = false;
+    }
+  });
+};
+
+const onReset: FormProps['onReset'] = () => {
+  formData.value.data = { ...formData.value.raw };
+};
+
+const RULES = {
+  url: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  id: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  key: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  support: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  start: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  mode: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  color: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  content: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 </script>
 
-<style lang="less" scoped>
-.doh-dialog-container {
-  :deep(.t-tag--default) {
-    background-color: var(--td-bg-content-active-2);
-  }
-
-  .base {
-    display: flex;
-    flex-direction: column;
-    gap: var(--td-comp-margin-m);
-    align-items: stretch;
-  }
-
-  .param {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: stretch;
-  }
-}
-</style>
+<style lang="less" scoped></style>

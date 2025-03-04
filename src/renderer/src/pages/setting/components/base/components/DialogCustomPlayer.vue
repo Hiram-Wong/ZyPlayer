@@ -1,18 +1,21 @@
 <template>
-  <div class="custtom-player-dialog-container">
-    <common-dialog
-      v-model:visible="formVisible"
-      :confirm-btn=null
-      :cancel-btn="$t('pages.md.customPlayer.confirm')"
-    >
-      <template #title>
-        <h1>{{ $t('pages.md.customPlayer.title') }}</h1>
-      </template>
-      <template #content>
-        <md-render :text="$t('pages.md.customPlayer.content')" />
-      </template>
-    </common-dialog>
-  </div>
+  <common-dialog
+    v-model:visible="formVisible"
+    show-in-attached-element
+    attach="#main-component"
+    placement="center"
+    width="50%"
+    :footer="false"
+    :confirm-btn=null
+    :cancel-btn="$t('pages.md.customPlayer.confirm')"
+  >
+    <template #title>
+      <h1>{{ $t('pages.md.customPlayer.title') }}</h1>
+    </template>
+    <template #content>
+      <md-render :text="$t('pages.md.customPlayer.content')" />
+    </template>
+  </common-dialog>
 </template>
 
 <script setup lang="ts">

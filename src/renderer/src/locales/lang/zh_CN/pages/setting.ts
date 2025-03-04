@@ -215,9 +215,9 @@ export default {
   barrage: {
     title: '弹幕',
     header: '启用该参数需预处理数据, 将增加起播时间',
-    id: '返回标识',
-    key: '返回字段',
-    api: '接口',
+    id: '标识',
+    key: '字段',
+    url: '接口',
     support: '线路',
     start: '时间',
     color: '颜色',
@@ -308,6 +308,8 @@ export default {
   },
   sniffer: {
     title: '嗅探方案',
+    type: '模式',
+    url: '接口',
     pie: {
       sign: 'Puppeteer',
       name: '拦截和修改请求',

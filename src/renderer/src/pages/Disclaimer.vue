@@ -1,23 +1,21 @@
 <template>
-  <div class="disclaimer view-container">
-    <common-dialog
-      v-model:visible="formVisible"
-      :close-on-esc-keydown="false"
-      :close-on-overlay-click="false"
-      destroy-on-close
-      :confirm-btn="$t('pages.md.privacyPolicy.confirm')"
-      :cancel-btn="$t('pages.md.privacyPolicy.cancel')"
-      :on-confirm="confirmDisclaimer"
-      :on-close="cancelDisclaimer"
-    >
-      <template #title>
-        <h1>{{ $t('pages.md.privacyPolicy.title') }}</h1>
-      </template>
-      <template #content>
-        <md-render :text="$t('pages.md.privacyPolicy.content')" />
-      </template>
-    </common-dialog>
-  </div>
+  <common-dialog
+    v-model:visible="formVisible"
+    :close-on-esc-keydown="false"
+    :close-on-overlay-click="false"
+    destroy-on-close
+    :confirm-btn="$t('pages.md.privacyPolicy.confirm')"
+    :cancel-btn="$t('pages.md.privacyPolicy.cancel')"
+    :on-confirm="confirmDisclaimer"
+    :on-close="cancelDisclaimer"
+  >
+    <template #title>
+      <h1>{{ $t('pages.md.privacyPolicy.title') }}</h1>
+    </template>
+    <template #content>
+      <md-render :text="$t('pages.md.privacyPolicy.content')" />
+    </template>
+  </common-dialog>
 </template>
 
 <script setup lang="ts">
@@ -58,7 +56,7 @@ const confirmDisclaimer = () => {
   formVisible.value = false;
 };
 
-const updateAgreementMask = async (status) => {
+const updateAgreementMask = async (status: Boolean) => {
   await putSetting({ key: "agreementMask", doc: status });
 };
 
