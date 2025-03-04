@@ -3,6 +3,7 @@ export default {
   loading: '加载中...',
   upload: '上传',
   random: '随机',
+  more: '更多',
   placeholder: {
     general: '请输入内容',
     startPage: '请输入起始页路径, 例如/home/',
@@ -21,6 +22,7 @@ export default {
     pdfaTip: '列表规则(如 body&&li)',
     pdfhTip: '节点规则(如 body&&a,0&&href)',
     splitForVerticalLine: '按｜分隔',
+    enterConfirm: '输入并回车确认',
   },
   form: {
     success: '成功',
@@ -35,7 +37,6 @@ export default {
     add: '添加',
     edit: '编辑',
     flag: '标识',
-    splitTip: '分隔符请使用半角状态","',
     restoreFactoryHeader: '恢复出厂',
     restoreFactoryBody: '你确定要恢复出厂吗? 确认后恢复到初始状态。',
     rule: {
@@ -236,6 +237,7 @@ export default {
     additionalTip: '原有数据上追加，确认配置吗',
     override: '覆盖',
     additional: '追加',
+    history: '历史',
     easyConfig: {
       title: '快捷配置',
       app: '此软件',

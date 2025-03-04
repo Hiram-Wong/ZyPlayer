@@ -3,6 +3,7 @@ export default {
   loading: 'Loading...',
   upload: 'Upload',
   random: 'Random',
+  more: 'More',
   placeholder: {
     general: 'Please enter the content',
     startPage: 'Please enter the start page path, such as /home/',
@@ -21,6 +22,7 @@ export default {
     pdfaTip: 'List rules (e.g. body&&li)',
     pdfhTip: 'Node rules (e.g. body&&a,0&&href)',
     splitForVerticalLine: 'Split for vertical line',
+    enterConfirm: 'Type and enter to confirm',
   },
   form: {
     success: 'Success',
@@ -35,7 +37,6 @@ export default {
     add: 'Add',
     edit: 'Edit',
     flag: 'Flag',
-    splitTip: 'Please use half-width state for separator ","',
     restoreFactoryHeader: 'Eestore Factory',
     restoreFactoryBody: 'Are you sure to restore the factory? Return to the initial state after leaving the factory.',
     rule: {
@@ -238,6 +239,7 @@ export default {
     additionalTip: 'Additions to original data',
     override: 'Override',
     additional: 'Additional',
+    history: 'History',
     easyConfig: {
       title: 'Quick Config',
       app: 'this app',
