@@ -11,53 +11,44 @@
 
         <t-dialog
           v-model:visible="active.setting"
-          :header="$t('pages.lab.aiBrain.setting')"
           show-in-attached-element
+          attach="#main-component"
           placement="center"
-          :footer="false"
+          width="50%"
         >
-        <div class="ai-dialog-container dialog-container-padding">
-          <t-form ref="form" :data="formData" @submit="onSubmitAiSave">
-            <div class="data-item top">
+        <template #header>
+          {{ $t('pages.lab.aiBrain.setting') }}
+        </template>
+        <template #body>
+          <t-form ref="formRef" :data="formData" :rules="RULES" :label-width="60">
+            <div class="data-item">
               <p class="title-label mg-b">{{ $t('pages.lab.aiBrain.platform.title') }}</p>
-              <div class="platforms">
+              <t-space>
                 <template v-for="item in AI_PLATFORMS">
                   <t-link theme="default" @click="handleOpenUrl(item.url)">{{ item.name }}</t-link>
                 </template>
-              </div>
+              </t-space>
             </div>
             <div class="data-item">
               <p class="title-label mg-tb">{{ $t('pages.lab.aiBrain.params') }}</p>
-              <div class="param">
-                <t-input
-                  v-model="formData.config.server"
-                  :label="$t('pages.lab.aiBrain.server')"
-                  class="input-item"
-                />
-                <t-input
-                  :label="$t('pages.lab.aiBrain.key')"
-                  v-model="formData.config.key"
-                  class="input-item"
-                  type="password"
-                />
-                <t-select
-                  v-model="formData.config.model"
-                  :label="$t('pages.lab.aiBrain.model')"
-                  creatable
-                  filterable
-                >
+              <t-form-item :label="$t('pages.lab.aiBrain.server')" name="server">
+                <t-input v-model="formData.config.server" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
+              </t-form-item>
+              <t-form-item :label="$t('pages.lab.aiBrain.key')" name="key">
+                <t-input v-model="formData.config.key" type="password" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
+              </t-form-item>
+              <t-form-item :label="$t('pages.lab.aiBrain.model')" name="model">
+                <t-select v-model="formData.config.model" creatable filterable>
                   <t-option v-for="item in AI_MODELS" :key="item.label" :value="item.value" :label="item.label" @create="handleAiModel"/>
                 </t-select>
-              </div>
-            </div>
-            <div class="optios">
-              <t-form-item style="float: right">
-                <t-button variant="outline" @click="onClickCloseBtn">取消</t-button>
-                <t-button theme="primary" type="submit">确定</t-button>
               </t-form-item>
             </div>
           </t-form>
-        </div>
+        </template>
+        <template #footer>
+          <t-button variant="outline" @click="onCancel">{{ $t('pages.setting.dialog.cancel') }}</t-button>
+          <t-button theme="primary" @click="onSubmit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
+        </template>
         </t-dialog>
       </div>
     </div>
@@ -220,11 +211,11 @@ const handleAiModel = (val: string) => {
   if (targetIndex === -1) AI_MODELS.value.push({ value: val, label: val });
 };
 
-const onClickCloseBtn = () => {
+const onCancel = () => {
   active.value.setting = false;
 };
 
-const onSubmitAiSave = async () => {
+const onSubmit = async () => {
   try {
     await putSetting({ key: "ai", doc: formData.value.config });
     if (formData.value.config.model !== formData.value.rawConfig.model) {
@@ -341,6 +332,12 @@ const handleOperation = (type: string, options: { e: MouseEvent, index: number }
     handleInputEnter(userQuery);
   }
 };
+
+const RULES = {
+  server: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  key: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  model: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+};
 </script>
 
 <style lang="less" scoped>
@@ -376,31 +373,6 @@ const handleOperation = (type: string, options: { e: MouseEvent, index: number }
         border-color: transparent;
         .t-radio-button {
           padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-s);
-          background-color: var(--td-bg-content-input-2);
-          border-color: transparent;
-        }
-      }
-    }
-
-
-    .ai-dialog-container {
-      :deep(.t-tag--default) {
-        background-color: var(--td-bg-content-active-2);
-      }
-
-      .platforms {
-        display: flex;
-        flex-direction: row;
-        gap: var(--td-comp-margin-s);
-      }
-
-      .param {
-        display: flex;
-        flex-direction: column;
-        gap: var(--td-comp-margin-m);
-        align-items: stretch;
-
-        :deep(.t-input) {
           background-color: var(--td-bg-content-input-2);
           border-color: transparent;
         }

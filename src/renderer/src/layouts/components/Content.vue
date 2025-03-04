@@ -2,7 +2,7 @@
   <router-view v-if="isRouterAlive" v-slot="{ Component }">
     <transition name="fade" mode="out-in">
       <keep-alive>
-        <component :is="Component" :key="activeRouteFullPath" :class="`${prefix}-component`" />
+        <component :is="Component" :key="activeRouteFullPath" :class="`${prefix}-component`" id="main-component" />
       </keep-alive>
     </transition>
   </router-view>

@@ -18,39 +18,41 @@
         </template>
 
       </t-input>
-      <t-button class="button w-btn" theme="default" @click="getSource()">
+      <t-button class="button w-btn" theme="default" @click="onSubmit()">
         {{ $t('pages.lab.staticFilter.action.source') }}
       </t-button>
     </div>
 
     <t-dialog
       v-model:visible="active.reqDialog"
-      placement="center"
-      :header="$t('pages.lab.staticFilter.dialog.request.title')"
-      :cancel-btn="$t('pages.lab.staticFilter.dialog.request.cancel')"
       show-in-attached-element
-      attach=".view-container"
-      @confirm="active.reqDialog = false"
-      @cancel="reqCancel()"
+      attach="#main-component"
+      placement="center"
+      width="50%"
     >
-      <div class="dialog-item">
-        <p>{{ $t('pages.lab.staticFilter.dialog.request.reqEncode') }}</p>
-        <t-select v-model="formData.encode">
-          <t-option v-for="item in reqEncode" :key="item.value" :value="item.value" :label="item.label" />
-        </t-select>
-      </div>
-      <div class="dialog-item">
-        <p>{{ $t('pages.lab.staticFilter.dialog.request.reqHeader') }}</p>
-        <t-textarea v-model="formData.header" placeholder='{ "User-Agent": "Mozilla/5.0" }' />
-      </div>
-      <div v-if="formData.method !== 'GET'" class="dialog-item">
-        <p>{{ $t('pages.lab.staticFilter.dialog.request.reqBody') }}</p>
-        <t-select v-model="formData.contentType" class="contentType" style="margin-bottom: 5px;">
-          <t-option v-for="item in reqContentTypes" :key="item.label" :value="item.value"
-            :label="item.label" />
-        </t-select>
-        <t-textarea v-model="formData.body" placeholder='{ "key": "01b9b7" }' />
-      </div>
+      <template #header>
+        {{ $t('pages.lab.req.title') }}
+      </template>
+      <template #body>
+        <t-form ref="formRef" :data="formData" :rules="RULES" :label-width="80">
+          <t-form-item :label="$t('pages.lab.req.reqEncode')" name="encode">
+            <t-select v-model="formData.encode" :options="reqEncode" />
+          </t-form-item>
+          <t-form-item :label="$t('pages.lab.req.reqHeader')" name="header">
+            <t-textarea v-model="formData.header" placeholder='{ "User-Agent": "Mozilla/5.0" }' />
+          </t-form-item>
+          <t-form-item :label="$t('pages.lab.req.contentType')" name="contentType" v-if="formData.method !== 'GET'">
+            <t-select v-model="formData.contentType" :options="reqContentTypes"  />
+          </t-form-item>
+          <t-form-item :label="$t('pages.lab.req.reqBody')" name="body" v-if="formData.method !== 'GET'">
+            <t-textarea v-model="formData.body" placeholder='{ "key": "01b9b7" }' />
+          </t-form-item>
+        </t-form>
+      </template>
+      <template #footer>
+        <t-button variant="outline" @click="onReset">{{ $t('pages.setting.dialog.reset') }}</t-button>
+        <t-button theme="primary" @click="onSubmit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
+      </template>
     </t-dialog>
   </div>
 </template>
@@ -126,9 +128,9 @@ const props = defineProps({
       method: 'GET',
       url: '',
       encode: 'UTF-8',
-      header: '',
+      header: '{}',
       contentType: 'application/json',
-      body: '',
+      body: '{}',
     }
   },
 });
@@ -148,9 +150,11 @@ const active = ref({
   reqDialog: false,
 });
 
-const prepareRequestOptions = (method, header, body, contentType) => {
-  const parsedHeader = JSON.parse(header || '{}');
-  let parsedBody = JSON.parse(body || '{}');
+const prepareRequestOptions = (method = 'GET', header = '{}', body = '{}', contentType = 'application/json') => {
+  if (!header) header = '{}';
+  if (!body) body = '{}';
+  const parsedHeader = Function('return (' + header + ')')();
+  let parsedBody = Function('return (' + body + ')')();
 
   if (method !== 'GET' && parsedBody) {
     parsedHeader['Content-Type'] = contentType;
@@ -170,12 +174,16 @@ const prepareRequestOptions = (method, header, body, contentType) => {
   return { parsedHeader, parsedBody };
 };
 
-const getSource = async () => {
-  const { url, method, encode, header, body, contentType } = formData.value;
+const onSubmit = async () => {
+  let { url, method, encode, header, body, contentType } = formData.value;
 
   if (!url) {
     MessagePlugin.warning(t('pages.lab.staticFilter.message.htmlNoUrl'));
     return;
+  };
+
+  if (!url.startsWith('http')) {
+    url = 'http://' + url;
   };
 
   try {
@@ -193,14 +201,16 @@ const getSource = async () => {
   }
 };
 
-const reqCancel = () => {
-  formData.value.header = '';
-  formData.value.body = '';
+const onReset = () => {
+  formData.value.header = '{}';
+  formData.value.body = '{}';
   formData.value.encode = 'UTF-8';
   formData.value.contentType = 'application/json';
-  active.value.reqDialog = true;
 };
 
+const RULES = {
+  encode: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+};
 </script>
 
 <style lang="less" scoped>

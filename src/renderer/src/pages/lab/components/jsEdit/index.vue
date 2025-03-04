@@ -20,13 +20,16 @@
           v-model:visible="active.template"
           :header="$t('pages.lab.jsEdit.template')"
           show-in-attached-element
-          width="40%"
+          attach="#main-component"
           @confirm="confirmTemplate()"
         >
-          <p>{{ $t('pages.lab.jsEdit.templateTip') }}</p>
-          <t-select v-model="form.template">
-            <t-option v-for="(item, index) in Object.keys(mubanData)" :key="index" :value="item" :label="item" />
-          </t-select>
+          <t-form ref="formRef" :data="form" :rules="TEMPLATE_RULES" :label-width="60">
+            <t-form-item name="template" label-width="0px">
+              <t-select v-model="form.template">
+                <t-option v-for="(item, index) in Object.keys(mubanData)" :key="index" :value="item" :label="item" />
+              </t-select>
+            </t-form-item>
+          </t-form>
         </t-dialog>
       </div>
     </div>
@@ -302,9 +305,12 @@ import drpySuggestions from './utils/drpy_suggestions';
 import drpyObjectInner from './utils/drpy_object_inner.ts?raw';
 import TSplit from '@/components/split/index.vue';
 
+const TEMPLATE_RULES = {};
+
 const remote = window.require('@electron/remote');
 const router = useRouter();
 const storeSetting = useSettingStore();
+
 const logRef = useTemplateRef('logRef');
 const form = ref({
   content: {

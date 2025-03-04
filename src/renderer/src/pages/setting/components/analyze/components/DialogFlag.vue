@@ -10,7 +10,7 @@
       {{ $t('pages.setting.dialog.flag') }}
     </template>
     <template #body>
-      <t-form ref="formRef" :data="formData.data" :rules="RULES" :label-width="60">
+      <t-form ref="formRef" :data="formData" :rules="RULES" :label-width="60" :requiredMark="false">
         <t-form-item name="flag" label-width="0px">
           <t-tag-input v-model="formData.data" multiple clearable :placeholder="$t('pages.setting.placeholder.enterConfirm')" @change="handleFlagFilter" />
         </t-form-item>
@@ -27,6 +27,7 @@
 import { ref, useTemplateRef, watch } from 'vue';
 import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
 import { cloneDeep, uniq } from 'lodash-es';
+import { t } from '@/locales';
 
 const props = defineProps({
   visible: {
@@ -89,7 +90,9 @@ const onReset: FormProps['onReset'] = () => {
   formData.value.data = [ ...formData.value.raw ];
 };
 
-const RULES = {};
+const RULES = {
+  // flag: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+};
 </script>
 
 <style lang="less" scoped></style>
