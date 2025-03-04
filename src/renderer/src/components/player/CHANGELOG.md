@@ -74,3 +74,7 @@
   - 修复artplayer|oplayer方法playNext入参错误
   - 自定义播放器样式各自导入不再整体导入
   - 微调图标svg和样式
+- 2024.2.26:
+  - 修复oplayer不支持请求头问题
+  - 修复formatUrlHeaders数据类型错误导致播放地址拼接失败
+  - 修复formatUrlHeaders方法value拼写错误

@@ -125,9 +125,9 @@ const mediaUtils = (() => {
   const formatUrlHeaders = (url: string, headers: { [key: string]: string } = {}) => {
     if (headers && Object.keys(headers).length > 0) {
       for (const key in headers) {
-        let valye = headers[key];
-        if (valye.includes('=')) valye = valye.replaceAll('=', '$*&');
-        url += `@${key}=${valye}`;
+        let value = headers[key].toString();
+        if (value.includes('=')) value = value.replaceAll('=', '$*&');
+        url += `@${key}=${value}`;
       }
     }
     return url;

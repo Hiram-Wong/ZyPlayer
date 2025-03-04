@@ -190,7 +190,16 @@ class OPlayerAdapter {
       },
       OUI({ ...defaultUi }),
       new ODanmaku({ enable: true, displaySender: false, heatmap: false, source: [] }),
-      OHls({ forceHLS: true }),
+      OHls({
+        config : {
+          xhrSetup(xhr) {
+            const headers = options.headers || {};
+            for (const key in headers || {}) {
+              xhr.setRequestHeader(key, headers[key]);
+            }
+          }
+        }
+      }),
       ODash(),
       OMpegts(),
       // OTorrent({ library: 'https://cdn.jsdelivr.net/npm/webtorrent@0.98.18/webtorrent.min.js' })
