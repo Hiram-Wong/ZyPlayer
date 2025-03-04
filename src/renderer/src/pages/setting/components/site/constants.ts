@@ -3,43 +3,38 @@ import { PrimaryTableCol, TableRowData } from 'tdesign-vue-next';
 
 export const COLUMNS: PrimaryTableCol<TableRowData>[] = [
   {
-    colKey: 'row-select',
     type: 'multiple',
-    width: 64,
     fixed: 'left',
+    colKey: 'row-select',
   },
   {
     title: t('pages.setting.table.header.name'),
-    fixed: 'left',
-    width: 150,
-    ellipsis: true,
     align: 'left',
     colKey: 'name',
+    ellipsis: true,
   },
   {
     title: t('pages.setting.table.header.type'),
     align: 'center',
     colKey: 'type',
-    width: 130,
+    ellipsis: true,
   },
   {
     title: t('pages.setting.table.header.group'),
-    align: 'left',
-    width: 100,
-    ellipsis: true,
+    align: 'center',
     colKey: 'group',
+    ellipsis: true,
   },
   {
     title: t('pages.setting.table.header.status'),
-    align: 'left',
+    align: 'center',
     colKey: 'isActive',
-    width: 80,
   },
   {
+    title: t('pages.setting.table.header.operate'),
     align: 'center',
     fixed: 'right',
-    width: 220,
+    width: 230,
     colKey: 'op',
-    title: t('pages.setting.table.header.operate'),
   },
 ];

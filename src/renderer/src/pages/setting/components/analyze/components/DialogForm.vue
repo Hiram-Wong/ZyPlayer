@@ -1,14 +1,16 @@
 <template>
   <t-dialog
     v-model:visible="formVisible"
-    :header="formType === 'add' ? $t('pages.setting.dialog.add') : $t('pages.setting.dialog.edit')"
-    :width="650"
+    show-in-attached-element
+    attach="#main-component"
     placement="center"
-    :footer="false"
-    @close="onClose"
+    width="50%"
   >
+    <template #header>
+      {{ formType === 'add' ? $t('pages.setting.dialog.add') : $t('pages.setting.dialog.edit') }}
+    </template>
     <template #body>
-      <t-form ref="form" :data="formData.data" :rules="RULES" :label-width="60" @submit="onSubmit" @reset="onReset">
+      <t-form ref="formRef" :data="formData.data" :rules="RULES" :label-width="60">
         <t-form-item :label="$t('pages.setting.analyze.name')" name="name">
           <t-input v-model="formData.data.name" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
@@ -21,21 +23,19 @@
         <t-form-item :label="$t('pages.setting.analyze.api')" name="url">
           <t-input v-model="formData.data.url" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-
-        <div class="optios">
-          <t-form-item style="float: right">
-            <t-button variant="outline" type="reset">{{ $t('pages.setting.dialog.reset') }}</t-button>
-            <t-button theme="primary" type="submit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
-          </t-form-item>
-        </div>
       </t-form>
+    </template>
+    <template #footer>
+      <t-button variant="outline" @click="onReset">{{ $t('pages.setting.dialog.reset') }}</t-button>
+      <t-button theme="primary" @click="onSubmit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
     </template>
   </t-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-
+import { ref, useTemplateRef, watch } from 'vue';
+import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
+import { cloneDeep } from 'lodash-es';
 import { t } from '@/locales';
 
 const props = defineProps({
@@ -52,12 +52,13 @@ const props = defineProps({
     default: 'add'
   },
 });
-const formVisible = ref(false);
+const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
+const formVisible = ref<Boolean>(false);
 const formData = ref({
-  data: { ...props.data },
-  raw: { ...props.data },
+  data: cloneDeep(props.data),
+  raw: cloneDeep(props.data),
 });
-const formType = ref(props.type);
+const formType = ref<string>(props.type);
 
 const emits = defineEmits(['update:visible', 'submit']);
 
@@ -77,8 +78,8 @@ watch(
   () => props.data,
   (val) => {
     formData.value = {
-      data: { ...val },
-      raw: { ...val },
+      data: cloneDeep(val),
+      raw: cloneDeep(val),
     };
   },
 );
@@ -89,19 +90,20 @@ watch(
   },
 );
 
-const onSubmit = async ({ validateResult }) => {
-  if (validateResult === true) {
-    emits('submit', 'table', formData.value.data);
-    formVisible.value = false;
-  };
+const onSubmit: FormProps['onSubmit'] = async () => {
+  formRef.value?.validate().then((validateResult) => {
+    if (validateResult && Object.keys(validateResult).length) {
+      const firstError = Object.values(validateResult)[0]?.[0]?.message;
+      MessagePlugin.warning(firstError);
+    } else {
+      emits('submit', 'table', formData.value.data);
+      formVisible.value = false;
+    }
+  });
 };
 
-const onReset = () => {
+const onReset: FormProps['onReset'] = () => {
   formData.value.data = { ...formData.value.raw };
-};
-
-const onClose = () => {
-  onReset();
 };
 
 const RULES = {
