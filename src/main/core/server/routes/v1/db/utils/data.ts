@@ -408,7 +408,7 @@ const readData = async (path: string) => {
 
 const importData = async (importType: string, remoteType: string, path: string) => {
   let content: any = await readData(path);
-  if (importType === 'easy') {
+  if (importType === 'easyConfig') {
     if (remoteType === 'catvod') content = await easy2catvod(content, path);
     else content = easy2tvbox(content, path, remoteType);
   }

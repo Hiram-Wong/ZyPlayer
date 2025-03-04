@@ -1,5 +1,12 @@
 <template>
-  <t-dialog v-model:visible="formVisible" :header="$t('pages.setting.data.title')" placement="center" :footer="false">
+  <t-dialog
+    v-model:visible="formVisible"
+    :header="$t('pages.setting.data.title')"
+    attach="#main-component"
+    placement="center"
+    width="50%"
+    :footer="false"
+  >
     <template #body>
       <div class="data-dialog-container dialog-container-padding">
         <div class="data-item top">
@@ -20,39 +27,65 @@
                   class="input-item" :placeholder="$t('pages.setting.placeholder.general')"></t-input>
                 <div class="button-group-item">
                   <t-popconfirm :content="$t('pages.setting.data.additionalTip')" placement="bottom"
-                    @confirm="importData('easy', 'additional')">
+                    @confirm="importData('easyConfig', 'additional')">
                     <t-button block variant="outline">{{ $t('pages.setting.data.additional') }}</t-button>
                   </t-popconfirm>
                   <t-popconfirm :content="$t('pages.setting.data.overrideTip')" placement="bottom"
-                    @confirm="importData('easy', 'override')">
+                    @confirm="importData('easyConfig', 'override')">
                     <t-button block>{{ $t('pages.setting.data.override') }}</t-button>
                   </t-popconfirm>
+                  <t-dropdown>
+                    <t-button block variant="text">{{ $t('pages.setting.data.history') }}</t-button>
+                    <t-dropdown-menu>
+                      <t-dropdown-item
+                        v-for="item in historyList.easyConfig"
+                        :key="item.id"
+                        :value="item.id"
+                        @click="handleHistoryFill('easyConfig', item.id)"
+                      >
+                        <t-popup :content="item.videoId">{{ item.videoName }}</t-popup>
+                      </t-dropdown-item>
+                    </t-dropdown-menu>
+                  </t-dropdown>
                 </div>
               </t-collapse-panel>
               <t-collapse-panel value="remoteImport" :header="$t('pages.setting.data.configImport.title')">
-                <t-radio-group v-model="formData.importData.type" class="input-item">
+                <t-radio-group v-model="formData.completeConfig.type" class="input-item">
                   <t-radio value="remote">{{ $t('pages.setting.data.configImport.remote') }}</t-radio>
                   <t-radio value="local">{{ $t('pages.setting.data.configImport.local') }}</t-radio>
                 </t-radio-group>
                 <p class="tip">{{ $t('pages.setting.data.configImport.tip') }}</p>
                 <div class="input-group-item">
                   <t-input :label="$t('pages.setting.data.configImport.address')"
-                    v-model="formData.importData.url"
+                    v-model="formData.completeConfig.url"
                     :placeholder="$t('pages.setting.placeholder.general')"
                   />
-                  <t-button v-if="formData.importData.type === 'local'" class="upload-item" theme="default" @click="uploadFileEvent">
+                  <t-button v-if="formData.completeConfig.type === 'local'" class="upload-item" theme="default" @click="uploadFileEvent">
                     {{ $t('pages.setting.upload') }}
                   </t-button>
                 </div>
                 <div class="button-group-item">
                   <t-popconfirm :content="$t('pages.setting.data.additionalTip')" placement="bottom"
-                    @confirm="importData('complete', 'additional')">
+                    @confirm="importData('completeConfig', 'additional')">
                     <t-button block variant="outline">{{ $t('pages.setting.data.additional') }}</t-button>
                   </t-popconfirm>
                   <t-popconfirm :content="$t('pages.setting.data.overrideTip')" placement="bottom"
-                      @confirm="importData('complete', 'override')">
-                      <t-button block>{{ $t('pages.setting.data.override') }}</t-button>
-                    </t-popconfirm>
+                      @confirm="importData('completeConfig', 'override')">
+                    <t-button block>{{ $t('pages.setting.data.override') }}</t-button>
+                  </t-popconfirm>
+                  <t-dropdown>
+                    <t-button block variant="text">{{ $t('pages.setting.data.history') }}</t-button>
+                    <t-dropdown-menu>
+                      <t-dropdown-item
+                        v-for="item in historyList.completeConfig"
+                        :key="item.id"
+                        :value="item.id"
+                        @click="handleHistoryFill('completeConfig', item.id)"
+                      >
+                        <t-popup :content="item.videoId">{{ item.videoName }}</t-popup>
+                      </t-dropdown-item>
+                    </t-dropdown-menu>
+                  </t-dropdown>
                 </div>
               </t-collapse-panel>
               <t-collapse-panel value="exportData" :header="$t('pages.setting.data.configExport.title')">
@@ -160,8 +193,11 @@
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch, reactive } from 'vue';
+import moment from 'moment';
+
 import { t } from '@/locales';
 import { clearDb, exportDb, webdevLocal2Remote, webdevRemote2Local, initDb } from '@/api/setting';
+import { fetchHistoryPage, delHistory, addHistory } from '@/api/history';
 import emitter from '@/utils/emitter';
 
 const remote = window.require('@electron/remote');
@@ -177,11 +213,7 @@ const props = defineProps({
     default: () => {
       return {
         sync: false,
-        data: {
-          url: '',
-          username: '',
-          password: ''
-        }
+        data: { url: '', username: '', password: '' }
       }
     },
   }
@@ -190,20 +222,10 @@ const formVisible = ref(false);
 const formData = ref({
   webdev: {
     sync: false,
-    data: {
-      url: '',
-      username: '',
-      password: ''
-    }
+    data: { url: '', username: '', password: '' }
   },
-  easyConfig: {
-    type: 'tvbox',
-    url: ''
-  },
-  importData: {
-    type: 'remote',
-    url: ''
-  },
+  easyConfig: { type: 'tvbox', url: '' },
+  completeConfig: { type: 'remote', url: '' },
   clearSeletct: {
     sites: false,
     iptv: false,
@@ -215,10 +237,7 @@ const formData = ref({
     cache: false,
     thumbnail: false,
   },
-  size: {
-    cache: '',
-    thumbnail: '',
-  },
+  size: { cache: 0, thumbnail: 0 },
 });
 const active = reactive({
   clear: {
@@ -244,7 +263,10 @@ const active = reactive({
     setting: false,
   }
 });
-
+const historyList = ref<any>({
+  easyConfig: [],
+  completeConfig: [],
+});
 const emits = defineEmits(['update:visible', 'submit']);
 
 watch(
@@ -258,6 +280,7 @@ watch(
   (val) => {
     formVisible.value = val;
     if (val) {
+      Promise.all([getHistory('easyConfig'), getHistory('completeConfig')]);
       getCacheSize();
       getThumbnailSize();
     };
@@ -312,16 +335,68 @@ const refreshEmitter = (arryList: string[]) => {
   }
 };
 
+// 获取历史
+const getHistory = async (type: string) => {
+  try {
+    const res = await fetchHistoryPage({ page: 1, pageSize: 5, type });
+    if (res.hasOwnProperty('list')) historyList.value[type] = res.list;
+  } catch (err: any) {
+    console.error('Failed to fetch history:', err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err.message}`);
+  }
+};
+
+// 清除数据
+const clearHistory = async (type: string) => {
+  try {
+    await delHistory({ type });
+    historyList.value[type] = [];
+  } catch (err: any) {
+    console.error('Failed to clear history:', err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err.message}`);
+  }
+};
+
+// 增加
+const addHistoryItem = async (type: string, data: { [key: string]: string}) => {
+  try {
+    const doc = {
+      date: moment().unix(),
+      relateId: data.relateId,
+      videoName: data.videoName,
+      videoId: data.videoId,
+      type,
+    };
+
+    const isExist = historyList.value[type].some(item => item.videoId === doc.videoId);
+    if (isExist) return;
+
+    await addHistory(doc);
+    await getHistory(type);
+  } catch (err: any) {
+    console.error('Failed to add history:', err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err.message}`);
+  }
+};
+
+// 填充数据
+const handleHistoryFill = async (type: string, id: string) => {
+  const item = historyList.value[type].find(item => item.id === id);
+  if (!item) return;
+  formData.value[type].url = item.videoId;
+  formData.value[type].type = item.relateId;
+};
+
 // 配置导入
 const importData = async (importType, importMode) => {
   try {
-    let url, type;
-    if (importType === 'easy') {
+    let url, type, host;
+    if (importType === 'easyConfig') {
       url = formData.value.easyConfig.url;
       type = formData.value.easyConfig.type;
     } else {
-      url = formData.value.importData.url;
-      type = formData.value.importData.type;
+      url = formData.value.completeConfig.url;
+      type = formData.value.completeConfig.type;
     };
 
     if (!url) {
@@ -329,12 +404,10 @@ const importData = async (importType, importMode) => {
       return;
     };
 
-    const res = await initDb({
-      url: url,
-      importType,
-      remoteType: type,
-      importMode
-    });
+    try { host = new URL(url).host; } catch { host = url; };
+
+    const res = await initDb({ url, importType, remoteType: type, importMode });
+    await addHistoryItem(importType, { relateId: type, videoName: host, videoId: url });
     refreshEmitter(res?.table);
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err) {
@@ -352,7 +425,7 @@ const uploadFileEvent = () => {
       console.log('用户取消了选择');
     } else {
       console.log('选中的文件路径:', result.filePaths);
-      formData.value.importData.url = result.filePaths[0];
+      formData.value.completeConfig.url = result.filePaths[0];
     }
   }).catch(err => {
     console.log('出现错误:', err);
@@ -440,8 +513,9 @@ const clearData = async () => {
         emitter.emit('refreshDriveConfig');
         emitter.emit('refreshDriveTable');
       },
-      'history': () => {
+      'history': async () => {
         emitter.emit('refreshHistory');
+        await Promise.all([getHistory('easyConfig'), getHistory('completeConfig')]);
       },
       'star': () => {
         emitter.emit('refreshBinge');
@@ -454,6 +528,7 @@ const clearData = async () => {
       'thumbnail': async () => {
         await window.electron.ipcRenderer.send('tmpdir-manage', 'rmdir', 'thumbnail');
         emitter.emit('refreshIptvConfig');
+        await getThumbnailSize();
       }
     };
 
