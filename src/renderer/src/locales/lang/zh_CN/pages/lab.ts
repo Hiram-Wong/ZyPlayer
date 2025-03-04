@@ -9,6 +9,13 @@ export default {
     snifferPlay: '嗅探播放',
     pluginCenter: '插件中心',
   },
+  req: {
+    title: '请求参数',
+    reqEncode: '编码',
+    reqHeader: '请求头',
+    reqBody: '请求体',
+    contentType: '类型',
+  },
   jsEdit: {
     import: '导入',
     export: '导出',
@@ -173,15 +180,6 @@ export default {
       filterTip: '选择器(如 body&&.scroll-content) 同一类型用;分割 不同类型换行',
       filterInfoTip: '详细筛选(key;name;type;title;url) 一行对应一个',
     },
-    dialog: {
-      request: {
-        title: '请求参数',
-        reqEncode: '响应编码',
-        reqHeader: '请求头',
-        reqBody: '请求体',
-        cancel: '重置',
-      },
-    },
     message: {
       htmlNoUrl: '地址为空',
       inputNoClassParse: '参数大类为空',
@@ -194,7 +192,7 @@ export default {
     title: 'Ai-创想无限',
     declare: '内容由 AI 大模型生成，请仔细甄别',
     params: 'OpenAI参数',
-    server: '服务器',
+    server: '接口',
     key: '密钥',
     model: '模型',
     tip1: 'OpenAI官方的APIKey',

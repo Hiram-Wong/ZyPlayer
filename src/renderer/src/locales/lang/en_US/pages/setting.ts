@@ -33,6 +33,8 @@ export default {
   dialog: {
     cancel: 'Cancel',
     confirm: 'OK',
+    install: 'Install',
+    save: 'Save',
     reset: 'Reset',
     add: 'Add',
     edit: 'Edit',

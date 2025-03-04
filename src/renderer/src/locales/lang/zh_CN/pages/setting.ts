@@ -33,6 +33,8 @@ export default {
   dialog: {
     cancel: '取消',
     confirm: '确定',
+    install: '安装',
+    save: '保存',
     reset: '重置',
     add: '添加',
     edit: '编辑',
