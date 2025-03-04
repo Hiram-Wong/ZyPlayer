@@ -335,7 +335,7 @@ const form = ref({
   },
   category: {
     t: '',
-    f: '',
+    f: '{}',
     pg: 1,
   },
   search: {
@@ -870,6 +870,7 @@ const handleDataDebugHomeVod = async () => {
 
 const handleDataDebugCategory = async () => {
   let { t: tid, f = '{}', pg } = form.value.category;
+  if (!f) f = '{}';
   f = Function('return (' + f + ')')();
 
   if (!tid) {
