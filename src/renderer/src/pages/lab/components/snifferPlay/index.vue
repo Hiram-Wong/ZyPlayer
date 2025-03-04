@@ -119,24 +119,14 @@ const sniiferEvent = async () => {
 };
 
 const playerPlayEvent = async () => {
-  let { url, headers, type } = formData.value.player;
+  let { url, headers = '{}', type } = formData.value.player;
   if (!headers) headers = '{}';
+  headers = Function('return (' + headers + ')')();
+
   if (!url || !(/^(http:\/\/|https:\/\/)/.test(url) || url.includes('magnet:'))) {
     MessagePlugin.warning(t('pages.lab.snifferPlay.message.playerNoUrl'));
     return;
   };
-
-  try {
-    headers = JSON5.parse(headers);
-    if (typeof headers === 'object' && headers !== null && !Array.isArray(headers)) {
-    } else {
-      MessagePlugin.warning(t('pages.lab.snifferPlay.message.headersNoJson'));
-      return;
-    };
-  } catch {
-    MessagePlugin.warning(t('pages.lab.snifferPlay.message.headersNoJson'));
-    return;
-  }
 
   const playerMode = storePlayer.setting.playerMode;
 
@@ -145,7 +135,7 @@ const playerPlayEvent = async () => {
   } else {
     let mediaType = type;
     if (mediaType === 'auto') {
-      const checkType = await mediaUtils.checkMediaType(url, headers);
+      const checkType = await mediaUtils.checkMediaType(url, headers as Object);
       if (checkType === 'unknown' && !checkType) {
         MessagePlugin.warning(t('pages.lab.snifferPlay.message.mediaNoType'));
         return;
