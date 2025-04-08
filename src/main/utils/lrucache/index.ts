@@ -5,10 +5,10 @@ class LruCache {
     this.capacity = capacity;
     this.cache = new Map();
   }
-  has(key: string) {
+  has(key: string): boolean {
     return this.cache.has(key);
   }
-  get(key: string) {
+  get(key: string): any {
     if (!this.cache.has(key)) {
       return;
     }
@@ -17,7 +17,7 @@ class LruCache {
     this.cache.set(key, value);
     return value;
   }
-  put(key: string, value: any) {
+  put(key: string, value: any): string | Promise<string> {
     if (this.cache.has(key)) {
       this.cache.delete(key);
     } else if (this.cache.size >= this.capacity) {
@@ -26,7 +26,7 @@ class LruCache {
     this.cache.set(key, value);
     return value;
   }
-  delete(key: string) {
+  delete(key: string): boolean | Promise<boolean> {
     return this.cache.delete(key);
   }
 }
