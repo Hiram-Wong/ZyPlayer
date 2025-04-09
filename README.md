@@ -334,6 +334,6 @@ ps:
 
 ### 💰赞助商
 
-[![image](https://s2.loli.net/2025/04/09/w8XAO2jDQkoGWL6.png)](https://yxvm.com/)
+[![yxvm_support.png](https://s2.loli.net/2025/04/09/JMyQZUKY2bX4G3q.png)](https://yxvm.com/)
 
 [NodeSupport](https://github.com/NodeSeekDev/NodeSupport)赞助了本项目
