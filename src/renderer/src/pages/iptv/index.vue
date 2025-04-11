@@ -18,7 +18,7 @@
         <div class="content-wrapper" id="back-top">
           <t-row :gutter="[16, 4]" style="margin-left: -8px; margin-right: -8px">
             <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in channelList" :key="item.id" class="card"
-              @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)">
+              @click="playEvent(item)" @contextmenu="conButtonClick(item, $event)" @contextmenu.prevent>
               <div class="card-main">
                 <div v-show="iptvConfig.ext.delay && item.delay" class="card-delay-tag">
                   <span v-if="item.delay < 500" class="status-item success">{{ item.delay }}ms</span>

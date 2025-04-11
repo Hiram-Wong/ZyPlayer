@@ -1,7 +1,7 @@
 import { is } from '@electron-toolkit/utils';
 import { enable as renoteEnable } from '@electron/remote/main';
 import { attachTitleBarToWindow } from '@electron-uikit/titlebar';
-import { app, BrowserWindow, nativeTheme, shell } from 'electron';
+import { app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions, nativeTheme, shell } from 'electron';
 import { register as localshortcutRegister, unregisterAll as localshortcutUnregisterAll } from 'electron-localshortcut';
 import { join } from 'path';
 import url from 'url';
@@ -69,6 +69,18 @@ const createWin = (name: string, options: { [key: string]: any } ) => {
         );
       });
     };
+
+    win.webContents.on('context-menu', () => {
+      const menu: Array<MenuItemConstructorOptions | MenuItem> = [
+        { label: '剪切', role: 'cut' },
+        { label: '复制', role: 'copy' },
+        { label: '粘贴', role: 'paste' },
+        { label: '全选', role: 'selectAll' },
+        { type: 'separator' },
+        { label: '刷新', role: 'reload' },
+      ];
+      Menu.buildFromTemplate(menu).popup({ window: win! })
+    })
 
     winPool[name] = win.id;
   }
