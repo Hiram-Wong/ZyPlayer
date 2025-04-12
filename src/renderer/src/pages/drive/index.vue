@@ -52,7 +52,7 @@
               class="infinite-loading-container"
             />
             <div v-else class="infinite-loading-container" style="min-height: 1px; text-align: center; margin-bottom: 2em;">
-              {{ $t(`pages.iptv.infiniteLoading.${active.infiniteType}`) }}
+              {{ $t(`pages.drive.infiniteLoading.${active.infiniteType}`) }}
             </div>
           </div>
         </div>
