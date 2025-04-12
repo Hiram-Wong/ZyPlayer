@@ -30,16 +30,10 @@ const VIP_LIST = [
  */
 const fetchBingeData = async (relateId: string, videoId: number): Promise<{ status: boolean; data: any }> => {
   console.log('[film_common][fetchBingeData][start]收藏获取流程开启');
-  let data = {
-    status: false,
-    data: {},
-  };
+  let data = { status: false, data: {}, };
   try {
     const response = await findStar({ relateId, videoId });
-    data = {
-      status: !!response,
-      data: response || {},
-    };
+    data = { status: !!response, data: response || {}, };
     console.log(`[film_common][fetchBingeData][return]`, data);
   } catch (err) {
     console.error(`[film_common][fetchBingeData][error]`, err);
@@ -58,10 +52,7 @@ const fetchBingeData = async (relateId: string, videoId: number): Promise<{ stat
  */
 const putBingeData = async (action: string, id: any = null, doc: any = {}): Promise<{ status: boolean; data: any }> => {
   console.log('[film_common][putBingeData][start]收藏更新流程开启');
-  let data = {
-    status: false,
-    data: {},
-  };
+  let data = { status: false, data: {}, };
   try {
     let res = {};
     if (action === 'add') {
@@ -71,10 +62,7 @@ const putBingeData = async (action: string, id: any = null, doc: any = {}): Prom
     } else if (action === 'update') {
       res = await putStar({ ids: [id], doc });
     }
-    data = {
-      status: true,
-      data: res,
-    };
+    data = { status: true, data: res };
     console.log(`[film_common][putBingeData][return]`, data);
   } catch (err) {
     console.error(`[film_common][putBingeData][error]`, err);
@@ -148,10 +136,7 @@ const putHistoryData = async (id: any = null, doc: any = {}): Promise<void> => {
 
   try {
     if (id) {
-      data = await putHistory({
-        ids: [id],
-        doc,
-      });
+      data = await putHistory({ ids: [id], doc, });
     } else {
       data = await addHistory(doc);
     }

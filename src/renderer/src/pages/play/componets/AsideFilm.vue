@@ -362,6 +362,7 @@ const fetchBinge = async () => {
 const putBinge = async (update: boolean = false) => {
   const constructDoc = () => ({
     date: moment().unix(),
+    type: 'film',
     relateId: extConf.value.site.key,
     videoId: infoConf.value.vod_id,
     videoImage: infoConf.value.vod_pic,
