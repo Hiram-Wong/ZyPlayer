@@ -5,7 +5,7 @@ export default {
     title: '历史',
   },
   type: {
-    film: '电影',
+    film: '影视',
     iptv: '电视',
     drive: '网盘',
     analyze: '解析',
