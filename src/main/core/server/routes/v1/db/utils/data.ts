@@ -353,6 +353,7 @@ const commonDelImportData = (data) => {
           .map((item) => {
             return {
               id: item?.id || uuidv4(),
+              type: item?.type,
               relateId: item.relateId,
               videoId: item.videoId,
               videoImage: item?.videoImage || '',

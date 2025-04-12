@@ -64,6 +64,7 @@ const update = async () => {
     CREATE TABLE IF NOT EXISTS tbl_star (
       id uuid DEFAULT gen_random_uuid(),
       "date" integer,
+      "type" varchar(255) not null,
       "relateId" varchar(255) not null,
       "videoId" varchar(510) not null,
       "videoImage" varchar(510),
