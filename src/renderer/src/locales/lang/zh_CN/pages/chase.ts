@@ -4,6 +4,12 @@ export default {
     clearAll: '清空',
     title: '历史',
   },
+  type: {
+    film: '电影',
+    iptv: '电视',
+    drive: '网盘',
+    analyze: '解析',
+  },
   binge: {
     title: '收藏',
     checkUpdate: '更新',

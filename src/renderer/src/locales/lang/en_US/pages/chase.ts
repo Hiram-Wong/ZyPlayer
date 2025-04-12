@@ -4,6 +4,12 @@ export default {
     clearAll: 'Clear',
     title: 'History',
   },
+  type: {
+    film: 'Film',
+    iptv: 'Iptv',
+    drive: 'Drive',
+    analyze: 'Parse',
+  },
   binge: {
     title: 'Favorite',
     checkUpdate: 'Update',
