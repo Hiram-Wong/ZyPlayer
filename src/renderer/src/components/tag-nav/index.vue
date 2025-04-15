@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import uniqBy from 'lodash/uniqBy';
+import { uniqBy } from 'lodash-es';
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps<{

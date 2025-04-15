@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import request from '@/utils/request';
 
 let controller = new AbortController();

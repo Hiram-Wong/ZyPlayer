@@ -1,4 +1,4 @@
-import throttle from 'lodash/throttle';
+import { throttle } from 'lodash-es';
 import { onBeforeMount, onMounted, ref, SetupContext, toRefs, nextTick, watch } from 'vue';
 import * as monacoModule from 'monaco-editor';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
