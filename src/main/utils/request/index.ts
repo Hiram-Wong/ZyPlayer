@@ -2,22 +2,25 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } f
 import https from 'https';
 import PQueue from 'p-queue';
 
+const TIMEOUT = 5000;
+
 const getTimeout = (timeout: number | undefined | null) => {
-  const baseTimeout = 5000;
+  const baseTimeout = TIMEOUT;
 
   if (timeout !== null && timeout !== undefined) {
     return Math.max(baseTimeout, timeout);
   }
 
-  if (globalThis.variable?.timeout) {
-    return Math.max(baseTimeout, globalThis.variable.timeout);
+  const dbTimeout = globalThis.variable?.timeout;
+  if (dbTimeout) {
+    return Math.max(baseTimeout, dbTimeout);
   }
 
   return baseTimeout;
 };
 
 const service: AxiosInstance = axios.create({
-  timeout: 5000,
+  timeout: TIMEOUT,
   httpsAgent: new https.Agent({
     rejectUnauthorized: false,
   }),

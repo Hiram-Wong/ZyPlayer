@@ -1,16 +1,31 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
-// import { getPinia } from '@/utils/tool';
+import { getPinia } from '@/utils/tool';
 
 const baseURL = String(
   import.meta.env.DEV ? '/api' : `${import.meta.env.VITE_API_URL}${import.meta.env.VITE_API_URL_PREFIX}`,
 );
+const TIMEOUT = 5000;
 
-// const TIMEOUT = getPinia('setting', 'timeout') < 1000 ? 1000 : getPinia('setting', 'timeout');
+const getTimeout = (timeout: number | undefined | null) => {
+  const baseTimeout = TIMEOUT;
+
+  if (timeout !== null && timeout !== undefined) {
+    return Math.max(baseTimeout, timeout);
+  }
+
+  const dbTimeout = getPinia('setting', 'timeout');
+  if (dbTimeout) {
+    return Math.max(baseTimeout, dbTimeout);
+  }
+
+  return baseTimeout;
+};
 
 const service: AxiosInstance = axios.create({
   baseURL,
-  // timeout: TIMEOUT,
+  timeout: TIMEOUT,
   headers: {
     "Content-Type": "application/json;charset=utf-8",
   },
@@ -37,9 +52,7 @@ service.interceptors.response.use(
 );
 
 const request = async (config: AxiosRequestConfig) => {
-  if (config?.timeout && config?.timeout < 5000) {
-    delete config.timeout;
-  }
+  config.timeout = getTimeout(config?.timeout);
   const res = await service.request(config);
   if (res.data.code === 0 && res.status === 200) {
     return res.data.data;
@@ -49,9 +62,7 @@ const request = async (config: AxiosRequestConfig) => {
 };
 
 const requestComplete: any = async (config: AxiosRequestConfig) => {
-  if (config?.timeout && config?.timeout < 5000) {
-    delete config.timeout;
-  }
+  config.timeout = getTimeout(config?.timeout);
   const { status, data, headers } = await service.request(config);
   return {
     status,
@@ -60,4 +71,57 @@ const requestComplete: any = async (config: AxiosRequestConfig) => {
   };
 };
 
-export { request as default, requestComplete };
+const requestSse = (config) => {
+  config.timeout = getTimeout(config?.timeout);
+  const { success, fail, complete } = config?.options || {};
+  const url = `${baseURL}${config.url}`;
+  const method = config?.method?.toUpperCase() || 'GET';
+  const headers = config?.headers || {};
+  const data = config?.data || {};
+  const timeout = config?.timeout || TIMEOUT;
+
+  fetchEventSource(url, {
+    method,
+    headers,
+    timeout,
+    body: JSON.stringify(data),
+    onopen(response) {
+      if (!response.ok) {
+        const err = new Error('请求失败');
+        complete?.(false, err.message);
+        fail?.(err);
+      }
+    },
+    onmessage(event) {
+      try {
+        let response: any = event.data;
+        console.log('response', response);
+        if (response === '[DONE]') {
+          complete?.(true);
+          return;
+        } else {
+          response = JSON.parse(response);
+        }
+
+        const choices = response?.choices?.[0];
+        if (choices?.finish_reason === 'stop') {
+          complete?.(true);
+          return;
+        } else {
+          success?.(choices);
+        }
+      } catch (err: any) {
+        console.error('解析数据失败:', err);
+        complete?.(false, err.message);
+        fail?.(err);
+      }
+    },
+    onerror(err) {
+      console.error('捕获到错误:', err);
+      complete?.(false, err.message);
+      fail?.(err);
+    },
+  });
+};
+
+export { request as default, requestComplete, requestSse };
