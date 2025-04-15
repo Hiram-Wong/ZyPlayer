@@ -1,4 +1,4 @@
-import request from '@/utils/request';
+import request, { requestSse } from '@/utils/request';
 import { getPinia } from '@/utils/tool';
 
 export function fetchDebugSource(action) {
@@ -34,12 +34,63 @@ export function fetchDelAdStream(doc) {
   });
 }
 
-export function fetchAiAnswer(docs) {
+export function fetchAiChat(doc) {
   return request({
-    url: '/v1/lab/ai',
+    url: '/v1/lab/ai/chat',
     method: 'post',
-    data: docs,
+    data: { ...doc.data, stream: false },
     timeout: getPinia('setting', 'timeout') * 2,
+  });
+}
+
+export function fetchAiStream(doc) {
+  return requestSse({
+    url: '/v1/lab/ai/chat',
+    method: 'post',
+    data: { ...doc.data, stream: true },
+    timeout: getPinia('setting', 'timeout') * 2,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    options: doc.options,
+  });
+}
+
+export function fetchAiCache() {
+  return request({
+    url: '/v1/lab/ai/cache',
+    method: 'get',
+  });
+}
+
+export function createAiCache() {
+  return request({
+    url: '/v1/lab/ai/cache/create',
+    method: 'post',
+  });
+}
+
+export function addAiCache(doc) {
+  return request({
+    url: '/v1/lab/ai/cache',
+    method: 'post',
+    data: doc
+  });
+}
+
+export function putAiCache(doc) {
+  return request({
+    url: '/v1/lab/ai/cache',
+    method: 'put',
+    data: doc
+  });
+}
+
+export function delAiCache(doc) {
+  return request({
+    url: '/v1/lab/ai/cache',
+    method: 'delete',
+    data: doc
   });
 }
 

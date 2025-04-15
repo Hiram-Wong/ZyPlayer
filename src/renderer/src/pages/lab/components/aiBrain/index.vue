@@ -24,7 +24,7 @@
             <div class="data-item">
               <p class="title-label mg-b">{{ $t('pages.lab.aiBrain.platform.title') }}</p>
               <t-space>
-                <template v-for="item in AI_PLATFORMS">
+                <template v-for="item in AI_PLATFORM">
                   <t-link theme="default" @click="handleOpenUrl(item.url)">{{ item.name }}</t-link>
                 </template>
               </t-space>
@@ -53,52 +53,84 @@
       </div>
     </div>
     <div class="content">
-      <t-chat ref="chatRef" :clear-history="chatList.length > 0 && !active.streamLoad" @clear="clearConfirm">
-        <template v-for="(item, index) in chatList" :key="index">
-          <t-chat-item
+      <t-chat
+        ref="chatRef"
+        :data="chatList"
+        :clear-history="chatList.length > 0 && !active.isStreamLoad"
+        :is-stream-load="active.isStreamLoad"
+        :text-loading="active.loading"
+        @scroll="handleChatScroll"
+        @clear="clearConfirm"
+      >
+        <template #content="{ item, index }">
+          <t-chat-reasoning v-if="item.reasoning?.length > 0" expand-icon-placement="right">
+            <template #header>
+              <t-chat-loading v-if="active.isStreamLoad" :text="$t('pages.lab.aiBrain.reasoning')" indicator />
+              <div v-else style="display: flex; align-items: center">
+                <CheckCircleIcon style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px" />
+                <span>{{ $t('pages.lab.aiBrain.reasoned') }}</span>
+              </div>
+            </template>
+            <t-chat-content v-if="item.reasoning.length > 0" :content="item.reasoning" />
+          </t-chat-reasoning>
+          <t-chat-content v-if="item.content.length > 0" :content="item.content" />
+          <!-- <t-chat-item
+            v-if="item.content.length > 0"
             :avatar="item.avatar"
             :role="item.role"
             :content="item.content"
             :text-loading="index === 0 && active.loading"
-          >
-          <template v-if="!active.streamLoad" #actions>
-            <t-chat-action
-              :is-good="actionStatus[chatList.length - index]?.good"
-              :is-bad="actionStatus[chatList.length - index]?.bad"
-              :content="item.content"
-              @operation="(type: string, { e }) => handleOperation(type, { e, index })"
-            />
-          </template>
-          </t-chat-item>
+          /> -->
+        </template>
+        <template #actions="{ item, index }">
+          <t-chat-action
+            :content="item.content"
+            :is-good="actionStatus[chatList.length - index]?.good"
+            :is-bad="actionStatus[chatList.length - index]?.bad"
+            :operation-btn="['good', 'bad', 'replay', 'copy']"
+            @operation="(type: string, { e }) => handleOperation(type, { e, index })"
+          />
         </template>
         <template #footer>
-          <t-chat-input
-            :placeholder="$t('pages.lab.aiBrain.placeholder.send')"
-            :stop-disabled="active.streamLoad"
+          <t-chat-sender
+            :stop-disabled="active.isStreamLoad"
+            :textarea-props="{
+              placeholder: $t('pages.lab.aiBrain.placeholder.input'),
+            }"
             @send="handleInputEnter"
           />
-          <div class="chat-action-footer">{{ $t('pages.lab.aiBrain.declare') }}</div>
         </template>
       </t-chat>
+      <t-button v-show="active.isShowToBottom" variant="text" class="bottomBtn" @click="backBottom">
+        <div class="to-bottom">
+          <ArrowDownIcon />
+        </div>
+      </t-button>
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import clone from 'lodash/clone';
+import { cloneDeep } from 'lodash-es';
 import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { ArrowDownIcon, CheckCircleIcon } from 'tdesign-icons-vue-next';
 import {
   Chat as TChat,
   ChatAction as TChatAction,
   ChatContent as TChatContent,
   ChatInput as TChatInput,
   ChatItem as TChatItem,
+  ChatLoading as TChatLoading,
+  ChatReasoning as TChatReasoning,
+  ChatSender as TChatSender,
 } from '@tdesign-vue-next/chat';
 
 import { t } from '@/locales';
-import { fetchAiAnswer } from '@/api/lab';
+import { fetchAiChat, fetchAiStream, delAiCache, addAiCache, createAiCache, putAiCache } from '@/api/lab';
 import { fetchSettingDetail, putSetting } from '@/api/setting';
-import openaiIcon from '@/assets/ai/openai.png';
+import { platform as AI_PLATFORM } from '@/config/ai';
+import openaiIcon from '@/assets/ai/openai_kimi.png';
 import userIcon from '@/assets/ai/user.png';
 import '@/style/theme/index.less'; // 必须后引入, 不然样式冲突
 
@@ -118,33 +150,7 @@ const AI_MODELS = ref([
   },
 ]);
 
-const AI_PLATFORMS = computed(() => {
-  return [
-    {
-      id: 'openai',
-      name: t('pages.lab.aiBrain.platform.openai'),
-      url: 'https://platform.openai.com/api-keys',
-    },
-    {
-      id: 'deepseek',
-      name: t('pages.lab.aiBrain.platform.deepseek'),
-      url: 'https://platform.deepseek.com/api_keys',
-    },
-    {
-      id: 'kimi',
-      name: t('pages.lab.aiBrain.platform.kimi'),
-      url: 'https://platform.moonshot.cn/console/api-keys',
-    },
-    {
-      id: 'free',
-      name: t('pages.lab.aiBrain.platform.free'),
-      url: 'https://github.com/chatanywhere/GPT_API_free',
-    },
-  ]
-});
-
 const formData = ref({
-  aiType: 'qa',
   config: {
     server: '',
     key: '',
@@ -155,17 +161,17 @@ const formData = ref({
     key: '',
     model: 'gpt-3.5-turbo',
   },
-  codeSnippet: '',
-  demand: '',
   result: '',
-  contentHtml: ''
+  prompt: '',
+  sessionId: '',
 });
-const chatRef = useTemplateRef('chatRef');
+const chatRef = useTemplateRef<any>('chatRef');
 const active = ref({
   nav: '',
   setting: false,
   loading: false,
-  streamLoad: false,
+  isStreamLoad: false,
+  isShowToBottom: false,
   good: false,
   bad: false,
 });
@@ -174,16 +180,25 @@ const actionStatus = ref({});
 
 // 滚动到底部
 const backBottom = () => {
-  if (!chatRef.value) return;
-  // @ts-ignore
-  chatRef.value.scrollToBottom({
+  chatRef.value?.scrollToBottom({
     behavior: 'smooth',
   });
+};
+
+const handleChatScroll = ({ e }) => {
+  const scrollTop = e.target.scrollTop;
+  active.value.isShowToBottom = scrollTop < 0;
 };
 
 const clearConfirm = async () => {
   chatList.value = [];
   actionStatus.value = {};
+
+  const { sessionId } = formData.value;
+  if (sessionId) {
+    await delAiCache({ ids: sessionId, metadata: [] });
+    formData.value.sessionId = '';
+  };
 };
 
 onMounted(() => {
@@ -195,7 +210,7 @@ const handleOpChange = (type: string) => {
 
   switch (type) {
     case 'setting':
-      formData.value.config = clone(formData.value.rawConfig);
+      formData.value.config = cloneDeep(formData.value.rawConfig);
       active.value.setting = true;
       break;
   };
@@ -223,8 +238,8 @@ const onSubmit = async () => {
         content: t('pages.lab.aiBrain.chat.modelChange', { model: formData.value.config.model }),
         role: 'model-change',
       });
-    }
-    formData.value.rawConfig = clone(formData.value.config);
+    };
+    formData.value.rawConfig = cloneDeep(formData.value.config);
     MessagePlugin.success(t('pages.setting.data.success'));
     active.value.setting = false;
   } catch (err) {
@@ -247,62 +262,93 @@ const fetchAiConf = async () => {
 };
 
 const handleInputEnter = async (val: string) => {
-  if (!val) {
-    MessagePlugin.warning(t('pages.lab.aiBrain.message.contentEmpty'));
-    return;
-  };
   if (!formData.value.config.server || !formData.value.config.key || !formData.value.config.model) {
     MessagePlugin.warning(t('pages.lab.aiBrain.message.aiParmsEmpty'));
     return;
   };
-  if (active.value.streamLoad) {
+  if (!val) {
+    MessagePlugin.warning(t('pages.lab.aiBrain.message.contentEmpty'));
     return;
-  }
+  };
+  if (active.value.isStreamLoad) {
+    return;
+  };
 
   chatList.value.unshift({
-    avatar: userIcon,
+    // avatar: userIcon,
     content: val,
     role: 'user',
   });
 
-  const response = await fetchAiReply(val);
-  if (response instanceof Error) {
-    chatList.value.unshift({
-      avatar: openaiIcon,
-      content: response.message,
-      role: 'error',
-    })
-  } else {
-    chatList.value.unshift({
-      avatar: openaiIcon,
-      content: response,
-      role: 'assistant',
-    });
-  }
-}
+  if (!formData.value.sessionId) {
+    const res = await createAiCache();
+    formData.value.sessionId = res.id;
+  };
 
-const fetchAiReply = async (command: string) => {
+  await fetchAiReply(val);
+};
+
+const fetchAiReply = async (prompt: string) => {
   active.value.loading = true;
-  active.value.streamLoad = true;
-  let response;
+  active.value.isStreamLoad = true;
+
+  chatList.value.unshift({
+    avatar: openaiIcon,
+    role: 'assistant',
+    content: '',
+    reasoning: '',
+    duration: 0,
+  });
+
   try {
-    const doc = {
-      type: formData.value.aiType,
-      codeSnippet: formData.value.codeSnippet,
-      demand: command,
-    };
-    response = await fetchAiAnswer(doc);
+    const startTime = Date.now();
+    const { config: { model }, sessionId } = formData.value;
+    fetchAiStream({
+      data: { prompt, model, sessionId },
+      options: {
+        success(result) {
+          if (!result) return;
+          const lastItem = chatList.value[0];
+          lastItem.reasoning += result.delta?.reasoning_content || '';
+          lastItem.content += result.delta?.content || '';
+        },
+        fail(err) {
+          const lastItem = chatList.value[0];
+          lastItem.role = 'error';
+          lastItem.content = err.message;
+          lastItem.reasoning = err.message;
+          // 显示用时
+          lastItem.duration = Math.floor((Date.now() - startTime) / 1000);
+          // 控制终止按钮
+          active.value.isStreamLoad = false;
+          active.value.loading = false;
+        },
+        complete(isOk, msg) {
+          if (!isOk) {
+            const lastItem = chatList.value[0];
+            lastItem.role = 'error';
+            lastItem.content = msg;
+            lastItem.reasoning = msg;
+          }
+          const lastItem = chatList.value[0];
+          // 显示用时
+          lastItem.duration = Math.floor((Date.now() - startTime) / 1000);
+          // 控制终止按钮
+          active.value.isStreamLoad = false;
+          active.value.loading = false;
+        },
+      }
+    });
   } catch (err: any) {
-    response = err;
-  } finally {
-    active.value.loading = false;
-    active.value.streamLoad = false;
-    return response;
+    console.error(err);
+    const lastItem = chatList.value[0];
+    lastItem.role = 'error';
+    lastItem.content = err.message;
+    lastItem.reasoning = err.message;
   }
 };
 
-const handleOperation = (type: string, options: { e: MouseEvent, index: number }) => {
-  console.log('handleOperation', type, options);
+const handleOperation = async (type: string, options: { e: MouseEvent, index: number }) => {
   const { index } = options;
   if (type === 'good') {
     const postion = chatList.value.length - index;
@@ -326,8 +372,12 @@ const handleOperation = (type: string, options: { e: MouseEvent, index: number }
     actionStatus.value[postion].good = false;
   } else if (type === 'replay') {
     const userQuery = chatList.value[index + 1].content; // 获取用户输入
-    // delete chatList.value[index + 1]; // 删除机器回复
-    // delete chatList.value[index]; // 删除用户输入
+
+    // 删除当前机器回复和用户输入 第一次机器回复 第二次用户输入
+    for (let i = 1; i <= 2; i++) {
+      chatList.value.shift();
+      await delAiCache({ ids: formData.value.sessionId, metadata: [-1] })
+    };
 
     handleInputEnter(userQuery);
   }
@@ -396,14 +446,19 @@ const RULES = {
     }
 
     :deep(.t-chat__text) {
-      .t-chat__text__user {
+      .t-chat__text__user, .t-chat__text--user {
+        background: var(--td-bg-color-secondarycontainer);
+        color: var(--td-text-color-primary);
+        border-radius: var(--td-radius-default);
+        padding: var(--td-comp-paddingTB-xxs) var(--td-comp-paddingLR-s);
+
         pre {
           background-color: transparent;
           color: var(--td-text-color-primary);
         }
       }
 
-      .t-chat__text__assistant {
+      .t-chat__text__assistant, .t-chat__text--assistant {
         a {
           color: var(--td-text-color-primary);
           pointer-events: none;
@@ -468,6 +523,37 @@ const RULES = {
         text-align: center;
         font-size: 12px;
         color: var(--td-text-color-secondary);
+      }
+    }
+
+    .bottomBtn {
+      position: absolute;
+      left: 50%;
+      margin-left: -20px;
+      bottom: 200px;
+      padding: 0;
+      border: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      box-shadow: var(--td-shadow-3);
+    }
+
+    .to-bottom {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--td-font-white-1);
+      box-sizing: border-box;
+      background: var(--td-bg-color-container);
+      border-radius: 50%;
+      font-size: 24px;
+      line-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .t-icon {
+        font-size: 24px;
       }
     }
   }

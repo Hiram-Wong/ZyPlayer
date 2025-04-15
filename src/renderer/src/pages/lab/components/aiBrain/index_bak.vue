@@ -108,7 +108,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import JSON5 from "json5";
 
 import { t } from '@/locales';
-import { fetchAiAnswer } from '@/api/lab';
+import { fetchAiChat } from '@/api/lab';
 import { fetchSettingDetail, putSetting } from '@/api/setting';
 import { copyToClipboardApi } from '@/utils/tool';
 
@@ -186,7 +186,7 @@ const AiAnswerEvent = async () => {
       codeSnippet: formData.value.codeSnippet,
       demand: formData.value.demand,
     };
-    const response = await fetchAiAnswer(doc);
+    const response = await fetchAiChat(doc);
     let content = response;
     try {
       const toObj = JSON5.parse(JSON5.stringify(content));
