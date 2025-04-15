@@ -1,0 +1,23 @@
+<svg width="14px" height="14px" viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="-0.705293158%" y1="50.0021563%" x2="100.312135%" y2="50.0021563%" id="linearGradient-4h0vanbknf-1">
+            <stop stop-color="#00D2FF" offset="0%"></stop>
+            <stop stop-color="#00AAFF" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="-9.29138965%" y1="41.8073795%" x2="100.956705%" y2="55.3447786%" id="linearGradient-4h0vanbknf-2">
+            <stop stop-color="#00D2FF" offset="0%"></stop>
+            <stop stop-color="#00AAFF" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="-0.00194067313%" y1="50.0040223%" x2="99.6830366%" y2="50.0040223%" id="linearGradient-4h0vanbknf-3">
+            <stop stop-color="#FF4B7D" offset="0%"></stop>
+            <stop stop-color="#FF2D64" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="youku-small" transform="translate(0.312110, 0.000000)" fill-rule="nonzero">
+            <path d="M1.61865069,8.84746643 C0.0703082813,9.6103028 -0.459742263,11.2991401 0.434749646,12.61959 C1.32924167,13.94004 3.30955021,14.3920752 4.85789262,13.6292389 L11.8466682,10.1877082 L5.37064938,6.99950952 L1.61865069,8.84746643 Z" id="路径" fill="url(#linearGradient-4h0vanbknf-1)"></path>
+            <polygon id="路径" fill="url(#linearGradient-4h0vanbknf-2)" style="mix-blend-mode: multiply;" points="11.8442031 10.1877082 5.37064938 6.99950952 4.24283116 7.55557846"></polygon>
+            <path d="M11.8442031,3.81236199 L4.85789262,0.370831324 C3.30989051,-0.392005037 1.32985783,0.0597948203 0.435365924,1.37995455 C-0.459126104,2.70011428 0.0706485822,4.38871625 1.61865069,5.15155261 L5.37064938,6.99950952 L11.8442031,10.186657 L11.8442031,10.186657 C14.718599,8.77073101 14.718599,5.22933919 11.8442031,3.81236199 Z" id="路径" fill="url(#linearGradient-4h0vanbknf-3)"></path>
+        </g>
+    </g>
+</svg>
