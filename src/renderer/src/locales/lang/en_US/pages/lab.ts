@@ -209,12 +209,16 @@ export default {
     fetchTip: 'Enter someing...',
     codeSnippetTip: 'Enter html code snippet',
     setting: 'Setting',
+    reason: 'Reason',
+    reasoning: 'Reasoning...',
+    reasoned: 'Have thought deeply',
     message: {
       contentEmpty: 'Content is empty',
       aiParmsEmpty: 'AI parms is empty',
     },
     placeholder: {
       send: 'Send message to AI',
+      input: 'Please enter content...',
     },
     platform: {
       title: 'Platform',
@@ -395,6 +399,7 @@ export default {
       update: 'Update',
       install: 'Install',
       uninstall: 'UnInstall',
+      uninstallTip: 'It will not work after uninstall, Please careful',
       cancelTip: 'The current plug-in has an incomplete command, please wait moment',
       devtoolDomAttchErrTip: 'The DOM is not mounted on the page, and the developer Tool failed to open',
       loadUiEntryError: 'Failed to load entry',

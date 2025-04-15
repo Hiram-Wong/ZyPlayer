@@ -22,6 +22,9 @@ export default {
     tip: '输入 {0} 快速指定搜索源, 例如',
     watch: '查看',
     content: '的所有内容',
+  },
+  platform: {
+    360: '360影视',
     iqiyi: '爱奇艺',
     youku: '优酷视频',
     tencent: '腾讯视频',

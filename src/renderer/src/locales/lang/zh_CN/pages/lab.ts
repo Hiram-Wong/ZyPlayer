@@ -210,12 +210,16 @@ export default {
     fetchTip: '输入一些需求...',
     codeSnippetTip: '输入html代码片段',
     setting: '设置',
+    reason: '推理',
+    reasoning: '推理中...',
+    reasoned: '已深度思考',
     message: {
       contentEmpty: '内容为空',
       aiParmsEmpty: 'AI参数为空',
     },
     placeholder: {
       send: '给 AI 发送消息',
+      input: '请输入内容...',
     },
     platform: {
       title: '平台',
@@ -396,6 +400,7 @@ export default {
       update: '更新',
       install: '安装',
       uninstall: '卸载',
+      uninstallTip: '卸载后将无法使用, 请谨慎操作',
       cancelTip: '当前插件存在未执行完命令, 请稍后',
       devtoolDomAttchErrTip: '打开开发者工具失败, DOM未挂载到页面上',
       loadUiEntryError: '加载入口失败',

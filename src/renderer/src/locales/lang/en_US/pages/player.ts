@@ -4,13 +4,15 @@ export default {
   header: {
     backMain: 'BackToMain',
   },
-  film: {
-    desc: 'Desc',
-    background: '背景',
+  function: {
     like: 'Like',
     download: 'Down',
     share: 'Share',
     setting: 'Setting',
+  },
+  film: {
+    desc: 'Desc',
+    background: '背景',
     analyze: 'Analyze',
     anthology: 'Anthology',
     line: 'Line',
@@ -31,6 +33,8 @@ export default {
     unplay: 'unplay',
     played: 'played',
     playing: 'play',
+    useing: 'useing',
+    unuse: 'unuse',
   },
   infiniteLoading: {
     complete: 'Load Complete',

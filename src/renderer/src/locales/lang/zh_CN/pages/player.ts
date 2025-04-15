@@ -4,13 +4,15 @@ export default {
   header: {
     backMain: '回到主界面',
   },
-  film: {
-    desc: '简介',
-    background: '背景',
+  function: {
     like: '收藏',
     download: '下载',
     share: '分享',
     setting: '设置',
+  },
+  film: {
+    desc: '简介',
+    background: '背景',
     analyze: '解析',
     anthology: '选集',
     line: '线路',
@@ -31,6 +33,8 @@ export default {
     unplay: '未播放',
     played: '已播放',
     playing: '播放中',
+    useing: '使用中',
+    unuse: '未使用',
   },
   infiniteLoading: {
     complete: '人家是有底线的',
