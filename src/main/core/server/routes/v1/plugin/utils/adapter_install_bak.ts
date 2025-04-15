@@ -3,7 +3,6 @@ import { dirname, join, resolve } from 'path';
 import workerpool from 'workerpool';
 import { JsonDB, Config } from 'node-json-db';
 import { pathToFileURL, fileURLToPath } from 'url';
-import os from 'os';
 import logger from '@main/core/logger';
 import {
   deleteFile,
@@ -29,6 +28,7 @@ const runModule = async (entryBasePath: string, modulePath: string, method: 'sto
     throw err;
   }
 };
+
 /**
  * 系统插件管理器
  * @class AdapterHandler
@@ -179,8 +179,6 @@ class AdapterHandler {
         } else if (info?.type === 'system') {
           info.main = info?.main ? pathToFileURL(resolve(pluginBasePath, info.main)).toString() : '';
         }
-        // 2.3 base
-        info.base = pathToFileURL(resolve(pluginBasePath)).toString() || '';
 
         // 2.停止插件
         const index = await this.db.getIndex(`${this.dbTable}`, info.name, 'name');
@@ -191,12 +189,7 @@ class AdapterHandler {
         if (await fileExist(pluginPkgLockPath)) await deleteFile(pluginPkgLockPath);
 
         // 4.安装插件
-        const execRes = await this.execCommand('install', {
-            prefix: pluginBasePath,
-            registry: this.registry,
-            save: true,
-          }, []
-        );
+        const execRes = await this.execCommand('install', { prefix: pluginBasePath }, []);
         if (execRes.code === -1) continue;
 
         // 5.插件参数
@@ -209,7 +202,6 @@ class AdapterHandler {
           description: info?.description || '',
           readme: info?.readme || '',
           main: info?.main || '',
-          base: info?.base || '',
           version: info?.version || '0.0.0',
           logo: info?.logo || '',
           status: info?.status || 'STOPED',
@@ -342,7 +334,7 @@ class AdapterHandler {
           try {
             let pool = this.syncModules.get(`${pluginInfo.name}`);
             if (!pool) {
-              pool = workerpool.pool({ workerType: 'process', maxWorkers: os.cpus().length - 1 });
+              pool = workerpool.pool({ workerType: 'process' });
               this.syncModules.set(`${pluginInfo.name}`, pool);
             }
 
@@ -430,56 +422,42 @@ class AdapterHandler {
 
   /**
    * 执行包管理器命令
-   * https://juejin.cn/post/6929317820362653703
    * @memberof AdapterHandler
    */
   private async execCommand(
     cmd: string,
-    options: { [key: string]: any } = {},
-    args: string[] = []
-  ): Promise<{ code: number; msg: string; data: any }> {
-    // 定义日志监听器
-    const logListener = (message: any) => {
-      logger.info(`[plugin][execCommand][log] ${message}`);
-    };
+    options: { [key: string]: string },
+    modules: string[] = [],
+  ): Promise<{ code: number; msg: string; data: any[] }> {
+    return new Promise(async (resolve: any, reject: any) => {
+      const config: { [key: string]: any } = {
+        save: true,
+        registry: this.registry,
+      };
 
-    try {
-      // 注册日志监听器
-      npm.on('log', logListener);
+      npm.load(config, (loadErr: any) => {
+        npm.config.prefix = options?.prefix || this.baseDir; // 重要, 刷新项目工作路径
+        logger.info(`[plugin][execCommand][env][prefix] ${npm.config.prefix}`);
 
-      // 检查命令是否存在
-      if (!npm.commands[cmd]) {
-        logger.error(`[plugin][execCommand][error] unsupported npm command: ${cmd}`);
-        return { code: -1, msg: `unsupported npm ${cmd}`, data: null };
-      }
+        if (loadErr) {
+          logger.error(`[plugin][execCommand][load][error] ${loadErr.message}`);
+          reject({ code: -1, msg: loadErr.message, data: null });
+        }
 
-      // 加载 npm 配置
-      await npm.load();
-
-      // 设置命令参数
-      if (options.prefix) npm.localPrefix = options.prefix;
-      if (options.registry) npm.config.set('registry', options.registry);
-      if (options.save) npm.config.set('save', options.save);
-
-      // 执行 npm 命令
-      return new Promise<{ code: number; msg: string; data: any }>((resolve, reject) => {
-        npm.commands[cmd](args, (err: any) => {
-          if (err) {
-            logger.error(`[plugin][execCommand][error] npm ${cmd} error: ${err.message}`);
-            reject({ code: -1, msg: err.message, data: null });
-          } else {
-            logger.info(`[plugin][execCommand][success] npm ${cmd} success`);
-            resolve({ code: 0, msg: 'ok', data: null });
+        npm.commands[cmd](modules, function (cmdErr: any, data: any[]) {
+          if (cmdErr) {
+            logger.error(`[plugin][execCommand][${cmd}][error] ${cmdErr.message}`);
+            reject({ code: -1, msg: cmdErr.message, data: null });
           }
+          logger.info(`[plugin][execCommand][data]`, data);
+          resolve({ code: 0, msg: 'ok', data });
+        });
+
+        npm.on('log', (message) => {
+          logger.info(`[plugin][execCommand][log] ${message}`);
         });
       });
-    } catch (err: any) {
-      logger.error(`[plugin][execCommand][error] ${err.message}`);
-      return { code: -1, msg: err.message, data: null };
-    } finally {
-      // 移除日志监听器
-      npm.off('log', logListener);
-    }
+    });
   }
 }
 

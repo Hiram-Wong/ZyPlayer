@@ -85,7 +85,6 @@
             </div>
           </div>
           <div class="actions">
-            <t-button theme="default" class="uninstall_btn" @click="handleControlChange('uninstall', pluginInfo.name)">{{ $t('pages.lab.pluginCenter.control.uninstall') }}</t-button>
             <t-dropdown theme="default" trigger="click" destroy-on-close>
               <t-button theme="default" shape="square" variant="outline" class="control_btn">
                 <caret-down-small-icon />
@@ -96,6 +95,12 @@
                 <t-dropdown-item v-if="pluginInfo.type === 'ui' "value="devtool" @click="handleOpenDevtool"> {{ $t('pages.lab.pluginCenter.control.devtool') }}</t-dropdown-item>
               </t-dropdown-menu>
             </t-dropdown>
+            <t-popconfirm
+              :content="$t('pages.lab.pluginCenter.control.uninstallTip')"
+              @confirm="handleControlChange('uninstall', pluginInfo.name)"
+            >
+              <t-button theme="danger" class="uninstall_btn">{{ $t('pages.lab.pluginCenter.control.uninstall') }}</t-button>
+            </t-popconfirm>
           </div>
         </div>
 
@@ -556,10 +561,13 @@ const RULES = {
           display: flex;
           gap: var(--td-size-4);
 
-          .control_btn, .uninstall_btn {
+          .uninstall_btn {
+            border-color: transparent;
+          }
+
+          .control_btn {
             color: var(--td-text-color-secondary);
             background-color: var(--td-bg-content-input-2);
-            --ripple-color: transparent;
             border-color: transparent;
 
             &:hover {
