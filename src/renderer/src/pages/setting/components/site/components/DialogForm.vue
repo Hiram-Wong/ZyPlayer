@@ -14,15 +14,15 @@
         <t-form-item :label="$t('pages.setting.site.name')" name="name">
           <t-input v-model="formData.data.name" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
-        <t-form-item :label="$t('pages.setting.site.type')" name="type">
-          <t-select v-model="formData.data.type" :options="SITE_TYPE" :placeholder="$t('pages.setting.placeholder.general')" @change="changeTypeEvent" />
-        </t-form-item>
         <div class="key-group">
           <t-form-item :label="$t('pages.setting.site.key')" name="key" style="flex: 1">
             <t-input v-model="formData.data.key" :placeholder="$t('pages.setting.placeholder.general')" />
           </t-form-item>
           <t-button theme="default" @click="randomKeyEvent">{{ $t('pages.setting.random') }}</t-button>
         </div>
+        <t-form-item :label="$t('pages.setting.site.type')" name="type">
+          <t-select v-model="formData.data.type" :options="SITE_TYPE" :placeholder="$t('pages.setting.placeholder.general')" @change="changeTypeEvent" />
+        </t-form-item>
         <t-form-item :label="$t('pages.setting.site.api')" name="api">
           <t-input v-model="formData.data.api" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>

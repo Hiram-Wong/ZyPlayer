@@ -14,6 +14,12 @@
         <t-form-item :label="$t('pages.setting.drive.name')" name="name">
           <t-input v-model="formData.data.name" class="input-item" :placeholder="$t('pages.setting.placeholder.general')" />
         </t-form-item>
+        <div class="key-group">
+          <t-form-item :label="$t('pages.setting.site.key')" name="key" style="flex: 1">
+            <t-input v-model="formData.data.key" :placeholder="$t('pages.setting.placeholder.general')" />
+          </t-form-item>
+          <t-button theme="default" @click="randomKeyEvent">{{ $t('pages.setting.random') }}</t-button>
+        </div>
         <t-form-item :label="$t('pages.setting.drive.server')" name="server">
           <t-input v-model="formData.data.server" class="input-item"
             :placeholder="$t('pages.setting.placeholder.general')" />
@@ -44,6 +50,7 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, watch } from 'vue';
 import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
+import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash-es';
 import { t } from '@/locales';
 
@@ -102,6 +109,10 @@ watch(
   },
 );
 
+const randomKeyEvent = () => {
+  formData.value.data.key = uuidv4();
+};
+
 const onSubmit: FormProps['onSubmit'] = async () => {
   formRef.value?.validate().then((validateResult) => {
     if (validateResult && Object.keys(validateResult).length) {
@@ -120,9 +131,18 @@ const onReset: FormProps['onReset'] = () => {
 
 const RULES = {
   name: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+  key: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   server: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
   showAll: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
 };
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.key-group {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--td-comp-margin-m);
+  gap: 10px;
+  align-items: center;
+}
+</style>
