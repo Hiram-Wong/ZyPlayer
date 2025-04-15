@@ -1,203 +1,155 @@
 import OpenAI, { ClientOptions } from 'openai';
-import ora from 'ora';
+import { PassThrough } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
 
-import { PARSE_ELEMENTS_CONTEXT, GET_ELEMENT_SELECTORS_CONTEXT, HELP_CONTEXT } from './context';
-import { isObject, logStart, logSuccess } from './general';
-
-type OpenAIChatModel =
-  | 'gpt-4-0125-preview'
-  | 'gpt-4-turbo-preview'
-  | 'gpt-4-1106-preview'
-  | 'gpt-4-vision-preview'
-  | 'gpt-4o'
-  | 'gpt-4'
-  | 'gpt-4-turbo'
-  | 'gpt-4-0314'
-  | 'gpt-4-0613'
-  | 'gpt-4-32k'
-  | 'gpt-4-32k-0314'
-  | 'gpt-4-32k-0613'
-  | 'gpt-3.5-turbo'
-  | 'gpt-3.5-turbo-16k'
-  | 'gpt-3.5-turbo-0301'
-  | 'gpt-3.5-turbo-0613'
-  | 'gpt-3.5-turbo-1106'
-  | 'gpt-3.5-turbo-0125'
-  | 'gpt-3.5-turbo-16k-0613';
-
-interface CreateOpenAIConfig {
-  defaultModel?: {
-    chatModel: OpenAIChatModel;
-  };
-  clientOptions?: ClientOptions;
+interface OpenAIRunChatOption {
+  model?: string;
+  messages: Array<{ role: 'user' | 'system' | 'assistant'; content: string; }>;
+  stream?: boolean;
+  timeout?: number;
 }
 
 interface OpenAICommonAPIOtherOption {
-  model?: OpenAIChatModel;
+  prompt: string;
+  model?: string;
+  sessionId?: string | null;
+  stream?: boolean;
+  timeout?: number;
 }
 
-interface OpenAIRunChatOption {
-  model: OpenAIChatModel | undefined;
-  context: string;
-  HTMLContent: string;
-  userContent: string;
-  responseFormatType: 'text' | 'json_object';
-}
+const SYSTEM_PROMPT = `我现在有一个爬虫相关的问题需要请教你。作为爬虫专家和前端专家，需要能帮我解答一下, 只需回答 user 用户的问题。
+zyfun[ZyPlayer]是一款采用现代化技术栈开发的全功能媒体播放器, 以清新的薄荷绿为主题, 旨在为用户提供流畅的跨平台娱乐体验。
+GitHub: https://github.com/Hiram-Wong/ZyPlayer
+`;
 
-interface OpenAIParseElementsContentOptions {
-  message: string;
-}
+class OpenAIApp {
+  private openai: OpenAI | null = null;
+  private options: ClientOptions = {};
+  private messages: Map<string, Array<{ role: string; content: string }>> = new Map();
 
-interface OpenAIGetElementSelectorsContentOptions {
-  message: string;
-  pathMode: 'default' | 'strict';
-}
+  constructor() {}
 
-interface OpenAIGetElementSelectorsResult {
-  selectors: string;
-  type: 'single' | 'multiple' | 'none';
-}
-
-interface OpenAIParseElementsResult<T extends Record<string, string>> {
-  filters: T[];
-  type: 'single' | 'multiple' | 'none';
-}
-
-interface OpenAIApp {
-  parseElements<T extends Record<string, string>>(
-    HTML: string,
-    content: string | OpenAIParseElementsContentOptions,
-    option?: OpenAICommonAPIOtherOption,
-  ): Promise<OpenAIParseElementsResult<T>>;
-
-  getElementSelectors(
-    HTML: string,
-    content: string | OpenAIGetElementSelectorsContentOptions,
-    option?: OpenAICommonAPIOtherOption,
-  ): Promise<OpenAIGetElementSelectorsResult>;
-
-  help(content: string, option?: OpenAICommonAPIOtherOption): Promise<string>;
-
-  custom(): OpenAI;
-}
-
-export function createOpenAI(config: CreateOpenAIConfig = {}): OpenAIApp {
-  const { defaultModel, clientOptions } = config;
-
-  const openai = new OpenAI(clientOptions);
-  const chatDefaultModel: OpenAIChatModel = defaultModel?.chatModel ?? 'gpt-3.5-turbo';
-
-  async function runChat<T>(option: OpenAIRunChatOption): Promise<T> {
-    const { model = chatDefaultModel, context, HTMLContent, userContent, responseFormatType } = option;
-
-    const spinner = ora(logStart(`AI is answering your question, please wait a moment`)).start();
-    try {
-      const timeout = globalThis.variable.timeout || 5000;
-      const completion = await openai.chat.completions.create(
-        {
-          model,
-          messages: [
-            { role: 'system', content: context },
-            { role: 'user', name: 'zyfun', content: HTMLContent },
-            { role: 'user', name: 'coder', content: userContent },
-          ],
-          response_format: { type: responseFormatType },
-          temperature: 0.1,
-        },
-        { maxRetries: 1, timeout },
-      );
-      spinner.succeed(logSuccess(`AI has completed your question`));
-
-      const content = completion.choices[0].message.content;
-      const result = responseFormatType === 'json_object' ? JSON.parse(content!) : content;
-
-      return result;
-    } catch (err) {
-      spinner.fail(`AI encountered an error or timeout`);
-      if (HTMLContent) {
-        return {
-          filters: `AI encountered an error or timeout; ${err}`,
-          selectors: `AI encountered an error or timeout; ${err}`,
-        } as any;
-      } else return `AI encountered an error or timeout; ${err}` as any;
-    }
+  clientCreate(options: ClientOptions) {
+    this.openai = new OpenAI(options);
   }
 
-  const app: OpenAIApp = {
-    async parseElements<T extends Record<string, string>>(
-      HTML: string,
-      content: string | OpenAIParseElementsContentOptions,
-      option: OpenAICommonAPIOtherOption = {},
-    ): Promise<OpenAIParseElementsResult<T>> {
-      const { model } = option;
+  checkOptions(options: ClientOptions): boolean {
+    if (Object.keys(options).length === 0) return false;
+    if (!options.apiKey) return false;
+    if (!options.baseURL || !/^(https?:\/\/)/.test(options.baseURL)) return false;
+    return true;
+  }
 
-      let coderContent: string = '';
-      if (isObject(content)) {
-        coderContent = JSON.stringify(content);
-      } else {
-        const obj: OpenAIParseElementsContentOptions = {
-          message: content,
-        };
-        coderContent = JSON.stringify(obj);
+  checkClient(options: ClientOptions = {}): boolean {
+    const isVisable = this.checkOptions(options);
+    if (!isVisable) return false;
+    const isDifferent = Object.keys(options).some(
+      key => this.options[key] !== options[key]
+    );
+    if (isDifferent) {
+      this.options = { ...this.options, ...options };
+      this.clientCreate(this.options);
+    }
+    return true;
+  }
+
+  cacheCreate() {
+    const key = uuidv4();
+    this.messages.set(key, []);
+    return { id: key, metadata: [] };
+  }
+
+  cacheAdd(key: string, doc: { role: string; content: string }) {
+    const current = this.messages.get(key) || [];
+    current.push(doc);
+    this.messages.set(key, current);
+    return { id: key, metadata: current };
+  }
+
+  cacheFetch(key: string) {
+    return { id: key, metadata: this.messages.get(key) || [] };
+  }
+
+  cacheDel(key: string, index: number[]) {
+    if (index.length === 0) {
+      this.messages.delete(key);
+    } else {
+      const current = this.messages.get(key) || [];
+      for (const i of index) {
+        current.splice(i, 1);
       }
+      this.messages.set(key, current);
+    }
+    return { id: key, metadata: this.messages.get(key) || [] };
+  }
 
-      const result = await runChat<OpenAIParseElementsResult<T>>({
-        model,
-        context: PARSE_ELEMENTS_CONTEXT,
-        HTMLContent: HTML,
-        userContent: coderContent,
-        responseFormatType: 'json_object',
-      });
-
-      return result;
-    },
-
-    async getElementSelectors(
-      HTML: string,
-      content: string | OpenAIGetElementSelectorsContentOptions,
-      option: OpenAICommonAPIOtherOption = {},
-    ): Promise<OpenAIGetElementSelectorsResult> {
-      const { model } = option;
-
-      let coderContent: string = '';
-      if (isObject(content)) {
-        coderContent = JSON.stringify(content);
-      } else {
-        const obj: OpenAIGetElementSelectorsContentOptions = {
-          message: content,
-          pathMode: 'default',
-        };
-        coderContent = JSON.stringify(obj);
+  cachePut(key: string, metadata: Array<{ index: number, doc: { role: string; content: string } }>) {
+    const current = this.messages.get(key) || [];
+    for (let { index, doc } of metadata) {
+      if (index < 0) index = current.length + index;
+      if (index >= 0 && index < current.length) {
+        current[index] = doc;
       }
+    }
+    this.messages.set(key, current);
+    return { id: key, metadata: current };
+  }
 
-      const result = await runChat<OpenAIGetElementSelectorsResult>({
-        model,
-        context: GET_ELEMENT_SELECTORS_CONTEXT,
-        HTMLContent: HTML,
-        userContent: coderContent,
-        responseFormatType: 'json_object',
-      });
+  async runChat(option: OpenAIRunChatOption): Promise<AsyncIterable<any>> {
+    const { model, messages, stream, timeout } = option;
+    const completion: any = this.openai!.chat.completions.create(
+      {
+        model: model || 'gpt-3.5-turbo',
+        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
+        temperature: 0.3,
+        stream,
+        stream_options: { "include_usage": false } // 禁用使用统计
+      },
+      { maxRetries: 1, timeout },
+    );
 
-      return result;
-    },
+    return completion;
+  }
 
-    async help(content: string, option: OpenAICommonAPIOtherOption = {}): Promise<string> {
-      const { model } = option;
+  async chat(option: OpenAICommonAPIOtherOption) {
+    if (!this.openai) throw new Error('OpenAI client is not initialized.');
 
-      const result = await runChat<string>({
-        model,
-        context: HELP_CONTEXT,
-        HTMLContent: '',
-        userContent: content,
-        responseFormatType: 'text',
-      });
-      return result;
-    },
+    const { prompt, model, sessionId = uuidv4(), stream = false, timeout } = option;
+    const history: any[] = this.messages.get(sessionId!) || [];
 
-    custom() {
-      return openai;
-    },
-  };
+    history.push({ role: 'user', content: prompt });
+    this.messages.set(sessionId!, history);
 
-  return app;
+    const result: any = await this.runChat({
+      model,
+      messages: history,
+      stream,
+      timeout: timeout || globalThis.variable?.timeout || 5000,
+    });
+
+    if (stream) {
+      const passThroughStream = new PassThrough();
+
+      (async () => {
+        const chunks: string[] = [];
+        for await (const chunk of result) {
+          const delta = chunk?.choices?.[0]?.delta?.content || '';
+          chunks.push(delta);
+          passThroughStream.write(JSON.stringify(chunk));
+        }
+        passThroughStream.end();
+        this.cacheAdd(sessionId!, { role: 'assistant', content: chunks.join('') });
+        // console.log(this.cacheFetch(sessionId!));
+      })()
+
+      return { result: passThroughStream, sessionId }; // 返回完整的处理结果
+    } else {
+      const reply = result.choices?.[0]?.message?.content;
+      this.cacheAdd(sessionId!, { role: 'assistant', content: reply });
+      // console.log(this.cacheFetch(sessionId!));
+      return { result, sessionId };
+    }
+  }
 }
+
+export default OpenAIApp;
