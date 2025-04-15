@@ -26,11 +26,13 @@ const update = async () => {
 
     CREATE TABLE IF NOT EXISTS tbl_iptv (
       id uuid DEFAULT gen_random_uuid(),
+      key varchar(255) not null,
       name varchar(255) not null,
       url text not null,
       type varchar(255) not null,
       epg varchar(255),
       logo varchar(255),
+      headers varchar(2048),
       "isActive" boolean not null default true
     );
 
@@ -43,21 +45,24 @@ const update = async () => {
 
     CREATE TABLE IF NOT EXISTS tbl_drive (
       id uuid DEFAULT gen_random_uuid(),
+      key varchar(255) not null,
       name varchar(255) not null,
       server varchar(255) not null,
       "startPage" varchar(255),
       search boolean not null default false,
-      headers varchar(255),
-      params varchar(255),
+      headers varchar(2048),
+      params varchar(2048),
       "showAll" boolean default false,
       "isActive" boolean not null default true
     );
 
     CREATE TABLE IF NOT EXISTS tbl_analyze (
       id uuid DEFAULT gen_random_uuid(),
+      key varchar(255) not null,
       name varchar(255) not null,
       url varchar(255) not null,
       type integer not null default 0,
+      headers varchar(2048),
       "isActive" boolean not null default true
     );
 
@@ -66,11 +71,11 @@ const update = async () => {
       "date" integer,
       "type" varchar(255) not null,
       "relateId" varchar(255) not null,
-      "videoId" varchar(510) not null,
-      "videoImage" varchar(510),
-      "videoName" varchar(510),
-      "videoType" varchar(255),
-      "videoRemarks" varchar(255)
+      "videoId" varchar(1024) not null,
+      "videoImage" varchar(2048),
+      "videoName" varchar(1024),
+      "videoType" varchar(1024),
+      "videoRemarks" varchar(1024)
     );
 
     CREATE TABLE IF NOT EXISTS tbl_history (
@@ -80,10 +85,10 @@ const update = async () => {
       "relateId" varchar(255),
       "siteSource" varchar(255),
       "playEnd" boolean,
-      "videoId" varchar(510),
-      "videoImage" varchar(510),
-      "videoName" varchar(510),
-      "videoIndex" varchar(510),
+      "videoId" varchar(1024),
+      "videoImage" varchar(2048),
+      "videoName" varchar(1024),
+      "videoIndex" varchar(2048),
       "watchTime" real,
       "duration" real,
       "skipTimeInEnd" real,

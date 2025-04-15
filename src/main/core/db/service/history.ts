@@ -35,18 +35,18 @@ export default {
   async removeByType(type) {
     return await db.delete(schema.history).where(eq(schema.history.type, type));
   },
-  async page(page = 1, pageSize = 20, type = 'all', kw = '') {
+  async page(page = 1, pageSize = 20, type = [], kw = '') {
     const baseQuery = db.select().from(schema.history);
     const conditions: any[] = [];
 
-    if (type !== 'all') {
-      conditions.push(eq(schema.history.type, type));
+    if (type.length > 0) {
+      conditions.push(inArray(schema.history.type, type));
     }
     if (kw) {
       conditions.push(like(schema.history.videoName, `%${kw}%`));
     }
 
-    let query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
+    let query: any = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
     query = query
       .limit(pageSize)
       .offset((page - 1) * pageSize)

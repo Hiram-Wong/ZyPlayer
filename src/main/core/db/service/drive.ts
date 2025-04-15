@@ -18,6 +18,10 @@ export default {
     const res = await db.select().from(schema.drive).where(eq(schema.drive.id, id));
     return res?.[0];
   },
+  async findByKey(key) {
+    const res = await db.select().from(schema.drive).where(eq(schema.drive.key, key));
+    return res?.[0];
+  },
   async set(doc) {
     await db.delete(schema.drive);
     return await db.insert(schema.drive).values(doc);

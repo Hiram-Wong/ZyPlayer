@@ -1,4 +1,3 @@
-import find from 'lodash/find';
 import JSON5 from 'json5';
 import { v4 as uuidv4, validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { resolve } from 'url';
@@ -108,7 +107,7 @@ const easy2tvbox = async (config, url, type) => {
       }));
   }
   if (content.hasOwnProperty('lives')) {
-    let oldLives = find(content.lives, { group: 'redirect' });
+    let oldLives = content.lives.find((item) => item.group === 'redirect' );
     if (oldLives && !Array.isArray(oldLives)) {
       oldLives = [oldLives];
     }
@@ -275,11 +274,13 @@ const commonDelImportData = (data) => {
           .map((item) => {
             return {
               id: item?.id || uuidv4(),
+              key: item?.key || item?.id || uuidv4(),
               name: item.name,
               type: item?.type || 'remote',
               url: item.url,
               epg: item?.epg || '',
               logo: item?.logo || '',
+              headers: item.headers || '',
               isActive: true,
             };
           });
@@ -302,13 +303,14 @@ const commonDelImportData = (data) => {
           .map((item) => {
             return {
               id: item?.id || uuidv4(),
+              key: item?.key || item?.id || uuidv4(),
               name: item?.name || '',
               server: item?.server || '',
               showAll: item.showAll || false,
               startPage: item?.startPage || '',
               search: !!item.search,
-              headers: item.headers || null,
-              params: item.params || null,
+              headers: item.headers || '',
+              params: item.params || '',
               isActive: true,
             };
           });
@@ -319,9 +321,11 @@ const commonDelImportData = (data) => {
           .map((item) => {
             return {
               id: item?.id || uuidv4(),
+              key: item?.key || item?.id || uuidv4(),
               name: item?.name || '',
               url: item?.url || '',
               type: item?.type ? item.type : 0,
+              headers: item.headers || '',
               isActive: true,
             };
           });
@@ -353,7 +357,7 @@ const commonDelImportData = (data) => {
           .map((item) => {
             return {
               id: item?.id || uuidv4(),
-              type: item?.type,
+              type: item?.type || 'film',
               relateId: item.relateId,
               videoId: item.videoId,
               videoImage: item?.videoImage || '',

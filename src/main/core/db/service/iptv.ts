@@ -18,6 +18,10 @@ export default {
     const res = await db.select().from(schema.iptv).where(eq(schema.iptv.id, id));
     return res?.[0];
   },
+  async findByKey(key) {
+    const res = await db.select().from(schema.iptv).where(eq(schema.iptv.key, key));
+    return res?.[0];
+  },
   async set(doc) {
     await db.delete(schema.iptv);
     return await db.insert(schema.iptv).values(doc);

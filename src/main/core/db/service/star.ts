@@ -32,24 +32,33 @@ export default {
   async remove(ids) {
     return await db.delete(schema.star).where(inArray(schema.star.id, ids));
   },
-  async page(page = 1, pageSize = 20, kw = '') {
-    let query = db.select().from(schema.star);
-    let count = db.$count(schema.star);
+  async removeByType(type) {
+    return await db.delete(schema.star).where(eq(schema.star.type, type));
+  },
+  async page(page = 1, pageSize = 20, type = [], kw = '') {
+    const baseQuery = db.select().from(schema.star);
+    const conditions: any[] = [];
 
-    if (kw) {
-      query = query.where(like(schema.star.name, `%${kw}%`));
-      count = db.$count(schema.star, like(schema.star.name, `%${kw}%`));
+    if (type.length > 0) {
+      conditions.push(inArray(schema.star.type, type));
     }
+    if (kw) {
+      conditions.push(like(schema.star.videoName, `%${kw}%`));
+    }
+
+    let query: any = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
     query = query
       .limit(pageSize)
       .offset((page - 1) * pageSize)
       .orderBy(desc(schema.star.date));
-
     const list = await query;
-    const total = await count;
+
+    const countQuery = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
+    const total = await countQuery;
+
     return {
       list: list,
-      total: total,
+      total: total.length,
     };
   },
 };

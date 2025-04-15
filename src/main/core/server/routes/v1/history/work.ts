@@ -1,5 +1,5 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
-import { history, site } from '@main/core/db/service';
+import { history, site, analyze, iptv, drive } from '@main/core/db/service';
 
 const API_PREFIX = 'api/v1/history';
 
@@ -38,14 +38,25 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       data: dbRes,
     };
   });
-  fastify.get(`/${API_PREFIX}/page`, async (req: FastifyRequest<{ Querystring: { [key: string]: string } }>) => {
-    const { page, pageSize, type, kw } = req.query;
+  fastify.get(`/${API_PREFIX}/page`, async (req: FastifyRequest<{ Querystring: { [key: string]: any } }>) => {
+    let { page, pageSize, 'type[]': type, kw } = req.query;
+    if (!Array.isArray(type)) type = [type];
     const dbResHistory = await history.page(parseInt(page), parseInt(pageSize), type, kw);
+
     // 使用 map 来处理异步操作，并且使用 Promise.all 来等待所有的异步操作完成
     const processedList = await Promise.all(
       dbResHistory.list.map(async (item) => {
         if (item.type === 'film') {
           const dbResSite = await site.findByKey(item.relateId);
+          return { ...item, relateSite: dbResSite || {} };
+        } else if (item.type === 'iptv') {
+          const dbResSite = await iptv.findByKey(item.relateId);
+          return { ...item, relateSite: dbResSite || {} };
+        } else if (item.type === 'analyze') {
+          const dbResSite = await analyze.findByKey(item.relateId);
+          return { ...item, relateSite: dbResSite || {} };
+        } else if (item.type === 'drive') {
+          const dbResSite = await drive.findByKey(item.relateId);
           return { ...item, relateSite: dbResSite || {} };
         }
         return item;

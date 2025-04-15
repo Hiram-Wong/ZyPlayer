@@ -22,6 +22,10 @@ export default {
     const res = await db.select().from(schema.analyze).where(eq(schema.analyze.id, id));
     return res?.[0];
   },
+  async findByKey(key) {
+    const res = await db.select().from(schema.analyze).where(eq(schema.analyze.key, key));
+    return res?.[0];
+  },
   async set(doc) {
     await db.delete(schema.analyze);
     return await db.insert(schema.analyze).values(doc);

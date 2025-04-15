@@ -24,11 +24,13 @@ const site = pgTable('site', {
 
 const iptv = pgTable('iptv', {
   id: uuid().defaultRandom(),
+  key: varchar('key', { length: 255 }).notNull().unique(),
   name: varchar('name', { length: 255 }),
   url: text('url'),
   type: varchar('type', { length: 255 }),
   epg: varchar('epg', { length: 255 }),
   logo: varchar('logo', { length: 255 }),
+  headers: varchar('headers', { length: 2048 }),
   isActive: boolean('isActive'),
 });
 
@@ -41,11 +43,12 @@ const channel = pgTable('channel', {
 
 const drive = pgTable('drive', {
   id: uuid().defaultRandom(),
+  key: varchar('key', { length: 255 }).notNull().unique(),
   name: varchar('name', { length: 255 }),
   server: varchar('server', { length: 255 }),
   startPage: varchar('startPage', { length: 255 }),
-  headers: varchar('headers', { length: 255 }),
-  params: varchar('params', { length: 255 }),
+  headers: varchar('headers', { length: 2048 }),
+  params: varchar('params', { length: 2048 }),
   search: integer('search'),
   showAll: boolean('showAll'),
   isActive: boolean('isActive'),
@@ -53,9 +56,11 @@ const drive = pgTable('drive', {
 
 const analyze = pgTable('analyze', {
   id: uuid().defaultRandom(),
+  key: varchar('key', { length: 255 }).notNull().unique(),
   name: varchar('name', { length: 255 }),
   url: varchar('url', { length: 255 }),
   type: integer('type'),
+  headers: varchar('headers', { length: 2048 }),
   isActive: boolean('isActive'),
 });
 
@@ -67,9 +72,9 @@ const history = pgTable('history', {
   siteSource: varchar('siteSource', { length: 255 }),
   playEnd: boolean('playEnd'),
   videoId: varchar('videoId', { length: 1024 }),
-  videoImage: varchar('videoImage', { length: 1024 }),
-  videoName: varchar('videoName', { length: 510 }),
-  videoIndex: varchar('videoIndex', { length: 510 }),
+  videoImage: varchar('videoImage', { length: 2048 }),
+  videoName: varchar('videoName', { length: 1024 }),
+  videoIndex: varchar('videoIndex', { length: 2048 }),
   watchTime: real('watchTime'),
   duration: real('duration'),
   skipTimeInEnd: real('skipTimeInEnd'),
@@ -82,10 +87,10 @@ const star = pgTable('star', {
   type: varchar('type', { length: 255 }),
   relateId: varchar('relateId', { length: 255 }),
   videoId: varchar('videoId', { length: 1024 }),
-  videoImage: varchar('videoImage', { length: 1024 }),
-  videoName: varchar('videoName', { length: 510 }),
-  videoType: varchar('videoType', { length: 255 }),
-  videoRemarks: varchar('videoRemarks', { length: 255 }),
+  videoImage: varchar('videoImage', { length: 2048 }),
+  videoName: varchar('videoName', { length: 1024 }),
+  videoType: varchar('videoType', { length: 1024 }),
+  videoRemarks: varchar('videoRemarks', { length: 1024 }),
 });
 
 export { setting, site, iptv, channel, drive, analyze, history, star };

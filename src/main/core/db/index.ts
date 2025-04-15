@@ -17,6 +17,7 @@ const updates = [
   { version: '3.3.8', update: migration.update3_3_7to3_3_8 },
   { version: '3.3.9', update: migration.update3_3_8to3_3_9 },
   { version: '3.3.10', update: migration.update3_3_9to3_3_10 },
+  { version: '3.4.0', update: migration.update3_3_10to3_4_0 },
 ];
 
 const magrite = async () => {
