@@ -70,6 +70,13 @@ export function fetchChannelPage(doc: object) {
   });
 }
 
+export function fetchChannelDetail(id) {
+  return request({
+    url: `/v1/channel/${id}`,
+    method: 'get',
+  });
+}
+
 export function fetchChannelEpg(doc: object) {
   return request({
     url: `/v1/channel/epg`,
