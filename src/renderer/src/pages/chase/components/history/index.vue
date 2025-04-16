@@ -19,6 +19,9 @@
                 <delete-icon />
               </div>
               <div class="card-main">
+                <div class="card-tag card-tag-orange">
+                  <span class="card-tag-text text-hide">{{ $t(`pages.chase.type.${detail["type"]}`) }}</span>
+                </div>
                 <t-image class="card-main-item" :src='detail["videoImage"]'
                   :style="{ width: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
                   :loading="renderLoading" :error="renderError">
@@ -33,7 +36,8 @@
               </div>
               <div class="card-footer">
                 <p class="card-footer-title text-hide">
-                  {{ detail["videoName"] }} {{ formatIndex(detail["videoIndex"]).index }}
+                  <span>{{ detail["videoName"] }}</span>
+                  <span v-if="['film'].includes(detail['type'])">{{ formatIndex(detail["videoIndex"]).index }}</span>
                 </p>
                 <p class="card-footer-desc tiles-item_desc_row text-hide">
                   <laptop-icon size="14px" class="tiles-item_watch_pc icon" />
@@ -67,7 +71,7 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import _ from 'lodash';
+import { size, reject } from 'lodash-es';
 import moment from 'moment';
 import { DeleteIcon, LaptopIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
@@ -80,6 +84,11 @@ import { usePlayStore } from '@/store';
 
 import { delHistory, fetchHistoryPage } from '@/api/history';
 import { fetchCmsDetail, fetchCmsInit } from '@/api/site';
+import { putAlistInit, fetchAlistDir, fetchAlistFile } from '@/api/drive';
+import { fetchIptvActive, fetchChannelDetail } from '@/api/iptv';
+import { fetchAnalyzeHelper } from '@/utils/common/film';
+import { base64 } from '@/utils/crypto';
+
 import { formatIndex } from '@/utils/common/film';
 import emitter from '@/utils/emitter';
 
@@ -139,7 +148,7 @@ const getHistoryList = async () => {
   let length = 0;
   const { pageIndex, pageSize } = pagination.value;
   try {
-    const res = await fetchHistoryPage({ page: pageIndex, pageSize, type: 'film' });
+    const res = await fetchHistoryPage({ page: pageIndex, pageSize, type: ['film', 'iptv', 'drive', 'analyze'] });
 
     if (res?.list && Array.isArray(res?.list) && res?.list?.length > 0) {
       for (const item of res.list) {
@@ -177,40 +186,101 @@ const load = async ($state) => {
   }
 };
 
+const handleFilmPlay = async (item) => {
+  const { videoName, videoImage, videoId, relateSite } = item;
+  await fetchCmsInit({ sourceId: relateSite.id });
+  const response = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
+  const info = response?.list[0];
+  if (!info?.vod_name) info.vod_name = videoName;
+  if (!info?.vod_pic) info.vod_pic = videoImage;
+  if (!info?.vod_id) info.vod_id = videoId;
+  const doc = {
+    info: { ...info },
+    ext: { site: relateSite, setting: storePlayer.setting },
+  };
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    detailFormData.value = doc;
+    isVisible.detail = true;
+  } else {
+    storePlayer.updateConfig({ type: 'film', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  }
+};
+
+const handleIptvPlay = async (item) => {
+  const { videoName, videoId, videoImage, relateSite } = item;
+  const infoData = await fetchChannelDetail(videoId);
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, infoData.url);
+  } else {
+    const response = await fetchIptvActive();
+    const { epg, markIp, logo } = response["ext"];
+    const doc = {
+      info: { id: videoId, logo: videoImage, name: videoName, url: infoData.url, group: infoData.group },
+      ext: { epg, markIp, logo, site: relateSite, setting: storePlayer.setting },
+    };
+    storePlayer.updateConfig({ type: 'iptv', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  }
+};
+
+const handleDrivePlay = async (item) => {
+  const { videoName, videoImage, videoId, siteSource, relateSite } = item;
+  await putAlistInit({ sourceId: relateSite.id });
+  const infoData = await fetchAlistFile({ path: base64.decode(videoId), sourceId: relateSite.id });
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, infoData.url);
+  } else {
+    const dirData = await fetchAlistDir({ path: siteSource, sourceId: relateSite.id });
+    const doc = {
+      info: {
+        id: videoId, name: videoName, url: infoData.url,
+        thumb: videoImage, remark: infoData.remark,  path: siteSource,
+      },
+      ext: { files: dirData?.list || [], site: relateSite }
+    };
+    storePlayer.updateConfig({ type: 'drive', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  }
+};
+
+const handleAnalyzePlay = async (item) => {
+  const { relateSite, videoName, videoId } = item;
+  const url = videoId;
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    const response = await fetchAnalyzeHelper(`${relateSite.url}${url}`, relateSite.type);
+    if (!response.url) {
+      MessagePlugin.error(t('pages.analyze.message.error'));
+      return;
+    };
+    window.electron.ipcRenderer.send('call-player', playerMode.external, response.url);
+  } else {
+    const doc = {
+      info: { id: videoId, url, name: videoName },
+      ext: { site: relateSite, setting: storePlayer.setting },
+    };
+    storePlayer.updateConfig({ type: 'analyze', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  };
+};
+
 // 播放
 const playEvent = async (item) => {
   isVisible.loading = true;
 
   try {
-    const { videoName, videoImage, videoId, relateSite } = item;
-
-    await fetchCmsInit({ sourceId: relateSite.id });
-    const res = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
-    const detailItem = res?.list[0];
-    if (!detailItem.vod_name) detailItem.vod_name = videoName;
-    if (!detailItem.vod_pic) detailItem.vod_pic = videoImage;
-    if (!detailItem.vod_id) detailItem.vod_id = videoId;
-    item = detailItem;
-    console.log('[history][playEvent]', item);
-
-    const playerMode = storePlayer.getSetting.playerMode;
-    const doc = {
-      info: { ...item, name: item.vod_name },
-      ext: { site: relateSite, setting: storePlayer.setting },
-    }
-
-    if (playerMode.type === 'custom') {
-      detailFormData.value = doc;
-      isVisible.detail = true;
-    } else {
-      storePlayer.updateConfig({
-        type: 'film',
-        status: true,
-        data: doc
-      });
-
-      window.electron.ipcRenderer.send('open-play-win', videoName);
-    }
+    const { type } = item;
+    const methpodMap = {
+      film: handleFilmPlay,
+      iptv: handleIptvPlay,
+      drive: handleDrivePlay,
+      analyze: handleAnalyzePlay,
+    };
+    await methpodMap[type](item);
   } catch (err) {
     console.error(`[history][playEvent][error]`, err);
     MessagePlugin.warning(t('pages.chase.reqError'));
@@ -228,7 +298,7 @@ const removeEvent = async (item) => {
   if (timeDiff === 0) timeKey = 'today';
   else if (timeDiff < 7) timeKey = 'week';
   else timeKey = 'ago';
-  options.value[timeKey] = _.reject(options.value[timeKey], { id });
+  options.value[timeKey] = reject(options.value[timeKey], { id });
   pagination.value.count--;
 };
 
@@ -272,7 +342,7 @@ const defaultSet = () => {
     week: [],
     ago: [],
   };
-  if (!_.size(options.value)) infiniteId.value++;
+  if (!size(options.value)) infiniteId.value++;
   pagination.value.pageIndex = 1;
 };
 
@@ -421,7 +491,7 @@ const refreshHistory = () => {
           }
 
           .card-tag {
-            z-index: 15;
+            z-index: 9;
             position: absolute;
             left: 0;
             top: 0;

@@ -1,5 +1,5 @@
 <template>
-  <div class="container-aside-drive">
+  <div class="container-aside-analyze">
     <div class="tvg-block">
       <div class="title-album">
         <p class="title-text txthide">{{ formData.title }}</p>
@@ -26,34 +26,23 @@
         </div>
       </div>
     </div>
-    <div class="anthology-contents drive-anthology">
+    <div class="anthology-contents">
       <div class="box-anthology-header">
         <div class="left">
-          <h4 class="box-anthology-title">{{ $t('pages.player.film.anthology') }}</h4>
+          <h4 class="box-anthology-title">{{ $t('pages.player.film.analyze') }}</h4>
         </div>
         <div class="right"></div>
       </div>
       <div class="listbox drive-listbox">
         <t-list class="contents-wrap" split :scroll="{ type: 'virtual' }">
-          <t-list-item v-for="item in seasonList" :key="item.id" class="content" @click="changeDriveEvent(item)">
-            <div class="logo-wrap">
-              <t-image
-                class="logo"
-                fit="cover"
-                :src="item['thumb']"
-                :style="{ width: '64px', height: '28px', background: 'none', borderRadius: '6px' }"
-                :lazy="true"
-                :loading="renderLoading"
-                :error="renderError"
-              />
-            </div>
+          <t-list-item v-for="item in seasonList" :key="item.id" class="content" @click="changeAnalyzeEvent(item)">
             <div class="title-wrap txthide">{{ item['name'] }}</div>
             <div class="status-wrap">
-              <span :class="info['name'] === item['name'] ? 'playing' : 'unplay'">
+              <span :class="extConf['site']['id'] === item['id'] ? 'useing' : 'unuse'">
                 {{
-                  item['name'] === info['name']
-                    ? $t('pages.player.status.playing')
-                    : $t('pages.player.status.unplay')
+                  extConf['site']['id'] === item['id']
+                    ? $t('pages.player.status.useing')
+                    : $t('pages.player.status.unuse')
                 }}
               </span>
             </div>
@@ -68,9 +57,12 @@
 import { ref, watch, onMounted } from 'vue';
 import { throttle } from 'lodash-es';
 import moment from 'moment';
-import { Tv1Icon, LoadingIcon, HeartIcon, HeartFilledIcon, Share1Icon } from 'tdesign-icons-vue-next';
+import { HeartIcon, HeartFilledIcon, Share1Icon } from 'tdesign-icons-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { t } from '@/locales';
 import { fetchBingeData, putBingeData, fetchHistoryData, putHistoryData } from '@/utils/common/chase';
-import { fetchAlistFile, putAlistInit } from '@/api/drive';
+import { fetchAnalyzeActive } from '@/api/analyze';
+import { fetchAnalyzeHelper } from '@/utils/common/film';
 
 const props = defineProps({
   info: {
@@ -97,7 +89,7 @@ const processConf = ref(props.process);
 const formData = ref({
   title: props.info.name
 });
-const seasonList = ref<any[]>(extConf.value.files);
+const seasonList = ref<any[]>([]);
 const active = ref({
   nav: 'season',
   share: false,
@@ -131,7 +123,6 @@ watch(
   () => props.ext,
   (val) => {
     extConf.value = val;
-    seasonList.value = val.files;
   },
   { deep: true }
 );
@@ -154,12 +145,26 @@ onMounted(() => {
   setup();
 });
 
+const fetchAnalyze = async () => {
+  try {
+    const data = await fetchAnalyzeActive();
+    if (data.hasOwnProperty('default')) {
+      extConf.value.site = data["default"];
+    }
+    if (data.hasOwnProperty('data')) {
+      seasonList.value = data["data"];
+    }
+  } catch (err) {
+    console.log(err)
+  }
+};
+
 // 获取收藏
 const fetchBinge = async () => {
   const { key } = extConf.value.site;
-  const { id: vod_id } = infoConf.value;
+  const { url: vod_id } = infoConf.value;
 
-  const response = await fetchBingeData(key, vod_id, ['drive']);
+  const response = await fetchBingeData(key, vod_id, ['analyze']);
   const { code } = response;
 
   if (code === 0) {
@@ -172,16 +177,16 @@ const fetchBinge = async () => {
 const putBinge = async () => {
   const { id = null } = bingeData.value;
   const { key } = extConf.value.site;
-  const { id: vod_id, thumb: vod_pic, name: vod_name, path: type_name, remark: vod_remarks } = infoConf.value;
+  const { url: vod_id, name: vod_name,  } = infoConf.value;
   const doc = {
     date: moment().unix(),
-    type: 'drive',
+    type: 'analyze',
     relateId: key,
     videoId: vod_id,
-    videoImage: vod_pic,
+    videoImage: '',
     videoName: vod_name,
-    videoType: type_name,
-    videoRemarks: vod_remarks,
+    videoType: '',
+    videoRemarks: '',
   };
 
   let response: any;
@@ -198,9 +203,9 @@ const putBinge = async () => {
 // 获取历史
 const fetchHistory = async () => {
   const { key } = extConf.value.site;
-  const { id: vod_id } = infoConf.value;
+  const { url: vod_id } = infoConf.value;
 
-  const response = await fetchHistoryData(key, vod_id, ['drive']);
+  const response = await fetchHistoryData(key, vod_id, ['analyze']);
   const { code, data, status } = response;
 
   if (code === 0 && status) {
@@ -212,18 +217,18 @@ const fetchHistory = async () => {
 const putHistory = async () => {
   const { id = null } = historyData.value;
   const { key } = extConf.value.site;
-  const { id: vod_id, thumb: vod_pic, name: vod_name, url: vod_url, path: type_name } = infoConf.value;
+  const { url: vod_id, name: vod_name, } = infoConf.value;
   const { watchTime, duration, playEnd, skipTimeInStart, skipTimeInEnd } = videoData.value;
   const doc = {
     date: moment().unix(),
-    type: 'drive',
+    type: 'analyze',
     relateId: key,
-    siteSource: type_name,
+    siteSource: '',
     playEnd: playEnd,
     videoId: vod_id,
-    videoImage: vod_pic,
+    videoImage: '',
     videoName: vod_name,
-    videoIndex: `${vod_name}$${vod_url}`,
+    videoIndex: `${vod_name}$${vod_id}`,
     watchTime: watchTime,
     duration: duration,
     skipTimeInStart: skipTimeInStart,
@@ -250,41 +255,36 @@ const throttlePutHistory = throttle(
   }
 );
 
-const renderError = () => {
-  return (
-    <div class="renderIcon">
-      <Tv1Icon size="1.5em" stroke-width="2" />
-    </div>
-  );
-};
-const renderLoading = () => {
-  return (
-    <div class="renderIcon">
-      <LoadingIcon size="1.5em" stroke-width="2" />
-    </div>
-  );
-};
-
-const changeDriveEvent = async (item) => {
-  await putAlistInit({ sourceId: extConf.value.site.id });
-  const res = await fetchAlistFile({ sourceId: extConf.value.site.id, path: item.path });
+const changeAnalyzeEvent = async (item) => {
+  extConf.value.site = item;
   emits('update', {
-    type: 'drive',
-    data: Object.assign({ info: res, ext: extConf.value })
+    type: 'analyze',
+    data: Object.assign({ info: infoConf.value, ext: extConf.value })
   });
-  await callPlay({ url: res.url, headers: res?.header || {} });
+  await callPlay({ url: infoConf.value.url, headers: item?.headers || {} });
 };
 
 // 分享 dialog 数据
 const shareEvent = () => {
-  let name = infoConf.value['name'];
-  shareFormData.value = { ...shareFormData.value, name, url: infoConf.value.url };
   active.value.share = true;
 };
 
 // 调用播放器
 const callPlay = async (item) => {
-  emits('play', { ...item });
+  MessagePlugin.info(t('pages.analyze.message.info'));
+
+  try {
+    const { site, headers } = extConf.value;
+    const response = await fetchAnalyzeHelper(`${site.url}${item.url}`, site.type, headers);
+    if (response?.url) {
+      shareFormData.value.url = response.url;
+      emits('play', { url: response.url, headers: response?.headers || {}, type: response.mediaType });
+    } else {
+      MessagePlugin.error(t('pages.analyze.message.error'));
+    }
+  } catch (err) {
+    console.log(err);
+  };
 };
 
 // 定时更新播放进度
@@ -313,8 +313,11 @@ const setup = async () => {
   // 2. 获取收藏(不影响)
   fetchBinge();
 
+  // 3. 获取解析(不影响)
+  fetchAnalyze();
+
   // 3. 播放
-  await callPlay({ url: infoConf.value.url, headers: infoConf.value?.header || {} });
+  await callPlay({ url: infoConf.value.url, headers: extConf.value.site.headers || {} });
 };
 </script>
 

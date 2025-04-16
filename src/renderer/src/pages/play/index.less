@@ -83,7 +83,7 @@
 
 .container-aside {
   height: calc(100% - 20px);
-  overflow: hidden;
+  // overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -277,15 +277,15 @@
       height: calc(100% - 25px);
 
       .contents-wrap {
-        height: calc(100% - 25px);
+        // height: calc(100% - 25px);
       }
     }
 
     .iptv-listbox {
-      height: calc(100% - 25px);
+      height: 100%;
 
       .t-tabs__content {
-        height: calc(100% - 48px);
+        height: calc(100% - var(--td-comp-size-xl));
         width: 100%;
 
         .t-tab-panel {
@@ -297,7 +297,7 @@
           }
 
           .channel-wrap {
-            height: calc(100% - 28px - 12px);
+            height: calc(100% - 32px);
 
             .content {
               padding: 0;
@@ -307,14 +307,15 @@
       }
     }
 
-    .t-tabs {
-      margin-top: -10px;
+    .t-tabs__nav-item.t-size-m {
+      height: var(--td-comp-size-xl);
+      line-height: var(--td-comp-size-xl);
     }
 
     .listbox {
 
       .nav {
-        margin-top: 6px;
+        // margin-top: 6px;
       }
 
       .tag-container {
@@ -448,6 +449,10 @@
     }
   }
 
+  .iptv-anthology, .drive-anthology {
+    height: calc(100% - 78px - 6px);
+  }
+
   .contents-wrap {
     height: 100%;
     width: 100%;
@@ -473,11 +478,11 @@
           color: #2774f6;
         }
 
-        .playing {
+        .playing, .useing {
           color: #f09736;
         }
 
-        .unplay {
+        .unplay, .unuse {
           color: var(--td-text-color-primary);
         }
       }

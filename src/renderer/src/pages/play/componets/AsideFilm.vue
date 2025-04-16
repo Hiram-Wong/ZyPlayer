@@ -22,17 +22,17 @@
           <span v-show="info['vod_year']" class="txthide">{{ formatContent(info['vod_year']) }}</span>
         </div>
         <div class="function">
-          <div class="func-item like" @click="putBinge(false)">
+          <div class="func-item like" @click="putBinge">
             <span>
-              <heart-icon class="icon" v-if="active.binge" />
-              <heart-filled-icon class="icon" v-else />
+              <heart-filled-icon class="icon" v-if="active.binge" />
+              <heart-icon class="icon" v-else />
             </span>
-            <span class="tip">{{ $t('pages.player.film.like') }}</span>
+            <span class="tip">{{ $t('pages.player.function.like') }}</span>
           </div>
           <div class="dot"></div>
           <div class="func-item download" @click="downloadEvent">
             <download-icon class="icon" />
-            <span class="tip">{{ $t('pages.player.film.download') }}</span>
+            <span class="tip">{{ $t('pages.player.function.download') }}</span>
           </div>
           <div class="dot"></div>
           <div class="func-item share" @click="shareEvent">
@@ -40,7 +40,7 @@
               <template #customize>
                 <div style="display: flex; flex-direction: row; align-items: center">
                   <share1-icon class="icon" />
-                  <span class="tip">{{ $t('pages.player.film.share') }}</span>
+                  <span class="tip">{{ $t('pages.player.function.share') }}</span>
                 </div>
               </template>
             </share-popup>
@@ -55,7 +55,7 @@
                 <t-dropdown-item>
                   <div class="setting-item" @click="settingEvent">
                     <setting-icon />
-                    {{ $t('pages.player.film.setting') }}
+                    {{ $t('pages.player.function.setting') }}
                   </div>
                 </t-dropdown-item>
               </t-dropdown-menu>
@@ -189,7 +189,7 @@
 <script setup lang="tsx">
 import { ref, watch, computed, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import throttle from 'lodash/throttle';
+import { throttle } from 'lodash-es';
 import moment from 'moment';
 import {
   ChevronDownIcon,
@@ -205,13 +205,10 @@ import {
   StarIcon,
   Share1Icon
 } from 'tdesign-icons-vue-next';
+import { fetchBingeData, putBingeData, fetchHistoryData, putHistoryData } from '@/utils/common/chase';
 import {
   VIP_LIST,
   fetchBarrageData,
-  fetchBingeData,
-  putBingeData,
-  fetchHistoryData,
-  putHistoryData,
   playHelper,
   reverseOrderHelper,
   fetchRecommSearchHelper,
@@ -251,8 +248,7 @@ const props = defineProps({
 const emits = defineEmits(['update', 'play', 'barrage', 'pause']);
 const infoConf = ref(props.info);
 const extConf = ref(props.ext);
-const processConf = ref(props.process)
-
+const processConf = ref(props.process);
 const formData = ref({
   title: props.info.vod_name
 });
@@ -344,105 +340,113 @@ watch(
   },
   { deep: true }
 );
+
 onMounted(() => {
   setup();
 });
-
 
 // 获取收藏
 const fetchBinge = async () => {
   const { key } = extConf.value.site;
   const { vod_id } = infoConf.value;
-  const response = await fetchBingeData(key, vod_id);
-  bingeData.value = response.data;
-  active.value.binge = !response.status;
+
+  const response = await fetchBingeData(key, vod_id, ['film']);
+  const { code } = response;
+
+  if (code === 0) {
+    bingeData.value = response.data;
+    active.value.binge = response.status;
+  }
 };
 
 // 更新收藏
-const putBinge = async (update: boolean = false) => {
-  const constructDoc = () => ({
+const putBinge = async () => {
+  const { id = null } = bingeData.value;
+  const { key } = extConf.value.site;
+  const { vod_id, vod_pic, vod_name, type_name, vod_remarks } = infoConf.value;
+  const doc = {
     date: moment().unix(),
     type: 'film',
-    relateId: extConf.value.site.key,
-    videoId: infoConf.value.vod_id,
-    videoImage: infoConf.value.vod_pic,
-    videoName: infoConf.value.vod_name,
-    videoType: infoConf.value.type_name,
-    videoRemarks: infoConf.value.vod_remarks,
-  });
+    relateId: key,
+    videoId: vod_id,
+    videoImage: vod_pic,
+    videoName: vod_name,
+    videoType: type_name,
+    videoRemarks: vod_remarks,
+  };
 
   let response: any;
+  if (id) response = await putBingeData('del', {}, id);
+  else response = await putBingeData('add', doc, null);
+  const { code, data, status } = response;
 
-  if (bingeData.value?.id) {
-    if (update) {
-      response = await putBingeData('update', bingeData.value.id, constructDoc());
-      if (response?.data) bingeData.value = response.data;
-    } else {
-      response = await putBingeData('del', bingeData.value.id, {});
-      bingeData.value = {
-        relateId: null,
-        videoId: 0,
-        videoImage: '',
-        videoName: '',
-        videoType: '',
-        videoRemarks: '',
-        id: null,
-      };
-    }
-  } else if (!update) {
-    response = await putBingeData('add', '', constructDoc());
-    if (response?.data) bingeData.value = response.data;
+  if (code === 0) {
+    bingeData.value = data;
+    active.value.binge = status;
   }
-
-  if (response && !response.status) {
-    MessagePlugin.error(t('pages.player.message.error'));
-    return;
-  }
-
-  if (!update) active.value.binge = !active.value.binge;
 };
 
 // 获取历史
 const fetchHistory = async () => {
-  const response = await fetchHistoryData(extConf.value.site.key, infoConf.value.vod_id);
-  if (response.siteSource) active.value.flimSource = response.siteSource;
-  if (response.videoIndex) active.value.filmIndex = response.videoIndex;
-  if (!response.siteSource) response.siteSource = active.value.flimSource;
-  if (!response.videoIndex) response.videoIndex = active.value.filmIndex;
-  historyData.value = response;
-  videoData.value.skipTimeInStart = response.skipTimeInStart;
-  videoData.value.skipTimeInEnd = response.skipTimeInEnd;
+  const { key } = extConf.value.site;
+  const { vod_id } = infoConf.value;
+
+  const response = await fetchHistoryData(key, vod_id, ['film']);
+  const { code, data, status } = response;
+
+  if (code === 0 && status) {
+    if (data.siteSource) active.value.flimSource = data.siteSource;
+    if (data.videoIndex) active.value.filmIndex = data.videoIndex;
+    if (!data.siteSource) data.siteSource = active.value.flimSource;
+    if (!data.videoIndex) data.videoIndex = active.value.filmIndex;
+    historyData.value = data;
+    videoData.value.skipTimeInStart = data.skipTimeInStart;
+    videoData.value.skipTimeInEnd = data.skipTimeInEnd;
+  }
 };
 
 // 更新历史
 const putHistory = async () => {
+  const { id = null } = historyData.value;
+  const { key } = extConf.value.site;
+  const { vod_id, vod_pic, vod_name } = infoConf.value;
+  const { watchTime, duration, playEnd, skipTimeInStart, skipTimeInEnd } = videoData.value;
+  const { flimSource, filmIndex } = active.value;
   const doc = {
     date: moment().unix(),
     type: 'film',
-    relateId: extConf.value.site.key,
-    siteSource: active.value.flimSource,
-    playEnd: videoData.value.playEnd,
-    videoId: infoConf.value['vod_id'],
-    videoImage: infoConf.value['vod_pic'],
-    videoName: infoConf.value['vod_name'],
-    videoIndex: active.value.filmIndex,
-    watchTime: videoData.value.watchTime,
-    duration: videoData.value.duration,
-    skipTimeInStart: videoData.value.skipTimeInStart,
-    skipTimeInEnd: videoData.value.skipTimeInEnd,
+    relateId: key,
+    siteSource: flimSource,
+    playEnd: playEnd,
+    videoId: vod_id,
+    videoImage: vod_pic,
+    videoName: vod_name,
+    videoIndex: filmIndex,
+    watchTime: watchTime,
+    duration: duration,
+    skipTimeInStart: skipTimeInStart,
+    skipTimeInEnd: skipTimeInEnd,
   };
-  const response: any = await putHistoryData(historyData.value?.id, doc);
-  historyData.value = response;
+
+  let response: any;
+  if (id) response = await putHistoryData('put', doc, id);
+  else response = await putHistoryData('add', doc, null);
+  const { code, data, status } = response;
+
+  if (code === 0 && status) {
+    historyData.value = data;
+  }
 };
+
 // 节流更新历史
 const throttlePutHistory = throttle(
-    putHistory,
-    3000,
-    {
-      leading: true, // 节流开始前，默认true
-      trailing: false, // 节流结束后，默认true
-    }
-  );
+  putHistory,
+  3000,
+  {
+    leading: true, // 节流开始前，默认true
+    trailing: false, // 节流结束后，默认true
+  }
+);
 
 // 分享 dialog 数据
 const shareEvent = () => {

@@ -524,7 +524,7 @@ const fetchBarrageData = async (
  * @param type 解析类型
  * @returns 解析
  */
-const fetchAnalyzeHelper = async (url: string, type: number) => {
+const fetchAnalyzeHelper = async (url: string, type: number, headers: object = {}) => {
   console.log('[film_common][fetchAnalyzeHelper][start]获取解析流程开启');
   let data: { [key: string]: any } = { url: '', originalUrl: url, mediaType: undefined, headers: {} };
 
@@ -539,7 +539,7 @@ const fetchAnalyzeHelper = async (url: string, type: number) => {
         play.headers = resOfficial.headers;
       }
     } else if (type == 0) {
-      const resOfficial = await sniffer(url);
+      const resOfficial = await sniffer(url, '', '', '', '', headers);
       if (resOfficial.url) {
         play.playUrl = resOfficial.url;
         play.headers = resOfficial.headers;

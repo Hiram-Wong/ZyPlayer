@@ -243,6 +243,7 @@ const handleOpChange = async (type, doc) => {
     active.formType = 'add';
     formData.value = {
       name: '',
+      key: '',
       type: 0,
       isActive: true,
       url: ''

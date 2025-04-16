@@ -95,7 +95,7 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import differenceBy from 'lodash/differenceBy';
+import { differenceBy } from 'lodash-es';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
@@ -164,7 +164,6 @@ const siteConfig = ref({
   filterOnlySearchData: [],
   searchGroup: []
 }) as any;
-
 const active = ref({
   nav: null,
   class: 'homeVod',
@@ -556,11 +555,11 @@ const refreshConf = async () => {
   await getSetting();
 };
 
-const changeConf = async (key: string) => {
+const changeConf = async (id: string) => {
   try {
     defaultConf();
-    active.value.nav = key;
-    siteConfig.value.default = siteConfig.value.data.find(item => item.id === key);
+    active.value.nav = id;
+    siteConfig.value.default = siteConfig.value.data.find(item => item.id === id);
     active.value.infiniteType = 'noMore';
   } catch (err) {
     active.value.infiniteType = 'noData';

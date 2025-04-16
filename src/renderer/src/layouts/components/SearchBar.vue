@@ -128,11 +128,7 @@ const focusEvent = async () => {
 
 // 获取搜索历史
 const getSearchHistory = async () => {
-  const res = await fetchHistoryPage({
-    page: 1,
-    pageSize: 5,
-    type: 'search'
-  });
+  const res = await fetchHistoryPage({ page: 1, pageSize: 5, type: ['search'] });
   if (res.hasOwnProperty('list')) searchList.value = res.list;
 }
 

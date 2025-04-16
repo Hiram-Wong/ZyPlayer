@@ -13,6 +13,24 @@
           </div>
         </t-content>
         <t-aside key="side" :class="`${prefix}-aside`" v-show="!active.aside">
+          <aside-analyze-view class="container-aside"
+            v-if="storeConf.type === 'analyze'"
+            :info="asideFormData.info"
+            :ext="asideFormData.ext"
+            :process="processFormData"
+            @update="updateConf"
+            @play="updatePlay"
+            @pause="updatePause"
+          />
+          <aside-drive-view class="container-aside"
+            v-if="storeConf.type === 'drive'"
+            :info="asideFormData.info"
+            :ext="asideFormData.ext"
+            :process="processFormData"
+            @update="updateConf"
+            @play="updatePlay"
+            @pause="updatePause"
+          />
           <aside-film-view
             class="container-aside"
             v-if="storeConf.type === 'film'"
@@ -28,15 +46,10 @@
             v-if="storeConf.type === 'iptv'"
             :info="asideFormData.info"
             :ext="asideFormData.ext"
+            :process="processFormData"
             @update="updateConf"
             @play="updatePlay"
-          />
-          <aside-drive-view class="container-aside"
-            v-if="storeConf.type === 'drive'"
-            :info="asideFormData.info"
-            :ext="asideFormData.ext"
-            @update="updateConf"
-            @play="updatePlay"
+            @pause="updatePause"
           />
         </t-aside>
       </t-layout>
@@ -51,6 +64,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from 'tdesign-icons-vue-next';
 import { usePlayStore } from '@/store';
 import { prefix } from '@/config/global';
 import HeaderView from './componets/Header.vue';
+import AsideAnalyzeView from './componets/AsideAnalyze.vue';
 import AsideFilmView from './componets/AsideFilm.vue';
 import AsideIptvView from './componets/AsideIptv.vue';
 import AsideDriveView from './componets/AsideDrive.vue';
@@ -119,9 +133,7 @@ const updatePlay = async (item) => {
     window.electron.ipcRenderer.send('call-player', playerMode.external, playerFormData.value.url);
   } else {
     await playerRef.value?.create({ ...playerFormData.value }, playerMode.type);
-    if (storeConf.value.type === 'film') {
-      await playerRef.value?.onTimeUpdate();
-    }
+    await playerRef.value?.onTimeUpdate();
   }
 };
 

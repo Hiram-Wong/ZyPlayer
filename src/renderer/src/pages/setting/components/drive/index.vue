@@ -215,6 +215,7 @@ const handleOpChange = async (type, doc) => {
     active.formType = 'add';
     formData.value = {
       name: '',
+      key: '',
       server: '',
       startPage: '',
       search: false,

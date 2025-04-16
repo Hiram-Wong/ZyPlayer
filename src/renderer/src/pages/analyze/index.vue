@@ -9,95 +9,76 @@
     />
 
     <div class="content">
-      <div class="container">
-        <div class="analyze-player">
-          <div class="head-info-section">
-            <div class="left">
-              <div class="info">
-                <div class="title mg-right">{{ urlTitle ? urlTitle : $t('pages.analyze.noPlay') }}</div>
-                <t-button shape="round" size="small" class="open mg-right" v-if="playFormData.url" @click="openCurrentUrl">
-                  {{ $t('pages.analyze.source') }}</t-button>
-                <div class="share mg-right" v-if="playFormData.url" @click="shareEvent">
-                  <share-popup v-model:visible="active.share" :data="shareFromData">
-                    <template #customize>
-                      <share1-icon class="icon" />
-                    </template>
-                  </share-popup>
-                </div>
-              </div>
-            </div>
-            <div class="right">
-              <div class="action">
-                <div class="history mg-left" @click="active.history = true">
-                  <history-icon />
-                </div>
-                <div class="close mg-left" v-if="playFormData.url" @click="clearContent">
-                  <close-icon />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="player-content">
-            <multi-player ref="playerRef" />
-          </div>
+      <header class="header" v-if="classList.length > 0">
+        <div class="header-nav">
+          <title-menu :list="classList" :active="active.class" @change-key="changeClassEvent" />
         </div>
-        <div class="analyze-setting">
-          <div class="analyze-setting-group">
-            <t-input v-model="analyzeUrl" class="input-url" :placeholder="$t('pages.analyze.inputUrl')" size="large"
-              @change="formatUrlEvent" @enter="analyzeEvent" />
-            <t-button class="analyze-play" size="large" @click="analyzeEvent">
-              <p class="analyze-tip">{{ $t('pages.analyze.play') }}</p>
+      </header>
+      <div class="container">
+        <div class="urlbar-root">
+          <div class="urlbar-control">
+            <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('back')">
+              <arrow-left-icon />
+            </t-button>
+            <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('forward')">
+              <arrow-right-icon />
+            </t-button>
+            <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('refresh')">
+              <rotate-icon />
+            </t-button>
+            <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('home')">
+              <home-icon />
             </t-button>
           </div>
+          <t-input class="urlbar-url" v-model="controlText" @enter="handleWebviewLoad"></t-input>
+          <t-button variant="text" class="urlbar-play" @click="handleParse">
+            {{ $t('pages.analyze.play') }}
+          </t-button>
+        </div>
+        <div class="webview-container">
+          <webview
+            ref="webviewRef"
+            class="webview"
+            :src="webviewUrl"
+            disablewebsecurity
+            allowpopups
+            nodeIntegration
+          />
         </div>
       </div>
     </div>
-    <dialog-iframem-view v-model:visible="active.platform" :data="platFormData" @platform-play="platformPlay" />
-    <dialog-search-view v-model:visible="active.search"  :kw="searchText" class="dialog-search-view" @open-platform="openPlatform" />
-    <dialog-history-view v-model:visible="active.history" @history-play="historyPlayEvent" />
+
+    <t-loading :attach="`.${prefix}-content`" size="medium" :loading="isVisible.loading" />
   </div>
 </template>
 
 <script setup lang="ts">
 import moment from 'moment';
-import { Share1Icon, CloseIcon, HistoryIcon } from 'tdesign-icons-vue-next';
+import { ArrowLeftIcon, ArrowRightIcon, HomeIcon, RotateIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { onActivated, onMounted, ref, watch, useTemplateRef } from 'vue';
+import { computed, onActivated, onMounted, ref, reactive, watch, useTemplateRef } from 'vue';
 
+import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { usePlayStore } from '@/store';
-import { fetchAnalyzeActive, fetchAnalyzeTitle } from '@/api/analyze';
-import { putHistory, addHistory, findHistory } from '@/api/history';
+import { fetchAnalyzeActive } from '@/api/analyze';
+import { fetchHistoryData, putHistoryData } from '@/utils/common/chase';
 import { fetchAnalyzeHelper } from '@/utils/common/film';
 import emitter from '@/utils/emitter';
+import { platform as ANALYZE_PLATFORM } from '@/config/analyze';
 
-import { MultiPlayer } from '@/components/player';
-import DialogHistoryView from './components/DialogHistory.vue';
-import DialogIframemView from './components/DialogIframe.vue';
-import DialogSearchView from './components/DialogSearch.vue';
-import SharePopup from '@/components/share-popup/index.vue';
 import CommonNav from '@/components/common-nav/index.vue';
+import TitleMenu from '@/components/title-menu/index.vue';
 
 const storePlayer = usePlayStore();
 const searchText = ref('');
-const urlTitle = ref(''); // 播放地址的标题
-const analyzeUrl = ref<string>(''); // 输入需要解析地址
-const playerRef = useTemplateRef('playerRef');
-const shareFromData = ref({
-  name: '',
-  url: '',
-  provider: '',
-});
-const platFormData = ref({
-  name: '',
-  url: ''
-});
-const playFormData = ref({
-  url: '',
-  isLive: false,
-  headers: {},
-  type: '',
-  container: 'analyze-mse'
+const controlText = ref<string>('');
+const webviewRef = useTemplateRef<any>('webviewRef');
+const webviewUrl = ref<string>('about:blank');
+
+const classList = computed(() => {
+  const platform = ANALYZE_PLATFORM.value;
+  return platform.map(item => ({ type_id: item.id, type_name: item.name, }))
 });
 const analyzeConfig = ref<{ [key: string]: any } >({
   default: {
@@ -107,7 +88,12 @@ const analyzeConfig = ref<{ [key: string]: any } >({
   },
   data: []
 });
+const isVisible = reactive({
+  lazyload: false,
+  loading: false
+});
 const active = ref({
+  class: '360',
   nav: '',
   platform: false,
   history: false,
@@ -117,6 +103,7 @@ const active = ref({
 
 onMounted(() => {
   getSetting();
+  initClass();
 });
 
 onActivated(() => {
@@ -130,6 +117,89 @@ watch(
     if (!val) emitter.emit('refreshSearchConfig');
   }
 );
+watch(
+  () => webviewUrl.value,
+  (val) => {
+    controlText.value = val;
+  }
+);
+
+const initClass = () => {
+  const platform = ANALYZE_PLATFORM.value;
+  const item = platform[0];
+  active.value.class = item.id;
+  changeClassEvent(item.id);
+};
+
+// 切换分类
+const changeClassEvent = (id: string) => {
+  active.value.class = id;
+  const platform = ANALYZE_PLATFORM.value;
+  const item = platform.find((item) => item.id === id);
+
+  setTimeout(() => {
+    webviewUrl.value = item!.url;
+  }, 0);
+
+  window.electron.ipcRenderer.removeAllListeners('blockUrl');
+  window.electron.ipcRenderer.on('blockUrl', async (_, url) => {
+    if (url !== 'about:blank' && /^(https?:\/\/)/.test(url) && webviewUrl.value !== url) {
+      webviewUrl.value = url;
+    }
+  });
+};
+
+// 控制
+const handleWebviewControl = async (action: 'back'| 'forward'| 'home'|'refresh'| 'clearHistory') => {
+  const webview = webviewRef.value;
+  // 后退
+  const backEvent = () => {
+    if (webview.canGoBack()) webview.goBack();
+  };
+
+  // 前进
+  const forwardEvent = () => {
+    if (webview.canGoForward()) webview.goForward();
+  };
+
+  // 刷新
+  const refreshEvent = () => {
+    webview.reload();
+  };
+
+  // 清除浏览器导航历史记录
+  const clearHistoryEvent = () => {
+    webview.clearHistory();
+  };
+
+  const homeEvent = () => {
+    const platform = ANALYZE_PLATFORM.value;
+    const item = platform.find((item) => item.id === active.value.class);
+    controlText.value = item!.url;
+    handleWebviewLoad();
+  };
+
+  const method = {
+    back: backEvent,
+    home: homeEvent,
+    forward: forwardEvent,
+    refresh: refreshEvent,
+    clearHistory: clearHistoryEvent,
+  };
+
+  method[action]();
+};
+
+// 加载
+const handleWebviewLoad = () => {
+  let url = controlText.value;
+  console.log(url, url === 'about:blank' || !url)
+  if (url === 'about:blank' || !url) return;
+  if (!/^(https?:\/\/)/.test(url)) {
+    url = `http://${url}`;
+  };
+  webviewUrl.value = url;
+};
 
 // 获取解析接口及默认接口
 const getSetting = async () => {
@@ -147,176 +217,135 @@ const getSetting = async () => {
   }
 };
 
+const handleParse = async () => {
+  const url = controlText.value;
+  await playEvent(url);
+};
+
 // 格式化 url 公共方法
-const formatUrlMethod = (url) => {
+const handleUrlHref = (url: string) => {
   return url.split('?')[0];
 };
 
+const checkControlText = (url: string) => {
+  if (!url) return false;
+  if (/^(https?:\/\/)/.test(url) && url !== 'about:blank') return true;
+  else false;
+};
+
 // 解析函数公共方法
-const getVideoInfo = async (url: string, title: string) => {
-  await defaultPlay();
-  // 1.判断是否为空
-  if (!(active.value.nav && analyzeUrl.value)) {
-    MessagePlugin.error(t('pages.analyze.message.empty'));
-    return;
-  };
+const playEvent = async (url: string) => {
+  isVisible.loading = true;
 
-  // 2.获取解析接口信息
-  const api = analyzeConfig.value.data.find(item => item.id === active.value.nav);
-  if (!api) {
-    MessagePlugin.error(t('pages.analyze.message.invalidApi'));
-    return;
-  };
-
-  // 3.显示解析信息
-  urlTitle.value = title;
-  MessagePlugin.info(t('pages.analyze.message.info'));
-
-  // 4.解析地址
-  const analyzeRes = await fetchAnalyzeHelper(`${api.url}${url}`, api.type);
-  if (!analyzeRes.url) {
-    MessagePlugin.error(t('pages.analyze.message.error'));
-    return;
-  };
-  playFormData.value.type = analyzeRes.mediaType;
-  playFormData.value.url = analyzeRes.url;
-  playFormData.value.headers = analyzeRes.headers;
-  const playerMode = storePlayer.setting.playerMode;
-  if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', playerMode.external, playFormData.value.url);
-  } else {
-    if (playerRef.value) {
-      await playerRef.value.create(playFormData.value, playerMode.type);
+  try {
+    // 1.判断是否为空
+    if (!checkControlText(url)) {
+      MessagePlugin.error(t('pages.analyze.message.empty'));
+      return;
     };
-  }
 
-  // 5.记录播放记录
-  const res = await findHistory({ relateId: active.value.nav, videoId: url });
-
-  if (res) putHistory({
-    ids: [res.id],
-    doc: { date: moment().unix() }
-  });
-  else {
-    const doc = {
-      date: moment().unix(),
-      relateId: active.value.nav,
-      videoId: url,
-      videoName: urlTitle.value,
-      type: "analyze"
+    // 2.获取解析接口信息
+    const site = analyzeConfig.value.default;
+    if (!site?.url) {
+      MessagePlugin.error(t('pages.analyze.message.invalidApi'));
+      return;
     };
-    addHistory(doc);
+
+    // 3.显示解析信息
+    const title = webviewRef.value?.getTitle() || '';
+
+    // 4.解析地址
+    url = handleUrlHref(url);
+    const item = { url, title };
+
+    const playerMode = storePlayer.getSetting.playerMode;
+    if (playerMode.type === 'custom') {
+      const res = await fetchAnalyzeHelper(`${site.url}${url}`, site.type);
+      if (!res.url) {
+        MessagePlugin.error(t('pages.analyze.message.error'));
+        return;
+      };
+      window.electron.ipcRenderer.send('call-player', playerMode.external, res.url);
+
+      // 记录播放记录
+      const historyRes = await fetchHistoryData(site.key, url, ['analyze']);
+      const doc = {
+        date: moment().unix(),
+        type: 'analyze',
+        relateId: site.key,
+        siteSource: '',
+        playEnd: false,
+        videoId: url,
+        videoImage: '',
+        videoName: title,
+        videoIndex: `${title}$${url}`,
+        watchTime: 0,
+        duration: 0,
+        skipTimeInStart: 0,
+        skipTimeInEnd: 0,
+      };
+
+      if (historyRes.code === 0 && historyRes.status) {
+        putHistoryData('put', doc, historyRes.data.id);
+      } else {
+        putHistoryData('add', doc, null);
+      }
+    } else {
+      storePlayer.updateConfig({
+        type: 'analyze',
+        status: true,
+        data: {
+          info: { ...item, name: title },
+          ext: { site, setting: storePlayer.setting },
+        },
+      });
+      window.electron.ipcRenderer.send('open-play-win', item.vod_name);
+    };
+  } catch (err) {
+    console.error(`[analyze][playEvent][error]`, err);
+    MessagePlugin.warning(t('pages.chase.reqError'));
+  } finally {
+    isVisible.loading = false;
   }
 };
 
-// input 变化
-const formatUrlEvent = (url: string) => {
-  const formatUrl = formatUrlMethod(url);
-  analyzeUrl.value = formatUrl;
-};
-
-// 直接解析
-const analyzeEvent = async () => {
-  if (!(active.value.nav && analyzeUrl.value)) {
-    MessagePlugin.error(t('pages.analyze.message.empty'));
-    return;
-  };
-  const url = analyzeUrl.value!;
-  const res = (await fetchAnalyzeTitle(url))?.title;
-  await getVideoInfo(url!, res);
-};
-
-// 平台回调解析
-const platformPlay = async (url: string, title: string) => {
-  const formatUrl = formatUrlMethod(url);
-  analyzeUrl.value = formatUrl;
-  await getVideoInfo(formatUrl, title);
-};
-
-// 历史解析
-const historyPlayEvent = async (item) => {
-  active.value.nav = item.relateId;
-  const formatUrl = formatUrlMethod(item.videoId);
-  analyzeUrl.value = formatUrl;
-  await getVideoInfo(formatUrl, item.videoName);
-  active.value.history = false;
-};
-
-// 打开平台iframe
-const openPlatform = (item) => {
-  console.log('[analyze] search keyword', item);
-  const { name, url } = item;
-  platFormData.value = { name, url };
-  active.value.search = false;
-  active.value.platform = true;
-};
-
-// 打开当前播放地址
-const openCurrentUrl = () => {
-  if (analyzeUrl.value) {
-    openPlatform({
-      url: analyzeUrl.value,
-      name: urlTitle.value,
-    });
-  }
-};
-
-// 分享
-const shareEvent = () => {
-  const provider = analyzeConfig.value.data.find(item => item.id === active.value.nav);
-  if (Object.keys(provider).length === 0) return;
-  shareFromData.value = {
-    name: urlTitle.value,
-    url: playFormData.value.url,
-    provider: provider["name"],
-  };
-  active.value.share = true;
-};
-
-const defaultPlay = async () => {
-  urlTitle.value = '';
-  playFormData.value = { ...playFormData.value, ...{ url: '', headers: {}, type: ''} }
-};
-
-const clearContent = async ()=> {
-  defaultPlay();
-  analyzeUrl.value = '';
-  if (playerRef.value) await playerRef.value.destroy();
-};
-
-const defaultConf = ()=>{
+const defaultConf = () => {
   active.value.nav = '';
   searchText.value = '';
+  analyzeConfig.value.value.default = {};
   emitter.emit('refreshSearchConfig');
 };
 
-const refreshConf = () => {
+const refreshConf = async () => {
   console.log('[analyze][bus][refresh]');
   defaultConf();
-  analyzeConfig.value = {
-    default: {
-      id: '',
-      name: '',
-      type: 0
-    },
-    data: []
-  };
-  getSetting();
+  await getSetting();
 };
 
 const changeConf = async (id: string) => {
   console.log(`[analyze] change source: ${id}`);
-  defaultConf();
-  active.value.nav = id;
-  if (analyzeUrl.value) await getVideoInfo(analyzeUrl.value, urlTitle.value);
+  try {
+    // defaultConf();
+    active.value.nav = id;
+    analyzeConfig.value.default = analyzeConfig.value.data.find(item => item.id === id);
+    // await playEvent(controlText.value);
+  } catch (err) {
+  } finally {};
 };
 
 emitter.on('searchAnalyze', (kw) => {
   console.log('[analyze][bus][receive]', kw);
-  if (kw) {
-    searchText.value = kw as string;
-    active.value.search = true;
-  };
+  if (!kw) return;
+
+
+  const platform = ANALYZE_PLATFORM.value;
+  const item = platform.find((item) => item.id === active.value.class);
+  if (!item) return;
+
+  const url = `${item.search}${kw}`;
+  console.log(`[analyze][bus][search]`, url);
+  controlText.value = url;
+  handleWebviewLoad();
 });
 </script>
 
@@ -336,6 +365,9 @@ emitter.on('searchAnalyze', (kw) => {
     background-color: var(--td-bg-color-container);
     border-radius: var(--td-radius-default);
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--td-size-4);
 
     .container {
       width: 100%;
@@ -345,122 +377,27 @@ emitter.on('searchAnalyze', (kw) => {
       justify-content: space-between;
       gap: var(--td-size-4);
 
-      .analyze-player {
-        flex: 1;
-        border-radius: var(--td-radius-default);
+      .webview-container {
         height: 100%;
         width: 100%;
-        position: relative;
+        border-radius: var(--td-radius-default);
         overflow: hidden;
 
-        .head-info-section {
-          z-index: 4;
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          padding: 12px;
-          width: 100%;
-          height: 60px;
-          background: transparent;
-          display: flex;
-          justify-content: space-between;
-          border-radius: var(--td-radius-large) var(--td-radius-large) 0 0;
-
-          .mg-right {
-            margin-right: 6px;
-            color: rgba(255, 255, 255, .9);
-          }
-
-          .mg-left {
-            margin-left: 6px;
-            color: rgba(255, 255, 255, .9);
-          }
-
-          .left {
-            display: flex;
-            align-items: center;
-
-            .info {
-              height: 32px;
-              cursor: pointer;
-              background: rgba(0, 0, 0, .2);
-              border-radius: 33px;
-              align-items: center;
-              padding: 2px;
-              display: flex;
-
-              .avatar {
-                width: 32px;
-                height: 32px;
-
-                img {
-                  width: 100%;
-                  height: 100%;
-                  border: 2px solid rgba(22, 24, 35, .06);
-                  border-radius: 50%;
-                }
-              }
-
-              .title {
-                padding-left: 6px;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                font-weight: 500;
-                overflow: hidden;
-                max-width: 150px;
-                min-width: 64px;
-              }
-
-              .share,
-              .close {
-                height: 24px;
-                width: 24px;
-                display: flex;
-                align-items: center;
-                flex-direction: row;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.08);
-                border-radius: var(--td-radius-circle);
-                padding: 4px;
-              }
-            }
-          }
-
-          .right {
-            display: flex;
-            align-items: center;
-
-            .action {
-              height: 32px;
-              cursor: pointer;
-              background: rgba(0, 0, 0, .2);
-              border-radius: 33px;
-              align-items: center;
-              padding: 2px 6px 2px 2px;
-              display: flex;
-
-              .history,
-              .close {
-                height: 24px;
-                width: 24px;
-                display: flex;
-                align-items: center;
-                flex-direction: row;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.08);
-                border-radius: var(--td-radius-circle);
-                padding: 4px;
-              }
-            }
-          }
-        }
-
-        .player-content {
+        .webview {
           height: 100%;
           width: 100%;
-          position: relative;
-          z-index: 3;
+
+          &::-webkit-scrollbar {
+            width: 8px;
+            background: transparent;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            border-radius: 6px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+            background-color: var(--td-scrollbar-color);
+          }
         }
       }
 
@@ -514,26 +451,61 @@ emitter.on('searchAnalyze', (kw) => {
   }
 }
 
+.urlbar-root {
+  display: flex;
+  gap: var(--td-comp-margin-s);
 
-:deep(.t-dialog__ctx) {
-  .t-dialog__wrap {
-    overflow: hidden;
+  .urlbar-control {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: var(--td-bg-content-input-2);
+    border-radius: var(--td-radius-default);
+    height: 100%;
+    width: 100px;
+    padding: 0 var(--td-comp-paddingLR-s);
+
+    :deep(.t-button) {
+      &:not(.t-is-disabled):not(.t-button--ghost) {
+        --ripple-color: transparent;
+      }
+    }
+
+    :deep(.t-button__text) {
+      svg {
+        color: var(--td-text-color-placeholder);
+      }
+    }
+
+    :deep(.t-button--variant-text) {
+      &:hover {
+        border-color: transparent;
+        background-color: transparent;
+
+        .t-button__text {
+          svg {
+            color: var(--td-primary-color);
+          }
+        }
+      }
+    }
   }
 
-  .t-dialog__position {
-    padding: 0;
-    flex-direction: column;
+  .urlbar-url {
+    :deep(.t-input) {
+      background-color: var(--td-bg-content-input-2) !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+    }
+  }
 
-    .t-dialog--top {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
+  .urlbar-play {
+    background-color: var(--td-bg-content-input-2);
+    --ripple-color: transparent;
+    color: var(--td-text-color-placeholder);
 
-      .t-dialog__body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
+    &:hover {
+      color: var(--td-primary-color);
     }
   }
 }

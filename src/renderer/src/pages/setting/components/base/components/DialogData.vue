@@ -338,7 +338,7 @@ const refreshEmitter = (arryList: string[]) => {
 // 获取历史
 const getHistory = async (type: string) => {
   try {
-    const res = await fetchHistoryPage({ page: 1, pageSize: 5, type });
+    const res = await fetchHistoryPage({ page: 1, pageSize: 5, type: [type] });
     if (res.hasOwnProperty('list')) historyList.value[type] = res.list;
   } catch (err: any) {
     console.error('Failed to fetch history:', err);

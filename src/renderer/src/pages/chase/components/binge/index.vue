@@ -23,8 +23,11 @@
             <delete-icon />
           </div>
           <div class="card-main">
-            <div class="card-tag card-tag-orange" v-if='item["videoUpdate"]'>
+            <!-- <div class="card-tag card-tag-orange" v-if='item["videoUpdate"]'>
               <span class="card-tag-text text-hide">{{ $t('pages.chase.isUpdate') }}</span>
+            </div> -->
+            <div class="card-tag card-tag-orange">
+              <span class="card-tag-text text-hide">{{ $t(`pages.chase.type.${item["type"]}`) }}</span>
             </div>
             <t-image class="card-main-item" :src='item["videoImage"]'
               :style="{ width: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
@@ -62,15 +65,21 @@
 import 'v3-infinite-loading/lib/style.css';
 import lazyImg from '@/assets/lazy.png';
 
-import _ from 'lodash';
+import moment from 'moment';
+import { size, findIndex, reject } from 'lodash-es';
 import PQueue from 'p-queue';
 import { AssignmentCheckedIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { onActivated, onMounted, ref, reactive } from 'vue';
+import { onActivated, ref, reactive } from 'vue';
 
 import { delStar, fetchStarPage } from '@/api/star';
 import { fetchCmsDetail, fetchCmsInit } from '@/api/site';
+import { putAlistInit, fetchAlistDir, fetchAlistFile } from '@/api/drive';
+import { fetchIptvActive, fetchChannelDetail } from '@/api/iptv';
+import { fetchAnalyzeHelper } from '@/utils/common/film';
+import { fetchHistoryData, putHistoryData } from '@/utils/common/chase';
+import { base64 } from '@/utils/crypto';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
@@ -129,7 +138,7 @@ const getBingeList = async () => {
   let length = 0;
   const { pageIndex, pageSize } = pagination.value;
   try {
-    const res = await fetchStarPage({ page: pageIndex, pageSize });
+    const res = await fetchStarPage({ page: pageIndex, pageSize, type: ['film', 'iptv', 'drive', 'analyze'] });
     if (res?.list && Array.isArray(res?.list) && res?.list?.length > 0) {
       bingeConfig.value.data = bingeConfig.value.data.concat(res.list);
       pagination.value.count = res.total;
@@ -157,40 +166,168 @@ const load = async ($state) => {
   }
 };
 
+const handleFilmPlay = async (item) => {
+  const { videoName, videoImage, videoId, relateSite } = item;
+  await fetchCmsInit({ sourceId: relateSite.id });
+  const response = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
+  const info = response?.list[0];
+  if (!info?.vod_name) info.vod_name = videoName;
+  if (!info?.vod_pic) info.vod_pic = videoImage;
+  if (!info?.vod_id) info.vod_id = videoId;
+  const doc = {
+    info: { ...info },
+    ext: { site: relateSite, setting: storePlayer.setting },
+  };
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    detailFormData.value = doc;
+    isVisible.detail = true;
+  } else {
+    storePlayer.updateConfig({ type: 'film', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  }
+};
+
+const handleIptvPlay = async (item) => {
+  const { videoName, videoId, videoImage, relateSite } = item;
+  const infoData = await fetchChannelDetail(videoId);
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, infoData.url);
+    // 记录播放记录
+    const historyRes = await fetchHistoryData(relateSite.key, videoId, ['iptv']);
+    const doc = {
+      date: moment().unix(),
+      type: 'iptv',
+      relateId: relateSite.key,
+      siteSource: infoData.group,
+      playEnd: false,
+      videoId: videoId,
+      videoImage: videoImage,
+      videoName: videoName,
+      videoIndex: `${videoName}$${infoData.url}`,
+      watchTime: 0,
+      duration: 0,
+      skipTimeInStart: 0,
+      skipTimeInEnd: 0,
+    };
+
+    if (historyRes.code === 0 && historyRes.status) {
+      putHistoryData('put', doc, historyRes.data.id);
+    } else {
+      putHistoryData('add', doc, null);
+    }
+  } else {
+    const response = await fetchIptvActive();
+    const { epg, markIp, logo } = response["ext"];
+    const doc = {
+      info: { id: videoId, logo: videoImage, name: videoName, url: infoData.url, group: infoData.group },
+      ext: { epg, markIp, logo, site: relateSite, setting: storePlayer.setting },
+    };
+    storePlayer.updateConfig({ type: 'iptv', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  }
+};
+
+const handleDrivePlay = async (item) => {
+  const { videoName, videoImage, videoId, videoType, relateSite } = item;
+  await putAlistInit({ sourceId: relateSite.id });
+  const infoData = await fetchAlistFile({ path: base64.decode(videoId), sourceId: relateSite.id });
+  const dirData = await fetchAlistDir({ path: videoType, sourceId: relateSite.id });
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    window.electron.ipcRenderer.send('call-player', playerMode.external, infoData.url);
+    // 记录播放记录
+    const historyRes = await fetchHistoryData(relateSite.key, videoId, ['drive']);
+    const doc = {
+      date: moment().unix(),
+      type: 'drive',
+      relateId: relateSite.key,
+      siteSource: videoType,
+      playEnd: false,
+      videoId: videoId,
+      videoImage: videoImage,
+      videoName: videoName,
+      videoIndex: `${videoName}$${infoData.url}`,
+      watchTime: 0,
+      duration: 0,
+      skipTimeInStart: 0,
+      skipTimeInEnd: 0,
+    };
+
+    if (historyRes.code === 0 && historyRes.status) {
+      putHistoryData('put', doc, historyRes.data.id);
+    } else {
+      putHistoryData('add', doc, null);
+    }
+  } else {
+    const doc = {
+      info: {
+        id: videoId, name: videoName, url: infoData.url,
+        thumb: videoImage, remark: infoData.remark,  path: videoType,
+      },
+      ext: { files: dirData?.list || [], site: relateSite }
+    };
+    storePlayer.updateConfig({ type: 'drive', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  }
+};
+
+const handleAnalyzePlay = async (item) => {
+  const { videoName, videoId, relateSite } = item;
+  const playerMode = storePlayer.getSetting.playerMode;
+  if (playerMode.type === 'custom') {
+    const response = await fetchAnalyzeHelper(`${relateSite.url}${videoId}`, relateSite.type);
+    if (!response.url) {
+      MessagePlugin.error(t('pages.analyze.message.error'));
+      return;
+    };
+    window.electron.ipcRenderer.send('call-player', playerMode.external, response.url);
+    const historyRes = await fetchHistoryData(relateSite.key, videoId, ['analyze']);
+    const doc = {
+      date: moment().unix(),
+      type: 'analyze',
+      relateId: relateSite.key,
+      siteSource: '',
+      playEnd: false,
+      videoId: videoId,
+      videoImage: '',
+      videoName: videoName,
+      videoIndex: `${videoName}$${response.url}`,
+      watchTime: 0,
+      duration: 0,
+      skipTimeInStart: 0,
+      skipTimeInEnd: 0,
+    };
+
+    if (historyRes.code === 0 && historyRes.status) {
+      putHistoryData('put', doc, historyRes.data.id);
+    } else {
+      putHistoryData('add', doc, null);
+    }
+  } else {
+    const doc = {
+      info: { id: videoId, url, name: videoName },
+      ext: { site: relateSite, setting: storePlayer.setting },
+    };
+    storePlayer.updateConfig({ type: 'analyze', status: true, data: doc });
+    window.electron.ipcRenderer.send('open-play-win', videoName);
+  };
+};
+
 // 播放
 const playEvent = async (item) => {
   isVisible.loading = true;
 
   try {
-    const { videoName, videoImage, videoId, relateSite } = item;
-
-    await fetchCmsInit({ sourceId: relateSite.id });
-    const res = await fetchCmsDetail({ sourceId: relateSite.id, id: videoId });
-    const detailItem = res?.list[0];
-    if (!detailItem.vod_name) detailItem.vod_name = videoName;
-    if (!detailItem.vod_pic) detailItem.vod_pic = videoImage;
-    if (!detailItem.vod_id) detailItem.vod_id = videoId;
-    item = detailItem;
-    console.log('[binge][playEvent]', item);
-
-    const playerMode = storePlayer.getSetting.playerMode;
-    const doc = {
-      info: { ...item, name: item.vod_name },
-      ext: { site: relateSite, setting: storePlayer.setting },
-    }
-
-    if (playerMode.type === 'custom') {
-      detailFormData.value = doc;
-      isVisible.detail = true;
-    } else {
-      storePlayer.updateConfig({
-        type: 'film',
-        status: true,
-        data: doc
-      });
-
-      window.electron.ipcRenderer.send('open-play-win', videoName);
-    }
+    const { type } = item;
+    const methpodMap = {
+      film: handleFilmPlay,
+      iptv: handleIptvPlay,
+      drive: handleDrivePlay,
+      analyze: handleAnalyzePlay,
+    };
+    await methpodMap[type](item);
   } catch (err) {
     console.error(`[binge][playEvent][error]`, err);
     MessagePlugin.warning(t('pages.chase.reqError'));
@@ -203,20 +340,20 @@ const playEvent = async (item) => {
 const removeEvent = async (item) => {
   const { id } = item;
   await delStar({ ids: [id] });
-  bingeConfig.value.data = _.reject(bingeConfig.value.data, { id }) as any;
+  bingeConfig.value.data = reject(bingeConfig.value.data, { id }) as any;
   pagination.value.count--;
 };
 
 // 更新
 const updateVideoRemarks = (item, res) => {
-  const index = _.findIndex(bingeConfig.value.data, { ...item });
+  const index = findIndex(bingeConfig.value.data, { ...item });
   const isUpdate = res.vod_remarks !== bingeConfig.value.data[index].videoRemarks;
   bingeConfig.value.data[index].videoUpdate = isUpdate;
   bingeConfig.value.data[index].videoRemarks = res.vod_remarks;
 };
 
 const checkUpdaterEvent = async () => {
-  if (!_.size(bingeConfig.value.data)) {
+  if (!size(bingeConfig.value.data)) {
     MessagePlugin.info(t('pages.chase.binge.message.noCheckData'));
     return;
   }
@@ -272,7 +409,7 @@ const clearEvent = () => {
 
 const defaultSet = () => {
   bingeConfig.value.data = [];
-  if (!_.size(bingeConfig.value.data)) infiniteId.value++;
+  if (!size(bingeConfig.value.data)) infiniteId.value++;
   pagination.value.pageIndex = 1;
 };
 
@@ -377,7 +514,7 @@ const refreshBinge = () => {
       }
 
       .card-tag {
-        z-index: 15;
+        z-index: 9;
         position: absolute;
         left: 0;
         top: 0;
@@ -399,7 +536,7 @@ const refreshBinge = () => {
         display: block;
         width: 100%;
         height: 100%;
-        border-radius: 5px;
+        border-radius: var(--td-radius-default);
 
         .op {
           position: absolute;
