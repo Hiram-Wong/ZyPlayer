@@ -36,7 +36,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
           },
           input: {
             index: resolve(__dirname, 'src/main/index.ts'),
-            worker: resolve(__dirname, 'src/main/core/server/routes/v1/site/cms/adapter/drpy/worker.ts'),
+            site_drpy_worker: resolve(__dirname, 'src/main/core/server/routes/v1/site/cms/adapter/drpy/worker.ts'),
           },
           output: {
             manualChunks: {
@@ -73,7 +73,6 @@ export default defineConfig(({ mode }: ConfigEnv) => {
             assetFileNames: `assets/static/[ext]/[name]_[hash].[ext]`, // 资源文件像 字体，图片等
             manualChunks: {
               'monaco-editor': ['monaco-editor'],
-              lodash: ['lodash'],
               xgplayer: ['xgplayer', 'xgplayer-flv', 'xgplayer-hls', 'xgplayer-mp4', 'xgplayer-shaka'],
               artplayer: ['artplayer', 'artplayer-plugin-danmuku'],
               dplayer: ['dplayer'],
