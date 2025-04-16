@@ -189,21 +189,25 @@ ps:
   "analyze": [
     {
       "id": "fddfb425-6fd9-0b39-459f-a21f69739a6e", // id唯一值不可重复[uuidv4]
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // key值不建议重复[string] [3.4.0版本启用]
       "name": "Parse", // 名称[string]
       "type": 0, // 类型[number | 0:web-1:json]
       "url": "https://xxx.top/?jx=", // 解析源地址[string]
+      "headers": "", // 请求头[string] 未启用预留 [3.4.0版本启用]
       "isActive": true // 是否启用[boolean | true启用-false禁用]
     }
   ],
   "iptv": [
     {
       "id": "993841fe-5e91-5e5d-35d6-5be81822960b", // id唯一值不可重复[uuidv4]
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // key值不建议重复[string] [3.4.0版本启用]
       "name": "IPTV", // 名称[string]
       "url": "https://xxx.com/m3u/iptv.m3u", // 直播源地址[string]
       "type": "remote", // url格式[string | remote:远程m3u-local本地m3u文件路径-json本地手动文件]
-      "isActive": true, // 是否启用[boolean | true启用-false禁用]
       "epg": "https://epg.112114.eu.org/?ch={name}&date={date}", // 电子节目单地址[string]
-      "logo": "https://epg.112114.eu.org/logo/{name}.png" // 台标地址[string] - 3.3.8启用该参数
+      "logo": "https://epg.112114.eu.org/logo/{name}.png", // 台标地址[string] - 3.3.8启用该参数
+      "headers": "", // 请求头[string] 未启用预留 [3.4.0版本启用]
+      "isActive": true // 是否启用[boolean | true启用-false禁用]
     }
   ],
   "channel": [
@@ -232,6 +236,7 @@ ps:
   "drive": [
     {
       "id": "3293dc45-cf14-9c66-3028-5b7765b240b7",// id唯一值不可重复[uuidv4]
+      "key": "51793af6-c923-5504-85db-0ef686624dec", // key值不建议重复[string] [3.4.0版本启用]
       "name": "alist", // 名称[string]
       "server": "http://alist.xxx.pro/", // 网盘地址[string]
       "showAll": false, // 是否启用[boolean | true显示全部-false显示video]
