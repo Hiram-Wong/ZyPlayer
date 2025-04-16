@@ -128,6 +128,7 @@ const easy2tvbox = async (config, url, type) => {
 
           iptv.push({
             id: channel?.id || uuidv4(),
+            key: channel?.key || uuidv4(),
             name: channel.name,
             type: 'remote',
             url: url,
@@ -141,6 +142,7 @@ const easy2tvbox = async (config, url, type) => {
       iptv = content.lives.map((live) => {
         return {
           id: live?.id || uuidv4(),
+          key: live?.key || uuidv4(),
           name: live.name,
           type: 'remote',
           url: formatUrl(live.url, url),
@@ -157,6 +159,7 @@ const easy2tvbox = async (config, url, type) => {
       .filter((item) => item?.type !== 2 && item?.url)
       .map((item) => ({
         id: item?.id || uuidv4(),
+        key: item?.key || uuidv4(),
         name: item.name,
         url: item.url,
         type: item?.type ? item.type : 0,
@@ -169,6 +172,7 @@ const easy2tvbox = async (config, url, type) => {
       .filter((item) => item.type === 'alist' || !item.type)
       .map((item) => ({
         id: item?.id || uuidv4(),
+        key: item?.key || uuidv4(),
         name: item.name,
         server: item.server,
         showAll: item.showAll || false,
