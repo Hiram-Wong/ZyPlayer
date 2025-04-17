@@ -12,86 +12,88 @@ class workerLruCache extends LruCache {
   constructor(capacity: number) {
     super(capacity);
   }
+
   put(key: string, value: any) {
     if (this.cache.has(key)) {
       this.cache.delete(key);
     } else if (this.cache.size >= this.capacity) {
       const firstKey = this.cache.keys().next().value;
-      const child = this.cache.get(firstKey);
-      child.removeAllListeners();
-      treeKill(child.pid, 'SIGTERM');
-      this.cache.delete(this.cache.keys().next().value);
+      this._terminateProcess(this.cache.get(firstKey)!);
+      this.cache.delete(firstKey);
     }
     this.cache.set(key, value);
     return value;
   }
-  delete(key: string) {
+
+  delete(key: string): boolean {
     if (this.cache.has(key)) {
-      const child = this.cache.get(key);
-      child.removeAllListeners();
-      treeKill(child.pid, 'SIGTERM');
+      this._terminateProcess(this.cache.get(key)!);
     }
     return this.cache.delete(key);
+  }
+
+  private _terminateProcess(child: ChildProcess): void {
+    child.removeAllListeners();
+    treeKill(child.pid!, 'SIGTERM');
   }
 };
 
 const lruCache = new workerLruCache(cacheQueueSize);
 
 class T3Adapter {
-  id: string = '';
-  ext: string = '';
-  categoryfilter: any[] = [];
-  timeout: number = 5000;
-  cacheQueueSize: number = 6;
-  debug: boolean = false;
-  isInit: boolean = false;
-  isolatedContext: any;
-  child: ChildProcess | null = null;
+  id: string;
+  ext: string;
+  categoryfilter: string[];
+  timeout: number;
+  debug: boolean;
+  isInit: boolean;
+  child: ChildProcess | null;
 
-  constructor(source) {
+  constructor(source: { id: string; ext: string; categories: string[] }) {
     this.id = source.id;
     this.ext = source.ext;
     this.categoryfilter = source.categories;
     this.timeout = globalThis.variable.timeout || 5000;
     this.debug = globalThis.variable.debug || false;
-    this.cacheQueueSize = cacheQueueSize;
-  };
-  private doWork = (
-    child: ChildProcess | null,
-    data: { [key: string]: string | object | null },
-  ): Promise<{ [key: string]: any }> => {
-    return new Promise((resolve, reject) => {
-      child!.once('message', (message: { [key: string]: any }) => {
-        resolve(message);
-      });
+    this.isInit = false;
+    this.child = null;
+  }
 
-      child!.once('close', (code) => {
+  private doWork(child: ChildProcess, data: { [key: string]: any }): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const handleMessage = (message: any) => {
+        resolve(message);
+        child.off('message', handleMessage);
+      };
+      const handleClose = (code: number) => {
         logger.error(`[t3][worker][exit] code ${code}`);
         reject(new Error('Worker closed unexpectedly'));
-      });
-
-      child!.once('error', (err) => {
+        child.off('close', handleClose);
+      };
+      const handleError = (err: Error) => {
         logger.error(`[t3][worker][error] ${err.message}`);
         reject(err);
-      });
+        child.off('error', handleError);
+      };
 
-      child!.send(data);
+      child.once('message', handleMessage);
+      child.once('close', handleClose);
+      child.once('error', handleError);
+
+      child.send(data);
     });
-  };
+  }
+
   private async execCtx(options: { [key: string]: any }): Promise<any> {
-    if (lruCache.get(this.id)) {
-      this.child = lruCache.get(this.id);
-    } else {
-      this.child = fork(
-        resolve(__dirname, 'site_drpy_worker.js'),
-        [
-          `T3Fork-execCtx-${uuidv4()}`,
-          this.timeout.toString(),
-          this.debug.toString()
-        ]
-      );
-      lruCache.put(this.id, this.child);
-    };
+    this.child = lruCache.get(this.id) || fork(
+      resolve(__dirname, 'site_drpy_worker.js'),
+      [
+        `T3Fork-execCtx-${uuidv4()}`,
+        this.timeout.toString(),
+        this.debug.toString()
+      ]
+    );
+    lruCache.put(this.id, this.child!);
 
     if (!this.isInit) {
       if (options.type !== 'init') await this.doWork(this.child!, { type: 'init', data: this.ext });
@@ -101,35 +103,31 @@ class T3Adapter {
     const res = await this.doWork(this.child!, { ...options });
     return res.data;
   }
-  async init() {
-    const res = await this.execCtx({ type: 'init', data: this.ext });
-    return res;
-  }
-  async home() {
-    const res = await this.execCtx({ type: 'home', data: null });
 
+  async init(): Promise<any> {
+    return this.execCtx({ type: 'init', data: this.ext });
+  }
+
+  async home(): Promise<{ class: any[]; filters: any }> {
+    const res = await this.execCtx({ type: 'home', data: null });
     let classes: any[] = [];
 
-    // 分类
     if (res?.class) {
-      let categories: any[] = [];
-      for (const cls of res?.class) {
-        const n = cls.type_name.toString().trim();
-        if (categories && categories.length > 0) {
-          if (categories.indexOf(n) < 0) continue;
-        }
-        classes.push({
-          type_id: cls.type_id.toString(),
-          type_name: n,
-        });
+      const categories = res.class.map((cls: any) => cls.type_name.trim());
+      if (this.categoryfilter.length > 0) {
+        categories.filter((v: string) => this.categoryfilter.includes(v));
       }
-      if (categories && categories.length > 0 && this.categoryfilter && this.categoryfilter.length > 0) {
-        categories = categories.filter((v) => this.categoryfilter.includes(v.type_name));
+      classes = res.class.map((cls: any) => ({
+        type_id: cls.type_id.toString(),
+        type_name: cls.type_name.trim(),
+      }));
+
+      if (this.categoryfilter.length > 0) {
+        classes = classes.filter((cls) => this.categoryfilter.includes(cls.type_name));
       }
-      if (categories && categories.length > 0) {
-        classes = classes.sort((a, b) => {
-          return categories.indexOf(a.type_name) - categories.indexOf(b.type_name);
-        });
+
+      if (this.categoryfilter.length > 0) {
+        classes = classes.sort((a, b) => this.categoryfilter.indexOf(a.type_name) - this.categoryfilter.indexOf(b.type_name));
       }
     }
 
@@ -138,33 +136,33 @@ class T3Adapter {
       filters: res?.filters || {},
     };
   }
-  async homeVod() {
-    const res = await this.execCtx({ type: 'homeVod', data: null });
-    return res;
+
+  async homeVod(): Promise<any> {
+    return this.execCtx({ type: 'homeVod', data: null });
   }
-  async category(doc: { [key: string]: string }) {
-    const res = this.execCtx({ type: 'category', data: doc });
-    return res;
+
+  async category(doc: { [key: string]: string }): Promise<any> {
+    return this.execCtx({ type: 'category', data: doc });
   }
-  async detail(doc: { [key: string]: string }) {
-    const res = this.execCtx({ type: 'detail', data: doc });
-    return res;
+
+  async detail(doc: { [key: string]: string }): Promise<any> {
+    return this.execCtx({ type: 'detail', data: doc });
   }
-  async search(doc: { [key: string]: string }) {
-    const res = this.execCtx({ type: 'search', data: doc });
-    return res;
+
+  async search(doc: { [key: string]: string }): Promise<any> {
+    return this.execCtx({ type: 'search', data: doc });
   }
-  async play(doc: { [key: string]: string }) {
-    const res = this.execCtx({ type: 'play', data: doc });
-    return res;
+
+  async play(doc: { [key: string]: string }): Promise<any> {
+    return this.execCtx({ type: 'play', data: doc });
   }
-  async proxy(doc: { [key: string]: string }) {
-    const res = this.execCtx({ type: 'proxy', data: doc });
-    return res;
+
+  async proxy(doc: { [key: string]: string }): Promise<any> {
+    return this.execCtx({ type: 'proxy', data: doc });
   }
-  async runMain(doc: { [key: string]: string }) {
-    const res = this.execCtx({ type: 'runMain', data: doc });
-    return res;
+
+  async runMain(doc: { [key: string]: string }): Promise<any> {
+    return this.execCtx({ type: 'runMain', data: doc });
   }
 }
 

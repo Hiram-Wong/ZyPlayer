@@ -5,6 +5,8 @@ appId: com.zyfun.player
 # 应用程序的产品名称
 productName: zyfun
 copyright: Copyright © 2023 zyfun Team Inc.
+# 禁用 asar 打包
+"asar": true
 # 构建资源所在的目录
 directories:
   buildResources: build
@@ -32,7 +34,7 @@ win:
   target:
     - target: nsis
       arch:
-        - x64
+        # - x64
         - arm64
 # NSIS 安装器配置
 nsis:
@@ -76,9 +78,9 @@ mac:
   target:
     - target: dmg
       arch:
-        - x64
+        # - x64
         - arm64
-        - universal
+        # - universal
 # macOS 平台的 DMG 配置
 dmg:
   # DMG 文件的生成名称
@@ -128,4 +130,4 @@ publish:
   owner: "Hiram-Wong"
   repo: "ZyPlayer"
 # electronDownload:
-#   mirror: https://npmmirror.com/mirrors/electron/
+  mirror: https://npmmirror.com/mirrors/electron/
