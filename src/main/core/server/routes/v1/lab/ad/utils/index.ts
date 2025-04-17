@@ -41,7 +41,7 @@ const fixAdM3u8AiV1 = async (m3u8_url: string, headers: object = {}) => {
   }
 
   // logger.info('播放的地址：' + m3u8_url);
-  console.log({
+  logger.info({
     url: m3u8_url,
     method: 'get',
     ...option,
@@ -269,7 +269,7 @@ const fixAdM3u8AiV2 = async (m3u8_url: string, headers: object = {}) => {
  * @param headers 自定义访问m3u8的请求头,可以不传
  * @returns {string}
  */
-const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
+const fixAdM3u8AiV3 = async (m3u8_url: string, headers: object = {}) => {
   const startTime = Date.now();
   const options = { method: 'get', ...headers };
 
@@ -301,13 +301,13 @@ const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
   const compressEmptyLines = (lines: string[]): string[] => {
     const result: string[] = [];
     let lastLineWasEmpty = false;
-  
+
     for (const line of lines) {
       const isEmpty = !!(typeof line === 'string' ? line.trim() : '');
       if (isEmpty || lastLineWasEmpty) result.push(line);
       lastLineWasEmpty = isEmpty;
     }
-  
+
     return result;
   };
 
@@ -339,7 +339,7 @@ const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
     let maxSimilarity = 0;
     let primaryCount = 1;
     let secondaryCount = 0;
-  
+
     // 第一轮遍历：确定 `firstStr`
     for (let i = 0; i < cleanSegments.length; i++) {
       const segment = cleanSegments[i];
@@ -359,11 +359,11 @@ const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
       }
     }
     if (secondaryCount > primaryCount) firstStr = secondStr;
-  
+
     const firstStrLen = firstStr.length;
     const maxIterations = Math.min(cleanSegments.length, 10);
     const halfLength = Math.round(cleanSegments.length / 2).toString().length;
-  
+
     // 第二轮遍历：找到 `lastStr`
     let maxc = 0;
     const lastStr = cleanSegments
@@ -382,11 +382,11 @@ const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
         }
         return false;
       });
-  
+
     logger.info("最后切片: " + lastStr);
-  
+
     const adSegments: string[] = [];
-  
+
     // 第三轮遍历：处理 `ss`
     for (let i = 0; i < cleanSegments.length; i++) {
       const segment = cleanSegments[i];
@@ -406,10 +406,10 @@ const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
         }
       }
     }
-  
+
     return { adSegments, cleanSegments };
   }
-  
+
   const { cleanSegments, adSegments } = findAdSegments(lines, m3u8_url);
 
   logger.info('广告分片', adSegments);
@@ -417,9 +417,247 @@ const fixAdM3u8AiLatest = async (m3u8_url: string, headers: object = {}) => {
   return cleanSegments.join('\n');
 };
 
+/**
+ * 智能对比去除广告。支持嵌套m3u8。只需要传入播放地址
+ * 20250416
+ * @param m3u8_url m3u8播放地址
+ * @param headers 自定义访问m3u8的请求头,可以不传
+ * @returns {string}
+ */
+const fixAdM3u8AiLatest = async (m3u8_url, headers) => {
+  let ts = new Date().getTime();
+  let option = headers
+    ? {
+        headers: headers,
+      }
+    : {};
+
+  function b(s1, s2) {
+    let i = 0;
+    while (i < s1.length) {
+      if (s1[i] !== s2[i]) {
+        break;
+      }
+      i++;
+    }
+    return i;
+  }
+
+  function reverseString(str) {
+    return str.split("").reverse().join("");
+  }
+  let m3u8 = await request({
+    url: m3u8_url,
+    method: 'get',
+    ...option,
+  });
+  m3u8 = m3u8
+    .trim()
+    .split("\n")
+    .map((it) => (it.startsWith("#") ? it : urljoin(m3u8_url, it)))
+    .join("\n");
+  m3u8 = m3u8.replace(/\n\n/gi, "\n");
+  let last_url = m3u8.split("\n").slice(-1)[0];
+  if (last_url.length < 5) {
+    last_url = m3u8.split("\n").slice(-2)[0];
+  }
+  if (last_url.includes(".m3u8") && last_url !== m3u8_url) {
+    m3u8_url = urljoin(m3u8_url, last_url);
+    logger.info("嵌套的m3u8_url:" + m3u8_url);
+    m3u8 = await request({
+      url: m3u8_url,
+      method: 'get',
+      ...option,
+    });
+  }
+  let s = m3u8
+    .trim()
+    .split("\n")
+    .filter((it) => it.trim())
+    .join("\n");
+  let ss = s.split("\n");
+  let firststr = "";
+  let maxl = 0;
+  let kk = 0;
+  let kkk1 = 1;
+  let kkk2 = 0;
+  let secondstr = "";
+  for (let i = 0; i < ss.length; i++) {
+    let s = ss[i];
+    if (!s.startsWith("#")) {
+      if (kk == 0) firststr = s;
+      if (kk > 0) {
+        if (maxl > b(firststr, s) + 1) {
+          if (secondstr.length < 5) secondstr = s;
+          kkk2++;
+        } else {
+          maxl = b(firststr, s);
+          kkk1++;
+        }
+      }
+      kk++;
+      if (kk >= 30) break;
+    }
+  }
+  if (kkk2 > kkk1) firststr = secondstr;
+  let firststrlen = firststr.length;
+  let ml = Math.round(ss.length / 2).toString().length;
+  let maxc = 0;
+  let lastl = firststr.lastIndexOf("/");
+  lastl++;
+  let laststr = firststr;
+  if (maxl !== lastl) {
+    laststr = ss.toReversed().find((x) => {
+      if (!x.startsWith("#")) {
+        let k = b(reverseString(firststr), reverseString(x));
+        maxl = b(firststr, x);
+        maxc++;
+        if (firststrlen - maxl <= ml + k || maxc > 10) {
+          return true;
+        }
+      }
+      return false;
+    });
+    logger.info("最后一条切片：" + laststr);
+  }
+  let ad_urls = [];
+  for (let i = 0; i < ss.length; i++) {
+    let s = ss[i];
+    if (!s.startsWith("#")) {
+      if (b(firststr, s) < maxl) {
+        ad_urls.push(s);
+        ss.splice(i - 1, 2);
+        i = i - 2;
+      } else {
+        ss[i] = urljoin(m3u8_url, s);
+      }
+    } else {
+      ss[i] = s.replace(
+        /URI=\"(.*)\"/,
+        'URI="' + urljoin(m3u8_url, "$1") + '"',
+      );
+    }
+  }
+  logger.info("处理的m3u8地址:" + m3u8_url);
+  logger.info("----广告地址----");
+  logger.info(ad_urls);
+  if (ad_urls.length == 0) {
+    logger.info("----处理时间广告----");
+    let itemdata = [];
+
+    function addData(position, quantity, time) {
+      itemdata.push({
+        position,
+        quantity,
+        time,
+      });
+    }
+
+    function count3(str) {
+      let count = 0;
+      for (let i = 0; i < str.length; i++) {
+        if (str[i] === "3") {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    function printMinTimeData() {
+      let countMap = new Map();
+      let minTimeCount = 3;
+      let minTimeData = [];
+      itemdata.forEach((item) => {
+        countMap.set(item.time, (countMap.get(item.time) || 0) + 1);
+      });
+      countMap.forEach((count, time) => {
+        if (count <= minTimeCount) {
+          minTimeCount = count;
+          let tmp = [];
+          tmp = itemdata.filter((item) => item.time == time);
+          tmp.forEach((item) => minTimeData.push(item));
+        }
+      });
+      minTimeData.sort((a, b) => a.position - b.position);
+      for (let k = minTimeData.length - 1; k > -1; k--) {
+        let k1 = minTimeData[k].position;
+        let n = minTimeData[k].quantity;
+        let t = minTimeData[k].time;
+        if (parseFloat(n) < 10) {
+          logger.info("位置：" + k1 + " 数量：" + n + " 时间：" + t);
+          for (let j = k1; j < k1 + n * 2; j++) {
+            logger.info(ss[j]);
+          }
+          ss.splice(k1, 2 * n + 1);
+        }
+      }
+    }
+    let j = 0,
+      k1 = 0,
+      m = 0,
+      n = 0,
+      l = 0,
+      tt = 0,
+      t = 0;
+    let s2 = "";
+    for (let i = 0; i < ss.length; i++) {
+      let s = ss[i];
+      let s1 = "";
+      if (s.startsWith("#EXTINF")) {
+        s1 = s.slice(8);
+        n++;
+        if (n == 1) k1 = i;
+        if (s2.indexOf(s1) == -1) {
+          s2 = s2 + s1;
+          m++;
+        }
+        l += count3(s1);
+        t = t + parseFloat(s1);
+        tt += parseFloat(s1);
+        i++;
+        s = ss[i];
+      }
+      if (
+        s.startsWith("#EXT-X-DISCONTINUITY") ||
+        s.startsWith("#EXT-X-ENDLIST")
+      ) {
+        if (n >= 3 && t < 30 && l > n * 3) {
+          logger.info(
+            "位置：" +
+              k1 +
+              " 数量：" +
+              n +
+              " 时间：" +
+              t +
+              " 3的数量：" +
+              l +
+              " 进度：" +
+              Math.floor(tt / 60) +
+              "分钟" +
+              Math.floor(tt - Math.floor(tt / 60) * 60) +
+              "秒",
+          );
+          addData(k1, n, t.toFixed(5));
+        }
+        t = 0;
+        m = 0;
+        n = 0;
+        l = 0;
+        s2 = "";
+      }
+    }
+    printMinTimeData();
+  }
+  m3u8 = ss.join("\n");
+  logger.info("处理耗时：" + (new Date().getTime() - ts).toString());
+  logger.info(m3u8);
+  return m3u8;
+};
+
 const fixAdM3u8Ai = {
   v1: fixAdM3u8AiV1,
   v2: fixAdM3u8AiV2,
+  v3: fixAdM3u8AiV3,
   latest: fixAdM3u8AiLatest,
 };
 
