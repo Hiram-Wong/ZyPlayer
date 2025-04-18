@@ -74,7 +74,7 @@ const storePlayer = usePlayStore();
 const searchText = ref('');
 const controlText = ref<string>('');
 const webviewRef = useTemplateRef<any>('webviewRef');
-const webviewUrl = ref<string>('about:blank');
+const webviewUrl = ref<string>('');
 
 const classList = computed(() => {
   const platform = ANALYZE_PLATFORM.value;
@@ -93,7 +93,7 @@ const isVisible = reactive({
   loading: false
 });
 const active = ref({
-  class: '360',
+  class: '',
   nav: '',
   platform: false,
   history: false,
