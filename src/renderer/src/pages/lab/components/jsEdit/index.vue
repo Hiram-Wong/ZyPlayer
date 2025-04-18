@@ -34,14 +34,10 @@
       </div>
     </div>
     <div class="content">
-      <t-split
-        direction="vertical"
-        default-size="0.7"
-        class="split-pane"
-      >
-        <template #first>
-          <t-split class="split-pane">
-            <template #first>
+      <splitpanes class="default-theme split-pane" horizontal>
+        <pane size="70">
+          <splitpanes class="default-theme split-pane">
+            <pane>
               <div class="editor-pane">
                 <t-tabs v-model="active.editor" theme="card" lazy class="editor-pane-tabs">
                   <t-tab-panel :label="$t('pages.lab.jsEdit.editor.js')" value="js">
@@ -64,8 +60,8 @@
                   </t-tab-panel>
                 </t-tabs>
               </div>
-            </template>
-            <template #second>
+            </pane>
+            <pane>
               <t-tabs v-model="active.action" theme="card" lazy>
                 <t-tab-panel :label="$t('pages.lab.jsEdit.debug.dom')" value="dom">
                   <div class="dom_debug">
@@ -257,10 +253,10 @@
                   </div>
                 </t-tab-panel>
               </t-tabs>
-            </template>
-          </t-split>
-        </template>
-        <template #second>
+            </pane>
+          </splitpanes>
+        </pane>
+        <pane>
           <div class="console-pane">
             <div class="console-root">
               <div class="header-name">{{ $t('pages.lab.jsEdit.console.title') }}</div>
@@ -270,8 +266,8 @@
               <div class="log-box" ref="logRef"></div>
             </div>
           </div>
-        </template>
-      </t-split>
+        </pane>
+      </splitpanes>
     </div>
   </div>
 </template>
@@ -284,6 +280,7 @@ import 'luna-console/luna-console.css';
 
 import moment from 'moment';
 import JSON5 from 'json5';
+import { Splitpanes, Pane } from 'splitpanes';
 import LunaConsole from 'luna-console';
 import { computed, ref, onMounted, watch, useTemplateRef, nextTick, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
@@ -303,7 +300,7 @@ import { getOriginalJs } from './utils/crypto';
 import reqHtml from '../reqHtml/index.vue';
 import drpySuggestions from './utils/drpy_suggestions';
 import drpyObjectInner from './utils/drpy_object_inner.ts?raw';
-import TSplit from '@/components/split/index.vue';
+import 'splitpanes/dist/splitpanes.css';
 
 const TEMPLATE_RULES = {};
 
@@ -1240,17 +1237,16 @@ const handleWebviewLoad = (url: string) => {
 
   .content {
     flex: 1;
-    // display: flex;
-    // flex-direction: row;
-    // justify-content: space-between;
-    // grid-gap: var(--td-comp-margin-s);
     width: 100%;
-    // height: 100%;
     height: calc(100% - 36px - var(--td-size-4));
-    // overflow: hidden;
-
     border-radius: var(--td-radius-default);
     overflow: hidden;
+
+    :deep(.splitpanes) {
+      &.default-theme .splitpanes__splitter {
+        background-color: var(--td-border-level-1-color) !important;
+      }
+    }
 
     .left {
       height: 100%;
@@ -1732,59 +1728,6 @@ const handleWebviewLoad = (url: string) => {
     background-color: var(--td-bg-content-input-1);
     border-radius: var(--td-radius-default);
     overflow: hidden;
-  }
-}
-
-.split-pane {
-  height: 100%;
-  width: 100%;
-
-  .editor-pane {
-    height: 100%;
-    width: 100%;
-  }
-
-  .console-pane {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-
-    .console-root {
-      display: flex;
-      justify-content: space-between;
-      background-color: var(--td-bg-content-input-1);
-      padding: 0 var(--td-comp-paddingLR-xs);
-
-      .header-name {
-        color: var(--td-text-color-secondary);
-        font-size: var(--td-font-size-link-small);
-      }
-
-      .header-clear {
-        color: var(--td-text-color-secondary);
-        cursor: pointer;
-
-        &:hover {
-          color: var(--td-text-color-primary);
-        }
-      }
-    }
-
-    .log-pane-content {
-      display: flex;
-      flex: 1 1 auto;
-      flex-direction: column;
-      min-height: 0;
-
-      .log-box {
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        background-color: var(--td-bg-content-input-2);
-        color: var(--td-text-color-primary);
-      }
-    }
   }
 }
 </style>
