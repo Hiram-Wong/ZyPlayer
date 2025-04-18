@@ -79,12 +79,14 @@ const requestSse = (config) => {
   const headers = config?.headers || {};
   const data = config?.data || {};
   const timeout = config?.timeout || TIMEOUT;
+  const ctrl = config?.ctrl || new AbortController();
 
   fetchEventSource(url, {
     method,
     headers,
     timeout,
     body: JSON.stringify(data),
+    signal: ctrl.signal,
     onopen(response) {
       if (!response.ok) {
         const err = new Error('请求失败');
@@ -95,7 +97,6 @@ const requestSse = (config) => {
     onmessage(event) {
       try {
         let response: any = event.data;
-        console.log('response', response);
         if (response === '[DONE]') {
           complete?.(true);
           return;

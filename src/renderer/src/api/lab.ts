@@ -52,6 +52,7 @@ export function fetchAiStream(doc) {
     headers: {
       'Content-Type': 'application/json',
     },
+    ctrl: doc.ctrl,
     options: doc.options,
   });
 }

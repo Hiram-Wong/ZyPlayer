@@ -58,7 +58,6 @@
         :data="chatList"
         :clear-history="chatList.length > 0 && !active.isStreamLoad"
         :is-stream-load="active.isStreamLoad"
-        :text-loading="active.loading"
         @scroll="handleChatScroll"
         @clear="clearConfirm"
       >
@@ -73,6 +72,7 @@
             </template>
             <t-chat-content v-if="item.reasoning.length > 0" :content="item.reasoning" />
           </t-chat-reasoning>
+          <t-chat-loading v-if="active.isStreamLoad && item.content.length === 0" animation="gradient" class="t-chat__text--loading" />
           <t-chat-content v-if="item.content.length > 0" :content="item.content" />
           <!-- <t-chat-item
             v-if="item.content.length > 0"
@@ -84,20 +84,23 @@
         </template>
         <template #actions="{ item, index }">
           <t-chat-action
+            :disabled="active.isStreamLoad && index === 0"
             :content="item.content"
             :is-good="actionStatus[chatList.length - index]?.good"
             :is-bad="actionStatus[chatList.length - index]?.bad"
-            :operation-btn="['good', 'bad', 'replay', 'copy']"
+            :operation-btn="index === 0 ? ['good', 'bad', 'replay', 'copy'] : ['good', 'bad', 'copy']"
             @operation="(type: string, { e }) => handleOperation(type, { e, index })"
           />
         </template>
         <template #footer>
+          {{ active.isStreamLoad }}
           <t-chat-sender
             :stop-disabled="active.isStreamLoad"
             :textarea-props="{
               placeholder: $t('pages.lab.aiBrain.placeholder.input'),
             }"
             @send="handleInputEnter"
+            @stop="handleInputStop"
           />
         </template>
       </t-chat>
@@ -177,6 +180,7 @@ const active = ref({
 });
 const chatList = ref<any[]>([]);
 const actionStatus = ref({});
+const ctrl = ref();
 
 // 滚动到底部
 const backBottom = () => {
@@ -288,6 +292,16 @@ const handleInputEnter = async (val: string) => {
   await fetchAiReply(val);
 };
 
+const handleInputStop = () => {
+  ctrl.value.abort();
+  ctrl.value = null;
+  active.value.loading = false;
+  active.value.isStreamLoad = false;
+  if (chatList.value[0].content.length === 0) {
+    chatList.value[0].content = "用户已停止内容生成";
+  };
+};
+
 const fetchAiReply = async (prompt: string) => {
   active.value.loading = true;
   active.value.isStreamLoad = true;
@@ -302,9 +316,11 @@ const fetchAiReply = async (prompt: string) => {
 
   try {
     const startTime = Date.now();
+    ctrl.value = new AbortController();
     const { config: { model }, sessionId } = formData.value;
     fetchAiStream({
       data: { prompt, model, sessionId },
+      ctrl: ctrl.value,
       options: {
         success(result) {
           if (!result) return;
@@ -337,7 +353,7 @@ const fetchAiReply = async (prompt: string) => {
           active.value.isStreamLoad = false;
           active.value.loading = false;
         },
-      }
+      },
     });
   } catch (err: any) {
     console.error(err);
@@ -371,6 +387,9 @@ const handleOperation = async (type: string, options: { e: MouseEvent, index: nu
     actionStatus.value[postion].bad = !actionStatus.value[postion].bad;
     actionStatus.value[postion].good = false;
   } else if (type === 'replay') {
+    active.value.isStreamLoad = false;
+    active.value.loading = false;
+
     const userQuery = chatList.value[index + 1].content; // 获取用户输入
 
     // 删除当前机器回复和用户输入 第一次机器回复 第二次用户输入
@@ -443,6 +462,10 @@ const RULES = {
         color: var(--td-text-color-secondary);
         background-color: var(--td-bg-content-input-2);
       }
+    }
+
+    :deep(.t-chat__text--loading) {
+      padding: var(--td-comp-paddingTB-m) var(--td-comp-paddingLR-l);
     }
 
     :deep(.t-chat__text) {
