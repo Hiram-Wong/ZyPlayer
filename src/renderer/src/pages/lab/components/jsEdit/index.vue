@@ -260,7 +260,7 @@
           <div class="console-pane">
             <div class="console-root">
               <div class="header-name">{{ $t('pages.lab.jsEdit.console.title') }}</div>
-              <div class="header-clear" @click="handleConsoleClear">{{ $t('pages.lab.jsEdit.console.clear') }}</div>
+              <div class="header-clear" @click="handleConsoleClear"><clear-icon /></div>
             </div>
             <div class="log-pane-content">
               <div class="log-box" ref="logRef"></div>
@@ -273,19 +273,18 @@
 </template>
 
 <script setup lang="ts">
-import 'luna-object-viewer/luna-object-viewer.css';
-import 'luna-data-grid/luna-data-grid.css';
-import 'luna-dom-viewer/luna-dom-viewer.css';
-import 'luna-console/luna-console.css';
+import '@xterm/xterm/css/xterm.css';
+import 'splitpanes/dist/splitpanes.css';
 
+import { Terminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
 import moment from 'moment';
 import JSON5 from 'json5';
 import { Splitpanes, Pane } from 'splitpanes';
-import LunaConsole from 'luna-console';
-import { computed, ref, onMounted, watch, useTemplateRef, nextTick, shallowRef } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount, watch, useTemplateRef, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { GestureClickIcon, ArrowLeftIcon, ArrowRightIcon, RotateIcon } from 'tdesign-icons-vue-next';
+import { GestureClickIcon, ArrowLeftIcon, ArrowRightIcon, ClearIcon, RotateIcon } from 'tdesign-icons-vue-next';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import emitter from '@/utils/emitter';
@@ -300,7 +299,6 @@ import { getOriginalJs } from './utils/crypto';
 import reqHtml from '../reqHtml/index.vue';
 import drpySuggestions from './utils/drpy_suggestions';
 import drpyObjectInner from './utils/drpy_object_inner.ts?raw';
-import 'splitpanes/dist/splitpanes.css';
 
 const TEMPLATE_RULES = {};
 
@@ -389,7 +387,6 @@ const webview = ref({
   url: 'about:blank',
   route: 'about:blank',
 });
-const log = shallowRef<any>(null);
 const tmp = computed(() => {
   return {
     file: t('pages.lab.jsEdit.fileManage'),
@@ -403,6 +400,8 @@ const active = ref({
 });
 const mubanData = ref({});
 const debugId = ref('');
+const terminal = ref<Terminal>();
+const fitAddon = ref<FitAddon>();
 
 watch(
   () => storeSetting.displayMode,
@@ -423,6 +422,17 @@ onMounted(() => {
   setupConsole();
   getTemplate();
   setupData();
+});
+
+onBeforeUnmount(() => {
+  if (fitAddon.value && logRef.value) logResizeObserver.unobserve(logRef.value);
+  if (terminal.value) terminal.value.dispose();
+});
+
+// ResizeObserver 监听终端容器的大小变化
+const logResizeObserver = new ResizeObserver(() => {
+  // console.log('resize');
+  if (fitAddon.value) fitAddon.value.fit();
 });
 
 // common
@@ -803,21 +813,23 @@ const handleDomDebug = async (type: string, rule: string) => {
     'pdfh': fetchJsEditPdfh,
   };
 
-  const _console = log.value;
   try {
     const res = await methodMap[type]({ html: content, rule });
-    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
-    console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, res);
+
+    _console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
     _console.log(res);
-    console.log(res);
+    _console.log('\n');
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err: any) {
-    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
-    console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    console.error(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, err);
+
+    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
     _console.error(err);
-    console.error(err);
+    _console.log('\n');
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
+  fitAddon.value?.fit();
 };
 
 // btn
@@ -837,18 +849,9 @@ const handleDataDebugLog = async () => {
     sourceId: debugId.value
   });
 
-  const _console = log.value;
-
-  _console.warn(`server log: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
   res.forEach(([type, time, content]) => {
-    try {
-      content = JSON5.parse(content);
-    } catch {
-
-    } finally {
-      console.log(content);
-      _console[type](`server log: ${time}`, content);
-    }
+    console.log(content);
+    _console[type](content);
   });
 };
 
@@ -1023,40 +1026,80 @@ const handleDataDebug = async (type: string, data: { [key: string]: any } = {}) 
     'log': fetchCmsRunMain,
   };
 
-  const _console = log.value;
   try {
     const res = await methodMap[type]({ ...data, sourceId: debugId.value });
     if (type === 'proxy') form.value.proxy.upload = JSON5.stringify(res);
-    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
-    console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, res);
+
+    _console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
     _console.log(res);
-    console.log(res);
+    _console.log('\n');
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err: any) {
-    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
-    console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`);
+    console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, err);
+
+    _console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
     _console.error(err);
-    console.error(err);
+    _console.log('\n');
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
+  fitAddon.value?.fit();
 };
+
+// 创建一个日志工具
+const _console = (() => {
+  // 定义日志级别和对应的ANSI颜色代码
+  const LOG_LEVELS = {
+    info: '\x1b[34m', // 蓝色
+    warn: '\x1b[33m', // 黄色
+    error: '\x1b[31m', // 红色
+    log: '\x1b[0m' // 重置颜色
+  };
+
+  const strFormat = (str: string | number | object): string => {
+    if (typeof str === 'object') {
+      return JSON.stringify(str, null, 2);
+    }
+    return String(str);
+  };
+
+  const log = (level: keyof typeof LOG_LEVELS, arg: any) => {
+    const colorCode = LOG_LEVELS[level];
+    const formattedArg = strFormat(arg);
+    const output = `${colorCode}${formattedArg}${LOG_LEVELS.log}`;
+    terminal.value?.write(output);
+  };
+
+  return {
+    log: (arg: any) => log('log', arg),
+    info: (arg: any) => log('info', arg),
+    warn: (arg: any) => log('warn', arg),
+    error: (arg: any) => log('error', arg)
+  };
+})();
 
 // console
 const setupConsole = () => {
-  if (!logRef.value) return;
-
-  const _console = new LunaConsole(logRef.value, {
-    theme: storeSetting.displayMode === 'light' ? 'light' : 'dark',
+  terminal.value = new Terminal({
+    fontSize: 14,
+    fontFamily: "JetBrainsMono",
+    convertEol: true, //启用时，光标将设置为下一行的开头
+    disableStdin: true, //是否应禁用输入
+    cursorBlink: true,
+    cursorStyle: 'underline',
   });
-  log.value = _console;
-  _console.log('%c console setup success, welcome use zyfun js edit series tools ', 'background: var(--td-bg-content-input-1); color: var(--td-success-color)');
+  fitAddon.value = new FitAddon();
+  terminal.value.loadAddon(fitAddon.value);
+  terminal.value.open(logRef.value!);
+  fitAddon.value.fit();
+
+  logResizeObserver.observe(logRef.value!);
 };
 
 const handleConsoleClear = () => {
   console.clear();
 
-  if (!log.value) return;
-  log.value.clear();
+  terminal.value?.clear();
 };
 
 // webview
@@ -1243,188 +1286,67 @@ const handleWebviewLoad = (url: string) => {
     overflow: hidden;
 
     :deep(.splitpanes) {
-      &.default-theme .splitpanes__splitter {
-        background-color: var(--td-border-level-1-color) !important;
-      }
-    }
+      &.default-theme {
+        .splitpanes__splitter {
+          background-color: var(--td-border-level-1-color);
 
-    .left {
-      height: 100%;
-      width: calc((100% - var(--td-comp-margin-s)) / 2);
-
-      .edit {
-        display: flex;
-        flex-direction: column;
-        grid-gap: var(--td-comp-margin-s);
-        height: 100%;
-
-        .code-op {
-          display: flex;
-          flex-direction: column;
-          grid-gap: var(--td-comp-margin-s);
-
-          .code-op-item {
-            display: flex;
-            grid-gap: var(--td-comp-margin-s);
+          &::before {
+            background-color: var(--td-border-level-2-color);
           }
 
-          .item {
-            display: flex;
-            grid-gap: var(--td-comp-margin-s);
-          }
-
-          .source,
-          .sniffer {
-            display: flex;
-            grid-gap: var(--td-comp-margin-s);
-            flex: 1;
+          &::after {
+            background-color: var(--td-border-level-2-color);
           }
         }
 
-        .code-box {
-          flex: 1;
-          height: 100%;
-          border-radius: var(--td-radius-default);
-          overflow: hidden;
+        &.splitpanes--horizontal>.splitpanes__splitter,
+        .splitpanes--horizontal>.splitpanes__splitter {
+          border-color: var(--td-border-level-1-color);
+        }
+
+        &.splitpanes--vertical>.splitpanes__splitter,
+        .splitpanes--vertical>.splitpanes__splitter {
+          border-color: var(--td-border-level-1-color);
         }
       }
     }
 
-    .right {
+    .editor-pane {
       height: 100%;
-      width: calc((100% - var(--td-comp-margin-s)) / 2);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      grid-gap: var(--td-comp-margin-s);
+    }
 
-      .action {
-        width: 100%;
+    .console-pane {
+      height: 100%;
+      background-color: var(--td-bg-content-input-1);
+      // padding: var(--td-comp-paddingLR-s) var(--td-comp-paddingLR-s);
+
+      .console-root {
         display: flex;
-        flex-wrap: wrap;
-        grid-gap: var(--td-comp-margin-s);
+        justify-content: space-between;
+        padding: var(--td-comp-paddingLR-xxs) var(--td-comp-paddingLR-s);
 
-        .item {
-          display: flex;
-          flex-wrap: nowrap;
-          width: 100%;
-          overflow: hidden;
-
-          .init {
-            :deep(.t-button__text) {
-              display: flex;
-              flex-direction: row;
-              align-items: center;
-            }
-
-            .click {
-              margin-left: var(--td-comp-margin-s);
-              border: 2px solid rgba(132, 133, 141, 0.7);
-              border-radius: var(--td-radius-circle);
-              width: 24px;
-              height: 24px;
-            }
-
-            .status {
-              display: flex;
-              flex-direction: column;
-              font-size: 12px;
-              line-height: 14px;
-              align-content: flex-start;
-
-              .title {
-                font-weight: 500;
-                text-align: left;
-              }
-
-              .desc {
-                font-size: 10px;
-                text-align: left;
-              }
-            }
-          }
-
-          .input {
-            width: 100%;
-            margin-right: var(--td-comp-margin-s);
-          }
-
-          .w-btn {
-            width: 50px;
-          }
-
-          .w-100\% {
-            width: calc((100% - 50px - (var(--td-comp-margin-s))));
-          }
-
-          .w-50\% {
-            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 2);
-          }
-
-          .w-50-30\% {
-            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 3);
-          }
-
-          .w-50-70\% {
-            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 7);
-          }
-
-          .w-33-30\% {
-            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 3);
-          }
-
-          .w-33-40\% {
-            width: calc((100% - 50px - (var(--td-comp-margin-s) * 2)) / 10 * 4);
-          }
-
-          .w-33\% {
-            width: calc((100% - 50px - (var(--td-comp-margin-s) * 3)) / 3);
-          }
+        .header-clear {
+          cursor: pointer;
         }
       }
 
-      .log-container {
-        position: relative;
-        flex: 1;
-        width: 100%;
-        height: 100%;
-        margin-top: var(--td-comp-paddingTB-m);
+      .log-pane-content {
+        height: calc(100% - 26px);
         border-radius: var(--td-radius-default);
-        background-color: var(--td-bg-content-input-2);
+        overflow: hidden;
 
-        .log-nav {
-          position: absolute;
-          width: calc(100% - 30px);
-          z-index: 100;
-          top: -15px;
-          left: 15px;
-          display: flex;
-          justify-content: space-between;
-
-          :deep(.t-radio-group) {
-            box-shadow: var(--td-shadow-3);
-          }
-        }
-
-        .log-text {
+        .log-box {
           height: 100%;
-          width: 100%;
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          border-radius: var(--td-radius-default);
-          padding: var(--td-comp-paddingTB-xs) 0 var(--td-comp-paddingTB-m);
 
-          .log-box {
-            position: relative;
-            width: 100% !important;
-            height: 100% !important;
-            margin-top: var(--td-comp-paddingTB-m);
-            border-radius: 0 0 var(--td-radius-default) var(--td-radius-default);
-            overflow: hidden;
-            :deep(.monaco-edito) {
-              width: 100% !important;
-              height: 100% !important;
+          :deep(.xterm) {
+            height: 100%;
+
+            .xterm-viewport {
+              background-color: var(--td-bg-content-input-1) !important;
+            }
+
+            .xterm-screen {
+              padding: 0 var(--td-comp-paddingLR-s);
             }
           }
         }
