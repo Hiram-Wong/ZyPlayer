@@ -95,15 +95,15 @@ linux:
   target:
     - target: AppImage
       arch:
-        - x64
+        # - x64
         - arm64
-    - target: rpm
-      arch:
-        - x64
-        - arm64
+    # - target: rpm
+      # arch:
+        # - x64
+        # - arm64
     - target: deb
       arch:
-        - x64
+        # - x64
         - arm64
   # 维护者信息
   maintainer: zyfun team
@@ -130,4 +130,4 @@ publish:
   owner: "Hiram-Wong"
   repo: "ZyPlayer"
 # electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/
+#   mirror: https://npmmirror.com/mirrors/electron/
