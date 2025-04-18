@@ -93,7 +93,6 @@
           />
         </template>
         <template #footer>
-          {{ active.isStreamLoad }}
           <t-chat-sender
             :stop-disabled="active.isStreamLoad"
             :textarea-props="{
