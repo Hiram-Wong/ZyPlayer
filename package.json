@@ -1,6 +1,6 @@
 {
   "name": "zyfun",
-  "version": "3.4.0-beta20250419",
+  "version": "3.4.0-beta20250420",
   "description": "zyfun client",
   "main": "./out/main/index.js",
   "repository": {
@@ -58,7 +58,7 @@
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^2.1.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
-    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@electron-uikit/contextmenu": "^1.0.0",
