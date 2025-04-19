@@ -48,6 +48,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     options,
     () => {
       updateLanguage();
+      updateTheme();
       updateOptions();
     },
     { deep: true },
@@ -100,7 +101,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
       initDiffEditor();
     }
 
-    if (!options.value['theme']) {
+    if (!['vs', 'vs-dark'].includes(options.value['theme'])) {
       monaco.editor.setTheme('vs');
     }
 
@@ -204,6 +205,13 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
         monaco.editor.setModelLanguage(model.modified, language);
         monaco.editor.setModelLanguage(model.original, language);
       }
+    }
+  }
+
+  function updateTheme() {
+    const theme = options.value.theme;
+    if (!['vs', 'vs-dark'].includes(theme)) {
+      monaco.editor.setTheme(theme);
     }
   }
 
