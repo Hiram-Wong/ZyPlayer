@@ -1,4 +1,3 @@
-import { initialize as remoteInit } from '@electron/remote/main';
 import { electronApp, optimizer, platform } from '@electron-toolkit/utils';
 import { registerContextMenuListener } from '@electron-uikit/contextmenu';
 import { registerTitleBarListener } from '@electron-uikit/titlebar';
@@ -51,7 +50,6 @@ const setup = async () => {
     app.disableHardwareAcceleration();
   }
 
-  remoteInit(); // 主进程初始化
   await dbInit(); // 初始化数据库
   await globalVariable(); // 全局变量
   if (globalThis.variable.debug) await dbServer(); // 初始化数据库服务

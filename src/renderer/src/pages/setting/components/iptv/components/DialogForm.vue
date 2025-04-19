@@ -59,7 +59,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash-es';
 import { t } from '@/locales';
 
-const remote = window.require('@electron/remote');
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -132,19 +131,19 @@ const onReset: FormProps['onReset'] = () => {
   formData.value.data = { ...formData.value.raw };
 };
 
-const uploadFileEvent = () => {
-  remote.dialog.showOpenDialog({
-    properties: ['openFile']
-  }).then(result => {
-    if (result.canceled) {
-      console.log('用户取消了选择');
-    } else {
-      console.log('选中的文件路径:', result.filePaths);
-      formData.value.data.url = result.filePaths[0];
-    }
-  }).catch((err: any) => {
-    console.log('出现错误:', err);
+const uploadFileEvent = async () => {
+  const res = await window.electron.ipcRenderer.invoke('dialog-file-access', {
+    properties: ['openFile'],
+    filters: [{
+      name: 'M3u Files', extensions: ['m3u', 'm3u8','ts']
+    }, {
+      name: 'Text Files', extensions: ['txt']
+    }, {
+      name: 'All Files', extensions: ['*']
+    }],
   });
+  if (!res || res?.filePaths?.length === 0) return;
+  formData.value.data.url = res.filePaths[0];
 };
 
 const RULES = {

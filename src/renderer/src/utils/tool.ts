@@ -138,6 +138,15 @@ const loadExternalResource = (url: string, type: 'css' | 'js' | 'font') => {
   });
 };
 
+const platform = (() => {
+  // @ts-ignore
+  const { platform: val } = navigator.userAgentData;
+  if (val === 'Windows') return 'win32';
+  if (val === 'macOS') return 'darwin';
+  if (val === 'Linux') return 'linux';
+  return 'unknown';
+})();
+
 export {
   checkIpVersion,
   checkLiveM3U8,
@@ -147,4 +156,5 @@ export {
   setLocalStorage,
   getPinia,
   loadExternalResource,
+  platform,
 };

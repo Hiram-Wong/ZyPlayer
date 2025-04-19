@@ -194,14 +194,24 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch, reactive } from 'vue';
 import moment from 'moment';
+import { useFileSystemAccess } from '@vueuse/core';
 
 import { t } from '@/locales';
 import { clearDb, exportDb, webdevLocal2Remote, webdevRemote2Local, initDb } from '@/api/setting';
 import { fetchHistoryPage, delHistory, addHistory } from '@/api/history';
 import emitter from '@/utils/emitter';
 
-const remote = window.require('@electron/remote');
-const win = remote.getCurrentWindow();
+const file = useFileSystemAccess({
+  dataType: 'Text',
+  types: [{
+    description: 'JavaScript Files',
+    accept: { 'text/plain': ['.js'] },
+  }, {
+    description: 'Text Files',
+    accept: { 'text/plain': ['.txt'] },
+  }],
+  excludeAcceptAllOption: false,
+});
 
 const props = defineProps({
   visible: {
@@ -281,8 +291,7 @@ watch(
     formVisible.value = val;
     if (val) {
       Promise.all([getHistory('easyConfig'), getHistory('completeConfig')]);
-      getCacheSize();
-      getThumbnailSize();
+      Promise.all([getCacheSize(), getThumbnailSize()]);
     };
   },
 );
@@ -417,19 +426,19 @@ const importData = async (importType, importMode) => {
 };
 
 // 文件事件
-const uploadFileEvent = () => {
-  remote.dialog.showOpenDialog({
-    properties: ['openFile']
-  }).then(result => {
-    if (result.canceled) {
-      console.log('用户取消了选择');
-    } else {
-      console.log('选中的文件路径:', result.filePaths);
-      formData.value.completeConfig.url = result.filePaths[0];
-    }
-  }).catch(err => {
-    console.log('出现错误:', err);
+const uploadFileEvent = async () => {
+  const res = await window.electron.ipcRenderer.invoke('dialog-file-access', {
+    properties: ['openFile'],
+    filters: [{
+      name: 'Json Files', extensions: ['json']
+    }, {
+      name: 'Text Files', extensions: ['txt']
+    }, {
+      name: 'All Files', extensions: ['*']
+    }],
   });
+  if (!res || res?.filePaths?.length === 0) return;
+  formData.value.completeConfig.url = res.filePaths[0];
 };
 
 // 导出
@@ -444,40 +453,42 @@ const exportData = async () => {
   const str = JSON.stringify(dbData, null, 2);
 
   try {
-    const saveDialogResult = await remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
-      defaultPath: 'config.json',
-      filters: [{ name: 'JSON Files', extensions: ['json'] }],
+    file.data.value = str;
+    await file.saveAs({
+      suggestedName: 'config.json',
     });
-
-    if (!saveDialogResult.canceled) {
-      const { filePath } = saveDialogResult;
-      const fs = remote.require('fs').promises;
-      await fs.writeFile(filePath, str, 'utf-8');
-      MessagePlugin.success(t('pages.setting.data.success'));
-    }
-  } catch (err) {
+    MessagePlugin.success(t('pages.setting.data.success'));
+  } catch (err: any) {
     console.error('Failed to save or open save dialog:', err);
+    if (err?.name === 'AbortError') return;
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
 };
 
 //  获取 cache 大小
-const getCacheSize = async () => {
-  const { session } = win.webContents;
-  const getSize = await session.getCacheSize() / 1024 / 1024;
-  const formatToMb = getSize.toFixed(2);
-  formData.value.size.cache = formatToMb;
+const getCacheSize = async (): Promise<void> => {
+  const size = await window.electron.ipcRenderer.invoke('manage-session', 'size');
+  formData.value.size.cache = size;
+};
+
+// 删除 cache
+const delCache = async (): Promise<void> => {
+  await window.electron.ipcRenderer.invoke('manage-session','clearCache');
 };
 
 //  获取 thumbnail 文件夹大小
-const getThumbnailSize = () => {
-  window.electron.ipcRenderer.removeAllListeners("tmpdir-manage-size"); // 移除之前的事件监听器
-  window.electron.ipcRenderer.send('tmpdir-manage', 'size', 'thumbnail');
-  window.electron.ipcRenderer.on("tmpdir-manage-size", (_, data) => {
-    const getSize = data / 1024 / 1024;
-    const formatToMb = getSize.toFixed(2);
-    formData.value.size.thumbnail = formatToMb;
-  });
+const getThumbnailSize = async (): Promise<void> => {
+  const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
+  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'thumbnail');
+  const size = await window.electron.ipcRenderer.invoke('manage-file', 'size', defaultPath);
+  formData.value.size.thumbnail = size;
+};
+
+// 删除 thumbnail 文件夹
+const delThumbnail = async (): Promise<void> => {
+  const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
+  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'thumbnail');
+  await window.electron.ipcRenderer.invoke('manage-file','rm', defaultPath);
 };
 
 // 清理缓存
@@ -521,14 +532,13 @@ const clearData = async () => {
         emitter.emit('refreshBinge');
       },
       'cache': async () => {
-        const { session } = win.webContents;
-        await session.clearCache();
+        await delCache();
         await getCacheSize();
       },
       'thumbnail': async () => {
-        await window.electron.ipcRenderer.send('tmpdir-manage', 'rmdir', 'thumbnail');
-        emitter.emit('refreshIptvConfig');
+        await delThumbnail();
         await getThumbnailSize();
+        emitter.emit('refreshIptvConfig');
       }
     };
 

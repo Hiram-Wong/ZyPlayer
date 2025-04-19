@@ -26,12 +26,21 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { useFileSystemAccess } from '@vueuse/core';
+
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { CodeEditor } from '@/components/code-editor';
 
-const remote = window.require('@electron/remote');
 const storeSetting = useSettingStore();
+const file = useFileSystemAccess({
+  dataType: 'Text',
+  types: [{
+    description: 'Text Files',
+    accept: { 'text/plain': ['.txt'] },
+  }],
+  excludeAcceptAllOption: false,
+});
 
 const form = ref({
   target: '',
@@ -39,9 +48,8 @@ const form = ref({
 });
 const active = ref({
   nav: '',
+  clickType: '',
 });
-
-
 const diffEditConf = ref({
   theme: storeSetting.displayMode === 'light' ? 'vs' : 'vs-dark',
   enableSplitViewResizing: true, // 是否允许拖动分割线
@@ -59,29 +67,12 @@ const diffEditConf = ref({
 
 const importFileEvent = async (type: string) => {
   try {
-    const readFile = async(filePath: string) =>{
-      const fs = remote.require('fs').promises;
-      return await fs.readFile(filePath, 'utf-8');
-    }
-
-    const { canceled, filePaths } = await remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
-      title: 'Select a file to read',
-      filters: [
-        { name: 'JavaScript Files', extensions: ['js'] },
-        { name: 'Text Files', extensions: ['txt'] },
-        { name: 'All Files', extensions: ['*'] },
-      ],
-      properties: ['openFile'],
-    });
-
-    if (!canceled && filePaths) {
-      const filePath = filePaths[0];
-      const content = await readFile(filePath);
-      form.value[type] = content;
-      MessagePlugin.success(t('pages.setting.data.success'));
-    };
+    await file.open();
+    form.value[type] = file.data.value || '';
+    MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err: any) {
     console.error(`[exportFileEvent][Error]:`, err);
+    if (err?.name === 'AbortError') return;
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
 };
@@ -98,7 +89,6 @@ const handleOpChange = (type: string) => {
       break;
   };
 };
-
 </script>
 
 <style lang="less" scoped>

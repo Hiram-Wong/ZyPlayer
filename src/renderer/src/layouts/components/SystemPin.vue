@@ -11,20 +11,15 @@
 import { ref } from 'vue';
 import { PinFilledIcon, PinIcon } from 'tdesign-icons-vue-next';
 
-const { BrowserWindow,getCurrentWindow } = require('@electron/remote');
-const win = getCurrentWindow();
-
 const active = ref({
   pin: false,
 });
 
 // 窗口置顶
-const toggleAlwaysOnTop = () => {
-  const isAlwaysOnTop = win.isAlwaysOnTop();
-  const newValue = !isAlwaysOnTop;
-
-  win.setAlwaysOnTop(newValue);
-  BrowserWindow.getFocusedWindow().webContents.send('alwaysOnTop', newValue ? 'no' : 'yes');
-  active.value.pin = newValue;
+const toggleAlwaysOnTop = async () => {
+  const status = await window.electron.ipcRenderer.invoke('manage-pin', 'status');
+  const newStatus = !status;
+  await window.electron.ipcRenderer.invoke('manage-pin', 'set', newStatus);
+  active.value.pin = newStatus;
 };
 </script>

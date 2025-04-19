@@ -1,12 +1,12 @@
-import { electronApp, is, platform } from '@electron-toolkit/utils';
+import { electronApp, platform } from '@electron-toolkit/utils';
 import { exec } from 'child_process';
-import util from 'util';
-import { app, globalShortcut, ipcMain, nativeTheme, shell } from 'electron';
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, session, shell } from 'electron';
 import { join } from 'path';
+import util from 'util';
 import logger from '@main/core/logger';
 import puppeteerInElectron from '@main/utils/sniffer';
 import { toggleWindowVisibility } from '@main/utils/tool';
-import { readFile, fileExist, fileSize, fileState, deleteDir, deleteFile, createDir } from '@main/utils/hiker/file';
+import { createDir, deleteDir, deleteFile, saveFile, fileExist, fileSize, fileState, readFile } from '@main/utils/hiker/file';
 import { createMain, createPlay, getWin, getAllWin } from '@main/core/winManger';
 
 const execAsync = util.promisify(exec);
@@ -35,34 +35,53 @@ const ipcListen = () => {
     }
   });
 
-  ipcMain.on('tmpdir-manage', async (event, action, trails) => {
-    let formatPath = join(app.getPath('userData'), trails);
+  // 文件操作
+  ipcMain.handle('manage-file', async (_, action: string, path: string = '', val: string = '') => {
+    logger.info(`[ipcMain] file action is ${action}`);
+
     switch (action) {
-      case 'rmdir':
-      case 'mkdir':
-      case 'init':
-        try {
-          const pathExists = await fileExist(formatPath);
-          logger.info(`[ipcMain] tmpDir: ${formatPath}-exists-${pathExists}`);
-          if (pathExists) {
-            if (await fileState(formatPath) === 'file') await deleteFile(formatPath)
-            else if (await fileState(formatPath) === 'dir') await deleteDir(formatPath);
-          }
-          await createDir(formatPath);
-          logger.info(`[ipcMain] tmpDir: ${formatPath}-created-success`);
-        } catch (err) {
-          logger.error(err);
-        }
-        break;
-      case 'make':
-        await createDir(formatPath);
-        break;
-      case 'size':
-        event.reply('tmpdir-manage-size', await fileSize(formatPath));
-        break;
+      case 'rm': {
+        const pathExists = await fileExist(path);
+        if (pathExists) {
+          if (await fileState(path) === 'file') await deleteFile(path)
+          else if (await fileState(path) === 'dir') await deleteDir(path);
+        };
+        return;
+      }
+      case 'mk': {
+        const pathExists = await fileExist(path);
+        if (!pathExists) await createDir(path);
+        return;
+      }
+      case 'write': {
+        const pathExists = await fileExist(path);
+        if (pathExists && await fileState(path) !== 'file') return;
+        await saveFile(path, val);
+        return;
+      }
+      case 'read': {
+        const pathExists = await fileExist(path);
+        if (pathExists) {
+          if (await fileState(path) === 'file') return await readFile(path);
+          else if (await fileState(path) === 'dir') return [];
+        };
+      }
+      case 'size': {
+        const seize = await fileSize(path) / 1024 / 1024;
+        return seize.toFixed(2);
+      }
+      case 'state': {
+        return await fileState(path);
+      }
+      case 'exist': {
+        return await fileExist(path);
+      }
+      default:
+        return;
     };
   });
 
+  // ffmpeg生成缩略图
   ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
     const { ua, timeout } = globalThis.variable;
     const basePath = join(app.getPath('userData'), 'thumbnail');
@@ -108,11 +127,68 @@ const ipcListen = () => {
     },
   );
 
-  // 读取文件
-  ipcMain.handle('read-file', async (_, path) => {
-    logger.info(`[ipcMain] read-file: ${path}`);
-    const fileContent = (await readFile(path)) || '';
-    return fileContent;
+  // session
+  ipcMain.handle('manage-session', async (_, action) => {
+    logger.info(`[ipcMain] session action is ${action}`);
+    switch (action) {
+      case 'clearCache':
+        await session.defaultSession.clearCache();
+        return;
+      case 'clearStorage':
+        await session.defaultSession.clearStorageData();
+        return;
+      case 'clearAll':
+        await session.defaultSession.clearCache();
+        await session.defaultSession.clearStorageData();
+        return;
+      case 'size':
+        const getSize = await session.defaultSession.getCacheSize() / 1024 / 1024;
+        const formatToMb = getSize.toFixed(2);
+        return formatToMb;
+      default:
+        return;
+    }
+  });
+
+  // 置顶管理
+  ipcMain.handle('manage-pin', (event, action, val: boolean = false) => {
+    logger.info(`[ipcMain] pin action is ${action}`);
+
+    switch (action) {
+      case 'status': {
+        const win = BrowserWindow.fromWebContents(event.sender)
+        const status = win?.isAlwaysOnTop();
+        return status;
+      }
+      case 'toggle': {
+        const win = BrowserWindow.fromWebContents(event.sender)
+        const status = win?.isAlwaysOnTop();
+        win?.setAlwaysOnTop(!status);
+        return !status;
+      }
+      case 'set': {
+        const win = BrowserWindow.fromWebContents(event.sender)
+        win?.setAlwaysOnTop(!val);
+        return win?.isAlwaysOnTop();
+      }
+      default:
+        return;
+    }
+  });
+
+  // 文件对话框
+  ipcMain.handle('dialog-file-access', async (_, config) => {
+    logger.info(`[ipcMain] dialog-file-access: ${JSON.stringify(config)}`);
+    try {
+      const result = await dialog.showOpenDialog({
+        ...config
+      });
+      if (result.canceled) return null;
+      return result;
+    } catch (err: any) {
+      logger.error(`[ipcMain] dialog-file-access: ${err.message}`);
+      return null;
+    };
   });
 
   // 打开外部链接
@@ -123,6 +199,7 @@ const ipcListen = () => {
     }
   });
 
+  // 打开路径
   ipcMain.on('open-path', async (_, file) => {
     const path = join(app.getPath('userData'), file);
     await createDir(path);

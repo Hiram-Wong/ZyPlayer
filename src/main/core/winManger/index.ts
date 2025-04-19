@@ -1,5 +1,4 @@
 import { is } from '@electron-toolkit/utils';
-import { enable as renoteEnable } from '@electron/remote/main';
 import { attachTitleBarToWindow } from '@electron-uikit/titlebar';
 import { app, BrowserWindow, Menu, MenuItem, MenuItemConstructorOptions, nativeTheme, shell } from 'electron';
 import { register as localshortcutRegister, unregisterAll as localshortcutUnregisterAll } from 'electron-localshortcut';
@@ -8,11 +7,11 @@ import url from 'url';
 import { setting } from '@main/core/db/service';
 import logger from '@main/core/logger';
 
-const winPool = {};
-const DEFAULT_WIDTH_MAIN = 1000;
-const DEFAULT_HEIGHT_MAIN = 640;
-const DEFAULT_WIDTH_PLAY = 875;
-const DEFAULT_HEIGHT_PLAY = 550;
+const winPool: { [key: number]: BrowserWindow } = {};
+const DEFAULT_WIDTH_MAIN: number = 1000;
+const DEFAULT_HEIGHT_MAIN: number = 640;
+const DEFAULT_WIDTH_PLAY: number = 875;
+const DEFAULT_HEIGHT_PLAY: number = 550;
 
 const createWin = (name: string, options: { [key: string]: any } ) => {
   const { debug } = globalThis.variable;
@@ -26,7 +25,6 @@ const createWin = (name: string, options: { [key: string]: any } ) => {
     setTimeout(() => win!.reload(), 0);
   } else {
     win = new BrowserWindow(args);
-    renoteEnable(win.webContents);
     attachTitleBarToWindow(win);
 
     win.on('ready-to-show', () => {
@@ -43,18 +41,18 @@ const createWin = (name: string, options: { [key: string]: any } ) => {
       localshortcutRegister(win!, ['CommandOrControl+R'], () => {
         win!.reload();
       });
-      // 粘贴
-      localshortcutRegister(win!, ['CommandOrControl+Shift+V'], () => {
-        win!.webContents.paste();
-      });
-      // // 复制
-      // localshortcutRegister(win!, ['CommandOrControl+C'], () => {
-      //   win!.webContents.copy();
-      // });
     });
 
     win.on('close', () => {
       localshortcutUnregisterAll(win!);
+    });
+
+    win.on('enter-full-screen', () => {
+      win!.webContents.send('fullscreen', win!.isFullScreen());
+    });
+
+    win.on('leave-full-screen', () => {
+      win!.webContents.send('fullscreen', win!.isFullScreen());
     });
 
     if (debug) {
@@ -135,8 +133,8 @@ const createMain = async () => {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
       webviewTag: true,
       webSecurity: false,
       spellcheck: false,
@@ -198,8 +196,8 @@ const createPlay = async () => {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
       webSecurity: false,
       spellcheck: false,
       allowRunningInsecureContent: true,

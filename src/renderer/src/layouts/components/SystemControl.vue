@@ -4,8 +4,7 @@
 
 <script setup lang="ts">
 import '@electron-uikit/titlebar/renderer';
-
-const { platform } = process;
+import { platform } from '@/utils/tool';
 </script>
 
 <style lang="less" scoped>

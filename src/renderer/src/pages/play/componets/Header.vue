@@ -1,8 +1,8 @@
 <template>
-  <div class="container-header" :class="!isVisible.macMaximize ? 'drag' : 'no-drag'">
+  <div class="container-header" :class="!active.macMaximize ? 'drag' : 'no-drag'">
     <div
       class="left no-drag"
-      :style="{ 'padding-left': platform === 'darwin' && !isVisible.macMaximize ? '68px' : '0' }"
+      :style="{ 'padding-left': platform === 'darwin' && !active.macMaximize ? '68px' : '0' }"
     >
       <div class="open-main-win" @click="openMainWinEvent">
         <home-icon size="1em"/>
@@ -27,7 +27,10 @@
 <script setup lang="ts">
 import { onMounted, ref, reactive, watch } from 'vue';
 import { HomeIcon } from 'tdesign-icons-vue-next';
+import { platform } from '@/utils/tool';
+
 import logoIcon from '@/assets/icon.png';
+
 import SystemControl from '@/layouts/components/SystemControl.vue';
 import Language from '@/layouts/components/Language.vue';
 import Sponsor from '@/layouts/components/Sponsor.vue';
@@ -41,6 +44,12 @@ const props = defineProps({
   }
 });
 
+const active = ref({
+  pin: false,
+  macMaximize: false,
+});
+const formTitle = ref(props.title);
+
 watch(
   () => props.title,
   (val) => {
@@ -49,18 +58,8 @@ watch(
   },
 );
 
-const { getCurrentWindow } = require('@electron/remote');
-
-const win = getCurrentWindow();
-const { platform } = window.electron.process;
-const isVisible = reactive({
-  pin: false,
-  macMaximize: false,
-});
-const formTitle = ref(props.title);
-
 onMounted(() => {
-  minMaxEvent();
+  onFullscreenEvent();
 });
 
 // 打开主窗口
@@ -69,13 +68,14 @@ const openMainWinEvent = () => {
 };
 
 // 全屏事件 mac修复状态栏 css 用
-const minMaxEvent = () => {
+const onFullscreenEvent = () => {
   const handleFullScreen = (isFullScreen: boolean) => {
-    isVisible.macMaximize = isFullScreen;
+    active.value.macMaximize = isFullScreen;
   };
 
-  win.on('enter-full-screen', () => handleFullScreen(true));
-  win.on('leave-full-screen', () => handleFullScreen(false));
+  window.electron.ipcRenderer.on('fullscreen', (_, isFullScreen) => {
+    handleFullScreen(isFullScreen);
+  });
 };
 
 // 设置系统媒体信息

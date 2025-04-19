@@ -165,6 +165,7 @@ import { fetchSettingList, clearDb, sourceSetting } from '@/api/setting';
 import { usePlayStore, useSettingStore } from '@/store';
 import { t } from '@/locales';
 import emitter from '@/utils/emitter';
+import { platform } from '@/utils/tool';
 
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
@@ -188,11 +189,6 @@ const DialogCustomPlayer = shallowRef(defineAsyncComponent(() => import('./compo
 const DialogSnifferView = shallowRef(defineAsyncComponent(() => import('./components/DialogSniffer.vue')));
 const DialogBarrageView = shallowRef(defineAsyncComponent(() => import('./components/DialogBarrage.vue')));
 const DialogDisclaimerView = shallowRef(defineAsyncComponent(() => import('@/pages/Disclaimer.vue')));
-
-const remote = window.require('@electron/remote');
-const win = remote.getCurrentWindow();
-
-const { platform } = window.electron.process;
 
 const isVisible = reactive({
   data: false,
@@ -409,8 +405,7 @@ const clearDB = async () => {
 
 // 清除缓存
 const clearCache = async () => {
-  const { session } = win.webContents;
-  await session.clearCache();
+  window.electron.ipcRenderer.send('clearCache');
 };
 
 // 组合键格式化

@@ -73,6 +73,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch } from 'vue';
 
 import { t } from '@/locales';
+import { platform } from '@/utils/tool';
 
 const props = defineProps({
   visible: {
@@ -80,8 +81,6 @@ const props = defineProps({
     default: false,
   },
 });
-
-const { platform } = window.electron.process;
 
 const formVisible = ref(false);
 const updateInfo = ref({
