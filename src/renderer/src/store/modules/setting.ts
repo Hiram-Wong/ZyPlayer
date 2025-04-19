@@ -28,6 +28,9 @@ export const useSettingStore = defineStore('setting', {
       }
       return state.mode as ModeType;
     },
+    displayTheme: (state): ModeType => {
+      return state.theme as ModeType;
+    },
   },
   actions: {
     async changeMode(mode: ModeType | 'auto') {

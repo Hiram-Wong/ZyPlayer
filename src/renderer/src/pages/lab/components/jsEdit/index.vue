@@ -317,6 +317,12 @@ const file = useFileSystemAccess({
   excludeAcceptAllOption: false,
 });
 
+const theme = computed(() => storeSetting.displayTheme);
+const tmp = computed(() => {
+  return {
+    file: t('pages.lab.jsEdit.fileManage'),
+  };
+});
 const logRef = useTemplateRef('logRef');
 const form = ref({
   content: {
@@ -372,7 +378,7 @@ const form = ref({
 });
 const EDIT_CONF = {
   readOnly: false,
-  theme: storeSetting.displayMode === 'light' ? 'vs' : 'vs-dark',
+  theme: theme.value === 'light' ? 'vs' : 'vs-dark',
   wordWrap: 'on',
   automaticLayout: true,
   folding: true,
@@ -398,11 +404,6 @@ const webview = ref({
   url: 'about:blank',
   route: 'about:blank',
 });
-const tmp = computed(() => {
-  return {
-    file: t('pages.lab.jsEdit.fileManage'),
-  };
-});
 const active = ref({
   nav: '',
   template: false,
@@ -415,7 +416,7 @@ const terminal = ref<Terminal>();
 const fitAddon = ref<FitAddon>();
 
 watch(
-  () => storeSetting.displayMode,
+  () => theme.value,
   (val) => {
     jsEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
     htmlEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
@@ -623,7 +624,7 @@ const handleExportFile = async () => {
     };
 
     const title = content.match(/title:(.*?),/)?.[1]?.replace(/['"]/g, '')?.trim() || 'source';
-    
+
     file.data.value = content;
     await file.saveAs({
       suggestedName: `${title}.js`,

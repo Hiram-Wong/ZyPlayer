@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { useLocalStorage } from '@vueuse/core';
-import { computed, onMounted, reactive, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import { localeConfigKey } from '@/locales/index';
 import { useLocale } from '@/locales/useLocale';
@@ -22,21 +22,34 @@ import DisclaimerView from '@/pages/Disclaimer.vue';
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 const { getComponentsLocale, changeLocale } = useLocale();
+const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-const active = reactive({
+const active = ref({
   disclaimer: false,
 });
 
-const theme = computed(() => {
-  return storeSetting.getStateMode;
-});
+const handleThemeChange = (e: MediaQueryListEvent) => {
+  const theme = e.matches? 'dark' : 'light';
+  document.documentElement.setAttribute('theme-mode', theme);
+  storeSetting.updateConfig({ theme });
+};
 
 watch(
-  () => storeSetting.displayMode,
+  () => storeSetting.getStateMode,
   (val) => {
-    const isDarkMode = val === 'dark';
-    document.documentElement.setAttribute('theme-mode', isDarkMode ? 'dark' : '');
+    if (val === 'auto') {
+      (() => {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const theme = mediaQuery.matches ? 'dark' : 'light';
+        storeSetting.updateConfig({ theme });
+      })();
+      mediaQuery?.addEventListener('change', handleThemeChange);
+    } else {
+      storeSetting.updateConfig({ theme: val });
+      mediaQuery?.removeEventListener('change', handleThemeChange);
+    };
   },
+  { immediate: true },
 );
 watch(
   () => useLocalStorage(localeConfigKey, 'zh_CN').value,
@@ -56,7 +69,7 @@ const initConfig = async () => {
     mode: theme,
     timeout: timeout || 5000
   });
-  active.disclaimer = !agreementMask;
+  active.value.disclaimer = !agreementMask;
 
   const init = Object.assign(
     { ...PLAY_CONFIG.setting },
@@ -78,12 +91,4 @@ const initConfig = async () => {
     }
   }
 };
-
-window.electron.ipcRenderer.on('system-theme-updated', (_, activeTheme) => {
-  if (theme.value === 'auto') {
-    const themeMode = activeTheme === 'dark' ? 'dark' : '';
-    document.documentElement.setAttribute('theme-mode', themeMode);
-    console.log(`system-theme-updated: ${activeTheme}`);
-  }
-});
 </script>

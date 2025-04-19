@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { useFileSystemAccess } from '@vueuse/core';
 
@@ -42,6 +42,7 @@ const file = useFileSystemAccess({
   excludeAcceptAllOption: false,
 });
 
+const theme = computed(() => storeSetting.displayTheme);
 const form = ref({
   target: '',
   origin: '',
@@ -51,7 +52,7 @@ const active = ref({
   clickType: '',
 });
 const diffEditConf = ref({
-  theme: storeSetting.displayMode === 'light' ? 'vs' : 'vs-dark',
+  theme: theme.value === 'light' ? 'vs' : 'vs-dark',
   enableSplitViewResizing: true, // 是否允许拖动分割线
   originalEditable: true, // 是否允许编辑原始文本
   renderSideBySide: true, // 是否渲染为并排模式(不生效)
@@ -64,6 +65,13 @@ const diffEditConf = ref({
   scrollBeyondLastLine: false,
   fixedOverflowWidgets: true
 });
+
+watch(
+  () => theme.value,
+  (val) => {
+    diffEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
+  }
+);
 
 const importFileEvent = async (type: string) => {
   try {
