@@ -20,6 +20,15 @@
 
 **重要提醒**: 在开始使用前，请务必详读并同意用户协议，确保遵守相关规定!
 
+[![Star History Chart](https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date)](https://star-history.com/#Hiram-Wong/ZyPlayer&Date)
+
+## 🌴 法律声明与注意事项
+
+- 强烈倡导合法观影，本软件仅作为播放工具，不涉及资源存储或分发。
+- 仅供个人学习交流之用，24小时内请自觉卸载，勿作商业用途。
+- 软件提供播放框架，具体播放源需用户自行配置。
+- 部分灵感来源于[ZY-Player](https://github.com/Hunlongyu/ZY-Player)，图标素材感谢[@fourbeauty]贡献。
+
 <details>
 <summary>展开查看用户协议及免责申明</summary>
 感谢您选择使用zyfun(以下简称本软件)，在使用产品和服务之前，请您仔细阅读和理解以下声明:
@@ -41,8 +50,6 @@
 请您在使用本软件之前认真阅读并理解本免责声明的所有内容，感谢您的理解和支持。
 
 </details>
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date)](https://star-history.com/#Hiram-Wong/ZyPlayer&Date)
 
 ## 🎉 功能亮点
 
@@ -71,23 +78,16 @@
 
 </details>
 
-## 🌴 法律声明与注意事项
+### 🍿 播放器特性概览
 
-- 强烈倡导合法观影，本软件仅作为播放工具，不涉及资源存储或分发。
-- 仅供个人学习交流之用，24小时内请自觉卸载，勿作商业用途。
-- 软件提供播放框架，具体播放源需用户自行配置。
-- 部分灵感来源于[ZY-Player](https://github.com/Hunlongyu/ZY-Player)，图标素材感谢[@fourbeauty]贡献。
-
-### 播放器特性概览
-
-- 没有完美的播放器
+- **没有完美的播放器**
 - 如果只有画面没声音 - 一般为没有声轨
 - 如果黑屏有声音 - 一般为播放器不支持`H265[HEVC]`
-- 播放器选择需考虑格式兼容性，如`H264`与`H265`的差异
-- 针对播放失败, 建议切换播放器或者调用系统播放器
-- 播放能力上, 分为西瓜(`H265`兼容性较好)和其他(`H264`兼容性较好)
+- 播放器选择需考虑格式兼容性-不支持`mkv`格式
+- 针对播放失败-建议切换播放器或者调用系统播放器
+- 播放能力-西瓜(`H265`兼容性较好), 其他(`H264`兼容性较好)
 
-### 跨平台说明
+### 💻 跨平台说明
 
 > {appname}为软件名
 
