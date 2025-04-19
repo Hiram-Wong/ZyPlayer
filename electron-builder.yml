@@ -34,7 +34,7 @@ win:
   target:
     - target: nsis
       arch:
-        # - x64
+        - x64
         - arm64
 # NSIS 安装器配置
 nsis:
@@ -78,9 +78,9 @@ mac:
   target:
     - target: dmg
       arch:
-        # - x64
+        - x64
         - arm64
-        # - universal
+        - universal
 # macOS 平台的 DMG 配置
 dmg:
   # DMG 文件的生成名称
@@ -95,15 +95,15 @@ linux:
   target:
     - target: AppImage
       arch:
-        # - x64
+        - x64
         - arm64
-    # - target: rpm
-      # arch:
-        # - x64
-        # - arm64
+    - target: rpm
+      arch:
+        - x64
+        - arm64
     - target: deb
       arch:
-        # - x64
+        - x64
         - arm64
   # 维护者信息
   maintainer: zyfun team
