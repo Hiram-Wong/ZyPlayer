@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <div class="anthology-contents">
+    <div class="anthology-contents analyze-anthology">
       <div class="box-anthology-header">
         <div class="left">
           <h4 class="box-anthology-title">{{ $t('pages.player.film.analyze') }}</h4>
