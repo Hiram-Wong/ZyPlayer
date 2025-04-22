@@ -1,12 +1,11 @@
 import { FastifyPluginAsync, FastifyRequest } from 'fastify';
-import { join } from 'path';
-import { APP_STORE_PATH } from '@main/utils/hiker/file';
+import { APP_PLUGIN_PATH } from '@main/utils/hiker/path';
 import adapter from './utils/adapter_install';
 
 const API_PREFIX = 'api/v1/plugin';
-const APP_PLUGIN_PATH = join(APP_STORE_PATH, 'plugin');
+const PLUGIN_PATH = APP_PLUGIN_PATH;
 
-const pluginAdapter = new adapter({ baseDir: APP_PLUGIN_PATH });
+const pluginAdapter = new adapter({ baseDir: PLUGIN_PATH });
 
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.get(`/${API_PREFIX}/list`, async () => {

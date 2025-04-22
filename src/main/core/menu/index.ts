@@ -1,6 +1,7 @@
 import { platform } from '@electron-toolkit/utils';
 import { shell, app, Menu, MenuItem, MenuItemConstructorOptions } from 'electron';
 import logger from '@main/core/logger';
+import { APP_STORE_PATH } from '@main/utils/hiker/path';
 
 const createMenu = () => {
   if (!platform.isMacOS) {
@@ -74,7 +75,7 @@ const createMenu = () => {
           label: '打开数据目录',
           accelerator: process.platform === 'darwin' ? 'Cmd+Shift+T' : 'Ctrl+Shift+T',
           click: () => {
-            shell.openPath(app.getPath('userData'));
+            shell.openPath(APP_STORE_PATH);
           },
         },
       ],
@@ -82,7 +83,7 @@ const createMenu = () => {
   ];
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuBar));
+  logger.info('[menu][init] completed');
 };
 
-logger.info('[menu][init]');
 export default createMenu;

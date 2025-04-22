@@ -76,7 +76,6 @@ function stopSchedule(name: string): void {
         isRunning: false
       })
     }
-
   }
 }
 

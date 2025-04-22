@@ -2,7 +2,6 @@ import { FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { v4 as uuidv4 } from 'uuid';
 import { join, relative, basename, extname, dirname } from 'path';
 import {
-  APP_STORE_PATH,
   fileExist,
   fileState,
   readFile,
@@ -14,9 +13,10 @@ import {
   fileStateSync,
   readFileSync,
 } from '@main/utils/hiker/file';
+import { APP_FILE_PATH } from '@main/utils/hiker/path';
 
 const API_PREFIX = 'api/v1/file';
-const APP_FILE_PATH = join(APP_STORE_PATH, 'file');
+const FILE_PATH = APP_FILE_PATH;
 
 const api: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.delete(`/${API_PREFIX}/*`, async (req: FastifyRequest<{ Params: { [key: string]: string } }>) => {
@@ -50,13 +50,13 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
     }; // 注入给index.js文件main函数里使用
 
     const fileName = req.params['*'];
-    const exists = await fileExist(join(APP_FILE_PATH, fileName));
+    const exists = await fileExist(join(FILE_PATH, fileName));
 
     let response: any = '';
     if (exists) {
-      const stats = await fileState(join(APP_FILE_PATH, fileName));
+      const stats = await fileState(join(FILE_PATH, fileName));
       if (stats === 'dir') {
-        const indexPath = join(APP_FILE_PATH, fileName, './index.js');
+        const indexPath = join(FILE_PATH, fileName, './index.js');
         const indexStats = await fileState(indexPath);
 
         if (indexStats === 'file') {
@@ -82,7 +82,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
           };
         }
       } else if (stats === 'file') {
-        response = await readFile(join(APP_FILE_PATH, fileName));
+        response = await readFile(join(FILE_PATH, fileName));
       }
       return response;
     } else {
@@ -132,7 +132,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       }
     };
 
-    await walk(APP_FILE_PATH, APP_FILE_PATH);
+    await walk(FILE_PATH, FILE_PATH);
 
     return doc;
   });

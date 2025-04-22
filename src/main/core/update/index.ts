@@ -3,12 +3,11 @@ import { app, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { resolve, join } from 'path';
 import logger from '@main/core/logger';
-
 import { getWin } from '@main/core/winManger';
+import { getAppDefaultPath } from '@main/utils/hiker/path';
 
 const updaterCacheDirName = 'zyfun-updater';
-const updatePath = join(app.getAppPath(), updaterCacheDirName, 'pending');
-logger.info(`[update][init] path:${updatePath}`);
+const updatePath = join(getAppDefaultPath('runtime'), updaterCacheDirName, 'pending');
 
 if (is.dev) {
   Object.defineProperty(app, 'isPackaged', {
@@ -17,7 +16,7 @@ if (is.dev) {
     },
   });
   autoUpdater.updateConfigPath = resolve(__dirname, '../../dev-app-update.yml');
-}
+};
 
 autoUpdater.autoDownload = false; // 关闭自动下载
 autoUpdater.autoInstallOnAppQuit = false; // 关闭自动安装
@@ -83,4 +82,6 @@ export default () => {
     logger.info('[update] downloaded');
     sendUpdateMessage('update-downloaded', { code: 0, msg: 'ok', data: { downloaded: true } });
   });
+
+  logger.info(`[update][init] path:${updatePath}`);
 };

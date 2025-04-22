@@ -96,7 +96,7 @@ const destroyWin = (name: string) => {
 
 const getWin = (name: string) => {
   const id = winPool[name];
-  logger.info(`[winManager][getWin]name:${name} id:${id}`);
+  logger.info(`[winManager][win] name:${name}-id:${id}`);
 
   if (id) return BrowserWindow.fromId(Number(id));
   return null;

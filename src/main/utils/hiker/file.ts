@@ -1,11 +1,7 @@
-import { app } from 'electron';
-import { join } from 'path';
 import fs from 'fs-extra';
+import { join } from 'path';
 import { gzip } from '@main/utils/crypto';
-
-const APP_MARK = 'zy';
-const APP_MARK_PATH = `${APP_MARK}://`;
-const APP_STORE_PATH = app.getPath('userData');
+import { APP_MARK_PATH, APP_STORE_PATH } from './path';
 
 // 检查路径是否以特定前缀开头
 const isAppMarkPath = (url: string): boolean => url.startsWith(APP_MARK_PATH);
@@ -308,7 +304,6 @@ const fileSizeSync = (folderPath: string): number => {
 };
 
 export {
-  APP_STORE_PATH,
   fileExist,
   fileExistSync,
   fileSize,

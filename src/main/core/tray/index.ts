@@ -2,6 +2,7 @@ import { platform } from '@electron-toolkit/utils';
 import { BrowserWindow, Tray, Menu, app, shell, nativeImage } from 'electron';
 import { join } from 'path';
 import logger from '@main/core/logger';
+import { APP_PUBLIC_PATH, APP_STORE_PATH } from '@main/utils/hiker/path';
 
 const showWindows = () => {
   const windows = BrowserWindow.getAllWindows();
@@ -19,7 +20,7 @@ const createTrayMenu = () => {
     },
     {
       label: '打开数据目录',
-      click: () => shell.openPath(app.getPath('userData')),
+      click: () => shell.openPath(APP_STORE_PATH),
     },
     {
       label: '关于',
@@ -38,9 +39,9 @@ const createTrayMenu = () => {
  * Create system tray
  */
 const createSystemTray = () => {
-  // const lightIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_light.png');
-  const darkIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'tray_dark.png');
-  const colorIcon = join(app.getAppPath(), 'resources', 'img/icons/', 'logo.png');
+  // const lightIcon = join(APP_PUBLIC_PATH, 'img/icons/tray_light.png');
+  const darkIcon = join(APP_PUBLIC_PATH, 'img/icons/tray_dark.png');
+  const colorIcon = join(APP_PUBLIC_PATH, 'img/icons/logo.png');
 
   // Create tray icon
   const icon = nativeImage.createFromPath(platform.isMacOS ? darkIcon : colorIcon);
@@ -62,7 +63,7 @@ const createSystemTray = () => {
 
   // Tray menu
   if (!platform.isMacOS) mainTray.setContextMenu(createTrayMenu());
+  logger.info('[tray][init] completed');
 };
 
-logger.info('[tray][init]');
 export default createSystemTray;

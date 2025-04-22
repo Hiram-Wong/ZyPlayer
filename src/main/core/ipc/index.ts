@@ -2,14 +2,15 @@ import { electronApp, platform } from '@electron-toolkit/utils';
 import { exec } from 'child_process';
 import { app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, session, shell } from 'electron';
 import { join } from 'path';
-import util from 'util';
+import { promisify } from 'util';
 import logger from '@main/core/logger';
 import puppeteerInElectron from '@main/utils/sniffer';
 import { toggleWindowVisibility } from '@main/utils/tool';
-import { createDir, deleteDir, deleteFile, saveFile, fileExist, fileSize, fileState, readFile } from '@main/utils/hiker/file';
 import { createMain, createPlay, getWin, getAllWin } from '@main/core/winManger';
+import { createDir, deleteDir, deleteFile, saveFile, fileExist, fileSize, fileState, readFile } from '@main/utils/hiker/file';
+import { getAppDefaultPath, APP_STORE_PATH } from '@main/utils/hiker/path';
 
-const execAsync = util.promisify(exec);
+const execAsync = promisify(exec);
 
 const ipcListen = () => {
   // 设置开机自启
@@ -84,7 +85,7 @@ const ipcListen = () => {
   // ffmpeg生成缩略图
   ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
     const { ua, timeout } = globalThis.variable;
-    const basePath = join(app.getPath('userData'), 'thumbnail');
+    const basePath = join(APP_STORE_PATH, 'thumbnail');
 
     await createDir(basePath);
     const formatPath = join(basePath, `${key}.jpg`);
@@ -201,7 +202,7 @@ const ipcListen = () => {
 
   // 打开路径
   ipcMain.on('open-path', async (_, file) => {
-    const path = join(app.getPath('userData'), file);
+    const path = join(APP_STORE_PATH, file);
     await createDir(path);
     shell.openPath(path);
   });
@@ -211,7 +212,7 @@ const ipcListen = () => {
     logger.info(`[ipcMain] read-path: ${type}`);
     const types = ['home', 'appData', 'userData', 'sessionData', 'temp', 'exe', 'module', 'desktop', 'documents', 'downloads', 'music', 'pictures', 'videos', 'recent', 'logs', 'crashDumps'];
     if (!types.includes(type)) return '';
-    const path = app.getPath(type);
+    const path = getAppDefaultPath(type);
     return path;
   });
 
