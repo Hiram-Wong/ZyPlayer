@@ -41,6 +41,12 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       }
     }
 
+    ['aardwareAcceleration', 'ua', 'dns', 'selfBoot', 'recordShortcut', 'timeout', 'debug'].forEach((key) => {
+      if (destination[key] !== undefined) {
+        globalThis.variable[key] = destination[key];
+      }
+    });
+
     return {
       code: 0,
       msg: 'ok',
