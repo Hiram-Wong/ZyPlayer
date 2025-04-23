@@ -5,6 +5,7 @@
     attach="#main-component"
     placement="center"
     width="50%"
+    destroy-on-close
     :footer="false"
   >
     <template #body>
@@ -194,12 +195,17 @@
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch, reactive } from 'vue';
 import moment from 'moment';
+import { cloneDeep } from 'lodash-es';
 import { useFileSystemAccess } from '@vueuse/core';
 
 import { t } from '@/locales';
 import { clearDb, exportDb, webdevLocal2Remote, webdevRemote2Local, initDb } from '@/api/setting';
 import { fetchHistoryPage, delHistory, addHistory } from '@/api/history';
 import emitter from '@/utils/emitter';
+
+defineOptions({
+  name: 'SettingBaseDialogData',
+});
 
 const file = useFileSystemAccess({
   dataType: 'Text',
@@ -218,13 +224,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  webdev: {
+  data: {
     type: Object,
-    default: () => {
-      return {
+    default: {
+      data: {
         sync: false,
         data: { url: '', username: '', password: '' }
-      }
+      },
+      type: 'data'
     },
   }
 });
@@ -296,12 +303,11 @@ watch(
   },
 );
 watch(
-  () => props.webdev,
+  () => props.data,
   (val) => {
-    const { sync, data } = val;
-    formData.value.webdev.sync = sync;
-    formData.value.webdev.data = { ...data };
-  }
+    formData.value.webdev.sync = val.data.sync;
+    formData.value.webdev.data = cloneDeep(val.data.data);
+  }, { deep: true }
 );
 
 const refreshEmitter = (arryList: string[]) => {

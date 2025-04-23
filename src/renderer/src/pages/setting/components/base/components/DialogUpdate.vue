@@ -5,6 +5,7 @@
     attach="#main-component"
     placement="center"
     width="50%"
+    destroy-on-close
     :footer="false"
     :close-on-esc-keydown="false"
     :close-on-overlay-click="false"
@@ -74,6 +75,10 @@ import { ref, watch } from 'vue';
 
 import { t } from '@/locales';
 import { platform } from '@/utils/tool';
+
+defineOptions({
+  name: 'SettingBaseDialogUpdate',
+});
 
 const props = defineProps({
   visible: {

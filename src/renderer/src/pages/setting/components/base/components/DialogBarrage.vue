@@ -5,6 +5,7 @@
     attach="#main-component"
     placement="center"
     width="50%"
+    destroy-on-close
   >
     <template #header>
       {{ $t('pages.setting.barrage.title') }}
@@ -59,6 +60,10 @@ import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-nex
 import { cloneDeep, uniq } from 'lodash-es';
 import { t } from '@/locales';
 
+defineOptions({
+  name: 'SettingBaseDialogBarrage',
+});
+
 const props = defineProps({
   visible: {
     type: Boolean,
@@ -66,7 +71,7 @@ const props = defineProps({
   },
   data: {
     type: Object,
-    default: { data: { url: '', key: '', support: [], start: '', mode: '', color: '', content: '' },  type: '' },
+    default: { data: { url: '', id: '', key: '', support: [], start: '', mode: '', color: '', content: ''  },  type: '' },
   },
 });
 const formVisible = ref(false);

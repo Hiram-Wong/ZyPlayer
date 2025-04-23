@@ -5,6 +5,7 @@
     attach="#main-component"
     placement="center"
     width="50%"
+    destroy-on-close
     :footer="false"
     :confirm-btn=null
     :cancel-btn="$t('pages.md.customPlayer.confirm')"
@@ -23,6 +24,10 @@ import { ref, watch } from 'vue';
 
 import CommonDialog from '@/components/common-setting/note/index.vue';
 import MdRender from '@/components/markdown-render/index.vue';
+
+defineOptions({
+  name: 'SettingBaseDialogCustomPlayer',
+});
 
 const props = defineProps({
   visible: {

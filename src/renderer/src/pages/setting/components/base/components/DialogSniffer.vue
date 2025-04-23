@@ -5,6 +5,7 @@
     attach="#main-component"
     placement="center"
     width="50%"
+    destroy-on-close
   >
     <template #header>
       {{ $t('pages.setting.sniffer.title') }}
@@ -33,7 +34,12 @@
 import { ref, watch, useTemplateRef } from 'vue';
 import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
 import { cloneDeep } from 'lodash-es';
+
 import { t } from '@/locales';
+
+defineOptions({
+  name: 'SettingBaseDialogSniffer',
+});
 
 const props = defineProps({
   visible: {

@@ -5,6 +5,7 @@
     attach="#main-component"
     placement="center"
     width="50%"
+    destroy-on-close
   >
     <template #header>
       {{ $t('pages.setting.dns.title') }}
@@ -12,7 +13,7 @@
     <template #body>
       <t-form ref="formRef" :data="formData.data" :rules="RULES" :label-width="60"  :requiredMark="false">
         <t-form-item name="data" :label-width="0">
-          <t-textarea v-model="formData.data.data" :placeholder="$t('pages.setting.placeholder.general')" autofocus :autosize="{ minRows: 2, maxRows: 4 }" @change="handleMatchTag" />
+          <t-textarea v-model="formData.data.data" :placeholder="$t('pages.setting.placeholder.general')" :autosize="{ minRows: 2, maxRows: 4 }" @change="handleMatchTag" />
         </t-form-item>
         <t-radio-group v-model="select" variant="default-filled" size="small" @change="handleChangeSelect">
           <t-radio-button v-for="item in LIST" :key="item.name" :value="item.dns">{{ item.name }}</t-radio-button>
@@ -29,9 +30,12 @@
 <script setup lang="ts">
 import { reactive, ref, watch, useTemplateRef } from 'vue';
 import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
-import { findIndex, cloneDeep } from 'lodash-es';
 import { t } from '@/locales';
 import DNS_CONFIG from '@/config/doh';
+
+defineOptions({
+  name: 'SettingBaseDialogDns',
+});
 
 const props = defineProps({
   visible: {
@@ -45,8 +49,8 @@ const props = defineProps({
 });
 const formVisible = ref<Boolean>(false);
 const formData = ref({
-  data: cloneDeep(props.data),
-  raw: cloneDeep(props.data),
+  data: { data: '',  type: '' },
+  raw: { data: '',  type: '' },
 });
 const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
 const LIST = reactive([...DNS_CONFIG]);
@@ -54,29 +58,17 @@ const select = ref('');
 
 const emits = defineEmits(['update:visible', 'submit']);
 
-watch(
-  () => formVisible.value,
+watch(() => formVisible.value, (val) => emits('update:visible', val));
+watch(() => props.visible, (val) => formVisible.value = val);
+watch(() => props.data,
   (val) => {
-    emits('update:visible', val);
-  },
-);
-watch(
-  () => props.visible,
-  (val) => {
-    formVisible.value = val;
-  },
-);
-watch(
-  () => props.data,
-  (val) => {
-    formData.value = { data: cloneDeep(val), raw: cloneDeep(val) };
-
+    formData.value = { data: val, raw: val } as any;
     handleMatchTag(val.data);
   },
 );
 
-const handleMatchTag = (item: string) => {
-  const index = findIndex(LIST, ['dns', item]);
+const handleMatchTag = (dns: string) => {
+  const index = LIST.findIndex((item) => item.dns === dns);
 
   if (index === -1) select.value = '';
   else select.value = LIST[index].dns;

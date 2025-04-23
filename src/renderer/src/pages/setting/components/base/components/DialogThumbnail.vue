@@ -5,6 +5,7 @@
     attach="#main-component"
     placement="center"
     width="50%"
+    destroy-on-close
     :confirm-btn="$t('pages.md.thumbanilFfmpeg.confirm')"
     :cancel-btn="$t('pages.md.thumbanilFfmpeg.cancel')"
     :on-confirm="dialogCheckFfmpeg"
@@ -26,6 +27,10 @@ import { t } from '@/locales';
 
 import CommonDialog from '@/components/common-setting/note/index.vue';
 import MdRender from '@/components/markdown-render/index.vue';
+
+defineOptions({
+  name: 'SettingBaseDialogThumbnail',
+});
 
 const props = defineProps({
   visible: {
