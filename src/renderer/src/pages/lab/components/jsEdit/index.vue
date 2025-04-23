@@ -5,6 +5,16 @@
         <h3 class="title">{{ $t('pages.lab.jsEdit.title') }}</h3>
       </div>
       <div class="right-operation-container">
+        <t-button class="mode-toogle" theme="default" @click="handleModeToggle">
+          <div class="status">
+            <span class="title">{{ $t('pages.lab.jsEdit.action.mode') }}</span>
+            <span class="desc">
+              {{ $t('pages.lab.jsEdit.action.status') }}:
+              {{ form.init.mode }}
+            </span>
+          </div>
+        </t-button>
+
         <t-radio-group variant="default-filled" v-model="active.nav" @change="handleOpChange">
           <t-radio-button value="template">{{ $t('pages.lab.jsEdit.template') }}</t-radio-button>
           <t-select v-model="tmp.file" auto-width @change="handleOpFileChange">
@@ -99,7 +109,7 @@
                         <div class="status">
                           <span class="title">{{ $t('pages.lab.jsEdit.action.init') }}</span>
                           <span class="desc">
-                            {{ $t('pages.lab.jsEdit.action.currentStatus') }}:
+                            {{ $t('pages.lab.jsEdit.action.status') }}:
                             {{
                               form.init.auto
                                 ? $t('pages.lab.jsEdit.action.auto')
@@ -111,22 +121,9 @@
                           <gesture-click-icon />
                         </div>
                       </t-button>
-
-                      <t-button class="button init w-btn" theme="default" @click="handleModeToggle">
-                        <div class="status">
-                          <span class="title">{{ $t('pages.lab.jsEdit.action.mode') }}</span>
-                          <span class="desc">
-                            {{ $t('pages.lab.jsEdit.action.currentStatus') }}:
-                            {{
-                              form.init.mode === 't3'
-                                ? $t('pages.lab.jsEdit.action.t3')
-                                : $t('pages.lab.jsEdit.action.t4')
-                            }}
-                          </span>
-                        </div>
+                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugLog" v-show="form.init.mode === 't3js'">
+                        {{ $t('pages.lab.jsEdit.action.log') }}
                       </t-button>
-
-                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugLog" v-show="form.init.mode === 't3'">日志</t-button>
                     </div>
                     <div class="item">
                       <t-button class="button w-btn" theme="default" @click="handleDataDebugHome">
@@ -372,7 +369,7 @@ const form = ref({
   },
   init: {
     auto: false,
-    mode: 't3',
+    mode: 't3js',
     log: false,
   },
 });
@@ -420,6 +417,25 @@ watch(
   (val) => {
     jsEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
     htmlEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
+
+    if (terminal.value) {
+      terminal.value.options.theme = {
+        ...terminal.value.options.theme,
+        foreground: val === 'light' ? '#000000' : '#ffffff'
+      };
+    }
+  }
+);
+watch(
+  () => form.value.init.mode,
+  (mode) => {
+    if (mode === 't3js') {
+      jsEditConf.value.language = 'javascript';
+    } else if (mode === 't3py') {
+      jsEditConf.value.language = 'python';
+    } else {
+      jsEditConf.value.language = 'javascript';
+    }
   }
 );
 watch(
@@ -456,9 +472,15 @@ const utilsWriteFile = async (filePath: string, val: string) => {
   await window.electron.ipcRenderer.invoke('manage-file', 'write', filePath, val);
 };
 
-const utilsT3BasePath = async () => {
+const utilsT3JsBasePath = async () => {
   const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
   const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/drpy_dzlive/drpy_js/`);
+  return defaultPath;
+};
+
+const utilsT3PyBasePath = async () => {
+  const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
+  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, `file/py/`);
   return defaultPath;
 };
 
@@ -470,8 +492,10 @@ const utilsT4BasePath = async () => {
 
 const utilsBasePath = async () => {
   const type = form.value.init.mode;
-  if (type === 't3') {
-    return await utilsT3BasePath();
+  if (type === 't3js') {
+    return await utilsT3JsBasePath();
+  } else if (type === 't3py') {
+    return await utilsT3PyBasePath();
   } else if (type === 't4') {
     return await utilsT4BasePath();
   }
@@ -517,6 +541,30 @@ const utilsDecode = async (content: string) => {
   return await utilsLocal(content);
 };
 
+const utilsReadT3PyFile = async () =>{
+  try {
+    const basePath = await utilsT3PyBasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.py`);
+    const content = await utilsReadFile(defaultPath);
+    return content;
+  } catch (err) {
+    console.error(`[utilsReadT3PyFile][Error]:`, err);
+    return '';
+  }
+};
+
+const utilsWriteT3PyFile = async (val: string) =>{
+  try {
+    const basePath = await utilsT3PyBasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.py`);
+    await utilsWriteFile(defaultPath, val);
+    return true;
+  } catch (err) {
+    console.error(`[utilsWriteT3PyFile][Error]:`, err);
+    return false;
+  }
+};
+
 const utilsReadT4File = async () =>{
   try {
     const basePath = await utilsT4BasePath();
@@ -545,8 +593,11 @@ const sitePutJs = async () => {
   const type = form.value.init.mode;
   const content = form.value.content.js;
 
-  if (type === 't3') {
-    await putSite({ ids: [debugId.value], doc: { ext: content, type: 7, api: 'csp_DRPY' } });
+  if (type === 't3js') {
+    await putSite({ ids: [debugId.value], doc: { ext: content, type: 7, api: './drpy.min.js' } });
+  } else if (type === 't3py') {
+    await utilsWriteT3PyFile(content);
+    await putSite({ ids: [debugId.value], doc: { type: 12, api: 'http://127.0.0.1:9978/api/v1/file/py/debug.py' } });
   } else if (type === 't4') {
     await utilsWriteT4File(content);
     await putSite({ ids: [debugId.value], doc: { type: 6, api: 'http://127.0.0.1:5757/api/debug' } });
@@ -555,21 +606,38 @@ const sitePutJs = async () => {
 
 const setupData = async () => {
   const debugRes = await fetchJsEditDebug();
+  const typeMap = {
+    7: 't3js',
+    12: 't3py',
+    6: 't4',
+  };
   if (debugRes?.id) {
     debugId.value = debugRes.id;
     const type = debugRes.type;
-    form.value.init.mode = type === 7 ? 't3' : 't4';
-    if (type === 7) {
+    const mode = typeMap[type];
+    form.value.init.mode = mode;
+    if (mode === 't3js') {
       form.value.content.js = debugRes.ext;
+    } else if (mode === 't3py') {
+      form.value.content.js = await utilsReadT3PyFile();
     } else {
       form.value.content.js = await utilsReadT4File();
     }
   } else {
+    const mode = form.value.init.mode;
     const siteRes = await addSite({
       name: 'debug',
       key: 'debug',
-      type: form.value.init.mode === 't3' ? 7 : 6,
-      api: form.value.init.mode === 't3' ? 'csp_DRPY' : 'http://127.0.0.1:5757/api/debug',
+      type: ((mode) => {
+        if (mode === 't3js') return 7;
+        else if (mode === 't3py') return 12;
+        else if (mode === 't4') return 6;
+      })(mode),
+      api: ((mode) => {
+        if (mode === 't3js') return './drpy.min.js';
+        else if (mode === 't3py') return 'http://127.0.0.1:9978/api/v1/file/py/debug.py';
+        else if (mode === 't4') return 'http://127.0.0.1:5757/api/debug';
+      })(mode),
       search: 1,
       playUrl: '',
       group: 'debug',
@@ -814,11 +882,15 @@ const handleDomDebug = async (type: string, rule: string) => {
 
 // btn
 const handleModeToggle = async () => {
-  const status = form.value.init.mode === 't3' ? 't4' : 't3';
+  const defaultMode = ['t3js', 't3py', 't4'];
+  const activeIndex = defaultMode.indexOf(form.value.init.mode);
+  const status = activeIndex + 1 === defaultMode.length ? defaultMode[0] : defaultMode[activeIndex + 1];
   form.value.init.mode = status;
   if (status === 't4') {
     MessagePlugin.info(t('pages.lab.jsEdit.message.modeT4'));
-  };
+  } else if (status === 't3py') {
+    MessagePlugin.info(t('pages.lab.jsEdit.message.modeT3py'));
+  }
   await sitePutJs();
 };
 
@@ -1063,6 +1135,9 @@ const setupConsole = () => {
   terminal.value = new Terminal({
     fontSize: 14,
     fontFamily: "JetBrainsMono",
+    theme: {
+      foreground: theme.value === 'light' ? '#000000' : '#ffffff'
+    },
     convertEol: true, //启用时，光标将设置为下一行的开头
     disableStdin: true, //是否应禁用输入
     cursorBlink: true,
@@ -1158,6 +1233,33 @@ const handleWebviewLoad = (url: string) => {
     }
 
     .right-operation-container {
+      display: flex;
+      align-items: center;
+      gap: var(--td-size-4);
+
+      .mode-toogle {
+        height: 36px;
+        min-width: 80px;
+
+        .status {
+          display: flex;
+          flex-direction: column;
+          font-size: 12px;
+          line-height: 16px;
+          justify-content: center;
+
+          .title {
+            font-weight: 500;
+            text-align: left;
+          }
+
+          .desc {
+            font-size: 10px;
+            text-align: left;
+          }
+        }
+      }
+
       :deep(.t-radio-group.t-size-m) {
         background-color: var(--td-bg-content-input-2);
         border-color: transparent;

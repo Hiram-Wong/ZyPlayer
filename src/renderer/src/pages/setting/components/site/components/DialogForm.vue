@@ -151,7 +151,7 @@ const createOptions = (val: string) => {
 const changeTypeEvent = (type: number) => {
   switch (type) {
     case 7:
-      formData.value.data.api = 'csp_DRPY';
+      formData.value.data.api = './drpy.min.js';
       break;
     case 9:
       formData.value.data.api = 'csp_XBPQ';

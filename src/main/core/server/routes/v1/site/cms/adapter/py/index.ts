@@ -40,17 +40,17 @@ class T3PyAdapter {
       if (paths.length > 0) {
         this.pythonPath = paths[0];
         this.isPythonInstalled = 0;
-        logger.info(`Python found at: ${this.pythonPath}`);
+        logger.info(`[site][t3-py][py] env: ${this.pythonPath}`);
         return true;
       }
 
       this.isPythonInstalled = -1;
-      logger.warn('Python not found in PATH');
+      logger.warn('[site][t3-py][py] env not found');
       return false;
 
     } catch (err) {
       this.isPythonInstalled = -1;
-      logger.error('Failed to locate Python:', err);
+      logger.error('[site][t3-py][py]', err);
       return false;
     }
   }
@@ -71,12 +71,12 @@ class T3PyAdapter {
       let transcript: string = '';
 
       pyShell.on('message', (message: string) => {
-        console.log('message', message);
+        logger.info('[site][t3-py][ipc]', message);
         transcript = message;
       });
 
       pyShell.end((err: PythonShellError, _code: number, _signal: string) => {
-        console.log('end', err, _code, _signal);
+        logger.info('[site][t3-py][end]', err, _code, _signal);
 
         if (err) {
           logger.error('PythonShell error:', err);

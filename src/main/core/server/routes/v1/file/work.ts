@@ -40,6 +40,50 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       };
     }
   });
+  fastify.get(`/${API_PREFIX}/:dir/config`, async (req: FastifyRequest<{ Params: { [key: string]: string } }>) => {
+    const reqDir = req.params['dir'] || '';
+    const doc: { [key: string]: any[] } = {
+      sites: [],
+    };
+
+    const walk = async (directoryPath: string, rootDirectory: string) => {
+      const stat = await fileState(directoryPath);
+      if (stat === 'dir') {
+        const files = await readDir(directoryPath);
+        if (!files || files.length === 0) return;
+
+        for (const file of files) {
+          const filePath = join(directoryPath, file);
+          const stat = await fileState(filePath);
+
+          if (stat === 'dir') {
+            await walk(filePath, rootDirectory);
+          } else if (stat === 'file') {
+            if (/\.(js|py)(?:\?.*)?$/.test(filePath)) {
+              const relativePath = relative(rootDirectory, filePath);
+              const fileName = basename(relativePath, extname(relativePath));
+
+              doc.sites.push({
+                id: uuidv4(),
+                key: uuidv4(),
+                name: fileName,
+                type: 3,
+                api: `http://127.0.0.1:9978/api/v1/file/${relativePath}`,
+                searchable: 1,
+                quickSearch: 0,
+                filterable: 1,
+                ext: `./${basename(relativePath)}`,
+              });
+            }
+          }
+        }
+      }
+    };
+
+    await walk(join(FILE_PATH, reqDir), FILE_PATH);
+
+    return doc;
+  });
   fastify.get(`/${API_PREFIX}/*`, async (req: FastifyRequest<{ Params: { [key: string]: string } }>) => {
     const pathLib = {
       join,
@@ -92,49 +136,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         data: null,
       };
     }
-  });
-  fastify.get(`/${API_PREFIX}/config`, async () => {
-    const doc: { [key: string]: any[] } = {
-      sites: [],
-    };
-
-    const walk = async (directoryPath: string, rootDirectory: string) => {
-      const stat = await fileState(directoryPath);
-      if (stat === 'dir') {
-        const files = await readDir(directoryPath);
-        if (!files || files.length === 0) return;
-
-        for (const file of files) {
-          const filePath = join(directoryPath, file);
-          const stat = await fileState(filePath);
-
-          if (stat === 'dir') {
-            await walk(filePath, rootDirectory);
-          } else if (stat === 'file') {
-            if (/\.js(?:\?.*)?$/.test(filePath)) {
-              const relativePath = relative(rootDirectory, filePath);
-              const fileName = basename(relativePath, extname(relativePath));
-
-              doc.sites.push({
-                id: uuidv4(),
-                key: uuidv4(),
-                name: fileName,
-                type: 3,
-                api: `http://127.0.0.1:9978/api/v1/file/${relativePath}`,
-                searchable: 1,
-                quickSearch: 0,
-                filterable: 1,
-                ext: `./${relativePath}`,
-              });
-            }
-          }
-        }
-      }
-    };
-
-    await walk(FILE_PATH, FILE_PATH);
-
-    return doc;
   });
 };
 

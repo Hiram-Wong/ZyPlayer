@@ -28,27 +28,33 @@ const easy2tvbox = async (config, url, type) => {
   let content = config;
 
   const formatType = (selectType: string, soureceType: number, api: string) => {
-    // 0cms[xml] 1cms[json] 2drpy[js0] 6hipy[t4] 3app[v3] 4app[v3]
+    // 优先处理 selectType
+    if (selectType === 'drpy') return 2;
 
-    if (selectType === 'drpy') {
-      return 2; // drpy
-    } else {
-      if (api === 'csp_XBPQ')
-        return 9; // xbpq
-      else if (api === 'csp_XYQ')
-        return 10; // xyq
-      else if (api === 'csp_AppYsV2') return 11; // appysv2
-      switch (soureceType) {
-        case 0:
-          return 0; // t0[xml]
-        case 1:
-          return 1; // t1[json]
-        case 3:
-          return 7; // t3[drpy]
-        case 4:
-          return 6; // t4[hipy]
-      }
+    // 特殊 API 映射
+    const apiMap: Record<string, number> = {
+      'csp_XBPQ': 9,
+      'csp_XYQ': 10,
+      'csp_AppYsV2': 11,
+    };
+
+    if (api in apiMap) return apiMap[api];
+
+    // 处理 soureceType 分支
+    switch (soureceType) {
+      case 0:
+        return 0; // cms[xml]
+      case 1:
+        return 1; // cms[json]
+      case 3:
+        if (api?.includes('.js')) return 7;  // drpy[js]
+        if (api?.includes('.py')) return 12; // drpy[py]
+        break;
+      case 4:
+        return 6; // hipy[t4]
     }
+
+    return -1; // 默认未匹配
   };
 
   const formatGroup = (type: string) => {
@@ -87,7 +93,8 @@ const easy2tvbox = async (config, url, type) => {
           [0, 1, 4].includes(item.type) ||
           (item.type === 3 && item.api === 'csp_XBPQ') ||
           (item.type === 3 && item.api === 'csp_XYQ') ||
-          (item.type === 3 && item.api.includes('drpy')),
+          (item.type === 3 && item.api.includes('.js')) ||
+          (item.type === 3 && item.api.includes('.py'))
       )
       .map((item) => ({
         id: item?.id || uuidv4(),

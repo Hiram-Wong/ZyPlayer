@@ -69,10 +69,12 @@ export default {
     action: {
       init: '初始化',
       mode: '模式',
-      currentStatus: '当前状态',
+      status: '状态',
       manual: '手动',
       auto: '自动',
-      t3: 'T3',
+      log: '日志',
+      t3js: 'T3Js',
+      t3py: 'T3Py',
       t4: 'T4',
       source: '源码',
       obtain: '获取',
@@ -117,6 +119,7 @@ export default {
     message: {
       openDevTools: '目前只能通过开发者工具->控制台查看日志',
       modeT4: 'T4模式需配合插件使用, 请先确认已安装插件, 且插件目录为drpy-node, 并启动运行状态',
+      modeT3py: 'T3-Py模式需配合python环境使用, 请先确认已安装python环境, 并安装依赖',
       htmlNoUrl: '地址为空',
       ruleNoHtml: '必须先获取源代码',
       ruleNoRule: '规则为空',

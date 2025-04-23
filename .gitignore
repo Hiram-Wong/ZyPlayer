@@ -36,6 +36,7 @@ yarn-error.log
 # dev files
 thumbnail/
 *.pyc
+__pycache__/
 
 # lock文件
 yarn.lock

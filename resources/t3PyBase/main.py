@@ -2,49 +2,52 @@ import importlib.util
 import sys
 import json
 import requests
+import asyncio
+import inspect
 
 def load_module_from_source(module_name, source_code):
     """
     从字符串形式的源代码加载模块
-    :param module_name: 模块名
-    :param source_code: 模块的源代码（字符串形式）
-    :return: 加载后的模块对象
     """
-    # 创建一个模块规范
     spec = importlib.util.spec_from_loader(module_name, loader=None)
-    # 创建一个模块对象
     module = importlib.util.module_from_spec(spec)
-    # 将模块添加到 sys.modules 中
     sys.modules[module_name] = module
-    # 执行模块代码
     exec(source_code, module.__dict__)
     return module
 
+def sync_wrapper(func, params):
+    """
+    同步方法包装器，兼容协程和普通函数
+    """
+    if inspect.iscoroutinefunction(func):
+        return asyncio.run(func(*params))
+    else:
+        return func(*params)
+
 if __name__ == '__main__':
     try:
-        # 参数获取
-        source_url = sys.argv[1] # 源地址
-        method_name = sys.argv[2] # 方法
-        # 参数
-        method_parms_str = sys.argv[3]
-        method_parms = json.loads(method_parms_str)
-        # 初始化参数
+        source_url = sys.argv[1]  # 模块地址
+        method_name = sys.argv[2]  # 调用的方法
+        method_params_str = sys.argv[3]  # 方法参数 JSON 字符串
+        method_params = json.loads(method_params_str)  # 转换成 Python 对象
         init_extend = sys.argv[4] if len(sys.argv) == 5 else ""
+
+        # 下载并加载模块
         module_name = "dynamic_module"
         source_code = requests.get(source_url).text
-
-        # 加载模块
         module = load_module_from_source(module_name, source_code)
 
-        # 使用模块中的类和方法
+        # 创建类实例并初始化（如果有 init 方法）
         spider = module.Spider()
+        # if hasattr(spider, 'init'):
+        #     sync_wrapper(spider.init, [init_extend])
         if method_name != 'init':
-            spider.init(init_extend)
-        map_method = getattr(spider, method_name)
-        result = map_method(*method_parms)
+            sync_wrapper(spider.init, [init_extend])
 
-        print(json.dumps(result))
+        # 调用指定方法
+        method = getattr(spider, method_name)
+        result = sync_wrapper(method, method_params)
+
+        print(json.dumps(result, ensure_ascii=False))
     except Exception as e:
-        print(e)
-
- # python main.py 'http://127.0.0.1:9978/api/v1/file/py/芒.py' 'homeContent' '[]'
+        print(json.dumps({'error': str(e)}, ensure_ascii=False))

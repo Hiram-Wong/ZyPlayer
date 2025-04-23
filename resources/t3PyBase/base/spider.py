@@ -149,3 +149,6 @@ class Spider(metaclass=ABCMeta):
     def delCache(self, key):
         r = self.fetch(f'http://127.0.0.1:{Proxy.getPort()}/cache?do=del&key={key}', timeout=5)
         return 'succeed' if r.status_code == 200 else 'failed'
+
+class BaseSpider(Spider):
+    pass
