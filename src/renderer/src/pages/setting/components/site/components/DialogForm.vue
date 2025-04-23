@@ -94,17 +94,18 @@ const formGroup = ref<any[]>(props.group);
 const SITE_TYPE = [
   { label: 'T0[xml]', value: 0 },
   { label: 'T1[json]', value: 1 },
-  { label: 'drpy[js0]', value: 2 },
   // { label: 'app[v1]', value: 3 },
   // { label: 'app[v3]', value: 4 },
   // { label: 'spider[xpath]', value: 5 },
-  { label: 'T4[hipy]', value: 6 },
   { label: 'T3[js]', value: 7 },
+  { label: 'T3[py]', value: 12 },
+  { label: 'T4[hipy]', value: 6 },
   { label: 'catvod[nodejs]', value: 8 },
   { label: 'csp[XBPQ]', value: 9 },
   { label: 'csp[XYQ]', value: 10 },
   { label: 'csp[AppYsV2]', value: 11 },
-]
+  { label: 'drpy[js0]', value: 2 },
+]; // 0-12 已使用
 
 const emits = defineEmits(['update:visible', 'submit']);
 

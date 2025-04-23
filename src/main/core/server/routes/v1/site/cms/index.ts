@@ -6,7 +6,8 @@ import {
   DrpyJs0Adapter,
   T0Adapter,
   T1Adapter,
-  T3Adapter,
+  T3DrpyAdapter,
+  T3PyAdapter,
   T4Adapter,
   XbpqAdapter,
   XyqAdapter,
@@ -22,11 +23,12 @@ const adapterRelation = {
   1: T1Adapter,
   2: DrpyJs0Adapter,
   6: T4Adapter,
-  7: T3Adapter,
+  7: T3DrpyAdapter,
   8: CatvodAdapter,
   9: XbpqAdapter,
   10: XyqAdapter,
   11: AppYsV2Adapter,
+  12: T3PyAdapter,
 };
 
 const lruCache = new LruCache(10);

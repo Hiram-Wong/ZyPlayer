@@ -32,7 +32,7 @@ class workerLruCache extends LruCache {
 
 const lruCache = new workerLruCache(cacheQueueSize);
 
-class T3Adapter {
+class T3DrpyAdapter {
   id: string = '';
   ext: string = '';
   categoryfilter: any[] = [];
@@ -141,4 +141,4 @@ class T3Adapter {
   }
 }
 
-export default T3Adapter;
+export default T3DrpyAdapter;

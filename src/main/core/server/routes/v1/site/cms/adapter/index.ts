@@ -5,8 +5,9 @@ import XbpqAdapter from './xbpq';
 import XyqAdapter from './xyq';
 import T1Adapter from './t1Json';
 import T0Adapter from './t0Xml';
-import T3Adapter from './drpy';
+import T3DrpyAdapter from './drpy';
 import T4Adapter from './t4Hipy';
+import T3PyAdapter from './py';
 
 export {
   AppYsV2Adapter,
@@ -14,7 +15,8 @@ export {
   DrpyJs0Adapter,
   T0Adapter,
   T1Adapter,
-  T3Adapter,
+  T3DrpyAdapter,
+  T3PyAdapter,
   T4Adapter,
   XbpqAdapter,
   XyqAdapter,

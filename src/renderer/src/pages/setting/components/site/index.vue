@@ -26,11 +26,12 @@
         <!-- <span v-else-if="row.type === 3">app[v3]</span>
         <span v-else-if="row.type === 4">app[v1]</span> -->
         <span v-else-if="row.type === 6">T4[hipy]</span>
-        <span v-else-if="row.type === 7">T3[drpy]</span>
+        <span v-else-if="row.type === 7">T3[js]</span>
         <span v-else-if="row.type === 8">catvod[nodejs]</span>
         <span v-else-if="row.type === 9">csp[XBPQ]</span>
         <span v-else-if="row.type === 10">csp[XYQ]</span>
         <span v-else-if="row.type === 11">csp[AppYsV2]</span>
+        <span v-else-if="row.type === 12">T3[py]</span>
       </template>
       <template #op="slotProps">
         <t-space>
