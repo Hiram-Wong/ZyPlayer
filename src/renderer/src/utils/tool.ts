@@ -139,11 +139,10 @@ const loadExternalResource = (url: string, type: 'css' | 'js' | 'font') => {
 };
 
 const platform = (() => {
-  // @ts-ignore
-  const { platform: val } = navigator.userAgentData;
-  if (val === 'Windows') return 'win32';
-  if (val === 'macOS') return 'darwin';
-  if (val === 'Linux') return 'linux';
+  const platform = (navigator as any).userAgentData.platform;
+  if (platform === 'Windows') return 'win32';
+  if (platform === 'macOS') return 'darwin';
+  if (platform === 'Linux') return 'linux';
   return 'unknown';
 })();
 
