@@ -1,31 +1,22 @@
-import { BrowserWindow, desktopCapturer } from 'electron';
-import { getWin } from '@main/core/winManger';
+import { desktopCapturer } from 'electron';
+import { getWin, getAllWin } from '@main/core/winManger';
 import request from '@main/utils/request';
 import { ipVersion } from 'is-ip';
 
-const toggleWindowVisibility = () => {
-  const windows = BrowserWindow.getAllWindows();
-  if (windows.length === 0) return;
-  const anyVisible = windows.some((win) => win.isVisible());
-  windows.forEach((win) => {
-    if (!win.isDestroyed()) {
-      const playWin = getWin('play');
-      if (anyVisible) {
-        win.hide();
-        if (playWin) {
-          playWin.webContents.send('media-control', false);
-          playWin.webContents.setAudioMuted(true);
-        }
-      } else {
-        win.show();
-        if (playWin) {
-          playWin.webContents.send('media-control', true);
-          playWin.webContents.setAudioMuted(false);
-          playWin.focus();
-        }
-      }
-    }
+const toggleWinVisable = (status: boolean | undefined = undefined) => {
+  const wins = getAllWin().filter((win) => !win.isDestroyed());
+  if (wins.length === 0) return;
+  const isVisable = typeof status === 'boolean' ? !status : wins.some((win) => win.isVisible());
+  wins.forEach((win) => {
+    if (isVisable) win.hide();
+    else win.show();
+
+    win.webContents.send('media-control', !isVisable);
+    win.webContents.setAudioMuted(isVisable);
   });
+
+  const playWin = getWin('play');
+  if (playWin && !playWin.isDestroyed() && !isVisable) playWin.focus();
 };
 
 const parseCustomUrl = (url: string) => {
@@ -96,4 +87,4 @@ const findWinByName = async (name: string) => {
   return source;
 };
 
-export { isLocalhostRef, parseCustomUrl, toggleWindowVisibility, getIP, getConfig, singleton, findWinByName };
+export { isLocalhostRef, parseCustomUrl, toggleWinVisable, getIP, getConfig, singleton, findWinByName };

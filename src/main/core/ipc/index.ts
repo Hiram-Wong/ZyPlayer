@@ -1,11 +1,12 @@
 import { electronApp, platform } from '@electron-toolkit/utils';
 import { exec } from 'child_process';
-import { app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, session, shell } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, session, shell } from 'electron';
 import { join } from 'path';
 import { promisify } from 'util';
 import logger from '@main/core/logger';
+import { globalShortcut } from '@main/core/shortcut';
 import puppeteerInElectron from '@main/utils/sniffer';
-import { toggleWindowVisibility } from '@main/utils/tool';
+import { toggleWinVisable } from '@main/utils/tool';
 import { createMain, createPlay, getWin, getAllWin } from '@main/core/winManger';
 import { createDir, deleteDir, deleteFile, saveFile, fileExist, fileSize, fileState, readFile } from '@main/utils/hiker/file';
 import { getAppDefaultPath, APP_STORE_PATH } from '@main/utils/hiker/path';
@@ -239,21 +240,23 @@ const ipcListen = () => {
     createPlay();
   });
 
-  // 更新快捷键
-  ipcMain.on('update-shortcut', (_, shortcut) => {
-    logger.info(`[ipcMain] storage-shortcuts: ${shortcut}`);
-    globalShortcut.unregisterAll();
-    logger.info(`[ipcMain] globalShortcut-install: ${shortcut}`);
-    globalShortcut.register(shortcut, () => {
-      toggleWindowVisibility();
-    });
-    globalThis.variable.recordShortcut = shortcut;
-  });
-
-  // 取消注册全局快捷键
-  ipcMain.on('uninstall-shortcut', () => {
-    logger.info(`[ipcMain] globalShortcut unregisterAll`);
-    globalShortcut.unregisterAll();
+  // 老板键管理
+  ipcMain.handle('manage-boss-shortcut', (_, action, shortcut) => {
+    logger.info(`[ipcMain] bossShortcut ${action}`);
+    switch (action) {
+      case 'register': {
+        return globalShortcut.register(shortcut, toggleWinVisable);
+      }
+      case 'unRegister': {
+        return globalShortcut.unregister(shortcut);
+      }
+      case 'unRegisterAll': {
+        return globalShortcut.unregisterAll();
+      }
+      case 'isRegistered': {
+        return globalShortcut.isRegistered(shortcut);
+      }
+    }
   });
 
   // 窗口管理

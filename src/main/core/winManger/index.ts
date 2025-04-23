@@ -7,7 +7,7 @@ import url from 'url';
 import { setting } from '@main/core/db/service';
 import logger from '@main/core/logger';
 
-const winPool: { [key: number]: BrowserWindow } = {};
+const winPool: { [key: string]: number } = {};
 const DEFAULT_WIDTH_MAIN: number = 1000;
 const DEFAULT_HEIGHT_MAIN: number = 640;
 const DEFAULT_WIDTH_PLAY: number = 875;
@@ -100,6 +100,11 @@ const getWin = (name: string) => {
 
   if (id) return BrowserWindow.fromId(Number(id));
   return null;
+};
+
+const getWinName = (id: number) => {
+  if (typeof id !== 'number') return null;
+  return Object.keys(winPool).filter(key => winPool[key] === id)?.[0] || null;
 };
 
 const getAllWin = () => BrowserWindow.getAllWindows();
@@ -261,4 +266,4 @@ const saveWindowState = async (name: string) => {
   await setting.update(['windowPosition'], db);
 };
 
-export { closeAllWin, createWin, destroyWin, createMain, createPlay, getAllWin, getWin };
+export { closeAllWin, createWin, destroyWin, createMain, createPlay, getAllWin, getWin, getWinName };
