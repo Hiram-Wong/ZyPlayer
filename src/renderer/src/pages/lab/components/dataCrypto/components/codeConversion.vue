@@ -121,6 +121,7 @@ const copyStrEvent = async (val: string) => {
     flex-direction: column;
     gap: 16px;
     padding: 0 var(--td-comp-paddingLR-xxs);
+    flex: 1;
   }
 
   .input, .output, .action {

@@ -156,6 +156,7 @@ const copyStrEvent = async (val: string) => {
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;
+    flex: 1;
 
     .input, .output {
       display: flex;

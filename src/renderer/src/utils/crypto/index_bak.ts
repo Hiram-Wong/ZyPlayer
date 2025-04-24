@@ -236,23 +236,8 @@ const html = {
 };
 
 const unicode = {
-  encode: (val: string) => {
-    const encodeUnicode = (val: string) => {
-      const res: any[] = [];
-      for (let i = 0; i < val.length; i++) {
-        res[i] = ('00' + val.charCodeAt(i).toString(16)).slice(-4);
-      }
-      return '\\u' + res.join('\\u');
-    };
-    return encodeUnicode(val);
-  },
-  decode: (val: string) => {
-    const decodeUnicode = (val: string) => {
-      val = val.replace(/\\/g, '%');
-      return unescape(val);
-    };
-    return decodeUnicode(val);
-  },
+  encode: (val: string) => val.split('').map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join(''),
+  decode: (val: string) => val.replace(/\\u([\dA-Fa-f]{4})/g, (_, code) => String.fromCharCode(parseInt(code, 16))),
 };
 
 const gzip = {
@@ -351,34 +336,37 @@ const getPad = (padding: string) => {
 
 const rc4 = {
   encode: (
-    val: string,
+    src: string,
     key: string,
     encoding: string = 'utf8',
     keyEncoding: string = 'utf8',
     outputEncode: string = 'base64',
   ) => {
     if (!['base64', 'hex'].includes(outputEncode.toLowerCase())) return '';
-    if (!key || !val) return '';
+    if (!key || !src) return '';
 
-    let plaintext = parseEncode(val, encoding);
-    let v = parseEncode(key, keyEncoding);
+    let plaintext = parseEncode(src, encoding);
+    let k = parseEncode(key, keyEncoding);
 
-    return formatEncode(crypto.RC4.encrypt(plaintext, v), outputEncode);
+    return formatEncode(crypto.RC4.encrypt(plaintext, k), outputEncode);
   },
   decode: (
-    val: string,
+    src: string,
     key: string,
     encoding: string = 'utf8',
     keyEncoding: string = 'utf8',
     outputEncode: string = 'base64',
   ) => {
     if (!['base64', 'hex'].includes(encoding.toLowerCase())) return '';
-    if (!key || !val) return '';
+    if (!key || !src) return '';
 
-    let plaintext = parseEncode(val, encoding);
-    let v = parseEncode(key, keyEncoding);
-
-    return formatDecode(crypto.RC4.toString(plaintext, v), outputEncode);
+    let k = parseEncode(key, keyEncoding);
+    const ciphertext = parseEncode(src, encoding);
+    const cipherParams = crypto.lib.CipherParams.create({
+      ciphertext: ciphertext,
+    });
+    const decrypted = crypto.RC4.decrypt(cipherParams, k);
+    return formatDecode(decrypted, outputEncode);
   },
 };
 
