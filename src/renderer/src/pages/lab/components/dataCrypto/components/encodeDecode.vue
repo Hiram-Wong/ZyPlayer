@@ -12,7 +12,7 @@
               <t-select auto-width v-model="formData.crypto.keyEncode" style="width: auto;">
                 <t-option v-for="item in keyEncodeList" :key="item.value" :value="item.value" :label="item.label" />
               </t-select>
-              <t-input v-model="formData.rc4.key" :placeholder="$t('pages.setting.placeholder.general')" />
+              <t-input v-model="formData.crypto.key" :placeholder="$t('pages.setting.placeholder.general')" />
             </div>
           </t-badge>
           <t-badge :count="$t('pages.lab.dataCrypto.encodeDecode.content')" color="var(--td-success-color)" shape="round">
@@ -165,9 +165,6 @@ import TitleMenu from '@/components/title-menu/index.vue';
 const formData = ref({
   input: '',
   output: '',
-  rc4: {
-    key: '',
-  },
   rsa: {
     padding: 'PKCS1',
     encode: 'base64',
@@ -333,11 +330,16 @@ const codeConversionEvent = (type: 'encode' | 'decode') => {
     const input = formData.value.input;
     if (type === 'encode') {
       if (active.value.action === 'rc4') {
-        if (!input || !formData.value.rc4.key) {
+        const { encode, key, keyEncode, outputEncode } =  formData.value.crypto;
+        if (!input || !key) {
           MessagePlugin.warning(`${t('pages.lab.dataCrypto.message.inputEmpty')}`);
           return;
         }
-        formData.value.output = rc4.encode(input, formData.value.rc4.key);
+        if (outputEncode === 'utf8') {
+          MessagePlugin.warning(`${t('pages.lab.dataCrypto.encodeDecode.crypto.message.encodeNotUtf8')}`);
+          return;
+        }
+        formData.value.output = rc4.encode(input, key, encode, keyEncode, outputEncode);
       } else if (active.value.action === 'rsa') {
         if (!input || !formData.value.rsa.key) {
           MessagePlugin.warning(`${t('pages.lab.dataCrypto.message.inputEmpty')}`);
@@ -363,15 +365,20 @@ const codeConversionEvent = (type: 'encode' | 'decode') => {
           rabbitLegacy: rabbitLegacy,
           sm4: sm4
         };
-        formData.value.output = methodMap[active.value.action].encode(formData.value.input, key, mode, padding, encode, iv, keyEncode, ivEncode, outputEncode);
+        formData.value.output = methodMap[active.value.action].encode(input, key, mode, padding, encode, iv, keyEncode, ivEncode, outputEncode);
       }
     } else {
       if (active.value.action === 'rc4') {
-        if (!input || !formData.value.rc4.key) {
+        const { encode, key, keyEncode, outputEncode } =  formData.value.crypto;
+        if (!input || !key) {
           MessagePlugin.warning(`${t('pages.lab.dataCrypto.message.inputEmpty')}`);
           return;
         }
-        formData.value.output = rc4.decode(input, formData.value.rc4.key);
+        if (encode === 'utf8') {
+          MessagePlugin.warning(`${t('pages.lab.dataCrypto.encodeDecode.crypto.message.decodeNotUtf8')}`);
+          return;
+        }
+        formData.value.output = rc4.decode(input, key, encode, keyEncode, outputEncode);
       } else if (active.value.action === 'rsa') {
         if (!input || !formData.value.rsa.key) {
           MessagePlugin.warning(`${t('pages.lab.dataCrypto.message.inputEmpty')}`);
@@ -397,7 +404,7 @@ const codeConversionEvent = (type: 'encode' | 'decode') => {
           rabbitLegacy: rabbitLegacy,
           sm4: sm4
         };
-        formData.value.output = methodMap[active.value.action].decode(formData.value.input, key, mode, padding, encode, iv, keyEncode, ivEncode, outputEncode);
+        formData.value.output = methodMap[active.value.action].decode(input, key, mode, padding, encode, iv, keyEncode, ivEncode, outputEncode);
       }
     };
     MessagePlugin.success(`${t('pages.setting.form.success')}`);
@@ -430,6 +437,7 @@ const copyStrEvent = async (val: string) => {
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;
+    flex: 1;
   }
 
   .input, .output, .action {

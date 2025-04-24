@@ -1,6 +1,6 @@
 import crypto from 'crypto-js';
 import WxmpRsa from 'wxmp-rsa';
-import * as smCrypto from 'sm-crypto-v2';
+import smCrypto from 'sm-crypto';
 import {
   utf8ToUint8Array,
   uint8ArrayToUtf8,
@@ -599,7 +599,7 @@ const sm4 = (() => {
         padding: getPad(padding),
         output: 'array',
       });
-      return formatDecode(encrypted, outputEncode);
+      return formatDecode(Uint8Array.from(encrypted), outputEncode);
     },
     decode: (
       src: string,
@@ -628,7 +628,7 @@ const sm4 = (() => {
         padding: getPad(padding),
         output: 'array',
       });
-      return formatDecode(decrypted, outputEncode);
+      return formatDecode(Uint8Array.from(decrypted), outputEncode);
     },
   };
 })();
