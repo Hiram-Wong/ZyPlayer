@@ -20,13 +20,14 @@ class T3PyAdapter {
   fileContent: string = '';
 
   constructor(source: { api: string; extend: any; categories?: string }) {
-    // 基础数据
     this.scriptPath = join(getAppDefaultPath('resources'), 't3PyBase');
-
     this.isPythonInstalled = -2;
+
     this.api = source.api;
     this.extend = source.extend;
-    this.categoryfilter = source.categories ? source.categories.split(/[,，]/).map((category) => category.trim()) : [];
+    this.categoryfilter = source.categories
+      ? source.categories.split(/[,，]/).map((s) => s.trim())
+      : [];
   }
 
   // 检查 Python 是否安装
@@ -47,7 +48,6 @@ class T3PyAdapter {
       this.isPythonInstalled = -1;
       logger.warn('[site][t3-py][py] env not found');
       return false;
-
     } catch (err) {
       this.isPythonInstalled = -1;
       logger.error('[site][t3-py][py]', err);
@@ -60,6 +60,8 @@ class T3PyAdapter {
     if (this.isPythonInstalled === -1) throw new Error('Python not installed');
 
     return new Promise(async (resolve, reject) => {
+      logger.info('[site][t3-py][ipc] args:', [this.api, method, JSON.stringify(data)]);
+
       const pyShell = new PythonShell('main.py', {
         mode: 'text',
         pythonOptions: ['-u'],
@@ -70,24 +72,25 @@ class T3PyAdapter {
 
       let transcript: string = '';
 
-      pyShell.on('message', (message: string) => {
-        logger.info('[site][t3-py][ipc]', message);
-        transcript = message;
+      pyShell.on('message', (msg: string) => {
+        logger.info('[site][t3-py][msg]', msg);
+        transcript += msg;
       });
 
-      pyShell.end((err: PythonShellError, _code: number, _signal: string) => {
-        logger.info('[site][t3-py][end]', err, _code, _signal);
+      pyShell.end((err: PythonShellError, code: number, signal: string) => {
+        logger.info(`[site][t3-py][end] code:${code}-signal:${signal}`);
 
         if (err) {
-          logger.error('PythonShell error:', err);
+          logger.error('[site][t3-py][err]', err);
           reject(err);
-        } else {
-          try {
-            resolve(JSON5.parse(transcript));
-          } catch (err) {
-            logger.error('Failed to parse transcript:', err);
-            resolve(transcript);
-          }
+        }
+
+        try {
+          const parsed = JSON5.parse(transcript);
+          resolve(parsed);
+        } catch (parseErr) {
+          logger.warn('[site][t3-py][parse-fallback]', parseErr);
+          resolve(transcript);
         }
       });
     });
@@ -98,7 +101,7 @@ class T3PyAdapter {
       url: this.api,
       method: 'GET',
     });
-    return await this.execCtx('homeContent', [this.extend]);
+    return await this.execCtx('init', [this.extend]);
   }
 
   async home(): Promise<any> {

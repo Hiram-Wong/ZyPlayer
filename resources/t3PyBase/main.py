@@ -26,11 +26,13 @@ def sync_wrapper(func, params):
 
 if __name__ == '__main__':
     try:
-        source_url = sys.argv[1]  # 模块地址
-        method_name = sys.argv[2]  # 调用的方法
-        method_params_str = sys.argv[3]  # 方法参数 JSON 字符串
+        # 解决不同操作系统下的参数传递问题
+        args = [arg.strip("'\"") for arg in sys.argv[1:]]
+        source_url = args[0]  # 模块地址
+        method_name = args[1]  # 调用的方法
+        method_params_str = args[2]  # 方法参数 JSON 字符串
         method_params = json.loads(method_params_str)  # 转换成 Python 对象
-        init_extend = sys.argv[4] if len(sys.argv) == 5 else ""
+        init_extend = args[3] if len(args) == 4 else ""
 
         # 下载并加载模块
         module_name = "dynamic_module"
