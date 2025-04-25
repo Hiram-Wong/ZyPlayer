@@ -15,6 +15,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SharePopup: typeof import('./src/components/share-popup/index.vue')['default']
+    ShortcutInput: typeof import('./src/components/shortcut-input/index.vue')['default']
     Split: typeof import('./src/components/split/index.vue')['default']
     Table: typeof import('./src/components/common-setting/table/index.vue')['default']
     TagNav: typeof import('./src/components/tag-nav/index.vue')['default']

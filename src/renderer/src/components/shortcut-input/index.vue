@@ -39,9 +39,9 @@ const props = defineProps({
 const emits = defineEmits(['update:modelValue']);
 
 const modelValue = ref(props.modelValue);
+const originVal = ref(props.modelValue);
 const tip = ref('');
 const status = ref('default');
-const tmp = ref({ origin: '' });
 
 const shortcutVal = computed({
   get: () => handleShortcutFormat(modelValue.value),
@@ -70,7 +70,7 @@ watch(
       status.value = isValid ? 'default' : 'error';
       if (isValid) {
         emits('update:modelValue', val);
-        tmp.value.origin = val;
+        originVal.value = val;
       }
     }
   },
@@ -156,12 +156,12 @@ const handleKeyUp = (_value: any, context: { e: KeyboardEvent }) => {
   const { e } = context;
   e.preventDefault();
 
-  modelValue.value = tmp.value.origin;
+  modelValue.value = originVal.value;
 };
 
 const cancelShortcut = () => {
   modelValue.value = '';
-  tmp.value.origin = '';
+  originVal.value = '';
 };
 </script>
 
