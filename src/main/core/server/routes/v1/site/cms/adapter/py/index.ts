@@ -33,19 +33,26 @@ class T3PyAdapter {
   // 检查 Python 是否安装
   async checkPython(): Promise<boolean> {
     const command = platform === 'win32' ? 'where python || where python3' : 'which python || which python3';
+    const linebreak =  platform === 'win32' ? '\r\n' : '\n';
 
     try {
       const { stdout } = await execAsync(command);
-      const paths = stdout.trim().split('\n').filter(Boolean);
+      let paths = stdout.split(linebreak).filter(Boolean);
+
+      // 如果是 Windows 平台，过滤掉 Windows Store 的 Python 路径
+      if (platform === 'win32') {
+        paths = paths.filter((path) => !path.includes('\\AppData\\Local\\Microsoft\\WindowsApps\\'));
+      }
+      logger.info('[site][t3-py][py] envs:', paths);
 
       if (paths.length > 0) {
         this.pythonPath = paths[0];
-        this.isPythonInstalled = 0;
-        logger.info(`[site][t3-py][py] env: ${this.pythonPath}`);
+        this.isPythonInstalled = 0; // 0 表示 Python 已安装
+        logger.info(`[site][t3-py][py] env select: ${this.pythonPath}`);
         return true;
       }
 
-      this.isPythonInstalled = -1;
+      this.isPythonInstalled = -1; // -1 表示 Python 未安装
       logger.warn('[site][t3-py][py] env not found');
       return false;
     } catch (err) {
@@ -68,6 +75,9 @@ class T3PyAdapter {
         scriptPath: this.scriptPath,
         pythonPath: this.pythonPath,
         args: [this.api, method, JSON.stringify(data)],
+        env: {
+          PYTHONIOENCODING: 'utf-8',
+        },
       });
 
       let transcript: string = '';
