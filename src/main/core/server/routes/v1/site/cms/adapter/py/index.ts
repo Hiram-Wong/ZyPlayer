@@ -32,7 +32,8 @@ class T3PyAdapter {
 
   // 检查 Python 是否安装
   async checkPython(): Promise<boolean> {
-    const command = platform === 'win32' ? 'where python || where python3' : 'which python || which python3';
+    // https://github.com/nodejs/node-v0.x-archive/issues/2190
+    const command = platform === 'win32' ? 'chcp 65001 | where python || where python3' : 'which python || which python3';
     const linebreak =  platform === 'win32' ? '\r\n' : '\n';
 
     try {
@@ -67,14 +68,14 @@ class T3PyAdapter {
     if (this.isPythonInstalled === -1) throw new Error('Python not installed');
 
     return new Promise(async (resolve, reject) => {
-      logger.info('[site][t3-py][ipc] args:', [this.api, method, JSON.stringify(data)]);
+      logger.info('[site][t3-py][ipc] args:', [this.fileContent, method, JSON.stringify(data)]);
 
       const pyShell = new PythonShell('main.py', {
         mode: 'text',
         pythonOptions: ['-u'],
         scriptPath: this.scriptPath,
         pythonPath: this.pythonPath,
-        args: [this.api, method, JSON.stringify(data)],
+        args: [this.fileContent, method, JSON.stringify(data)],
         env: {
           PYTHONIOENCODING: 'utf-8',
         },
@@ -84,7 +85,7 @@ class T3PyAdapter {
 
       pyShell.on('message', (msg: string) => {
         logger.info('[site][t3-py][msg]', msg);
-        transcript += msg;
+        transcript = msg;
       });
 
       pyShell.end((err: PythonShellError, code: number, signal: string) => {

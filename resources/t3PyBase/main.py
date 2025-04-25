@@ -4,6 +4,8 @@ import json
 import requests
 import asyncio
 import inspect
+# import contextlib
+# import io
 
 def load_module_from_source(module_name, source_code):
     """
@@ -19,6 +21,11 @@ def sync_wrapper(func, params):
     """
     同步方法包装器，兼容协程和普通函数
     """
+    # with io.StringIO() as buf, contextlib.redirect_stdout(buf):
+    #     if inspect.iscoroutinefunction(func):
+    #         return asyncio.run(func(*params))
+    #     else:
+    #         return func(*params)
     if inspect.iscoroutinefunction(func):
         return asyncio.run(func(*params))
     else:
@@ -28,7 +35,9 @@ if __name__ == '__main__':
     try:
         # 解决不同操作系统下的参数传递问题
         args = [arg.strip("'\"") for arg in sys.argv[1:]]
-        source_url = args[0]  # 模块地址
+        # source_url = args[0]  # 模块地址
+        # source_code = requests.get(source_url).content
+        source_code = args[0]  # 模块代码
         method_name = args[1]  # 调用的方法
         method_params_str = args[2]  # 方法参数 JSON 字符串
         method_params = json.loads(method_params_str)  # 转换成 Python 对象
@@ -36,7 +45,6 @@ if __name__ == '__main__':
 
         # 下载并加载模块
         module_name = "dynamic_module"
-        source_code = requests.get(source_url).text
         module = load_module_from_source(module_name, source_code)
 
         # 创建类实例并初始化（如果有 init 方法）
@@ -50,6 +58,6 @@ if __name__ == '__main__':
         method = getattr(spider, method_name)
         result = sync_wrapper(method, method_params)
 
-        print(json.dumps(result, ensure_ascii=False))
+        print(json.dumps(result, ensure_ascii=False), flush=True)
     except Exception as e:
-        print(json.dumps({'error': str(e)}, ensure_ascii=False))
+        print(json.dumps({'error': str(e)}, ensure_ascii=False), flush=True)
