@@ -241,22 +241,23 @@ const ipcListen = () => {
   });
 
   // 老板键管理
-  ipcMain.handle('manage-boss-shortcut', (_, action, shortcut) => {
-    logger.info(`[ipcMain] bossShortcut ${action}`);
+  ipcMain.handle('manage-boss-shortcut', (_, doc) => {
+    logger.info('[ipcMain][bossShortcut] args:', doc);
+
+    const { action, shortcut, name, override } = doc;
     switch (action) {
       case 'register': {
-        return globalShortcut.register(shortcut, toggleWinVisable);
+        return globalShortcut.register({ shortcut, func: toggleWinVisable, name, override });
       }
       case 'unRegister': {
-        return globalShortcut.unregister(shortcut);
-      }
-      case 'unRegisterAll': {
-        return globalShortcut.unregisterAll();
+        return globalShortcut.unregister({ shortcut, name });
       }
       case 'isRegistered': {
-        return globalShortcut.isRegistered(shortcut);
+        return globalShortcut.isRegistered({ shortcut, name });
       }
     }
+
+    return false;
   });
 
   // 窗口管理

@@ -308,20 +308,16 @@ watch(() => [
 // 监听快捷键
 watch(
   () => formData.value.recordShortcut,
-  async (newShortcut, oldShortcut) => {
-    if (oldShortcut) {
-      await window.electron.ipcRenderer.invoke('manage-boss-shortcut', 'unRegister', oldShortcut);
-    }
+  async (val) => {
+    await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'unRegister', name: 'boss' });
+    if (!val) return;
 
-    if (!newShortcut) return;
-
-    const isAvailable = await window.electron.ipcRenderer.invoke('manage-boss-shortcut', 'isRegistered', newShortcut);
-
+    const isAvailable = await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'isRegistered', shortcut: val });
     if (isAvailable) {
-      MessagePlugin.error(t('pages.setting.placeholder.shortcutErrRegistered'));
       formData.value.recordShortcut = '';
+      MessagePlugin.error(t('pages.setting.placeholder.shortcutErrRegistered'));
     } else {
-      await window.electron.ipcRenderer.invoke('manage-boss-shortcut', 'register', newShortcut);
+      await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'register', shortcut: val, name: 'boss' });
     }
   }
 );

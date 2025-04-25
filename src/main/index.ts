@@ -191,7 +191,12 @@ const setupReady = () => {
       });
     };
     if (globalThis.variable.debug) dbServer();  // 初始化数据库服务
-    if (globalThis.variable.recordShortcut) globalShortcut.register(globalThis.variable.recordShortcut, toggleWinVisable);  // 注册老板键
+    if (globalThis.variable.recordShortcut) globalShortcut.register({
+      shortcut: globalThis.variable.recordShortcut,
+      func: toggleWinVisable,
+      name: 'boss',
+      override: true,
+    });  // 注册老板键
   });
 
   app.on('activate', () => {
@@ -200,7 +205,7 @@ const setupReady = () => {
 
   app.on('window-all-closed', () => {
     nativeTheme.removeAllListeners('updated');
-    globalShortcut.unregisterAll();
+    globalShortcut.clear();
     if (!platform.isMacOS) app.quit();
   });
 
