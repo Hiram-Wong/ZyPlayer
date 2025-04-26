@@ -183,7 +183,7 @@ const getVideoInfo = async (url: string, title: string) => {
   playFormData.value.headers = analyzeRes.headers;
   const playerMode = storePlayer.setting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: playFormData.value.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: playFormData.value.url });
   } else {
     if (playerRef.value) {
       await playerRef.value.create(playFormData.value, playerMode.type);

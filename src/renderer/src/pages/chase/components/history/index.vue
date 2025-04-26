@@ -213,7 +213,7 @@ const handleIptvPlay = async (item) => {
   const infoData = await fetchChannelDetail(videoId);
   const playerMode = storePlayer.getSetting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: infoData.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: infoData.url });
   } else {
     const response = await fetchIptvActive();
     const { epg, markIp, logo } = response["ext"];
@@ -232,7 +232,7 @@ const handleDrivePlay = async (item) => {
   const infoData = await fetchAlistFile({ path: base64.decode(videoId), sourceId: relateSite.id });
   const playerMode = storePlayer.getSetting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: infoData.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: infoData.url });
   } else {
     const dirData = await fetchAlistDir({ path: siteSource, sourceId: relateSite.id });
     const doc = {
@@ -257,7 +257,7 @@ const handleAnalyzePlay = async (item) => {
       MessagePlugin.error(t('pages.analyze.message.error'));
       return;
     };
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: response.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: response.url });
   } else {
     const doc = {
       info: { id: videoId, url, name: videoName },

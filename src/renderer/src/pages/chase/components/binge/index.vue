@@ -193,7 +193,7 @@ const handleIptvPlay = async (item) => {
   const infoData = await fetchChannelDetail(videoId);
   const playerMode = storePlayer.getSetting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: infoData.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: infoData.url });
     // 记录播放记录
     const historyRes = await fetchHistoryData(relateSite.key, videoId, ['iptv']);
     const doc = {
@@ -236,7 +236,7 @@ const handleDrivePlay = async (item) => {
   const dirData = await fetchAlistDir({ path: videoType, sourceId: relateSite.id });
   const playerMode = storePlayer.getSetting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: infoData.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: infoData.url });
     // 记录播放记录
     const historyRes = await fetchHistoryData(relateSite.key, videoId, ['drive']);
     const doc = {
@@ -282,7 +282,7 @@ const handleAnalyzePlay = async (item) => {
       MessagePlugin.error(t('pages.analyze.message.error'));
       return;
     };
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: response.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: response.url });
     const historyRes = await fetchHistoryData(relateSite.key, videoId, ['analyze']);
     const doc = {
       date: moment().unix(),

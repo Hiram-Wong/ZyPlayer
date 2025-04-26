@@ -231,7 +231,7 @@ const callPlay = async (item) => {
   const response = await playHelper(url, extConf.value.site, active.value.flimSource, analyzeType, false);
   if (response?.url) {
     const { playerMode } = extConf.value.setting;
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: response.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: response.url });
     putHistory();
   };
 };

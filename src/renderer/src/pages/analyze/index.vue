@@ -265,7 +265,7 @@ const playEvent = async (url: string) => {
         MessagePlugin.error(t('pages.analyze.message.error'));
         return;
       };
-      window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: res.url });
+      window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: res.url });
 
       // 记录播放记录
       const historyRes = await fetchHistoryData(site.key, url, ['analyze']);

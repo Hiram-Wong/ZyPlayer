@@ -273,7 +273,7 @@ const playEvent = async (item) => {
     const res = await fetchAlistFile({ path: item.path, sourceId: site.id });
     const playerMode = storePlayer.getSetting.playerMode;
     if (playerMode.type === 'custom') {
-      window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: res.url });
+      window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: res.url });
 
       // 记录播放记录
       const historyRes = await fetchHistoryData(site.key, base64.encode(item.path), ['drive']);

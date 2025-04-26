@@ -130,7 +130,7 @@ const updatePlay = async (item) => {
 
   const playerMode = storeConf.value.setting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: playerFormData.value.url });
+    window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: playerFormData.value.url });
   } else {
     await playerRef.value?.create({ ...playerFormData.value }, playerMode.type);
     await playerRef.value?.onTimeUpdate();
