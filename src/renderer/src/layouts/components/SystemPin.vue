@@ -17,9 +17,8 @@ const active = ref({
 
 // 窗口置顶
 const toggleAlwaysOnTop = async () => {
-  const status = await window.electron.ipcRenderer.invoke('manage-pin', 'status');
-  const newStatus = !status;
-  await window.electron.ipcRenderer.invoke('manage-pin', 'set', newStatus);
+  const currStatus = await window.electron.ipcRenderer.invoke('manage-pin', { action: 'status' });
+  const newStatus = await window.electron.ipcRenderer.invoke('manage-pin', { action: 'set', config: { status: !currStatus } });
   active.value.pin = newStatus;
 };
 </script>
