@@ -309,15 +309,15 @@ watch(() => [
 watch(
   () => formData.value.recordShortcut,
   async (val) => {
-    await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'unRegister', name: 'boss' });
+    await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'unRegister', config: { name: 'boss' }});
     if (!val) return;
 
-    const isAvailable = await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'isRegistered', shortcut: val });
+    const isAvailable = await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'isRegistered', config: { shortcut: val }});
     if (isAvailable) {
       formData.value.recordShortcut = '';
       MessagePlugin.error(t('pages.setting.placeholder.shortcutErrRegistered'));
     } else {
-      await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'register', shortcut: val, name: 'boss' });
+      await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'register', config: { shortcut: val, name: 'boss' }});
     }
   }
 );
