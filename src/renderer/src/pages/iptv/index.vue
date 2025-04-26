@@ -280,7 +280,7 @@ const playEvent = async (item) => {
     const site: any = iptvConfig.value.default;
     const playerMode = storePlayer.getSetting.playerMode;
     if (playerMode.type === 'custom') {
-      window.electron.ipcRenderer.send('call-player', playerMode.external, item.url);
+      window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: item.url });
       // 记录播放记录
       const { id: vod_id, logo: vod_pic, name: vod_name, url: vod_url, group: type_name } = item;
       const historyRes = await fetchHistoryData(site.key, vod_url, ['iptv']);
@@ -315,7 +315,7 @@ const playEvent = async (item) => {
           ext: { epg, markIp, logo, site, setting: storePlayer.setting },
         },
       });
-      window.electron.ipcRenderer.send('open-play-win', item.name);
+      window.electron.ipcRenderer.send('open-win', { action: 'play' });
     }
   } catch (err) {
     console.error(`[iptv][playEvent][error]`, err);

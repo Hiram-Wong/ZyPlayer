@@ -131,7 +131,7 @@ const playerPlayEvent = async () => {
   const playerMode = storePlayer.setting.playerMode;
 
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', playerMode.external, url);
+    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url });
   } else {
     let mediaType = type;
     if (mediaType === 'auto') {

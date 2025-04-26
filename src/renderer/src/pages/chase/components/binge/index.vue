@@ -184,7 +184,7 @@ const handleFilmPlay = async (item) => {
     isVisible.detail = true;
   } else {
     storePlayer.updateConfig({ type: 'film', status: true, data: doc });
-    window.electron.ipcRenderer.send('open-play-win', videoName);
+    window.electron.ipcRenderer.send('open-win', { action: 'play' });
   }
 };
 
@@ -193,7 +193,7 @@ const handleIptvPlay = async (item) => {
   const infoData = await fetchChannelDetail(videoId);
   const playerMode = storePlayer.getSetting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', playerMode.external, infoData.url);
+    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: infoData.url });
     // 记录播放记录
     const historyRes = await fetchHistoryData(relateSite.key, videoId, ['iptv']);
     const doc = {
@@ -225,7 +225,7 @@ const handleIptvPlay = async (item) => {
       ext: { epg, markIp, logo, site: relateSite, setting: storePlayer.setting },
     };
     storePlayer.updateConfig({ type: 'iptv', status: true, data: doc });
-    window.electron.ipcRenderer.send('open-play-win', videoName);
+    window.electron.ipcRenderer.send('open-win', { action: 'play' });
   }
 };
 
@@ -236,7 +236,7 @@ const handleDrivePlay = async (item) => {
   const dirData = await fetchAlistDir({ path: videoType, sourceId: relateSite.id });
   const playerMode = storePlayer.getSetting.playerMode;
   if (playerMode.type === 'custom') {
-    window.electron.ipcRenderer.send('call-player', playerMode.external, infoData.url);
+    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: infoData.url });
     // 记录播放记录
     const historyRes = await fetchHistoryData(relateSite.key, videoId, ['drive']);
     const doc = {
@@ -269,7 +269,7 @@ const handleDrivePlay = async (item) => {
       ext: { files: dirData?.list || [], site: relateSite }
     };
     storePlayer.updateConfig({ type: 'drive', status: true, data: doc });
-    window.electron.ipcRenderer.send('open-play-win', videoName);
+    window.electron.ipcRenderer.send('open-win', { action: 'play' });
   }
 };
 
@@ -282,7 +282,7 @@ const handleAnalyzePlay = async (item) => {
       MessagePlugin.error(t('pages.analyze.message.error'));
       return;
     };
-    window.electron.ipcRenderer.send('call-player', playerMode.external, response.url);
+    window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: response.url });
     const historyRes = await fetchHistoryData(relateSite.key, videoId, ['analyze']);
     const doc = {
       date: moment().unix(),
@@ -311,7 +311,7 @@ const handleAnalyzePlay = async (item) => {
       ext: { site: relateSite, setting: storePlayer.setting },
     };
     storePlayer.updateConfig({ type: 'analyze', status: true, data: doc });
-    window.electron.ipcRenderer.send('open-play-win', videoName);
+    window.electron.ipcRenderer.send('open-win', { action: 'play' });
   };
 };
 

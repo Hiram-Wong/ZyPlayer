@@ -503,8 +503,7 @@ const playEvent = async (item) => {
         status: true,
         data: doc,
       });
-
-      window.electron.ipcRenderer.send('open-play-win', item.vod_name);
+      window.electron.ipcRenderer.send('open-win', { action: 'play' });
     }
   } catch (err) {
     console.error(`[film][playEvent][error]`, err);

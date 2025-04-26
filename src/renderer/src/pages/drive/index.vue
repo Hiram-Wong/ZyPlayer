@@ -273,7 +273,7 @@ const playEvent = async (item) => {
     const res = await fetchAlistFile({ path: item.path, sourceId: site.id });
     const playerMode = storePlayer.getSetting.playerMode;
     if (playerMode.type === 'custom') {
-      window.electron.ipcRenderer.send('call-player', playerMode.external, res.url);
+      window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: res.url });
 
       // 记录播放记录
       const historyRes = await fetchHistoryData(site.key, base64.encode(item.path), ['drive']);
@@ -314,7 +314,7 @@ const playEvent = async (item) => {
           ext: { files: driveContent.value, site: driveConfig.value.default }
         },
       });
-      window.electron.ipcRenderer.send('open-play-win', res.name);
+      window.electron.ipcRenderer.send('open-win', { action: 'play' });
     }
   } catch (err) {
     console.error(`[film][playEvent][error]`, err);

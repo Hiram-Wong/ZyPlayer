@@ -64,7 +64,7 @@ onMounted(() => {
 
 // 打开主窗口
 const openMainWinEvent = () => {
-  window.electron.ipcRenderer.send('show-main-win');
+  window.electron.ipcRenderer.send('open-win', { action: 'main' });
 };
 
 // 全屏事件 mac修复状态栏 css 用

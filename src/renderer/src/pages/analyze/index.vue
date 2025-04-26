@@ -265,7 +265,7 @@ const playEvent = async (url: string) => {
         MessagePlugin.error(t('pages.analyze.message.error'));
         return;
       };
-      window.electron.ipcRenderer.send('call-player', playerMode.external, res.url);
+      window.electron.ipcRenderer.send('call-player', { path: playerMode.external, url: res.url });
 
       // 记录播放记录
       const historyRes = await fetchHistoryData(site.key, url, ['analyze']);
@@ -299,7 +299,7 @@ const playEvent = async (url: string) => {
           ext: { site, setting: storePlayer.setting },
         },
       });
-      window.electron.ipcRenderer.send('open-play-win', item.vod_name);
+      window.electron.ipcRenderer.send('open-win', { action: 'play' });
     };
   } catch (err) {
     console.error(`[analyze][playEvent][error]`, err);
