@@ -26,21 +26,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { useFileSystemAccess } from '@vueuse/core';
 
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { CodeEditor } from '@/components/code-editor';
 
 const storeSetting = useSettingStore();
-const file = useFileSystemAccess({
-  dataType: 'Text',
-  types: [{
-    description: 'Text Files',
-    accept: { 'text/plain': ['.txt'] },
-  }],
-  excludeAcceptAllOption: false,
-});
 
 const theme = computed(() => storeSetting.displayTheme);
 const form = ref({
@@ -75,12 +66,30 @@ watch(
 
 const importFileEvent = async (type: string) => {
   try {
-    await file.open();
-    form.value[type] = file.data.value || '';
+    const res = await window.electron.ipcRenderer.invoke('manage-dialog', {
+      action: 'showOpenDialog',
+      config: {
+        properties: ['openFile', 'showHiddenFiles'],
+        filters: [
+          { name: 'Text Files', extensions: ['txt'] },
+          { name: 'Json Files', extensions: ['json'] },
+          { name: 'All Files', extensions: ['*'] }
+        ],
+      }
+    });
+    if (!res || res.canceled || !res.filePaths.length) return;
+
+    const fileContent = await window.electron.ipcRenderer.invoke('manage-file', {
+      action: 'read',
+      config: {
+        path: res.filePaths[0],
+      }
+    });
+
+    form.value[type] = fileContent || '';
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err: any) {
-    console.error(`[exportFileEvent][Error]:`, err);
-    if (err?.name === 'AbortError') return;
+    console.error(`[importFileEvent] err:`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
 };

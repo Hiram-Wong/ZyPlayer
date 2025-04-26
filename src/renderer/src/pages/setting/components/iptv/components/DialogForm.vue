@@ -132,18 +132,26 @@ const onReset: FormProps['onReset'] = () => {
 };
 
 const uploadFileEvent = async () => {
-  const res = await window.electron.ipcRenderer.invoke('dialog-file-access', {
-    properties: ['openFile'],
-    filters: [{
-      name: 'M3u Files', extensions: ['m3u', 'm3u8','ts']
-    }, {
-      name: 'Text Files', extensions: ['txt']
-    }, {
-      name: 'All Files', extensions: ['*']
-    }],
-  });
-  if (!res || res?.filePaths?.length === 0) return;
-  formData.value.data.url = res.filePaths[0];
+  try {
+    const res = await window.electron.ipcRenderer.invoke('manage-dialog', {
+      action: 'showOpenDialog',
+      config: {
+        properties: ['openFile', 'showHiddenFiles'],
+        filters: [
+          { name: 'M3u Files', extensions: ['m3u', 'm3u8','ts'] },
+          { name: 'Text Files', extensions: ['txt'] },
+          { name: 'All Files', extensions: ['*'] }
+        ],
+      }
+    });
+    if (!res || res.canceled || !res.filePaths.length) return;
+
+    formData.value.data.url = res.filePaths[0] || '';
+    MessagePlugin.success(t('pages.setting.data.success'));
+  } catch (err: any) {
+    console.error(`[uploadFileEvent] err:`, err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
+  }
 };
 
 const RULES = {

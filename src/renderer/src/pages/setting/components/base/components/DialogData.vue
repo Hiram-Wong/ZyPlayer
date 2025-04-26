@@ -196,7 +196,6 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, watch, reactive } from 'vue';
 import moment from 'moment';
 import { cloneDeep } from 'lodash-es';
-import { useFileSystemAccess } from '@vueuse/core';
 
 import { t } from '@/locales';
 import { clearDb, exportDb, webdevLocal2Remote, webdevRemote2Local, initDb } from '@/api/setting';
@@ -205,18 +204,6 @@ import emitter from '@/utils/emitter';
 
 defineOptions({
   name: 'SettingBaseDialogData',
-});
-
-const file = useFileSystemAccess({
-  dataType: 'Text',
-  types: [{
-    description: 'JavaScript Files',
-    accept: { 'text/plain': ['.js'] },
-  }, {
-    description: 'Text Files',
-    accept: { 'text/plain': ['.txt'] },
-  }],
-  excludeAcceptAllOption: false,
 });
 
 const props = defineProps({
@@ -433,18 +420,24 @@ const importData = async (importType, importMode) => {
 
 // 文件事件
 const uploadFileEvent = async () => {
-  const res = await window.electron.ipcRenderer.invoke('dialog-file-access', {
-    properties: ['openFile'],
-    filters: [{
-      name: 'Json Files', extensions: ['json']
-    }, {
-      name: 'Text Files', extensions: ['txt']
-    }, {
-      name: 'All Files', extensions: ['*']
-    }],
-  });
-  if (!res || res?.filePaths?.length === 0) return;
-  formData.value.completeConfig.url = res.filePaths[0];
+  try {
+    const res = await window.electron.ipcRenderer.invoke('manage-dialog', {
+      action: 'showOpenDialog',
+      config: {
+        properties: ['openFile', 'showHiddenFiles'],
+        filters: [
+          { name: 'Json Files', extensions: ['json'] },
+          { name: 'Text Files', extensions: ['txt'] },
+          { name: 'All Files', extensions: ['*'] }
+        ],
+      },
+    });
+    if (!res || res.canceled || !res.filePaths.length) return;
+    formData.value.completeConfig.url = res.filePaths[0] || '';
+  } catch (err: any) {
+    console.error(`[uploadFileEvent] err:`, err);
+    MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
+  }
 };
 
 // 导出
@@ -459,34 +452,50 @@ const exportData = async () => {
   const str = JSON.stringify(dbData, null, 2);
 
   try {
-    file.data.value = str;
-    await file.saveAs({
-      suggestedName: 'config.json',
+    const res = await window.electron.ipcRenderer.invoke('manage-dialog', {
+      action: 'showSaveDialog',
+      config: {
+        defaultPath: `zyfun_config_${moment().format('YYYYMMDD_HHmmss')}.json`,
+        properties: ['showHiddenFiles'],
+        filters: [
+          { name: 'JSON Files', extensions: ['json'] }
+        ],
+      }
     });
-    MessagePlugin.success(t('pages.setting.data.success'));
+    if (!res || res.canceled || !res.filePath) return;
+
+    const writeStatus = await window.electron.ipcRenderer.invoke('manage-file', {
+      action: 'write',
+      config: {
+        path: res.filePath,
+        content: str,
+      }
+    });
+
+    if (writeStatus) MessagePlugin.success(t('pages.setting.data.success'));
+    else MessagePlugin.error(t('pages.setting.data.fail'));
   } catch (err: any) {
-    console.error('Failed to save or open save dialog:', err);
-    if (err?.name === 'AbortError') return;
+    console.error(`[exportData] err:`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}:${err}`);
   }
 };
 
 //  获取 cache 大小
 const getCacheSize = async (): Promise<void> => {
-  const size = await window.electron.ipcRenderer.invoke('manage-session', 'size');
+  const size = await window.electron.ipcRenderer.invoke('manage-session', { action: 'size' });
   formData.value.size.cache = size;
 };
 
 // 删除 cache
 const delCache = async (): Promise<void> => {
-  await window.electron.ipcRenderer.invoke('manage-session','clearCache');
+  await window.electron.ipcRenderer.invoke('manage-session', { action: 'clearCache' });
 };
 
 //  获取 thumbnail 文件夹大小
 const getThumbnailSize = async (): Promise<void> => {
   const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
   const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'thumbnail');
-  const size = await window.electron.ipcRenderer.invoke('manage-file', 'size', defaultPath);
+  const size = await window.electron.ipcRenderer.invoke('manage-file', { action: 'size', config: { path: defaultPath }});
   formData.value.size.thumbnail = size;
 };
 
@@ -494,7 +503,7 @@ const getThumbnailSize = async (): Promise<void> => {
 const delThumbnail = async (): Promise<void> => {
   const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
   const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'thumbnail');
-  await window.electron.ipcRenderer.invoke('manage-file','rm', defaultPath);
+  await window.electron.ipcRenderer.invoke('manage-file', { action: 'rm', config: { path: defaultPath }});
 };
 
 // 清理缓存

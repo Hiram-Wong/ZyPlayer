@@ -38,8 +38,9 @@ const ipcListen = () => {
   });
 
   // 文件操作
-  ipcMain.handle('manage-file', async (_, action: string, path: string = '', val: string = '') => {
-    logger.info(`[ipcMain] file action is ${action}`);
+  ipcMain.handle('manage-file', async (_,  doc) => {
+    const { action, config: { path, val} } = doc;
+    logger.info('[ipcMain][file] args:', doc);
 
     switch (action) {
       case 'rm': {
@@ -178,19 +179,15 @@ const ipcListen = () => {
     }
   });
 
-  // 文件对话框
-  ipcMain.handle('dialog-file-access', async (_, config) => {
-    logger.info(`[ipcMain] dialog-file-access: ${JSON.stringify(config)}`);
-    try {
-      const result = await dialog.showOpenDialog({
-        ...config
-      });
-      if (result.canceled) return null;
-      return result;
-    } catch (err: any) {
-      logger.error(`[ipcMain] dialog-file-access: ${err.message}`);
-      return null;
-    };
+  // 对话框
+  ipcMain.handle('manage-dialog', async (_, doc) => {
+    logger.info('[ipcMain][dialog] args:', doc);
+    const { action, config } = doc;
+    if (!dialog?.[action])  return;
+    const result = await dialog.showOpenDialog({
+      ...config
+    });
+    return result;
   });
 
   // 打开外部链接

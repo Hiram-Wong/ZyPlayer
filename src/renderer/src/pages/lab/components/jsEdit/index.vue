@@ -275,7 +275,6 @@ import 'splitpanes/dist/splitpanes.css';
 
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { useFileSystemAccess } from '@vueuse/core';
 import moment from 'moment';
 import JSON5 from 'json5';
 import { Splitpanes, Pane } from 'splitpanes';
@@ -302,17 +301,6 @@ const TEMPLATE_RULES = {};
 
 const router = useRouter();
 const storeSetting = useSettingStore();
-const file = useFileSystemAccess({
-  dataType: 'Text',
-  types: [{
-    description: 'JavaScript Files',
-    accept: { 'text/plain': ['.js'] },
-  }, {
-    description: 'Text Files',
-    accept: { 'text/plain': ['.txt'] },
-  }],
-  excludeAcceptAllOption: false,
-});
 
 const theme = computed(() => storeSetting.displayTheme);
 const tmp = computed(() => {
@@ -465,11 +453,11 @@ const logResizeObserver = new ResizeObserver(() => {
 
 // common
 const utilsReadFile = async(filePath: string) =>{
-  return await window.electron.ipcRenderer.invoke('manage-file', 'read', filePath);
+  return await window.electron.ipcRenderer.invoke('manage-file', { action: 'read', config: { path: filePath }});
 };
 
-const utilsWriteFile = async (filePath: string, val: string) => {
-  await window.electron.ipcRenderer.invoke('manage-file', 'write', filePath, val);
+const utilsWriteFile = async (filePath: string, content: string) => {
+  return await window.electron.ipcRenderer.invoke('manage-file', { action: 'write', config: { path: filePath, content: content }});
 };
 
 const utilsT3JsBasePath = async () => {
@@ -672,12 +660,30 @@ const confirmTemplate = () => {
 
 const handleImportFile = async () => {
   try {
-    await file.open();
-    form.value.content.js = file.data.value || '';
+    const res = await window.electron.ipcRenderer.invoke('manage-dialog', {
+      action: 'showOpenDialog',
+      config: {
+        properties: ['openFile', 'showHiddenFiles'],
+        filters: [
+          { name: 'JavaScript Files', extensions: ['js'] },
+          { name: 'Py Files', extensions: ['py'] },
+          { name: 'All Files', extensions: ['*'] }
+        ],
+      }
+    });
+    if (!res || res.canceled || !res.filePaths.length) return;
+
+    const fileContent = await window.electron.ipcRenderer.invoke('manage-file', {
+      action: 'read',
+      config: {
+        path: res.filePaths[0],
+      }
+    });
+
+    form.value.content.js = fileContent || '';
     MessagePlugin.success(t('pages.setting.data.success'));
   } catch (err: any) {
-    console.error(`[exportFileEvent][Error]:`, err);
-    if (err?.name === 'AbortError') return;
+    console.error(`[handleImportFile] err:`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
 };
@@ -691,16 +697,36 @@ const handleExportFile = async () => {
       return;
     };
 
-    const title = content.match(/title:(.*?),/)?.[1]?.replace(/['"]/g, '')?.trim() || 'source';
+    const basePath = await utilsBasePath();
+    let defaultPath = '';
+    if (form.value.init.mode === 't3py') {
+      defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `source.py`);
+    } else {
+      const title = content.match(/title:(.*?),/)?.[1]?.replace(/['"]/g, '')?.trim() || 'source';
+      defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `${title}.js`);
+    }
 
-    file.data.value = content;
-    await file.saveAs({
-      suggestedName: `${title}.js`,
+    const res = await window.electron.ipcRenderer.invoke('manage-dialog', {
+      action: 'showSaveDialog',
+      config: {
+        defaultPath: defaultPath,
+        properties: ['showHiddenFiles'],
+      }
     });
-    MessagePlugin.success(t('pages.setting.data.success'));
+    if (!res || res.canceled || !res.filePath) return;
+
+    const writeStatus = await window.electron.ipcRenderer.invoke('manage-file', {
+      action: 'write',
+      config: {
+        path: res.filePath,
+        content: content,
+      }
+    });
+
+    if (writeStatus) MessagePlugin.success(t('pages.setting.data.success'));
+    else MessagePlugin.error(t('pages.setting.data.fail'));
   } catch (err: any) {
-    console.error(`[exportFileEvent][Error]:`, err);
-    if (err?.name === 'AbortError') return;
+    console.error(`[handleExportFile] err:`, err);
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   };
 };
