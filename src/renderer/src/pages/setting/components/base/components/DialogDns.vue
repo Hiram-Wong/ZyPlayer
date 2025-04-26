@@ -86,6 +86,7 @@ const onSubmit: FormProps['onSubmit'] = async () => {
     } else {
       const { data, type } = formData.value.data;
       emits('submit', { data, type });
+      window.electron.ipcRenderer.send('update-dns', data);
       formVisible.value = false;
     }
   });

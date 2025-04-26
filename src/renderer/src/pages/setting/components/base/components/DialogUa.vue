@@ -87,7 +87,6 @@ const onSubmit: FormProps['onSubmit'] = async () => {
     } else {
       const { data, type } = formData.value.data;
       emits('submit', { data, type });
-      window.electron.ipcRenderer.send('update-global', 'ua', data);
       formVisible.value = false;
     }
   });
