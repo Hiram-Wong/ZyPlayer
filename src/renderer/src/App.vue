@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { useLocalStorage } from '@vueuse/core';
+import { useLocalStorage, useScriptTag, usePreferredDark } from '@vueuse/core';
 import { onMounted, ref, watch } from 'vue';
 
 import { localeConfigKey } from '@/locales/index';
@@ -15,46 +15,45 @@ import { useLocale } from '@/locales/useLocale';
 import { usePlayStore, useSettingStore } from '@/store';
 import { fetchSetup } from '@/api/setting';
 import PLAY_CONFIG from '@/config/play';
-import { loadExternalResource } from '@/utils/tool';
 
 import DisclaimerView from '@/pages/Disclaimer.vue';
 
 const storePlayer = usePlayStore();
 const storeSetting = useSettingStore();
 const { getComponentsLocale, changeLocale } = useLocale();
-const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+const systemDark = usePreferredDark();
+const pagespySrcipt = useScriptTag(
+  'https://pagespy.jikejishu.com/page-spy/index.min.js',
+  () => {
+    // @ts-ignore
+    window.$pageSpy = new PageSpy({
+      api: 'pagespy.jikejishu.com',
+      clientOrigin: 'https://pagespy.jikejishu.com',
+      project: 'zyfun',
+      autoRender: true,
+      title: 'zyfun for debug',
+    });
+  },
+  { manual: true },
+);
 
 const active = ref({
   disclaimer: false,
 });
 
-const handleThemeChange = (e: MediaQueryListEvent) => {
-  const theme = e.matches? 'dark' : 'light';
-  document.documentElement.setAttribute('theme-mode', theme);
-  storeSetting.updateConfig({ theme });
-};
-
-watch(
-  () => storeSetting.getStateMode,
-  (val) => {
-    if (val === 'auto') {
-      (() => {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const theme = mediaQuery.matches ? 'dark' : 'light';
-        storeSetting.updateConfig({ theme });
-      })();
-      mediaQuery?.addEventListener('change', handleThemeChange);
-    } else {
-      storeSetting.updateConfig({ theme: val });
-      mediaQuery?.removeEventListener('change', handleThemeChange);
-    };
-  },
-  { immediate: true },
-);
 watch(
   () => useLocalStorage(localeConfigKey, 'zh_CN').value,
   (val) => {
     changeLocale(val);
+  },
+);
+watch(
+  () => systemDark.value,
+  (val) => {
+    const mode = storeSetting.getStateMode;
+    const theme = mode === 'auto' ? val ? 'dark' : 'light' : mode;
+    storeSetting.updateConfig({ theme });
+    document.documentElement.setAttribute('theme-mode', theme);
   },
 );
 
@@ -77,18 +76,6 @@ const initConfig = async () => {
   )
   storePlayer.updateConfig({ setting: init });
 
-  if (debug) {
-    const status = await loadExternalResource('https://pagespy.jikejishu.com/page-spy/index.min.js', 'js');
-    if (status) {
-      // @ts-ignore
-      window.$pageSpy = new PageSpy({
-        api: 'pagespy.jikejishu.com',
-        clientOrigin: 'https://pagespy.jikejishu.com',
-        project: 'zyfun',
-        autoRender: true,
-        title: 'zyfun for debug',
-      });
-    }
-  }
+  if (debug) await pagespySrcipt.load();
 };
 </script>
