@@ -480,7 +480,7 @@ const exportData = async () => {
   }
 };
 
-//  获取 cache 大小
+// 获取 cache 大小
 const getCacheSize = async (): Promise<void> => {
   const size = await window.electron.ipcRenderer.invoke('manage-session', { action: 'size' });
   formData.value.size.cache = size;
@@ -494,7 +494,7 @@ const delCache = async (): Promise<void> => {
 //  获取 thumbnail 文件夹大小
 const getThumbnailSize = async (): Promise<void> => {
   const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
-  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'thumbnail');
+  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'tmp/thumbnail');
   const size = await window.electron.ipcRenderer.invoke('manage-file', { action: 'size', config: { path: defaultPath }});
   formData.value.size.thumbnail = size;
 };
@@ -502,7 +502,7 @@ const getThumbnailSize = async (): Promise<void> => {
 // 删除 thumbnail 文件夹
 const delThumbnail = async (): Promise<void> => {
   const userDataPath = await window.electron.ipcRenderer.invoke('get-app-path', 'userData');
-  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'thumbnail');
+  const defaultPath = await window.electron.ipcRenderer.invoke('path-join', userDataPath, 'tmp/thumbnail');
   await window.electron.ipcRenderer.invoke('manage-file', { action: 'rm', config: { path: defaultPath }});
 };
 
