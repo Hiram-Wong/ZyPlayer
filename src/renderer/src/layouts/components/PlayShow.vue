@@ -65,11 +65,11 @@ const setMarqueeAnimation = () => {
 }
 
 const focusPlayerWindowEvent = () => {
-  window.electron.ipcRenderer.send('manage-win', 'play', 'focus');
+  window.electron.ipcRenderer.send('manage-win', { win: 'play', action: 'focus' });
 };
 
 const destroyPlayerWindowEvent = () => {
-  window.electron.ipcRenderer.send('manage-win', 'play', 'destroy');
+  window.electron.ipcRenderer.send('manage-win', { win: 'play', action: 'destroy' });
   playerStore.updateConfig({
     status: false,
   });
