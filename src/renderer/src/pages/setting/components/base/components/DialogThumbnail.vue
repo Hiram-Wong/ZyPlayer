@@ -8,7 +8,7 @@
     destroy-on-close
     :confirm-btn="$t('pages.md.thumbanilFfmpeg.confirm')"
     :cancel-btn="$t('pages.md.thumbanilFfmpeg.cancel')"
-    :on-confirm="dialogCheckFfmpeg"
+    :on-confirm="handleCheckFfmpeg"
   >
     <template #title>
       <h1>{{ $t('pages.md.thumbanilFfmpeg.title') }}</h1>
@@ -55,11 +55,10 @@ watch(
   },
 );
 
-const dialogCheckFfmpeg = () => {
-  window.electron.ipcRenderer.invoke('ffmpeg-installed-check').then(status => {
-    if (status) MessagePlugin.success(t('pages.setting.thumbanilFfmpeg.haveFfmpeg'));
-    else MessagePlugin.error(t('pages.setting.thumbanilFfmpeg.noFfmpeg'));
-  });
+const handleCheckFfmpeg = async () => {
+  const status = await window.electron.ipcRenderer.invoke('ffmpeg-check');
+  if (status) MessagePlugin.success(t('pages.setting.thumbanilFfmpeg.haveFfmpeg'));
+  else MessagePlugin.error(t('pages.setting.thumbanilFfmpeg.noFfmpeg'));
 };
 </script>
 
