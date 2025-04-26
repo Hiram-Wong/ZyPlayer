@@ -2,6 +2,7 @@ import { electronApp, platform } from '@electron-toolkit/utils';
 import { exec } from 'child_process';
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, session, shell } from 'electron';
 import { join } from 'path';
+import { pathToFileURL } from 'url';
 import { promisify } from 'util';
 import logger from '@main/core/logger';
 import { globalShortcut } from '@main/core/shortcut';
@@ -9,185 +10,244 @@ import puppeteerInElectron from '@main/utils/sniffer';
 import { toggleWinVisable } from '@main/utils/tool';
 import { createMain, createPlay, getWin, getAllWin } from '@main/core/winManger';
 import { createDir, deleteDir, deleteFile, saveFile, fileExist, fileSize, fileState, readFile } from '@main/utils/hiker/file';
-import { getAppDefaultPath, APP_STORE_PATH } from '@main/utils/hiker/path';
+import { getAppDefaultPath, APP_STORE_PATH, APP_TMP_PATH } from '@main/utils/hiker/path';
 
 const execAsync = promisify(exec);
 
 const ipcListen = () => {
   // 设置开机自启
   ipcMain.on('toggle-selfBoot', (_, status) => {
-    logger.info(`[ipcMain] set-selfBoot: ${status}`);
+    logger.info(`[ipcMain][selfBoot] status:${status}`);
     electronApp.setAutoLaunch(status);
   });
 
   // 打开系统代理设置
   ipcMain.on('open-proxy-setting', () => {
-    logger.info(`[ipcMain] open-proxy-setting`);
+    logger.info(`[ipcMain][proxy-setting] open`);
     if (platform.isWindows) shell.openPath('ms-settings:network-proxy');
     if (platform.isMacOS) shell.openExternal('x-apple.systempreferences:com.apple.preference.network?Proxies');
     if (platform.isLinux) shell.openPath('gnome-control-center network');
   });
 
   // 打开播放器
-  ipcMain.on('call-player', (_, path: string, url: string) => {
-    if (url && path) {
+  ipcMain.handle('call-player', async (_, doc) => {
+    logger.info(`[ipcMain][call-player] args:${JSON.stringify(doc)}`);
+
+    const { url, path } = doc;
+    if (!url || !path) return;
+
+    try {
       const command = `${path} "${url}"`;
-      exec(command);
-      logger.info(`[ipcMain] call-player: command:${command}`);
+      logger.info(`[ipcMain][call-player] command:${command}`);
+      const { stdout, stderr } = await execAsync(command);
+
+      if (stdout) {
+        logger.info(`[ipcMain][call-player] info output:`, stdout);
+        return true;
+      }
+
+      if (stderr) {
+        logger.error(`[ipcMain][call-player] err output:`, stderr);
+      }
+
+      return false;
+    } catch (err: any) {
+      logger.error(`[ipcMain][call-player] err:`, err);
+      return false;
     }
   });
 
   // 文件操作
   ipcMain.handle('manage-file', async (_,  doc) => {
-    const { action, config: { path, val} } = doc;
-    logger.info('[ipcMain][file] args:', doc);
+    logger.info('[ipcMain][file] args:', JSON.stringify(doc));
 
-    switch (action) {
-      case 'rm': {
-        const pathExists = await fileExist(path);
-        if (pathExists) {
-          if (await fileState(path) === 'file') await deleteFile(path)
-          else if (await fileState(path) === 'dir') await deleteDir(path);
-        };
-        return;
-      }
-      case 'mk': {
-        const pathExists = await fileExist(path);
-        if (!pathExists) await createDir(path);
-        return;
-      }
-      case 'write': {
-        const pathExists = await fileExist(path);
-        if (pathExists && await fileState(path) !== 'file') return;
-        await saveFile(path, val);
-        return;
-      }
-      case 'read': {
-        const pathExists = await fileExist(path);
-        if (pathExists) {
-          if (await fileState(path) === 'file') return await readFile(path);
-          else if (await fileState(path) === 'dir') return [];
-        };
-      }
-      case 'size': {
-        const seize = await fileSize(path) / 1024 / 1024;
-        return seize.toFixed(2);
-      }
-      case 'state': {
-        return await fileState(path);
-      }
-      case 'exist': {
-        return await fileExist(path);
-      }
-      default:
-        return;
-    };
+    const rm = async (config) => {
+      const { path } = config;
+      const pathExists = await fileExist(path);
+      if (!pathExists) return false;
+      if (await fileState(path) === 'file') return await deleteFile(path)
+      else if (await fileState(path) === 'dir') return await deleteDir(path);
+      return false;
+    }
+
+    const mk = async (config) => {
+      const { path } = config;
+      const pathExists = await fileExist(path);
+      if (pathExists) return false;
+      return await createDir(path);
+    }
+
+    const write = async (config) => {
+      const { path, content } = config;
+      const pathExists = await fileExist(path);
+      if (pathExists && await fileState(path)!== 'file') return false;
+      return await saveFile(path, content);
+    }
+
+    const read = async (config) => {
+      const { path } = config;
+      const pathExists = await fileExist(path);
+      if (pathExists) {
+        if (await fileState(path) === 'file') return await readFile(path);
+        else if (await fileState(path) === 'dir') return [];
+      };
+      return '';
+    }
+
+    const size = async (config) => {
+      const { path } = config;
+      const pathExists = await fileExist(path);
+      if (!pathExists) return 0;
+      const seize = await fileSize(path) / 1024 / 1024;
+      return seize.toFixed(2);
+    }
+
+    const state = async (config) => {
+      const { path } = config;
+      const pathExists = await fileExist(path);
+      if (!pathExists) return 'unknown';
+      return await fileState(path);
+    }
+
+    const exist = async (config) => {
+      const { path } = config;
+      return await fileExist(path);
+    }
+
+    const { action, config } = doc;
+    const methodMap = { rm, mk, write, read, size, state, exist };
+    if (!methodMap[action]) return;
+    return await methodMap[action](config);
   });
 
   // ffmpeg生成缩略图
   ipcMain.handle('ffmpeg-thumbnail', async (_, url, key) => {
     const { ua, timeout } = globalThis.variable;
-    const basePath = join(APP_STORE_PATH, 'thumbnail');
+    const basePath = join(APP_TMP_PATH, 'thumbnail');
 
-    await createDir(basePath);
+    if (await fileExist(basePath)) {
+      if ((await fileState(basePath)) !== 'dir') await deleteDir(basePath);
+    } else {
+      await createDir(basePath);
+    }
+
     const formatPath = join(basePath, `${key}.jpg`);
 
     const ffmpegCommand = 'ffmpeg';
     const inputOptions = ['-user_agent', `"${ua}"`, '-i', `"${url}"`];
     const outputOptions = ['-y', '-frames:v', '1', '-q:v', '20', '-update', '1'];
     const command = [ffmpegCommand, ...inputOptions, ...outputOptions, `"${formatPath}"`].join(' ');
+    logger.info(`[ipcMain][ffmpeg-thumbnail] command: ${command}`);
 
     try {
       const { stdout, stderr } = await execAsync(command, { timeout });
-      logger.info(`[ipcMain] FFmpeg generated success. ${stderr || stdout}`);
-      return { key, url: `file://${formatPath}` };
+      logger.info(`[ipcMain][ffmpeg-thumbnail] output:`, stdout || stderr);
+
+      if (await fileExist(formatPath)) {
+        return { key, url: pathToFileURL(formatPath).toString() };
+      }
+      return { key, url: '' };
     } catch (err: any) {
-      logger.error(`[ipcMain] Error FFmpeg generating thumbnail: ${err.message}`);
+      logger.error(`[ipcMain][ffmpeg-thumbnail] err:`, err);
       return { key, url: '' };
     }
   });
 
   // 检查ffmpeg是否安装
-  ipcMain.handle('ffmpeg-installed-check', async () => {
+  ipcMain.handle('ffmpeg-check', async () => {
     const { timeout } = globalThis.variable;
 
     try {
       const { stdout, stderr } = await execAsync('ffmpeg -version', { timeout });
-      logger.info(`[ipcMain] FFmpeg installed. ${stderr || stdout}`);
-      return true;
-    } catch (err) {
-      logger.error(`[ipcMain] Error checking FFmpeg installation: ${err}`);
+      if (stdout.includes('version')) {
+        logger.info(`[ipcMain][ffmpeg-check] info output:`, stdout);
+        return true;
+      }
+
+      if (stderr) {
+        logger.error(`[ipcMain][ffmpeg-check] err output:`, stderr);
+      }
+
+      return false;
+    } catch (err: any) {
+      logger.error(`[ipcMain][ffmpeg-check] err:`, err);
       return false;
     }
   });
 
   // 获取嗅探数据
-  ipcMain.handle(
-    'sniffer-media',
-    async (_, url, run_script, init_script, custom_regex, sniffer_exclude, headers = {}) => {
+  ipcMain.handle('sniffer-media', async (_, doc) => {
+      const { url, run_script, init_script, custom_regex, sniffer_exclude, headers = {} } = doc;
       const res = await puppeteerInElectron(url, run_script, init_script, custom_regex, sniffer_exclude, headers);
       return res;
     },
   );
 
   // session
-  ipcMain.handle('manage-session', async (_, action) => {
-    logger.info(`[ipcMain] session action is ${action}`);
-    switch (action) {
-      case 'clearCache':
-        await session.defaultSession.clearCache();
-        return;
-      case 'clearStorage':
-        await session.defaultSession.clearStorageData();
-        return;
-      case 'clearAll':
-        await session.defaultSession.clearCache();
-        await session.defaultSession.clearStorageData();
-        return;
-      case 'size':
-        const getSize = await session.defaultSession.getCacheSize() / 1024 / 1024;
-        const formatToMb = getSize.toFixed(2);
-        return formatToMb;
-      default:
-        return;
+  ipcMain.handle('manage-session', async (_, doc) => {
+    logger.info('[ipcMain][session] args:', JSON.stringify(doc));
+
+    const clearCache = async () => {
+      return await session.defaultSession.clearCache();
     }
+
+    const clearStorage = async () => {
+      return await session.defaultSession.clearStorageData();
+    }
+
+    const clearAll = async () => {
+      const clearCacheRes = await session.defaultSession.clearCache();
+      const clearStorageRes = await session.defaultSession.clearStorageData();
+      // @ts-ignore
+      return clearCacheRes && clearStorageRes;
+    }
+
+    const getSize = async () => {
+      const size = await session.defaultSession.getCacheSize() / 1024 / 1024;
+      const sizeToMb = size.toFixed(2);
+      return sizeToMb;
+    }
+
+    const { action } = doc;
+    const methodMap = { clearCache, clearStorage, clearAll, getSize };
+    if (!methodMap[action]) return;
+    return await methodMap[action]();
   });
 
   // 置顶管理
-  ipcMain.handle('manage-pin', (event, action, val: boolean = false) => {
-    logger.info(`[ipcMain] pin action is ${action}`);
+  ipcMain.handle('manage-pin', (event, doc) => {
+    logger.info('[ipcMain][pin] args:', JSON.stringify(doc));
 
-    switch (action) {
-      case 'status': {
-        const win = BrowserWindow.fromWebContents(event.sender)
-        const status = win?.isAlwaysOnTop();
-        return status;
-      }
-      case 'toggle': {
-        const win = BrowserWindow.fromWebContents(event.sender)
-        const status = win?.isAlwaysOnTop();
-        win?.setAlwaysOnTop(!status);
-        return !status;
-      }
-      case 'set': {
-        const win = BrowserWindow.fromWebContents(event.sender)
-        win?.setAlwaysOnTop(!val);
-        return win?.isAlwaysOnTop();
-      }
-      default:
-        return;
+    const status = ({ win }) => {
+      return win?.isAlwaysOnTop();
     }
+
+    const set = ({ win, status = false }) => {
+      win?.setAlwaysOnTop(status);
+      return win?.isAlwaysOnTop();
+    }
+
+    const toggle = ({ win }) => {
+      const status = win?.isAlwaysOnTop();
+      win?.setAlwaysOnTop(!status);
+      return !status;
+    }
+
+    const methodMap = { status, set, toggle };
+
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const { action, config } = doc;
+    if (!methodMap?.[action] || win?.isDestroyed()) return;
+    return methodMap[action]({ win, ...config });
   });
 
   // 对话框
   ipcMain.handle('manage-dialog', async (_, doc) => {
-    logger.info('[ipcMain][dialog] args:', doc);
+    logger.info('[ipcMain][dialog] args:', JSON.stringify(doc));
+
     const { action, config } = doc;
-    if (!dialog?.[action])  return;
-    const result = await dialog.showOpenDialog({
-      ...config
-    });
-    return result;
+    if (!dialog?.[action]) return;
+    return await dialog[action](config);
   });
 
   // 打开外部链接
@@ -233,33 +293,34 @@ const ipcListen = () => {
     app.quit();
   });
 
-  ipcMain.on('open-play-win', (_, _arg) => {
-    createPlay();
-  });
-
   // 老板键管理
   ipcMain.handle('manage-boss-shortcut', (_, doc) => {
-    logger.info('[ipcMain][bossShortcut] args:', doc);
+    logger.info('[ipcMain][bossShortcut] args:', JSON.stringify(doc));
 
-    const { action, shortcut, name, override } = doc;
-    switch (action) {
-      case 'register': {
-        return globalShortcut.register({ shortcut, func: toggleWinVisable, name, override });
-      }
-      case 'unRegister': {
-        return globalShortcut.unregister({ shortcut, name });
-      }
-      case 'isRegistered': {
-        return globalShortcut.isRegistered({ shortcut, name });
-      }
+    const register = (config) => {
+      const { shortcut, name, override } = config;
+      return globalShortcut.register({ shortcut, func: toggleWinVisable, name, override });
+    }
+    const unRegister = (config) => {
+      const { shortcut, name } = config;
+      return globalShortcut.unregister({ shortcut, name });
+    }
+    const isRegistered = (config) => {
+      const { shortcut, name } = config;
+      return globalShortcut.isRegistered({ shortcut, name });
     }
 
-    return false;
+    const { action, config } = doc;
+    const methodMap = { register, unRegister, isRegistered };
+    if (!methodMap[action]) return;
+    return methodMap[action](config);
   });
 
   // 窗口管理
-  ipcMain.on('manage-win', (_, winName, action) => {
-    logger.info(`[ipcMain] ${winName} action is ${action}`);
+  ipcMain.on('manage-win', (_, doc) => {
+    logger.info(`[ipcMain][win] args:${JSON.stringify(doc)}`);
+
+    const { win: winName, action } = doc;
     const win = getWin(winName);
     if (!win || win.isDestroyed()) return;
 
@@ -297,36 +358,55 @@ const ipcListen = () => {
     }
   });
 
-  // 显示主窗口
-  ipcMain.on('show-main-win', () => {
-    logger.info(`[ipcMain] show main windows`);
-    const win = getWin('main');
-    if (!win || win.isDestroyed()) {
-      createMain();
-    } else {
-      win.show();
-      win.focus();
+  ipcMain.on('open-win', (_, doc) => {
+    logger.info('[ipcMain][win] args:', JSON.stringify(doc));
+
+    const main = () => {
+      const win = getWin('main');
+      if (!win || win.isDestroyed()) {
+        createMain();
+      } else {
+        win.show();
+        win.focus();
+      }
     }
+
+    const play = () => {
+      const win = getWin('play');
+      if (!win || win.isDestroyed()) {
+        createPlay();
+      } else {
+        win.reload();
+        win.show();
+        win.focus();
+      }
+    }
+
+    const { action } = doc;
+    const methodMap = { main, play };
+    if (!methodMap[action]) return;
+    return methodMap[action]();
   });
 
   // 更新dns
   ipcMain.on('update-dns', (_, item) => {
-    logger.info(`[ipcMain] new dns: ${item}`);
-    if (item) {
+    logger.info(`[ipcMain][dns] args: ${item}`);
+
+    if (item && /^(https?:\/\/)/.test(item)) {
       app.configureHostResolver({
         secureDnsMode: 'secure',
         secureDnsServers: [item],
       });
     } else {
-      app.configureHostResolver({
-        secureDnsMode: 'off',
-      });
+      app.configureHostResolver({ secureDnsMode: 'off' });
     }
   });
 
   // 更新全局变量
-  ipcMain.on('update-global', (_, key, value) => {
-    logger.info(`[ipcMain] update-global: key: ${key} - value: ${value}`);
+  ipcMain.on('update-global', (_, doc) => {
+    logger.info('[ipcMain][global] args:', JSON.stringify(doc));
+
+    const { key, value } = doc;
     if (Object.keys(globalThis.variable).includes(key)) {
       globalThis.variable[key] = value;
     }

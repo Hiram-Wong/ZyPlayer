@@ -54,10 +54,25 @@ const setupCheck = async () => {
  * 应用启动参数
  */
 const setupApp = async () => {
+  /**
+   * OutOfBlinkCors - 跨域
+   * SameSiteByDefaultCookies - Cookie共享
+   * CookiesWithoutSameSiteMustBeSecure - Cookie支持非HTTPS
+   * BlockInsecurePrivateNetworkRequests - 私有网络发起的不安全请求
+   * OutOfProcessPdf - PDF处理
+   * IsolateOrigins - 隔离特定的源
+   * site-per-process - 网站独立进程
+   * StandardCompliantNonSpecialSchemeURLParsing - URL解析规则
+   */
   app.commandLine.appendSwitch(
     'disable-features',
     'OutOfBlinkCors, SameSiteByDefaultCookies, CookiesWithoutSameSiteMustBeSecure, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process, StandardCompliantNonSpecialSchemeURLParsing',
   ); // 禁用
+  /**
+   * HardwareAccelerationModeDefault - 硬件加速
+   * PlatformHEVCDecoderSupport - 视频解码
+   * GlobalShortcutsPortal - 全局快捷键
+   */
   app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport, HardwareAccelerationModeDefault, GlobalShortcutsPortal'); // 启用
   app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书错误
   app.commandLine.appendSwitch('disable-web-security'); // 禁用安全
