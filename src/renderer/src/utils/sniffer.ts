@@ -19,15 +19,14 @@ const snifferPie = async (
   };
 
   try {
-    const res = await window.electron.ipcRenderer.invoke(
-      'sniffer-media',
+    const res = await window.electron.ipcRenderer.invoke('sniffer-media', {
       url,
       run_script,
       init_script,
       custom_regex,
       sniffer_exclude,
       headers,
-    );
+    });
 
     if (res.code === 0) {
       data.url = res.data.url;
