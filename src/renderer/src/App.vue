@@ -48,13 +48,14 @@ watch(
   },
 );
 watch(
-  () => systemDark.value,
+  () => [ systemDark.value, storeSetting.getStateMode ],
   (val) => {
-    const mode = storeSetting.getStateMode;
-    const theme = mode === 'auto' ? val ? 'dark' : 'light' : mode;
+    const [ dark, mode ]: any = val;
+    const theme: string  = mode === 'auto' ? dark ? 'dark' : 'light' : mode;
     storeSetting.updateConfig({ theme });
     document.documentElement.setAttribute('theme-mode', theme);
   },
+  { immediate: true }
 );
 
 onMounted(() => {
