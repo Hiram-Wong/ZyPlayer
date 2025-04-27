@@ -134,8 +134,6 @@ import { fetchSettingDetail, putSetting } from '@/api/setting';
 import { platform as AI_PLATFORM } from '@/config/ai';
 import openaiIcon from '@/assets/ai/openai_kimi.png';
 import userIcon from '@/assets/ai/user.png';
-import '@/style/theme/index.less'; // 必须后引入, 不然样式冲突
-
 
 const AI_MODELS = ref([
   {
@@ -580,4 +578,9 @@ const RULES = {
     }
   }
 }
+</style>
+
+<style lang="less">
+@import '@/style/theme/index.less';
+@import '@/style/layout.less';
 </style>
