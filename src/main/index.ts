@@ -149,7 +149,6 @@ const setupSession = () => {
     delete requestHeaders['Electron-Cookie'];
 
     if (requestHeaders['Redirect'] === 'manual') reqIdRedirect[id] = headers;
-    console.log(url, requestHeaders);
 
     // 清理不再需要的记录
     delete reqIdMethod[id];
