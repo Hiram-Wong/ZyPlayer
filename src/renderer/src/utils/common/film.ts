@@ -533,10 +533,14 @@ const fetchAnalyzeHelper = async (url: string, type: number, headers: object = {
 
     if (type == 1) {
       const resOfficial = await fetchConfig({ url, method: 'GET' });
-      const paeseOfficial = JSONPath({ path: '$.url', json: resOfficial.data });
-      if (paeseOfficial.length > 0) {
-        play.playUrl = paeseOfficial[0];
-        play.headers = resOfficial.headers;
+      const [officialUrl] = JSONPath({ path: '$.url', json: resOfficial.data }) || [];
+      if (officialUrl) {
+        play.playUrl = officialUrl;
+
+        const [header] = JSONPath({ path: '$.header', json: resOfficial.data }) || [];
+        const [headers] = JSONPath({ path: '$.headers', json: resOfficial.data }) || [];
+        
+        play.headers = header || headers || {};
       }
     } else if (type == 0) {
       const resOfficial = await sniffer(url, '', '', '', '', headers);
