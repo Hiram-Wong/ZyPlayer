@@ -42,7 +42,20 @@ const parseCustomUrl = (url: string) => {
   return { redirectURL, headers };
 };
 
-const isLocalhostRef = (url: string) => `${url}`.includes('//localhost') || `${url}`.includes('//127.0.0.1');
+const isLocalhostRef = (url: string): boolean => `${url}`.includes('//localhost') || `${url}`.includes('//127.0.0.1');
+
+const isUrlScheme = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    const BROWER = ['http:', 'https:', 'file:', 'data:', 'blob:', 'about:', 'javascript:', 'mailto:', 'tel:', 'sms:', 'ftp:'];
+    const CHROME = ['chrome:', 'chrome-extension:', 'chrome-untrusted:', 'chrome-search:', 'chrome-devtools:', 'devtools:'];
+    const SPECIAL  = ['magnet:', 'webtorrent:'];
+    const SAFE = [...BROWER, ...CHROME, ...SPECIAL];
+    return !SAFE.includes(parsed.protocol);
+  } catch (err) {
+    return true;
+  }
+};
 
 const getIP = async () => {
   const urls = ['https://ipv6.icanhazip.com', 'https://ipv4.icanhazip.com'];
@@ -87,4 +100,4 @@ const findWinByName = async (name: string) => {
   return source;
 };
 
-export { isLocalhostRef, parseCustomUrl, toggleWinVisable, getIP, getConfig, singleton, findWinByName };
+export { isLocalhostRef, isUrlScheme, parseCustomUrl, toggleWinVisable, getIP, getConfig, singleton, findWinByName };

@@ -18,7 +18,7 @@ import { createMain } from './core/winManger';
 
 import { createDir, deleteFile, fileExist, fileState } from './utils/hiker/file';
 import { APP_TMP_PATH, APP_DB_PATH, APP_LOG_PATH, APP_PLUGIN_PATH, APP_FILE_PATH } from './utils/hiker/path';
-import { isLocalhostRef, parseCustomUrl, toggleWinVisable } from './utils/tool';
+import { isLocalhostRef, isUrlScheme, parseCustomUrl, toggleWinVisable } from './utils/tool';
 
 /**
  * 环境变量修复
@@ -100,6 +100,8 @@ const setupSession = () => {
     const { url, id } = details;
     // 取消请求-devtools拦截器
     if (['devtools-detector', 'disable-devtool'].some(f => url.includes(f))) return callback({ cancel: true });
+    // 取消请求-urlscheme拦截器
+    if (isUrlScheme(url)) return callback({ cancel: false });
     // 不处理-本地地址 但lab/ad除外
     if (isLocalhostRef(url) && !url.includes('lab/ad')) return callback({});
 
@@ -123,27 +125,31 @@ const setupSession = () => {
 
     // 合理处理：优先使用 Electron-xxx -> 自定义 headers -> 原始值
 
-    // 处理Origin
+    // 处理 Origin - 确定请求来源(域名)
     requestHeaders['Origin'] = requestHeaders['Electron-Origin'] || headers['Origin'] || requestHeaders['Origin'];
     delete requestHeaders['Electron-Origin'];
+    if (requestHeaders['Origin'] && isLocalhostRef(requestHeaders['Origin'])) delete requestHeaders['Origin'];
+
+    // 处理 Host - 确定目标服务器(URL无路径)
+    requestHeaders['Host'] = requestHeaders['Electron-Host'] || headers['Host'] || requestHeaders['Host'];
+    delete requestHeaders['Electron-Host'];
+    if (requestHeaders['Host'] && isLocalhostRef(requestHeaders['Host'])) delete requestHeaders['Host'];
+    
+    // 处理 Referer - 确定跳转来源(完整URL)
+    requestHeaders['Referer'] = requestHeaders['Electron-Referer'] || headers['Referer'] || requestHeaders['Referer'];
+    delete requestHeaders['Electron-Referer'];
+    if (requestHeaders['Referer'] && isLocalhostRef(requestHeaders['Referer'])) delete requestHeaders['Referer'];
 
     // 处理 User-Agent
     requestHeaders['User-Agent'] = requestHeaders['Electron-User-Agent'] || headers['User-Agent'] || globalThis.variable.ua || requestHeaders['User-Agent'];
     delete requestHeaders['Electron-User-Agent'];
 
-    // 处理 Host
-    requestHeaders['Host'] = requestHeaders['Electron-Host'] || headers['Host'] || requestHeaders['Host'] || new URL(url).host;
-    delete requestHeaders['Electron-Host'];
-
     // 处理 Cookie
     requestHeaders['Cookie'] = requestHeaders['Electron-Cookie'] || headers['Cookie'] || requestHeaders['Cookie'];
     delete requestHeaders['Electron-Cookie'];
 
-    // 处理 Referer
-    requestHeaders['Referer'] = requestHeaders['Electron-Referer'] || headers['Referer'] || requestHeaders['Referer'];
-    delete requestHeaders['Electron-Referer'];
-
     if (requestHeaders['Redirect'] === 'manual') reqIdRedirect[id] = headers;
+    console.log(url, requestHeaders);
 
     // 清理不再需要的记录
     delete reqIdMethod[id];
