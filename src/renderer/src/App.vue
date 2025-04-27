@@ -43,19 +43,27 @@ const active = ref({
 
 watch(
   () => useLocalStorage(localeConfigKey, 'zh_CN').value,
-  (val) => {
-    changeLocale(val);
-  },
+  (val) => changeLocale(val)
 );
 watch(
-  () => [ systemDark.value, storeSetting.getStateMode ],
-  (val) => {
-    const [ dark, mode ]: any = val;
-    const theme: string  = mode === 'auto' ? dark ? 'dark' : 'light' : mode;
-    storeSetting.updateConfig({ theme });
-    document.documentElement.setAttribute('theme-mode', theme);
+  () => [systemDark.value, storeSetting.getStateMode],
+  (newVal, oldVal) => {
+    const [newDark, newMode] = newVal;
+    const [oldDark, oldMode] = oldVal;
+
+    console.log('new:', newVal, 'old:', oldVal);
+
+    if (newMode !== oldMode) {
+      storeSetting.changeMode(newMode as 'auto' | 'dark' | 'light');
+    }
+    if (newDark !== oldDark) {
+      if (newMode === 'auto') {
+        const theme = newDark ? 'dark' : 'light';
+        storeSetting.updateConfig({ theme });
+        storeSetting.changeMode(theme);
+      }
+    }
   },
-  { immediate: true }
 );
 
 onMounted(() => {
