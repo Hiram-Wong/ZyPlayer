@@ -224,6 +224,7 @@ const handleParse = async () => {
 
 // 格式化 url 公共方法
 const handleUrlHref = (url: string) => {
+  if (url.includes('youku.com')) return url;
   return url.split('?')[0];
 };
 
@@ -256,7 +257,6 @@ const playEvent = async (url: string) => {
 
     // 4.解析地址
     url = handleUrlHref(url);
-    const item = { url, title };
 
     const playerMode = storePlayer.getSetting.playerMode;
     if (playerMode.type === 'custom') {
@@ -295,7 +295,7 @@ const playEvent = async (url: string) => {
         type: 'analyze',
         status: true,
         data: {
-          info: { ...item, name: title },
+          info: { url, name: title },
           ext: { site, setting: storePlayer.setting },
         },
       });

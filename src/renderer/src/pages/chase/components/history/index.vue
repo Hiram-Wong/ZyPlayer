@@ -20,7 +20,7 @@
               </div>
               <div class="card-main">
                 <div class="card-tag card-tag-orange">
-                  <span class="card-tag-text text-hide">{{ $t(`pages.chase.type.${detail["type"]}`) }}</span>
+                  <span class="card-tag-text text-hide">{{ $t(`pages.chase.type.${detail["type"] as string}`) }}</span>
                 </div>
                 <t-image class="card-main-item" :src='detail["videoImage"]'
                   :style="{ width: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
@@ -249,10 +249,9 @@ const handleDrivePlay = async (item) => {
 
 const handleAnalyzePlay = async (item) => {
   const { relateSite, videoName, videoId } = item;
-  const url = videoId;
   const playerMode = storePlayer.getSetting.playerMode;
   if (playerMode.type === 'custom') {
-    const response = await fetchAnalyzeHelper(`${relateSite.url}${url}`, relateSite.type);
+    const response = await fetchAnalyzeHelper(`${relateSite.url}${videoId}`, relateSite.type);
     if (!response.url) {
       MessagePlugin.error(t('pages.analyze.message.error'));
       return;
@@ -260,7 +259,7 @@ const handleAnalyzePlay = async (item) => {
     window.electron.ipcRenderer.invoke('call-player', { path: playerMode.external, url: response.url });
   } else {
     const doc = {
-      info: { id: videoId, url, name: videoName },
+      info: { name: videoName, url: videoId },
       ext: { site: relateSite, setting: storePlayer.setting },
     };
     storePlayer.updateConfig({ type: 'analyze', status: true, data: doc });

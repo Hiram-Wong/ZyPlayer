@@ -307,7 +307,7 @@ const handleAnalyzePlay = async (item) => {
     }
   } else {
     const doc = {
-      info: { id: videoId, url, name: videoName },
+      info: { name: videoName, url: videoId },
       ext: { site: relateSite, setting: storePlayer.setting },
     };
     storePlayer.updateConfig({ type: 'analyze', status: true, data: doc });
