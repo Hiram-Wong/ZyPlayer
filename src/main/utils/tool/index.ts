@@ -20,26 +20,35 @@ const toggleWinVisable = (status: boolean | undefined = undefined) => {
 };
 
 const parseCustomUrl = (url: string) => {
-  url = decodeURIComponent(url);
+  try {
+    const decodedUrl = decodeURIComponent(url.trim());
 
-  const [redirectURL, ...headersParts] = url.split('@');
+    const [redirectURL, ...headerParts] = decodedUrl.split('@');
 
-  if (!headersParts) return { redirectURL, headers: {} };
-
-  const headers = headersParts.reduce((acc, part) => {
-    let [key, value] = part.split('=');
-    if (key && value) {
-      key = key
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join('-');
-      value = value.replaceAll('$*&', '=');
-      acc[key] = value;
+    if (headerParts.length === 0) {
+      return { redirectURL, headers: {} };
     }
-    return acc;
-  }, {});
 
-  return { redirectURL, headers };
+    const headers = headerParts.reduce<Record<string, string>>((acc, part) => {
+      const [rawKey, rawValue] = part.split('=');
+
+      if (rawKey && rawValue) {
+        const key = rawKey
+          .split('-')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join('-');
+
+        const value = rawValue.replaceAll('$*&', '=');
+        acc[key] = value;
+      }
+
+      return acc;
+    }, {});
+
+    return { redirectURL, headers };
+  } catch {
+    return { redirectURL: url, headers: {} };
+  }
 };
 
 const isLocalhostRef = (url: string): boolean => `${url}`.includes('//localhost') || `${url}`.includes('//127.0.0.1');
