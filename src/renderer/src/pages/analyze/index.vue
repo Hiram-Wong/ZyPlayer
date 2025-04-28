@@ -36,14 +36,7 @@
           </t-button>
         </div>
         <div class="webview-container">
-          <webview
-            ref="webviewRef"
-            class="webview"
-            :src="webviewUrl"
-            disablewebsecurity
-            allowpopups
-            nodeIntegration
-          />
+          <webview v-if="isWebviewVisible" ref="webviewRef" class="webview" src="about:blank" partition="persist:analyze" allowpopups />
         </div>
       </div>
     </div>
@@ -56,7 +49,7 @@
 import moment from 'moment';
 import { ArrowLeftIcon, ArrowRightIcon, HomeIcon, RotateIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, onActivated, onMounted, ref, reactive, watch, useTemplateRef } from 'vue';
+import { computed, nextTick, onActivated, onMounted, ref, reactive, watch, useTemplateRef } from 'vue';
 
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
@@ -73,8 +66,8 @@ import TitleMenu from '@/components/title-menu/index.vue';
 const storePlayer = usePlayStore();
 const searchText = ref('');
 const controlText = ref<string>('');
-const webviewRef = useTemplateRef<any>('webviewRef');
-const webviewUrl = ref<string>('');
+const webviewRef = useTemplateRef<Electron.WebviewTag | null>('webviewRef');
+const isWebviewVisible = ref<boolean>(true);
 
 const classList = computed(() => {
   const platform = ANALYZE_PLATFORM.value;
@@ -101,59 +94,161 @@ const active = ref({
   share: false
 });
 
-onMounted(() => {
-  getSetting();
-  initClass();
-});
-
-onActivated(() => {
-  const isListenedRefreshAnalyzeConfig = emitter.all.get('refreshAnalyzeConfig');
-  if (!isListenedRefreshAnalyzeConfig) emitter.on('refreshAnalyzeConfig', refreshConf);
-});
-
 watch(
   () => active.value.search,
   (val) => {
     if (!val) emitter.emit('refreshSearchConfig');
   }
 );
-watch(
-  () => webviewUrl.value,
-  (val) => {
-    controlText.value = val;
-  }
-);
+
+onMounted(() => {
+  getSetting();
+  initClass();
+  initWebview();
+});
+
+onActivated(() => {
+  ensureAnalyzeConfigListener();
+  validateAndRecoverWebview();
+});
 
 const initClass = () => {
-  const platform = ANALYZE_PLATFORM.value;
-  const item = platform[0];
+  const item = ANALYZE_PLATFORM.value[0];
   active.value.class = item.id;
-  changeClassEvent(item.id);
+  controlText.value = item.url;
+};
+
+const initWebview = () => {
+  nextTick(() => {
+    bindDomReady();
+    handleWebviewLoad(controlText.value);
+  });
+};
+
+// 全局 emit
+const ensureAnalyzeConfigListener = () => {
+  if (!emitter.all.get('refreshAnalyzeConfig')) {
+    emitter.on('refreshAnalyzeConfig', refreshConf);
+  }
+};
+
+// 验证 webview 是否挂掉
+const validateAndRecoverWebview = async () => {
+  if (!webviewRef.value || !controlText.value) return;
+
+  try {
+    webviewRef.value.getURL();
+  } catch {
+    console.warn('webview 失效，正在恢复...');
+    await resetWebview();
+    bindDomReady();
+    nextTick(() => {
+      handleWebviewLoad(controlText.value);
+    });
+  }
+};
+
+// 绑定 dom-ready 事件
+const bindDomReady = () => {
+  if (!webviewRef.value) return;
+
+  const loadWebview = () => {
+    console.log('webview dom-ready');
+    webviewRef.value?.removeEventListener('dom-ready', loadWebview);
+    
+    // ✅ dom-ready 后直接重新加载 controlText 的内容
+    if (controlText.value) {
+      handleWebviewLoad(controlText.value);
+    }
+  };
+
+  webviewRef.value.removeEventListener('dom-ready', loadWebview);
+  webviewRef.value.addEventListener('dom-ready', loadWebview);
+};
+
+// 重置 webview
+const resetWebview = async () => {
+  isWebviewVisible.value = false;
+  await nextTick();
+  isWebviewVisible.value = true;
+  await nextTick();
+};
+
+const handleWebviewLoad = async (url: string) => {
+  if (!url || url === 'about:blank') return;
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    try {
+      parsedUrl = new URL(`http://${url}`);
+      url = parsedUrl.href;
+    } catch {
+      console.error('Invalid URL:', url);
+      return;
+    }
+  }
+
+  // 限制只允许 http/https 协议
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) return;
+
+  controlText.value = url;
+  await webviewRef.value?.loadURL(url);
+
+  const setupWebviewListeners = () => {
+    const webview = webviewRef.value;
+    if (!webview) return;
+
+    const webviewRoute = (event: { url: string }) => {
+      if (controlText.value === event.url) return;
+      controlText.value = event.url;
+      console.log('webviewRoute', event.url);
+    };
+
+    // 移除之前的监听器（避免重复注册）
+    webview.removeEventListener('did-navigate-in-page', webviewRoute);
+    // webview.removeEventListener('did-navigate', webviewRoute);
+    webview.removeEventListener('did-redirect-navigation', webviewRoute);
+
+    // 添加新的监听器
+    webview.addEventListener('did-navigate-in-page', webviewRoute);
+    // webview.addEventListener('did-navigate', webviewRoute);
+    webview.addEventListener('did-redirect-navigation', webviewRoute);
+  };
+
+  const setupIpcListeners = () => {
+    // 只清除 blockUrl 监听器，防止其他 ipc 消息被误删
+    window.electron.ipcRenderer.removeAllListeners('blockUrl');
+
+    window.electron.ipcRenderer.on('blockUrl', async (_, blockedUrl: string) => {
+      handleWebviewLoad(blockedUrl);
+    });
+  };
+
+  nextTick(() => {
+    setupWebviewListeners();
+    setupIpcListeners();
+  });
 };
 
 // 切换分类
 const changeClassEvent = (id: string) => {
-  active.value.class = id;
-  const platform = ANALYZE_PLATFORM.value;
-  const item = platform.find((item) => item.id === id);
-
-  setTimeout(() => {
-    webviewUrl.value = item!.url;
-  }, 0);
-
-  window.electron.ipcRenderer.removeAllListeners('blockUrl');
-  window.electron.ipcRenderer.on('blockUrl', async (_, url) => {
-    if (url !== 'about:blank' && /^(https?:\/\/)/.test(url) && webviewUrl.value !== url) {
-      webviewUrl.value = url;
-    }
-  });
+  const item = ANALYZE_PLATFORM.value.find((item) => item.id === id);
+  if (item) {
+    active.value.class = item.id;
+    controlText.value = item.url;
+    handleWebviewLoad(item.url);
+  }
 };
 
-// 控制
-const handleWebviewControl = async (action: 'back'| 'forward'| 'home'|'refresh'| 'clearHistory') => {
+// 处理 webview 控制
+const handleWebviewControl = async (action: 'back'| 'forward'| 'home'| 'refresh'| 'clearHistory') => {
   const webview = webviewRef.value;
+  if (!webview) return;
+
   // 后退
-  const backEvent = () => {
+  const backEvent = async () => {
     if (webview.canGoBack()) webview.goBack();
   };
 
@@ -175,8 +270,7 @@ const handleWebviewControl = async (action: 'back'| 'forward'| 'home'|'refresh'|
   const homeEvent = () => {
     const platform = ANALYZE_PLATFORM.value;
     const item = platform.find((item) => item.id === active.value.class);
-    controlText.value = item!.url;
-    handleWebviewLoad();
+    handleWebviewLoad(item!.url);
   };
 
   const method = {
@@ -188,17 +282,6 @@ const handleWebviewControl = async (action: 'back'| 'forward'| 'home'|'refresh'|
   };
 
   method[action]();
-};
-
-// 加载
-const handleWebviewLoad = () => {
-  let url = controlText.value;
-  console.log(url, url === 'about:blank' || !url)
-  if (url === 'about:blank' || !url) return;
-  if (!/^(https?:\/\/)/.test(url)) {
-    url = `http://${url}`;
-  };
-  webviewUrl.value = url;
 };
 
 // 获取解析接口及默认接口
@@ -344,8 +427,7 @@ emitter.on('searchAnalyze', (kw) => {
 
   const url = `${item.search}${kw}`;
   console.log(`[analyze][bus][search]`, url);
-  controlText.value = url;
-  handleWebviewLoad();
+  handleWebviewLoad(url);
 });
 </script>
 

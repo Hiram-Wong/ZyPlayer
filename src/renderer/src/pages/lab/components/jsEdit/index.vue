@@ -239,14 +239,14 @@
                         <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('forward')">
                           <arrow-right-icon />
                         </t-button>
-                        <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('reload')">
+                        <t-button theme="default" shape="square" size="small" variant="text" @click="handleWebviewControl('refresh')">
                           <rotate-icon />
                         </t-button>
                       </div>
-                      <t-input class="urlbar-url" v-model="webview.url" @enter="handleWebviewLoad"></t-input>
+                      <t-input class="urlbar-url" v-model="controlText" @enter="handleWebviewLoad"></t-input>
                       <t-button variant="text" class="urlbar-devtool" @click="handleWebviewControl('devtools')">F12</t-button>
                     </div>
-                    <webview ref="webviewRef" class="webview-box" :src="webview.route" disablewebsecurity allowpopups nodeIntegration style="height: 100%; width: 100%;"/>
+                    <webview v-if="isWebviewVisible" ref="webviewRef" class="webview-box" src="about:blank" partition="persist:js-edit" allowpopups />
                   </div>
                 </t-tab-panel>
               </t-tabs>
@@ -278,7 +278,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import moment from 'moment';
 import JSON5 from 'json5';
 import { Splitpanes, Pane } from 'splitpanes';
-import { computed, ref, onMounted, onBeforeUnmount, watch, useTemplateRef, nextTick } from 'vue';
+import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { GestureClickIcon, ArrowLeftIcon, ArrowRightIcon, ClearIcon, RotateIcon } from 'tdesign-icons-vue-next';
@@ -384,11 +384,9 @@ const htmlEditConf = ref({
   ...EDIT_CONF,
   language: 'html',
 });
-const webviewRef = ref<any>(null);
-const webview = ref({
-  url: 'about:blank',
-  route: 'about:blank',
-});
+const controlText = ref<string>('');
+const webviewRef = useTemplateRef<Electron.WebviewTag | null>('webviewRef');
+const isWebviewVisible = ref<boolean>(true);
 const active = ref({
   nav: '',
   template: false,
@@ -433,11 +431,25 @@ watch(
     form.value.lastEditTime.edit = currentTime;
   }
 );
+watch(
+  () => active.value.action,
+  (val) => {
+    if (val === 'preview' && !!controlText.value) {
+      nextTick(() => {
+        validateAndRecoverWebview();
+      });
+    }
+  }
+);
 
 onMounted(() => {
   setupConsole();
   getTemplate();
   setupData();
+});
+
+onActivated(() => {
+  if (active.value.action === 'preview') validateAndRecoverWebview();
 });
 
 onBeforeUnmount(() => {
@@ -1184,50 +1196,144 @@ const handleConsoleClear = () => {
 };
 
 // webview
-const handleWebviewControl = (type: string) => {
+
+// 验证 webview 是否挂掉
+const validateAndRecoverWebview = async () => {
+  if (!webviewRef.value || !controlText.value) return;
+
+  try {
+    webviewRef.value.getURL();
+  } catch {
+    console.warn('webview 失效，正在恢复...');
+    await resetWebview();
+    bindDomReady();
+    nextTick(() => {
+      handleWebviewLoad(controlText.value);
+    });
+  }
+};
+
+// 绑定 dom-ready 事件
+const bindDomReady = () => {
   if (!webviewRef.value) return;
 
-  switch (type) {
-    case 'back':
-    if (webviewRef.value.canGoBack()) webviewRef.value.goBack();
-      break;
-    case 'forward':
-    if (webviewRef.value.canGoForward()) webviewRef.value.goForward();
-      break;
-    case 'reload':
-      webviewRef.value.reload();
-      break;
-    case 'devtools':
-      webviewRef.value.openDevTools();
-      break;
-  }
-}
-
-const handleWebviewLoad = (url: string) => {
-  if (!url) return;
-
-  if (!/^(https?:\/\/)/.test(url)) {
-    url = `http://${url}`;
-    webview.value.url = url;
-  }
-  webview.value.route = url;
-
-  const webviewLoadError = (err: any) => {
-    MessagePlugin.warning(`${t('pages.lab.pluginCenter.control.loadUiEntryError')}: ${err.errorDescription}`);
-    webviewRef.value.src = 'about:blank';
+  const loadWebview = () => {
+    console.log('webview dom-ready');
+    webviewRef.value?.removeEventListener('dom-ready', loadWebview);
+    
+    // ✅ dom-ready 后直接重新加载 controlText 的内容
+    if (controlText.value) {
+      handleWebviewLoad(controlText.value);
+    }
   };
 
-  const webviewRoute = (event: any) => {
-    console.log('webviewRoute', event);
-    webview.value.url = event.url;
+  webviewRef.value.removeEventListener('dom-ready', loadWebview);
+  webviewRef.value.addEventListener('dom-ready', loadWebview);
+};
+
+// 重置 webview
+const resetWebview = async () => {
+  isWebviewVisible.value = false;
+  await nextTick();
+  isWebviewVisible.value = true;
+  await nextTick();
+};
+
+const handleWebviewLoad = (url: string) => {
+  if (!url || url === 'about:blank') return;
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    try {
+      parsedUrl = new URL(`http://${url}`);
+      url = parsedUrl.href;
+    } catch {
+      console.error('Invalid URL:', url);
+      return;
+    }
+  }
+
+  // 限制只允许 http/https 协议
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) return;
+  controlText.value = url;
+  webviewRef.value?.loadURL(url);
+
+  const setupWebviewListeners = () => {
+    const webview = webviewRef.value;
+    if (!webview) return;
+
+    const webviewRoute = (event: { url: string }) => {
+      if (controlText.value === event.url) return;
+      controlText.value = event.url;
+      console.log('webviewRoute', event.url);
+    };
+
+    // 移除之前的监听器（避免重复注册）
+    webview.removeEventListener('did-navigate-in-page', webviewRoute);
+    // webview.removeEventListener('did-navigate', webviewRoute);
+    webview.removeEventListener('did-redirect-navigation', webviewRoute);
+
+    // 添加新的监听器
+    webview.addEventListener('did-navigate-in-page', webviewRoute);
+    // webview.addEventListener('did-navigate', webviewRoute);
+    webview.addEventListener('did-redirect-navigation', webviewRoute);
+  };
+
+  const setupIpcListeners = () => {
+    // 只清除 blockUrl 监听器，防止其他 ipc 消息被误删
+    window.electron.ipcRenderer.removeAllListeners('blockUrl');
+
+    window.electron.ipcRenderer.on('blockUrl', async (_, blockedUrl: string) => {
+      handleWebviewLoad(blockedUrl);
+    });
   };
 
   nextTick(() => {
-    webviewRef.value.removeEventListener('did-fail-load', webviewLoadError);
-    webviewRef.value.addEventListener('did-fail-load', webviewLoadError);
-    webviewRef.value.addEventListener('did-navigate-in-page', webviewRoute);
-    webviewRef.value.addEventListener('did-navigate', webviewRoute);
+    setupWebviewListeners();
+    setupIpcListeners();
   });
+};
+
+// 处理 webview 控制
+const handleWebviewControl = async (action: 'back'| 'forward'| 'devtools'| 'refresh'| 'clearHistory') => {
+  const webview = webviewRef.value;
+  if (!webview) return;
+
+  // 后退
+  const backEvent = () => {
+    if (webview.canGoBack()) webview.goBack();
+  };
+
+  // 前进
+  const forwardEvent = () => {
+    if (webview.canGoForward()) webview.goForward();
+  };
+
+  // 刷新
+  const refreshEvent = () => {
+    webview.reload();
+  };
+
+  // 清除浏览器导航历史记录
+  const clearHistoryEvent = () => {
+    webview.clearHistory();
+  };
+
+  const openDevToolsEvent = () => {
+    webview.openDevTools();
+  };
+
+  const method = {
+    back: backEvent,
+    devtools: openDevToolsEvent,
+    forward: forwardEvent,
+    refresh: refreshEvent,
+    clearHistory: clearHistoryEvent,
+  };
+
+  method[action]();
 };
 </script>
 

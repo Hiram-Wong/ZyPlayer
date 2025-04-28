@@ -113,14 +113,7 @@
         <div class="plugin-webview data-item" v-if="pluginInfo.type === 'ui'">
           <p class="title-label">{{ $t('pages.lab.pluginCenter.webview.title') }}</p>
           <div class="plugin-content" >
-            <webview
-              class="custom-webview"
-              ref="webviewRef"
-              :src="pluginInfo.main"
-              disablewebsecurity
-              allowpopups
-              nodeIntegration
-            />
+            <webview class="custom-webview" ref="webviewRef" :src="pluginInfo.main" partition="persist:plugin" allowpopups />
           </div>
         </div>
       </div>
