@@ -257,6 +257,7 @@ const throttlePutHistory = throttle(
 
 const changeAnalyzeEvent = async (item) => {
   extConf.value.site = item;
+  videoData.value.skipTime = videoData.value.watchTime;
   emits('update', {
     type: 'analyze',
     data: Object.assign({ info: infoConf.value, ext: extConf.value })
@@ -278,7 +279,7 @@ const callPlay = async (item) => {
     const response = await fetchAnalyzeHelper(`${site.url}${item.url}`, site.type, headers);
     if (response?.url) {
       shareFormData.value.url = response.url;
-      emits('play', { url: response.url, headers: response?.headers || {}, type: response.mediaType });
+      emits('play', { url: response.url, headers: response?.headers || {}, type: response.mediaType, startTime: videoData.value.skipTime });
     } else {
       MessagePlugin.error(t('pages.analyze.message.error'));
     }
@@ -316,7 +317,10 @@ const setup = async () => {
   // 3. 获取解析(不影响)
   fetchAnalyze();
 
-  // 3. 播放
+  // 4. 初始化播放数据
+  videoData.value.skipTime = historyData.value.watchTime;
+
+  // 5. 播放
   await callPlay({ url: infoConf.value.url, headers: extConf.value.site.headers || {} });
 };
 </script>

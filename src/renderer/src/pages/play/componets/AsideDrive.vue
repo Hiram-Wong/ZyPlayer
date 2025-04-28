@@ -268,6 +268,7 @@ const renderLoading = () => {
 const changeDriveEvent = async (item) => {
   await putAlistInit({ sourceId: extConf.value.site.id });
   const res = await fetchAlistFile({ sourceId: extConf.value.site.id, path: item.path });
+  videoData.value.skipTime = videoData.value.watchTime;
   emits('update', {
     type: 'drive',
     data: Object.assign({ info: res, ext: extConf.value })
@@ -284,7 +285,7 @@ const shareEvent = () => {
 
 // 调用播放器
 const callPlay = async (item) => {
-  emits('play', { ...item });
+  emits('play', { ...item, startTime: videoData.value.skipTime });
 };
 
 // 定时更新播放进度
@@ -313,7 +314,10 @@ const setup = async () => {
   // 2. 获取收藏(不影响)
   fetchBinge();
 
-  // 3. 播放
+  // 3. 初始化播放数据
+  videoData.value.skipTime = historyData.value.watchTime;
+
+  // 4. 播放
   await callPlay({ url: infoConf.value.url, headers: infoConf.value?.header || {} });
 };
 </script>
