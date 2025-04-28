@@ -83,6 +83,7 @@ const setupApp = async () => {
   app.commandLine.appendSwitch("no-sandbox"); // 禁用沙盒
   app.commandLine.appendSwitch('proxy-bypass-list', '<local>'); // 代理白名单
   app.commandLine.appendSwitch('wm-window-animations-disabled'); // 禁用窗口动画
+  app.commandLine.appendSwitch('disable-http-cache'); // 禁用HTTP缓存-if头
 
   if (platform.isLinux) app.disableHardwareAcceleration(); // 禁用硬件加速
 };
