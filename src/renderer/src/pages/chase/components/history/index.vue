@@ -41,11 +41,12 @@
                 </p>
                 <p class="card-footer-desc tiles-item_desc_row text-hide">
                   <laptop-icon size="14px" class="tiles-item_watch_pc icon" />
-                  <span class="tiles-item_desc_watch" v-if='detail["playEnd"]'>{{ $t('pages.chase.progress.watched')
-                    }}</span>
+                  <span class="tiles-item_desc_watch" v-if='detail["playEnd"]'>
+                    {{ $t('pages.chase.progress.watched') }}
+                  </span>
                   <span class="tiles-item_desc_watch" v-else>
-                    {{ $t('pages.chase.progress.watching') }}{{ formatProgress(detail["watchTime"],
-                      detail["duration"]) }}
+                    {{ $t('pages.chase.progress.watching') }}
+                    {{ formatProgress(detail["watchTime"], detail["duration"]) }}
                   </span>
                 </p>
               </div>
@@ -332,7 +333,9 @@ const filterDate = (date) => {
 // 播放进度
 const formatProgress = (start, all) => {
   const progress = Math.trunc((start / all) * 100);
-  return progress ? `${progress}%` : '0%';
+  if (progress === Infinity) return '100%';
+  if (progress === 0) return '0%';
+  return progress;
 };
 
 const defaultSet = () => {
