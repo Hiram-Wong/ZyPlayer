@@ -51,8 +51,6 @@ watch(
     const [newDark, newMode] = newVal;
     const [oldDark, oldMode] = oldVal;
 
-    console.log('new:', newVal, 'old:', oldVal);
-
     if (newMode !== oldMode) {
       storeSetting.changeMode(newMode as 'auto' | 'dark' | 'light');
     }
