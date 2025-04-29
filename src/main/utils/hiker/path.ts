@@ -58,6 +58,20 @@ const APP_FILE_PATH = join(APP_STORE_PATH, 'file');
 const APP_PUBLIC_PATH = getAppDefaultPath('resources');
 const APP_RUNTIME_PATH = getAppDefaultPath('runtime');
 
+// 检查路径是否以特定前缀开头
+const isAppMarkPath = (url: string): boolean => url.startsWith(APP_MARK_PATH);
+const isAppStorePath = (url: string): boolean => url.startsWith(APP_STORE_PATH);
+
+// 路径转换：相对路径转绝对路径
+const relativeToAbsolute = (path: string): string => {
+  return isAppMarkPath(path) ? path.replace(APP_MARK_PATH, APP_STORE_PATH) : path;
+};
+
+// 路径转换：绝对路径转相对路径
+const absoluteToRelative = (path: string): string => {
+  return isAppStorePath(path) ? path.replace(APP_STORE_PATH, APP_MARK_PATH) : path;
+};
+
 export {
   APP_MARK,
   APP_MARK_PATH,
@@ -69,5 +83,9 @@ export {
   APP_FILE_PATH,
   APP_PUBLIC_PATH,
   APP_RUNTIME_PATH,
+  isAppMarkPath,
+  isAppStorePath,
   getAppDefaultPath,
+  relativeToAbsolute,
+  absoluteToRelative,
 };

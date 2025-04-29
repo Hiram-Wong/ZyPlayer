@@ -1,21 +1,7 @@
 import fs from 'fs-extra';
 import { join } from 'path';
 import { gzip } from '@main/utils/crypto';
-import { APP_MARK_PATH, APP_STORE_PATH } from './path';
-
-// 检查路径是否以特定前缀开头
-const isAppMarkPath = (url: string): boolean => url.startsWith(APP_MARK_PATH);
-const isAppStorePath = (url: string): boolean => url.startsWith(APP_STORE_PATH);
-
-// 路径转换：相对路径转绝对路径
-const relativeToAbsolute = (path: string): string => {
-  return isAppMarkPath(path) ? path.replace(APP_MARK_PATH, APP_STORE_PATH) : path;
-};
-
-// 路径转换：绝对路径转相对路径
-const absoluteToRelative = (path: string): string => {
-  return isAppStorePath(path) ? path.replace(APP_STORE_PATH, APP_MARK_PATH) : path;
-};
+import { relativeToAbsolute } from './path';
 
 // 检查文件或目录是否存在
 const fileExist = async (filePath: string): Promise<boolean> => {
@@ -326,6 +312,4 @@ export {
   deleteDirSync,
   createDir,
   createDirSync,
-  relativeToAbsolute,
-  absoluteToRelative,
 };
