@@ -93,19 +93,19 @@
 
 - **MacOS**:
   - 提供 arm64(苹果芯)、x64(英特尔芯) 及 universal(通用) 三种架构安装包
-  - 日志路径: `~/Library/Logs/{appname}/`
+  - 日志路径: `~/Library/Logs/{appname}/log/`
   - 数据库路径: `~/Library/Application\ Support/{appname}/database/`
   - 插件路径: `~/Library/Application\ Support/{appname}/plugin/`
   - 文件路径: `~/Library/Application\ Support/{appname}/file/`
 - **Linux**:
   - 针对 arm64、x64 架构发行 image、deb、rpm 安装包
-  - 日志路径: `~/.config/{appname}/logs/`
+  - 日志路径: `~/.config/{appname}/log/`
   - 数据库路径: `~/.config/{appname}/database/`
   - 插件路径: `~/.config/{appname}/plugin/`
   - 文件路径: `~/.config/{appname}/file/`
 - **Windows**:
   - 支持 arm64、x64、ia32，以及通用版本
-  - 日志路径: `%USERPROFILE%\AppData\Roaming\{appname}\logs\`
+  - 日志路径: `%USERPROFILE%\AppData\Roaming\{appname}\log\`
   - 数据库路径: `%USERPROFILE%\AppData\Roaming\{appname}\database\`
   - 插件路径: `%USERPROFILE%\AppData\Roaming\{appname}\plugin\`
   - 文件路径: `%USERPROFILE%\AppData\Roaming\{appname}\file\`
@@ -116,12 +116,10 @@
 
 > **最新开发版下载**: 访问 [GitHub Actions页面](https://github.com/Hiram-Wong/ZyPlayer/actions) 获取, 需登录Github账号。
 
-### macOS 安装问题解决方案
-
-因为软件没有签名，所以会被 macOS 的安全检查所拦下。安装后打开遇到「文件已损坏」的情况，请按如下方式操作：
+### MacOS 安装后打开提示「文件已损坏」
 
 ```bash
-> {appname}为软件名
+> {appname}为软件名, 访问前自行替换[含括号一起替换]
 
 [1] 执行下面命令信任开发者, 会要求输入密码:
     sudo spctl --master-disable
@@ -132,18 +130,38 @@
 ### Linux Appimage桌面快捷方式设置
 
 ```bash
-> {appname}为软件名
+> {appname}为软件名, 访问前自行替换[含括号一起替换]
 
 [1] 选择一张icon图标下载
 [2] 在任意位置新建一个名为{appname}.desktop的文件，并写入如下内容
     [Desktop Entry]
     Name={appname}
-    Exec=/home/xxx/Downloads/{appname}.AppImage  # AppImage程序路径
+    Exec=/home/xxx/Downloads/{appname}-x.x.x.AppImage  # AppImage程序路径
     Icon=/home/xxx/Downloads/{appname}.png  # 图标路径
     Type=Application
     StartupNotify=true
 [3] 保存{appname}.desktop后右键属性,在权限目录下允许作为程序执行文件上打钩
 [4] 将{appname}.desktop文件复制到/usr/share/applications路径下
+```
+
+### Linux Appimage运行失败
+
+```bash
+# 报错关键词 Running as root without --no-sandbox is not supported. See https://ccrbug.com/638180.
+./文件名.AppImage --no-shawbox
+# 报错关键词 dlopen()：error loading libfuse.so.2
+sudo apt-get install libfuse2
+# 报错关键词 Exiting GPU process due to errors during initialization
+xhost +
+```
+
+### Linux deb安装失败
+
+```bash
+# 报错关键词 Package libnss3-1d is not installed
+sudo apt-get install libnss3-1d
+# 报错关键词 Package libxss1 is not installed
+sudo apt-get install libxss1
 ```
 
 ## 🚗 二次开发
