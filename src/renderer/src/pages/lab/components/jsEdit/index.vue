@@ -1084,6 +1084,7 @@ const handleModeToggle = async () => {
   } else if (status === 't3py') {
     MessagePlugin.info(t('pages.lab.jsEdit.message.modeT3py'));
   }
+  form.value.content.js = await utilsRead();
   await utilsPutSite();
 };
 
