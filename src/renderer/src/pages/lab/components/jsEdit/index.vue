@@ -121,7 +121,7 @@
                           <gesture-click-icon />
                         </div>
                       </t-button>
-                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugLog" v-show="form.init.mode === 't3js'">
+                      <t-button class="button init w-btn" theme="default" @click="handleDataDebugLog">
                         {{ $t('pages.lab.jsEdit.action.log') }}
                       </t-button>
                     </div>
@@ -289,6 +289,7 @@ import { CodeEditor } from '@/components/code-editor';
 import { setT3Proxy } from '@/api/proxy';
 import { addSite, putSite } from '@/api/site';
 import { fetchJsEditPdfa, fetchJsEditPdfh, fetchJsEditMuban, fetchJsEditDebug } from '@/api/lab';
+import { fetchLog, clearLog } from '@/api/plugin';
 import { fetchCmsHome, fetchCmsHomeVod, fetchCmsDetail, fetchCmsCategory, fetchCmsPlay, fetchCmsSearch, fetchCmsInit, fetchCmsRunMain, putSiteDefault, fetchCmsProxy } from '@/api/site';
 // import { aes } from '@/utils/crypto';
 // import { fetchConfig } from '@/api/setting';
@@ -541,6 +542,18 @@ const utilsDecode = async (content: string) => {
   return await utilsLocal(content);
 };
 
+const utilsReadT3JsFile = async () =>{
+  try {
+    const basePath = await utilsT3JsBasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.js`);
+    const content = await utilsReadFile(defaultPath);
+    return content;
+  } catch (err) {
+    console.error(`[utilsReadT3JsFile][Error]:`, err);
+    return '';
+  }
+};
+
 const utilsReadT3PyFile = async () =>{
   try {
     const basePath = await utilsT3PyBasePath();
@@ -550,18 +563,6 @@ const utilsReadT3PyFile = async () =>{
   } catch (err) {
     console.error(`[utilsReadT3PyFile][Error]:`, err);
     return '';
-  }
-};
-
-const utilsWriteT3PyFile = async (val: string) =>{
-  try {
-    const basePath = await utilsT3PyBasePath();
-    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.py`);
-    await utilsWriteFile(defaultPath, val);
-    return true;
-  } catch (err) {
-    console.error(`[utilsWriteT3PyFile][Error]:`, err);
-    return false;
   }
 };
 
@@ -577,6 +578,41 @@ const utilsReadT4File = async () =>{
   }
 };
 
+const utilsRead = async () => {
+  const type = form.value.init.mode;
+  if (type === 't3js') {
+    return await utilsReadT3JsFile();
+  } else if (type === 't3py') {
+    return await utilsReadT3PyFile();
+  } else if (type === 't4') {
+    return await utilsReadT4File();
+  }
+};
+
+const utilsWriteT3JsFile = async (val: string) =>{
+  try {
+    const basePath = await utilsT3JsBasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.js`);
+    await utilsWriteFile(defaultPath, val);
+    return true;
+  } catch (err) {
+    console.error(`[utilsWriteT3JsFile][Error]:`, err);
+    return false;
+  }
+};
+
+const utilsWriteT3PyFile = async (val: string) =>{
+  try {
+    const basePath = await utilsT3PyBasePath();
+    const defaultPath = await window.electron.ipcRenderer.invoke('path-join', basePath, `debug.py`);
+    await utilsWriteFile(defaultPath, val);
+    return true;
+  } catch (err) {
+    console.error(`[utilsWriteT3PyFile][Error]:`, err);
+    return false;
+  }
+};
+
 const utilsWriteT4File = async (val: string) =>{
   try {
     const basePath = await utilsT4BasePath();
@@ -589,18 +625,140 @@ const utilsWriteT4File = async (val: string) =>{
   }
 };
 
-const sitePutJs = async () => {
+const utilsWrite = async (val: string) => {
+  const type = form.value.init.mode;
+  if (type === 't3js') {
+    return await utilsWriteT3JsFile(val);
+  } else if (type === 't3py') {
+    return await utilsWriteT3PyFile(val);
+  } else if (type === 't4') {
+    return await utilsWriteT4File(val);
+  }
+};
+
+const utilsGetLogT3Js = async () =>{
+  try {
+    const res = await fetchCmsRunMain({
+      func: "function main() { return getLogRecord() }",
+      arg: "",
+      sourceId: debugId.value
+    });
+    return res;
+  } catch (err) {
+    console.error(`[utilsGetLogT3Js][Error]:`, err);
+    return [];
+  }
+};
+
+const utilsGetLogT3Py = async () =>{
+  try {
+    const res = await fetchCmsRunMain({
+      func: "function main() { return getLogRecord() }",
+      arg: "",
+      sourceId: debugId.value
+    });
+    return res;
+  } catch (err) {
+    console.error(`[utilsGetLogT3Py][Error]:`, err);
+    return [];
+  }
+};
+
+const utilsGetLogT4 = async () =>{
+  try {
+    const res = await fetchLog('drpy-node');
+    return res;
+  } catch (err) {
+    console.error(`[utilsGetLogT4][Error]:`, err);
+    return [];
+  }
+};
+
+const utilsGetLog = async () => {
+  const type = form.value.init.mode;
+  if (type === 't3js') {
+    return await utilsGetLogT3Js();
+  } else if (type === 't3py') {
+    return await utilsGetLogT3Py();
+  } else if (type === 't4') {
+    return await utilsGetLogT4();
+  }
+};
+
+const utilsClearLogT3Js = async () =>{
+  try {
+    const res = await fetchCmsRunMain({
+      func: "function main() { return clearLogRecord() }",
+      arg: "",
+      sourceId: debugId.value
+    });
+    return res;
+  } catch (err) {
+    console.error(`[utilsClearLogT3Js][Error]:`, err);
+    return [];
+  }
+};
+
+const utilsClearLogT3Py = async () =>{
+  try {
+    const res = await fetchCmsRunMain({
+      func: "function main() { return clearLogRecord() }",
+      arg: "",
+      sourceId: debugId.value
+    });
+    return res;
+  } catch (err) {
+    console.error(`[utilsClearLogT3Py][Error]:`, err);
+    return [];
+  }
+};
+
+const utilsClearLogT4 = async () =>{
+  try {
+    const res = await clearLog('drpy-node');
+    return res;
+  } catch (err) {
+    console.error(`[utilsClearLogT4][Error]:`, err);
+    return [];
+  }
+};
+
+const utilsClearLog = async () => {
+  const type = form.value.init.mode;
+  if (type === 't3js') {
+    return await utilsClearLogT3Js();
+  } else if (type === 't3py') {
+    return await utilsClearLogT3Py();
+  } else if (type === 't4') {
+    return await utilsClearLogT4();
+  }
+};
+
+const utilsPutSiteT3Js = async (id: string, content: string) => {
+  await utilsWriteT3JsFile(content);
+  await putSite({ ids: [id], doc: { type: 7, api: './drpy.min.js', ext: 'http://127.0.0.1:9978/api/v1/file/drpy_dzlive/drpy_js/debug.js' } });
+};
+
+const utilsPutSiteT3Py = async (id: string, content: string) => {
+  await utilsWriteT3PyFile(content);
+  await putSite({ ids: [id], doc: { type: 12, api: 'http://127.0.0.1:9978/api/v1/file/py/debug.py', ext: '' } });
+};
+
+const utilsPutSiteT4 = async (id: string, content: string) => {
+  await utilsWriteT4File(content);
+  await putSite({ ids: [id], doc: { type: 6, api: 'http://127.0.0.1:5757/api/debug', ext: '' } });
+};
+
+const utilsPutSite = async () => {
   const type = form.value.init.mode;
   const content = form.value.content.js;
-
+  const id = debugId.value;
   if (type === 't3js') {
-    await putSite({ ids: [debugId.value], doc: { ext: content, type: 7, api: './drpy.min.js' } });
+    return await utilsPutSiteT3Js(id, content);
   } else if (type === 't3py') {
-    await utilsWriteT3PyFile(content);
-    await putSite({ ids: [debugId.value], doc: { type: 12, api: 'http://127.0.0.1:9978/api/v1/file/py/debug.py' } });
+    return await utilsPutSiteT3Py(id, content);
   } else if (type === 't4') {
-    await utilsWriteT4File(content);
-    await putSite({ ids: [debugId.value], doc: { type: 6, api: 'http://127.0.0.1:5757/api/debug' } });
+    return await utilsPutSiteT4(id, content);
   }
 };
 
@@ -611,28 +769,25 @@ const setupData = async () => {
     12: 't3py',
     6: 't4',
   };
+
   if (debugRes?.id) {
     debugId.value = debugRes.id;
     const type = debugRes.type;
     const mode = typeMap[type];
     form.value.init.mode = mode;
-    if (mode === 't3js') {
-      form.value.content.js = debugRes.ext;
-    } else if (mode === 't3py') {
-      form.value.content.js = await utilsReadT3PyFile();
-    } else {
-      form.value.content.js = await utilsReadT4File();
-    }
+    form.value.content.js = await utilsRead();
   } else {
     const mode = form.value.init.mode;
     const siteRes = await addSite({
       name: 'debug',
       key: 'debug',
+      // @ts-ignore
       type: ((mode) => {
         if (mode === 't3js') return 7;
         else if (mode === 't3py') return 12;
         else if (mode === 't4') return 6;
       })(mode),
+      // @ts-ignore
       api: ((mode) => {
         if (mode === 't3js') return './drpy.min.js';
         else if (mode === 't3py') return 'http://127.0.0.1:9978/api/v1/file/py/debug.py';
@@ -750,7 +905,7 @@ const handleDebug = async () => {
       MessagePlugin.warning(t('pages.lab.jsEdit.message.initNoData'));
       return;
     };
-    await sitePutJs();
+    await utilsPutSite();
     await putSiteDefault(debugId.value);
     emitter.emit('refreshFilmConfig');
     router.push({ name: 'FilmIndex' });
@@ -929,20 +1084,29 @@ const handleModeToggle = async () => {
   } else if (status === 't3py') {
     MessagePlugin.info(t('pages.lab.jsEdit.message.modeT3py'));
   }
-  await sitePutJs();
+  await utilsPutSite();
 };
 
 const handleDataDebugLog = async () => {
-  const res = await fetchCmsRunMain({
-    func: "function main() {return getLogRecord()}",
-    arg: "",
-    sourceId: debugId.value
-  });
+  try {
+    const res = await utilsGetLog();
 
-  res.forEach(([type, time, content]) => {
-    console.log(content);
-    _console[type](content);
-  });
+    res.forEach(([type, time, content]) => {
+      console.info(`log: ${moment(time).format('YYYY-MM-DD HH:mm:ss')}`, content);
+
+      _console.info(`log: ${moment(time).format('YYYY-MM-DD HH:mm:ss')} > `);
+      _console.log(content);
+      _console.log('\n');
+    });
+  } catch (err: any) {
+    console.warn(`log: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, err);
+
+    _console.info(`log: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
+    _console.error(err);
+    _console.log('\n');
+    MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
+  }
+  fitAddon.value?.fit();
 };
 
 // data
@@ -1097,7 +1261,7 @@ const handleDataDebug = async (type: string, data: { [key: string]: any } = {}) 
   if (type === 'init' || (edit > init && auto)) {
     const currentTime = moment().unix();
     form.value.lastEditTime.init = currentTime;
-    await sitePutJs();
+    await utilsPutSite();
     if (type !== 'init') {
       await fetchCmsInit({ sourceId: debugId.value, debug: true });
     };
@@ -1191,7 +1355,6 @@ const setupConsole = () => {
 
 const handleConsoleClear = () => {
   console.clear();
-
   terminal.value?.clear();
 };
 
@@ -1239,6 +1402,7 @@ const resetWebview = async () => {
   await nextTick();
 };
 
+// 处理 webview 加载
 const handleWebviewLoad = (url: string) => {
   if (!url || url === 'about:blank') return;
 

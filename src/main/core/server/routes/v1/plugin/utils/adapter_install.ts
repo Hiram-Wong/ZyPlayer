@@ -19,6 +19,16 @@ import {
 import { AdapterHandlerOptions, AdapterInfo } from './types';
 
 const runModule = async (entryBasePath: string, modulePath: string, method: 'stop' | 'start') => {
+  globalThis.logRecord = [];
+  ['log', 'warn', 'error'].forEach((level) => {
+    const original = console[level];
+    console[level] = (...args: any[]) => {
+      const timeStamp = new Date().getTime();
+      globalThis.logRecord.push([level, timeStamp, ...args]);
+      original.call(console, timeStamp, ...args);
+    };
+  });
+
   try {
     process.chdir(entryBasePath);
 
@@ -29,6 +39,23 @@ const runModule = async (entryBasePath: string, modulePath: string, method: 'sto
     throw err;
   }
 };
+
+const runLog = async (method: 'getLog' | 'clearLog') => {
+  try {
+    if (method === 'getLog') {
+      const res = { code: 0, msg: 'ok', data: globalThis.logRecord };
+      globalThis.logRecord = [];
+      return res;
+    }
+    if (method === 'clearLog') {
+      globalThis.logRecord = [];
+      return { code: 0, msg: 'ok', data: globalThis.logRecord };
+    }
+  } catch (err: any) {
+    throw err;
+  }
+};
+
 /**
  * 系统插件管理器
  * @class AdapterHandler
@@ -87,6 +114,18 @@ class AdapterHandler {
       logger.error(`[plugin][readJsonFile][error] ${err.message}`);
       throw new Error(`Failed to read JSON file: ${filePath}`);
     }
+  }
+
+  async readLog(plugin: string) {
+    let pool = this.syncModules.get(`${plugin}`);
+    const res = await pool.exec(runLog, ['getLog']);
+    return res.data;
+  }
+
+  async clearLog(plugin: string) {
+    let pool = this.syncModules.get(`${plugin}`);
+    const res = await pool.exec(runLog, ['clearLog']);
+    return res.data;
   }
 
   async fetchList(plugins: any[] = [], all: boolean = false) {

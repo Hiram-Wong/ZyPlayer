@@ -46,19 +46,14 @@ var NODERSA = { NodeRSA: nodeRsaModule, ...nodeRsaModule };
 
 // history部分为zy需要
 let logRecord: any[] = [];
-console.log = (function (oriLogFunc) {
-  return function (...args) {
-    let currentDate = new Date();
-    let hours = currentDate.getHours();
-    let minutes = currentDate.getMinutes();
-    let seconds = currentDate.getSeconds();
-    let timeStamp = `${hours.toString().padStart(2, '0')}:${minutes
-      .toString()
-      .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; // 格式化时分秒
-    logRecord.push(['log', timeStamp, ...args]); // 记录日志内容
-    oriLogFunc(timeStamp, ...args); // 保持原来的输出功能
+['log', 'warn', 'error'].forEach((level) => {
+  const original = console[level];
+  console[level] = (...args: any[]) => {
+    const timeStamp = new Date().getTime();
+    logRecord.push([level, timeStamp, ...args]);
+    original.call(console, timeStamp, ...args);
   };
-})(console.log);
+});
 const getLogRecord = () => {
   const res = logRecord;
   logRecord = [];

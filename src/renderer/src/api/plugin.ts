@@ -40,6 +40,20 @@ export function uninstall(doc: object) {
   });
 }
 
+export function fetchLog(id: string) {
+  return request({
+    url: `/v1/plugin/log/${id}`,
+    method: 'get',
+  });
+}
+
+export function clearLog(id: string) {
+  return request({
+    url: `/v1/plugin/log/${id}`,
+    method: 'delete',
+  });
+}
+
 export function list() {
   return request({
     url: `/v1/plugin/list`,

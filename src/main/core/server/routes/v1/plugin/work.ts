@@ -70,6 +70,24 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       data: res,
     };
   });
+  fastify.get(`/${API_PREFIX}/log/:id`, async (req: FastifyRequest<{ Params: { [key: string]: string } }>) => {
+    const { id } = req.params;
+    const res = await pluginAdapter.readLog(id);
+    return {
+      code: 0,
+      msg: 'ok',
+      data: res,
+    };
+  });
+  fastify.delete(`/${API_PREFIX}/log/:id`, async (req: FastifyRequest<{ Params: { [key: string]: string } }>) => {
+    const { id } = req.params;
+    const res = await pluginAdapter.clearLog(id);
+    return {
+      code: 0,
+      msg: 'ok',
+      data: res,
+    };
+  });
 };
 
 export default api;

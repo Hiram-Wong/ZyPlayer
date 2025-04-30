@@ -14,14 +14,18 @@ class T3PyAdapter {
   pythonPath: string = '';
   scriptPath: string = '';
   isPythonInstalled: number = -2; // 0已安装 -1为安装 -2 未检测
+  timeout: number = 5000;
   api: string = '';
   extend: any = '';
   categoryfilter: string[] = [];
   fileContent: string = '';
+  logRecord: any[] = [];
 
   constructor(source: { api: string; extend: any; categories?: string }) {
     this.scriptPath = join(getAppDefaultPath('resources'), 't3PyBase');
     this.isPythonInstalled = -2;
+    this.timeout = globalThis.variable.timeout || 5000;
+    this.logRecord = [];
 
     this.api = source.api;
     this.extend = source.extend;
@@ -76,6 +80,7 @@ class T3PyAdapter {
         scriptPath: this.scriptPath,
         pythonPath: this.pythonPath,
         args: [this.fileContent, method, JSON.stringify(data)],
+        timeout: this.timeout,
         env: {
           PYTHONIOENCODING: 'utf-8',
         },
@@ -85,7 +90,14 @@ class T3PyAdapter {
 
       pyShell.on('message', (msg: string) => {
         logger.info('[site][t3-py][msg]', msg);
+
+        try {
+          msg = JSON5.parse(msg);
+        } catch {}
+
         transcript = msg;
+
+        this.logRecord.push(['log', new Date().getTime(), msg]); // 记录日志内容
       });
 
       pyShell.end((err: PythonShellError, code: number, signal: string) => {
@@ -96,13 +108,7 @@ class T3PyAdapter {
           reject(err);
         }
 
-        try {
-          const parsed = JSON5.parse(transcript);
-          resolve(parsed);
-        } catch (parseErr) {
-          logger.warn('[site][t3-py][parse-fallback]', parseErr);
-          resolve(transcript);
-        }
+        resolve(transcript);
       });
     });
   }
@@ -174,8 +180,31 @@ class T3PyAdapter {
     return await this.execCtx('playerContent', [flag, input, flags]);
   }
 
-  runMain(): string {
-    return '';
+  runMain(doc: { func: string, arg: any }): string {
+    const { func, arg } = doc;
+
+    const getLogRecord = () => {
+      const res = this.logRecord;
+      this.logRecord = [];
+      return res;
+    };
+
+    const clearLogRecord = () => {
+      this.logRecord = [];
+      return this.logRecord;
+    };
+
+    let mainFunc = function (arg) {
+      return '';
+    };
+
+    try {
+      eval(func + '\nmainFunc=main;');
+      return mainFunc(arg);
+    } catch (err: any) {
+      logger.error(`执行main_funct发生了错误:${err.message}`);
+      return '';
+    }
   }
 }
 
