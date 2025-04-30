@@ -1537,6 +1537,15 @@ const handleWebviewControl = async (action: 'back'| 'forward'| 'devtools'| 'refr
       .mode-toogle {
         height: 36px;
         min-width: 80px;
+        font: var(--td-font-body-medium);
+        color: var(--td-text-color-secondary);
+        --ripple-color: transparent;
+        background-color: var(--td-bg-content-input-2);
+        border-color: transparent;
+
+        &:hover {
+          color: var(--td-text-color-primary);
+        }
 
         .status {
           display: flex;
