@@ -53,6 +53,7 @@
       </div>
     </div>
     <div class="content">
+      <t-config-provider :global-config="getComponentsLocale">
       <t-chat
         ref="chatRef"
         :data="chatList"
@@ -61,10 +62,11 @@
         @scroll="handleChatScroll"
         @clear="clearConfirm"
       >
+        <!-- eslint-disable vue/no-unused-vars -->
         <template #content="{ item, index }">
           <t-chat-reasoning v-if="item.reasoning?.length > 0" expand-icon-placement="right">
             <template #header>
-              <t-chat-loading v-if="active.isStreamLoad" :text="$t('pages.lab.aiBrain.reasoning')" indicator />
+              <t-chat-loading v-if="active.isStreamLoad" :text="$t('pages.lab.aiBrain.reasoning')" />
               <div v-else style="display: flex; align-items: center">
                 <CheckCircleIcon style="color: var(--td-success-color-5); font-size: 20px; margin-right: 8px" />
                 <span>{{ $t('pages.lab.aiBrain.reasoned') }}</span>
@@ -100,9 +102,23 @@
             }"
             @send="handleInputEnter"
             @stop="handleInputStop"
-          />
+          >
+            <!-- 自定义操作区域的内容，默认支持图片上传、附件上传和发送按钮 -->
+            <template #suffix="{ renderPresets }">
+              <!-- 在这里可以进行自由的组合使用，或者新增预设 -->
+              <!-- 不需要附件操作的使用方式 -->
+              <component :is="renderPresets([])" />
+              <!-- 只需要附件上传的使用方式-->
+              <!-- <component :is="renderPresets([{ name: 'uploadAttachment' }])" /> -->
+              <!-- 只需要图片上传的使用方式-->
+              <!-- <component :is="renderPresets([{ name: 'uploadImage' }])" /> -->
+              <!-- 任意配置顺序-->
+              <!-- <component :is="renderPresets([{ name: 'uploadAttachment' }, { name: 'uploadImage' }])" /> -->
+            </template>
+          </t-chat-sender>
         </template>
       </t-chat>
+      </t-config-provider>
       <t-button v-show="active.isShowToBottom" variant="text" class="bottomBtn" @click="backBottom">
         <div class="to-bottom">
           <ArrowDownIcon />
@@ -134,6 +150,10 @@ import { fetchSettingDetail, putSetting } from '@/api/setting';
 import { platform as AI_PLATFORM } from '@/config/ai';
 import openaiIcon from '@/assets/ai/openai_kimi.png';
 import userIcon from '@/assets/ai/user.png';
+import { useLocale } from '@/locales/useLocale';
+
+
+const { getComponentsLocale, changeLocale } = useLocale();
 
 const AI_MODELS = ref([
   {
@@ -186,8 +206,9 @@ const backBottom = () => {
   });
 };
 
-const handleChatScroll = ({ e }) => {
-  const scrollTop = e.target.scrollTop;
+const handleChatScroll = ({ e } : { e: Event }) => {
+  const target = e.target as HTMLElement;
+  const scrollTop = target.scrollTop;
   active.value.isShowToBottom = scrollTop < 0;
 };
 
