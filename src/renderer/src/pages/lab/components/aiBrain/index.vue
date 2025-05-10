@@ -53,7 +53,6 @@
       </div>
     </div>
     <div class="content">
-      <t-config-provider :global-config="getComponentsLocale">
       <t-chat
         ref="chatRef"
         :data="chatList"
@@ -118,7 +117,6 @@
           </t-chat-sender>
         </template>
       </t-chat>
-      </t-config-provider>
       <t-button v-show="active.isShowToBottom" variant="text" class="bottomBtn" @click="backBottom">
         <div class="to-bottom">
           <ArrowDownIcon />
