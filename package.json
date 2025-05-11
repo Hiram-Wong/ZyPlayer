@@ -1,6 +1,6 @@
 {
   "name": "zyfun",
-  "version": "3.4.1-beta20250510",
+  "version": "3.4.1-beta20250511",
   "description": "zyfun client",
   "main": "./out/main/index.js",
   "repository": {
@@ -84,7 +84,7 @@
     "@types/lodash-es": "4.17.12",
     "@types/node": "^22.15.17",
     "@types/uuid": "^10.0.0",
-    "@types/web": "^0.0.233",
+    "@types/web": "^0.0.232",
     "@typescript-eslint/eslint-plugin": "^8.32.0",
     "@typescript-eslint/parser": "^8.32.0",
     "@vitejs/plugin-vue": "^5.2.4",
@@ -154,7 +154,7 @@
     "p-queue": "^8.1.0",
     "pako": "^2.1.0",
     "pinia": "^3.0.2",
-    "pinia-plugin-persistedstate": "^4.2.0",
+    "pinia-plugin-persistedstate": "^4.3.0",
     "prettier": "^3.5.3",
     "python-shell": "^5.0.0",
     "qrcode.vue": "^3.6.0",
