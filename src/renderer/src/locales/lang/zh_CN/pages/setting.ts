@@ -341,6 +341,7 @@ export default {
     tip: 'win在线更新, mac和linux前往',
     install: '安装',
     download: '下载',
+    downloadProcess: '下载进度',
     downloading: '下载中',
     message: {
       downloaded: '安装包下载完成',

@@ -20,6 +20,7 @@ if (is.dev) {
 
 autoUpdater.autoDownload = false; // 关闭自动下载
 autoUpdater.autoInstallOnAppQuit = false; // 关闭自动安装
+autoUpdater.disableDifferentialDownload = true; // 关闭差分更新
 
 export default () => {
   // 通用的IPC发送函数
@@ -35,7 +36,7 @@ export default () => {
 
   // 主进程监听检查更新事件
   ipcMain.on('check-for-update', () => {
-    logger.info('checkForUpdate');
+    logger.info('[update] check for update');
     autoUpdater.checkForUpdates();
   });
 
@@ -58,29 +59,30 @@ export default () => {
   });
 
   autoUpdater.on('update-available', (info: any) => {
-    logger.info(`[update] available: ${info}`);
-    sendUpdateMessage('update-available', { code: 0, msg: 'ok', data: info });
+    logger.info(`[update] available`, info);
+    const { version, releaseNotes } = info;
+    sendUpdateMessage('update-available', { code: 0, msg: 'ok', data: { version, releaseNotes, available: true } });
   });
 
   autoUpdater.on('update-not-available', () => {
     logger.info('[update] not available');
-    sendUpdateMessage('update-not-available', { code: 0, msg: 'ok', data: { available: false } });
+    sendUpdateMessage('update-not-available', { code: 0, msg: 'ok', data: { version: app.getVersion(), releaseNotes: '', available: false } });
   });
 
   autoUpdater.on('error', (err: any) => {
-    logger.error(`[update] error: ${err.message}`);
-    sendUpdateMessage('update-error', { code: -1, msg: err.message, data: null });
+    logger.error(`[update] error`, err);
+    sendUpdateMessage('update-error', { code: -1, msg: err.message, data: err });
   });
 
   autoUpdater.on('download-progress', (progress: any) => {
     const percent = Math.trunc(progress.percent);
     logger.info(`[update] download progress: ${percent}%`);
-    sendUpdateMessage('download-progress', { code: 0, msg: 'ok', data: { percent } });
+    sendUpdateMessage('download-progress', { code: 0, msg: 'ok', data: { percent, downloaded: percent === 100 } });
   });
 
   autoUpdater.on('update-downloaded', () => {
     logger.info('[update] downloaded');
-    sendUpdateMessage('update-downloaded', { code: 0, msg: 'ok', data: { downloaded: true } });
+    sendUpdateMessage('update-downloaded', { code: 0, msg: 'ok', data: { percent: 100, downloaded: true } });
   });
 
   logger.info(`[update][init] path:${updatePath}`);
