@@ -1,10 +1,23 @@
+import type { TabValue } from 'tdesign-vue-next';
 import { LocationQueryRaw, RouteRecordName } from 'vue-router';
 
-import STYLE_CONFIG from '@/config/system';
+export interface RouteMeta {
+  title?: string | Record<string, string>;
+  icon?: string;
+  expanded?: boolean;
+  orderNo?: number;
+  hidden?: boolean;
+  hiddenBreadcrumb?: boolean;
+  single?: boolean;
+  keepAlive?: boolean;
+  frameSrc?: string;
+  frameBlank?: boolean;
+}
 
 export interface MenuRoute {
-  path: string;
-  title?: string;
+  // TODO: menuitem 组件实际支持 string 类型但是类型错误，暂时使用 any 类型避免打包错误待组件类型修复
+  path: any;
+  title?: string | Record<string, string>;
   name?: string;
   icon?:
     | string
@@ -13,20 +26,15 @@ export interface MenuRoute {
       };
   redirect?: string;
   children: MenuRoute[];
-  meta: any;
+  meta: RouteMeta;
 }
 
 export type ModeType = 'dark' | 'light';
 
-export type ConfigType = 'configBase' | 'siteSource' | 'iptvSource' | 'analyzeSource' | 'driveSource' | 'editSource';
-
-export type SettingType = typeof STYLE_CONFIG;
-
-export type ClassName = { [className: string]: any } | ClassName[] | string;
-
-export type CommonObjType = {
-  [key: string]: string | number;
-};
+export interface UserInfo {
+  name: string;
+  roles: string[];
+}
 
 export interface NotificationItem {
   id: string;
@@ -52,4 +60,10 @@ export interface TRouterInfo {
 export interface TTabRouterType {
   isRefreshing: boolean;
   tabRouterList: Array<TRouterInfo>;
+}
+
+export interface TTabRemoveOptions {
+  value: TabValue;
+  index: number;
+  e: MouseEvent;
 }

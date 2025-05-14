@@ -19,9 +19,3 @@ declare module '*.svg' {
 }
 
 declare type Recordable<T = any> = Record<string, T>;
-
-declare global {
-  interface Window {
-    removeLoading: () => void;
-  }
-}
