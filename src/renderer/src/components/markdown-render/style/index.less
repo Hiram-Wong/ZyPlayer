@@ -10,92 +10,12 @@
     color: var(--td-text-color-secondary);
   }
 
-  /* 第一层级：实心圆 */
-  ul {
-    list-style-type: disc;
-  }
-
-  ul li::marker {
-    content: "•"; /* 实心圆 */
-  }
-
-  /* 第二层级：空心圆 */
-  ul ul {
-    list-style-type: circle;
-  }
-
-  ul ul li::marker {
-    content: "◦"; /* 空心圆 */
-  }
-
-  /* 第三层级：实心方块 */
-  ul ul ul {
-    list-style-type: square;
-  }
-
-  ul ul ul li::marker {
-    content: "▪"; /* 实心方块 */
-  }
-
-
-
-  /* 第一层级：数字 */
-  ol {
-    counter-reset: level1;
-    list-style: none; /* 移除默认的列表样式 */
-    padding-left: 28px; /* 移除默认的缩进 */
-  }
-
-  ol li {
-    counter-increment: level1;
-  }
-
-  ol li::marker {
-    content: counter(level1) ". ";
-  }
-
-  /* 第二层级：大写罗马数字 */
-  ol ol {
-    counter-reset: level2;
-    list-style: none; /* 移除默认的列表样式 */
-  }
-
-  ol ol li {
-    counter-increment: level2;
-  }
-
-  ol ol li::marker {
-    content: counter(level2, lower-roman) ". ";
-  }
-
-  /* 第三层级：小写字母 */
-  ol ol ol {
-    counter-reset: level3;
-    list-style: none; /* 移除默认的列表样式 */
-  }
-
-  ol ol ol li {
-    counter-increment: level3;
-  }
-
-  ol ol ol li::marker {
-    content: counter(level3, lower-alpha) " ";
-  }
-
   img {
     max-width: 35% !important;
   }
 
 	p {
 		white-space: pre-wrap;
-	}
-
-	ol {
-		list-style-type: decimal;
-	}
-
-	ul {
-		list-style-type: disc;
 	}
 
 	pre code,
@@ -142,7 +62,6 @@
 }
 
 :root[theme-mode='dark'] {
-
 	.highlight pre,
 	pre {
 		background-color: #282c34;

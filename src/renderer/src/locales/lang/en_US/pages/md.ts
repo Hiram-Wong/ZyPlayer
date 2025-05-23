@@ -21,4 +21,10 @@ export default {
     confirm: 'Aagree',
     cancel: 'Disagree',
   },
+  label: {
+    copy: 'Copy',
+    lang: 'Lang',
+    copySuccess: 'Copy success',
+    copyError: 'Copy failed, please check your browser settings',
+  },
 };

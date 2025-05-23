@@ -91,7 +91,7 @@
       </div>
       <div class="ai-item result" v-if="formData.result && !active.loading">
         <t-card :title="$t('pages.lab.aiBrain.result')">
-          <md-render :text="formData.contentHtml" class="chat-msg-content pa-3" />
+          <md-render :text="formData.contentHtml" :label="label" class="chat-msg-content pa-3" />
           <template #actions>
             <t-button size="small" shape="round" @click.stop="copyAiAnswer">{{
               $t('pages.lab.aiBrain.copy') }}</t-button>
@@ -103,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
+import { computed, ref, nextTick, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import JSON5 from "json5";
 
@@ -142,6 +142,14 @@ const formData = ref({
 });
 const active = ref({
   loading: false
+});
+const label = computed(() => {
+  return {
+    copy: t('pages.md.label.copy'),
+    lang: t('pages.md.label.lang'),
+    copySuccess: t('pages.md.label.copySuccess'),
+    copyError: t('pages.md.label.copyError'),
+  }
 });
 
 onMounted(() => {

@@ -21,4 +21,10 @@ export default {
     confirm: '同意并继续',
     cancel: '不同意',
   },
+  label: {
+    copy: '复制',
+    lang: '语言',
+    copySuccess: '复制成功',
+    copyError: '复制失败，请检查您的浏览器设置',
+  },
 };

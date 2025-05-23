@@ -14,13 +14,13 @@
       <h1>{{ $t('pages.md.thumbanilFfmpeg.title') }}</h1>
     </template>
     <template #content>
-      <md-render :text="$t('pages.md.thumbanilFfmpeg.content')" />
+      <md-render :text="$t('pages.md.thumbanilFfmpeg.content')" :label="label" />
     </template>
   </common-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 
 import { t } from '@/locales';
@@ -40,6 +40,14 @@ const props = defineProps({
 });
 
 const formVisible = ref(false);
+const label = computed(() => {
+  return {
+    copy: t('pages.md.label.copy'),
+    lang: t('pages.md.label.lang'),
+    copySuccess: t('pages.md.label.copySuccess'),
+    copyError: t('pages.md.label.copyError'),
+  }
+});
 const emits = defineEmits(['update:visible']);
 
 watch(

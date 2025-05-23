@@ -107,7 +107,7 @@
         <div class="plugin-readme data-item" v-if="pluginInfo.type === 'system'">
           <p class="title-label">{{ $t('pages.lab.pluginCenter.content.title') }}</p>
           <div class="md">
-            <md-render class="custom-md" :text="pluginInfo.readme" />
+            <md-render class="custom-md" :text="pluginInfo.readme" :label="label" />
           </div>
         </div>
         <div class="plugin-webview data-item" v-if="pluginInfo.type === 'ui'">
@@ -148,6 +148,14 @@ const active = ref({
   controlLoad: {}
 });
 const webviewRef = ref<any>(null);
+const label = computed(() => {
+  return {
+    copy: t('pages.md.label.copy'),
+    lang: t('pages.md.label.lang'),
+    copySuccess: t('pages.md.label.copySuccess'),
+    copyError: t('pages.md.label.copyError'),
+  }
+});
 
 const renderError = () => {
   return (
