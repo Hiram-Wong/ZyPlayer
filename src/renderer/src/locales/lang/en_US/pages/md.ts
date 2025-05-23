@@ -1,6 +1,6 @@
-import privacyPolicyMD from '@/assets/md/en_US/privacy-policy.md?raw';
-import thumbnailFfmpegMD from '@/assets/md/en_US/thumbnail-ffmpeg.md?raw';
-import customPlayerMD from '@/assets/md/en_US/custom-player.md?raw';
+import privacyPolicyMD from './md/privacy-policy.md?raw';
+import thumbnailFfmpegMD from './md/thumbnail-ffmpeg.md?raw';
+import customPlayerMD from './md/custom-player.md?raw';
 
 export default {
   thumbanilFfmpeg: {
