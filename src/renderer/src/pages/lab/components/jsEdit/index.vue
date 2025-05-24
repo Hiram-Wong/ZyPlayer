@@ -260,7 +260,7 @@
               <div class="header-clear" @click="handleConsoleClear"><clear-icon /></div>
             </div>
             <div class="log-pane-content">
-              <div class="log-box" ref="logRef"></div>
+              <terminal-view :options="termConf" ref="logRef" class="log-box" />
             </div>
           </div>
         </pane>
@@ -270,15 +270,12 @@
 </template>
 
 <script setup lang="ts">
-import '@xterm/xterm/css/xterm.css';
 import 'splitpanes/dist/splitpanes.css';
 
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
 import moment from 'moment';
 import JSON5 from 'json5';
 import { Splitpanes, Pane } from 'splitpanes';
-import { computed, nextTick, onActivated, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { computed, nextTick, onActivated, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { GestureClickIcon, ArrowLeftIcon, ArrowRightIcon, ClearIcon, RotateIcon } from 'tdesign-icons-vue-next';
@@ -298,6 +295,8 @@ import reqHtml from '../reqHtml/index.vue';
 import drpySuggestions from './utils/drpy_suggestions';
 import drpyObjectInner from './utils/drpy_object_inner.ts?raw';
 
+import TerminalView from '@/components/terminal/index.vue';
+
 const TEMPLATE_RULES = {};
 
 const router = useRouter();
@@ -309,7 +308,18 @@ const tmp = computed(() => {
     file: t('pages.lab.jsEdit.fileManage'),
   };
 });
-const logRef = useTemplateRef('logRef');
+const termConf = ref({
+  fontSize: 14,
+  fontFamily: "JetBrainsMono",
+  theme: {
+    foreground: theme.value === 'light' ? '#000000' : '#ffffff',
+  },
+  convertEol: true, //启用时，光标将设置为下一行的开头
+  disableStdin: true, //是否应禁用输入
+  cursorBlink: true,
+  cursorStyle: 'underline',
+});
+const logRef = useTemplateRef<InstanceType<typeof TerminalView> | null>('logRef');
 const form = ref({
   content: {
     js: '',
@@ -396,8 +406,6 @@ const active = ref({
 });
 const mubanData = ref({});
 const debugId = ref('');
-const terminal = ref<Terminal>();
-const fitAddon = ref<FitAddon>();
 
 watch(
   () => theme.value,
@@ -405,11 +413,13 @@ watch(
     jsEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
     htmlEditConf.value.theme = val === 'light' ? 'vs' : 'vs-dark';
 
-    if (terminal.value) {
-      terminal.value.options.theme = {
-        ...terminal.value.options.theme,
-        foreground: val === 'light' ? '#000000' : '#ffffff'
-      };
+    if (logRef.value) {
+      termConf.value = {
+        ...termConf.value,
+        theme: {
+          foreground: val === 'light'? '#000000' : '#ffffff'
+        },
+      }
     }
   }
 );
@@ -451,17 +461,6 @@ onMounted(() => {
 
 onActivated(() => {
   if (active.value.action === 'preview') validateAndRecoverWebview();
-});
-
-onBeforeUnmount(() => {
-  if (fitAddon.value && logRef.value) logResizeObserver.unobserve(logRef.value);
-  if (terminal.value) terminal.value.dispose();
-});
-
-// ResizeObserver 监听终端容器的大小变化
-const logResizeObserver = new ResizeObserver(() => {
-  // console.log('resize');
-  if (fitAddon.value) fitAddon.value.fit();
 });
 
 // common
@@ -1058,19 +1057,16 @@ const handleDomDebug = async (type: string, rule: string) => {
     const res = await methodMap[type]({ html: content, rule });
     console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, res);
 
-    _console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
-    _console.log(res);
-    _console.log('\n');
+    logRef.value?.write(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `, 'info', false);
+    logRef.value?.write(res);
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err: any) {
     console.error(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, err);
 
-    _console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
-    _console.error(err);
-    _console.log('\n');
+    logRef.value?.write(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `, 'info', false);
+    logRef.value?.write(err, 'error');
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
-  fitAddon.value?.fit();
 };
 
 // btn
@@ -1092,22 +1088,19 @@ const handleDataDebugLog = async () => {
   try {
     const res = await utilsGetLog();
 
-    res.forEach(([type, time, content]) => {
+    res.forEach(([_type, time, content]) => {
       console.info(`log: ${moment(time).format('YYYY-MM-DD HH:mm:ss')}`, content);
 
-      _console.info(`log: ${moment(time).format('YYYY-MM-DD HH:mm:ss')} > `);
-      _console.log(content);
-      _console.log('\n');
+      logRef.value?.write(`log: ${moment(time).format('YYYY-MM-DD HH:mm:ss')} > `, 'info', false);
+      logRef.value?.write(content);
     });
   } catch (err: any) {
     console.warn(`log: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, err);
 
-    _console.info(`log: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
-    _console.error(err);
-    _console.log('\n');
+    logRef.value?.write(`log: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `, 'info', false);
+    logRef.value?.write(err, 'error');
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
-  fitAddon.value?.fit();
 };
 
 // data
@@ -1286,77 +1279,26 @@ const handleDataDebug = async (type: string, data: { [key: string]: any } = {}) 
     if (type === 'proxy') form.value.proxy.upload = JSON5.stringify(res);
     console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, res);
 
-    _console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
-    _console.log(res);
-    _console.log('\n');
+    logRef.value?.write(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `, 'info', false);
+    logRef.value?.write(res);
     MessagePlugin.success(`${t('pages.setting.data.success')}`);
   } catch (err: any) {
     console.warn(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')}`, err);
 
-    _console.info(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `);
-    _console.error(err);
-    _console.log('\n');
+    logRef.value?.write(`${type}: ${moment().format('YYYY-MM-DD HH:mm:ss')} > `, 'info', false);
+    logRef.value?.write(err, 'error');
     MessagePlugin.error(`${t('pages.setting.data.fail')}: ${err.message}`);
   }
-  fitAddon.value?.fit();
 };
-
-// 创建一个日志工具
-const _console = (() => {
-  // 定义日志级别和对应的ANSI颜色代码
-  const LOG_LEVELS = {
-    info: '\x1b[34m', // 蓝色
-    warn: '\x1b[33m', // 黄色
-    error: '\x1b[31m', // 红色
-    log: '\x1b[0m' // 重置颜色
-  };
-
-  const strFormat = (str: string | number | object): string => {
-    if (typeof str === 'object') {
-      return JSON.stringify(str, null, 2);
-    }
-    return String(str);
-  };
-
-  const log = (level: keyof typeof LOG_LEVELS, arg: any) => {
-    const colorCode = LOG_LEVELS[level];
-    const formattedArg = strFormat(arg);
-    const output = `${colorCode}${formattedArg}${LOG_LEVELS.log}`;
-    terminal.value?.write(output);
-  };
-
-  return {
-    log: (arg: any) => log('log', arg),
-    info: (arg: any) => log('info', arg),
-    warn: (arg: any) => log('warn', arg),
-    error: (arg: any) => log('error', arg)
-  };
-})();
 
 // console
 const setupConsole = () => {
-  terminal.value = new Terminal({
-    fontSize: 14,
-    fontFamily: "JetBrainsMono",
-    theme: {
-      foreground: theme.value === 'light' ? '#000000' : '#ffffff'
-    },
-    convertEol: true, //启用时，光标将设置为下一行的开头
-    disableStdin: true, //是否应禁用输入
-    cursorBlink: true,
-    cursorStyle: 'underline',
-  });
-  fitAddon.value = new FitAddon();
-  terminal.value.loadAddon(fitAddon.value);
-  terminal.value.open(logRef.value!);
-  fitAddon.value.fit();
-
-  logResizeObserver.observe(logRef.value!);
+  logRef.value?.init();
 };
 
 const handleConsoleClear = () => {
   console.clear();
-  terminal.value?.clear();
+  logRef.value?.clear();
 };
 
 // webview

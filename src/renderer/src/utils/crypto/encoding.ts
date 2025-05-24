@@ -10,7 +10,6 @@ const base64 = {
   atob: (val: string) => uint8ArrayToUtf8(base64ToUint8Array(val)),
 };
 
-
 const hash = {
   'md5-16': (val: string) => crypto.MD5(val).toString().slice(8, 24),
   'md5-32': (val: string) => crypto.MD5(val).toString(),
