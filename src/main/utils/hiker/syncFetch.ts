@@ -115,13 +115,13 @@ const fetch = (url: string, options: RequestOptions = {}) => {
         }
       }
     }
+
     if (method !== 'GET') {
-      // 软件会自动将body请求体a=xx&b=1转成{a:xx,b:1}
-      if (options?.body && typeof options?.body === 'string') {
-        options.body = parseQueryString(options.body);
-      }
       if (contentType.includes('application/x-www-form-urlencoded')) {
-        config['body'] = new URLSearchParams(options.body).toString();
+        const body = parseQueryString(options.body as string) as Record<string, string>;
+        config['body'] = new URLSearchParams(body).toString();
+      } else if (contentType.includes('text/plain')) {
+        config['body'] = options.body;
       } else if (contentType.includes('multipart/form-data')) {
         const fd = new FormData();
         fd.append('file', fs.readFileSync(options.body as string), options.body as string);
@@ -129,34 +129,39 @@ const fetch = (url: string, options: RequestOptions = {}) => {
         config['headers']['Content-Type'] = fd.getHeaders();
       } else {
         if (!config.headers['content-type']) config['headers']['Content-Type'] = 'application/json';
-        config['body'] = JSON.stringify(options.body);
+        const body = parseQueryString(options.body as string);
+        config['body'] = JSON.stringify(body);
       }
     }
 
     console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
-    let res = syncFetch(url, config);
-    res.getBody = function (encoding: BufferEncoding | undefined) {
-      return encoding ? Buffer.from(res.buffer()).toString(encoding) : res.buffer();
+    let resp = syncFetch(url, config);
+    resp.getBody = function (encoding: BufferEncoding | undefined) {
+      const buffer = resp.buffer();
+      return encoding ? Buffer.from(buffer).toString(encoding) : buffer;
     };
 
-    if (options?.onlyHeaders) {
-      return res.headers.raw();
-    }
-    if (options?.withHeaders) {
-      return toString({ headers: res.headers.raw(), body: res.getBody(charset) });
-    }
-    if (options?.withStatusCode) {
-      return toString({ headers: res.headers.raw(), body: res.getBody(charset), statusCode: res.status });
-    }
-    if (options?.toHex) {
-      return toString({
-        headers: res.headers.raw(),
-        body: Buffer.from(res.getBody()).toString('hex'),
-        statusCode: res.status,
-      });
-    }
-    return toString(res.getBody(charset));
+    const { onlyHeaders, withHeaders, withStatusCode, toHex } = options || {};
+
+    // 仅返回 headers 的场景
+    if (onlyHeaders) {
+      return toString(resp.headers.raw());
+    };
+
+    // 处理响应体
+    const content = toHex ? Buffer.from(resp.getBody()).toString('hex') : resp.getBody(charset);
+
+    // 仅返回非 headers 或 statusCode 的场景
+    if (!(withHeaders || withStatusCode)) {
+      return toString(content);
+    };
+
+    return toString({
+      headers: resp.headers.raw(),
+      statusCode: resp.status,
+      body: content,
+    });
   } catch (err: any) {
     console.log(err);
     return null;

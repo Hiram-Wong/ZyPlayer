@@ -126,23 +126,24 @@ const fetch = (url: string, options: RequestOptions = {}) => {
         }
       }
     }
+
     if (method !== 'GET') {
-      // 软件会自动将body请求体a=xx&b=1转成{a:xx,b:1}
-      if (options?.body && typeof options?.body === 'string') {
-        options.body = parseQueryString(options.body);
-      }
       if (contentType.includes('application/x-www-form-urlencoded')) {
+        const body = parseQueryString(options.body as string);
         const fd = new FormData();
-        Object.entries(options.body as { [key: string]: string }).forEach(([key, value]) => {
+        Object.entries(body as { [key: string]: string }).forEach(([key, value]) => {
           fd.append(key, value);
         });
         config['form'] = fd;
+      } else if (contentType.includes('text/plain')) {
+        config['body'] = options.body;
       } else if (contentType.includes('multipart/form-data')) {
         const fd = new FormData();
         fd.append('file', fs.readFileSync(options.body as string), options.body as string);
         config['form'] = fd;
       } else {
-        config['json'] = options.body;
+        const body = parseQueryString(options.body as string);
+        config['json'] = body;
       }
     }
     // 软件会自动加Content-Type添加application/json
@@ -151,31 +152,34 @@ const fetch = (url: string, options: RequestOptions = {}) => {
 
     console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
-    let res = syncRequest(method, url, config);
-    // @ts-ignore 重写getBody函数, 否则300+请求码报错
-    res.getBody = function (encoding: BufferEncoding | undefined) {
+    let resp: any = syncRequest(method, url, config);
+    // 重写getBody函数, 否则300+请求码报错
+    resp.getBody = function (encoding: BufferEncoding | undefined) {
       return encoding ? this.body.toString(encoding) : this.body;
     };
-    // @ts-ignore 重写请求头
-    res.headers = serialize2dict(res.headers);
+    // 重写请求头
+    resp.headers = serialize2dict(resp.headers);
 
-    if (options?.onlyHeaders) {
-      return res.headers;
-    }
-    if (options?.withHeaders) {
-      return toString({ headers: res.headers, body: res.getBody(charset) });
-    }
-    if (options?.withStatusCode) {
-      return toString({ headers: res.headers, body: res.getBody(charset), statusCode: res.statusCode });
-    }
-    if (options?.toHex) {
-      return toString({
-        headers: res.headers,
-        body: Buffer.from(res.getBody()).toString('hex'),
-        statusCode: res.statusCode,
-      });
-    }
-    return toString(res.getBody(charset));
+    const { onlyHeaders, withHeaders, withStatusCode, toHex } = options || {};
+
+    // 仅返回 headers 的场景
+    if (onlyHeaders) {
+      return toString(resp.headers);
+    };
+
+    // 处理响应体
+    const content = toHex ? Buffer.from(resp.getBody()).toString('hex') : resp.getBody(charset);
+
+    // 仅返回非 headers 或 statusCode 的场景
+    if (!(withHeaders || withStatusCode)) {
+      return toString(content);
+    };
+
+    return toString({
+      headers: resp.headers,
+      statusCode: resp.statusCode,
+      body: content,
+    });
   } catch (err: any) {
     console.log(err);
     return null;
