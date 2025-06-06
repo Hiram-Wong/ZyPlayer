@@ -387,6 +387,9 @@ sudo apt-get install libxss1
 
 ## 💰 金主爸爸
 
+[NodeSupport](https://github.com/NodeSeekDev/NodeSupport)赞助了本项目
+
 [![yxvm_support.png](https://s2.loli.net/2025/04/09/JMyQZUKY2bX4G3q.png)](https://yxvm.com/)
 
-[NodeSupport](https://github.com/NodeSeekDev/NodeSupport)赞助了本项目
+
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
