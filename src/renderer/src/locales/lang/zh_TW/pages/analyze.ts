@@ -1,0 +1,47 @@
+export default {
+  name: '解析',
+  noPlay: '暫無播放',
+  play: '播放',
+  source: '原始',
+  support: '支援平台',
+  history: {
+    title: '歷史',
+    clear: '清空',
+    cancel: '取消',
+  },
+  dialog: {
+    cancel: '取消',
+    confirm: '確定',
+    header: '刪除記錄',
+    body: '確定要刪除所有記錄嗎？刪除後無法復原。',
+  },
+  search: {
+    input: '輸入關鍵字搜尋',
+    enter: 'Enter',
+    clear: '清空',
+    tip: '輸入 {0} 可快速指定搜尋來源，例如',
+    watch: '查看',
+    content: '的所有內容',
+  },
+  platform: {
+    360: '360 影視',
+    iqiyi: '愛奇藝',
+    youku: '優酷視頻',
+    tencent: '騰訊視頻',
+    sohu: '搜狐視頻',
+    mgtv: '芒果 TV',
+    pptv: '聚力網',
+    letv: '樂視視頻',
+  },
+  message: {
+    invalidApi: '無效的解析介面',
+    info: '正在載入目前影片，請耐心等待',
+    error: '載入失敗，請嘗試切換其他介面',
+    empty: '請選擇解析介面或輸入需要解析的網址',
+  },
+  inputUrl: '貼個連結，讓世界充滿愛',
+  infiniteLoading: {
+    complete: '已經到底線了',
+    error: '哎呀，出了一點差錯',
+  },
+};
