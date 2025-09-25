@@ -21,6 +21,7 @@
 **重要提醒**: 在开始使用前，请务必详读并同意用户协议，确保遵守相关规定!
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Hiram-Wong/ZyPlayer&type=Date)](https://star-history.com/#Hiram-Wong/ZyPlayer&Date)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer?ref=badge_shield)
 
 ## 🌴 法律声明与注意事项
 
@@ -393,3 +394,7 @@ sudo apt-get install libxss1
 
 
 [![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer?ref=badge_large)
