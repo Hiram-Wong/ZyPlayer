@@ -40,6 +40,7 @@
 - 优化: 封装多个公共组件 webview|group-btn|lazy-bg|input-req
 - 修复: 开发环境下主程序部分情况下无法热重载问题
 - 修复: 开发环境下代码规范(eslint prettierrc)格式化不生效
+- 修复: github action构建mac包内存溢出
 - 修复: windows首次使用弹命令行窗口(仅3.4.0版本) [issue #447]
 - 修复: 字体加载不渲染问题
 - 修复: 请求头: 开发者工具请求头显示不对应; CDP嗅探请求头不生效
