@@ -81,6 +81,8 @@ vitest.config.*.timestamp-*
 
 # TypeScript incremental build
 .tsbuildinfo
+**/auto-imports.d.ts
+**/components.d.ts
 
 # Temp
 .temp
