@@ -1,6 +1,7 @@
 <template>
-  <div class="lab-container">
-    <common-nav :title="$t('pages.lab.name')" :list="settingSet.list" :active="settingSet.select" @change-key="changeConf" />
+  <div class="lab view-container">
+    <common-nav :list="componentNav" :active="active" class="sidebar" @change="onNavChange" />
+
     <div class="content">
       <div class="container">
         <keep-alive>
@@ -10,85 +11,67 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { computed, defineAsyncComponent, reactive, shallowRef } from 'vue';
-import { t } from '@/locales';
-import CommonNav from '@/components/common-nav/index.vue';
+import { computed, defineAsyncComponent, shallowRef } from 'vue';
 
-// 异步加载组件，也可以直接导入组件
+import CommonNav from '@/components/common-nav/index.vue';
+import { t } from '@/locales';
+import { useSettingStore } from '@/store';
+
+const settingStore = useSettingStore();
+
 const componentMap = {
-  'dataCrypto': defineAsyncComponent(() => import('./components/dataCrypto/index.vue')),
-  'fileDiff': defineAsyncComponent(() => import('./components/fileDiff/index.vue')),
-  'aiBrain': defineAsyncComponent(() => import('./components/aiBrain/index.vue')),
-  'jsEdit': defineAsyncComponent(() => import('./components/jsEdit/index.vue')),
-  'staticFilter': defineAsyncComponent(() => import('./components/staticFilter/index.vue')),
-  'snifferPlay': defineAsyncComponent(() => import('./components/snifferPlay/index.vue')),
-  'pluginCenter': defineAsyncComponent(() => import('./components/pluginCenter/index.vue')),
+  crypto: defineAsyncComponent(() => import('./components/crypto/index.vue')),
+  diff: defineAsyncComponent(() => import('./components/diff/index.vue')),
+  edit: defineAsyncComponent(() => import('./components/edit/index.vue')),
+  sift: defineAsyncComponent(() => import('./components/sift/index.vue')),
+  sniffer: defineAsyncComponent(() => import('./components/sniffer/index.vue')),
+  player: defineAsyncComponent(() => import('./components/player/index.vue')),
+  extension: defineAsyncComponent(() => import('./components/extension/index.vue')),
 };
 
-const currentComponent = shallowRef(componentMap['dataCrypto']);
+const currentComponent = shallowRef(componentMap[settingStore.nav.lab || 'crypto']);
 
-const settingNav = computed(() => {
-  return [
-    {
-      id: 'dataCrypto',
-      name: t('pages.lab.nav.dataCrypto')
-    },
-    {
-      id: 'fileDiff',
-      name: t('pages.lab.nav.fileDiff')
-    },
-    {
-      id: 'aiBrain',
-      name: t('pages.lab.nav.aiBrain')
-    }, {
-      id: 'jsEdit',
-      name: t('pages.lab.nav.jsEdit')
-    }, {
-      id: 'staticFilter',
-      name: t('pages.lab.nav.staticFilter')
-    }, {
-      id: 'snifferPlay',
-      name: t('pages.lab.nav.snifferPlay')
-    },
-    {
-      id: 'pluginCenter',
-      name: t('pages.lab.nav.pluginCenter')
-    }
-  ]
-});
+const active = computed(() => settingStore.nav.lab || 'crypto');
+const componentNav = computed(() => [
+  { id: 'crypto', name: t('pages.lab.crypto.title') },
+  { id: 'diff', name: t('pages.lab.diff.title') },
+  { id: 'edit', name: t('pages.lab.edit.title') },
+  { id: 'sift', name: t('pages.lab.sift.title') },
+  { id: 'sniffer', name: t('pages.lab.sniffer.title') },
+  { id: 'player', name: t('pages.lab.player.title') },
+  { id: 'extension', name: t('pages.lab.extension.title') },
+]);
 
-const settingSet = reactive({
-  select: 'dataCrypto',
-  list: settingNav
-});
+const onNavChange = (item: string) => {
+  settingStore.updateConfig({ nav: { ...settingStore.nav, lab: item } });
 
-const changeConf = (key: string) => {
-  settingSet.select = key;
-  currentComponent.value = componentMap[key];
+  if (Object.hasOwn(componentMap, item)) {
+    currentComponent.value = componentMap[item];
+  }
 };
 </script>
-
 <style lang="less" scoped>
-.lab-container {
+.view-container {
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  position: relative;
-  flex: 1 1;
+  gap: var(--td-size-4);
+
+  .sidebar {
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
 
   .content {
-    min-width: 750px;
-    position: relative;
-    padding: var(--td-pop-padding-l);
-    background-color: var(--td-bg-color-container);
-    border-radius: var(--td-radius-default);
+    height: 100%;
+    width: 100%;
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    gap: var(--td-size-4);
+    overflow: hidden;
 
     .container {
       flex: 1;

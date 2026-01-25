@@ -1,8 +1,18 @@
-# OS specific files
-.DS_Store
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
-# dependencies manager
-node_modules/
+# Dependencies
+node_modules
+venv
+.venv
+
+# Yarn
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,35 +20,88 @@ node_modules/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+.yarn-cache
 
-# build files
-es/
-lib/
-dist/
+# Python
+uv.lock
+
+# Build Outputs
+dist
+dev-dist
+dist-ssr
+packages/*/build
+.next/
 out/
-typings/
 
-_site
-package
-tmp*
-temp*
-coverage
-test-report.html
-.idea/
-yarn-error.log
-*.zip
-.history
-.stylelintcache
+# Turbo
+.turbo
 
+# Vercel
+.vercel
+
+# Editors
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE
+.vscode/*
+.idea/*
+.aider*
+.claude/*
+.claude-code-router/*
+.codebuddy/*
+.cursor/*
+.gemini/*
+.qwen/*
+.trae/*
+.zed/*
+
+# Env
+.env
+.env.development.local
+.env.test.local
+.env.production.local
 .env.local
-.env.*.local
 
-# dev files
+# OS
+.DS_Store
+
+# Misc
+*.pem
+
+# Tests
+coverage
+.vitest-cache
+vitest.config.*.timestamp-*
+.nyc_output
+
+# TypeScript incremental build
+.tsbuildinfo
+
+# Temp
+.temp
+.tmp
+
+# Runtime
+pids
+*.pid
+*.seed
+*.pid.lock
 thumbnail/
 *.pyc
 __pycache__/
 
-# lock文件
-yarn.lock
-package-lock.json
-pnpm-lock.yaml
+# Husky
+.husky/*
+!.husky/_/*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Dump
+*.dmp
+dmp.txt

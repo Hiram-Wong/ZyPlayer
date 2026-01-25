@@ -1,13 +1,14 @@
 <template>
-  <router-view v-if="isRouterAlive" v-slot="{ Component }">
-    <transition name="fade" mode="out-in">
-      <keep-alive>
-        <component :is="Component" :key="activeRouteFullPath" :class="`${prefix}-component`" id="main-component" />
-      </keep-alive>
-    </transition>
-  </router-view>
+  <div :class="[`${prefix}-content-container`]">
+    <router-view v-if="isRouterAlive" v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <keep-alive>
+          <component :is="Component" id="main-component" :key="activeRouteFullPath" :class="`${prefix}-component`" />
+        </keep-alive>
+      </transition>
+    </router-view>
+  </div>
 </template>
-
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';

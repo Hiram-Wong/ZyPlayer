@@ -1,67 +1,51 @@
-import { useLocalStorage, usePreferredLanguages } from '@vueuse/core';
-import { DropdownOption } from 'tdesign-vue-next';
+import type { ILangWithoutSystem } from '@shared/locales';
+import { defaultLocale, fallbackLocale, lang, langCode, messages } from '@shared/locales';
+import { usePreferredLanguages } from '@vueuse/core';
 import { computed } from 'vue';
+import type { Composer } from 'vue-i18n';
 import { createI18n } from 'vue-i18n';
 
-// 导入语言文件
-const langModules = import.meta.glob('./lang/*/index.ts', { eager: true });
+const importMessages = computed(() => messages());
 
-const langModuleMap = new Map<string, Object>();
+export const defaultLang = (value?: ILangWithoutSystem | 'system'): ILangWithoutSystem => {
+  let lang = value;
 
-export const langCode: Array<string> = [];
+  if (!lang) {
+    try {
+      const store = localStorage.getItem('setting');
+      if (store) {
+        const parsed = JSON.parse(store);
+        lang = parsed.lang;
+      }
+    } catch {}
+  }
 
-export const localeConfigKey = 'zy-locale';
+  if (!lang || lang === 'system') {
+    const languages = usePreferredLanguages();
+    const preferred = languages.value[0];
+    lang = preferred as ILangWithoutSystem;
+  }
 
-// 获取浏览器默认语言环境
-const languages = usePreferredLanguages();
+  if (!langCode.includes(lang as ILangWithoutSystem)) {
+    lang = defaultLocale;
+  }
 
-// 生成语言模块列表
-const generateLangModuleMap = () => {
-  const fullPaths = Object.keys(langModules);
-  fullPaths.forEach((fullPath) => {
-    const k = fullPath.replace('./lang', '');
-    const startIndex = 1;
-    const lastIndex = k.lastIndexOf('/');
-    const code = k.substring(startIndex, lastIndex);
-    langCode.push(code);
-    langModuleMap.set(code, langModules[fullPath]);
-  });
+  return lang as ILangWithoutSystem;
 };
-
-// 导出 Message
-const importMessages = computed(() => {
-  generateLangModuleMap();
-
-  const message: Recordable = {};
-  langModuleMap.forEach((value: any, key) => {
-    message[key] = value.default;
-  });
-  return message;
-});
 
 export const i18n = createI18n({
   legacy: false,
-  locale: useLocalStorage(localeConfigKey, 'zh_CN').value || languages.value[0] || 'zh_CN',
-  fallbackLocale: 'zh_CN',
+  locale: defaultLang(),
+  fallbackLocale,
   messages: importMessages.value,
   globalInjection: true,
 });
 
-export const langList = computed(() => {
-  if (langModuleMap.size === 0) generateLangModuleMap();
+export const langList = computed(() => lang());
 
-  const list: DropdownOption[] = [];
-  langModuleMap.forEach((value: any, key) => {
-    list.push({
-      content: value.default.lang,
-      value: key,
-    });
-  });
+export { langCode } from '@shared/locales';
 
-  return list;
-});
-
-// @ts-ignore
-export const { t } = i18n.global;
+// export const { t }: { t: Composer['t'] } = i18n.global;
+export const t: Composer['t'] = i18n.global.t;
 
 export default i18n;

@@ -1,0 +1,14 @@
+[project]
+name = "zyfun-film-adapter_t3_py"
+version = "0.1.0"
+requires-python = ">=3.6"
+dependencies = [
+  "cachetools",
+  "lxml",
+  "jsonpath",
+  "pyquery",
+  "pycryptodome",
+  "requests",
+  "pyzmq",
+  "ujson"
+]

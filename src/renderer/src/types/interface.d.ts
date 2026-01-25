@@ -1,5 +1,5 @@
 import type { TabValue } from 'tdesign-vue-next';
-import { LocationQueryRaw, RouteRecordName } from 'vue-router';
+import type { LocationQueryRaw, RouteRecordName } from 'vue-router';
 
 export interface RouteMeta {
   title?: string | Record<string, string>;
@@ -12,6 +12,7 @@ export interface RouteMeta {
   keepAlive?: boolean;
   frameSrc?: string;
   frameBlank?: boolean;
+  position?: string;
 }
 
 export interface MenuRoute {
@@ -27,23 +28,7 @@ export interface MenuRoute {
   redirect?: string;
   children: MenuRoute[];
   meta: RouteMeta;
-}
-
-export type ModeType = 'dark' | 'light';
-
-export interface UserInfo {
-  name: string;
-  roles: string[];
-}
-
-export interface NotificationItem {
-  id: string;
-  content: string;
-  type: string;
-  status: boolean;
-  collected: boolean;
-  date: string;
-  quality: string;
+  position?: string;
 }
 
 export interface TRouterInfo {

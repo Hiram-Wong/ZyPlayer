@@ -1,3 +1,13 @@
 {
-  "recommendations": ["dbaeumer.vscode-eslint"]
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    "lokalise.i18n-ally",
+    // "oxc.oxc-vscode",
+    "typescriptteam.native-preview",
+    "sdras.vue-vscode-snippets",
+    "vitest.explorer",
+    "vue.volar"
+  ]
 }

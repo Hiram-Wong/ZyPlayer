@@ -1,0 +1,96 @@
+- 差异说明
+  - 解码器
+    - dash
+      - xgplayer: shaka([dash加载ranage为0](https://github.com/bytedance/xgplayer/issues/1674))
+      - artplayer/oplayer/nplayer/dplayer: dash
+    - flv
+      - oplayer: mpegts
+      - artplayer/xgplayer/nplayer/dplayer: flv
+    - mpegts: oplayer/xgplayer不支持ts分片类型
+    - torrent: xgplayer不支持
+    - xgplayer: 解码器默认参数与其他不对齐(参数不一致)
+  - 请求头(不支持情况) -> 链接绑请求头 -> 底层拦截(electron)
+    - oplayer: dash/flv/shaka均不支持
+    - xgplayer: 仅m3u8/flv支持
+    - torrent: 均不支持
+    - shaka: 解码器只有第一次请求mpd存在请求头 m4s 不带请求头
+  - 记忆
+    - oplayer: 赋值音量与ui不对应(功能不影响) -> 静音直接显示0 但 赋值会显示赋值
+    - oplayer: 倍速/音量/静音记忆失效(偶发)
+  - 右键
+    - 支持: artplayer/dplayer/nplayer(不支持画质数据)
+    - 不支持: xgpayer/oplayer
+  - 音量
+    - artplayer/dplayer/oplayer/xgplayer: 静音显示0
+    - nplayer: 静音显示原音量
+    - artplayer: 静音点击音量条会提示音量变动但是ui没渲染实际也是静音, 拖动直接恢复
+  - 弹幕
+    - dplayer: 弹幕使用 url+blob / apiBackend
+    - dplayer: 弹幕发布无法控制底部距离
+    - oplayer: 渲染有问题获取不到图层真实尺寸
+    - xgplayer: 不支持弹幕配置项
+  - 国际化
+    - artplayer/dplayer/nplayer/xgplayer: 支持 简体/繁体/英语
+    - oplayer: 不支持繁体
+    - artplayer: 弹幕部分只支持简体
+  - 画质
+    - nplayer: 不支持多画质
+    - xgplayer: 首次不显示默认画质
+  - 切换
+    - 解码器
+      - dplayer/nplayer/oplayer/xgplayer: 跨解码器切换链接
+      - artplayer: 同解码器切换链接
+    - 请求头
+      - artplayer/dplayer/nplayer/xgplayer: 可切请求头
+      - oplayer: 不可切请求头
+    - xgplayer 切换 mpd 失败
+    - dplayer 切换 mpd 会提示加载失败, 实际加载了
+  - 其他
+    - nplayer: 一旦 startTime 超过总时长会报错
+    - nplayer: 摧毁后重建会丢失插件 pip 和 playNext, 刷新生效
+
+- 参数
+  - container: 容器id不带#
+  - type: 解码器类型 hls dash flv mpegts torrent mp4
+  - url: 视频地址
+  - quality: 视频质量 { name, url }
+  - headers: 请求头
+  - autoplay: 自动播放
+  - isLive: 直播
+  - startTime: 开始时间,单位秒
+  - next: 下集按钮
+
+- 方法
+  - barrage: 弹幕
+  - create: 创建播放器
+  - destroy: 摧毁播放器
+  - onTimeUpdate: 实时返回时间
+  - play: 播放
+  - pause: 暂停
+  - togglePlay: 播放/暂停
+  - toggleMuted: 切换静音
+  - time: 视频时间<当前播放时间, 总进度时间>
+  - seek: 跳转
+  - playbackRate: 当前倍速
+  - setPlaybackRate: 设置倍速
+  - muted: 当前静音
+  - setMuted: 设置静音
+  - volume: 当前音量
+  - setVolume: 设置音量
+
+- 插槽
+  - header: 头部插槽
+
+- mediaUtils
+  - checkMediaType: 检测媒体类型
+  - removeUnSafeHeaders: 移除不安全请求头
+  - convertStandardToUri: 请求头转url拼接
+  - convertWebToElectron: web不安全请求头转electron请求头
+  - getExtensionFromMime: 获取文件扩展名-根据Mime
+  - getMimeFromExtension: 获取Mime-根据扩展名
+  - getFileExtension: 获取文件扩展名-根据路径
+  - getStreamContentTypeToExtension: 获取媒体类型-根据网络流ContentType
+  - getDecoderFromExtension: 获取媒体对应解码器
+  - getStreamContentType: 获取ContentType
+  - isHEVCVideoSupported: 检查是否支持hevc
+  - isSafeHeader: 检查请求头 key 是否安全

@@ -1,23 +1,32 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "include": [
-    "src/renderer/src/env.d.ts",
     "src/renderer/src/**/*",
-    "src/renderer/src/**/*.ts",
-    "src/renderer/src/**/*.tsx",
-    "src/renderer/src/**/*.vue",
-    "src/preload/*.d.ts"
+    "src/preload/**/*",
+    "packages/shared/**/*",
+  ],
+  "exclude": [
+    "src/renderer/src/pages/lab/components/edit/utils/inject/**/*"
   ],
   "compilerOptions": {
     "composite": true,
-    "baseUrl": ".",
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo/tsconfig.web.tsbuildinfo",
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "moduleResolution": "bundler",
+    "types": ["vite/client", "vitest/globals"],
     "paths": {
-      "@/*" :[
-        "src/renderer/src/*"
-      ],
-      "@renderer/*": [
-        "src/renderer/*"
-      ]
-    }
+      "@/*": ["./src/renderer/src/*"],
+      "@main/*": ["./src/main/*"],
+      "@preload/*": ["./src/preload/*"],
+      "@renderer/*": ["./src/renderer/*"],
+      "@shared/*": ["./packages/shared/*"],
+      "@logger": ["./src/main/services/LoggerService"],
+      "@pkg": ["./package.json"]
+    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": true
   }
 }

@@ -1,711 +1,741 @@
 <template>
   <div class="film view-container">
-    <common-nav
-      :title="$t('pages.film.name')"
-      :list="siteConfig.filterOnlySearchData"
-      :active="active.nav"
-      search
-      @change-key="changeConf"
-   />
+    <common-nav :list="config.list" :active="active.nav" search class="sidebar" @change="onNavChange" />
 
     <div class="content">
-      <header class="header" v-if="classConfig.data.length > 0">
-        <div class="header-nav">
-          <title-menu :list="classConfig.data" :active="active.class" @change-key="changeClassEvent" />
+      <div v-if="classList.length > 1" class="header">
+        <div class="left-op-container">
+          <title-menu :list="classList" :active="active.class" class="nav" @change="onClassChange" />
         </div>
-        <t-button theme="default" shape="square" variant="text" v-if="filterData[active.class]" class="quick_filter">
-          <root-list-icon @click="isVisible.toolbar = !isVisible.toolbar" />
-        </t-button>
-      </header>
-      <!-- 过滤工具栏 -->
-      <div v-show="isVisible.toolbar" class="filter header-wrapper">
-        <div class="tags">
-          <div v-for="filterItem in filterData[active.class]" :key="filterItem.key" class="tags-list">
-            <div class="item title">{{ filterItem.name }}</div>
-            <div class="wp">
-              <div v-for="item in filterItem.value" :key="item" class="item"
-                :class="{ active: active.filter[filterItem.key] === item.v }" :label="item.n" :value="item.v"
-                @click="changeFilterEvent(filterItem.key, item.v)">
-                {{ item.n }}
+        <div v-if="filterData[active.class]" class="right-op-container">
+          <t-popup
+            placement="bottom"
+            attach=".content"
+            :overlay-style="{
+              padding: '0 var(--td-comp-paddingLR-s)',
+            }"
+            :z-index="2"
+            :visible="active.filterPopup"
+            @visible-change="handleFilterPopupVisible"
+          >
+            <t-button theme="default" shape="square" variant="text" class="filter-btn" @click="handleFilterVisible">
+              <template #icon><root-list-icon /></template>
+            </t-button>
+
+            <template #content>
+              <div class="filter-wrapper">
+                <div v-for="filterItem in filterData[active.class]" :key="filterItem.key" class="filter-content">
+                  <div class="title">{{ filterItem.name }}</div>
+                  <div class="tags">
+                    <span
+                      v-for="(item, index) in filterItem.value"
+                      :key="index"
+                      class="tag"
+                      :class="{ active: active.filter[filterItem.key] === item.v }"
+                      @click="changeFilterEvent(filterItem.key, item.v)"
+                    >
+                      {{ item.n }}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </template>
+          </t-popup>
         </div>
       </div>
-      <div class="container">
-        <div class="content-wrapper" id="back-top">
+
+      <div v-if="folderBreadcrumb.length">
+        <t-breadcrumb
+          :max-items="8"
+          :items-before-collapse="2"
+          :items-after-collapse="3"
+          max-item-width="140"
+          class="breadcrumb"
+        >
+          <t-breadcrumb-item
+            v-for="item in folderBreadcrumb"
+            :key="item.value"
+            @click="handleFolderBreadcrumbClick(item)"
+          >
+            {{ item.label }}
+          </t-breadcrumb-item>
+          <template #ellipsis="{ items }">
+            <t-dropdown>
+              <t-button variant="text" size="small" shape="square">
+                <ellipsis-icon stroke-color="var(--td-text-color-placeholder)" />
+              </t-button>
+              <t-dropdown-menu>
+                <t-dropdown-item
+                  v-for="item in items"
+                  :key="item.key"
+                  :value="item.key"
+                  @click="handleFolderBreadcrumbClick({ label: item.content, value: item.key })"
+                >
+                  {{ item.content }}
+                </t-dropdown-item>
+              </t-dropdown-menu>
+            </t-dropdown>
+          </template>
+        </t-breadcrumb>
+      </div>
+
+      <div id="back-top" class="container">
+        <div class="content-wrapper">
           <t-row :gutter="[16, 4]" style="margin-left: -8px; margin-right: -8px">
-            <t-col :md="3" :lg="3" :xl="2" :xxl="1" v-for="item in filmData.list" :key="item.vod_id" class="card"
-              @click="playEvent(item)">
+            <t-col
+              v-for="item in filmList"
+              :key="item.vod_id"
+              :md="3"
+              :xl="2"
+              :xxl="1"
+              class="card"
+              @click="playEvent(item)"
+            >
               <div class="card-main">
-                <div v-if="item.vod_remarks || item.vod_remark" class="card-tag card-tag-orange">
-                  <span class="card-tag-text text-hide">{{ item.vod_remarks || item.vod_remark }}</span>
+                <div v-if="item.vod_remarks" class="card-tag card-tag-mask">
+                  <span class="card-tag-text txthide txthide1">{{ item.vod_remarks }}</span>
                 </div>
-                <t-image class="card-main-item" :src="item.vod_pic"
-                  :style="{ height: '100%', background: 'none', overflow: 'hidden' }" :lazy="true" fit="cover"
-                  :loading="renderLoading" :error="renderError">
+                <t-image
+                  class="card-main-item"
+                  :src="item.vod_pic"
+                  :lazy="true"
+                  fit="cover"
+                  shape="round"
+                  :loading="renderDefaultLazy"
+                  :error="renderDefaultLazy"
+                >
                   <template #overlayContent>
-                    <div class="op" v-if="item.relateSite">
-                      <div class="op-box">
-                        <span>{{ item.relateSite.name }}</span>
-                      </div>
+                    <div v-if="item.relateSite" class="summary">
+                      <span class="summary-text">{{ item.relateSite.name }}</span>
                     </div>
                   </template>
                 </t-image>
               </div>
               <div class="card-footer">
-                <p class="card-footer-title text-hide">{{ item.vod_name }}</p>
-                <p class="card-footer-desc text-hide">
-                  <span v-if="item.vod_blurb">{{ item.vod_blurb }}</span>
-                  <span v-else-if="item.vod_content">{{ item.vod_content }}</span>
-                  <span v-else-if="item.vod_remarks">{{ item.vod_remarks }}</span>
-                  <span v-else>{{ $t('pages.film.noDesc') }}</span>
-                </p>
+                <p class="card-footer-title txthide txthide1">{{ item.vod_name }}</p>
+                <p class="card-footer-desc txthide txthide1">{{ item.vod_blurb || $t('pages.film.noDesc') }}</p>
               </div>
             </t-col>
           </t-row>
 
           <div class="infinite-loading">
             <infinite-loading
-              v-if="isVisible.lazyload"
+              v-if="active.lazyload"
               class="infinite-loading-container"
               :identifier="infiniteId"
               :duration="200"
-              @infinite="load"
+              @infinite="loadMore"
             >
-              <template #complete>{{ $t(`pages.film.infiniteLoading.${active.infiniteType}`) }}</template>
-              <template #error>{{ $t('pages.film.infiniteLoading.error') }}</template>
+              <template #complete>{{ LOAD_TEXT_OPTIONS[active.loadStatus] }}</template>
+              <template #error>{{ $t('common.infiniteLoading.error') }}</template>
             </infinite-loading>
-            <infinite-loading
-              v-else="isVisible.lazyload"
-              class="infinite-loading-container"
-            />
+            <infinite-loading v-else class="infinite-loading-container" />
           </div>
         </div>
       </div>
     </div>
 
-    <detail-view v-model:visible="isVisible.detail" :ext="detailFormData.ext" :info="detailFormData.info" />
-    <t-loading :attach="`.${prefix}-content`" size="medium" :loading="isVisible.loading" />
-    <t-back-top container="#back-top" size="small" :offset="['1.4rem', '0.5rem']" :duration="2000" />
+    <t-loading :attach="`.${attachContent}`" size="medium" :loading="active.loading" />
+    <t-back-top container="#back-top" size="small" :offset="['1rem', '0.8rem']" :duration="2000" />
+
+    <dialog-detail-view
+      v-model:visible="dialogState.visibleDetail"
+      :extra="detailFormData.extra"
+      :info="detailFormData.info"
+    />
   </div>
 </template>
-
 <script setup lang="tsx">
 import 'v3-infinite-loading/lib/style.css';
-import lazyImg from '@/assets/lazy.png';
 
-import { differenceBy } from 'lodash-es';
+import { IPC_CHANNEL } from '@shared/config/ipcChannel';
+import { isArray, isArrayEmpty, isObject, isObjectEmpty } from '@shared/modules/validate';
+import type { ICmsHome, ICmsInfo } from '@shared/types/cms';
+import type { IModels } from '@shared/types/db';
+import { differenceBy } from 'es-toolkit';
+import { EllipsisIcon, RootListIcon } from 'tdesign-icons-vue-next';
+import type { PopupVisibleChangeContext } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { RootListIcon } from 'tdesign-icons-vue-next';
 import InfiniteLoading from 'v3-infinite-loading';
-import { onActivated, onMounted, reactive, ref } from 'vue';
+import type { StateHandler as ILoadStateHdandler } from 'v3-infinite-loading/lib/types';
+import { computed, onActivated, onMounted, ref } from 'vue';
 
-import { prefix } from '@/config/global';
+import { fetchCmsCategory, fetchCmsDetail, fetchCmsHome, fetchCmsSearch, fetchSiteActive } from '@/api/film';
+import CommonNav from '@/components/common-nav/index.vue';
+import LazyBg from '@/components/lazy-bg/index.vue';
+import TitleMenu from '@/components/title-menu/index.vue';
+import { emitterChannel, emitterSource } from '@/config/emitterChannel';
+import { attachContent } from '@/config/global';
 import { t } from '@/locales';
-import { usePlayStore } from '@/store';
-
-import { fetchSiteActive, fetchCmsHome, fetchCmsInit, fetchCmsHomeVod, fetchCmsCategory, fetchCmsDetail, fetchCmsSearch } from '@/api/site';
+import { usePlayerStore } from '@/store';
 import emitter from '@/utils/emitter';
 
-import DetailView from './components/Detail.vue';
-import CommonNav from '@/components/common-nav/index.vue';
-import TitleMenu from '@/components/title-menu/index.vue';
+import DialogDetailView from './components/DialogDetail.vue';
 
-const storePlayer = usePlayStore();
+const storePlayer = usePlayerStore();
 
-const renderError = () => {
-  return (
-    <div class="renderIcon" style="height: 100%">
-      <img src={lazyImg} style="height: 100%; object-fit: cover;" />
-    </div>
-  );
-};
-const renderLoading = () => {
-  return (
-    <div class="renderIcon" style="height: 100%">
-      <img src={lazyImg} style="height: 100%; object-fit: cover;" />
-    </div>
-  );
-};
+const renderDefaultLazy = () => <LazyBg class="render-icon" />;
 
-const infiniteId = ref(+new Date()); // infinite-loading属性重置组件
-const searchTxt = ref(''); // 搜索框
-const searchCurrentSite = ref(); // 搜索当前源
+const infiniteId = ref(Date.now());
+const searchValue = ref('');
 
 const detailFormData = ref({
   info: {},
-  ext: { site: {}, setting: {} },
-}); //  详情组件源传参
-const isVisible = reactive({
-  toolbar: false,
-  detail: false,
-  loadClass: false,
-  loading: false,
-  lazyload: false
+  extra: {},
 });
+
 const pagination = ref({
   pageIndex: 1,
-  pageSize: 36,
-  count: 0,
+  pageSize: 32,
   total: 0,
-}); // 分页请求
-const filterData = ref({});
-const siteConfig = ref({
-  default: {
-    id: '',
-    type: 0,
-    categories: '',
-    ext: ''
+});
+
+const config = ref({
+  default: {} as IModels['site'],
+  list: [] as IModels['site'][],
+  extra: {
+    search: '',
+    filter: false,
   },
-  search: '',
-  filter: false,
-  data: [],
-  filterOnlySearchData: [],
-  searchGroup: []
-}) as any;
+  searchList: [] as IModels['site'][],
+});
+
+const classList = ref<ICmsHome['class']>([]);
+const filterData = ref<ICmsHome['filters']>({});
+const filmList = ref<Array<ICmsInfo & { relateSite: IModels['site'] }>>([]);
+const folderBreadcrumb = ref<Array<{ label: ICmsInfo['vod_name']; value: ICmsInfo['vod_id'] }>>([]);
+
+const dialogState = ref({
+  visibleDetail: false,
+});
 const active = ref({
-  nav: null,
-  class: 'homeVod',
-  tmpClass: '',
-  tmpId: '',
-  infiniteType: 'loading',
-  filter: {}
-}) as any;
-
-const filmData = ref({
-  list: [],
-  rawList: [],
-}) as any;
-
-const classConfig = ref({
-  data: []
+  nav: '',
+  class: '' as ICmsInfo['vod_id'],
+  filter: {},
+  folder: '',
+  searchCurrent: '',
+  filterPopup: false,
+  loadStatus: 'complete' as 'complete' | 'error' | 'noConfig' | 'noSelect',
+  lazyload: false,
+  loading: false,
 });
 
-onMounted(() => {
-  getSetting();
-});
+const LOAD_TEXT_OPTIONS = computed(() => ({
+  complete: t('common.infiniteLoading.complete'),
+  error: t('common.infiniteLoading.error'),
+  noSelect: t('common.infiniteLoading.noSelect'),
+  noConfig: t('pages.film.infiniteLoading.noConfig'),
+}));
+
+onMounted(() => getSetting());
 
 onActivated(() => {
-  const isListenedRefreshFilmConfig = emitter.all.get('refreshFilmConfig');
-  if (!isListenedRefreshFilmConfig) emitter.on('refreshFilmConfig', refreshConf);
+  emitter.off(emitterChannel.REFRESH_FILM_CONFIG, reloadConfig);
+  emitter.on(emitterChannel.REFRESH_FILM_CONFIG, reloadConfig);
+
+  emitter.off(emitterChannel.SEARCH_FILM_RECOMMEND, onSearchRecommend);
+  emitter.on(emitterChannel.SEARCH_FILM_RECOMMEND, onSearchRecommend);
 });
 
+const changeFilterEvent = (key: string, value: string | number) => {
+  active.value.filter[key] = value;
 
-// 非cms筛选：基于请求数据
-const filterApiEvent = async () => {
-  filmData.value = { list: [], rawList: [] };
-  pagination.value.pageIndex = 1;
-  infiniteId.value++;
+  resetPagination();
+
+  filmList.value = [];
+  infiniteId.value = Date.now();
+
+  active.value.filterPopup = false;
 };
 
-// 筛选条件切换
-const changeFilterEvent = (key, item) => {
-  console.log(`[film] change filter: ${key}:${item}`);
-  active.value.filter[key] = item;
+const resetFilter = () => {
+  if (!isObject(filterData.value) || isObjectEmpty(filterData.value)) return;
 
-  filterApiEvent();
-};
+  const currentFilters = filterData.value[active.value.class] || [];
 
-const searchGroup = (type: string, defaultConfig:{ [key: string]: string }) => {
-  if (!defaultConfig || !defaultConfig?.id ) return [];
-
-  let query = siteConfig.value.data.filter((item) => item["search"] !== 0);
-  if (type === 'site') query = query.filter((item) => item["id"] === defaultConfig["id"]);
-  if (type === 'group') query = query.filter((item) => item["group"] === defaultConfig["group"]);
-  return query;
-};
-
-const getSetting = async () => {
-  try {
-    const data = await fetchSiteActive();
-    if (data.hasOwnProperty('default')) {
-      siteConfig.value.default = data["default"];
-      active.value.nav = data["default"]["id"];
-      active.value.infiniteType = 'noMore';
-    } else {
-      active.value.infiniteType = 'noData';
-    }
-    if (Array.isArray(data['data']) && data["data"].length > 0) {
-      siteConfig.value.data = data["data"];
-      siteConfig.value.filterOnlySearchData = data["data"].filter((item) => item["search"] !== 2);
-    }
-    if (data.hasOwnProperty('filter')) {
-      siteConfig.value.filter = data["filter"];
-    }
-    if (data.hasOwnProperty('search')) {
-      siteConfig.value.search = data["search"];
-    }
-  } catch (err) {
-    active.value.infiniteType = 'noData';
-  } finally {
-    isVisible.lazyload = true;
-  }
-};
-
-// 过滤条件-选中第一项
-const classFilter = () => {
-  const result = {};
-
-  if (filterData[active.value.class]) {
-    filterData[active.value.class].forEach((item) => {
-      result[item.key] = item.value[0]?.v ?? '全部';
-    });
-  }
+  const result = currentFilters.reduce((o, { key, value }) => {
+    o[key] = value[0]?.v ?? '全部';
+    return o;
+  }, {});
 
   active.value.filter = result;
 };
 
-// 获取分类
-const getClassList = async (source) => {
-  try {
-    const res = await fetchCmsHome({ sourceId: source.id });
-    if (Array.isArray(res?.class) && res?.class.length > 0) {
-      const classDataFormat = res.class;
-      classDataFormat.unshift({
-        type_id: "homeVod",
-        type_name: "首页"
-      });
-      classConfig.value.data = classDataFormat;
-      const classItem = classDataFormat[0];
-      active.value.class = classItem["type_id"];
-    } else {
-      active.value.infiniteType = 'categoryError';
-    };
-    if (Object.keys(res.filters).length > 0) filterData.value = res.filters;
-  } catch (err) {
-    console.log(err);
-    active.value.infiniteType = 'networkError';
+const handleFilterVisible = () => {
+  const status = active.value.filterPopup;
+
+  active.value.filterPopup = !status;
+};
+
+const handleFilterPopupVisible = (_visible: boolean, context: PopupVisibleChangeContext) => {
+  if (context.trigger === 'document') {
+    active.value.filterPopup = false;
   }
 };
 
-// 切换分类
-const changeClassEvent = (key: string) => {
-  active.value.class = key;
-  active.value.tmpClass = '';
-
-  classFilter();
-  searchTxt.value = '';
-  active.value.infiniteType = 'noMore';
-  filmData.value = { list: [], rawList: [] };
-  emitter.emit('refreshSearchConfig');
-  pagination.value.pageIndex = 1;
-  infiniteId.value++;
+const collateSearchSite = (type: string, source: IModels['site']): IModels['site'][] => {
+  let query = config.value.list.filter((item) => Boolean(item.search));
+  if (type === 'site') query = query.filter((item) => item.id === source.id);
+  if (type === 'group') query = query.filter((item) => item.group === source.group);
+  return query;
 };
 
-// 获取资源
-const getFilmList = async (source) => {
-  const pg = pagination.value.pageIndex;
-  const t = active.value.tmpClass || active.value.class;
+const resetPagination = () => {
+  pagination.value.pageIndex = 1;
+  pagination.value.total = 0;
+};
+
+const getSetting = async () => {
+  try {
+    const resp = await fetchSiteActive();
+    if (resp?.default) {
+      config.value.default = resp.default;
+      active.value.nav = resp.default.id;
+    }
+    if (resp?.list) config.value.list = resp.list;
+    if (resp?.extra) config.value.extra = resp.extra;
+
+    active.value.loadStatus =
+      resp?.default && resp.list.length ? 'complete' : resp.list.length ? 'noSelect' : 'noConfig';
+  } catch (error) {
+    console.error(`Failed to get site config:`, error);
+    active.value.loadStatus = 'error';
+  } finally {
+    active.value.lazyload = true;
+  }
+};
+
+const getCmsHome = async (source: IModels['site']): Promise<number> => {
+  const resp = await fetchCmsHome({ uuid: source.id });
+
+  if (isArray(resp.class) && !isArrayEmpty(resp.class)) {
+    classList.value = [
+      { type_id: '', type_name: computed(() => t('common.recommend')) },
+      ...resp.class.map((item) => ({
+        type_id: item.type_id,
+        type_name: item.type_name,
+      })),
+    ];
+    active.value.class = classList.value[0].type_id;
+  }
+
+  if (isObject(resp.filters) && !isObjectEmpty(resp.filters)) {
+    filterData.value = resp.filters;
+    resetFilter();
+  }
+
+  return resp.class.length;
+};
+
+const getCmsCategory = async (source: IModels['site']): Promise<number> => {
+  const { pageIndex } = pagination.value;
+
+  const tid = active.value.folder || active.value.class;
   const f = active.value.filter || {};
 
-  let length = 0;
-  try {
-    let res = { list: [] };
-    if (active.value.class === 'homeVod') {
-      res = await fetchCmsHomeVod({ sourceId: source.id })
-    } else {
-      res = await fetchCmsCategory({
-        sourceId: source.id,
-        page: pg || 1,
-        tid: t,
-        filter: !!f,
-        f: JSON.stringify(f)
-      });
-    };
-    if (Array.isArray(res?.list) && res?.list.length > 0) {
-      const newFilms = differenceBy(res.list, filmData.value.list, 'vod_id');
-      filmData.value.list = [...filmData.value.list, ...newFilms];
-      filmData.value.rawList = [...filmData.value.rawList, ...res.list];
-      pagination.value.pageIndex++;
-      length = newFilms.length;
-    } else {
-      active.value.infiniteType = 'networkError';
-      length = 0;
-    };
-  } catch (err) {
-    active.value.infiniteType = 'networkError';
-    console.error(err);
-    length = 0;
-  } finally {
-    console.log(`[film] load data length: ${length}`);
+  const resp = await fetchCmsCategory({
+    uuid: source.id,
+    tid,
+    page: pageIndex,
+    extend: String(JSON.stringify(f)),
+  });
+
+  if (isArray(resp.list) && !isArrayEmpty(resp.list)) {
+    resp.list = differenceBy(resp.list, filmList.value, (item: ICmsInfo) => item.vod_id);
+    filmList.value.push(...resp.list);
+  }
+  if (resp.total) pagination.value.total = resp.total;
+
+  return resp.list.length;
+};
+
+const loadMoreCategory = async (): Promise<number> => {
+  const source = config.value.default;
+
+  if (!isArray(classList.value) || isArrayEmpty(classList.value)) {
+    const length = await getCmsHome(source);
+    if (length < 1) active.value.loadStatus = 'error';
     return length;
+  }
+
+  return await getCmsCategory(source);
+};
+
+const loadMoreSearch = async (): Promise<number> => {
+  const { pageIndex } = pagination.value;
+  const searchCurrentId = active.value.searchCurrent;
+  const searchSiteList = config.value.searchList;
+  const searchCurrentIndex = searchSiteList.findIndex((item) => item.id === searchCurrentId);
+  const isLastSearchSite = searchCurrentIndex + 1 >= searchSiteList.length;
+
+  const switchNextSearchSite = (): number => {
+    resetPagination();
+
+    if (isLastSearchSite) {
+      return 0;
+    } else {
+      active.value.searchCurrent = searchSiteList[searchCurrentIndex + 1].id;
+      return 1;
+    }
+  };
+
+  try {
+    if (isLastSearchSite) return 0;
+
+    const resp = await fetchCmsSearch({
+      uuid: searchCurrentId,
+      wd: searchValue.value,
+      page: pageIndex,
+    });
+
+    if (!isArray(resp.list) || isArrayEmpty(resp.list)) {
+      return switchNextSearchSite();
+    }
+
+    resp.list = differenceBy(resp.list, filmList.value, (item: ICmsInfo) => item.vod_id);
+    if (isArrayEmpty(resp.list)) {
+      return switchNextSearchSite();
+    }
+
+    filmList.value.push(
+      ...resp.list.map((item) => ({
+        ...item,
+        relateSite: searchSiteList[searchCurrentIndex],
+      })),
+    );
+
+    pagination.value.pageIndex++;
+    return resp.list;
+  } catch (error) {
+    console.error('Failed to load search data:', error);
+    return switchNextSearchSite();
   }
 };
 
-// 加载
-const load = async ($state: { complete: () => void; loaded: () => void; error: () => void }) => {
-  console.log('[film] loading...');
+const loadMore = async ($state: ILoadStateHdandler) => {
   try {
-    const checkComplete = () => {
-      const stopFlag = ['noData', 'networkError', 'categoryError']
-      return stopFlag.includes(active.value.infiniteType)
-    }
-    if (checkComplete()) {
+    if (active.value.loadStatus !== 'complete') {
       $state.complete();
       return;
-    };
-    const defaultSite = searchTxt.value ? searchCurrentSite.value : siteConfig.value.default;
+    }
 
-    // setp1: 初始化
-    if (!active.value.tmpId || active.value.tmpId !== defaultSite.id) {
-      await fetchCmsInit({ sourceId: defaultSite.id });
-      active.value.tmpId = defaultSite.id;
-      pagination.value.pageIndex = 1;
-    };
+    const length = searchValue.value ? await loadMoreSearch() : await loadMoreCategory();
 
-    // setp2: 获取分类
-    if (classConfig.value.data.length <= 1 && !searchTxt.value) {
-      await getClassList(defaultSite);
-      if (checkComplete()) {
-        $state.complete();
-        return;
-      };
-    };
-
-    // setp3: 加载数据
-    const loadFunction = searchTxt.value ? getSearchList : getFilmList;
-    const resLength = await loadFunction(defaultSite); // 动态加载数据
-
-    if (resLength === 0 || filmData.value.list.filter((item) => item.vod_id === 'no_data').length > 0) {
+    if (length === 0) {
+      resetPagination();
       $state.complete();
-    } else $state.loaded();
-  } catch (err) {
-    console.error(err);
+    } else {
+      pagination.value.pageIndex++;
+      $state.loaded();
+    }
+  } catch (error) {
+    console.error(`Failed to load more data:`, error);
     $state.error();
   }
 };
 
-// 搜索
-const searchEvent = async () => {
-  console.log(`[film] search keyword:${searchTxt.value}`);
-  active.value.infiniteType = 'noMore';
-  filmData.value = { list: [], rawList: [] };
-  pagination.value.pageIndex = 1;
-  searchCurrentSite.value = siteConfig.value.searchGroup ? siteConfig.value.searchGroup[0] : null;
-  infiniteId.value++;
-};
-
-// 搜索加载数据
-const getSearchList = async () => {
-  let length = 0;
-  const pg = pagination.value.pageIndex;
-  const searchGroup = siteConfig.value.searchGroup;
-  const currentSite = searchCurrentSite.value;
-
-  const index = searchGroup.indexOf(currentSite);
-  const isLastSite = index + 1 >= searchGroup.length;
-  const filterStatus = siteConfig.value.filter;
-
-  try {
-    // 1. 判断当前搜索的站点是否为空 || 超出站点
-    if (!currentSite || index + 1 > searchGroup.length) {
-      console.log('[film][search] no site or index out of bounds');
-      return length;
-    };
-
-    // 2. 请求数据
-    const res = await fetchCmsSearch({ sourceId: currentSite.id, wd: searchTxt.value, pg: pg === 1 ? null : pg });
-    const reSearch = res?.list;
-
-    // 2.1 数据为空
-    if (!Array.isArray(reSearch) || reSearch.length === 0) {
-      console.log('[film][search] empty search results');
-      // 聚搜过程中,如果某个站搜不出来结果，返回1让其他站继续搜索。单搜就返回0终止搜索
-      if (isLastSite) {
-        length = 0;
-      } else {
-        length = 1;
-        searchCurrentSite.value = searchGroup[index + 1];
-      };
-      pagination.value.pageIndex = 1;
-      return length;
-    }
-
-    // 2.2 数据去重
-    let resultDetail = filterStatus ? reSearch.filter((item) => item?.vod_name.includes(searchTxt.value)) : reSearch;
-    let newFilms = differenceBy(resultDetail, filmData.value.list, 'vod_id'); // 去重
-    if (newFilms.length > 0) {
-      newFilms = resultDetail.map(item => ({ ...item, relateSite: currentSite }));
-      filmData.value.list.push(...newFilms);
-
-      length = newFilms.length;
-      pagination.value.pageIndex++;
-      return length;
-    } else {
-      if (isLastSite) {
-        length = 0;
-      } else {
-        length = 1;
-        searchCurrentSite.value = searchGroup[index + 1];
-      };
-      pagination.value.pageIndex = 1;
-      return length;
-    }
-  } catch (err) {
-    console.log(err)
-    // 聚搜的某一个站点发生错误,返回1让其他站点能继续搜索。只有一个站点进行搜索的时候发生错误就返回0终止搜索
-    if (isLastSite) {
-      length = 0;
-    } else {
-      length = 1;
-      searchCurrentSite.value = searchGroup[index + 1];
-    };
-    pagination.value.pageIndex = 1;
-  } finally {
-    console.log(`[film] load data length: ${length}`);
-    return length;
-  }
-};
-
-// 播放
 const playEvent = async (item) => {
-  isVisible.loading = true;
+  active.value.loading = true;
 
   try {
-    let site = item?.relateSite ? item.relateSite: siteConfig.value.default;
+    const site = item?.relateSite ? item.relateSite : config.value.default;
 
-    if (!active.value.tmpId || active.value.tmpId !== site.id) {
-      await fetchCmsInit({ sourceId: site.id });
-      active.value.tmpId = site.id;
-    };
-
-    // folder模式
-    if (item.hasOwnProperty('vod_tag') && item['vod_tag'] === 'folder') {
-      active.value.tmpClass = item.vod_id;
-      filmData.value = { list: [], rawList: [] };
-      pagination.value.pageIndex = 1;
-      infiniteId.value++;
+    if (['folder', 'action'].includes(item.vod_tag)) {
+      handleCmsTag(item.vod_tag, item);
       return;
-    };
-
-    if (!('vod_play_from' in item && 'vod_play_url' in item)) {
-      const res = await fetchCmsDetail({ sourceId: site.id, id: item.vod_id });
-      const detailItem = res?.list[0];
-      if (!detailItem.vod_name) detailItem.vod_name = item.vod_name;
-      if (!detailItem.vod_pic) detailItem.vod_pic = item.vod_pic;
-      if (!detailItem.vod_id) detailItem.vod_id = item.vod_id;
-      item = detailItem;
-    };
-    console.log('[film][playEvent]', item);
-
-    const playerMode = storePlayer.getSetting.playerMode;
-    const doc = {
-      info: { ...item, name: item.vod_name },
-      ext: { site, setting: storePlayer.setting },
     }
-    if (playerMode.type === 'custom') {
-      detailFormData.value = doc;
-      isVisible.detail = true;
+    active.value.folder = '';
+
+    const resp = await fetchCmsDetail({ uuid: site.id, ids: item.vod_id });
+    if (
+      !isArray(resp.list) ||
+      isArrayEmpty(resp.list) ||
+      !isObject(resp.list[0]?.vod_episode) ||
+      isObjectEmpty(resp.list[0]?.vod_episode)
+    ) {
+      MessagePlugin.warning(t('pages.film.message.noDetailInfo'));
+      return;
+    }
+
+    const info = {
+      ...resp.list[0],
+      ...(resp.list[0]?.vod_id ? {} : { vod_id: item.vod_id }),
+      ...(resp.list[0]?.vod_name ? {} : { vod_name: item.vod_name }),
+      ...(resp.list[0]?.vod_pic ? {} : { vod_pic: item.vod_pic }),
+    };
+
+    const player = storePlayer.player;
+
+    if (player.type === 'custom') {
+      playWithExternalPlayer(info, site);
     } else {
-      storePlayer.updateConfig({
-        type: 'film',
-        status: true,
-        data: doc,
-      });
-      window.electron.ipcRenderer.send('open-win', { action: 'play' });
+      playWithInternalPlayer(info, site);
     }
-  } catch (err) {
-    console.error(`[film][playEvent][error]`, err);
-    MessagePlugin.warning(t('pages.chase.reqError'));
+  } catch (error) {
+    console.error('Failed to play:', error);
+    MessagePlugin.error(`${t('common.error')}: ${(error as Error).message}`);
   } finally {
-    isVisible.loading = false;
+    active.value.loading = false;
   }
 };
 
-emitter.on('searchFilm', (data: any) => {
-  console.log('[film][bus][receive]', data);
-  const { kw, group, filter } = data;
-
-  searchTxt.value = kw;
-  siteConfig.value.filter = filter;
-  if (siteConfig.value.search !== group) siteConfig.value.search = group;
-  siteConfig.value.searchGroup = searchGroup(group, siteConfig.value.default);
-
-  if (siteConfig.value.searchGroup.length === 0) {
-    MessagePlugin.warning(t('pages.film.message.notSelectSourceBeforeSearch'));
-    return;
+const playWithExternalPlayer = async (item: ICmsInfo, active: IModels['site']) => {
+  detailFormData.value = {
+    info: item,
+    extra: { active },
   };
 
-  searchEvent();
-});
-
-const defaultConf = () => {
-  isVisible.lazyload = true;
-  isVisible.loadClass = false;
-  active.value.infiniteType = 'noData';
-  active.value.class = 'homeVod';
-  active.value.tmpClass = '';
-  active.value.tmpId = '';
-  searchTxt.value = '';
-  active.value.nav = '';
-  siteConfig.value.default = {};
-  classConfig.value.data = [];
-  filmData.value = { list: [], rawList: [] };
-  filterData.value = {};
-  emitter.emit('refreshSearchConfig');
-  pagination.value.pageIndex = 1;
-  infiniteId.value++;
+  dialogState.value.visibleDetail = true;
 };
 
-const refreshConf = async () => {
-  console.log('[film][bus][refresh]');
-  defaultConf();
+const playWithInternalPlayer = (item: ICmsInfo, active: IModels['site']) => {
+  storePlayer.updateConfig({
+    type: 'film',
+    status: true,
+    data: {
+      info: item,
+      extra: { active, site: config.value.list },
+    },
+  });
+
+  window.electron.ipcRenderer.invoke(IPC_CHANNEL.WINDOW_PLAYER);
+};
+
+const handleCmsTag = (type: 'folder' | 'action', doc: ICmsInfo) => {
+  const helper = {
+    folder: handleCmsTagFolder,
+    action: handleCmsTagAction,
+  };
+
+  helper?.[type]?.(doc);
+};
+
+const handleCmsTagFolder = (doc: ICmsInfo) => {
+  resetPagination();
+
+  const prefixPath = folderBreadcrumb.value.map((item) => item.value).join('');
+  folderBreadcrumb.value.push(
+    doc.vod_id.startsWith(prefixPath)
+      ? {
+          label: doc.vod_name,
+          value: doc.vod_id,
+        }
+      : { label: doc.vod_name, value: doc.vod_id },
+  );
+
+  active.value.folder = doc.vod_id;
+
+  filmList.value = [];
+
+  infiniteId.value = Date.now();
+};
+
+const handleCmsTagAction = (_doc: ICmsInfo) => {};
+
+const handleSearch = async () => {
+  filmList.value = [];
+  classList.value = [];
+  filterData.value = {};
+  active.value.searchCurrent = config.value.searchList?.[0]?.id || '';
+  resetPagination();
+  infiniteId.value = Date.now();
+};
+
+const onSearchRecommend = (eventData: { source: string; data: any }) => {
+  const {
+    source,
+    data: { kw, group, filter },
+  } = eventData;
+  if (source === emitterSource.PAGE_SHOW) return;
+
+  searchValue.value = kw;
+  config.value.extra.filter = filter;
+  config.value.extra.search = group;
+  config.value.searchList = collateSearchSite(group, config.value.default);
+
+  if (isArrayEmpty(config.value.searchList)) {
+    MessagePlugin.warning(t('pages.film.message.noEffectiveSearchSource'));
+    return;
+  }
+
+  handleSearch();
+};
+
+const onClassChange = (id: string) => {
+  resetPagination();
+
+  active.value.folder = '';
+  active.value.class = id;
+  active.value.filter = {};
+
+  filmList.value = [];
+  folderBreadcrumb.value = [];
+
+  resetFilter();
+
+  infiniteId.value = Date.now();
+};
+
+const defaultConfig = () => {
+  resetPagination();
+
+  searchValue.value = '';
+
+  active.value.lazyload = false;
+  active.value.loadStatus = 'complete';
+  active.value.folder = '';
+  active.value.class = '';
+  active.value.nav = '';
+  active.value.filter = {};
+
+  classList.value = [];
+  filterData.value = {};
+  filmList.value = [];
+  folderBreadcrumb.value = [];
+
+  config.value.default = {};
+
+  infiniteId.value = Date.now();
+};
+
+const reloadConfig = async (eventData: { source: string; data: any }) => {
+  const { source } = eventData;
+  if (source === emitterSource.PAGE_SHOW) return;
+
+  defaultConfig();
   await getSetting();
 };
 
-const changeConf = async (id: string) => {
+const onNavChange = async (id: string) => {
   try {
-    defaultConf();
+    defaultConfig();
+    active.value.class = '';
     active.value.nav = id;
-    siteConfig.value.default = siteConfig.value.data.find(item => item.id === id);
-    active.value.infiniteType = 'noMore';
-  } catch (err) {
-    active.value.infiniteType = 'noData';
+    config.value.default = config.value.list.find((item) => item.id === id);
+  } catch (error) {
+    console.error(`Failed to change config:`, error);
   } finally {
-    isVisible.lazyload = true;
+    active.value.lazyload = true;
   }
 };
-</script>
 
+const handleFolderBreadcrumbClick = (item: { label: ICmsInfo['vod_name']; value: ICmsInfo['vod_id'] }) => {
+  resetPagination();
+
+  const index = folderBreadcrumb.value.findIndex((i) => i.value === item.value);
+  folderBreadcrumb.value = folderBreadcrumb.value.slice(0, index + 1);
+  active.value.folder = item.value;
+
+  filmList.value = [];
+
+  infiniteId.value = Date.now();
+};
+</script>
 <style lang="less" scoped>
-.film {
+.view-container {
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  position: relative;
+  gap: var(--td-size-4);
+
+  .sidebar {
+    flex: 0 0 auto;
+  }
 
   .content {
-    // width: calc(100% - 170px);
-    min-width: 750px;
-    position: relative;
-    padding: var(--td-pop-padding-l);
-    background-color: var(--td-bg-color-container);
-    border-radius: var(--td-radius-default);
+    height: 100%;
+    width: 100%;
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--td-size-4);
+    overflow: hidden;
+    position: relative;
 
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       white-space: nowrap;
-      flex-shrink: 0;
-      width: 100%;
+      gap: var(--td-size-4);
+      padding: 0 var(--td-comp-paddingLR-s) 0 0;
 
-      .header-nav {
+      .left-op-container {
+        flex: 1;
         width: 100%;
         overflow: hidden;
-      }
 
-      :deep(.t-button) {
-        &:not(.t-is-disabled):not(.t-button--ghost) {
-          --ripple-color: transparent;
+        .nav {
+          width: 100%;
+          flex-grow: 0;
+          flex-shrink: 0;
         }
       }
 
-      :deep(.t-button__text) {
-        svg {
-          color: var(--td-text-color-placeholder);
-        }
-      }
-
-      :deep(.t-button--variant-text) {
-        &:hover {
-          border-color: transparent;
-          background-color: transparent;
-
-          .t-button__text {
-            svg {
-              color: var(--td-primary-color);
-            }
-          }
-        }
-      }
-
-      .quick_filter {
-        margin-right: -6px;
+      .right-op-container {
+        flex-grow: 0;
+        flex-shrink: 0;
       }
     }
 
-    .filter {
-      position: relative;
+    .breadcrumb {
+      height: var(--td-comp-size-m);
+      margin: auto var(--td-comp-paddingLR-s) auto 0;
+      padding: 0 0 0 var(--td-comp-paddingLR-s);
+      border-radius: var(--td-radius-medium);
+      background-color: var(--td-bg-color-component);
+
+      :deep(.t-breadcrumb__item) {
+        .t-breadcrumb--text-overflow .t-breadcrumb__inner:hover {
+          color: var(--td-text-color-primary);
+          cursor: pointer;
+        }
+      }
+    }
+
+    .filter-wrapper {
       height: auto;
-      transition: height 0.3s;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--td-size-4);
+      overflow-y: auto;
 
-      .tags {
+      .filter-content {
         width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: baseline;
+        gap: var(--td-size-4);
 
-        .tags-list {
-          padding-top: var(--td-comp-paddingTB-xs);
-          width: 100%;
+        .title {
+          flex-shrink: 0;
+          padding: 0 var(--td-comp-paddingLR-s);
+        }
+
+        .tags {
           display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: flex-start;
+          flex-flow: wrap;
+          overflow: hidden;
+          gap: var(--td-size-4);
 
-          &:after {
-            clear: both;
-            display: block;
-            height: 0;
-            visibility: hidden;
-            content: '';
+          .tag {
+            display: inline-block;
+            padding: 0 var(--td-comp-paddingTB-s);
+            color: var(--td-text-color-secondary);
+            text-align: center;
+            cursor: pointer;
+
+            &:hover {
+              color: var(--td-text-color-primary);
+            }
           }
 
-          .title {
-            // float: left;
-            width: 50px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: left;
-            cursor: auto;
-            box-sizing: border-box;
-            height: 30px;
-            font-weight: 400;
-            font-size: 15px;
-            line-height: 30px;
-          }
-
-          .wp {
-            // float: left;
-            // width: calc(100% - 50px);
-            width: 100%;
-            overflow-y: auto;
-            white-space: nowrap;
-            flex-wrap: nowrap;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            align-content: center;
-
-            &::-webkit-scrollbar {
-              height: 8px;
-              background: transparent;
-            }
-
-            .item {
-              display: block;
-              padding: 0 14px;
-              margin-right: 5px;
-              box-sizing: border-box;
-              height: 30px;
-              font-weight: 400;
-              font-size: 13px;
-              line-height: 30px;
-              text-align: center;
-              cursor: pointer;
-            }
-
-            .active {
-              height: 30px;
-              border-radius: 20px;
-              background: var(--td-bg-color-component);
-            }
+          .active {
+            color: var(--td-text-color-primary);
+            border-radius: var(--td-radius-round);
+            background-color: var(--td-bg-color-component);
           }
         }
       }
@@ -715,54 +745,49 @@ const changeConf = async (id: string) => {
       flex: 1;
       height: 100%;
       width: 100%;
-      overflow: hidden;
+      overflow: auto;
+      padding: 0 var(--td-comp-paddingLR-s) 0 0;
 
       .content-wrapper {
-        overflow-y: auto;
-        overflow-x: hidden;
         width: 100%;
         height: 100%;
         position: relative;
 
         .card {
-          box-sizing: border-box;
           width: inherit;
-          position: relative;
           cursor: pointer;
-
-          .text-hide {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: block;
-          }
 
           .card-main {
             position: relative;
             width: 100%;
             height: 0;
             overflow: hidden;
-            border-radius: var(--td-radius-default);
-            padding-top: 139.9%;
-
-            .card-tag-orange {
-              background: #ffdd9a;
-              color: #4e2d03;
-            }
+            border-radius: var(--td-radius-medium);
+            padding-top: 128%;
+            background-color: var(--td-bg-color-component);
+            transition: all 0.25s ease-in-out;
 
             .card-tag {
-              z-index: 15;
               position: absolute;
-              left: 0;
-              top: 0;
-              border-radius: 6px 0 6px 0;
-              padding: 1px 6px;
-              max-width: 60%;
+              z-index: 2;
 
-              .card-tag-text {
-                font-size: 12px;
-                height: 18px;
-                line-height: 18px;
+              &-mask {
+                left: 0;
+                top: 0;
+                border-radius: var(--td-radius-medium) 0 var(--td-radius-large) 0;
+                padding: var(--td-comp-paddingTB-xxs) var(--td-comp-paddingLR-s);
+                background: linear-gradient(-45deg, #45c58b, #94dab2);
+                border: 1px solid #33a371;
+                border-width: 0 1px 1px 0;
+                max-width: 66%;
+              }
+
+              &-text {
+                color: #006c44;
+                font-weight: 500;
+                font-size: var(--td-font-size-mark-small);
+                height: var(--td-comp-size-xxs);
+                line-height: var(--td-line-height-mark-small);
               }
             }
 
@@ -774,68 +799,81 @@ const changeConf = async (id: string) => {
               width: 100%;
               height: 100%;
 
-              .op {
+              :deep(.render-icon) {
+                height: var(--td-comp-size-xxxl);
+                width: var(--td-comp-size-xxxl);
+                background: transparent;
+              }
+
+              :deep(img) {
+                transition: all 0.25s ease-in-out;
+              }
+
+              .summary {
                 position: absolute;
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                background: linear-gradient(to bottom, rgba(22, 24, 35, 0.4) 0%, rgba(22, 24, 35, .8) 100%);
+                border-radius: 0 0 var(--td-radius-medium) var(--td-radius-medium);
+                background: linear-gradient(180deg, rgb(0 0 0 / 0%), rgb(22 24 35 / 40%));
 
-                .op-box {
+                &-text {
+                  text-align: center;
+                  display: inline-block;
+                  width: 100%;
                   padding: var(--td-comp-paddingTB-xs) 0;
-                  background: linear-gradient(to right,
-                      rgba(255, 255, 255, 0),
-                      rgba(255, 255, 255, 0.4) 30%,
-                      rgba(255, 255, 255, 0.4) 70%,
-                      rgba(255, 255, 255, 0));
-                  ;
-
-                  span {
-                    text-align: center;
-                    display: inline-block;
-                    width: 100%;
-                    color: #fdfdfd;
-                    font-weight: 500;
-                  }
+                  color: var(--td-font-white-1);
+                  line-height: var(--td-line-height-body-small);
+                  font-weight: 500;
                 }
               }
             }
           }
 
-          .card-main:hover {
-            .card-main-item {
-              :deep(img) {
-                transition: all 0.25s ease-in-out;
-                transform: scale(1.05);
-              }
-            }
-          }
-
           .card-footer {
-            position: relative;
-            padding-top: var(--td-comp-paddingTB-s);
+            padding: var(--td-comp-paddingTB-xs) 0 var(--td-comp-paddingTB-xxs) 0;
 
             .card-footer-title {
-              font-weight: 700;
+              font-weight: 500;
+              font-size: var(--td-font-size-title-medium);
               line-height: var(--td-line-height-title-medium);
-              height: 22px;
+              color: var(--td-text-color-primary);
+              transition: all 0.25s ease-in-out;
             }
 
             .card-footer-desc {
-              font-size: 13px;
-              line-height: var(--td-line-height-body-large);
+              font-size: var(--td-font-size-body-medium);
+              line-height: var(--td-line-height-body-small);
               color: var(--td-text-color-placeholder);
             }
           }
 
           &:hover {
-            .card-footer-title {
-              color: var(--td-brand-color);
+            .card-main {
+              .card-main-item {
+                :deep(img) {
+                  transform: scale(1.05);
+                }
+              }
+            }
+
+            .card-footer {
+              .card-footer-title {
+                color: var(--td-brand-color);
+              }
             }
           }
         }
       }
     }
   }
+}
+
+.infinite-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--td-text-color-placeholder);
+  text-align: center;
 }
 </style>

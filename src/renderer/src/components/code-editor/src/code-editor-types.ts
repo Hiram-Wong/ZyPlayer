@@ -1,15 +1,24 @@
-import { ExtractPropTypes, PropType, Ref } from 'vue';
+import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api.d.ts';
+import type { ExtractPropTypes, PropType, Ref } from 'vue';
 
-export type Mode = 'normal' | 'diff' | 'review';
-export type Theme = 'light' | 'dark';
+export type IEditor = typeof import('monaco-editor');
 
-export interface Decoration {
+export type IMode = 'normal' | 'diff' | 'review';
+export type ITheme = 'light' | 'dark';
+export type ILang = 'python' | 'json' | 'yaml' | 'javascript' | 'typescript' | 'plaintext';
+
+export interface IEditorOptions {
+  diff: monaco.editor.IStandaloneDiffEditorConstructionOptions;
+  normal: monaco.editor.IStandaloneEditorConstructionOptions;
+}
+
+export interface IDecoration {
   lineNumber: number;
   icon?: string;
   customClasses?: string;
   glyphClassName?: string;
 }
-export interface Comment {
+export interface IComment {
   lineNumber: number;
   isExpanded: boolean;
   domNode?: HTMLElement;
@@ -18,21 +27,35 @@ export interface Comment {
   offsetLeft?: number;
 }
 
+export interface IUseCodeEditor {
+  editorEl: Ref;
+}
+
+export interface IPositionInfo {
+  top?: number;
+  height?: number;
+}
+
+export interface ILayoutInfo extends IPositionInfo {
+  minimapWidth?: number;
+  offsetLeft?: number;
+}
+
 export const codeEditorProps = {
   modelValue: {
     type: String,
     default: '',
   },
-  mode: {
-    type: String as PropType<Mode>,
-    default: 'normal',
-  },
-  originalText: {
+  originalValue: {
     type: String,
     default: '',
   },
+  mode: {
+    type: String as PropType<IMode>,
+    default: 'normal',
+  },
   theme: {
-    type: String as PropType<Theme>,
+    type: String as PropType<ITheme>,
     default: 'light',
   },
   autoHeight: {
@@ -63,27 +86,13 @@ export const codeEditorProps = {
     default: () => [2, 4],
   },
   editorDecorations: {
-    type: Array as PropType<Decoration[]>,
+    type: Array as PropType<IDecoration[]>,
     default: () => [],
   },
   comments: {
-    type: Array as PropType<Comment[]>,
+    type: Array as PropType<IComment[]>,
     default: () => [],
   },
 };
 
 export type CodeEditorProps = ExtractPropTypes<typeof codeEditorProps>;
-
-export interface UseCodeEditor {
-  editorEl: Ref;
-}
-
-export interface PositionInfo {
-  top?: number;
-  height?: number;
-}
-
-export interface LayoutInfo extends PositionInfo {
-  minimapWidth?: number;
-  offsetLeft?: number;
-}

@@ -1,0 +1,58 @@
+export default {
+  app: {
+    about: 'About {{ name }}',
+    hide: 'Hide',
+    hideOthers: 'Hide Others',
+    show: 'Show',
+    showAll: 'Show All',
+    quit: 'Quit {{ name }}',
+    reboot: 'Reboot',
+  },
+  file: {
+    title: 'File',
+    closeWindow: 'Close Window',
+  },
+  edit: {
+    title: 'Edit',
+    undo: 'Undo',
+    redo: 'Redo',
+    cut: 'Cut',
+    copy: 'Copy',
+    paste: 'Paste',
+    pasteAndMatchStyle: 'Paste and Match Style',
+    delete: 'Delete',
+    selectAll: 'Select all',
+  },
+  view: {
+    title: 'View',
+    reload: 'Reload',
+    forceReload: 'Force Reload',
+    toggleDevTools: 'Toggle Developer Tools',
+    actualSize: 'Actual Size',
+    zoomIn: 'Zoom In',
+    zoomOut: 'Zoom Out',
+    toggleFullScreen: 'Toggle Full Screen',
+  },
+  window: {
+    title: 'Window',
+    minimize: 'Minimize',
+    zoom: 'Zoom',
+    fill: 'Fill',
+    center: 'Center',
+  },
+  help: {
+    title: 'Help',
+  },
+  contextMenu: {
+    inspect: 'Inspect',
+  },
+  tray: {
+    open: 'Open {{ name }}',
+    version: 'Version: {{ version }}',
+    website: 'Website',
+    document: 'Document',
+    reportIssue: 'Report Issue',
+    openData: 'Open Data Folder',
+    quit: 'Quit',
+  },
+};

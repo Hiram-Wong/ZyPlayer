@@ -1,0 +1,8 @@
+<svg width="16px" height="15px" viewBox="0 0 16 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="icon icon-play">
+  <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="播放">
+      <rect id="画布" x="0" y="0" width="16" height="14.55"></rect>
+      <path d="M13.0471102,5.48475393 C13.6394738,5.86828617 14,6.54551053 14,7.27469386 C14,8.0038772 13.6394738,8.68110155 13.0471102,9.06463379 L5.06657567,14.2313622 C3.72777567,15.0994989 2,14.0914081 2,12.4424746 L2,2.10796544 C2,0.459031947 3.72878078,-0.549058853 5.06758078,0.31802551 L13.0471102,5.48580622 L13.0471102,5.48475393 Z" id="路径" fill="#FFFFFF" fill-rule="nonzero"></path>
+    </g>
+  </g>
+</svg>

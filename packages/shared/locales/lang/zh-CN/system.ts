@@ -1,0 +1,58 @@
+export default {
+  app: {
+    about: '关于 {{ name }}',
+    hide: '隐藏',
+    hideOthers: '隐藏其他',
+    show: '显示',
+    showAll: '显示全部',
+    quit: '退出 {{ name }}',
+    reboot: '重启',
+  },
+  file: {
+    title: '文件',
+    closeWindow: '关闭窗口',
+  },
+  edit: {
+    title: '编辑',
+    undo: '撤销',
+    redo: '重做',
+    cut: '剪切',
+    copy: '复制',
+    paste: '粘贴',
+    pasteAndMatchStyle: '粘贴并匹配样式',
+    delete: '删除',
+    selectAll: '全选',
+  },
+  view: {
+    title: '视图',
+    reload: '重新加载',
+    forceReload: '强制重新加载',
+    toggleDevTools: '切换开发者工具',
+    actualSize: '实际大小',
+    zoomIn: '放大',
+    zoomOut: '缩小',
+    toggleFullScreen: '切换全屏模式',
+  },
+  window: {
+    title: '窗口',
+    minimize: '最小化',
+    zoom: '缩放',
+    fill: '填充',
+    center: '居中',
+  },
+  help: {
+    title: '帮助',
+  },
+  contextMenu: {
+    inspect: '检查',
+  },
+  tray: {
+    open: '打开 {{ name }}',
+    version: '版本: {{ version }}',
+    website: '网站',
+    document: '文档',
+    reportIssue: '报告问题',
+    openData: '打开数据文件夹',
+    quit: '退出',
+  },
+};

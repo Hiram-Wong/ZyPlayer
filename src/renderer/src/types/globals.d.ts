@@ -1,13 +1,10 @@
-// 通用声明
-import { HTMLTitleBarElementAttributes } from '@electron-uikit/titlebar/renderer';
-
-export {};
+/// <reference types="vite/client" />
 
 // Vue
 declare module '*.vue' {
-  import { DefineComponent } from 'vue';
+  import type { DefineComponent } from 'vue';
 
-  const component: DefineComponent<{}, {}, any>;
+  const component: DefineComponent<object, object, any>;
   export default component;
 }
 
@@ -19,3 +16,7 @@ declare module '*.svg' {
 }
 
 declare type Recordable<T = any> = Record<string, T>;
+
+declare global {
+  interface Window {}
+}

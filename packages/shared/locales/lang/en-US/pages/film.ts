@@ -1,0 +1,53 @@
+export default {
+  title: 'Film',
+  noDesc: 'No plot summary',
+  info: {
+    type: 'Type',
+    area: 'Area',
+    release: 'Release',
+  },
+  infiniteLoading: {
+    noConfig: 'Please go to [Setting->Film Config] to configure the data',
+  },
+  message: {
+    formatEpisodeError: 'Data source formatting episode error, check if the data source is normal',
+    notSelectAnalyze: 'Recognized official data, but no analyze selected',
+    notSelectSourceBeforeSearch: 'No data source selected or Site Mode data source search status is off',
+    noEffectiveSearchSource:
+      'No effective search data source, please check the data source search configuration and search mode',
+    noDetailInfo: 'Detail data is missing or incorrect',
+  },
+  field: {
+    name: 'Name',
+    type: 'Type',
+    typeMap: {
+      't0-xml': 'T0[xml]',
+      't1-json': 'T1[json]',
+      't3-js_drpy': 'T3[js_drpy]',
+      't3-js_quick': 'T3[js_quick]',
+      't3-csp_xbpq': 'T3[csp_xbpq]',
+      't3-csp_xyq': 'T3[csp_xyq]',
+      't3-csp_appysv2': 'T3[csp_appysv2]',
+      't3-alist': 'T3[alist]',
+      't3-py': 'T3[py]',
+      't4-drpys': 'T4[drpys]',
+      't4-catvod': 'T4[catvod]',
+      't4-drpy_js0': 'T4[drpy_js0]',
+    },
+    key: 'Key',
+    api: 'Api',
+    search: 'Search',
+    searchMap: {
+      close: 'Close',
+      only: 'Only',
+      gather: 'Gather',
+    },
+    playUrl: 'Parse',
+    ext: 'Extension',
+    group: 'Group',
+    category: 'Category',
+    searchClose: 'Close',
+    searchOnly: 'Only',
+    searchGather: 'Gather',
+  },
+};

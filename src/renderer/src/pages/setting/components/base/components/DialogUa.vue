@@ -2,38 +2,49 @@
   <t-dialog
     v-model:visible="formVisible"
     show-in-attached-element
-    attach="#main-component"
+    :attach="`.${attachContent}`"
     placement="center"
-    width="50%"
     destroy-on-close
+    lazy
   >
     <template #header>
       {{ $t('pages.setting.ua.title') }}
     </template>
     <template #body>
-      <t-form ref="formRef" :data="formData.data" :rules="RULES" :label-width="60"  :requiredMark="false">
-        <t-form-item name="data" :label-width="0">
-          <t-textarea v-model="formData.data.data" :placeholder="$t('pages.setting.placeholder.general')" :autosize="{ minRows: 2, maxRows: 4 }" @change="handleMatchTag" />
-        </t-form-item>
-        <t-radio-group v-model="select" variant="default-filled" size="small" class="mg-t" @change="handleChangeSelect">
-          <t-radio-button v-for="item in LIST" :key="item.name" :value="item.ua">{{ item.name }}</t-radio-button>
-        </t-radio-group>
-      </t-form>
+      <div class="ua view-container">
+        <t-form
+          ref="formRef"
+          :data="formData"
+          :rules="RULES"
+          :label-width="0"
+          required-mark-position="right"
+          label-align="left"
+          reset-type="initial"
+          @submit="onSubmit"
+        >
+          <t-form-item :style="{ marginBottom: 'var(--td-comp-margin-s)' }">
+            <t-radio-group v-model="select" variant="default-filled" @change="handleChangeSelect">
+              <t-radio-button v-for="item in LIST" :key="item.name" :value="item.value">{{ item.name }}</t-radio-button>
+            </t-radio-group>
+          </t-form-item>
+          <t-form-item :label="$t('common.content')" name="data">
+            <t-textarea
+              v-model="formData.data"
+              :placeholder="$t('common.placeholder.input')"
+              :autosize="{ minRows: 4, maxRows: 4 }"
+              @change="handleMatchTag"
+            />
+          </t-form-item>
+        </t-form>
+      </div>
     </template>
     <template #footer>
-      <t-button variant="outline" @click="onReset">{{ $t('pages.setting.dialog.reset') }}</t-button>
-      <t-button theme="primary" @click="onSubmit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
+      <t-button theme="default" variant="base" @click="handleReset">{{ $t('common.reset') }}</t-button>
+      <t-button theme="primary" variant="base" @click="handleSubmit">{{ $t('common.confirm') }}</t-button>
     </template>
   </t-dialog>
 </template>
-
 <script setup lang="ts">
-import { reactive, ref, watch, useTemplateRef } from 'vue';
-import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
-
-import { t } from '@/locales';
-import UA_CONFIG from '@/config/ua';
-
 defineOptions({
   name: 'SettingBaseDialogUA',
 });
@@ -45,62 +56,89 @@ const props = defineProps({
   },
   data: {
     type: Object,
-    default: { data: '',  type: '' },
+    default: () => ({ data: '' }),
   },
 });
-const formVisible = ref<Boolean>(false);
-const formData = ref({
-  data: { data: '',  type: '' },
-  raw: { data: '',  type: '' },
-});
-const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
-const LIST = reactive([...UA_CONFIG]);
-const select = ref('');
-
 const emits = defineEmits(['update:visible', 'submit']);
 
-watch(() => formVisible.value, (val) => emits('update:visible', val));
-watch(() => props.visible, (val) => formVisible.value = val);
-watch(() => props.data,
-  (val) => {
-    formData.value = { data: val, raw: val } as any;
-    handleMatchTag(val.data);
-  },
+import { USER_AGENT } from '@shared/config/userAgent';
+import type { FormInstanceFunctions, SubmitContext } from 'tdesign-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { ref, useTemplateRef, watch } from 'vue';
+
+import { attachContent } from '@/config/global';
+
+const LIST = [
+  { name: 'Chrome', value: USER_AGENT.PC_WIN32_CHROME },
+  { name: 'Safari', value: USER_AGENT.PC_DARWIN_SAFARI },
+  { name: 'Android', value: USER_AGENT.MOBILE_ANDROID_PIXEL },
+  { name: 'IPhone', value: USER_AGENT.MOBILE_IOS_SAFARI },
+  { name: 'Mpv', value: USER_AGENT.MPV },
+  { name: 'OkHttp', value: USER_AGENT.OKHTTP },
+  { name: 'Dart', value: USER_AGENT.DART },
+];
+const TYPE = 'ua';
+const RULES = {};
+
+const formVisible = ref(false);
+const formData = ref(props.data);
+const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
+const select = ref('');
+
+watch(
+  () => formVisible.value,
+  (val) => emits('update:visible', val),
+);
+watch(
+  () => props.visible,
+  (val) => (formVisible.value = val),
+);
+watch(
+  () => props.data,
+  (val) => (formData.value = val),
+);
+watch(
+  () => formData.value.data,
+  (val) => handleMatchTag(val),
 );
 
-const handleMatchTag = (ua: string) => {
-  const index = LIST.findIndex((item) => item.ua === ua);
+const handleMatchTag = (value: string) => {
+  const index = LIST.findIndex((item) => item.value === value);
 
   if (index === -1) select.value = '';
-  else select.value = LIST[index].ua;
+  else select.value = LIST[index].value;
 };
 
 const handleChangeSelect = (item: string) => {
-  formData.value.data.data = item;
+  formData.value.data = item;
 };
 
-const onSubmit: FormProps['onSubmit'] = async () => {
-  formRef.value?.validate().then((validateResult) => {
-    if (validateResult && Object.keys(validateResult).length) {
-      const firstError = Object.values(validateResult)[0]?.[0]?.message;
-      MessagePlugin.warning(firstError);
-    } else {
-      const { data, type } = formData.value.data;
-      emits('submit', { data, type });
-      formVisible.value = false;
-    }
-  });
+const handleExecute = () => {
+  emits('submit', TYPE, formData.value.data);
+  formVisible.value = false;
 };
 
-const onReset: FormProps['onReset'] = () => {
-  formData.value.data = { ...formData.value.raw };
-
-  handleMatchTag(formData.value.raw.data);
+const onSubmit = (context: SubmitContext<FormData>) => {
+  const { validateResult, firstError } = context;
+  if (validateResult && typeof validateResult === 'boolean') {
+    handleExecute();
+  } else {
+    MessagePlugin.warning(firstError!);
+  }
 };
 
-const RULES = {
-  data: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+const handleSubmit = () => {
+  formRef.value?.submit();
+};
+
+const handleReset = () => {
+  formRef.value?.reset();
 };
 </script>
-
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.view-container {
+  padding: 0 var(--td-comp-paddingLR-xxs) var(--td-comp-paddingTB-xxs);
+  max-height: 340px;
+  overflow-y: auto;
+}
+</style>

@@ -1,0 +1,40 @@
+diff --git a/dist/index.es.js b/dist/index.es.js
+index 8f1ac84be65e4dde278503ec9a04e15c7c6ad715..6a428ec3d6563c54ad687645039d76b128cec353 100644
+--- a/dist/index.es.js
++++ b/dist/index.es.js
+@@ -23,7 +23,7 @@ const _TorrentPlugin = class _TorrentPlugin {
+     if (!matcher(source))
+       return false;
+     if (!_TorrentPlugin.library) {
+-      _TorrentPlugin.library = globalThis.WebTorrent || (library ? await loadSDK(library, "WebTorrent") : (await import("webtorrent/webtorrent.min.js")).default);
++      _TorrentPlugin.library = globalThis.WebTorrent || (typeof library === "string" ? await loadSDK(library, "WebTorrent") : library?.default) || {};
+     }
+     const webtorrent = _TorrentPlugin.library;
+     if (!webtorrent.WEBRTC_SUPPORT)
+diff --git a/dist/index.min.js b/dist/index.min.js
+index 88c45ee23559bb75d516bf4937a94eb34a97b490..e50b68277076e64dafc42ded917fd78ca528715e 100644
+--- a/dist/index.min.js
++++ b/dist/index.min.js
+@@ -5,4 +5,4 @@
+  * author: shiyiya
+  * homepage: https://github.com/shiyiya/oplayer
+  */
+-!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t(require("@oplayer/core")):"function"==typeof define&&define.amd?define(["@oplayer/core"],t):(e="undefined"!=typeof globalThis?globalThis:e||self).OTorrent=t(e.OPlayer)}(this,(function(e){"use strict";const t=class t{constructor(e){this.options=e,this.key="torrent",this.name="oplayer-plugin-torrent",this.version="1.2.25-beta.2"}apply(e){return this.player=e,this}async load(n,r){let o=n.$video;const i=this.options,a=i.config,s=void 0===a?{}:a,l=i.matcher,c=void 0===l?t.defaultMatcher:l,d=i.library;if(!c(r))return!1;t.library||(t.library=globalThis.WebTorrent||(d?await e.loadSDK(d,"WebTorrent"):(await import("webtorrent/webtorrent.min.js")).default));const h=t.library;if(!h.WEBRTC_SUPPORT)return!1;const u=this.instance=new h(s),p=[];return u.add(r.src,(e=>{var t;if(e.files.forEach((e=>{e.name.endsWith(".mp4")?p.push(e):e.name.startsWith("poster")&&e.getBlobURL(((e,t)=>{!e&&t&&(o.poster=t)}))})),!p.length)throw new Error("media not found");this.player.on("loadedmetadata",(e=>{this.instance&&setTimeout((()=>{this.player.emit("canplay",e)}))})),p[0].renderTo(o,{controls:!1}),null==(t=this.player.context.ui)||t.menu.register({name:"Torrent",position:"top",children:p.map(((e,t)=>({name:e.name,default:0==t,value:e}))),onChange(e,t){let n=e.value,r=e.name;t.innerText=r,n.renderTo(o,{controls:!1})}})})),this}async unload(){this.instance&&await this.instance.destroy()}async destroy(){await this.unload()}};t.defaultMatcher=e=>/magnet:?[^\"]+/.test(e.src)||/.*\.torrent/.test(e.src);let n=t;return function(){return new n(arguments.length>0&&void 0!==arguments[0]?arguments[0]:{})}}));
++!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t(require("@oplayer/core")):"function"==typeof define&&define.amd?define(["@oplayer/core"],t):(e="undefined"!=typeof globalThis?globalThis:e||self).OTorrent=t(e.OPlayer)}(this,(function(e){"use strict";const t=class t{constructor(e){this.options=e,this.key="torrent",this.name="oplayer-plugin-torrent",this.version="1.2.25-beta.2"}apply(e){return this.player=e,this}async load(n,r){let o=n.$video;const i=this.options,a=i.config,s=void 0===a?{}:a,l=i.matcher,c=void 0===l?t.defaultMatcher:l,d=i.library;if(!c(r))return!1;t.library||(t.library=globalThis.WebTorrent||((typeof d)==="string"?await e.loadSDK(d,"WebTorrent"):d?.default)||{});const h=t.library;if(!h.WEBRTC_SUPPORT)return!1;const u=this.instance=new h(s),p=[];return u.add(r.src,(e=>{var t;if(e.files.forEach((e=>{e.name.endsWith(".mp4")?p.push(e):e.name.startsWith("poster")&&e.getBlobURL(((e,t)=>{!e&&t&&(o.poster=t)}))})),!p.length)throw new Error("media not found");this.player.on("loadedmetadata",(e=>{this.instance&&setTimeout((()=>{this.player.emit("canplay",e)}))})),p[0].renderTo(o,{controls:!1}),null==(t=this.player.context.ui)||t.menu.register({name:"Torrent",position:"top",children:p.map(((e,t)=>({name:e.name,default:0==t,value:e}))),onChange(e,t){let n=e.value,r=e.name;t.innerText=r,n.renderTo(o,{controls:!1})}})})),this}async unload(){this.instance&&await this.instance.destroy()}async destroy(){await this.unload()}};t.defaultMatcher=e=>/magnet:?[^\"]+/.test(e.src)||/.*\.torrent/.test(e.src);let n=t;return function(){return new n(arguments.length>0&&void 0!==arguments[0]?arguments[0]:{})}}));
+diff --git a/src/index.ts b/src/index.ts
+index 39d377f975bb03ffc0ee5662cbd3984cd537149d..050d2f7445b725b27675bcf72337bc98cb9ffa57 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -40,9 +40,10 @@ class TorrentPlugin implements PlayerPlugin {
+     if (!TorrentPlugin.library) {
+       TorrentPlugin.library =
+         (globalThis as any).WebTorrent ||
+-        (library
++        (typeof library === 'string'
+           ? await loadSDK(library, 'WebTorrent')
+-          : (await import('webtorrent/webtorrent.min.js')).default)
++          : library?.default)
++        || {}
+     }
+ 
+     const webtorrent = TorrentPlugin.library

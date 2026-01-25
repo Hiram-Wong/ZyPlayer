@@ -1,176 +1,229 @@
 <template>
-  <div class="setting-base-container">
-    <t-form ref="form" label-width="110px" :data="formData" label-align="left">
-      <t-form-item :label="$t('pages.setting.base.theme')" name="theme">
-        <t-radio-group v-model="formData.theme">
-          <div v-for="(item, index) in MODE_OPTIONS" :key="index" class="setting-layout-drawer">
-            <t-radio-button :key="index" :value="item.type">
-              <component :is="getModeIcon(item.type)" class="mode-img" />
+  <div class="setting-base view-component-container">
+    <t-form :data="formData" label-align="left">
+      <t-form-item :label="$t('common.theme.title')" name="theme">
+        <t-radio-group v-model="formData.theme" class="theme">
+          <div v-for="item in THEME_OPTIONS" :key="item.value" class="theme-item">
+            <t-radio-button :key="item.value" :value="item.value" class="theme-btn">
+              <component :is="item.icon" class="theme-icon" />
             </t-radio-button>
-            <p :style="{ textAlign: 'center', marginTop: '8px' }">{{ item.text }}</p>
+            <p class="theme-text">{{ item.label }}</p>
           </div>
         </t-radio-group>
       </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.bossKey')" name="shortcutKey">
+      <t-form-item :label="$t('common.lang')" name="lang">
+        <t-select v-model="formData.lang" :options="LANG_OPTIONS" :style="{ width: '296px' }" />
+      </t-form-item>
+      <t-form-item :label="$t('pages.setting.base.bossKey')" name="bossKey">
         <t-space align="center">
-          <shortcut-input
-            v-model="formData.recordShortcut"
-            class="shortcut-content"
-            :style="{ width: '255px' }"
+          <input-shortcut
+            v-model="formData.bossKey"
+            :placeholder="$t('common.placeholder.inputSet')"
+            :style="{ width: '296px' }"
           />
-          <span class="title" @click="handleReset('recordShortcut')">{{ $t('pages.setting.base.reset') }}</span>
+          <span class="title" @click="handleResetConf('bossKey')">{{ $t('common.reset') }}</span>
         </t-space>
       </t-form-item>
       <t-form-item :label="$t('pages.setting.base.timeout')" name="timeout">
-        <div class="timeout">
+        <t-space align="center">
+          <t-input-number
+            v-model="formData.timeout"
+            theme="column"
+            :min="5000"
+            :max="1000 * 60"
+            :style="{ width: '296px' }"
+            @change="handleNetTimeout"
+          />
+          <span class="title" @click="handleResetConf('timeout')">{{ $t('common.reset') }}</span>
+        </t-space>
+      </t-form-item>
+      <t-form-item :label="$t('pages.setting.base.hot')" name="hot">
+        <t-select v-model="formData.hot" :options="HOT_OPTIONS" :style="{ width: '296px' }" />
+      </t-form-item>
+      <t-form-item :label="$t('pages.film.title')" name="site">
+        <t-space align="center">
+          <t-select v-model="formData.site.searchMode" :label="$t('common.search')" :style="{ width: '296px' }">
+            <t-option value="site" :label="$t('pages.setting.base.site.searchMap.local')"></t-option>
+            <t-option value="group" :label="$t('pages.setting.base.site.searchMap.group')"></t-option>
+            <t-option value="all" :label="$t('pages.setting.base.site.searchMap.all')"></t-option>
+          </t-select>
+          <!-- <t-select v-model="formData.site.filterMode" :label="$t('common.filter')" :style="{ width: '140px' }">
+            <t-option :value="true" :label="$t('common.enable')"></t-option>
+            <t-option :value="false" :label="$t('common.disable')"></t-option>
+          </t-select> -->
+        </t-space>
+      </t-form-item>
+      <t-form-item :label="$t('pages.live.title')" name="live">
+        <t-space direction="vertical">
           <t-space align="center">
-            <t-input-number v-model="formData.timeout" theme="column" class="timeout-content"
-              :placeholder="t('pages.setting.placeholder.general')"
-              :style="{ width: '255px' }"
-              :min="5000"
-              :max="1000 * 60"
-              @change="handleNetTimeout"
+            <t-radio v-model="formData.live.ipMark" allow-uncheck>
+              {{ $t('pages.setting.base.live.ipMark') }}
+            </t-radio>
+            <t-radio v-model="formData.live.delay" allow-uncheck>
+              {{ $t('pages.setting.base.live.delay') }}
+            </t-radio>
+            <t-radio v-model="formData.live.thumbnail" allow-uncheck>
+              {{ $t('pages.setting.base.live.thumbnail') }}
+              <t-popup
+                destroy-on-close
+                attach=".t-form-item__live"
+                :content="$t('pages.setting.base.live.popup.thumbnail')"
+              >
+                <info-circle-icon :style="{ marginBottom: 'var(--td-comp-margin-xs)' }" />
+              </t-popup>
+            </t-radio>
+          </t-space>
+          <t-space align="center">
+            <t-input
+              v-model="formData.live.epg"
+              clearable
+              :label="$t('pages.live.field.epg')"
+              :style="{ width: '296px' }"
             />
-            <span class="title" @click="handleReset('timeout')">{{ $t('pages.setting.base.reset') }}</span>
+            <span class="title" @click="handleDialog('liveEpg')">{{ $t('common.explain') }}</span>
+            <span class="title" @click="handleResetConf('live.epg')">{{ $t('common.reset') }}</span>
           </t-space>
-        </div>
-      </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.film')" name="film">
-        <div class="film">
-          <t-space direction="vertical">
-            <t-space align="center">
-              <t-select v-model="formData.defaultHot" :placeholder="$t('pages.setting.placeholder.general')"
-                :label="$t('pages.setting.base.hotRecommend')" :style="{ width: '255px' }">
-                <t-option value="kylive" :label="$t('pages.setting.base.kylive')"></t-option>
-                <t-option value="enlightent" :label="$t('pages.setting.base.enlightent')"></t-option>
-                <t-option value="douban" :label="$t('pages.setting.base.douban')"></t-option>
-                <t-option value="komect" :label="$t('pages.setting.base.komect')"></t-option>
-              </t-select>
-            </t-space>
-            <t-space align="center">
-              <t-select v-model="formData.defaultSearchType" :placeholder="$t('pages.setting.placeholder.general')"
-                :label="$t('pages.setting.base.search')" :style="{ width: '120px' }">
-                <t-option value="site" :label="$t('pages.setting.base.site')"></t-option>
-                <t-option value="group" :label="$t('pages.setting.base.group')"></t-option>
-                <t-option value="all" :label="$t('pages.setting.base.all')"></t-option>
-              </t-select>
-              <t-select v-model="formData.defaultFilterType" :placeholder="$t('pages.setting.placeholder.general')"
-                :label="$t('pages.setting.base.filter')" :style="{ width: '120px' }">
-                <t-option :value="true" :label="$t('pages.setting.base.on')"></t-option>
-                <t-option :value="false" :label="$t('pages.setting.base.off')"></t-option>
-              </t-select>
-            </t-space>
+          <t-space align="center">
+            <t-input
+              v-model="formData.live.logo"
+              clearable
+              :label="$t('pages.live.field.logo')"
+              :style="{ width: '296px' }"
+            />
+            <span class="title" @click="handleDialog('liveLogo')">{{ $t('common.explain') }}</span>
+            <span class="title" @click="handleResetConf('live.logo')">{{ $t('common.reset') }}</span>
           </t-space>
-        </div>
-      </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.iptv')" name="iptv">
-        <div class="iptv">
-          <t-space direction="vertical">
-            <t-space align="center">
-              <t-radio v-model="formData.iptvMarkIp" allow-uncheck>{{ $t('pages.setting.base.markIp') }}</t-radio>
-              <t-radio v-model="formData.iptvDelay" allow-uncheck>{{ $t('pages.setting.base.delay') }}</t-radio>
-              <t-radio v-model="formData.iptvThumbnail" allow-uncheck>{{ $t('pages.setting.base.thumbnail') }}</t-radio>
-              <span class="title" @click="handleDialog('iptvThumbnail')">{{ $t('pages.setting.base.info') }}</span>
-            </t-space>
-            <t-space align="center">
-              <t-input v-model="formData.defaultIptvEpg" :label="$t('pages.setting.base.defaultEpg')"
-                :placeholder="$t('pages.setting.placeholder.epgTip')" :style="{ width: '255px' }" />
-              <span class="title" @click="handleReset('defaultIptvEpg')">{{ $t('pages.setting.base.reset') }}</span>
-            </t-space>
-            <t-space align="center">
-              <t-input v-model="formData.defaultIptvLogo" :label="$t('pages.setting.base.globalLogo')"
-                :placeholder="$t('pages.setting.placeholder.logoTip')" :style="{ width: '255px' }" />
-              <span class="title" @click="handleReset('defaultIptvLogo')">{{ $t('pages.setting.base.reset') }}</span>
-            </t-space>
-          </t-space>
-        </div>
-
-        <dialog-thumbnail-view v-model:visible="isVisible.iptvThumbnail" destroy-on-close />
-      </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.player')" name="player">
-        <div class="player">
-          <t-space direction="vertical">
-            <t-space align="center">
-              <t-select v-model="formData.playerMode.type" :options="PLAYER_OPTIONS"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '255px' }" />
-              <span class="title" @click="handleDialogForm('snifferMode')">{{ $t('pages.setting.base.sniffer') }}</span>
-              <span class="title" @click="handleDialogForm('barrage')">{{ $t('pages.setting.base.barrage') }}</span>
-            </t-space>
-            <t-space align="center" v-if="formData.playerMode.type === 'custom'">
-              <t-input v-model="formData.playerMode.external" :label="$t('pages.setting.base.command')"
-                :placeholder="$t('pages.setting.placeholder.general')" :style="{ width: '255px' }" />
-              <span class="title" @click="handleDialog('customPlayer')">{{ $t('pages.setting.base.info') }}</span>
-            </t-space>
-          </t-space>
-        </div>
-
-        <dialog-barrage-view v-model:visible="isVisible.barrage" :data="dialogFormData" @submit="handleDialogReceive" />
-        <dialog-sniffer-view v-model:visible="isVisible.snifferMode" :data="dialogFormData" @submit="handleDialogReceive" />
-        <dialog-custom-player-view v-model:visible="isVisible.customPlayer" />
-      </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.security')" name="security">
-        <t-space>
-          <span v-if="platform !== 'linux'" class="title" @click="handleNetProxy">
-            {{ $t('pages.setting.base.proxy') }}
-          </span>
-          <span class="title" @click="handleDialogForm('ua')">{{ $t('pages.setting.base.ua') }}</span>
-          <span class="title" @click="handleDialogForm('dns')">{{ $t('pages.setting.base.dns') }}</span>
         </t-space>
 
-        <dialog-ua-view v-model:visible="isVisible.ua" :data="dialogFormData" @submit="handleDialogReceive" />
-        <dialog-dns-view v-model:visible="isVisible.dns" :data="dialogFormData" @submit="handleDialogReceive" />
+        <dialog-document
+          v-model:visible="isVisible.liveEpg"
+          :attach="`.${attachContent}`"
+          :title="$t('pages.md.liveEpg.title')"
+          :content="$t('pages.md.liveEpg.content')"
+        />
+        <dialog-document
+          v-model:visible="isVisible.liveLogo"
+          :attach="`.${attachContent}`"
+          :title="$t('pages.md.liveLogo.title')"
+          :content="$t('pages.md.liveLogo.content')"
+        />
       </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.permission')" name="permission">
-        <t-space>
-          <t-radio v-if="platform !== 'linux'" v-model="formData.selfBoot" allow-uncheck @change="handleSelefBoot">
-            {{ $t('pages.setting.base.selefBoot') }}
-          </t-radio>
-          <!-- <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="handleHardwareAcceleration">
-            {{ $t('pages.setting.base.hardwareAcceleration') }}
-          </t-radio> -->
-          <t-radio v-model="formData.windowPosition.status" allow-uncheck>
-            {{ $t('pages.setting.base.windowPosition') }}
-          </t-radio>
-          <t-radio v-model="formData.debug" allow-uncheck @change="handleDebug">
-            {{ $t('pages.setting.base.debug') }}
-          </t-radio>
+      <t-form-item :label="$t('aigc.subheading')" name="ai">
+        <t-space direction="vertical">
+          <t-select
+            v-model="formData.aigc.type"
+            :options="AIGC_PROVIDER_OPTIONS"
+            :label="$t('common.provider')"
+            disabled
+            :style="{ width: '296px' }"
+          />
+          <t-input v-model="formData.aigc.server" clearable :label="$t('common.api')" :style="{ width: '296px' }" />
+          <t-input
+            v-model="formData.aigc.key"
+            type="password"
+            clearable
+            :label="$t('aigc.field.key')"
+            :style="{ width: '296px' }"
+          />
+          <t-input
+            v-model="formData.aigc.model"
+            clearable
+            :label="$t('aigc.field.model')"
+            :style="{ width: '296px' }"
+          />
         </t-space>
       </t-form-item>
-      <t-form-item :label="$t('pages.setting.base.other')" name="other">
-        <t-space>
-          <span class="title" @click="handleResetFactory">{{ $t('pages.setting.base.restoreFactory') }}</span>
-          <span class="title" @click="handleDialogForm('webdev')">{{ $t('pages.setting.base.dataMange') }}</span>
-          <span class="title" @click="handleDialog('update')">{{ $t('pages.setting.base.checkUpdate') }}</span>
-          <span class="title" @click="handleDialog('disclaimer')">{{ $t('pages.setting.base.disclaimer') }}</span>
+      <t-form-item :label="$t('pages.setting.base.player.title')" name="player">
+        <t-space direction="vertical">
+          <t-space align="center">
+            <t-select v-model="formData.player.type" :options="PLAYER_OPTIONS" :style="{ width: '296px' }" />
+            <span class="title" @click="handleDialogForm('sniffer')">
+              {{ $t('pages.setting.base.player.sniffer') }}
+            </span>
+            <span class="title" @click="handleDialogForm('barrage')">
+              {{ $t('pages.setting.base.player.barrage') }}
+            </span>
+          </t-space>
+          <t-space v-if="formData.player.type === PLAYER_TYPE.CUSTOM" align="center">
+            <t-input
+              v-model="formData.player.external"
+              :label="$t('pages.setting.base.player.command')"
+              :style="{ width: '296px' }"
+            />
+            <span class="title" @click="handleDialog('customPlayer')">{{ $t('common.explain') }}</span>
+          </t-space>
         </t-space>
 
-        <dialog-data-view v-model:visible="isVisible.webdev" :data="dialogFormData" @submit="handleDialogReceive" />
+        <dialog-barrage-view v-model:visible="isVisible.barrage" :data="dialogFormData" @submit="onDialogSubmit" />
+        <dialog-sniffer-view v-model:visible="isVisible.sniffer" :data="dialogFormData" @submit="onDialogSubmit" />
+        <dialog-document
+          v-model:visible="isVisible.customPlayer"
+          :attach="`.${attachContent}`"
+          :title="$t('pages.md.customPlayer.title')"
+          :content="$t('pages.md.customPlayer.content')"
+        />
+      </t-form-item>
+      <t-form-item :label="$t('pages.setting.base.security.title')" name="security">
+        <t-space align="center">
+          <span class="title" @click="handleDialogForm('proxy')">{{ $t('pages.setting.base.security.proxy') }}</span>
+          <span class="title" @click="handleDialogForm('ua')">{{ $t('pages.setting.base.security.ua') }}</span>
+          <span class="title" @click="handleDialogForm('dns')">{{ $t('pages.setting.base.security.dns') }}</span>
+        </t-space>
+
+        <dialog-ua-view v-model:visible="isVisible.ua" :data="dialogFormData" @submit="onDialogSubmit" />
+        <dialog-proxy-view v-model:visible="isVisible.proxy" :data="dialogFormData" @submit="onDialogSubmit" />
+        <dialog-dns-view v-model:visible="isVisible.dns" :data="dialogFormData" @submit="onDialogSubmit" />
+      </t-form-item>
+      <t-form-item :label="$t('pages.setting.base.permission.title')" name="permission">
+        <t-space align="center">
+          <t-radio v-model="formData.autoLaunch" allow-uncheck @change="handleAutoLaunch">
+            {{ $t('pages.setting.base.permission.autoLaunch') }}
+          </t-radio>
+          <t-radio v-model="formData.hardwareAcceleration" allow-uncheck @change="handleHardwareAcceleration">
+            {{ $t('pages.setting.base.permission.hardwareAcceleration') }}
+          </t-radio>
+          <t-radio v-model="formData.debug" allow-uncheck>
+            {{ $t('pages.setting.base.permission.debug') }}
+          </t-radio>
+        </t-space>
+      </t-form-item>
+      <t-form-item :label="$t('pages.setting.base.other.title')" name="other">
+        <t-space align="center">
+          <span class="title" @click="handleFactoryReset">{{ $t('pages.setting.base.other.factoryReset') }}</span>
+          <span class="title" @click="handleDialog('update')">{{ $t('pages.setting.base.other.checkUpdate') }}</span>
+          <span class="title" @click="handleDialog('disclaimer')">{{ $t('pages.setting.base.other.disclaimer') }}</span>
+        </t-space>
+
         <dialog-update-view v-model:visible="isVisible.update" />
         <dialog-disclaimer-view v-model:visible="isVisible.disclaimer" />
       </t-form-item>
     </t-form>
   </div>
 </template>
-
 <script setup lang="ts">
+import { IPC_CHANNEL } from '@shared/config/ipcChannel';
+import { AIGC_PROVIDER_TYPE, PLAYER_TYPE, REC_HOT_TYPE } from '@shared/config/setting';
+import type { ISetting } from '@shared/config/tblSetting';
+import { settingObj as tblSetting } from '@shared/config/tblSetting';
+import { THEME } from '@shared/config/theme';
+import { isObject, isObjectEmpty, isPositiveFiniteNumber } from '@shared/modules/validate';
+import { cloneDeep, isEqual, pickBy } from 'es-toolkit';
+import { InfoCircleIcon } from 'tdesign-icons-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
-import { computed, onMounted, onActivated, ref, watch, defineAsyncComponent, shallowRef } from 'vue';
+import { computed, defineAsyncComponent, onActivated, onMounted, ref, watch } from 'vue';
 
-import { fetchSettingList, clearDb, sourceSetting } from '@/api/setting';
-import { usePlayStore, useSettingStore } from '@/store';
-import { t } from '@/locales';
+import { dataDbClear } from '@/api/data';
+import { fetchSettingList, sourceSetting } from '@/api/setting';
+import ThemeAutoIcon from '@/assets/theme/auto.svg';
+import ThemeDarkIcon from '@/assets/theme/dark.svg';
+import ThemeLightIcon from '@/assets/theme/light.svg';
+import DialogDocument from '@/components/dialog-docment/index.vue';
+import InputShortcut from '@/components/input-shortcut/index.vue';
+import { emitterChannel, emitterSource } from '@/config/emitterChannel';
+import { attachContent } from '@/config/global';
+import { langList, t } from '@/locales';
+import { usePlayerStore, useSettingStore } from '@/store';
 import emitter from '@/utils/emitter';
-import { platform } from '@/utils/tool';
-
-import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
-import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
-import SettingLightIcon from '@/assets/assets-setting-light.svg';
-
-import ShortcutInput from '@/components/shortcut-input/index.vue';
-
-defineOptions({
-  name: 'SettingPage',
-});
 
 const createAsyncComponentRefs = (components: string[]): Record<string, any> => {
   const refs: Record<string, any> = {};
@@ -181,188 +234,199 @@ const createAsyncComponentRefs = (components: string[]): Record<string, any> => 
   return refs;
 };
 
-const componentNames = [
-  'Data', 'Ua', 'Dns', 'Update',
-  'Thumbnail', 'CustomPlayer', 'Sniffer', 'Barrage',
-];
+const componentNames = ['Ua', 'Proxy', 'Dns', 'Update', 'Sniffer', 'Barrage'];
 
-// 生成异步组件引用
-const {
-  DialogDataView,
-  DialogUaView,
-  DialogDnsView,
-  DialogUpdateView,
-  DialogThumbnailView,
-  DialogCustomPlayerView,
-  DialogSnifferView,
-  DialogBarrageView
-} = createAsyncComponentRefs(componentNames);
-const DialogDisclaimerView = shallowRef(defineAsyncComponent(() => import('@/pages/Disclaimer.vue')));
+const { DialogUaView, DialogProxyView, DialogDnsView, DialogUpdateView, DialogSnifferView, DialogBarrageView } =
+  createAsyncComponentRefs(componentNames);
+const DialogDisclaimerView = defineAsyncComponent(() => import('@/pages/Disclaimer.vue'));
 
-const storePlayer = usePlayStore();
+const storePlayer = usePlayerStore();
 const storeSetting = useSettingStore();
 
 const isVisible = ref({
-  webdev: false,
-  update: false,
-  dns: false,
-  ua: false,
-  iptvThumbnail: false,
-  snifferMode: false,
+  liveEpg: false,
+  liveLogo: false,
   customPlayer: false,
+  sniffer: false,
   barrage: false,
+  ua: false,
+  proxy: false,
+  dns: false,
+  update: false,
   disclaimer: false,
 });
-const dialogFormData = ref({ data: {}, type: '' });
+const dialogFormData = ref({ data: {} });
 
-const formData = ref({
-  version: '3.4.10',
-  theme: 'auto',
-  lang: 'zh_CN',
-  defaultHot: 'kylive',
-  defaultSearchType: 'site',
-  defaultFilterType: false,
-  defaultIptvEpg: 'https://epg.112114.eu.org/?ch={name}&date={date}',
-  defaultIptvLogo: 'https://epg.112114.eu.org/logo/{name}.png',
-  timeout: 5000,
-  iptvMarkIp: true,
-  iptvThumbnail: false,
-  iptvDelay: false,
-  defaultSite: null,
-  defaultIptv: null,
-  defaultAnalyze: null,
-  analyzeFlag: [ 'youku', 'qq', 'iqiyi', 'qiyi', 'letv', 'sohu', 'tudou', 'pptv', 'mgtv' ],
-  defaultDrive: '',
-  defaultViewCasual: '',
-  playerMode: { type: 'artplayer', external: '' },
-  snifferMode: { type: 'pie', url: '' },
-  barrage: { url: '', id: '', key: '', support: [], start: '', mode: '', color: '', content: '' },
-  softSolution: false,
-  skipStartEnd: false,
-  agreementMask: false,
-  recordShortcut: '',
-  selfBoot: false,
-  hardwareAcceleration: true,
-  ua: '',
-  communitySubscribe: '',
-  webdev: { sync: false, data: { url: "https://dav.jianguoyun.com/dav/", username: "", password: "" } },
-  windowPosition: { status: false, position: { width: 1000, height: 640 } },
-  debug: false
-});
+const formData = ref<ISetting>(tblSetting);
 
-const MODE_OPTIONS = computed(() => [
-  { type: 'light', text: t('pages.setting.base.light') },
-  { type: 'dark', text: t('pages.setting.base.dark') },
-  { type: 'auto', text: t('pages.setting.base.auto') }
+const THEME_OPTIONS = computed(() => [
+  { value: THEME.SYSTEM, label: t('common.followSystem'), icon: ThemeAutoIcon },
+  { value: THEME.LIGHT, label: t('common.theme.light'), icon: ThemeLightIcon },
+  { value: THEME.DARK, label: t('common.theme.dark'), icon: ThemeDarkIcon },
+]);
+
+const LANG_OPTIONS = computed(() => [
+  { value: 'system', label: t('common.followSystem') },
+  ...langList.value.map((lang) => ({ value: lang.value, label: lang.label })),
+]);
+
+const HOT_OPTIONS = computed(() => [
+  { value: REC_HOT_TYPE.BAIDU, label: t('pages.setting.base.site.hotMap.baidu') },
+  { value: REC_HOT_TYPE.DOUBAN, label: t('pages.setting.base.site.hotMap.douban') },
+  { value: REC_HOT_TYPE.ENLIGHTENT, label: t('pages.setting.base.site.hotMap.enlightent') },
+  { value: REC_HOT_TYPE.KOMECT, label: t('pages.setting.base.site.hotMap.komect') },
+  { value: REC_HOT_TYPE.KYLIVE, label: t('pages.setting.base.site.hotMap.kylive') },
+  { value: REC_HOT_TYPE.QUARK, label: t('pages.setting.base.site.hotMap.quark') },
 ]);
 
 const PLAYER_OPTIONS = computed(() => [
-  { label: t('pages.setting.base.xgplayer'), value: 'xgplayer' },
-  // { label: t('pages.setting.base.dplayer'), value: 'dplayer' },
-  { label: t('pages.setting.base.artplayer'), value: 'artplayer' },
-  // { label: t('pages.setting.base.nplayer'), value: 'nplayer' },
-  { label: t('pages.setting.base.oplayer'), value: 'oplayer' },
-  { label: t('pages.setting.base.custom'), value: 'custom' }
+  { value: PLAYER_TYPE.XGPLAYER, label: t('media.playerMap.xgplayer') },
+  // { value: PLAYER_TYPE.DPLAYER, label: t('media.playerMap.dplayer') },
+  { value: PLAYER_TYPE.ARTPLAYER, label: t('media.playerMap.artplayer') },
+  // { value: PLAYER_TYPE.NPLAYER, label: t('media.playerMap.nplayer') },
+  // { value: PLAYER_TYPE.OPLAYER, label: t('media.playerMap.oplayer') },
+  { value: PLAYER_TYPE.CUSTOM, label: t('media.playerMap.customplayer') },
 ]);
 
-const theme = computed(() => storeSetting.getStateMode);
+const AIGC_PROVIDER_OPTIONS = computed(() => [
+  // { value: AIGC_PROVIDER_TYPE.AMZON, label: t('aigc.field.providerMap.amazon') },
+  { value: AIGC_PROVIDER_TYPE.ANTHROPIC, label: t('aigc.field.providerMap.anthropic') },
+  { value: AIGC_PROVIDER_TYPE.AZURE, label: t('aigc.field.providerMap.azure') },
+  { value: AIGC_PROVIDER_TYPE.GEMINI, label: t('aigc.field.providerMap.gemini') },
+  { value: AIGC_PROVIDER_TYPE.OPENAI, label: t('aigc.field.providerMap.openai') },
+]);
 
-const getModeIcon = (mode: string) => ({
-  light: SettingLightIcon,
-  dark: SettingDarkIcon,
-  auto: SettingAutoIcon
-})[mode];
-
-watch(() => theme.value, val => formData.value.theme = val);
-
-watch(() => formData.value, async (newVal) => {
-  storeSetting.updateConfig({
-    mode: newVal.theme,
-    timeout: Math.max(newVal.timeout, 5000)
-  });
-  storePlayer.updateConfig({
-    setting: {
-      playerMode: newVal.playerMode,
-      snifferMode: newVal.snifferMode,
-      barrage: newVal.barrage
-    },
-  } as any);
-  await putConf(newVal);
-}, { deep: true });
-
-// 监听刷新hot
-watch(() => [
-  formData.value.defaultHot,
-  formData.value.defaultSearchType,
-  formData.value.defaultFilterType
-], () => emitter.emit('refreshHotConfig'));
-
-// 监听刷新iptv
-watch(() => [
-  formData.value.iptvMarkIp,
-  formData.value.iptvDelay,
-  formData.value.iptvThumbnail,
-  formData.value.defaultIptvEpg
-], () => emitter.emit('refreshIptvConfig'));
-
-// 监听快捷键
 watch(
-  () => formData.value.recordShortcut,
-  async (val) => {
-    await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'unRegister', config: { name: 'boss' }});
-    if (!val) return;
-
-    const isAvailable = await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'isRegistered', config: { shortcut: val }});
-    if (isAvailable) {
-      formData.value.recordShortcut = '';
-      MessagePlugin.error(t('pages.setting.placeholder.shortcutErrRegistered'));
-    } else {
-      await window.electron.ipcRenderer.invoke('manage-boss-shortcut', { action: 'register', config: { shortcut: val, name: 'boss' }});
+  () => ({
+    theme: storeSetting.theme,
+    lang: storeSetting.lang,
+  }),
+  (newVal, oldVal) => {
+    const patch = pickBy(newVal, (value, key) => !isEqual(value, oldVal[key]));
+    for (const key in patch) {
+      if (formData.value[key] !== patch[key]) formData.value[key] = patch[key];
     }
-  }
+  },
 );
 
-onMounted(() => {
-  fetchConf();
+watch(
+  () => formData.value,
+  (val) => sourceSettingConf(val),
+  { deep: true },
+);
+
+watch(
+  () => ({
+    theme: formData.value.theme,
+    lang: formData.value.lang,
+    timeout: formData.value.timeout,
+    debug: formData.value.debug,
+    bossKey: formData.value.bossKey,
+  }),
+  (newVal, oldVal) => {
+    const patch = pickBy(
+      { ...newVal, timeout: Math.max(newVal.timeout, 5000) },
+      (value, key) => !isEqual(value, oldVal[key]),
+    );
+    if (!isObjectEmpty(patch)) storeSetting.updateConfig(patch);
+  },
+);
+
+watch(
+  () => ({
+    player: formData.value.player,
+    barrage: formData.value.barrage,
+  }),
+  (newVal, oldVal) => {
+    const patch = pickBy(newVal, (value, key) => !isEqual(value, oldVal[key]));
+    if (!isObjectEmpty(patch)) storePlayer.updateConfig(patch);
+  },
+  { deep: true },
+);
+
+watch(
+  () => [formData.value.hot, formData.value.site],
+  () => emitter.emit(emitterChannel.REFRESH_SEARCH_CONFIG, { source: emitterSource.SETTING_BASE }),
+  { deep: true },
+);
+
+watch(
+  () => formData.value.aigc,
+  () => emitter.emit(emitterChannel.REFRESH_AIGC_CONFIG, { source: emitterSource.SETTING_BASE }),
+  { deep: true },
+);
+
+watch(
+  () => formData.value.live,
+  () => emitter.emit(emitterChannel.REFRESH_LIVE_CONFIG, { source: emitterSource.SETTING_BASE }),
+  { deep: true },
+);
+
+onMounted(() => setup());
+
+onActivated(() => {
+  emitter.off(emitterChannel.REFRESH_SETTING_CONFIG, reloadConfig);
+  emitter.on(emitterChannel.REFRESH_SETTING_CONFIG, reloadConfig);
 });
 
-onActivated(() => !emitter.all.get('refreshConf') && emitter.on('refreshConf', refreshConf));
-
-const fetchConf = async () => {
-  formData.value = await fetchSettingList();
+const setup = () => {
+  getSetting();
 };
 
-const putConf = async (val) => {
+const reloadConfig = async (eventData: { source: string; data: any }) => {
+  const { source } = eventData;
+  if (source === emitterSource.SETTING_BASE) return;
+
+  await getSetting();
+};
+
+const getSetting = async () => {
+  try {
+    const resp = await fetchSettingList();
+
+    if (isObject(resp) && !isObjectEmpty(resp)) {
+      formData.value = resp as ISetting;
+    }
+  } catch (error) {
+    console.error(`Failed to get setting conf:`, error);
+    MessagePlugin.error(`${t('common.error')}:${(error as Error).message}`);
+  }
+};
+
+const sourceSettingConf = async (val: ISetting) => {
   await sourceSetting(val);
 };
 
-// 网络超时
 const handleNetTimeout = (val: number) => {
-  formData.value.timeout = val < 5000 || val > 60000 ? 5000 : val;
+  const timeout = isPositiveFiniteNumber(val) ? (val < 5000 || val > 60000 ? 5000 : val) : 5000;
+  formData.value.timeout = timeout;
 };
 
-// 网络代理
-const handleNetProxy = () => window.electron.ipcRenderer.send('open-proxy-setting');
-
-// 重启应用
 const handleReboot = () => {
-  MessagePlugin.success(t('pages.setting.message.reboot'));
-  setTimeout(() => window.electron.ipcRenderer.send('reboot-app'), 1000);
+  MessagePlugin.warning(t('pages.setting.message.willReboot'));
+  setTimeout(() => window.electron.ipcRenderer.invoke(IPC_CHANNEL.APP_REBOOT), 3000);
 };
 
-// 出厂恢复
-const handleResetFactory = () => {
+const handleAutoLaunch = () => {
+  const isLaunchOnBoot = formData.value.autoLaunch;
+  window.electron.ipcRenderer.invoke(IPC_CHANNEL.APP_AUTO_LAUNCH, isLaunchOnBoot);
+};
+
+const handleHardwareAcceleration = () => {
+  MessagePlugin.warning(t('pages.setting.message.warnReboot'));
+};
+
+const handleFactoryReset = () => {
   const dialog = DialogPlugin({
-    body: t('pages.setting.dialog.restoreFactoryBody'),
-    header: t('pages.setting.dialog.restoreFactoryHeader'),
+    header: t('pages.setting.factoryReset.title'),
+    body: t('pages.setting.factoryReset.content'),
     width: '320px',
-    confirmBtn: t('pages.setting.dialog.confirm'),
-    cancelBtn: t('pages.setting.dialog.cancel'),
+    confirmBtn: t('common.confirm'),
+    cancelBtn: t('common.cancel'),
     placement: 'center',
     closeBtn: '',
     onConfirm: async () => {
-      await clearDb(["reset", "cache"]);
-      window.electron.ipcRenderer.send('clearCache');
+      await dataDbClear({ types: '' });
       dialog.hide();
       handleReboot();
     },
@@ -370,67 +434,66 @@ const handleResetFactory = () => {
   });
 };
 
-// 开机自启
-const handleSelefBoot = () => window.electron.ipcRenderer.send('toggle-selfBoot', formData.value.selfBoot);
-
-// 硬件加速
-const handleHardwareAcceleration = () => handleReboot();
-
-// 调试模式
-const handleDebug = () => handleReboot();
-
-// 重置
-const handleReset = (type: string): void => {
-  console.log(`reset action: ${type}`);
+const handleResetConf = (type: string) => {
   const defaultMap = {
-    recordShortcut: 'Shift+Alt+Z',
-    defaultIptvEpg: 'https://epg.112114.eu.org/?ch={name}&date={date}',
-    defaultIptvLogo: 'https://epg.112114.eu.org/logo/{name}.png',
-    timeout: 5000,
-    defaultViewCasual: 'http://api.yujn.cn/api/zzxjj.php',
+    bossKey: 'Shift + Alt + Z',
+    'live.epg': 'https://epg.112114.eu.org/?ch={name}&date={date}',
+    'live.logo': 'https://epg.112114.eu.org/logo/{name}.png',
+    timeout: 10000,
   };
 
-  if (defaultMap.hasOwnProperty(type)) {
-    formData.value[type] = defaultMap[type as keyof typeof defaultMap];
-  };
+  if (Object.hasOwn(defaultMap, type)) {
+    const keys = type.split('.');
+    const last = keys.pop()!;
+
+    let target: any = formData.value;
+    for (const k of keys) {
+      if (target[k] == null || typeof target[k] !== 'object') target[k] = {};
+      target = target[k];
+    }
+
+    target[last] = defaultMap[type as keyof typeof defaultMap];
+  }
 };
 
-// 对话框 + 传参
 const handleDialogForm = (type: string) => {
-  dialogFormData.value = { data: formData.value[type], type };
+  const doc = { data: formData.value[type] };
+  dialogFormData.value = cloneDeep(doc);
   isVisible.value[type] = true;
 };
 
-// 对话框
 const handleDialog = (type: string) => {
   isVisible.value[type] = true;
 };
 
-// 数据接收
-const handleDialogReceive = ({ data, type }) => {
-  formData.value[type] = data;
-};
+const onDialogSubmit = (type: string, doc: any) => {
+  formData.value[type] = doc;
 
-const refreshConf = () => {
-  console.log('[setting][bus][refresh]');
-  fetchConf();
+  switch (type) {
+    case 'dns': {
+      window.electron.ipcRenderer.invoke(IPC_CHANNEL.APP_DNS, doc);
+      break;
+    }
+    case 'proxy': {
+      const { type, url, bypass } = doc;
+      window.electron.ipcRenderer.invoke(
+        IPC_CHANNEL.APP_PROXY,
+        type,
+        ...(type === 'custom' && url ? [url, bypass] : []),
+      );
+      // window.electron.ipcRenderer.invoke(IPC_CHANNEL.APP_PROXY_SYSTEM);
+      break;
+    }
+  }
 };
 </script>
-
 <style lang="less" scoped>
-.setting-base-container {
-  height: 100%;
-  padding: 0 var(--td-comp-paddingLR-xxl);
-  overflow: auto;
+.view-component-container {
+  padding: 0 0 var(--td-comp-paddingTB-s) var(--td-comp-paddingLR-xl);
+  overflow-y: auto;
 
-  :deep(.t-radio-group.t-size-m .t-radio-button) {
+  .t-radio-group.t-size-m .t-radio-button {
     height: auto;
-  }
-
-  :deep(.t-form__label) {
-    label {
-      font-weight: 500;
-    }
   }
 
   .title {
@@ -439,38 +502,36 @@ const refreshConf = () => {
     font-weight: 500;
   }
 
-  .setting-layout-drawer {
+  .theme {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 35px;
-    box-sizing: content-box;
+    flex-direction: row;
+    gap: var(--td-size-8);
 
-    .t-radio-button {
-      display: inline-flex;
-      max-height: 78px;
-      padding: 0;
-      border-radius: var(--td-radius-default);
-      border: 2px solid transparent;
+    .theme-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
 
-      > :deep(.t-radio-button__label) {
+      .theme-btn {
         display: inline-flex;
-        position: relative;
+        max-height: 78px;
+        padding: 0;
+        border-radius: var(--td-radius-s);
+        border: 2px solid transparent;
 
-        .mode-img,
-        .layout-img {
-          border-radius: 9px;
+        > :deep(.t-radio-button__label) {
+          display: inline-flex;
         }
       }
-    }
 
-    .t-is-checked {
-      border-radius: 10px;
-      border: 2px solid var(--td-brand-color);
-    }
+      .t-is-checked {
+        border: 2px solid var(--td-brand-color);
+      }
 
-    .t-form__controls-content {
-      justify-content: end;
+      .theme-text {
+        margin-top: var(--td-comp-margin-s);
+        text-align: center;
+      }
     }
   }
 }

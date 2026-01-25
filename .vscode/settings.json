@@ -1,33 +1,67 @@
 {
-  "files.eol":"\n",
-  "editor.tabSize": 2,
-  "eslint.format.enable": true,
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "vue"],
-  "[vue]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[typescriptreact]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[javascriptreact]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[typescript]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascript]": {
-    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[less]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[vue]": {
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
-  "html.customData": [
-    "./node_modules/@electron-uikit/titlebar/custom-elements.json"
-  ],
-  "i18n-ally.localesPaths": [
-    "src/renderer/src/locales",
-    "src/renderer/src/locales/lang"
-  ]
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    // "source.fixAll.oxc": "explicit",
+    "source.organizeImports": "never"
+  },
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "files.eol": "\n",
+  "i18n-ally.displayLanguage": "zh-CN",
+  "i18n-ally.enabledFrameworks": ["vue", "i18next"],
+  "i18n-ally.enabledParsers": ["ts", "js", "json"],
+  "i18n-ally.fullReloadOnChanged": true,
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.localesPaths": ["packages/shared/locales/lang"],
+  "i18n-ally.namespace": true,
+  "i18n-ally.pathMatcher": "{locale}/{namespaces}.{ext}",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.sourceLanguage": "zh-CN",
+  "i18n-ally.usage.derivedKeyRules": ["{key}_one", "{key}_other"],
+  "search.exclude": {
+    "**/*.min.js": true,
+    "**/*.svg": true,
+    "**/dist/**": true,
+    "**/node_modules/**": true,
+    "out/**": true,
+    "patches/**": true
+  },
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  // "typescript.experimental.useTsgo": true
+  "typescript.tsserver.maxTsServerMemory": 4096
 }

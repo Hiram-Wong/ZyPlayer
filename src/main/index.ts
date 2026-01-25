@@ -1,251 +1,248 @@
-import { registerContextMenuListener } from '@electron-uikit/contextmenu';
-import { registerTitleBarListener } from '@electron-uikit/titlebar';
-import { electronApp, optimizer, platform } from '@electron-toolkit/utils';
-import { app, BrowserWindow, nativeTheme, session } from 'electron';
-import fixPath from 'fix-path';
+// don't reorder this file, it's used to initialize the app data dir and
+// other which should be run before the main process is ready
 
-import { setup as dbInit, server as dbServer, webdev } from './core/db';
-import ipcListen from './core/ipc';
-import globalVariable from './core/global';
-import logger from './core/logger';
-import createMenu from './core/menu';
-import protocolResgin from './core/protocol';
-import serverInit from './core/server';
-import { globalShortcut } from './core/shortcut';
-import createTray from './core/tray';
-import autoUpdater from './core/update';
-import { createMain } from './core/winManger';
+import process from 'node:process';
 
-import { createDir, deleteFile, fileExist, fileState } from './utils/hiker/file';
-import { APP_TMP_PATH, APP_DB_PATH, APP_LOG_PATH, APP_PLUGIN_PATH, APP_FILE_PATH } from './utils/hiker/path';
-import { isLocalhostRef, isUrlScheme, parseCustomUrl, toggleWinVisable } from './utils/tool';
+import { electronApp, optimizer } from '@electron-toolkit/utils';
+import { loggerService } from '@logger';
+import { registerIpc } from '@main/ipc';
+import { appLocale } from '@main/services/AppLocale';
+import { configManager } from '@main/services/ConfigManager';
+import { dbService } from '@main/services/DbService';
+import { fastifyService } from '@main/services/FastifyService';
+import { terminate as filmCmsTerminate } from '@main/services/FastifyService/routes/v1/film/cms/utils/cache';
+import { fileStorage } from '@main/services/FileStorage';
+import { MenuService } from '@main/services/MenuService';
+import { pluginService } from '@main/services/PluginService';
+import { handleProtocolUrl, setupAppImageDeepLink } from '@main/services/ProtocolClient';
+import { proxyManager } from '@main/services/ProxyManager';
+import { TrayService } from '@main/services/TrayService';
+import { windowService } from '@main/services/WindowService';
+import { isDev, isLinux, isMacOS, isWindows } from '@main/utils/systeminfo';
+import { APP_NAME, APP_NAME_PROTOCOL } from '@shared/config/appinfo';
+import { LOG_MODULE } from '@shared/config/logger';
+import { runAsyncFunction } from '@shared/modules/function';
+import { isBoolean, isHttp } from '@shared/modules/validate';
+import { app, crashReporter } from 'electron';
+import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
+
+const logger = loggerService.withContext(LOG_MODULE.MAIN);
+
+// enable local crash reports
+crashReporter.start({
+  productName: APP_NAME,
+  submitURL: '',
+  uploadToServer: false,
+});
 
 /**
- * 环境变量修复
+ * Environment Variable Repair
  */
 const setupEnv = () => {
-  // 修复环境变量
-  fixPath();
-  logger.info(`[env] ${process.env.PATH}`);
-  logger.info(`[electron][version] ${process.versions.electron}`);
-  logger.info(`[chromium][version] ${process.versions.chrome}`);
-  logger.info(`[node][version] ${process.versions.node}`);
-  logger.info(`[v8][version] ${process.versions.v8}`);
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // ignore TLS certificate errors
+  process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'; // disable security warnings
 
-  // 设置环境变量
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';  // 忽略 TLS 证书错误
-  process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';  // 关闭安全警告
-};
+  // in production mode, handle uncaught exception and unhandled rejection globally
+  if (!isDev) {
+    // handle uncaught exception
+    process.on('uncaughtException', (error) => {
+      logger.error('Uncaught Exception:', error);
+    });
 
-/**
- * 检查所需路径
- */
-const setupCheck = async () => {
-  const DEFAULT_PATH = [APP_TMP_PATH, APP_DB_PATH, APP_LOG_PATH, APP_PLUGIN_PATH, APP_FILE_PATH];
-  for (const path of DEFAULT_PATH) {
-    if (!(await fileExist(path)) || (await fileState(path)) !== 'dir') {
-      await deleteFile(path);
-      await createDir(path);
-    }
+    // handle unhandled rejection
+    process.on('unhandledRejection', (reason, promise) => {
+      logger.error(`Unhandled Rejection at: ${promise} reason: ${reason}`);
+    });
   }
 };
 
 /**
- * 应用启动参数
+ * Application Initialization Processing
  */
 const setupApp = async () => {
   /**
-   * OutOfBlinkCors - 跨域
-   * SameSiteByDefaultCookies - Cookie共享
-   * CookiesWithoutSameSiteMustBeSecure - Cookie支持非HTTPS
-   * BlockInsecurePrivateNetworkRequests - 私有网络发起的不安全请求
-   * OutOfProcessPdf - PDF处理
-   * IsolateOrigins - 隔离特定的源
-   * site-per-process - 网站独立进程
-   * StandardCompliantNonSpecialSchemeURLParsing - URL解析规则
+   * Disable hardware acceleration if setting is enabled
    */
-  app.commandLine.appendSwitch(
-    'disable-features',
-    'OutOfBlinkCors, SameSiteByDefaultCookies, CookiesWithoutSameSiteMustBeSecure, BlockInsecurePrivateNetworkRequests, OutOfProcessPdf, IsolateOrigins, site-per-process, StandardCompliantNonSpecialSchemeURLParsing',
-  ); // 禁用
-  /**
-   * HardwareAccelerationModeDefault - 硬件加速
-   * PlatformHEVCDecoderSupport - 视频解码
-   * GlobalShortcutsPortal - 全局快捷键
-   */
-  app.commandLine.appendSwitch('enable-features', 'PlatformHEVCDecoderSupport, HardwareAccelerationModeDefault, GlobalShortcutsPortal'); // 启用
-  app.commandLine.appendSwitch('ignore-certificate-errors'); // 忽略证书错误
-  app.commandLine.appendSwitch('disable-web-security'); // 禁用安全
-  app.commandLine.appendSwitch('disable-renderer-backgrounding'); // 禁用渲染器后台化
-  app.commandLine.appendSwitch('disable-site-isolation-trials'); // 禁用站点隔离试验
-  app.commandLine.appendSwitch('gpu-memory-buffer-compositor-resources'); // GPU内存缓冲
-  app.commandLine.appendSwitch("ignore-gpu-blacklist"); // 忽略GPU黑名单
-  app.commandLine.appendSwitch("no-sandbox"); // 禁用沙盒
-  app.commandLine.appendSwitch('proxy-bypass-list', '<local>'); // 代理白名单
-  app.commandLine.appendSwitch('wm-window-animations-disabled'); // 禁用窗口动画
-  app.commandLine.appendSwitch('disable-http-cache'); // 禁用HTTP缓存-if头
+  const dbHardwareAcceleration = configManager.hardwareAcceleration;
+  const disableHardwareAcceleration = isBoolean(dbHardwareAcceleration) ? !dbHardwareAcceleration : false;
+  if (disableHardwareAcceleration) {
+    app.disableHardwareAcceleration();
+  }
 
-  if (platform.isLinux) app.disableHardwareAcceleration(); // 禁用硬件加速
+  /**
+   * Disable chromium's window animations
+   * main purpose for this is to avoid the transparent window flashing when it is shown
+   * (especially on Windows for SelectionAssistant Toolbar)
+   * Know Issue: https://github.com/electron/electron/issues/12130#issuecomment-627198990
+   */
+  if (isWindows) {
+    app.commandLine.appendSwitch('wm-window-animations-disabled');
+  }
+
+  /**
+   * Enable GlobalShortcutsPortal for Linux Wayland Protocol
+   * see: https://www.electronjs.org/docs/latest/api/global-shortcut
+   */
+  if (isLinux && process.env.XDG_SESSION_TYPE === 'wayland') {
+    app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal');
+  }
+
+  /**
+   * Set window class and name for Linux
+   * This ensures the window manager identifies the app correctly on both X11 and Wayland
+   */
+  if (isLinux) {
+    app.commandLine.appendSwitch('class', APP_NAME);
+    app.commandLine.appendSwitch('name', APP_NAME);
+  }
+
+  /**
+   * Enable Chromium features
+   * https://github.com/microsoft/vscode/pull/241640/files
+   */
+  const enableFeatures = [
+    'DocumentPolicyIncludeJSCallStacksInCrashReports', // unresponsive renderer js call stacks
+    'EarlyEstablishGpuChannel', // early establish gpu channel
+    'EstablishGpuChannelAsync', // early establish gpu channel
+    'PlatformHEVCDecoderSupport', // HEVC video decoding support
+    'VaapiVideoDecoder', // VA-API video decoder
+    'UseMultiPlaneFormatForHardwareVideo', // Fix frame pool issue
+    'VaapiIgnoreDriverChecks', // Ignore driver compatibility check
+    'CanvasOopRasterization', // Canvas OOP rasterization
+  ];
+  app.commandLine.appendSwitch('enable-features', enableFeatures.join(','));
+  app.commandLine.appendSwitch('ignore-certificate-errors'); // ignore certificate errors
+  app.commandLine.appendSwitch('disable-web-security'); // disable web security
+  app.commandLine.appendSwitch('disable-http-cache'); // disable HTTP cache
+
+  /**
+   * Disable Chromium features
+   */
+  const disableFeatures = [
+    'OutOfBlinkCors', // Disable CORS for cross-origin requests
+    'SameSiteByDefaultCookies', // Enable SameSite cookies by default
+    'CookiesWithoutSameSiteMustBeSecure', // Allow cookies without SameSite to be secure
+    'BlockInsecurePrivateNetworkRequests', // Block insecure requests initiated by private networks
+  ];
+  app.commandLine.appendSwitch('disable-features', disableFeatures.join(','));
 };
 
 /**
- * 网络请求拦截器
+ * Application Ready Processing
  */
-const setupSession = () => {
-  let reqIdMethod: Record<string, any> = {}; // 请求id与headers列表
-  let reqIdRedirect: Record<string, any> = {}; // 请求id与重定向地址
-  const defaultSession = session.defaultSession;
+const setupReady = () => {
+  app.whenReady().then(async () => {
+    // Set app user model id for windows
+    electronApp.setAppUserModelId(import.meta.env.VITE_MAIN_BUNDLE_ID || 'com.player.zyfun');
 
-  // 发送请求前拦截器
-  defaultSession.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
-    const { url, id } = details;
-    // 取消请求-devtools拦截器
-    if (['devtools-detector', 'disable-devtool'].some(f => url.includes(f))) return callback({ cancel: true });
-    // 取消请求-urlscheme拦截器
-    if (isUrlScheme(url)) return callback({ cancel: false });
-    // 不处理-本地地址 但lab/ad除外
-    if (isLocalhostRef(url) && !url.includes('lab/ad')) return callback({});
+    // Set doh
+    const hostResolver = configManager.dns;
+    if (isHttp(hostResolver, true)) {
+      logger.info(`Using secure dns: ${hostResolver}`);
+      app.configureHostResolver({
+        secureDnsMode: 'secure',
+        secureDnsServers: [hostResolver],
+      });
+    }
 
-    // http://xxx.com/xxx.jpgG@Referer=ianpianapp.com@User-Agent=jianpian-version353
-    const { redirectURL, headers } = parseCustomUrl(url);
-    if (headers && Object.keys(headers).length) {
-      reqIdMethod[id] = headers;
-      callback({ cancel: false, redirectURL });
-    } else {
-      callback({});
+    const mainWindow = windowService.createMainWindow();
+
+    // eslint-disable-next-line no-new
+    new TrayService();
+    // eslint-disable-next-line no-new
+    new MenuService();
+
+    registerIpc(mainWindow, app);
+
+    // Setup deep link for AppImage on Linux
+    await setupAppImageDeepLink();
+
+    if (isDev) {
+      installExtension([VUEJS_DEVTOOLS])
+        .then(([...args]) => logger.info(`Added devtool extensions: ${args.map((arg) => arg.name).join(', ')}`))
+        .catch((error) => logger.error('An error occurred: ', error));
     }
   });
 
-  // 发送请求头前拦截器
-  defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    const { requestHeaders, url, id } = details;
-    const headers = reqIdMethod[id] || {};
-
-    // 不处理本地地址
-    if (isLocalhostRef(url)) return callback({ requestHeaders });
-
-    // 合理处理：优先使用 Electron-xxx -> 自定义 headers -> 原始值
-
-    // 处理 Origin - 确定请求来源(域名)
-    requestHeaders['Origin'] = requestHeaders['Electron-Origin'] || headers['Origin'] || requestHeaders['Origin'];
-    delete requestHeaders['Electron-Origin'];
-    if (requestHeaders['Origin'] && isLocalhostRef(requestHeaders['Origin'])) delete requestHeaders['Origin'];
-
-    // 处理 Host - 确定目标服务器(URL无路径)
-    requestHeaders['Host'] = requestHeaders['Electron-Host'] || headers['Host'] || requestHeaders['Host'];
-    delete requestHeaders['Electron-Host'];
-    if (requestHeaders['Host'] && isLocalhostRef(requestHeaders['Host'])) delete requestHeaders['Host'];
-    
-    // 处理 Referer - 确定跳转来源(完整URL)
-    requestHeaders['Referer'] = requestHeaders['Electron-Referer'] || headers['Referer'] || requestHeaders['Referer'];
-    delete requestHeaders['Electron-Referer'];
-    if (requestHeaders['Referer'] && isLocalhostRef(requestHeaders['Referer'])) delete requestHeaders['Referer'];
-
-    // 处理 User-Agent
-    requestHeaders['User-Agent'] = requestHeaders['Electron-User-Agent'] || headers['User-Agent'] || globalThis.variable.ua || requestHeaders['User-Agent'];
-    delete requestHeaders['Electron-User-Agent'];
-
-    // 处理 Cookie
-    requestHeaders['Cookie'] = requestHeaders['Electron-Cookie'] || headers['Cookie'] || requestHeaders['Cookie'];
-    delete requestHeaders['Electron-Cookie'];
-
-    if (requestHeaders['Redirect'] === 'manual') reqIdRedirect[id] = headers;
-
-    // 清理不再需要的记录
-    delete reqIdMethod[id];
-    callback({ requestHeaders });
-  });
-
-  // 响应拦截器
-  defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    const { id, responseHeaders, statusCode } = details;
-
-    // iframe 跨域
-    ['X-Frame-Options', 'x-frame-options'].forEach(h => delete responseHeaders?.[h]);
-
-    // 携带cookie的拦截问题
-    ['set-cookie', 'Set-Cookie'].forEach((key) => {
-      if (responseHeaders?.hasOwnProperty(key)) {
-        // responseHeaders[key] = responseHeaders[key].map((ck) => `${ck}; SameSite=None; Secure`);
-        responseHeaders[key] = responseHeaders[key].map((ck) => `${ck}`);
-      };
-    });
-
-    if (reqIdRedirect[id] && statusCode === 302) {
-      delete reqIdRedirect[id];
-      return callback({
-        cancel: false,
-        responseHeaders,
-        statusLine: 'HTTP/1.1 200 OK',
-      });
-    };
-
-    callback({ cancel: false, responseHeaders });
-  });
-};
-
-/**
- * 应用准备就绪后的处理
- */
-const setupReady = () => {
-  app.whenReady().then(() => {
-    registerTitleBarListener();  // 注册标题栏事件监听
-    registerContextMenuListener();  // 注册上下文菜单事件监听
-    electronApp.setAppUserModelId('com.zyfun');  // 设置应用用户模型ID
-    optimizer.registerFramelessWindowIpc();  // 注册无边框窗口IPC
-    setupSession(); // 网络请求拦截器
-    autoUpdater(); // 检测更新
-    ipcListen(); // ipc通讯
-    createTray(); // 系统托盘 必须 tray 先加载 否则加载不出 menu
-    createMenu(); // 菜单
-    protocolResgin(); // 协议注册
-    createMain(); // 主窗口
-    serverInit(); // 启动后端
-    webdev.cronSyncWebdev(); // 同步webdev
-
-    // 设置安全dns-doh
-    if (globalThis.variable?.dns) {
-      logger.info(`[dns] doh: ${globalThis.variable.dns}`);
-      app.configureHostResolver({
-        secureDnsMode: 'secure',
-        secureDnsServers: [globalThis.variable.dns],
-      });
-    };
-    if (globalThis.variable.debug) dbServer();  // 初始化数据库服务
-    if (globalThis.variable.recordShortcut) globalShortcut.register({
-      shortcut: globalThis.variable.recordShortcut,
-      func: toggleWinVisable,
-      name: 'boss',
-      override: true,
-    });  // 注册老板键
-  });
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createMain();
+  app.on('activate', function () {
+    const windowNames = windowService.getAllNames();
+    if (windowNames.length === 0) {
+      windowService.createMainWindow();
+    } else {
+      windowService.showAllWindows();
+    }
   });
 
   app.on('window-all-closed', () => {
-    nativeTheme.removeAllListeners('updated');
-    globalShortcut.clear();
-    if (!platform.isMacOS) app.quit();
+    if (!isMacOS) app.quit();
   });
 
-  // 多实例处理
-  app.on('second-instance', () => {
-    BrowserWindow.getAllWindows().forEach((win: BrowserWindow) => win.show());
+  // macOS specific: handle protocol when app is already running
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    handleProtocolUrl(url);
   });
+
+  const handleOpenUrl = (args: string[]) => {
+    const url = args.find((arg) => arg.startsWith(APP_NAME_PROTOCOL));
+    if (url) handleProtocolUrl(url);
+  };
+
+  // for windows to start with url
+  handleOpenUrl(process.argv);
+
+  // Listen for second instance
+  app.on('second-instance', (_event, argv) => {
+    windowService.showAllWindows();
+
+    // Protocol handler for Windows/Linux
+    // The commandLine is an array of strings where the last item might be the URL
+    handleOpenUrl(argv);
+  });
+
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
+
+  app.on('before-quit', async () => {
+    app.isQuitting = true;
+  });
+
+  app.on('will-quit', async (e: Electron.Event) => {
+    e.preventDefault();
+
+    await filmCmsTerminate();
+    await fastifyService.stop();
+    await pluginService.clean();
+    logger.finish();
+
+    app.exit(0);
+  });
+
+  // In this file you can include the rest of your app"s specific main process
+  // code. You can also put them in separate files and require them here.
 };
 
 const main = async () => {
-  // 锁定单例
-  if (!app.requestSingleInstanceLock()) return app.quit();
+  setupEnv();
+  setupApp();
 
-  setupApp();                                 // 应用启动参数
-  setupEnv();                                 // 环境变量修复
-  await setupCheck();                         // 检查所需路径
-  await dbInit();                             // 初始化数据库
-  await globalVariable();                     // 设置全局变量
-  setupReady();                               // 注册事件监听
+  if (!app.requestSingleInstanceLock()) {
+    app.quit();
+    process.exit(0);
+  } else {
+    await fileStorage.initRequireDir();
+    await dbService.init();
+    await proxyManager.configureProxy(configManager.proxy);
+    await fastifyService.start();
+
+    appLocale.init();
+    setupReady();
+
+    runAsyncFunction(() => {
+      pluginService.autoLaunch();
+    });
+  }
 };
 
 main();

@@ -1,0 +1,360 @@
+/* 进度条按钮 */
+.xgplayer .xgplayer-progress-btn {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* 文本按钮 */
+.xgplayer .btn-text span {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: transparent !important;
+  border: none;
+  border-radius: 0;
+  min-width: unset !important;
+}
+
+/* 提示 */
+.xgplayer xg-icon .xg-tips {
+  top: -46px;
+}
+
+.xgplayer .xg-tips {
+  border-radius: 8px;
+  background: #1f1f1fe6;
+}
+
+/* 面板 */
+.xgplayer-pc .xg-options-list {
+  color: #fff !important;
+  font-size: 14px;
+  width: 78px;
+  padding-bottom: 20px;
+  background-color: transparent !important;
+}
+
+.xgplayer-pc .xg-options-list::after {
+  content: '';
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 20px);
+  background: #1f1f1fe6;
+  border-radius: 8px;
+  z-index: -1;
+}
+
+.xgplayer-pc .xg-options-list .option-item {
+  height: 34px !important;
+  padding: 0 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff !important;
+}
+
+.xgplayer-pc .xg-options-list .option-item:first-child {
+  margin-top: 0 !important;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.xgplayer-pc .xg-options-list .option-item:last-child {
+  margin-bottom: 0 !important;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.xgplayer .xg-options-list li:hover,
+.xgplayer .xg-options-list li.selected {
+  color: #00c452 !important;
+}
+
+.xgplayer-pc .xg-options-list .option-item.selected {
+  color: #00c452 !important;
+}
+
+.xgplayer-pc .xg-options-list .option-item:hover {
+  background-color: #26262b;
+}
+
+/* 音量面板 */
+.xgplayer-pc .xgplayer-volume xg-slider.xgplayer-slider {
+  border-radius: 0 0 8px 8px;
+  width: 63px;
+  height: 125px;
+  left: 50%;
+  transform: translate(-50%);
+  background: #1f1f1fe6;
+  bottom: 60px;
+}
+
+.xgplayer-pc .xgplayer-volume xg-slider.xgplayer-slider .xgplayer-bar {
+  left: 30px;
+  bottom: 12px;
+  height: 98px;
+  transform: none;
+  top: auto;
+}
+
+.xgplayer-pc .xgplayer-volume xg-slider.xgplayer-slider .xgplayer-drag {
+  max-height: 98px;
+}
+
+.xgplayer .xgplayer-value-label {
+  border-radius: 8px 8px 0 0;
+  background: #1f1f1fe6;
+  padding: 4px 0 0;
+}
+
+/* 弹幕面板 */
+.xgplayer .xgplayer-panel {
+  display: none !important;
+}
+
+.xgplayer .xgplayer-panel-slider {
+  padding: 16px;
+  height: auto;
+  width: auto;
+}
+
+.xgplayer-pc .xgplayer-panel-slider {
+  border-radius: 8px;
+  background: #1f1f1fe6;
+  width: 340px;
+  left: calc(-200px + 50%);
+  padding-bottom: 20px;
+  background-color: transparent !important;
+}
+
+.xgplayer-pc .xgplayer-panel-slider::after {
+  content: '';
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 20px);
+  background: #1f1f1fe6;
+  border-radius: 8px;
+  z-index: -1;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-hidemode-radio li {
+  border-radius: 16px;
+  background: #26262b;
+  display: inline-block;
+  padding: 2px 4px;
+  width: 60px;
+  text-align: center;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-transparency,
+.xgplayer .xgplayer-panel-slider .xgplayer-showarea,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmuspeed,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmufont {
+  padding: 8px 0;
+  position: relative;
+  display: flex !important;
+  font-size: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-transparency span {
+  text-align: left;
+  flex: 0 0 80px;
+  display: block;
+  top: 0;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-transparency input {
+  flex: 1;
+  width: 100%;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-showarea-name,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmuspeed-name,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmufont-name {
+  text-align: left;
+  flex: 0 0 80px;
+  display: block;
+  top: 0;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-showarea-control,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmuspeed-control,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmufont-control {
+  flex: 1;
+  align-items: center;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-showarea-control-down-dots,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmuspeed-control-down-dots,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmufont-control-down-dots {
+  width: 100%;
+  margin-left: 0;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-showarea-control-up,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmuspeed-control-up,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmufont-control-up {
+  width: 100%;
+  margin-left: 0;
+}
+
+.xgplayer .xgplayer-panel-slider .xgplayer-showarea .xgplayer-showarea-line,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmuspeed .xgplayer-danmuspeed-line,
+.xgplayer .xgplayer-panel-slider .xgplayer-danmufont .xgplayer-danmufont-line {
+  width: 100%;
+  margin-left: 0;
+}
+
+.xgplayer .xgplayer-danmu {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-right: 16px !important;
+}
+
+.xgplayer .xgplayer-danmu .icon-warp {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.xgplayer .xgplayer-danmu .tips-wrap {
+  position: absolute;
+  bottom: 44px;
+  background: rgb(0 0 0 / 54%);
+  font-size: 11px;
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 4px;
+  text-align: center;
+  opacity: 0.85;
+  white-space: nowrap;
+  display: none;
+}
+
+.xgplayer .panel-normal .panel-box {
+  color: #fff;
+}
+
+.xgplayer .panel-normal .panel-box .xg-player-slider {
+  padding: 8px 0;
+}
+
+.xgplayer .panel-inner .panel-box {
+  color: #fff;
+}
+
+.xgplayer .panel-inner .panel-box .xg-player-slider {
+  padding: 4px 0;
+}
+
+.xgplayer .panel-fullscreen .panel-box {
+  color: #fff;
+}
+
+.xgplayer .panel-fullscreen .panel-box .xg-player-slider {
+  padding: 8px 0;
+}
+
+.xgplayer .panel-box {
+  padding: 16px;
+}
+
+.xgplayer .panel-box.pc-panel {
+  right: -10px;
+  bottom: 34px;
+  z-index: 20;
+  border-radius: 4px;
+  color: #fff;
+  position: absolute;
+  box-sizing: border-box;
+  width: 278px;
+  background-color: rgb(0 0 0 / 80%);
+  box-shadow: 0 1px 15px rgb(11 18 35 / 26%);
+  display: none;
+}
+
+.xgplayer .panel-box.pc-panel .xg-player-slider {
+  padding: 8px 0;
+}
+
+.xgplayer .panel-box .box-header {
+  display: flex;
+  font-weight: 500;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.xgplayer .panel-box .box-header .header-reset {
+  display: flex;
+  width: 64px;
+  height: 22px;
+  line-height: 22px;
+  justify-content: center;
+  align-items: center;
+  background: rgb(0 0 0 / 40%);
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.xgplayer .panel-box .box-header .header-reset:hover {
+  background: rgb(255 255 255 / 30%);
+}
+
+.xgplayer .xgplayer-danmu-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  outline: none;
+}
+
+.xgplayer .xgplayer-danmu-container div {
+  color: #fff;
+  text-shadow:
+    black 1px 0 1px,
+    black 0 1px 1px,
+    black 0 -1px 1px,
+    black -1px 0 1px;
+}
+
+.xgplayer.xgplayer-mobile .xgplayer-danmu {
+  margin-right: 10px !important;
+}
+
+.xgplayer.xgplayer-mobile .panel-box .box-header {
+  margin-bottom: 15px;
+}
+
+/* 音乐播放器样式 */
+.xgplayer.xgplayer-music .xg-video-container {
+  background-image: url('../../../assets/img/bg/bg-player.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.xgplayer.xgplayer-music .xgplayer-controls .xgplayer-time.xg-time-left {
+  margin-left: 16px;
+}
+
+.xgplayer.xgplayer-music .xgplayer-progress {
+  top: 0;
+  transform: none;
+  min-width: 80px;
+}
+
+.xgplayer.xgplayer-music .xgplayer-controls .xgplayer-time.xg-time-right {
+  margin-right: 16px;
+}

@@ -1,0 +1,8 @@
+<svg width="16px" height="15px" viewBox="0 0 16 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="icon icon-mbackward">
+  <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="默认" fill="#FFFFFF" transform="translate(8, 7.5) scale(-1, 1) translate(-8, -7.5)">
+      <path d="M8.285,5.485 C8.729,5.868 9,6.545 9,7.275 C9,8.003 8.729,8.681 8.285,9.064 L2.3,14.23 C1.296,15.1 0,14.092 0,12.443 L0,2.108 C0,0.459 1.297,-0.55 2.3,0.318 L8.285,5.486 L8.285,5.485 Z" id="路径"></path>
+      <path d="M16,7.3 C16,7.901 15.76,8.46 15.365,8.776 L10.045,13.036 C9.152,13.752 8,12.92 8,11.56 L8,3.04 C8,1.68 9.153,0.848 10.045,1.563 L15.365,5.825 C15.759,6.141 16,6.7 16,7.301 L16,7.3 Z" id="路径"></path>
+    </g>
+  </g>
+</svg>

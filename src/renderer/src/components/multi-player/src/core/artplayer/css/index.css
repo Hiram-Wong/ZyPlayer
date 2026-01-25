@@ -1,0 +1,227 @@
+/* 加载 */
+.art-video-player.art-loading-show .art-loading svg {
+  width: 64px !important;
+  height: 64px !important;
+}
+
+/* 右键 */
+.art-contextmenus {
+  border-radius: 8px !important;
+}
+
+.art-video-player .art-info {
+  border-radius: 8px !important;
+}
+
+/* 下控制条 */
+.art-controls {
+  margin-bottom: 4px;
+}
+
+.art-controls-left:first-child {
+  margin-left: -6px;
+}
+
+.art-controls-right:last-child {
+  margin-right: -4px;
+}
+
+/* 图标 */
+.art-video-player svg {
+  height: 21px;
+  width: 21px;
+}
+
+/* 提示 */
+[class*='hint--']::before {
+  display: none;
+}
+
+[class*='hint--']::after {
+  box-shadow: none !important;
+}
+
+.hint--top::before,
+.hint--top::after {
+  bottom: calc(100% + 15px) !important;
+}
+
+.hint--rounded::after {
+  border-radius: 8px !important;
+  font-weight: 700;
+}
+
+/* 全局提示 */
+.art-video-player .art-notice {
+  inset: auto 0 56px !important;
+  border-radius: 8px !important;
+}
+
+/* 音量面板 */
+.art-control-volume .art-volume-panel {
+  width: 42px !important;
+  height: 160px !important;
+  border-radius: 8px !important;
+  padding: 0 0 25px !important;
+}
+
+.art-control-volume .art-volume-panel .art-volume-inner {
+  background-color: transparent !important;
+}
+
+.art-video-player.art-backdrop .art-contextmenus,
+.art-video-player.art-backdrop .art-info,
+.art-video-player.art-backdrop .art-settings,
+.art-video-player.art-backdrop .art-layer-auto-playback,
+.art-video-player.art-backdrop .art-selector-list,
+.art-video-player.art-backdrop .art-volume-inner {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* 设置面板 */
+.art-video-player .art-settings {
+  border-radius: 8px !important;
+  bottom: 60px !important;
+}
+
+/* 画质面板 */
+.art-control-quality .art-selector-list {
+  border-radius: 8px !important;
+  padding-bottom: 25px;
+}
+
+.art-control-quality .art-selector-list::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: calc(100% - 19px);
+  bottom: 19px;
+  border-radius: 8px;
+  background-color: #000000bf !important;
+}
+
+.art-video-player.art-backdrop .art-control-quality .art-selector-list {
+  background-color: transparent !important;
+}
+
+.art-control-selector .art-selector-list .art-selector-item {
+  z-index: 999;
+}
+
+.art-control-selector .art-selector-list .art-selector-item:hover {
+  background-color: #26262b !important;
+}
+
+/* 弹幕面板 */
+.art-controls-center {
+  z-index: 60;
+}
+
+.artplayer-plugin-danmuku .apd-config .apd-config-panel {
+  padding: 0 0 30px !important;
+  bottom: 22px !important;
+}
+
+.artplayer-plugin-danmuku .apd-config .apd-config-panel .apd-config-panel-inner {
+  border-radius: 8px !important;
+}
+
+.artplayer-plugin-danmuku .apd-slider .apd-slider-progress {
+  background-color: var(--art-theme) !important;
+}
+
+.artplayer-plugin-danmuku .apd-slider .apd-slider-dot {
+  background-color: var(--art-theme) !important;
+}
+
+.artplayer-plugin-danmuku .apd-config-other .apd-check-off path,
+.artplayer-plugin-danmuku .apd-config-other .apd-check-on path {
+  fill: var(--art-theme) !important;
+}
+
+[data-danmuku-mode0='false'] .apd-config-mode .apd-mode-0-off path,
+[data-danmuku-mode1='false'] .apd-config-mode .apd-mode-1-off path,
+[data-danmuku-mode2='false'] .apd-config-mode .apd-mode-2-off path {
+  fill: var(--art-theme) !important;
+}
+
+.artplayer-plugin-danmuku .apd-config-other .apd-other:hover {
+  color: #fff !important;
+}
+
+.artplayer-plugin-danmuku .apd-modes .apd-mode:hover {
+  color: #fff !important;
+}
+
+.art-fullscreen .artplayer-plugin-danmuku {
+  height: 100% !important;
+}
+
+.art-fullscreen .artplayer-plugin-danmuku .apd-config-icon,
+.art-fullscreen .artplayer-plugin-danmuku .apd-toggle-on,
+.art-fullscreen .artplayer-plugin-danmuku .apd-toggle-off {
+  height: 21px !important;
+  width: 21px !important;
+}
+
+[data-danmuku-emitter='false'].art-fullscreen .art-controls-center .artplayer-plugin-danmuku,
+[data-danmuku-emitter='false'].art-fullscreen-web .art-controls-center .artplayer-plugin-danmuku {
+  gap: 12px !important;
+}
+
+.art-controls .art-controls-center {
+  padding: 0 6px 0 12px !important;
+}
+
+/* 弹幕发送按钮 */
+.artplayer-plugin-danmuku .apd-send {
+  background-color: var(--art-theme) !important;
+  font-weight: 500;
+}
+
+.artplayer-plugin-danmuku .apd-send.apd-lock {
+  background-color: #6b6b6b !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+/* 弹幕发送参数面板 */
+.artplayer-plugin-danmuku .apd-style .apd-style-panel {
+  padding: 0 0 30px !important;
+  bottom: 22px !important;
+}
+
+.artplayer-plugin-danmuku .apd-style .apd-style-panel .apd-style-panel-inner {
+  border-radius: 8px !important;
+}
+
+[data-danmuku-mode='0'] .apd-style-mode [data-mode='0'],
+[data-danmuku-mode='1'] .apd-style-mode [data-mode='1'],
+[data-danmuku-mode='2'] .apd-style-mode [data-mode='2'] {
+  color: #fff !important;
+}
+
+[data-danmuku-mode='0'] .apd-style-mode [data-mode='0'] path,
+[data-danmuku-mode='1'] .apd-style-mode [data-mode='1'] path,
+[data-danmuku-mode='2'] .apd-style-mode [data-mode='2'] path {
+  fill: var(--art-theme) !important;
+}
+
+/* 弹幕开关提示 */
+.apd-toggle::after {
+  bottom: calc(100% + 23px) !important;
+}
+
+/* 播放暂停提示 */
+.art-icon-play::after,
+.art-icon-pause::after {
+  bottom: calc(100% + 23px) !important;
+}
+
+/* 中间按钮 */
+.art-mask .art-state .art-icon svg {
+  height: 64px !important;
+  width: 64px !important;
+}

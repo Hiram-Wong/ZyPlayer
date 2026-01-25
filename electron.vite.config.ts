@@ -1,149 +1,234 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
+
+import { TDesignResolver } from '@tdesign-vue-next/auto-import-resolver';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
-import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
-import { ConfigEnv, loadEnv } from 'vite';
-import vueDevTools from 'vite-plugin-vue-devtools';
-import svgLoader from 'vite-svg-loader';
-
-// 按需加载T-Desgin组件
+import { defineConfig } from 'electron-vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import { TDesignResolver } from 'unplugin-vue-components/resolvers';
+import { ViteImageOptimizer as viteImageOptimizer } from 'vite-plugin-image-optimizer';
+import viteVueDevTools from 'vite-plugin-vue-devtools';
+import viteSvgLoader from 'vite-svg-loader';
 
-const CWD = process.cwd();
+import pkg from './package.json';
 
-// see config at https://vitejs.dev/config/
-export default defineConfig(({ mode }: ConfigEnv) => {
-  const { VITE_API_URL, VITE_API_URL_PREFIX } = loadEnv(mode, CWD);
-  return {
-    main: {
-      resolve: {
-        alias: {
-          '@main': resolve('src/main'),
-        },
-      },
-      build: {
-        emptyOutDir: true, // 打包时先清空上一次构建生成的目录
-        sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
-        minify: false, // 关闭压缩
-        rollupOptions: {
-          treeshake: false, // 关闭treeshake
-          onwarn: (warning, warn) => {
-            if (warning.code === 'EVAL') return; // 忽略 eval 警告
-            if (warning.code === 'SOURCEMAP_ERROR') return; // 忽略 sourcemap 错误
-            warn(warning);
-          },
-          input: {
-            index: resolve(__dirname, 'src/main/index.ts'),
-            site_drpy_worker: resolve(__dirname, 'src/main/core/server/routes/v1/site/cms/adapter/drpy/worker.ts'),
-          },
-          output: {
-            manualChunks: {
-              fastify: ['fastify', 'fastify-plugin', '@fastify/cors', '@fastify/multipart'],
-              db: ['drizzle-kit', 'drizzle-orm'],
-              crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa', 'node-rsa'],
-            },
-          },
-          external: [],
-        },
-      },
-      plugins: [externalizeDepsPlugin(), swcPlugin()],
-    },
-    preload: {
-      plugins: [externalizeDepsPlugin()],
-    },
-    renderer: {
-      resolve: {
-        alias: {
-          '@renderer': resolve('src/renderer'),
-          '@': resolve('src/renderer/src'),
-        },
-      },
-      build: {
-        emptyOutDir: true, // 打包时先清空上一次构建生成的目录
-        sourcemap: false, // 关闭生成map文件 可以达到缩小打包体积
-        minify: false, // 关闭压缩
-        chunkSizeWarningLimit: 2000, // 打包后超过2kb的会单独打包
-        assetsInlineLimit: 4096, // 小于4kb的图片会转成base64
-        rollupOptions: {
-          output: {
-            entryFileNames: `assets/entry/[name]_[hash].js`, // 引入文件名的名称
-            chunkFileNames: `assets/chunk/[name]_[hash].js`, // 包的入口文件名称
-            assetFileNames: `assets/static/[ext]/[name]_[hash].[ext]`, // 资源文件像 字体，图片等
-            manualChunks: {
-              'monaco-editor': ['monaco-editor'],
-              xgplayer: ['xgplayer', 'xgplayer-flv', 'xgplayer-hls', 'xgplayer-mp4', 'xgplayer-shaka'],
-              artplayer: ['artplayer', 'artplayer-plugin-danmuku'],
-              dplayer: ['dplayer'],
-              nplayer: ['nplayer', '@nplayer/danmaku'],
-              oplayer: ['@oplayer/core', '@oplayer/plugins', '@oplayer/danmaku', '@oplayer/hls', '@oplayer/ui', '@oplayer/dash', '@oplayer/mpegts'],
-              'video-decoder': ['dashjs', 'flv.js', 'hls.js', 'mpegts.js','shaka-player'],
-              tdesign: ['tdesign-vue-next', 'tdesign-icons-vue-next', '@tdesign-vue-next/chat'],
-              md: ['markdown-it', 'highlight.js', 'markdown-it-mathjax3'],
-              crypto: ['crypto-js', 'he', 'pako', 'wxmp-rsa'],
-              vue: [
-                'vue',
-                'vue-router',
-                'pinia',
-                'vue-i18n',
-                'pinia-plugin-persistedstate',
-                'qrcode.vue',
-                'smooth-scrollbar',
-                'v3-infinite-loading',
-                'mitt',
-                '@imengyu/vue3-context-menu',
-              ],
-            },
-          },
-        },
-      },
-      css: {
-        preprocessorOptions: {
-          less: {
-            modifyVars: {
-              hack: `true; @import (reference) "${resolve('src/renderer/src/style/variables.less')}";`,
-            },
-            math: 'strict',
-            javascriptEnabled: true,
-          },
-        },
-      },
-      plugins: [
-        vue({
-          template: {
-            compilerOptions: {
-              isCustomElement: (tag) => tag === 'webview' || tag === 'title-bar',
-            },
-          },
-        }),
-        vueJsx(),
-        vueDevTools(),
-        svgLoader(),
-        AutoImport({
-          resolvers: [
-            TDesignResolver({
-              library: 'vue-next',
-            }),
-          ],
-        }),
-        Components({
-          resolvers: [
-            TDesignResolver({
-              library: 'vue-next',
-            }),
-          ],
-        }),
-      ],
-      server: {
-        strictPort: true, // 端口冲突自动分配端口
-        proxy: {
-          [VITE_API_URL_PREFIX]: {
-            target: VITE_API_URL, // 后台接口域名
-            changeOrigin: true, //是否跨域
-          },
-        },
+const isDev = process.env.NODE_ENV === 'development';
+const isProd = process.env.NODE_ENV === 'production';
+
+const visualizerPlugin = (type: 'renderer' | 'main') => {
+  return process.env[`VISUALIZER_${type.toUpperCase()}`] ? [visualizer({ open: true })] : [];
+};
+
+/**
+ * @see https://vitejs.dev/config/
+ * @see https://rolldown.rs/reference/config-options/
+ */
+export default defineConfig({
+  main: {
+    plugins: [...visualizerPlugin('main')],
+    resolve: {
+      alias: {
+        '@main': resolve('src/main'),
+        '@shared': resolve('packages/shared'),
+        '@logger': resolve('src/main/services/LoggerService'),
+        '@db': resolve('src/main/services/DatabaseService'),
+        '@server': resolve('src/main/services/FastifyService'),
+        '@pkg': resolve('package.json'),
       },
     },
-  };
+    build: {
+      rollupOptions: {
+        external: ['bufferutil', 'utf-8-validate', 'electron', ...Object.keys(pkg.dependencies)],
+        input: {
+          index: resolve(__dirname, 'src/main/index.ts'),
+          film_cms_adapter_t3_drpy_worker: resolve(
+            __dirname,
+            'src/main/services/FastifyService/routes/v1/film/cms/adapter/t3Drpy/worker.ts',
+          ),
+        },
+        onwarn: (warning, defaultHandler) => {
+          // TODO: We should resolve these warnings instead of ignoring them
+          switch (warning.code) {
+            case 'EVAL':
+            case 'SOURCEMAP_ERROR':
+            case 'COMMONJS_VARIABLE_IN_ESM':
+              return;
+            default:
+              break;
+          }
+
+          // Handle all other warnings normally
+          defaultHandler(warning);
+        },
+        output: {
+          manualChunks: undefined, // Disable code splitting completely-return null to force single file packaging
+          inlineDynamicImports: true, // Inline all dynamic imports, this is a key configuration
+          format: 'cjs',
+        },
+        treeshake: false,
+      },
+      externalizeDeps: {},
+      sourcemap: isDev,
+    },
+    esbuild: isProd ? { legalComments: 'none' } : {},
+    optimizeDeps: {
+      noDiscovery: isDev,
+    },
+    worker: {
+      format: 'es',
+    },
+  },
+  preload: {
+    plugins: [],
+    resolve: {
+      alias: {
+        '@shared': resolve('packages/shared'),
+        '@pkg': resolve('package.json'),
+      },
+    },
+    build: {
+      sourcemap: isDev,
+    },
+  },
+  renderer: {
+    plugins: [
+      vue({
+        template: {
+          compilerOptions: {
+            isCustomElement: (tag) => ['webview'].includes(tag),
+          },
+        },
+      }),
+      vueJsx({
+        transformOn: true,
+        // oxc: true,
+      }),
+      AutoImport({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+          TDesignResolver({
+            library: 'chat',
+          }),
+        ],
+      }),
+      Components({
+        resolvers: [
+          TDesignResolver({
+            library: 'vue-next',
+          }),
+          TDesignResolver({
+            library: 'chat',
+          }),
+        ],
+      }),
+      viteImageOptimizer(),
+      viteSvgLoader(),
+      viteVueDevTools(),
+      ...visualizerPlugin('renderer'),
+    ],
+    resolve: {
+      alias: {
+        '@': resolve('src/renderer/src'),
+        '@pkg': resolve('package.json'),
+        '@renderer': resolve('src/renderer'),
+        '@shared': resolve('packages/shared'),
+        '@logger': resolve('src/main/services/LoggerService'),
+      },
+    },
+    optimizeDeps: {
+      include: ['monaco-yaml/yaml.worker.js'],
+      esbuildOptions: {
+        target: 'esnext', // for dev
+      },
+    },
+    worker: {
+      format: 'es',
+    },
+    build: {
+      target: 'esnext', // for build
+      rollupOptions: {
+        external: ['worker_threads', 'crypto'],
+        input: {
+          index: resolve(__dirname, 'src/renderer/index.html'),
+        },
+        output: {
+          entryFileNames: `assets/entry/[name]_[hash].js`,
+          chunkFileNames: `assets/chunk/[name]_[hash].js`,
+          assetFileNames: `assets/static/[ext]/[name]_[hash].[ext]`,
+          advancedChunks: {
+            groups: [
+              {
+                name: 'vendor_tdesign',
+                test: /[\\/]node_modules[\\/](tdesign-vue-next|tdesign-icons-vue-next|@tdesign-vue-next\/chat)[\\/]/,
+              },
+              {
+                name: 'vendor_vue',
+                test: /[\\/]node_modules[\\/](vue|vue-router|vue-i18n|pinia|pinia-plugin-persistedstate|pinia-shared-state|@vueuse\/core|v3-infinite-loading|emittery)[\\/]/,
+              },
+              {
+                name: 'vendor_crypto',
+                test: /[\\/]node_modules[\\/](crypto-js|he|pako|node-forge|sm-crypto-v2|uuid)[\\/]/,
+              },
+              {
+                name: 'vendor_video-decoder',
+                test: /[\\/]node_modules[\\/](dashjs|flv\.js|hls\.js|mpegts\.js|shaka-player)[\\/]/,
+              },
+              {
+                name: 'vendor_xgplayer',
+                test: /[\\/]node_modules[\\/](xgplayer|xgplayer-.*)[\\/]/,
+              },
+              {
+                name: 'vendor_artplayer',
+                test: /[\\/]node_modules[\\/](artplayer|artplayer-.*)[\\/]/,
+              },
+              {
+                name: 'vendor_dplayer',
+                test: /[\\/]node_modules[\\/]dplayer[\\/]/,
+              },
+              {
+                name: 'vendor_nplayer',
+                test: /[\\/]node_modules[\\/](nplayer|@nplayer\/.*)[\\/]/,
+              },
+              {
+                name: 'vendor_oplayer',
+                test: /[\\/]node_modules[\\/]@oplayer[\\/]/,
+              },
+            ],
+          },
+        },
+        experimental: {
+          strictExecutionOrder: true,
+        },
+        onwarn: (warning, defaultHandler) => {
+          // TODO: We should resolve these warnings instead of ignoring them
+          switch (warning.code) {
+            case 'EVAL':
+            case 'COMMONJS_VARIABLE_IN_ESM':
+            case 'PLUGIN_TIMINGS':
+              return;
+            default:
+              break;
+          }
+
+          // Handle all other warnings normally
+          defaultHandler(warning);
+        },
+      },
+    },
+    esbuild: isProd ? { legalComments: 'none' } : {},
+    css: {
+      preprocessorOptions: {
+        less: {
+          modifyVars: {
+            hack: `true; @import (reference) "${resolve('src/renderer/src/style/variables.less')}";`,
+          },
+          math: 'strict',
+          javascriptEnabled: true,
+        },
+      },
+    },
+  },
 });

@@ -1,0 +1,39 @@
+diff --git a/dist/shaka-player.compiled.d.ts b/dist/shaka-player.compiled.d.ts
+index 0971e580f818994d0bddca4f19b142f07e9fde9b..9d5c5152684151ece456f45e4b7f47154b245833 100644
+--- a/dist/shaka-player.compiled.d.ts
++++ b/dist/shaka-player.compiled.d.ts
+@@ -5266,3 +5266,5 @@ declare namespace shaka.extern {
+ declare namespace shaka.extern {
+   type TransmuxerPlugin = ( ) => shaka.extern.Transmuxer ;
+ }
++
++export default shaka;
+diff --git a/dist/shaka-player.ui.d.ts b/dist/shaka-player.ui.d.ts
+index 460e0098302810603197f520eed2bff8fe45da54..41bab00766dba05d1727d24fdd14579fb79eab71 100644
+--- a/dist/shaka-player.ui.d.ts
++++ b/dist/shaka-player.ui.d.ts
+@@ -6011,3 +6011,5 @@ declare namespace shaka.extern {
+ declare namespace shaka.ui.Watermark {
+   type Options = { alpha : number , color : string , displayDuration : number , interval : number , position : string , size : number , skip : number , text : string , transitionDuration : number , type : string } ;
+ }
++
++export default shaka;
+diff --git a/index.d.ts b/index.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..79f4829aeddccde2a371bfc38c860b1c3639a4a1
+--- /dev/null
++++ b/index.d.ts
+@@ -0,0 +1,2 @@
++<reference path="./dist/shaka-player.compiled.d.ts" />
++<reference path="./dist/shaka-player.ui.d.ts" />
+\ No newline at end of file
+diff --git a/ui.d.ts b/ui.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..84a3be03b3928f2ae303f6e22991c5900517fd67
+--- /dev/null
++++ b/ui.d.ts
+@@ -0,0 +1,3 @@
++import shaka from 'shaka-player/dist/shaka-player.ui'
++export * from 'shaka-player/dist/shaka-player.ui'
++export default shaka;
+\ No newline at end of file

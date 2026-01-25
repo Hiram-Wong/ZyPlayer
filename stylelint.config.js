@@ -1,6 +1,7 @@
 export default {
   defaultSeverity: 'error',
   extends: ['stylelint-config-standard'],
+  plugins: ['stylelint-order'],
   rules: {
     'no-descending-specificity': null,
     'import-notation': 'string',
@@ -14,6 +15,7 @@ export default {
       },
     ],
     'media-query-no-invalid': null, // 官方表示此规则应当仅对于原生CSS启用，对于预处理器（Less）不应启用
+    'declaration-property-value-no-unknown': null, // 官方表示此规则应当仅对于原生CSS启用，对于预处理器（Less）不应启用
   },
   overrides: [
     {

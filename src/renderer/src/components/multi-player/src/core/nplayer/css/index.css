@@ -1,0 +1,139 @@
+/* 图标 */
+.nplayer_icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nplayer_icon svg {
+  height: 21px;
+  width: 21px;
+}
+
+/* 设置按钮 */
+.nplayer_control_setting-active {
+  background: transparent !important;
+}
+
+.nplayer_control_setting-active .nplayer_icon {
+  transform: none !important;
+}
+
+/* 播放 */
+.nplayer_poster_play {
+  position: relative !important;
+  transform: none !important;
+  left: 0 !important;
+  top: 0 !important;
+  height: 28px !important;
+  width: 28px !important;
+}
+
+/* 弹幕发送面板 */
+.nplayer_danmaku_send {
+  height: 34px;
+  border-radius: 8px;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 提示 面板 */
+.nplayer_tooltip_content,
+.nplayer_popover_panel {
+  background: #1f1f1fe6 !important;
+  border-radius: 8px;
+  font-weight: 700;
+  margin-bottom: 25px !important;
+  box-shadow: none !important;
+}
+
+.nplayer_popover_panel {
+  min-width: 192px;
+}
+
+/* 音量面板 */
+.nplayer_control_volume_bars {
+  background: transparent !important;
+  width: 42px;
+  padding-bottom: 25px;
+}
+
+.nplayer_control_volume_bars::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 19px);
+  bottom: 19px;
+  border-radius: 8px;
+  background: #1f1f1fe6 !important;
+}
+
+.nplayer_control_volume_bar {
+  width: 4px !important;
+  margin: 3px auto 0;
+  border-radius: 2px;
+}
+
+/* 弹幕控制面板 */
+.nplayer_danmaku_setting {
+  border-radius: 8px !important;
+  padding: 24px 20px 10px !important;
+  background: #1f1f1fe6 !important;
+  width: 312px !important;
+}
+
+.nplayer_danmaku_row {
+  margin: 0 0 18px !important;
+}
+
+.nplayer_danmaku_reset {
+  border-width: 0 !important;
+  background-color: #47494a !important;
+  border-radius: 100px;
+  padding: 0 10px !important;
+  font-size: 12px;
+  line-height: 26px;
+}
+
+.nplayer_danmaku_setting .nplayer_checkbox::before {
+  border-radius: 8px;
+}
+
+/* 右键 */
+.nplayer_contextmenu {
+  border-radius: 8px;
+  background: #1f1f1fe6 !important;
+  color: #bbb;
+  width: 234px;
+  padding: 10px 0 !important;
+}
+
+.nplayer_contextmenu_item {
+  cursor: pointer;
+  height: 34px;
+  line-height: 34px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0 0 20px !important;
+}
+
+.nplayer_contextmenu_item:hover {
+  background: #26262b !important;
+}
+
+@media not all and (hover: none) {
+  .nplayer_tooltip:hover {
+    background: transparent !important;
+  }
+}
+
+@media (any-hover: hover) {
+  .nplayer_control:hover {
+    cursor: default !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}

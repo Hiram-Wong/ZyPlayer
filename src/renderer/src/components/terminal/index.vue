@@ -1,132 +1,279 @@
 <template>
   <div ref="terminalRef" class="terminal"></div>
 </template>
-
 <script lang="ts" setup>
-defineOptions({ name: 'Terminal' });
+defineOptions({
+  name: 'Terminal',
+});
+
+const props = defineProps({
+  options: {
+    type: Object as PropType<ITerminalOptions>,
+    default: () => ({}),
+  },
+  console: {
+    type: Boolean,
+    default: false,
+  },
+  onKeyCallback: {
+    type: Function as PropType<(key: string) => void>,
+    default: (_key: string) => {},
+  },
+  onLinkClickCallback: {
+    type: Function as PropType<(uri: string) => void>,
+    default: (_uri: string) => {},
+  },
+});
 
 import '@xterm/xterm/css/xterm.css';
 
-import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import { Terminal, ITerminalOptions } from '@xterm/xterm';
+import type { LogLevel } from '@shared/config/logger';
+import { ANSICOLORS, LEVEL, LEVEL_COLOR_MAP } from '@shared/config/logger';
+import { toString } from '@shared/modules/toString';
+import { isJsonStr } from '@shared/modules/validate';
 import { FitAddon } from '@xterm/addon-fit';
+import { SearchAddon } from '@xterm/addon-search';
 import { WebLinksAddon } from '@xterm/addon-web-links';
+import { WebglAddon } from '@xterm/addon-webgl';
+import type { ITerminalOptions } from '@xterm/xterm';
+import { Terminal } from '@xterm/xterm';
+import JSON5 from 'json5';
+import type { PropType } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
+import { SearchBarAddon } from 'xterm-addon-search-bar';
 
-export type TerminalOptions = ITerminalOptions;
-export type TerminalIns = Terminal;
+import { isMacOS } from '@/utils/systeminfo';
 
-const props = defineProps<{
-  options: ITerminalOptions;
-}>();
+export type { ITerminalOptions } from '@xterm/xterm';
 
-const terminalRef = ref<HTMLElement | null>(null);
-const term = ref<Terminal | null>(null);
-const fitAddon = ref<FitAddon | null>(null);
-const webLinksAddon = ref<WebLinksAddon | null>(null);
-const termResizeObserver = ref<ResizeObserver | null>(null);
+export type ITerminal = Terminal;
+export type ITerminalLog = LogLevel;
+type ITerminalConsoleLog = Exclude<LogLevel, 'verbose' | 'silly' | 'none'> | 'log';
 
-const LOG_LEVELS = {
-  info: '\x1b[34m',
-  warn: '\x1b[33m',
-  error: '\x1b[31m',
-  trace: '\x1b[32m',
-  debug: '\x1b[35m',
-  log: '\x1b[0m',
-} as const;
+const terminalRef = useTemplateRef<HTMLElement>('terminalRef');
 
-type LogLevel = keyof typeof LOG_LEVELS;
+const options = ref<ITerminalOptions>(props.options);
+
+const term = ref<Terminal>();
+const fitAddon = ref<FitAddon>();
+const searchAddon = ref<SearchAddon>();
+const searchBarAddon = ref<SearchBarAddon>();
+const webLinksAddon = ref<WebLinksAddon>();
+const webglAddon = ref<WebglAddon>();
+
+const resizeObserver = ref<ResizeObserver>();
+const visibleObserver = ref<IntersectionObserver>();
 
 watch(
   () => props.options,
-  (newOptions) => {
-    term.value && (term.value.options = JSON.parse(JSON.stringify(newOptions)));
-  },
-  { deep: true }
+  (val) => (options.value = val),
+  { deep: true },
 );
 
-const init = async (onKeyCallback: (key: string) => void = () => {}) => {
-  await nextTick(); // 等待 DOM 渲染完成，确保 terminalRef.value 存在
-  if (!terminalRef.value) return;
-  if (term.value) {
-    clear();
-    return term.value;
-  };
+watch(
+  () => options.value,
+  (val) => {
+    if (term.value) Object.assign(term.value.options, val);
+  },
+  { deep: true },
+);
 
-  term.value = new Terminal({
-    cursorBlink: true,
-    fontFamily: '"JetBrainsMono", monospace',
-    ...props.options,
+onMounted(() => setup());
+onUnmounted(() => dispose());
+
+const setup = () => {
+  nextTick(() => {
+    const terminal = new Terminal(options.value);
+
+    const fit = new FitAddon();
+    const search = new SearchAddon();
+    const searchBar = new SearchBarAddon({ searchAddon: search as any });
+    const weblinks = new WebLinksAddon((event, uri) => {
+      event.preventDefault();
+
+      const modifierPressed = isMacOS ? event.metaKey : event.ctrlKey;
+      if (modifierPressed) props.onLinkClickCallback?.(uri);
+    });
+    const webgl = new WebglAddon();
+
+    terminal.loadAddon(fit);
+    terminal.loadAddon(weblinks);
+    terminal.loadAddon(webgl);
+    terminal.loadAddon(search);
+    terminal.loadAddon(searchBar as any);
+
+    terminal.open(terminalRef.value!);
+    terminal.focus();
+    fit.fit();
+
+    terminalRef.value?.addEventListener('keydown', handleKeyDown, true);
+
+    terminal.onKey((e: { key: string; domEvent: KeyboardEvent }) => {
+      const ev = e.domEvent;
+      const key = ev.key === 'Enter' ? '\n' : e.key;
+
+      props.onKeyCallback?.(key);
+    });
+
+    resizeObserver.value = new ResizeObserver(() => {
+      if (term.value && fitAddon.value) fitAddon.value.fit();
+    });
+    resizeObserver.value.observe(terminalRef.value!);
+
+    visibleObserver.value = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          fitAddon.value?.fit();
+        }
+      }
+    });
+    visibleObserver.value.observe(terminalRef.value!);
+
+    term.value = terminal;
+    fitAddon.value = fit;
+    searchAddon.value = search;
+    searchBarAddon.value = searchBar;
+    webLinksAddon.value = weblinks;
+    webglAddon.value = webgl;
   });
-
-  webLinksAddon.value = new WebLinksAddon();
-  term.value.loadAddon(webLinksAddon.value);
-
-  fitAddon.value = new FitAddon();
-  term.value.loadAddon(fitAddon.value);
-
-  term.value.open(terminalRef.value!);
-  fitAddon.value.fit();
-  term.value.focus();
-
-  term.value.onKey(e => {
-    const key = e.domEvent.keyCode === 13 ? '\n' : e.key;
-    onKeyCallback(key);
-  });
-
-  // 自动适应容器大小
-  termResizeObserver.value = new ResizeObserver(() => {
-    if (term.value && fitAddon.value) fitAddon.value.fit();
-  });
-  termResizeObserver.value.observe(terminalRef.value);
-
-  return term.value;
 };
 
-const write = (
-  data: string | number | object,
-  level: LogLevel | 'default' = 'default',
-  ln = true,
-) => {
-  if (!term.value) return;
+const colorText = (text: string, color: string) => {
+  return ANSICOLORS[color] + text + ANSICOLORS.END;
+};
 
-  let text = typeof data === 'object' ? JSON.stringify(data, null, 2) : data.toString();
-  if (level !== 'default') text = `${LOG_LEVELS[level]}${text}${LOG_LEVELS.log}`;
-  ln ? term.value.writeln(text) : term.value.write(text);
+const write = (val: unknown, level: ITerminalLog = LEVEL.VERBOSE, ln: boolean = true, prefix?: string) => {
+  let content = toString(val);
+  if (isJsonStr(content)) content = JSON.stringify(JSON5.parse(content), null, 2);
+  const text = colorText(colorText(content, LEVEL_COLOR_MAP[level]), 'BOLD');
+
+  if (term.value) {
+    if (prefix) term.value.write(prefix);
+    ln ? term.value.writeln(text) : term.value.write(text);
+  }
+
+  if (props.console) {
+    const allowedLevels: ITerminalConsoleLog[] = [LEVEL.ERROR, LEVEL.WARN, LEVEL.INFO, LEVEL.DEBUG];
+    const consoleLevel: ITerminalConsoleLog = allowedLevels.includes(level as ITerminalConsoleLog)
+      ? (level as ITerminalConsoleLog)
+      : 'log';
+
+    const logArgs = prefix ? [prefix, val] : [val];
+    console[consoleLevel](...logArgs);
+  }
 };
 
 const clear = () => {
-  if (term.value) {
-    term.value.clear(); // 清屏
-    term.value.reset(); // 重置终端状态（光标、样式等）
-  }
+  term.value?.clear();
+  term.value?.reset();
 };
 
 const dispose = () => {
-  if (termResizeObserver.value && terminalRef.value) {
-    termResizeObserver.value.unobserve(terminalRef.value);
-    termResizeObserver.value.disconnect();
+  if (resizeObserver.value && terminalRef.value) {
+    resizeObserver.value.unobserve(terminalRef.value);
+    resizeObserver.value.disconnect();
+  }
+  if (visibleObserver.value && terminalRef.value) {
+    visibleObserver.value.unobserve(terminalRef.value);
+    visibleObserver.value.disconnect();
   }
 
-  term.value?.dispose();
-  term.value = null;
-  fitAddon.value = null;
-  webLinksAddon.value = null;
-  termResizeObserver.value = null;
+  try {
+    fitAddon.value?.dispose();
+    searchAddon.value?.dispose();
+    searchBarAddon.value?.dispose();
+    webLinksAddon.value?.dispose();
+    webglAddon.value?.dispose();
+    term.value?.dispose();
+  } catch {}
+
+  terminalRef.value?.removeEventListener('keydown', handleKeyDown, true);
+
+  fitAddon.value = undefined;
+  searchAddon.value = undefined;
+  searchBarAddon.value = undefined;
+  webLinksAddon.value = undefined;
+  webglAddon.value = undefined;
+
+  term.value = undefined;
+
+  resizeObserver.value = undefined;
+  visibleObserver.value = undefined;
 };
 
-onBeforeUnmount(dispose);
+const focus = () => {
+  term.value?.focus();
+  fitAddon.value?.fit();
+};
+
+const handleKeyDown = (ev: KeyboardEvent) => {
+  const key = ev.key.toLowerCase();
+
+  if ((isMacOS && ev.metaKey && key === 'f') || (!isMacOS && ev.ctrlKey && key === 'f')) {
+    ev.preventDefault();
+
+    searchBarAddon.value?.show();
+  }
+};
 
 defineExpose({
-  init,
-  write,
   clear,
   dispose,
+  focus,
+  write,
 });
 </script>
-
 <style lang="less" scoped>
 .terminal {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+
+  :deep(.xterm) {
+    height: 100%;
+    padding-left: var(--td-comp-paddingLR-s);
+
+    .xterm-scrollable-element {
+      height: 100%;
+      margin-left: calc(0px - var(--td-comp-paddingLR-s));
+      padding-left: var(--td-comp-paddingLR-s);
+    }
+
+    .xterm-viewport {
+      background-color: var(--td-bg-content-input-1) !important;
+    }
+  }
+
+  :deep(.xterm-search-bar__addon) {
+    box-shadow: var(--td-shadow-1);
+    background-color: var(--td-bg-color-component-hover);
+    transition: transform 200ms linear;
+    padding: var(--td-comp-paddingTB-xs) var(--td-comp-paddingLR-xs);
+
+    .search-bar__input {
+      background-color: var(--td-bg-color-component);
+      color: var(--td-text-color-primary);
+      border-radius: var(--td-radius-default);
+      border-width: 1px;
+      border-style: solid;
+      border-color: transparent;
+
+      &:focus {
+        outline: none;
+        border-color: var(--td-brand-color);
+        box-shadow: 0 0 0 1px var(--td-brand-color-focus);
+      }
+    }
+
+    .search-bar__btn {
+      background-color: transparent;
+      border-radius: var(--td-radius-default);
+      margin-left: var(--td-comp-margin-xs);
+
+      &.prev {
+        margin-left: var(--td-comp-margin-xs);
+      }
+    }
+  }
 }
 </style>

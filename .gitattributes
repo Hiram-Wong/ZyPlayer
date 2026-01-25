@@ -1,0 +1,14 @@
+* text=auto eol=lf
+
+LICENSE.txt eol=crlf
+ThirdPartyNotices.txt eol=crlf
+
+*.bat eol=crlf
+*.cmd eol=crlf
+*.ps1 eol=lf
+*.sh eol=lf
+*.rtf -text
+**/*.json linguist-language=jsonc
+
+/.yarn/**            linguist-vendored
+/.yarn/releases/*    binary

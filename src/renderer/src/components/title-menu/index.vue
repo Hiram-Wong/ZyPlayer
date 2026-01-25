@@ -1,34 +1,46 @@
 <template>
-  <div class="title-menu_titleMenuB" ref="titleMenuBRef">
-    <div class="title-menu_firstMask" v-if="active.showFirstMask"></div>
-    <div class="title-menu_superWrapper" ref="superWrapperRef">
-      <div class="title-menu_superItem"
-        v-for="(item, index) in uniqueList"
-        :key="'type_' + item.type_id + '_index_' + index"
-        :class="[tagFlag === item.type_id ? 'title-menu_active' : '']"
-        @click="handleItemClick(item.type_id)"
+  <div ref="titleMenuRef" class="title-menu">
+    <!-- first mask -->
+    <div v-if="maskState.showFirstMask" class="title-menu__firstMask"></div>
+
+    <!-- menu wrapper -->
+    <div
+      ref="superWrapperRef"
+      class="title-menu__superWrapper"
+      :style="{ transform: `translateX(${currentTransformX}px)` }"
+    >
+      <div
+        v-for="(item, index) in menuList"
+        :key="index"
+        class="title-menu__superItem"
+        :class="{ 'super-item_active': activeMenu === item.type_id }"
+        @click="handleIMenuItemClick(item.type_id)"
       >
-        <div class="title-menu_content">{{ item.type_name }}</div>
-        <div class="title-menu_border" style="cursor: pointer;">
+        <div class="content">{{ item.type_name }}</div>
+        <div class="border">
           <div id="icon"></div>
           <div id="cover"></div>
           <div id="gradientBorder"></div>
         </div>
       </div>
     </div>
-    <div class="title-menu_lastMask" v-if="active.showLastMask"></div>
-    <div class="title-menu_menuWrapper" v-if="active.showMenuWrapper">
-      <t-dropdown theme="default" trigger="click" destroy-on-close >
-        <t-button theme="default" shape="square" variant="outline" class="menu_menu_btn">
+
+    <!-- last mask -->
+    <div v-if="maskState.showLastMask" class="title-menu__lastMask"></div>
+
+    <!-- dropdown -->
+    <div v-if="maskState.showMenuWrapper" class="title-menu__menuWrapper">
+      <t-dropdown theme="default" trigger="click" destroy-on-close>
+        <t-button theme="default" shape="square" variant="outline" class="dropdown">
           <caret-down-small-icon />
         </t-button>
         <t-dropdown-menu>
           <t-dropdown-item
-            v-for="(item, index) in uniqueList"
-            :key="'type_' + item.type_id + '_index_' + index"
+            v-for="(item, index) in menuList"
+            :key="index"
             :value="item.type_id"
-            :class="{ dropdown_active: tagFlag === item.type_id }"
-            @click="handleItemClick(item.type_id)"
+            :active="activeMenu === item.type_id"
+            @click="handleIMenuItemClick(item.type_id)"
           >
             {{ item.type_name }}
           </t-dropdown-item>
@@ -37,102 +49,203 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import './index.less';
-import { uniqBy } from 'lodash-es';
-import { computed, ref, watch, useTemplateRef, onMounted } from 'vue';
-import { CaretDownSmallIcon } from 'tdesign-icons-vue-next';
 
-const props = defineProps<{
-  active: any;
-  list: Array<{
-    type_id: string | number;
-    type_name: string;
-  }>;
-}>();
+defineOptions({
+  name: 'TitleMenu',
+});
+
+const props = defineProps({
+  active: {
+    type: String,
+    default: '',
+  },
+  list: {
+    type: Array<IMenuItem>,
+    default: () => [],
+  },
+});
+
+const emits = defineEmits(['change']);
+
+interface IMenuItem {
+  type_id: string;
+  type_name: string;
+}
+
+interface IMaskState {
+  showFirstMask: boolean;
+  showLastMask: boolean;
+  showMenuWrapper: boolean;
+}
+
+interface IRectInfo {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  width: number;
+  height: number;
+}
+
+interface ITransformResult {
+  translateX: number;
+  showFirstMask: boolean;
+  showLastMask: boolean;
+}
+
+import { debounce, isEqual } from 'es-toolkit';
+import { CaretDownSmallIcon } from 'tdesign-icons-vue-next';
+import { nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue';
+
+const DROPDOWN_MARGIN = 40;
+const DEBOUNCE_DELAY = 100;
+
+const titleMenuRef = useTemplateRef<HTMLDivElement>('titleMenuRef');
+const superWrapperRef = useTemplateRef<HTMLDivElement>('superWrapperRef');
+const resizeObserver = ref<ResizeObserver>();
+
+const maskState = ref<IMaskState>({
+  showFirstMask: false,
+  showLastMask: false,
+  showMenuWrapper: false,
+});
+
+const currentTransformX = ref(0);
+const activeMenu = ref(props.active);
+const menuList = ref(props.list);
 
 watch(
   () => props.active,
   (val) => {
-    tagFlag.value = val || '';
-    redrawEl();
+    activeMenu.value = val;
+    debouncedRedrawElement();
+  },
+);
+watch(
+  () => props.list,
+  (newVal, oldVal) => {
+    const isEq = isEqual(newVal, oldVal);
+    if (isEq) return;
+
+    menuList.value = Array.from(new Map(newVal.map((menuItem) => [menuItem.type_id, menuItem])).values());
+    defaultConfig();
+    debouncedRedrawElement();
   },
 );
 
-const emit = defineEmits(['changeKey']);
-const titleMenuBRef = useTemplateRef('titleMenuBRef');
-const superWrapperRef = useTemplateRef('superWrapperRef');
-const active = ref({
-  showFirstMask: false,
-  showLastMask: false,
-  showMenuWrapper: false,
-  transformValue: 0,
-});
-const tagFlag = ref(props.active);
-const uniqueList = computed(() => uniqBy(props.list, 'type_id').filter(item => ![null, undefined, ''].includes(item.type_name)));
+onMounted(() => setup());
 
-onMounted(() => {
-  redrawEl();
-});
+onUnmounted(() => dispose());
 
-const redrawEl = () => {
-  let selectedIdx = -1;
-  selectedIdx = uniqueList.value.findIndex(item => item.type_id === tagFlag.value);
-
-  const superRef = superWrapperRef.value;
-  const titleRef = titleMenuBRef.value;
-  if (superRef && titleRef) {
-    const rect = (rect) => ({
-      left: Math.floor(rect.left),
-      top: Math.floor(rect.top),
-      right: Math.floor(rect.right),
-      bottom: Math.floor(rect.bottom),
-      width: Math.floor(rect.width),
-      height: Math.floor(rect.height)
-    });
-    const innerRect = rect(superRef.getBoundingClientRect())  // 内
-    const outerRect = rect(titleRef.getBoundingClientRect())  // 外
-    const isInnerWider = innerRect.width > outerRect.width; // 内 > 外
-    if (isInnerWider !== active.value.showMenuWrapper) {
-      active.value.showMenuWrapper = isInnerWider;
-    }
-
-    if (!isInnerWider) return;
-
-    const targetElement = superRef.children[selectedIdx];
-    if (targetElement) {
-      const targetRect = rect(targetElement.getBoundingClientRect());
-      const halfOuterWidth = Math.floor(outerRect.width / 2);
-      const halfTargetWidth = Math.floor(targetRect.width / 2);
-      const margin = 43;
-      const maxTranslateX = Math.floor(outerRect.width - innerRect.width - margin);
-      let translateX = halfOuterWidth - (targetRect.left - outerRect.left) - halfTargetWidth;
-      if (translateX > 0) {
-        translateX = Math.min(0, active.value.transformValue + translateX);
-      } else {
-        translateX = active.value.transformValue === maxTranslateX ? maxTranslateX : Math.max(maxTranslateX, active.value.transformValue + translateX);
-      }
-      const showFirstMask = translateX < 0;
-      const showLastMask = innerRect.width > outerRect.width - translateX;
-      if (!(
-        active.value.transformValue === translateX &&
-        active.value.showFirstMask === showFirstMask &&
-        active.value.showLastMask === showLastMask
-      )) {
-        active.value.transformValue = translateX;
-        active.value.showFirstMask = showFirstMask;
-        active.value.showLastMask = showLastMask;
-      }
-      superWrapperRef.value.style.transform = `translateX(${translateX}px)`;
-    }
-  }
+const setup = () => {
+  initializeResizeObserver();
+  debouncedRedrawElement();
 };
 
-const handleItemClick = (key: string | number) => {
-  emit('changeKey', key);
+const dispose = () => {
+  resizeObserver.value?.disconnect();
+  defaultConfig();
+};
+
+const getElementRect = (element: HTMLElement): IRectInfo => {
+  const rect = element.getBoundingClientRect();
+
+  return {
+    left: Math.floor(rect.left),
+    right: Math.floor(rect.right),
+    top: Math.floor(rect.top),
+    bottom: Math.floor(rect.bottom),
+    width: Math.floor(rect.width),
+    height: Math.floor(rect.height),
+  };
+};
+
+const calculateTransformOffset = (
+  targetRect: IRectInfo,
+  outerRect: IRectInfo,
+  innerRect: IRectInfo,
+  currentTransform: number,
+): ITransformResult => {
+  const halfOuterWidth = Math.floor(outerRect.width / 2);
+  const halfTargetWidth = Math.floor(targetRect.width / 2);
+  const maxTranslateX = Math.floor(outerRect.width - innerRect.width - DROPDOWN_MARGIN);
+
+  let translateX = halfOuterWidth - (targetRect.left - outerRect.left) - halfTargetWidth;
+
+  const next = currentTransform + translateX;
+  translateX = Math.min(0, Math.max(next, maxTranslateX));
+
+  return {
+    translateX,
+    showFirstMask: translateX < 0,
+    showLastMask: innerRect.width > outerRect.width - translateX - DROPDOWN_MARGIN,
+  };
+};
+
+const redrawElement = () => {
+  const activeMenuIndex = menuList.value.findIndex((menuItem) => menuItem.type_id === activeMenu.value);
+  if (activeMenuIndex === -1) return;
+
+  nextTick(() => {
+    const superRef = superWrapperRef.value;
+    const titleRef = titleMenuRef.value;
+    if (!superRef || !titleRef) return;
+
+    const innerRect = getElementRect(superRef); // 内
+    const outerRect = getElementRect(titleRef); // 外
+    const targetElementRect = getElementRect(superRef.children[activeMenuIndex] as HTMLElement);
+
+    const isOverflowing = innerRect.width > outerRect.width; // 内 > 外
+
+    maskState.value.showMenuWrapper = isOverflowing;
+    if (!isOverflowing) return;
+
+    const { translateX, showFirstMask, showLastMask } = calculateTransformOffset(
+      targetElementRect,
+      outerRect,
+      innerRect,
+      currentTransformX.value,
+    );
+
+    const hasStateChanged =
+      currentTransformX.value !== translateX ||
+      maskState.value.showFirstMask !== showFirstMask ||
+      maskState.value.showLastMask !== showLastMask;
+
+    if (hasStateChanged) {
+      currentTransformX.value = translateX;
+      maskState.value.showFirstMask = showFirstMask;
+      maskState.value.showLastMask = showLastMask;
+    }
+  });
+};
+
+const debouncedRedrawElement = debounce(redrawElement, DEBOUNCE_DELAY);
+
+const initializeResizeObserver = () => {
+  nextTick(() => {
+    const containerElement = titleMenuRef.value;
+    if (!containerElement) return;
+
+    resizeObserver.value = new ResizeObserver(debounce(() => debouncedRedrawElement(), DEBOUNCE_DELAY));
+    resizeObserver.value.observe(containerElement);
+  });
+};
+
+const defaultConfig = () => {
+  maskState.value = {
+    showFirstMask: false,
+    showLastMask: false,
+    showMenuWrapper: false,
+  };
+
+  currentTransformX.value = 0;
+};
+
+const handleIMenuItemClick = (val: string) => {
+  emits('change', val);
 };
 </script>
-
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>

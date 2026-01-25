@@ -1,199 +1,135 @@
-import {
-  ExtensionIcon,
-  MovieClapperIcon,
-  Tv1Icon,
-  CloudIcon,
-  ViewInArIcon,
-  DataDisplayIcon,
-  Setting1Icon,
-  FillColor1Icon,
-  PlayCircleStrokeIcon,
-} from 'tdesign-icons-vue-next';
-
 import Layout from '@/layouts/index.vue';
+import { isProd } from '@/utils/systeminfo';
 
 export default [
   {
-    path: '/film',
-    name: 'film',
-    redirect: '/film/index',
+    path: '/',
+    name: 'Base',
+    redirect: '/film',
     component: Layout,
-    meta: {
-      title: {
-        zh_CN: '影视',
-        en_US: 'Film',
-      },
-      icon: MovieClapperIcon,
-    },
     children: [
       {
-        path: 'index',
-        name: 'FilmIndex',
+        path: 'film',
+        name: 'Film',
+        meta: {
+          title: {
+            'zh-CN': '影视',
+            'zh-TW': '影視',
+            'en-US': 'Film',
+          },
+          icon: 'movie-clapper',
+        },
         component: () => import('@/pages/film/index.vue'),
       },
-    ],
-  },
-  {
-    path: '/iptv',
-    name: 'iptv',
-    redirect: '/iptv/index',
-    component: Layout,
-    meta: {
-      title: {
-        zh_CN: '电视',
-        en_US: 'Iptv',
-      },
-      icon: Tv1Icon,
-    },
-    children: [
       {
-        path: 'index',
-        name: 'IptvIndex',
-        component: () => import('@/pages/iptv/index.vue'),
+        path: 'live',
+        name: 'Live',
+        meta: {
+          title: {
+            'zh-CN': '直播',
+            'zh-TW': '直播',
+            'en-US': 'Live',
+          },
+          icon: 'tv-1',
+        },
+        component: () => import('@/pages/live/index.vue'),
       },
-    ],
-  },
-  {
-    path: '/drive',
-    name: 'drive',
-    redirect: '/drive/index',
-    component: Layout,
-    meta: {
-      title: {
-        zh_CN: '网盘',
-        en_US: 'Drive',
-      },
-      icon: CloudIcon,
-    },
-    children: [
       {
-        path: 'index',
-        name: 'DriveIndex',
-        component: () => import('@/pages/drive/index.vue'),
+        path: 'parse',
+        name: 'Parse',
+        meta: {
+          title: {
+            'zh-CN': '解析',
+            'zh-TW': '解析',
+            'en-US': 'Parse',
+          },
+          icon: 'view-in-ar',
+        },
+        component: () => import('@/pages/parse/index.vue'),
       },
-    ],
-  },
-  {
-    path: '/play',
-    name: 'play',
-    redirect: '/play/index',
-    meta: {
-      title: {
-        zh_CN: '播放',
-        en_US: 'Play',
-      },
-      icon: PlayCircleStrokeIcon,
-      hidden: true,
-    },
-    children: [
       {
-        path: 'index',
-        name: 'PlayIndex',
-        component: () => import('@/pages/play/index.vue'),
+        path: 'moment',
+        name: 'Moment',
+        meta: {
+          title: {
+            'zh-CN': '过刻',
+            'zh-TW': '過刻',
+            'en-US': 'Moment',
+          },
+          icon: 'compass',
+        },
+        component: () => import('@/pages/moment/index.vue'),
       },
-    ],
-  },
-  {
-    path: '/analyze/',
-    name: 'Analyze',
-    redirect: '/analyze/index',
-    component: Layout,
-    meta: {
-      title: {
-        zh_CN: '解析',
-        en_US: 'Analyze',
-      },
-      icon: ViewInArIcon,
-    },
-    children: [
       {
-        path: 'index',
-        name: 'AnalyzeIndex',
-        component: () => import('@/pages/analyze/index.vue'),
+        path: 'test',
+        name: 'Test',
+        meta: {
+          title: {
+            'zh-CN': '测试',
+            'zh-TW': '測試',
+            'en-US': 'Test',
+          },
+          icon: 'fill-color-1',
+          hidden: isProd,
+        },
+        component: () => import('@/pages/test/index.vue'),
       },
-    ],
-  },
-  {
-    path: '/chase',
-    name: 'Chase',
-    redirect: '/chase/index',
-    component: Layout,
-    meta: {
-      title: {
-        zh_CN: '过刻',
-        en_US: 'Moment',
-      },
-      icon: DataDisplayIcon,
-    },
-    children: [
       {
-        path: 'index',
-        name: 'ChaseIndex',
-        component: () => import('@/pages/chase/index.vue'),
+        path: 'lab',
+        name: 'Lab',
+        meta: {
+          title: {
+            'zh-CN': '实验室',
+            'zh-TW': '實驗室',
+            'en-US': 'Lab',
+          },
+          icon: 'extension',
+          position: 'bottom',
+        },
+        component: () => import('@/pages/lab/index.vue'),
       },
-    ],
-  },
-  {
-    path: '/setting',
-    name: 'setting',
-    component: Layout,
-    redirect: '/setting/index',
-    meta: {
-      title: {
-        zh_CN: '设置',
-        en_US: 'Setting',
-      },
-      icon: Setting1Icon,
-      hidden: true,
-    },
-    children: [
       {
-        path: 'index',
-        name: 'SettingIndex',
+        path: 'setting',
+        name: 'Setting',
+        meta: {
+          title: {
+            'zh-CN': '设置',
+            'zh-TW': '設置',
+            'en-US': 'Setting',
+          },
+          icon: 'setting-1',
+          position: 'bottom',
+        },
         component: () => import('@/pages/setting/index.vue'),
       },
     ],
   },
   {
-    path: '/lab',
-    name: 'lab',
-    component: Layout,
-    redirect: '/lab/index',
+    path: '/player',
+    name: 'Player',
     meta: {
       title: {
-        zh_CN: '实验室',
-        en_US: 'Lab',
+        'zh-CN': '播放',
+        'zh-TW': '播放',
+        'en-US': 'Play',
       },
-      icon: ExtensionIcon,
+      icon: 'play-circle-stroke',
       hidden: true,
     },
-    children: [
-      {
-        path: 'index',
-        name: 'LabIndex',
-        component: () => import('@/pages/lab/index.vue'),
-      },
-    ],
+    component: () => import('@/pages/player/index.vue'),
   },
   {
-    path: '/test',
-    name: 'test',
-    component: Layout,
-    redirect: '/test/index',
+    path: '/browser',
+    name: 'Browser',
     meta: {
       title: {
-        zh_CN: '测试',
-        en_US: 'Test',
+        'zh-CN': '浏览',
+        'zh-TW': '瀏覽',
+        'en-US': 'Browse',
       },
-      icon: FillColor1Icon,
+      icon: 'logo-chrome',
       hidden: true,
     },
-    children: [
-      {
-        path: 'index',
-        name: 'TestIndex',
-        component: () => import('@/pages/test/index.vue'),
-      },
-    ],
+    component: () => import('@/pages/browser/index.vue'),
   },
 ];

@@ -1,0 +1,22 @@
+diff --git a/dist/index.js b/dist/index.js
+index c428018df26dbeb7300644c938caf13d339c8f7b..5902353901b546296f28f50459df6126932b0527 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -26,7 +26,7 @@ async function installExtension(extensionReference, options = {}) {
+     else {
+         throw new Error(`Invalid extensionReference passed in: "${extensionReference}"`);
+     }
+-    const installedExtension = targetSession.getAllExtensions().find((e) => e.id === chromeStoreID);
++    const installedExtension = targetSession.extensions.getAllExtensions().find((e) => e.id === chromeStoreID);
+     if (!forceDownload && installedExtension) {
+         return installedExtension;
+     }
+@@ -47,7 +47,7 @@ async function installExtension(extensionReference, options = {}) {
+         targetSession.removeExtension(installedExtension.id);
+         await unloadPromise;
+     }
+-    return targetSession.loadExtension(extensionFolder, loadExtensionOptions);
++    return targetSession.extensions.loadExtension(extensionFolder, loadExtensionOptions);
+ }
+ exports.default = installExtension;
+ exports.EMBER_INSPECTOR = {

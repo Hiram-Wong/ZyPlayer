@@ -8,7 +8,26 @@
     cursor: pointer;
   }
 
-  .monaco-editor {
+  .monaco-editor,
+  .monaco-diff-editor,
+  .monaco-component {
+    --vscode-editorGutter-background: var(--td-bg-color-component);
+    --vscode-editor-background: var(--td-bg-color-component);
+    --vscode-editorStickyScrollGutter-background: var(--td-bg-color-component-hover);
+    --vscode-editorStickyScroll-background: var(--td-bg-color-component-hover);
+    --vscode-editorStickyScroll-shadow: var(--td-bg-color-component-hover);
+    --vscode-scrollbar-shadow: var(--td-bg-color-component-hover);
+    --vscode-focusBorder: transparent;
+    --vscode-sash-hoverBorder: var(--td-bg-color-component-active);
+    --monaco-monospace-font: var(--td-font-family-code);
+
+    * {
+      font-family: var(--td-font-family-code);
+    }
+
+    height: 100% !important;
+    width: 100% !important;
+
     .find-widget {
       & > .button.codicon-widget-close {
         top: 8px;

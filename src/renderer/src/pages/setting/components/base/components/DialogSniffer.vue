@@ -2,41 +2,49 @@
   <t-dialog
     v-model:visible="formVisible"
     show-in-attached-element
-    attach="#main-component"
+    :attach="`.${attachContent}`"
     placement="center"
-    width="50%"
     destroy-on-close
+    lazy
   >
     <template #header>
       {{ $t('pages.setting.sniffer.title') }}
     </template>
     <template #body>
-      <t-form ref="formRef" :data="formData.data.data" :rules="RULES" :label-width="60">
-        <t-form-item :label="$t('pages.setting.sniffer.type')" name="type">
-          <t-radio-group variant="default-filled" v-model="formData.data.data.type">
-            <t-radio-button value="pie">{{ $t('pages.setting.sniffer.pie.sign') }}</t-radio-button>
-            <t-radio-button value="custom">{{ $t('pages.setting.sniffer.other.sign') }}</t-radio-button>
-          </t-radio-group>
-        </t-form-item>
-        <t-form-item :label="$t('pages.setting.sniffer.url')" name="url" v-if="formData.data.data.type === 'custom'">
-          <t-input v-model="formData.data.data.url" :placeholder="$t('pages.setting.placeholder.general')" />
-        </t-form-item>
-      </t-form>
+      <div class="sniffer view-container">
+        <t-form
+          ref="formRef"
+          :data="formData.data"
+          :rules="RULES"
+          :label-width="80"
+          required-mark-position="right"
+          label-align="left"
+          reset-type="initial"
+          @submit="onSubmit"
+        >
+          <t-form-item :label="$t('common.type')" name="type">
+            <t-radio-group v-model="formData.data.type" variant="default-filled">
+              <t-radio-button :value="SNIFFER_TYPE.CDP">
+                {{ $t('pages.setting.sniffer.typeMap.puppeteer') }}
+              </t-radio-button>
+              <t-radio-button :value="SNIFFER_TYPE.CUSTOM">
+                {{ $t('pages.setting.sniffer.typeMap.thirdParty') }}
+              </t-radio-button>
+            </t-radio-group>
+          </t-form-item>
+          <t-form-item v-if="formData.data.type === SNIFFER_TYPE.CUSTOM" :label="$t('common.api')" name="url">
+            <t-input v-model="formData.data.url" clearable />
+          </t-form-item>
+        </t-form>
+      </div>
     </template>
     <template #footer>
-      <t-button variant="outline" @click="onReset">{{ $t('pages.setting.dialog.reset') }}</t-button>
-      <t-button theme="primary" @click="onSubmit">{{ $t('pages.setting.dialog.confirm') }}</t-button>
+      <t-button theme="default" variant="base" @click="handleReset">{{ $t('common.reset') }}</t-button>
+      <t-button theme="primary" variant="base" @click="handleSubmit">{{ $t('common.confirm') }}</t-button>
     </template>
   </t-dialog>
 </template>
-
 <script setup lang="ts">
-import { ref, watch, useTemplateRef } from 'vue';
-import { FormInstanceFunctions, FormProps, MessagePlugin } from 'tdesign-vue-next';
-import { cloneDeep } from 'lodash-es';
-
-import { t } from '@/locales';
-
 defineOptions({
   name: 'SettingBaseDialogSniffer',
 });
@@ -48,59 +56,71 @@ const props = defineProps({
   },
   data: {
     type: Object,
-    default: { data: '', type: '' },
+    default: () => ({ data: { type: '', url: '' } }),
   },
 });
-
-const formVisible = ref<Boolean>(false);
-const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
-const formData = ref({
-  data: cloneDeep(props.data),
-  raw: cloneDeep(props.data),
-});
-
 const emits = defineEmits(['update:visible', 'submit']);
+
+import { SNIFFER_TYPE } from '@shared/config/setting';
+import type { FormInstanceFunctions, SubmitContext } from 'tdesign-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { ref, useTemplateRef, watch } from 'vue';
+
+import { attachContent } from '@/config/global';
+
+const RULES = {
+  url: [{ required: true }, { url: { protocols: ['http', 'https'], require_protocol: true } }],
+  type: [{ required: true }],
+};
+const TYPE = 'sniffer';
+
+const formVisible = ref<boolean>(false);
+const formData = ref(props.data);
+const formRef = useTemplateRef<FormInstanceFunctions>('formRef');
 
 watch(
   () => formVisible.value,
-  (val) => {
-    emits('update:visible', val);
-  },
+  (val) => emits('update:visible', val),
 );
 watch(
   () => props.visible,
-  (val) => {
-    formVisible.value = val;
-  },
+  (val) => (formVisible.value = val),
 );
 watch(
   () => props.data,
-  (val) => {
-    formData.value = { data: cloneDeep(val), raw: cloneDeep(val) };
-  },
+  (val) => (formData.value = val),
 );
 
-const onSubmit: FormProps['onSubmit'] = async () => {
-  formRef.value?.validate().then((validateResult) => {
-    if (validateResult && Object.keys(validateResult).length) {
-      const firstError = Object.values(validateResult)[0]?.[0]?.message;
-      MessagePlugin.warning(firstError);
-    } else {
-      const { data, type } = formData.value.data;
-      emits('submit', { data, type });
-      formVisible.value = false;
-    }
-  });
+const handleExecute = () => {
+  if (formData.value.data.type !== SNIFFER_TYPE.CUSTOM) {
+    formData.value.data.url = '';
+  }
+
+  emits('submit', TYPE, formData.value.data);
+  formVisible.value = false;
 };
 
-const onReset: FormProps['onReset'] = () => {
-  formData.value.data = { ...formData.value.raw };
+const onSubmit = (context: SubmitContext<FormData>) => {
+  const { validateResult, firstError } = context;
+  if (validateResult && typeof validateResult === 'boolean') {
+    handleExecute();
+  } else {
+    MessagePlugin.warning(firstError!);
+  }
 };
 
-const RULES = {
-  url: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
-  type: [{ required: true, message: t('pages.setting.dialog.rule.message'), type: 'error' }],
+const handleSubmit = () => {
+  formRef.value?.submit();
+};
+
+const handleReset = () => {
+  formRef.value?.reset();
 };
 </script>
-
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.view-container {
+  padding: 0 var(--td-comp-paddingLR-xxs) var(--td-comp-paddingTB-xxs);
+  max-height: 340px;
+  overflow-y: auto;
+}
+</style>

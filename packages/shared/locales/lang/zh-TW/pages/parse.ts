@@ -1,0 +1,42 @@
+export default {
+  title: '解析',
+  play: '播放',
+  search: {
+    input: '輸入關鍵詞搜索',
+    enter: '回車',
+    clear: '清空',
+    tip: '輸入 {0} 快速指定搜索源, 例如',
+    watch: '查看',
+    content: '的所有內容',
+  },
+  platform: {
+    title: '支持平臺',
+    360: '360影視',
+    iqiyi: '愛奇藝',
+    youku: '優酷視頻',
+    tencent: '騰訊視頻',
+    sohu: '搜狐視頻',
+    mgtv: '芒果tv',
+    pptv: '聚力網',
+    letv: '樂視視頻',
+    bilibili: '嗶哩嗶哩',
+  },
+  message: {
+    invalidAddress: '地址欄地址不正確',
+    invalidApi: '解析接口不正確',
+    noActiveSource: '未選擇解析源',
+    info: '正在加載當前視頻, 請耐心等待',
+    error: '加載失敗, 請嘗試切換其他接口',
+    empty: '請選擇解析接口或輸入需要解析的地址',
+  },
+  field: {
+    name: '名稱',
+    type: '類型',
+    api: '接口',
+    apiMap: {
+      web: 'Web',
+      json: 'Json',
+    },
+    script: '腳本',
+  },
+};

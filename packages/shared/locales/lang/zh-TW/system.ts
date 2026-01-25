@@ -1,0 +1,58 @@
+export default {
+  app: {
+    about: '關於 {{ name }}',
+    hide: '隱藏',
+    hideOthers: '隱藏其他',
+    show: '顯示',
+    showAll: '顯示全部',
+    quit: '退出 {{ name }}',
+    reboot: '重啟',
+  },
+  file: {
+    title: '文件',
+    closeWindow: '關閉窗口',
+  },
+  edit: {
+    title: '編輯',
+    undo: '撤銷',
+    redo: '重做',
+    cut: '剪切',
+    copy: '複製',
+    paste: '粘貼',
+    pasteAndMatchStyle: '粘貼並匹配樣式',
+    delete: '刪除',
+    selectAll: '全選',
+  },
+  view: {
+    title: '視圖',
+    reload: '重新加載',
+    forceReload: '強制重新加載',
+    toggleDevTools: '切換開發者工具',
+    actualSize: '實際大小',
+    zoomIn: '放大',
+    zoomOut: '縮小',
+    toggleFullScreen: '切換全屏模式',
+  },
+  window: {
+    title: '窗口',
+    minimize: '最小化',
+    zoom: '縮放',
+    fill: '填充',
+    center: '居中',
+  },
+  help: {
+    title: '幫助',
+  },
+  contextMenu: {
+    inspect: '檢查',
+  },
+  tray: {
+    open: '打開 {{ name }}',
+    version: '版本: {{ version }}',
+    website: '網站',
+    document: '文檔',
+    reportIssue: '報告問題',
+    openData: '打開數據文件夾',
+    quit: '退出',
+  },
+};

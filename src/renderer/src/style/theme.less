@@ -1,0 +1,63 @@
+:root {
+  --td-font-family: 'MiSans', 'Arial Regular';
+  --td-font-family-medium: 'MiSans', 'Arial Medium';
+  --td-font-family-code: 'JetBrainsMono', 'monospace';
+  --td-radius-xxs: var(--td-size-1);
+  --td-radius-xs: var(--td-size-2);
+  --td-radius-s: var(--td-size-4);
+  --td-radius-m: var(--td-size-5);
+  --td-radius-l: var(--td-size-6);
+  --td-radius-xl: var(--td-size-8);
+  --td-radius-xxl: var(--td-size-10);
+  --td-layout-size-aside: calc(var(--td-comp-size-xxxl) + var(--td-comp-size-xxs)); // 76px
+  --td-layout-size-header: calc(var(--td-comp-size-s) + var(--td-comp-size-xxxs)); // 44px
+}
+
+:root,
+:root[theme-mode='light'] {
+  --td-bg-lowest: rgb(227 227 227);
+  --td-bg-lowest-mac: rgb(227 227 227 / 25%);
+  --td-bg-midst-mac: rgb(255 255 255 / 15%);
+  // --td-bg-color-container: #f7f7f7;
+  --td-brand-color-blue: #0052d9;
+  --td-brand-color-light: var(--td-brand-color-1);
+  --td-brand-color-focus: var(--td-brand-color-2);
+  --td-brand-color-disabled: var(--td-brand-color-3);
+  --td-brand-color-hover: var(--td-brand-color-3);
+  --td-brand-color: var(--td-brand-color-4);
+  --td-brand-color-active: var(--td-brand-color-5);
+  --td-brand-color-1: #e4f9e9;
+  --td-brand-color-2: #c8f2d7;
+  --td-brand-color-3: #94dab2;
+  --td-brand-color-4: #45c58b;
+  --td-brand-color-5: #33a371;
+  --td-brand-color-6: #008857;
+  --td-brand-color-7: #006c44;
+  --td-brand-color-8: #005333;
+  --td-brand-color-9: #003b23;
+  --td-brand-color-10: #002515;
+}
+
+:root[theme-mode='dark'] {
+  --td-bg-lowest: rgb(28 28 28);
+  --td-bg-lowest-mac: rgb(28 28 30 / 25%);
+  --td-bg-midst-mac: rgb(0 0 0 / 15%);
+  // --td-bg-color-container: #212121;
+  --td-brand-color-blue: #2667d4;
+  --td-brand-color-light: var(--td-brand-color-1);
+  --td-brand-color-focus: var(--td-brand-color-2);
+  --td-brand-color-disabled: var(--td-brand-color-3);
+  --td-brand-color-hover: var(--td-brand-color-5);
+  --td-brand-color: var(--td-brand-color-6);
+  --td-brand-color-active: var(--td-brand-color-7);
+  --td-brand-color-1: #33a37120;
+  --td-brand-color-2: #003b23;
+  --td-brand-color-3: #005333;
+  --td-brand-color-4: #006c44;
+  --td-brand-color-5: #008857;
+  --td-brand-color-6: #33a371;
+  --td-brand-color-7: #45c58b;
+  --td-brand-color-8: #94dab2;
+  --td-brand-color-9: #c8f2d7;
+  --td-brand-color-10: #e4f9e9;
+}

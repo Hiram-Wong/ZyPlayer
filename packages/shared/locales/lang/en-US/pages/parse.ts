@@ -1,0 +1,42 @@
+export default {
+  title: 'Analyze',
+  play: 'Play',
+  search: {
+    input: 'Enter keyword to search',
+    enter: 'Enter',
+    clear: 'Clear',
+    tip: 'Enter {0} to quickly search source, for example',
+    watch: 'watch all about',
+    content: 'content',
+  },
+  platform: {
+    title: 'Support Platform',
+    360: '360',
+    iqiyi: 'Iqiyi',
+    youku: 'YouKu',
+    tencent: 'Tencent',
+    sohu: 'Sohu',
+    mgtv: 'MgTV',
+    pptv: 'PPTV',
+    letv: 'LeTV',
+    bilibili: 'Bilibili',
+  },
+  message: {
+    invalidAddress: 'Invalid address bar address',
+    invalidApi: 'Invalid parsing interface',
+    noActiveSource: 'No parsing source selected',
+    info: 'The current video is loading, please be patient',
+    error: 'Load failed, try switching to another interface',
+    empty: 'Please select the parsing interface or enter the address first',
+  },
+  field: {
+    name: 'Name',
+    type: 'Type',
+    api: 'Api',
+    apiMap: {
+      web: 'Web',
+      json: 'Json',
+    },
+    script: 'Script',
+  },
+};

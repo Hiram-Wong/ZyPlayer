@@ -1,6 +1,7 @@
 <template>
-  <div class="setting-container">
-    <common-nav :title="$t('pages.setting.name')" :list="settingSet.list" :active="settingSet.select" @change-key="changeClassEvent" />
+  <div class="setting view-container">
+    <common-nav :list="componentNav" :active="active" class="sidebar" @change="onNavChange" />
+
     <div class="content">
       <div class="container">
         <keep-alive>
@@ -10,97 +11,64 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
-import { computed, defineAsyncComponent, reactive, shallowRef, watch } from 'vue';
+import { computed, defineAsyncComponent, shallowRef } from 'vue';
 
+import CommonNav from '@/components/common-nav/index.vue';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 
-import CommonNav from '@/components/common-nav/index.vue';
+const settingStore = useSettingStore();
 
-// 异步加载组件，也可以直接导入组件
 const componentMap = {
-  'configBase': defineAsyncComponent(() => import('./components/base/index.vue')),
-  'siteSource': defineAsyncComponent(() => import('./components/site/index.vue')),
-  'iptvSource': defineAsyncComponent(() => import('./components/iptv/index.vue')),
-  'analyzeSource': defineAsyncComponent(() => import('./components/analyze/index.vue')),
-  'driveSource': defineAsyncComponent(() => import('./components/drive/index.vue')),
+  baseConfig: defineAsyncComponent(() => import('./components/base/index.vue')),
+  dataManage: defineAsyncComponent(() => import('./components/data/index.vue')),
+  filmSource: defineAsyncComponent(() => import('./components/film/index.vue')),
+  liveSource: defineAsyncComponent(() => import('./components/live/index.vue')),
+  parseSource: defineAsyncComponent(() => import('./components/parse/index.vue')),
 };
 
-const storeSetting = useSettingStore();
-const currentComponent = shallowRef(componentMap['configBase']);
+const currentComponent = shallowRef(componentMap[settingStore.nav.setting || 'baseConfig']);
 
-const settingNav = computed(() => {
-  return [
-    {
-      id: 'configBase',
-      name: t('pages.setting.nav.configBase')
-    }, {
-      id: 'siteSource',
-      name: t('pages.setting.nav.siteSource')
-    }, {
-      id: 'iptvSource',
-      name: t('pages.setting.nav.iptvSource')
-    }, {
-      id: 'analyzeSource',
-      name: t('pages.setting.nav.analyzeSource')
-    }, {
-      id: 'driveSource',
-      name: t('pages.setting.nav.driveSource')
-    }
-  ]
-});
+const active = computed(() => settingStore.nav.setting || 'baseConfig');
+const componentNav = computed(() => [
+  { id: 'baseConfig', name: t('pages.setting.nav.baseConfig') },
+  { id: 'dataManage', name: t('pages.setting.nav.dataManage') },
+  { id: 'filmSource', name: t('pages.setting.nav.filmSource') },
+  { id: 'liveSource', name: t('pages.setting.nav.liveSource') },
+  { id: 'parseSource', name: t('pages.setting.nav.parseSource') },
+]);
 
-const settingSet = reactive({
-  select: 'configBase',
-  list: settingNav
-});
+const onNavChange = (item: string) => {
+  settingStore.updateConfig({ nav: { ...settingStore.nav, setting: item } });
 
-// 初始化选中的组件
-if (storeSetting.sysConfigSwitch) {
-  settingSet.select = storeSetting.sysConfigSwitch;
-  currentComponent.value = componentMap[storeSetting.sysConfigSwitch];
-}
-
-// 监听sysConfigSwitch的变化
-watch(
-  () => storeSetting.sysConfigSwitch,
-  newValue => {
-    currentComponent.value = componentMap[newValue];
-    settingSet.select = newValue;
+  if (Object.hasOwn(componentMap, item)) {
+    currentComponent.value = componentMap[item];
   }
-);
-
-const changeComponent = (key: string) => {
-  currentComponent.value = componentMap[key];
-  storeSetting.updateConfig({ sysConfigSwitch: key });
-};
-
-const changeClassEvent = (item: string) => {
-  changeComponent(item);
 };
 </script>
-
 <style lang="less" scoped>
-.setting-container {
+.view-container {
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  position: relative;
-  flex: 1 1;
+  gap: var(--td-size-4);
+
+  .sidebar {
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
 
   .content {
-    min-width: 750px;
-    position: relative;
-    padding: var(--td-pop-padding-l);
-    background-color: var(--td-bg-color-container);
-    border-radius: var(--td-radius-default);
+    height: 100%;
+    width: 100%;
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    gap: var(--td-size-4);
+    overflow: hidden;
+    position: relative;
 
     .container {
       flex: 1;

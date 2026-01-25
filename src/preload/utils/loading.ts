@@ -1,13 +1,19 @@
 export function useLoading() {
   const className = `loaders-css__square`;
   const styleContent = `
+    :root {
+      --td-loading-bg: var(--td-bg-color-container);
+      --td-loading-circle: var(--td-brand-color-4);
+      --td-loading-dot: var(--td-text-color-primary);
+    }
+
     @keyframes square {
       0% { transform: rotate(0deg); }
       50% { transform: rotate(180deg); }
       100% { transform: rotate(360deg); }
     }
+
     .${className} {
-      box-sizing: border-box;
       width: 46px;
       height: 46px;
       border: 6px solid var(--td-loading-circle);
@@ -15,6 +21,7 @@ export function useLoading() {
       -webkit-animation: loading 1.5s linear infinite;
       animation: square 1.5s linear infinite;
     }
+
     .${className} > div {
       width: 10px;
       height: 10px;
@@ -24,6 +31,7 @@ export function useLoading() {
       position: absolute;
       background: var(--td-loading-dot);
     }
+
     .app-loading-wrap {
       position: fixed;
       top: 0;
@@ -64,10 +72,12 @@ const safe = {
     if (!Array.from(parent.children).find((e) => e === child)) {
       return parent.appendChild(child);
     }
+    return child;
   },
   remove(parent: HTMLElement, child: HTMLElement) {
     if (Array.from(parent.children).find((e) => e === child)) {
       return parent.removeChild(child);
     }
+    return child;
   },
 };

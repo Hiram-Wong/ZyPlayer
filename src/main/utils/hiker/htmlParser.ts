@@ -1,20 +1,7 @@
-/*!
- * @module htmlParser
- * @brief T3解析html处理库
- * @version 3.1.0
- *
- * @original-author hjdhnx
- * @original-source {@link https://github.com/hjdhnx/hipy-server/blob/master/app/t4/base/htmlParser.py | Source on GitHub}
- *
- * @modified-by HiramWong <admin@catni.cn>
- * @modification-date 2023-04-09T18:31:59+08:00
- * @modification-description Python转TypeScript, 适用于JavaScript项目
- */
-
+import { urlResolve } from '@shared/modules/headers';
+import type { Cheerio, CheerioAPI } from 'cheerio';
 import * as cheerio from 'cheerio';
-import { Cheerio, CheerioAPI } from 'cheerio';
 import { JSONPath } from 'jsonpath-plus';
-import { urljoin } from './base';
 
 const PARSE_CACHE = true; // 解析缓存
 const NOADD_INDEX = ':eq|:lt|:gt|:first|:last|:not|:even|:odd|:has|:contains|:matches|:empty|^body$|^#'; // 不自动加eq下标索引
@@ -34,25 +21,22 @@ class Jsoup {
 
   // 测试
   test(text: string, string: string): boolean {
-    const searchObj = new RegExp(text, 'mi').exec(string);
-    return searchObj ? true : false;
+    const searchObj = new RegExp(text, 'im').exec(string);
+    return !!searchObj;
   }
 
   // 包含
   contains(text: string, match: string): boolean {
-    return text.indexOf(match) !== -1;
+    return text.includes(match);
   }
 
   /**
    * 海阔解析表达式转原生表达式,自动补eq,如果传了first就最后一个也取eq(0)
-   * @param parse: 解析表达式
-   * @param first: 是否第一个
-   * @returns {string}
    */
   parseHikerToJq(parse: string, first: boolean = false): string {
     if (this.contains(parse, '&&')) {
       const parses = parse.split('&&'); // 带&&的重新拼接
-      let new_parses: string[] = []; //  构造新的解析表达式列表
+      const new_parses: string[] = []; //  构造新的解析表达式列表
       for (let i = 0; i < parses.length; i++) {
         const ps_list = parses[i].split(' ');
         const ps = ps_list[ps_list.length - 1]; // 如果分割&&后带空格就取最后一个元素
@@ -81,8 +65,6 @@ class Jsoup {
 
   /**
    * 根据传入的单规则获取 parse规则, 索引位置,排除列表  -- 可以用于剔除元素,支持多个, 按标签剔除, 按id剔除等操作
-   * @param nparse
-   * @returns {rule: string, index: number, excludes: string[]}
    */
   getParseInfo(nparse: string): { nparse_rule: string; nparse_index: number; excludes: string[] } {
     let excludes: string[] = []; // 定义排除列表默认值为空
@@ -100,7 +82,7 @@ class Jsoup {
         nparse_pos = nparse_pos.split('--')[0];
       }
       try {
-        nparse_index = parseInt(nparse_pos.split('(')[1].split(')')[0]);
+        nparse_index = Number.parseInt(nparse_pos.split('(')[1].split(')')[0]);
       } catch {}
     } else if (this.contains(nparse, '--')) {
       nparse_rule = nparse.split('--')[0];
@@ -112,21 +94,22 @@ class Jsoup {
 
   /**
    * 处理jquery lt和gt顺序不一致会导致跟jsoup表现不一致的问题，确保相邻位置的lt始终在gt前面
-   * @param selector
    */
-  reorderAdjacentLtAndGt(selector) {
+  reorderAdjacentLtAndGt(selector: string): string {
     // 使用正则表达式匹配相邻的 :gt() 和 :lt()，包括它们的参数
     const adjacentPattern = /:gt\((\d+)\):lt\((\d+)\)/;
 
     // 循环，直到没有更多相邻的 :gt() 和 :lt() 需要交换
-    let match;
-    while ((match = adjacentPattern.exec(selector)) !== null) {
+    let match = adjacentPattern.exec(selector);
+    while (match !== null) {
       // 构建交换后的字符串
       const replacement = `:lt(${match[2]}):gt(${match[1]})`;
       selector = selector.substring(0, match.index) + replacement + selector.substring(match.index + match[0].length);
 
       // 为了避免跳过任何可能的匹配项，从当前匹配项的开始位置重新开始匹配
       adjacentPattern.lastIndex = match.index;
+
+      match = adjacentPattern.exec(selector);
     }
 
     return selector;
@@ -134,12 +117,8 @@ class Jsoup {
 
   /**
    * 解析空格分割后的原生表达式中的一条记录,正确处理eq的索引,返回处理后的ret
-   * @param doc: cheerio.load() load后的dom对象
-   * @param nparse: 解析表达式
-   * @param ret: 当前返回值
-   * @returns {Cheerio}
    */
-  parseOneRule(doc, nparse: string, ret) {
+  parseOneRule(doc: CheerioAPI, nparse: string, ret: Cheerio<any> | null = null) {
     let { nparse_rule, nparse_index, excludes } = this.getParseInfo(nparse);
     nparse_rule = this.reorderAdjacentLtAndGt(nparse_rule);
     if (!ret) ret = doc(nparse_rule);
@@ -151,7 +130,7 @@ class Jsoup {
       ret = ret.clone(); // 克隆一个，避免直接remove影响原始DOM
       // ret = ret.toArray().map(element => doc(element));
 
-      for (let exclude of excludes) {
+      for (const exclude of excludes) {
         ret.find(exclude).remove();
       }
     }
@@ -161,7 +140,7 @@ class Jsoup {
 
   parseText(text: string) {
     // 使用正则表达式替换所有空白字符序列为单个换行符 '\n'
-    text = text.replace(/[\s]+/gm, '\n');
+    text = text.replace(/\s+/g, '\n');
     // 压缩连续的换行符为单个换行符
     // text = text.replace(/\n+/g, '\n').trim();
     // 去除字符串开头的空白。不用trim去所有
@@ -173,10 +152,7 @@ class Jsoup {
 
   /**
    * 解析空格分割后的原生表达式,返回处理后的ret
-   * https://pyquery.readthedocs.io/en/latest/api.html
-   * @param html
-   * @param parse
-   * @returns {Cheerio}
+   * @see https://pyquery.readthedocs.io/en/latest/api.html
    */
   pdfa(html: string, parse: string): string[] {
     if (!html || !parse) return [];
@@ -200,12 +176,12 @@ class Jsoup {
     const res: string[] = (ret?.toArray() ?? []).map((item: any) => {
       const res_html = `${doc(item)}`; // outerHTML()
       // const res_html = doc(item).html(); // innerHTML()
-      return res_html ? res_html : ''; // 空值检查，将 null 值转换为空字符串
+      return res_html || ''; // 空值检查，将 null 值转换为空字符串
     });
     return res;
   }
 
-  pdfl(html: string, parse: string, list_text: string, list_url: string, url_key: string): string[] {
+  pdfl(html: string, parse: string, list_text: string, list_url: string, _url_key: string): string[] {
     if (!html || !parse) return [];
     parse = this.parseHikerToJq(parse, false);
     const new_vod_list: any = [];
@@ -219,8 +195,17 @@ class Jsoup {
     }
 
     ret!.each((_, element) => {
-      new_vod_list.push(`${doc(element)}`); // outerHTML()
+      // new_vod_list.push(`${doc(element)}`); // outerHTML()
       // new_vod_list.push(doc(element).html()); // innerHTML()
+
+      const _html = `${doc(element)}`;
+      // new_vod_list.push(`${doc(element)}`);
+      const _doc = cheerio.load(_html);
+      const _ret1 = null;
+      const _title = this.parseOneRule(_doc, list_text, _ret1);
+      const _ret2 = null;
+      const _url = this.parseOneRule(_doc, list_url, _ret2);
+      new_vod_list.push(`${_title}${_url}`);
     });
 
     return new_vod_list;
@@ -231,7 +216,7 @@ class Jsoup {
    * https://pyquery.readthedocs.io/en/latest/api.html
    * @param html
    * @param parse
-   * @returns {Cheerio}
+   * @param baseUrl
    */
   pdfh(html: string, parse: string, baseUrl: string = ''): string {
     if (!html || !parse) return '';
@@ -244,9 +229,9 @@ class Jsoup {
       }
     }
 
-    if (parse == 'body&&Text' || parse == 'Text') {
+    if (parse === 'body&&Text' || parse === 'Text') {
       return this.parseText(doc.text());
-    } else if (parse == 'body&&Html' || parse == 'Html') {
+    } else if (parse === 'body&&Html' || parse === 'Html') {
       return doc.html();
     }
 
@@ -266,21 +251,23 @@ class Jsoup {
     }
     if (option) {
       switch (option) {
-        case 'Text':
+        case 'Text': {
           ret = (ret as Cheerio<any>)?.text() || '';
           ret = ret ? this.parseText(ret) : '';
           break;
-        case 'Html':
+        }
+        case 'Html': {
           ret = (ret as Cheerio<any>)?.html() || '';
           break;
-        default:
+        }
+        default: {
           // 保留原来的ret
-          let original_ret = (ret as Cheerio<any>)?.clone();
-          let options = option.split('||');
+          const original_ret = (ret as Cheerio<any>)?.clone();
+          const options = option.split('||');
           let opt_index = 0;
-          for (let opt of options) {
+          for (const opt of options) {
             // console.log(`opt_index:${opt_index},opt:${opt}`);
-            opt_index += 1;
+            opt_index = opt_index + 1;
             ret = original_ret?.attr(opt) || '';
             // console.log('ret:', ret);
             if (this.contains(opt.toLowerCase(), 'style') && this.contains(ret, 'url(')) {
@@ -296,7 +283,7 @@ class Jsoup {
                 if (ret.includes('http')) {
                   ret = ret.slice(ret.indexOf('http'));
                 } else {
-                  ret = urljoin(baseUrl, ret);
+                  ret = urlResolve(baseUrl, ret);
                 }
               }
             }
@@ -304,8 +291,10 @@ class Jsoup {
               break;
             }
           }
+        }
       }
     } else {
+      // 增加返回字符串，禁止直接返回pq对象
       ret = `${ret}`;
     }
 
@@ -331,14 +320,14 @@ class Jsoup {
       return '';
     }
 
-    if (!parse.startsWith('$.')) parse = '$.' + parse;
+    if (!parse.startsWith('$.')) parse = `$.${parse}`;
 
     let ret = '';
     const paths = parse.split('||');
     for (const path of paths) {
-      const queryResult = JSONPath({ path: path, json: html });
+      const queryResult = JSONPath({ path, json: html });
       ret = Array.isArray(queryResult) ? queryResult[0] || '' : queryResult || '';
-      if (addUrl && ret) ret = urljoin(this.MY_URL, ret);
+      if (addUrl && ret) ret = urlResolve(this.MY_URL, ret);
       if (ret) break;
     }
 
@@ -349,7 +338,7 @@ class Jsoup {
     return this.pjfh(html, parse, true);
   }
 
-  pjfa(html: any, parse: string): any[] {
+  pjfa(html: any, parse: string): string[] {
     if (!html || !parse) return [];
 
     try {
@@ -358,7 +347,7 @@ class Jsoup {
       return [];
     }
 
-    if (!parse.startsWith('$.')) parse = '$.' + parse;
+    if (!parse.startsWith('$.')) parse = `$.${parse}`;
 
     const result = JSONPath({ path: parse, json: html });
     if (Array.isArray(result) && Array.isArray(result[0]) && result.length === 1) {
@@ -368,11 +357,6 @@ class Jsoup {
     return result || [];
   }
 }
-
-const pdfh = (html: string, parse: string, base_url: string = globalThis?.MY_URL || ''): string => {
-  const jsp = new Jsoup(base_url);
-  return jsp.pdfh(html, parse, base_url);
-};
 
 const pd = (html: string, parse: string, base_url: string = globalThis?.MY_URL || ''): string => {
   const jsp = new Jsoup(base_url);
@@ -384,9 +368,14 @@ const pdfa = (html: string, parse: string): string[] => {
   return jsp.pdfa(html, parse);
 };
 
+const pdfh = (html: string, parse: string, base_url: string = globalThis?.MY_URL || ''): string => {
+  const jsp = new Jsoup(base_url);
+  return jsp.pdfh(html, parse, base_url);
+};
+
 const pdfl = (html: string, parse: string, list_text: string, list_url: string, url_key: string): string[] => {
   const jsp = new Jsoup();
   return jsp.pdfl(html, parse, list_text, list_url, url_key);
 };
 
-export { Jsoup as default, pd, pdfa, pdfh, pdfl };
+export { pd, pdfa, pdfh, pdfl };

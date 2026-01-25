@@ -1,18 +1,21 @@
-import { throttle } from 'lodash-es';
-import { onBeforeMount, onMounted, ref, SetupContext, toRefs, nextTick, watch } from 'vue';
+import { throttle } from 'es-toolkit';
 import * as monacoModule from 'monaco-editor';
-import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
-import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
-import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
-import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-import { CodeEditorProps, Comment, Decoration, LayoutInfo, PositionInfo } from '../code-editor-types';
+import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
+import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
+import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+import TypeScriptWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import YamlWorker from 'monaco-yaml/yaml.worker?worker';
+import type { SetupContext } from 'vue';
+import { nextTick, onBeforeMount, onMounted, ref, toRefs, watch } from 'vue';
+
+import type { CodeEditorProps, IComment, IDecoration, IEditor, ILayoutInfo, IPositionInfo } from '../code-editor-types';
 
 export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
   const editorEl = ref();
   const {
     modelValue,
-    originalText,
+    originalValue,
     options,
     mode,
     autoHeight,
@@ -25,7 +28,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     expandCommentIcon,
   } = toRefs(props);
 
-  let monaco: typeof monacoModule = monacoModule;
+  const monaco: IEditor = monacoModule;
   let editor: monacoModule.editor.IStandaloneCodeEditor;
   let diffEditor: monacoModule.editor.IStandaloneDiffEditor;
   let commentViewZones: Array<{ lineNumber: number; id: string }> = [];
@@ -53,8 +56,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     },
     { deep: true },
   );
-  watch(originalText, setDiffEditorOriginValue);
-  watch(modelValue, () => {
+  watch([modelValue, originalValue], () => {
     if (!modifyValueFromInner) {
       setValue();
     } else {
@@ -66,19 +68,22 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
 
   onMounted(async () => {
     if (typeof window !== 'undefined') {
-      self.MonacoEnvironment = {
+      window.MonacoEnvironment = {
         getWorker(_: any, label: string) {
           if (label === 'json') {
-            return new jsonWorker();
+            return new JsonWorker();
           }
           if (['css', 'scss', 'less'].includes(label)) {
-            return new cssWorker();
+            return new CssWorker();
           }
           if (['html', 'handlebars', 'razor'].includes(label)) {
-            return new htmlWorker();
+            return new HtmlWorker();
           }
           if (['typescript', 'javascript'].includes(label)) {
-            return new tsWorker();
+            return new TypeScriptWorker();
+          }
+          if (label === 'yaml') {
+            return new YamlWorker();
           }
           return new EditorWorker();
         },
@@ -101,7 +106,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
       initDiffEditor();
     }
 
-    if (!['vs', 'vs-dark'].includes(options.value['theme'])) {
+    if (!['vs', 'vs-dark'].includes(options.value.theme)) {
       monaco.editor.setTheme('vs');
     }
 
@@ -112,7 +117,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
   function initNormalEditor(): void {
     if (!editor) {
       editor = monaco.editor.create(editorEl.value, options.value);
-      editor.setModel(monaco.editor.createModel(modelValue.value, options.value['language']));
+      editor.setModel(monaco.editor.createModel(modelValue.value, options.value.language));
 
       ctx.emit('afterEditorInit', editor);
       ctx.emit('monacoObject', monaco);
@@ -129,8 +134,8 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     if (!diffEditor) {
       diffEditor = monaco.editor.createDiffEditor(editorEl.value, options.value);
       diffEditor.setModel({
-        original: monaco.editor.createModel(originalText.value, options.value['language']),
-        modified: monaco.editor.createModel(modelValue.value, options.value['language']),
+        original: monaco.editor.createModel(originalValue.value, options.value.language),
+        modified: monaco.editor.createModel(modelValue.value, options.value.language),
       });
 
       ctx.emit('afterEditorInit', diffEditor);
@@ -158,6 +163,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
       return;
     }
     diffEditor.getModel()!.modified?.setValue(modelValue.value);
+    diffEditor.getModel()!.original?.setValue(originalValue.value);
   }
 
   function handleAutoHeight(): void {
@@ -169,37 +175,38 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
   }
 
   function setValueEmitter(): void {
-    let model: monacoModule.editor.ITextModel | null = null;
+    const bindContentChange = (model: monacoModule.editor.ITextModel | null, side: 'original' | 'modified') => {
+      model?.onDidChangeContent(
+        throttle(() => {
+          const editorValue = model.getValue();
+
+          if (modelValue.value !== editorValue && side === 'modified') {
+            modifyValueFromInner = true;
+            ctx.emit('update:modelValue', editorValue);
+          }
+
+          if (originalValue.value !== editorValue && side === 'original') {
+            modifyValueFromInner = true;
+            ctx.emit('update:originalValue', editorValue);
+          }
+        }, 100),
+      );
+    };
+
     if (editor) {
-      model = editor.getModel();
+      bindContentChange(editor.getModel(), 'modified');
     } else if (diffEditor) {
-      model = diffEditor.getModel()!.modified;
+      bindContentChange(diffEditor.getModel()!.modified, 'modified');
+      bindContentChange(diffEditor.getModel()!.original, 'original');
     }
-
-    model?.onDidChangeContent(
-      throttle(() => {
-        const editorValue = model.getValue();
-        if (modelValue.value !== editorValue) {
-          modifyValueFromInner = true;
-          ctx.emit('update:modelValue', model.getValue());
-        }
-      }, 100),
-    );
-  }
-
-  function setDiffEditorOriginValue(): void {
-    if (!diffEditor || !diffEditor.getModel()) {
-      return;
-    }
-
-    diffEditor.getModel()!.original?.setValue(originalText.value);
   }
 
   function updateLanguage() {
     const language = options.value.language;
     if (editor) {
       if (mode.value === 'normal' || mode.value === 'review') {
-        monaco.editor.setModelLanguage(editor.getModel()!, language);
+        const model = editor.getModel()!;
+        monaco.editor.setModelLanguage(model, language);
       } else if (mode.value === 'diff') {
         const model = diffEditor.getModel()!;
         monaco.editor.setModelLanguage(model.modified, language);
@@ -275,7 +282,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     }
   }
 
-  function setDecorations(decoration: Decoration): any {
+  function setDecorations(decoration: IDecoration): any {
     return {
       range: new monaco.Range(decoration.lineNumber, 1, decoration.lineNumber, 1),
       options: {
@@ -333,10 +340,10 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     }
   }
 
-  function layoutOverlayWidget(lineNumber: number, ...positionInfos: PositionInfo[]): void {
+  function layoutOverlayWidget(lineNumber: number, ...positionInfos: IPositionInfo[]): void {
     const index = comments.value.findIndex((comment) => comment.lineNumber === lineNumber);
     const editorLayoutInfo = editor.getLayoutInfo();
-    const layoutInfo: LayoutInfo = calculateLayoutInfo(positionInfos, editorLayoutInfo, index);
+    const layoutInfo: ILayoutInfo = calculateLayoutInfo(positionInfos, editorLayoutInfo, index);
     if (layoutInfo.height) {
       heightMap.set(index, layoutInfo.height);
     }
@@ -346,7 +353,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     handleDomNodePosition(layoutInfo.top!, layoutInfo.height!, index);
   }
 
-  function calculateLayoutInfo(positionInfos: PositionInfo[], editorLayoutInfo: any, index: number): LayoutInfo {
+  function calculateLayoutInfo(positionInfos: IPositionInfo[], editorLayoutInfo: any, index: number): ILayoutInfo {
     let _offsetLeft = 0;
     const indexOffsetLeft = comments.value[index].offsetLeft;
     if (indexOffsetLeft) {
@@ -416,7 +423,7 @@ export function useCodeEditor(props: CodeEditorProps, ctx: SetupContext) {
     }
   }
 
-  function buildOverlayWidget(comment: Comment): any {
+  function buildOverlayWidget(comment: IComment): any {
     return {
       getId: () => {
         return `widget-lineNumber${comment.lineNumber}`;

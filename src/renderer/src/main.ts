@@ -1,20 +1,22 @@
+/* eslint-disable simple-import-sort/imports */
 import { createApp } from 'vue';
 
+import { print as consolePrint } from '@/utils/console';
+import { dom as initDom } from '@/utils/setup';
 import App from './App.vue';
+import i18n from './locales';
 import router from './router';
 import { store } from './store';
-import i18n from './locales';
 
-import 'tdesign-vue-next/es/style/index.css';
 import '@/style/index.less';
+import 'tdesign-vue-next/es/style/index.css';
 
-import { Tooltip as TTooltip } from 'tdesign-vue-next';
+initDom();
+consolePrint();
 
 const app = createApp(App);
-
 app.use(store);
 app.use(router);
 app.use(i18n);
-app.use(TTooltip);
 
 app.mount('#app').$nextTick(window.removeLoading);

@@ -1,0 +1,138 @@
+/* 加载 */
+.dplayer-bezel .dplayer-loading-icon,
+.dplayer-bezel .dplayer-bezel-icon {
+  width: 64px !important;
+  height: 64px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dplayer-bezel .dplayer-loading-icon svg,
+.dplayer-bezel .dplayer-bezel-icon svg {
+  width: calc(100% - 6px) !important;
+  height: calc(100% - 6px) !important;
+}
+
+/* 控制条 */
+.dplayer-icons-left:first-child {
+  margin-left: -10px !important;
+}
+
+.dplayer-icons-right:last-child {
+  margin-right: -8px !important;
+}
+
+.dplayer-setting {
+  margin-right: 3px;
+}
+
+/* 图标 */
+.dplayer svg {
+  height: 21px !important;
+  width: 21px !important;
+}
+
+.dplayer-controller .dplayer-icons .dplayer-icon .dplayer-icon-content {
+  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dplayer-controller .dplayer-icons.dplayer-icons-right .dplayer-icon {
+  padding: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.dplayer-controller .dplayer-icons.dplayer-icons-left .dplayer-icon {
+  padding: 0 !important;
+}
+
+.dplayer-play-icon svg,
+.dplayer-volume-icon svg {
+  height: 28px !important;
+  width: 28px !important;
+}
+
+/* 提示 */
+[aria-label][data-balloon-pos][data-balloon-pos^='up']::after,
+[aria-label][data-balloon-pos][data-balloon-pos^='up']::before {
+  bottom: calc(100% + 24px) !important;
+}
+
+.dplayer [aria-label]::after {
+  background: #1f1f1fe6 !important;
+  border-radius: 8px !important;
+}
+
+/* 屏蔽网页全屏 */
+.dplayer-full .dplayer-full-in-icon {
+  display: none !important;
+}
+
+/* 屏蔽弹幕发送组件 */
+.dplayer-comment {
+  display: none !important;
+}
+
+/* 弹幕发送框 */
+.dplayer-controller .dplayer-icons.dplayer-comment-box .dplayer-comment-input {
+  width: calc(100% - 40px) !important;
+}
+
+/* 设置面板 */
+.dplayer-setting-box {
+  bottom: 68px !important;
+  background: #1f1f1fe6 !important;
+  border-radius: 8px !important;
+}
+
+.dplayer-setting-box .dplayer-setting-item.dplayer-setting-audio {
+  display: none;
+}
+
+/* 右键 */
+.dplayer-menu {
+  background: #1f1f1fe6 !important;
+  color: #bbb;
+  border-radius: 8px !important;
+  min-width: 234px;
+  padding: 10px 0 !important;
+}
+
+.dplayer-menu .dplayer-menu-item {
+  height: 34px !important;
+  line-height: 34px;
+  max-width: 100%;
+  overflow: hidden;
+  padding-left: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dplayer-menu .dplayer-menu-item:hover {
+  background: #26262b !important;
+}
+
+.dplayer-menu .dplayer-menu-item a {
+  text-decoration: none;
+  color: #bbb !important;
+  padding: 0 !important;
+}
+
+.dplayer-info-panel {
+  background: #1f1f1fe6 !important;
+  border-radius: 8px !important;
+  margin: 10px 0 0 10px;
+  padding: 8px 5px !important;
+}
+
+.dplayer-info-panel .dplayer-info-panel-close {
+  text-align: right;
+  position: relative !important;
+  padding: 0 8px;
+  margin-bottom: 8px;
+}

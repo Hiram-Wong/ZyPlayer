@@ -1,0 +1,34 @@
+.multi-player {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-image: url('../img/bg/bg-player.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  &__header {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: fit-content;
+    z-index: 11;
+    padding: var(--td-comp-paddingTB-xxs) var(--td-comp-paddingLR-s);
+    background: linear-gradient(to bottom, rgb(0 0 0 / 80%) 0%, rgb(0 0 0 / 60%) 30%, rgb(0 0 0 / 0%) 100%);
+    color: var(--td-gray-color-1);
+    transition: all 0.3s ease;
+    opacity: 0;
+
+    .multi-player:hover &,
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__mse {
+    position: absolute !important;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}

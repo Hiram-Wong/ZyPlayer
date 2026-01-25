@@ -1,6 +1,0 @@
-<svg class="svgPlayPuase2" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
-  <g>
-    <path fill="#fff" d="M3.5,0C2.675,0,2,0.675,2,1.5v15C2,17.325,2.675,18,3.5,18S5,17.325,5,16.5v-15C5,0.675,4.325,0,3.5,0z"></path>
-    <path fill="#fff" d="M14.5,0C13.675,0,13,0.675,13,1.5v15c0,0.825,0.675,1.5,1.5,1.5s1.5-0.675,1.5-1.5v-15C16,0.675,15.325,0,14.5,0z"></path>
-  </g>
-</svg>

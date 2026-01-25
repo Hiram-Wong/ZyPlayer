@@ -1,133 +1,150 @@
-# see config at https://www.electron.build/configuration/configuration
+# see config at https://www.electron.build/configuration
 
-# 应用程序的唯一标识符
-appId: com.zyfun.player
-# 应用程序的产品名称
+appId: com.player.zyfun
 productName: zyfun
-copyright: Copyright © 2023 zyfun Team Inc.
-# 禁用 asar 打包
-"asar": true
-# 构建资源所在的目录
+copyright: Copyright © 2023 zyfun Inc.
+electronLanguages:
+  - zh-CN
+  - zh-TW
+  - en-US
+  - zh_CN # for macOS
+  - zh_TW # for macOS
+  - en # for macOS
 directories:
   buildResources: build
-# 包含在最终应用程序构建中的文件列表，这里使用通配符 ! 表示排除不需要的文件
+protocols:
+  - name: zyfun
+    schemes:
+      - zy
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
+  - '**/*'
+
+  # Exclusion IDE
+  - '!**/{.vscode,.idea,.cursor,.codebuddy,.trae,.qwen,.gemini,.claude}/*'
+  - '!**/{.editorconfig,.jekyll-metadata}'
+
+  # Exclusion build and configuration files
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-# 哪些文件将不会被压缩，而是解压到构建目录
+  - '!dev-app-update.yml'
+  - '!**/{tsconfig.json,tsconfig.tsbuildinfo,tsconfig.node.json,tsconfig.web.json}'
+
+  # Exclusion code quality and formatting tool configurations
+  - '!**/{.eslintignore,.eslintrc.js,.eslintrc.json,.eslintrc.cjs,.eslintcache,root.eslint.config.js,eslint.config.js,.eslint.config.mjs}'
+  - '!**/{.prettierignore,.prettierrc.yaml,.prettierrc.js}'
+  - '!**/{.stylelintignore,stylelint.config.js}'
+  - '!commitlintrc.{json,yml,yaml,js,cjs,mjs,ts,mts,cts}'
+  - '!commitlint.config.{js,cjs,mjs,ts,mts,cts}'
+
+  # Exclusion package managers
+  - '!{.nvmrc,.npmrc,pnpm-lock.yaml,yarn.lock,package-lock.json}'
+  - '!{.yarnclean,.yarnrc.yml}'
+
+  # Exclusion environment variable files
+  - '!{.env,.env.*}'
+
+  # Exclusion source code/documentation/design
+  - '!src'
+  - '!script'
+  - '!scripts'
+  - '!docs'
+  - '!packages'
+  - '!patches/*'
+  - '!design/*.sketch'
+
+  # Exclusion python
+  - '!**/.venv'
+  - '!**/venv'
+  - '!**/__pycache__'
+  - '!**/*.pyc'
+  - '!**/uv.lock'
+
+  # Exclusion version control
+  - '!**/{.git.gitignore,.gitattributes,.hg,.svn,CVS,RCS,SCCS,}'
+  - '!**/.DS_Store'
+  - '!._*'
+
+  # Exclusion tests/examples
+  - '!**/{test,tests,__tests__,powered-test,coverage}/**'
+  - '!**/{example,examples}/**'
+  - '!**/*.{spec,test}.{js,jsx,ts,tsx}'
+
+  # Exclusion others
+  - '!**/*.min.*.map'
+  - '!**/*.d.ts'
+  - '!*.log'
+  - '!**/{LICENSE,license,LICENSE.*,*.LICENSE.txt,NOTICE.txt,README.md,readme.md,CHANGELOG.md}'
+asar: true
 asarUnpack:
   - resources/**
-electronLanguages: ['en', 'zh-TW', 'zh-CN', 'en-US', 'en-GB']
-# afterPack: build/hook/removeLocales.js
-# afterSign: build/hook/notarize.js
-# Windows 平台配置
 win:
-  # 可执行文件名
+  artifactName: ${productName}-${os}-${version}-${arch}-setup.${ext}
   executableName: zyfun
-  # 应用程序的图标文件路径
-  icon: build/icons/logo.ico
-  # 构建类型
+  icon: build/icon.ico
+  signtoolOptions:
+    sign: scripts/win-sign.js
   target:
     - target: nsis
-      arch:
-        - x64
-        - arm64
-# NSIS 安装器配置
+    # - target: portable
+  verifyUpdateCodeSignature: false
 nsis:
-  # 安装程序的生成名称
-  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
-  # 创建的桌面快捷方式名称
-  shortcutName: ${productName}
-  # 卸载时显示的名称
-  uninstallDisplayName: ${productName}
-  # 创建桌面图标
-  createDesktopShortcut: always
-  # 是否允许 UAC 提升权限
-  allowElevation: true
-  # 是否允许用户更改安装目录
   allowToChangeInstallationDirectory: true
-  # 是否一件安装
+  artifactName: ${productName}-${os}-${version}-${arch}-setup.${ext}
+  buildUniversalInstaller: false
+  createDesktopShortcut: always
+  differentialPackage: false
+  include: build/nsis-installer.nsh
   oneClick: false
-  # 是否显示辅助安装程序的安装模式安装程序页面（选择按机器还是按用户）
-  perMachine: true
-  # 自定义 nsis
-  # include: build/installer.nsh（win11 部分机器有 无法正常打开）
-# macOS 平台配置
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+portable:
+  artifactName: ${productName}-${os}-${version}-${arch}-portable.${ext}
+  buildUniversalInstaller: false
 mac:
-  # 可执行文件名
-  executableName: zyfun
-  # 应用程序的图标文件路径
-  icon: build/icons/logo.icns
-  # 权限继承的文件路径
+  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
+  category: public.app-category.video
   entitlementsInherit: build/entitlements.mac.plist
-  # 扩展信息，如权限描述
+  executableName: zyfun
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  # 是否启用应用程序的 Notarization（苹果的安全审核）
+  icon: build/icon.icns
+  minimumSystemVersion: '20.1.0'
   notarize: false
-  darkModeSupport: true
-  category: public.app-category.video
-  # 构建类型
   target:
     - target: dmg
-      arch:
-        - x64
-        - arm64
-        - universal
-# macOS 平台的 DMG 配置
+    # - target: zip
 dmg:
-  # DMG 文件的生成名称
-  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
-# Linux 平台配置
+  writeUpdateInfo: false
 linux:
-  # 可执行文件名
+  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
+  category: Video;AudioVideo
+  desktop:
+    entry:
+      Name: zyfun
+      StartupWMClass: zyfun
   executableName: zyfun
-  # 应用程序的图标文件路径
-  icon: build/icons/logo.icns
-  # 构建类型
+  icon: build/icon.icns
+  maintainer: zyfun
+  mimeTypes:
+    - x-scheme-handler/zy
   target:
     - target: AppImage
-      arch:
-        - x64
-        - arm64
-    - target: rpm
-      arch:
-        - x64
-        - arm64
     - target: deb
-      arch:
-        - x64
-        - arm64
-  # 维护者信息
-  maintainer: zyfun team
-  # 应用程序类别
-  category: Audio;Video
-# AppImage 配置
-appImage:
-  #  AppImage 文件的生成名称
-  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
-# rpm 配置
+    - target: rpm
 rpm:
-  #  rpm 文件的生成名称
-  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
-# deb 配置
-deb:
-  #  deb 文件的生成名称
-  artifactName: ${productName}-${os}-${version}-${arch}.${ext}
-# 是否在构建之前重新编译原生模块
+  # Workaround for electron build issue on rpm package:
+  # https://github.com/electron/forge/issues/3594
+  fpm: ['--rpm-rpmbuild-define=_build_id_links none']
 npmRebuild: false
-# 自动更新的配置
 publish:
-  # 更新提供商
   provider: github
-  owner: "Hiram-Wong"
-  repo: "ZyPlayer"
-# electronDownload:
-#   mirror: https://npmmirror.com/mirrors/electron/
+  owner: 'Hiram-Wong'
+  repo: 'ZyPlayer'
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/
+beforePack: scripts/before-pack.js
+afterPack: scripts/after-pack.js
+afterSign: scripts/notarize.js
+artifactBuildCompleted: scripts/artifact-build-completed.js

@@ -1,0 +1,7 @@
+- Editor: If you get a lot of syntax errors, switch to another adapter and back again.
+- Logger: Some adapters do not support log output.
+- Adapter
+  - T4: Go to [Lab->Extension Manager->Plugin] install the corresponding module
+  - T3[py]
+    - For those who have adapted the plugin, go to[Lab->Extension Manager->Environment] install uv module
+    - Click initialize will automatically install python environment, first time you need to wait patiently, if it fails, you need to do it manually.

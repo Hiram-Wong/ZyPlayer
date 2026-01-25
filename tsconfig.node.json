@@ -1,17 +1,35 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.node.json",
-  "include": ["electron.vite.config.*", "src/main/**/*", "src/preload/**/*"],
+  "include": [
+    "electron.vite.config.*",
+    "scripts",
+    "src/main/**/*",
+    "src/main/env.d.ts",
+    "src/preload/**/*",
+    "packages/shared/**/*",
+  ],
+  "exclude": [
+    "src/main/services/FastifyService/routes/v1/film/cms/adapter/t3AppMumo.ts",
+    "src/main/services/FastifyService/routes/v1/film/cms/adapter/t3AppGet.ts",
+  ],
   "compilerOptions": {
     "composite": true,
-    "types": ["electron-vite/node"],
-    "baseUrl": ".",
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo/tsconfig.node.tsbuildinfo",
+    "moduleResolution": "bundler",
+    "types": ["electron-vite/node", "vitest/globals"],
     "paths": {
-      "@main/*" :[
-        "src/main/*"
-      ],
-      "@preload/*": [
-        "src/preload/*"
-      ],
-    }
+      "@main/*": ["./src/main/*"],
+      "@preload/*": ["./src/preload/*"],
+      "@renderer/*": ["./src/renderer/*"],
+      "@shared/*": ["./packages/shared/*"],
+      "@db/*": ["./src/main/services/DatabaseService/*"],
+      "@server/*": ["./src/main/services/FastifyService/*"],
+      "@logger": ["./src/main/services/LoggerService"],
+      "@pkg": ["./package.json"]
+    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": true
   }
 }

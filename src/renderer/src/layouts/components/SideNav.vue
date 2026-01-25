@@ -1,72 +1,92 @@
 <template>
-  <div :class="[`${prefix}-sidebar-layout`]">
-    <t-menu collapsed :value="active" :class="`${prefix}-block-column`">
-      <img class="logo" src="@/assets/icon.png" alt="logo" />
-      <div class="line"></div>
-      <template v-for="item in list" :key="item.path">
-        <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)[0])">
+  <div :class="[`${prefix}-aside-container`]">
+    <t-menu collapsed :value="active" :style="{ width: '100%' }">
+      <template v-if="!isMacOS" #logo>
+        <img src="@/assets/icon.png" alt="logo" class="t-menu__icon" />
+      </template>
+
+      <template v-for="item in list.top" :key="item.path">
+        <t-menu-item v-if="getHref(item)" :name="item.path" :value="getPath(item)" @click="openHref(getHref(item)![0])">
           <template #icon>
-            <component :is="menuIcon(item)" class="t-icon"></component>
+            <span class="t-menu__icon">
+              <component :is="menuIcon(item)"></component>
+            </span>
           </template>
           {{ renderMenuTitle(item.title!) }}
         </t-menu-item>
         <t-menu-item v-else :name="item.path" :value="getPath(item)" :to="item.path">
           <template #icon>
-            <component :is="menuIcon(item)" class="t-icon"></component>
+            <span class="t-menu__icon">
+              <component :is="menuIcon(item)"></component>
+            </span>
           </template>
           {{ renderMenuTitle(item.title!) }}
         </t-menu-item>
       </template>
+      <template #operations>
+        <t-menu collapsed :value="active" :style="{ width: '100%' }">
+          <template v-for="item in list.bottom" :key="item.path">
+            <t-menu-item
+              v-if="getHref(item)"
+              :name="item.path"
+              :value="getPath(item)"
+              @click="openHref(getHref(item)![0])"
+            >
+              <template #icon>
+                <span class="t-menu__icon">
+                  <component :is="menuIcon(item)"></component>
+                </span>
+              </template>
+              {{ renderMenuTitle(item.title!) }}
+            </t-menu-item>
+            <t-menu-item v-else :name="item.path" :value="getPath(item)" :to="item.path">
+              <template #icon>
+                <span class="t-menu__icon">
+                  <component :is="menuIcon(item)"></component>
+                </span>
+              </template>
+              {{ renderMenuTitle(item.title!) }}
+            </t-menu-item>
+          </template>
+        </t-menu>
+      </template>
     </t-menu>
   </div>
 </template>
-
 <script setup lang="tsx">
 import type { PropType } from 'vue';
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 
+import RenderIcon from '@/components/render-icon/index.vue';
 import { prefix } from '@/config/global';
 import { useLocale } from '@/locales/useLocale';
+import { getActive } from '@/router';
 import type { MenuRoute } from '@/types/interface';
+import { isMacOS } from '@/utils/systeminfo';
 
 type ListItemType = MenuRoute & { icon?: string };
 
-const props = defineProps({
-  navData: {
+const { menu } = defineProps({
+  menu: {
     type: Array as PropType<MenuRoute[]>,
     default: () => [],
   },
-  theme: {
-    type: String as PropType<'dark' | 'light'>,
-    default: 'light',
-  },
 });
 
-const route = useRoute();
 const { locale } = useLocale();
 
-const getActive = (maxLevel = 3): string => {
-  if (!route.path) {
-    return '';
-  }
-  return route.path
-    .split('/')
-    .filter((_item: string, index: number) => index <= maxLevel && index > 0)
-    .map((item: string) => `/${item}`)
-    .join('');
-};
-
+const list = computed(() => {
+  const menuList = getMenuList(menu);
+  const topList: ListItemType[] = menuList.filter((item) => item.position === 'top' || !item.position);
+  const bottomList: ListItemType[] = menuList.filter((item) => item.position === 'bottom');
+  return { top: topList, bottom: bottomList };
+});
 const active = computed(() => getActive());
 
-const list = computed(() => {
-  const { navData } = props;
-  return getMenuList(navData);
-});
-
 const menuIcon = (item: ListItemType) => {
-  const RenderIcon = item.icon;
-  return RenderIcon;
+  const filled = item.path === active.value;
+  if (typeof item.icon === 'string') return <RenderIcon name={`${item.icon}${filled ? '-filled' : ''}`} />;
+  return item.icon;
 };
 
 const renderMenuTitle = (title: string | Record<string, string>) => {
@@ -78,7 +98,7 @@ const getMenuList = (list: MenuRoute[], basePath?: string): ListItemType[] => {
   if (!list || list.length === 0) {
     return [];
   }
-  // 如果meta中有orderNo则按照从小到大排序
+
   list.sort((a, b) => {
     return (a.meta?.orderNo || 0) - (b.meta?.orderNo || 0);
   });
@@ -86,6 +106,7 @@ const getMenuList = (list: MenuRoute[], basePath?: string): ListItemType[] => {
   return list
     .map((item) => {
       const path = basePath && !item.path.includes(basePath) ? `${basePath}/${item.path}` : item.path;
+
       return {
         path,
         title: item.meta?.title,
@@ -93,6 +114,7 @@ const getMenuList = (list: MenuRoute[], basePath?: string): ListItemType[] => {
         children: getMenuList(item.children, path),
         meta: item.meta,
         redirect: item.redirect,
+        position: item.meta?.position,
       };
     })
     .filter((item) => item.meta && item.meta.hidden !== true);
@@ -101,15 +123,22 @@ const getMenuList = (list: MenuRoute[], basePath?: string): ListItemType[] => {
 const getHref = (item: MenuRoute) => {
   const { frameSrc, frameBlank } = item.meta;
   if (frameSrc && frameBlank) {
-    return frameSrc.match(/(http|https):\/\/([\w.]+\/?)\S*/);
+    return frameSrc.match(/(https?):\/\/([\w.]+)(?:\/\S*)?/);
   }
   return null;
 };
 
 const getPath = (item: ListItemType) => {
-  if (active.value.startsWith(item.path)) {
+  const activeLevel = active.value.split('/').length;
+  const pathLevel = item.path.split('/').length;
+  if (activeLevel > pathLevel && active.value.startsWith(item.path)) {
     return active.value;
   }
+
+  if (active.value === item.path) {
+    return active.value;
+  }
+
   return item.meta?.single ? item.redirect : item.path;
 };
 
@@ -117,20 +146,4 @@ const openHref = (url: string) => {
   window.open(url);
 };
 </script>
-
-<style lang="less" scoped>
-.logo {
-  width: var(--td-size-10);
-  height: var(--td-size-10);
-  margin: var(--td-comp-paddingTB-l) 0 var(--td-comp-paddingTB-m) 0;
-}
-
-.line {
-  width: 24px;
-  height: 1px;
-  background-color: var(--td-bg-content-active-2);
-  border-radius: 12px;
-  margin-bottom: var(--td-comp-paddingTB-xs);
-  cursor: pointer;
-}
-</style>
+<style lang="less" scoped></style>
