@@ -7,6 +7,16 @@ on:
         description: 'Release tag (e.g. v1.0.0)'
         required: true
         default: 'v1.0.0'
+      platform:
+        description: 'Build platform'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - windows
+          - mac
+          - linux
   push:
     tags:
       - v*.*.*
@@ -20,7 +30,14 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: ${{ fromJSON(
+          github.event_name == 'push' && '["macos-latest", "windows-latest", "ubuntu-latest"]' ||
+          github.event.inputs.platform == 'all' && '["macos-latest", "windows-latest", "ubuntu-latest"]' ||
+          github.event.inputs.platform == 'linux' && '["ubuntu-latest"]' ||
+          github.event.inputs.platform == 'windows' && '["windows-latest"]' ||
+          github.event.inputs.platform == 'mac' && '["macos-latest"]' ||
+          '["macos-latest", "windows-latest", "ubuntu-latest"]'
+          ) }}
       fail-fast: false
 
     steps:
@@ -49,7 +66,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: 22
 
       - name: macos-latest dependencies fix
         if: matrix.os == 'macos-latest'
@@ -101,12 +118,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max-old-space-size=8192
 
-      - name: Upload Release
+      - name: Release
         uses: ncipollo/release-action@v1
         with:
           draft: true
           allowUpdates: true
           makeLatest: false
           tag: ${{ steps.get-tag.outputs.tag }}
-          artifacts: 'dist/*.exe,dist/*.zip,dist/*.dmg,dist/*.AppImage,dist/*.snap,dist/*.deb,dist/*.rpm,dist/*.tar.gz,dist/latest*.yml,dist/*.blockmap'
+          artifacts: 'dist/*.exe,dist/*.zip,dist/*.dmg,dist/*.AppImage,dist/*.snap,dist/*.deb,dist/*.rpm,dist/*.tar.gz,dist/latest*.yml,dist/rc*.yml,dist/beta*.yml,dist/*.blockmap'
           token: ${{ secrets.GITHUB_TOKEN }}
