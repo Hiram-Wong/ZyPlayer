@@ -12,17 +12,17 @@ import iconDark from '../../../build/tray_icon_dark.png?asset';
 import iconLight from '../../../build/tray_icon_light.png?asset';
 import { windowService } from './WindowService';
 
-export class TrayService {
+class TrayService {
   private static instance: TrayService;
   private tray: Tray | null = null;
   private contextMenu: Menu | null = null;
 
-  constructor() {
-    this.updateTray(true);
-    TrayService.instance = this;
-  }
+  constructor() {}
 
-  public static getInstance() {
+  public static getInstance(): TrayService {
+    if (!TrayService.instance) {
+      TrayService.instance = new TrayService();
+    }
     return TrayService.instance;
   }
 
@@ -55,6 +55,7 @@ export class TrayService {
 
     this.tray.setToolTip(APP_NAME);
 
+    // only support windows and macOS right-click menu
     this.tray.on('right-click', () => {
       if (this.contextMenu) {
         this.tray?.popUpContextMenu(this.contextMenu);
@@ -128,3 +129,5 @@ export class TrayService {
     }
   }
 }
+
+export const trayService = TrayService.getInstance();

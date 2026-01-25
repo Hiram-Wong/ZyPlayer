@@ -4,16 +4,16 @@ import { APP_NAME } from '@shared/config/appinfo';
 import type { MenuItemConstructorOptions } from 'electron';
 import { Menu } from 'electron';
 
-export class MenuService {
+class MenuService {
   private static instance: MenuService;
   private contextMenu: Menu | null = null;
 
-  constructor() {
-    this.updateMenu(true);
-    MenuService.instance = this;
-  }
+  constructor() {}
 
-  public static getInstance() {
+  public static getInstance(): MenuService {
+    if (!MenuService.instance) {
+      MenuService.instance = new MenuService();
+    }
     return MenuService.instance;
   }
 
@@ -108,3 +108,5 @@ export class MenuService {
     }
   }
 }
+
+export const menuService = MenuService.getInstance();

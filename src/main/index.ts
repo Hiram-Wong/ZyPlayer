@@ -12,11 +12,11 @@ import { dbService } from '@main/services/DbService';
 import { fastifyService } from '@main/services/FastifyService';
 import { terminate as filmCmsTerminate } from '@main/services/FastifyService/routes/v1/film/cms/utils/cache';
 import { fileStorage } from '@main/services/FileStorage';
-import { MenuService } from '@main/services/MenuService';
+import { menuService } from '@main/services/MenuService';
 import { pluginService } from '@main/services/PluginService';
 import { handleProtocolUrl, setupAppImageDeepLink } from '@main/services/ProtocolClient';
 import { proxyManager } from '@main/services/ProxyManager';
-import { TrayService } from '@main/services/TrayService';
+import { trayService } from '@main/services/TrayService';
 import { windowService } from '@main/services/WindowService';
 import { isDev, isLinux, isMacOS, isWindows } from '@main/utils/systeminfo';
 import { APP_NAME, APP_NAME_PROTOCOL } from '@shared/config/appinfo';
@@ -147,10 +147,8 @@ const setupReady = () => {
 
     const mainWindow = windowService.createMainWindow();
 
-    // eslint-disable-next-line no-new
-    new TrayService();
-    // eslint-disable-next-line no-new
-    new MenuService();
+    trayService.updateTray(true);
+    menuService.updateMenu(true);
 
     registerIpc(mainWindow, app);
 

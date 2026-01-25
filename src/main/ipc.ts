@@ -8,12 +8,12 @@ import AppUpdater from '@main/services/AppUpdater';
 import { binaryService } from '@main/services/BinaryService';
 import { fastifyService } from '@main/services/FastifyService';
 import { fileStorage } from '@main/services/FileStorage';
-import { MenuService } from '@main/services/MenuService';
+import { menuService } from '@main/services/MenuService';
 import NotificationService from '@main/services/NotificationService';
 import { pluginService } from '@main/services/PluginService';
 import { proxyManager } from '@main/services/ProxyManager';
 import { shortcutService } from '@main/services/ShortcutService';
-import { TrayService } from '@main/services/TrayService';
+import { trayService } from '@main/services/TrayService';
 import { windowService } from '@main/services/WindowService';
 import { createDir, fileDelete, pathExist, readDirFaster, readFile, saveFile } from '@main/utils/file';
 import type { IHomePath, ISystemPath, IUserPath } from '@main/utils/path';
@@ -172,8 +172,8 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
   ipcMain.handle(IPC_CHANNEL.CHANGE_LANG, async (_, lang: ILang) => {
     appLocale.changeLocale(lang);
 
-    MenuService.getInstance().updateMenu(true);
-    TrayService.getInstance().updateTray(true);
+    menuService.updateMenu(true);
+    trayService.updateTray(true);
   });
 
   // file
