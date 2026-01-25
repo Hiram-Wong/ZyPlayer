@@ -84,6 +84,11 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Generate date tag
+        id: date
+        run: echo "date=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+        shell: bash
+
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
