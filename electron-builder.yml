@@ -114,7 +114,7 @@ mac:
   notarize: false
   target:
     - target: dmg
-    # - target: zip
+    - target: zip
 dmg:
   writeUpdateInfo: false
 linux:
