@@ -30,6 +30,7 @@ class TrayService {
     this.destroyTray();
 
     const iconPath = isMacOS ? (nativeTheme.shouldUseDarkColors ? iconLight : iconDark) : icon;
+
     const tray = new Tray(iconPath);
 
     if (isWindows) {
@@ -49,18 +50,18 @@ class TrayService {
 
     this.updateContextMenu();
 
-    if (isLinux) {
-      this.tray.setContextMenu(this.contextMenu);
-    }
-
     this.tray.setToolTip(APP_NAME);
 
-    // only support windows and macOS right-click menu
-    this.tray.on('right-click', () => {
-      if (this.contextMenu) {
-        this.tray?.popUpContextMenu(this.contextMenu);
-      }
-    });
+    // only windows and macos support right-click event and popUpContextMenu
+    if (isLinux) {
+      this.tray.setContextMenu(this.contextMenu);
+    } else {
+      this.tray.on('right-click', () => {
+        if (this.contextMenu) {
+          this.tray?.popUpContextMenu(this.contextMenu);
+        }
+      });
+    }
 
     this.tray.on('click', () => {
       windowService.showAllWindows();
@@ -116,7 +117,14 @@ class TrayService {
 
   public updateTray(showTray: boolean = false) {
     if (showTray) {
-      this.createTray();
+      if (!this.tray) {
+        this.createTray();
+      } else {
+        this.updateContextMenu();
+        if (isLinux) {
+          this.tray.setContextMenu(this.contextMenu);
+        }
+      }
     } else {
       this.destroyTray();
     }
