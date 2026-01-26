@@ -1,4 +1,3 @@
-
 <div align="right">
   <details>
     <summary >🌐 Language</summary>
@@ -30,66 +29,18 @@
   </details>
 </div>
 
-<!-- 项目 -->
-
-[github-release-shield]: https://img.shields.io/github/package-json/v/Hiram-Wong/ZyPlayer?label=Release
-[github-release-link]: https://github.com/Hiram-Wong/ZyPlayer/blob/release/package.json
-[github-contributors-shield]: https://openomy.app/svg?repo=Hiram-Wong/ZyPlayer&chart=bubble&latestMonth=12
-[github-contributors-link]: https://openomy.app/github/Hiram-Wong/ZyPlayer
-[github-download-shield]: https://img.shields.io/github/downloads/Hiram-Wong/ZyPlayer/total?label=Download
-[github-download-link]: https://github.com/Hiram-Wong/ZyPlayer/releases
-[github-license-shield]: https://img.shields.io/github/license/Hiram-Wong/ZyPlayer?label=License
-[github-license-link]: https://github.com/Hiram-Wong/ZyPlayer/blob/main/LICENSE
-[fossa-shield]: https://app.fossa.com/api/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer.svg?type=shield
-[fossa-link]: https://app.fossa.com/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer?ref=badge_shield
-[sponsor-shield]: https://img.shields.io/badge/赞助支持-FF6699.svg?logo=githubsponsors&logoColor=white
-[sponsor-link]: https://ko-fi.com/hiramwong
-[telegram-shield]: https://img.shields.io/badge/IM-Telegram-0088CC?logo=telegram
-[telegram-link]: https://t.me/+IOovrYLP7gYwYmNl
-
-<!-- 文档 -->
-
-[readmex-shield]: https://raw.githubusercontent.com/CodePhiliaX/resource-trusteeship/main/readmex.svg
-[readmex-link]: https://readmex.com/Hiram-Wong/ZyPlayer
-[deepwiki-shield]: https://deepwiki.com/badge.svg
-[deepwiki-link]: https://deepwiki.com/Hiram-Wong/ZyPlayer
-[zread-shield]: https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff
-[zread-link]: https://zread.ai/Hiram-Wong/ZyPlayer
-
-<!-- 排名 -->
-
-[rank-hellogithub-shield]: https://api.hellogithub.com/v1/widgets/recommend.svg?rid=c54bf4d457b64ee7a84fd1ea0b36419a
-[rank-hellogithub-link]: https://hellogithub.com/repository/Hunlongyu/ZY-Player
-[rank-trendshift-shield]: https://trendshift.io/api/badge/repositories/9742
-[rank-trendshift-link]: https://trendshift.io/repositories/9742
-[rank-producthunt-shield]: https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1019733&theme=light
-[rank-producthunt-link]: https://www.producthunt.com/products/zyfun?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-zyfun
-
-<div align="right" >
-  <details>
-    <summary>🌐 Language</summary>
-    <div>
-      <div align="right">
-        <p><a href="https://openaitx.github.io/#/view?user=Hiram-Wong&project=ZyPlayer&lang=en">English</a></p>
-        <p><a href="https://openaitx.github.io/#/view?user=Hiram-Wong&project=ZyPlayer&lang=zh-CN">简体中文</a></p>
-        <p><a href="https://openaitx.github.io/#/view?user=Hiram-Wong&project=ZyPlayer&lang=zh-TW">繁體中文</a></p>
-      </div>
-    </div>
-  </details>
-</div>
-
-<h1 align="center">
+<p align="center">
   <a href="https://github.com/Hiram-Wong/ZyPlayer/releases">
     <!-- <img src="https://github.com/Hiram-Wong/ZyPlayer/blob/main/build/icon.png?raw=true" width="150" height="150" alt="banner" /> -->
     <img width="128" src="https://s2.loli.net/2024/02/29/7Q1nVbhkHdSmo5D.png">
     <br>
   </a>
-</h1>
+</p>
 
 <div align="center">
 
 [![][github-release-shield]][github-release-link]
-[![][github-download-shield]][github-download-link]
+[![][github-nightly-shield]][github-nightly-link]
 [![][github-license-shield]][github-license-link]
 [![][fossa-shield]][fossa-link]
 [![][telegram-shield]][telegram-link]
@@ -114,27 +65,7 @@
 
 # 软件介绍
 
-`zyfun`是一款免费易用的媒体播放器桌面客户端，适用于 Windows、Mac 和 Linux。
-
-## 🌴 注意事项
-
-- 仅此Github发布，请勿上当受骗；请各位管理者不要费力宣传及引流本软件。
-- 强烈倡导合法观影，本软件仅作为播放工具，不涉及资源存储或分发。
-- 仅供个人学习交流之用，24小时内请自觉卸载，勿作商业用途。
-- 部分灵感来源于[ZY-Player](https://github.com/Hunlongyu/ZY-Player)，图标素材感谢[@fourbeauty]贡献。
-- 在开始使用前，请务必详读并同意用户协议，确保遵守相关规定。
-
-## 🌟 主要特性
-
-- **广泛兼容**：跨平台支持 Windows、Mac、Linux 系统。
-- **深色模式**：适配夜间使用，保护视力。
-- **资源接入**：轻松管理 json、xml 等格式的 CMS。
-- **IPTV支持**：无缝播放 m3u、genre 等格式。
-- **快捷隐藏**：内置老板键，隐私保护一键到位。
-- **多播放器**：内置多种播放器核心，满足不同需求。
-- **更多内容**: 自行探索...
-
-## 🖼️ 软件预览
+zyfun是一款免费、极简、全能的跨平台影音管家，一站式管理 T1-T4 全类型资源，内置多核播放器随心切换。独家老板键，一键隐身摸鱼无忧。用观影发现世界！
 
 <details>
 <summary>展开查看软件截图</summary>
@@ -150,6 +81,14 @@
 | ![历史记录](https://s2.loli.net/2024/07/20/DiYsx4fbcH3KU6T.png)  |   ![设置](https://s2.loli.net/2024/07/20/QeaDxZ2IYCFoVki.png)    |
 
 </details>
+
+## 🌴 注意事项
+
+- 仅此Github发布，请勿上当受骗；请各管理者不要宣传及引流本软件。
+- 强烈倡导合法观影，本软件仅作为播放工具，不涉及资源存储或分发。
+- 仅供个人学习交流之用，24小时内请自觉卸载，勿作商业用途。
+- 前身来源于[ZY-Player](https://github.com/Hunlongyu/ZY-Player)，图标由@fourbeauty设计。
+- 在开始使用前，请务必详读并同意用户协议，确保遵守相关规定。
 
 ## 💻 跨平台说明
 
@@ -172,50 +111,54 @@
 
 ## 🛠️ 下载安装
 
-> **最新发布版下载**: 访问 [GitHub Releases页面](https://github.com/Hiram-Wong/ZyPlayer/releases) 获取。
+> **最新发布版下载**: 访问 [GitHub Releases页面](https://github.com/Hiram-Wong/ZyPlayer/releases) 获取
 
-> **最新开发版下载**: 访问 [GitHub Actions页面](https://github.com/Hiram-Wong/ZyPlayer/actions) 获取, 需登录Github账号。
+> **最新开发版下载**: 访问 [GitHub Actions页面](https://github.com/Hiram-Wong/ZyPlayer/actions/workflows/nightly-build.yml) 获取, 需登录Github账号
 
 ### MacOS 安装后打开提示「文件已损坏」
 
 ```bash
-# 如下为顺序执行
-
-# 1.执行下面命令信任开发者, 会要求输入密码:
 sudo spctl --master-disable
-# 2.执行下面命令放行软件 :
 sudo xattr -cr /Applications/zyfun.app
 ```
 
 ### Linux Appimage运行失败
 
-```bash
-# 如下为不同问题的解决方法, 根据实际执行
+> Running as root without --no-sandbox is not supported
 
-# 报错关键词 Running as root without --no-sandbox is not supported. See https://ccrbug.com/638180.
-./文件名.AppImage --no-shawbox
-# 报错关键词 dlopen()：error loading libfuse.so.2
+```bash
+./文件名.AppImage --no-sandbox
+```
+
+> dlopen()：error loading libfuse.so.2
+
+```bash
 sudo apt-get install libfuse2
-# 报错关键词 Exiting GPU process due to errors during initialization
+```
+
+> Exiting GPU process due to errors during initialization
+
+```bash
 xhost +
 ```
 
 ### Linux deb安装失败
 
-```bash
-# 如下为不同问题的解决方法, 根据实际执行
+> Package libnss3-1d is not installed
 
-# 报错关键词 Package libnss3-1d is not installed
+```bash
 sudo apt-get install libnss3-1d
-# 报错关键词 Package libxss1 is not installed
+```
+
+> Package libxss1 is not installed
+
+```bash
 sudo apt-get install libxss1
 ```
 
 ## 📚 数据结构
 
-> 请严格按照数据结构填写, 避免不必要的报错(如数据字段类型不匹配)
-
-> 数据合并,请先手动导出后编辑数据后导入(软件直接导入为覆盖数据)
+> 请严格按照数据结构导入数据, 避免不必要的报错(如数据字段类型不匹配)
 
 <details>
 <summary>展开查看接口说明</summary>
@@ -376,15 +319,20 @@ sudo apt-get install libxss1
 
 </details>
 
-## 🖥️ 开发
+## 🤝 参与贡献
 
-[开发文档](docs/Develop.md)
+以下是您可以做出贡献的一些方式：
 
-## 🚀 贡献者
+- **贡献代码**：开发新功能或优化现有代码 <[开发文档](docs/Develop.md)>
+- **修复错误**：提交您发现的任何错误的修复 <[提交规范](docs/Conventional_Commits.md)>
+- **维护问题**：帮助管理GitHub问题
+- **产品设计**：参与设计讨论
+- **编写文档**：改进用户手册和指南
+- **社区参与**：加入讨论并帮助用户
 
 [![][github-contributors-shield]][github-contributors-link]
 
-## 🌟 Star 历史
+## 🌟 Star历史
 
 <a href="https://www.star-history.com/#Hiram-Wong/ZyPlayer&Date">
  <picture>
@@ -396,11 +344,40 @@ sudo apt-get install libxss1
 
 ## 💰 金主爸爸
 
-<p align="left">
-  <a href="https://yxvm.com/">
-    <img src="https://s2.loli.net/2025/04/09/JMyQZUKY2bX4G3q.png">
-  </a>
-  <a href="https://github.com/NodeSeekDev/NodeSupport">
-    <img src="https://avatars.githubusercontent.com/u/205379293?s=200&v=4">
-  </a>
-</p>
+- [NodeSupport](https://github.com/NodeSeekDev/NodeSupport) 赞助了本项目
+- [![image](https://s2.loli.net/2025/04/09/JMyQZUKY2bX4G3q.png)](https://yxvm.com/)
+
+<!-- Links & Images -->
+
+[github-release-shield]: https://img.shields.io/github/v/release/Hiram-Wong/ZyPlayer?label=Release&logo=github
+[github-release-link]: https://github.com/Hiram-Wong/ZyPlayer/releases
+[github-nightly-shield]: https://img.shields.io/github/actions/workflow/status/Hiram-Wong/ZyPlayer/nightly-build.yml?label=NightlyBuild&logo=github
+[github-nightly-link]: https://github.com/Hiram-Wong/ZyPlayer/actions/workflows/nightly-build.yml
+[github-contributors-shield]: https://openomy.app/svg?repo=Hiram-Wong/ZyPlayer&chart=bubble&latestMonth=12
+[github-contributors-link]: https://openomy.app/github/Hiram-Wong/ZyPlayer
+[github-license-shield]: https://img.shields.io/github/license/Hiram-Wong/ZyPlayer?label=License&logo=gnu
+[github-license-link]: https://github.com/Hiram-Wong/ZyPlayer/blob/main/LICENSE
+[fossa-shield]: https://app.fossa.com/api/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer.svg?type=shield
+[fossa-link]: https://app.fossa.com/projects/git%2Bgithub.com%2FHiram-Wong%2FZyPlayer?ref=badge_shield
+[sponsor-shield]: https://img.shields.io/badge/赞助支持-FF6699.svg?logo=githubsponsors&logoColor=white
+[sponsor-link]: https://ko-fi.com/hiramwong
+[telegram-shield]: https://img.shields.io/badge/IM-Telegram-0088CC?logo=telegram
+[telegram-link]: https://t.me/+IOovrYLP7gYwYmNl
+
+<!-- Links & Images -->
+
+[readmex-shield]: https://raw.githubusercontent.com/CodePhiliaX/resource-trusteeship/main/readmex.svg
+[readmex-link]: https://readmex.com/Hiram-Wong/ZyPlayer
+[deepwiki-shield]: https://deepwiki.com/badge.svg
+[deepwiki-link]: https://deepwiki.com/Hiram-Wong/ZyPlayer
+[zread-shield]: https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff
+[zread-link]: https://zread.ai/Hiram-Wong/ZyPlayer
+
+<!-- Links & Images -->
+
+[rank-hellogithub-shield]: https://api.hellogithub.com/v1/widgets/recommend.svg?rid=c54bf4d457b64ee7a84fd1ea0b36419a
+[rank-hellogithub-link]: https://hellogithub.com/repository/Hunlongyu/ZY-Player
+[rank-trendshift-shield]: https://trendshift.io/api/badge/repositories/9742
+[rank-trendshift-link]: https://trendshift.io/repositories/9742
+[rank-producthunt-shield]: https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1019733&theme=light
+[rank-producthunt-link]: https://www.producthunt.com/products/zyfun?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-zyfun
