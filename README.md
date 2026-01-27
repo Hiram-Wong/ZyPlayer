@@ -127,7 +127,7 @@ sudo xattr -cr /Applications/zyfun.app
 > Running as root without --no-sandbox is not supported
 
 ```bash
-./文件名.AppImage --no-sandbox
+./zyfun.AppImage --no-sandbox
 ```
 
 > dlopen()：error loading libfuse.so.2
@@ -142,7 +142,7 @@ sudo apt-get install libfuse2
 xhost +
 ```
 
-### Linux deb安装失败
+### Linux deb包安装失败
 
 > Package libnss3-1d is not installed
 
@@ -154,6 +154,21 @@ sudo apt-get install libnss3-1d
 
 ```bash
 sudo apt-get install libxss1
+```
+
+### Linux rpm包安装失败
+
+> Dependency check failed libXScrnSaver is needed
+
+```bash
+sudo yum install epel-release
+sudo yum install libXScrnSaver
+```
+
+> Dependency check failed xdg-utils is needed
+
+```bash
+sudo yum install xdg-utils
 ```
 
 ## 📚 数据结构
