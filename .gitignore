@@ -49,7 +49,7 @@ out/
 
 # IDE
 .vscode/*
-.idea/*
+**/.idea/*
 .aider*
 .claude/*
 .claude-code-router/*
