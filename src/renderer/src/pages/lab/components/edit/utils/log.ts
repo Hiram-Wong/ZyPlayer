@@ -72,7 +72,7 @@ export const SITE_LOG_MAP = {
   [SITE_TYPE.T3_XBPQ]: (logger: ILogger) => createSystemSseTransport(logger, SITE_TYPE.T3_XBPQ),
   [SITE_TYPE.T3_XYQ]: (logger: ILogger) => createSystemSseTransport(logger, SITE_TYPE.T3_XYQ),
   [SITE_TYPE.T3_APPYSV2]: (logger: ILogger) => createSystemSseTransport(logger, SITE_TYPE.T3_APPYSV2),
-  [SITE_TYPE.T3_PY]: () => null,
+  [SITE_TYPE.T3_PY]: (logger: ILogger) => createSystemSseTransport(logger, SITE_TYPE.T3_PY),
   [SITE_TYPE.T3_QUICK]: () => null,
   [SITE_TYPE.T3_ALIST]: (logger: ILogger) => createSystemSseTransport(logger, SITE_TYPE.T3_ALIST),
 };
