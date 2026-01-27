@@ -25,6 +25,15 @@ def custom_print(*args, **kwargs):
         pass
 
 
+def ensure_json_str(val):
+    if isinstance(val, str):
+        return val
+    try:
+        return json.dumps(val)
+    except:
+        return val
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Spider ZMQ server")
     parser.add_argument("--ctrl-port", type=int, default=19979, help="Control port")
@@ -40,7 +49,11 @@ def load_module_from_code(module_name: str, source_code: str):
     return module
 
 
-def sync_wrapper(func, params):
+def sync_wrapper(func, params: list):
+    if params is None or not params:
+        if inspect.iscoroutinefunction(func):
+            return asyncio.run(func())
+        return func()
     if inspect.iscoroutinefunction(func):
         return asyncio.run(func(*params))
     return func(*params)
@@ -50,18 +63,20 @@ def sync_wrapper(func, params):
 def get_spider(code_hash: int, code: str):
     module_name = f"dynamic_module_{code_hash}"
     module = load_module_from_code(module_name, code)
+
     spider_cls = getattr(module, "Spider", None)
-    if not spider_cls:
-        raise RuntimeError("Spider class not found in module")
-    return spider_cls()
+    if spider_cls is None:
+        raise ImportError("Spider class not found in module")
+
+    spider = spider_cls(t4_api="http://127.0.0.1:9978/proxy?do=py")
+    return spider
 
 
 def core(method_name: str, code: str, options: list):
     uuid = hash(code)
-    try:
-        spider = get_spider(uuid, code)
-    except Exception as e:
-        raise RuntimeError(f"Failed to load spider: {e}")
+    spider = get_spider(uuid, code)
+
+    # print(f"Received request: method={method_name}, options={options}")
 
     method = getattr(spider, method_name, None)
     if not method:
@@ -100,6 +115,10 @@ if __name__ == '__main__':
                 code = request.get("code", "")
                 method_name = request.get("type", "")
                 options = request.get("options", [])
+                if method_name == "init":
+                    if not options:
+                        options = ['']
+                    options = [ensure_json_str(options[0])]
 
                 res = core(method_name, code, options)
                 ctrl_socket.send_string(json.dumps(res, ensure_ascii=False))
