@@ -1,6 +1,12 @@
 <template>
   <div class="film view-container">
-    <common-nav :list="config.list" :active="active.nav" search class="sidebar" @change="onNavChange" />
+    <common-nav
+      :list="config.list.map((t) => ({ id: t.id, name: t.name }))"
+      :active="active.nav"
+      search
+      class="sidebar"
+      @change="onNavChange"
+    />
 
     <div class="content">
       <div v-if="classList.length > 1" class="header">
@@ -139,7 +145,7 @@
     <t-back-top container="#back-top" size="small" :offset="['1rem', '0.8rem']" :duration="2000" />
 
     <dialog-detail-view
-      v-model:visible="dialogState.visibleDetail"
+      v-model:visible="active.detailDialog"
       :extra="detailFormData.extra"
       :info="detailFormData.info"
     />
@@ -180,8 +186,8 @@ const infiniteId = ref(Date.now());
 const searchValue = ref('');
 
 const detailFormData = ref({
-  info: {},
-  extra: {},
+  info: {} as ICmsInfo,
+  extra: {} as { active: IModels['site'] },
 });
 
 const pagination = ref({
@@ -205,9 +211,6 @@ const filterData = ref<ICmsHome['filters']>({});
 const filmList = ref<Array<ICmsInfo & { relateSite: IModels['site'] }>>([]);
 const folderBreadcrumb = ref<Array<{ label: ICmsInfo['vod_name']; value: ICmsInfo['vod_id'] }>>([]);
 
-const dialogState = ref({
-  visibleDetail: false,
-});
 const active = ref({
   nav: '',
   class: '' as ICmsInfo['vod_id'],
@@ -218,6 +221,7 @@ const active = ref({
   loadStatus: 'complete' as 'complete' | 'error' | 'noConfig' | 'noSelect',
   lazyload: false,
   loading: false,
+  detailDialog: false,
 });
 
 const LOAD_TEXT_OPTIONS = computed(() => ({
@@ -479,13 +483,13 @@ const playEvent = async (item) => {
   }
 };
 
-const playWithExternalPlayer = async (item: ICmsInfo, active: IModels['site']) => {
+const playWithExternalPlayer = async (item: ICmsInfo, current: IModels['site']) => {
   detailFormData.value = {
     info: item,
-    extra: { active },
+    extra: { active: current },
   };
 
-  dialogState.value.visibleDetail = true;
+  active.value.detailDialog = true;
 };
 
 const playWithInternalPlayer = (item: ICmsInfo, active: IModels['site']) => {
@@ -593,7 +597,7 @@ const defaultConfig = () => {
   filmList.value = [];
   folderBreadcrumb.value = [];
 
-  config.value.default = {};
+  config.value.default = {} as IModels['site'];
 
   infiniteId.value = Date.now();
 };
@@ -611,7 +615,7 @@ const onNavChange = async (id: string) => {
     defaultConfig();
     active.value.class = '';
     active.value.nav = id;
-    config.value.default = config.value.list.find((item) => item.id === id);
+    config.value.default = config.value.list.find((item) => item.id === id)!;
   } catch (error) {
     console.error(`Failed to change config:`, error);
   } finally {

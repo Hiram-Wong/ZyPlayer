@@ -1,6 +1,12 @@
 <template>
   <div class="analyze view-container">
-    <common-nav :list="config.list" :active="active.nav" search class="sidebar" @change="onNavChange" />
+    <common-nav
+      :list="config.list.map((t) => ({ id: t.id, name: t.name }))"
+      :active="active.nav"
+      search
+      class="sidebar"
+      @change="onNavChange"
+    />
 
     <div class="content">
       <div class="header">
@@ -278,7 +284,7 @@ const defaultConfig = () => {
   // active.value.class = '';
   active.value.nav = '';
 
-  config.value.default = {};
+  config.value.default = {} as IModels['analyze'];
 };
 
 const reloadConfig = async (eventData: { source: string; data: any }) => {
@@ -293,7 +299,7 @@ const onNavChange = async (id: string) => {
   try {
     defaultConfig();
     active.value.nav = id;
-    config.value.default = config.value.list.find((item) => item.id === id);
+    config.value.default = config.value.list.find((item) => item.id === id)!;
   } catch (error) {
     console.error(`Failed to change config:`, error);
   }

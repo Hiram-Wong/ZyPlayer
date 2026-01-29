@@ -133,6 +133,7 @@ import {
   OrderDescendingIcon,
 } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
+import type { PropType } from 'vue';
 import { computed, ref, watch } from 'vue';
 
 import { fetchCmsPlay, fetchCmsProxy } from '@/api/film';
@@ -154,12 +155,12 @@ const props = defineProps({
     default: false,
   },
   info: {
-    type: Object,
+    type: Object as PropType<ICmsInfo>,
     default: () => ({}),
   },
   extra: {
-    type: Object,
-    default: () => ({ active: {}, setting: {} }),
+    type: Object as PropType<{ active: IModels['site'] }>,
+    default: () => ({ active: {} }),
   },
 });
 
@@ -169,11 +170,11 @@ const storePlayer = usePlayerStore();
 
 const formVisible = ref(false);
 
-const infoConf = ref<Partial<ICmsInfo>>(props.info);
+const infoConf = ref(props.info);
 const extraConf = ref(props.extra);
 
-const starData = ref<IModels['star']>({} as IModels['star']);
-const historyData = ref<IModels['history']>({} as IModels['history']);
+const starData = ref({} as IModels['star']);
+const historyData = ref({} as IModels['history']);
 
 const lineList = ref<{ type_id: string; type_name: string }[]>([]);
 
@@ -244,7 +245,7 @@ const getStarData = async () => {
     starData.value = isNil(resp?.id) ? {} : resp;
   } catch (error) {
     console.error('Get Star Data Error:', error);
-    starData.value = {};
+    starData.value = {} as IModels['star'];
   }
 };
 
@@ -257,11 +258,11 @@ const saveStarData = async () => {
     if (isArray(resp) && !isArrayEmpty(resp) && !isNil(resp[0]?.id)) {
       starData.value = resp[0];
     } else {
-      starData.value = {};
+      starData.value = {} as IModels['star'];
     }
   } catch (error) {
     console.error('Save Star Data Error:', error);
-    starData.value = {};
+    starData.value = {} as IModels['star'];
   }
 };
 
@@ -273,7 +274,7 @@ const delStarDate = async () => {
   } catch (error) {
     console.error('Delete Star Data Error:', error);
   } finally {
-    starData.value = {};
+    starData.value = {} as IModels['star'];
   }
 };
 
@@ -304,7 +305,7 @@ const getHistoryData = async () => {
     historyData.value = isNil(resp?.id) ? {} : resp;
   } catch (error) {
     console.error('Get History Data Error:', error);
-    historyData.value = {};
+    historyData.value = {} as IModels['history'];
   }
 };
 
@@ -312,23 +313,23 @@ const saveHistoryData = async () => {
   const doc = createHistoryDoc(infoConf.value as ICmsInfo, extraConf.value.active.key);
 
   const id = historyData.value?.id;
-  if (!isNil(id) && isPositiveFiniteNumber(historyData.value.watchTime)) doc.watchTime = historyData.value.watchTime;
-  if (!isNil(id) && isPositiveFiniteNumber(historyData.value.duration)) doc.duration = historyData.value.duration;
+  if (!isNil(id) && isPositiveFiniteNumber(historyData.value.watchTime)) doc.watchTime = historyData.value.watchTime!;
+  if (!isNil(id) && isPositiveFiniteNumber(historyData.value.duration)) doc.duration = historyData.value.duration!;
   if (!isNil(id) && isPositiveFiniteNumber(historyData.value.skipTimeInStart))
-    doc.skipTimeInStart = historyData.value.skipTimeInStart;
+    doc.skipTimeInStart = historyData.value.skipTimeInStart!;
   if (!isNil(id) && isPositiveFiniteNumber(historyData.value.skipTimeInEnd))
-    doc.skipTimeInEnd = historyData.value.skipTimeInEnd;
+    doc.skipTimeInEnd = historyData.value.skipTimeInEnd!;
 
   try {
     const resp = isNil(id) ? await addHistory(doc) : await putHistory({ id: [id], doc });
     if (isArray(resp) && !isArrayEmpty(resp) && !isNil(resp[0]?.id)) {
       historyData.value = resp[0];
     } else {
-      historyData.value = {};
+      historyData.value = {} as IModels['history'];
     }
   } catch (error) {
     console.error('Save History Data Error:', error);
-    historyData.value = {};
+    historyData.value = {} as IModels['history'];
   }
 };
 
@@ -513,10 +514,10 @@ const defaultConfig = () => {
   active.value.analyzeId = '';
   active.value.reverseOrder = true;
 
-  historyData.value = {};
-  starData.value = {};
+  historyData.value = {} as IModels['history'];
+  starData.value = {} as IModels['star'];
 
-  analyzeConfig.value = { default: {}, list: [] };
+  analyzeConfig.value = { default: {} as IModels['analyze'], list: [] };
 };
 </script>
 <style lang="less" scoped>

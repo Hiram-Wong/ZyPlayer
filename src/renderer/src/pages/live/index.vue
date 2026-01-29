@@ -1,6 +1,12 @@
 <template>
   <div class="live view-container">
-    <common-nav :list="config.list" :active="active.nav" search class="sidebar" @change="onNavChange" />
+    <common-nav
+      :list="config.list.map((t) => ({ id: t.id, name: t.name }))"
+      :active="active.nav"
+      search
+      class="sidebar"
+      @change="onNavChange"
+    />
 
     <div class="content">
       <div v-if="classList.length > 1" class="header">
@@ -428,7 +434,7 @@ const defaultConfig = () => {
   classList.value = [];
   channelList.value = [];
 
-  config.value.default = {};
+  config.value.default = {} as IModels['iptv'];
 
   infiniteId.value = Date.now();
 };
@@ -447,7 +453,7 @@ const onNavChange = async (id: string) => {
     active.value.class = '';
     active.value.nav = id;
     await putIptvDefault(id);
-    config.value.default = config.value.list.find((item) => item.id === id);
+    config.value.default = config.value.list.find((item) => item.id === id)!;
     emitter.emit(emitterChannel.REFRESH_LIVE_CONFIG, { source: emitterSource.PAGE_SHOW });
   } catch (error) {
     console.error(`Failed to change config:`, error);

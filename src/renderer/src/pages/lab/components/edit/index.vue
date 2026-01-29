@@ -508,7 +508,7 @@ const dataLoading = ref({
 });
 
 const templateNameList = ref<string[]>([]);
-const siteData = ref<IModels['site']>({});
+const siteData = ref({} as IModels['site']);
 
 const alert = ref<Record<string, Promise<MessageInstance> | null>>({
   debug: null,
@@ -541,7 +541,7 @@ onDeactivated(() => deactivateDispose());
 
 const setup = async () => {
   await getSiteData();
-  active.value.type = siteData.value.type || active.value.type;
+  active.value.type = siteData.value.type as ISiteType;
   editText.value.code = await readFile(active.value.type, 'silence');
 
   await connectLogger();
@@ -604,11 +604,11 @@ const saveSiteData = async () => {
     if (isArray(resp) && !isArrayEmpty(resp) && !isNil(resp[0]?.id)) {
       siteData.value = resp[0];
     } else {
-      siteData.value = {};
+      siteData.value = {} as IModels['site'];
     }
   } catch (error) {
     console.error('Save site Data Error:', error);
-    siteData.value = {};
+    siteData.value = {} as IModels['site'];
   }
 };
 
@@ -620,7 +620,7 @@ const getSiteData = async () => {
     siteData.value = site;
   } catch (error) {
     console.error('Fail to get site data', error);
-    siteData.value = {};
+    siteData.value = {} as IModels['site'];
   }
 };
 

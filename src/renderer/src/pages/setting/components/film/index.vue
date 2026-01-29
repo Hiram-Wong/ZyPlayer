@@ -187,7 +187,7 @@ const deleteItem = async (ids: string[]) => {
   }
 };
 
-const updateItem = async (ids: string[], doc: IModels['site']) => {
+const updateItem = async (ids: string[], doc: Partial<IModels['site']>) => {
   try {
     await putSite({ id: ids, doc });
     MessagePlugin.success(`${t('common.success')}`);
@@ -315,9 +315,9 @@ const handleOperation = async (type: string, payload: any) => {
 const handleDialogUpdate = async (type: string, doc: object) => {
   if (type === 'table') {
     if (dialogState.value.formType === 'add') {
-      await createItem(doc);
+      await createItem(doc as IModels['site']);
     } else {
-      await updateItem([dialogState.value.currentId], doc);
+      await updateItem([dialogState.value.currentId], doc as IModels['site']);
     }
   }
 

@@ -168,8 +168,8 @@ const settingFormData = ref({
 
 const navOptions = computed(() => [{ value: 'line', label: t('pages.parse.title') }]);
 
-const starData = ref<IModels['star']>({});
-const historyData = ref<IModels['history']>({});
+const starData = ref({} as IModels['star']);
+const historyData = ref({} as IModels['history']);
 const videoData = ref<IVideoOptions>({
   url: '',
   playEnd: false,
@@ -219,7 +219,7 @@ const getStarData = async () => {
     starData.value = isNil(resp?.id) ? {} : resp;
   } catch (error) {
     console.error('Get Star Data Error:', error);
-    starData.value = {};
+    starData.value = {} as IModels['star'];
   }
 };
 
@@ -232,11 +232,11 @@ const saveStarData = async () => {
     if (isArray(resp) && !isArrayEmpty(resp) && !isNil(resp[0]?.id)) {
       starData.value = resp[0];
     } else {
-      starData.value = {};
+      starData.value = {} as IModels['star'];
     }
   } catch (error) {
     console.error('Save Star Data Error:', error);
-    starData.value = {};
+    starData.value = {} as IModels['star'];
   }
 };
 
@@ -248,7 +248,7 @@ const delStarDate = async () => {
   } catch (error) {
     console.error('Delete Star Data Error:', error);
   } finally {
-    starData.value = {};
+    starData.value = {} as IModels['star'];
   }
 };
 
@@ -298,7 +298,7 @@ const getHistoryData = async () => {
     };
   } catch (error) {
     console.error('Get History Data Error:', error);
-    historyData.value = {};
+    historyData.value = {} as IModels['history'];
   }
 };
 
@@ -311,19 +311,19 @@ const saveHistoryData = async () => {
     if (isArray(resp) && !isArrayEmpty(resp) && !isNil(resp[0]?.id)) {
       historyData.value = resp[0];
     } else {
-      historyData.value = {};
+      historyData.value = {} as IModels['history'];
     }
   } catch (error) {
     console.error('Save History Data Error:', error);
-    historyData.value = {};
+    historyData.value = {} as IModels['history'];
   }
 };
 
 const throttleSaveHistory = throttle(saveHistoryData, 3000, { edges: ['leading', 'trailing'] });
 
 const handleSwitchParseItem = async (item: IModels['analyze']) => {
-  historyData.value = {};
-  starData.value = {};
+  historyData.value = {} as IModels['history'];
+  starData.value = {} as IModels['star'];
 
   videoData.value = { url: '', playEnd: false, watchTime: 0, duration: 0, skipTimeInStart: 0, skipTimeInEnd: 0 };
 

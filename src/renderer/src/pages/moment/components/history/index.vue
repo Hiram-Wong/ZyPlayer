@@ -64,7 +64,7 @@
                         </span>
                         <span v-else class="tiles-item_desc_watch">
                           {{ $t('pages.moment.progress.watching') }}
-                          {{ formatProgress(item.watchTime, item.duration) }}
+                          {{ formatProgress(item.watchTime ?? 0, item.duration ?? 0) }}
                         </span>
                       </p>
                     </div>
@@ -132,14 +132,26 @@ import { usePlayerStore } from '@/store';
 import emitter from '@/utils/emitter';
 
 type ITimeKey = 'today' | 'week' | 'ago';
-type IHistoryType = IModels['history']['type'];
-type IHistory = IModels['history'] & {
-  relateSite: IHistoryType extends 1 ? IModels['film'] : IHistoryType extends 2 ? IModels['iptv'] : IModels['analyze'];
+
+type IHistoryBase = IModels['history'];
+type IHistoryFilm = IHistoryBase & {
+  type: 1;
+  relateSite: IModels['site'];
 };
+type IHistoryLive = IHistoryBase & {
+  type: 2;
+  relateSite: IModels['iptv'];
+};
+type IHistoryParse = IHistoryBase & {
+  type: 3;
+  relateSite: IModels['analyze'];
+};
+type IHistory = IHistoryFilm | IHistoryLive | IHistoryParse;
+
 interface IParse {
-  api: string;
-  name: string;
-  id: string;
+  api: NonNullable<IHistoryBase['videoId']>;
+  name: NonNullable<IHistoryBase['videoName']>;
+  id: NonNullable<IHistoryBase['videoId']>;
 }
 
 const props = defineProps({
@@ -164,8 +176,8 @@ const historyData = ref<Record<ITimeKey, IHistory[]>>({
 });
 
 const detailFormData = ref({
-  info: {},
-  extra: {},
+  info: {} as ICmsInfo,
+  extra: {} as { active: IModels['site'] },
 });
 
 const infiniteId = ref(Date.now());
@@ -253,7 +265,7 @@ const loadMore = async ($state: ILoadStateHdandler) => {
   }
 };
 
-const handleFilmPlay = async (conf: IHistory) => {
+const handleFilmPlay = async (conf: IHistoryFilm) => {
   const playWithExternalPlayer = async (item: ICmsInfo, active: IModels['site']) => {
     detailFormData.value = {
       info: item,
@@ -301,7 +313,7 @@ const handleFilmPlay = async (conf: IHistory) => {
   }
 };
 
-const handleLivePlay = async (conf: IHistory) => {
+const handleLivePlay = async (conf: IHistoryLive) => {
   const createHistoryDoc = (item: IModels['channel'], siteKey: string) => ({
     type: 2,
     relateId: siteKey,
@@ -360,7 +372,7 @@ const handleLivePlay = async (conf: IHistory) => {
   }
 };
 
-const handleParsePlay = async (conf: IHistory) => {
+const handleParsePlay = async (conf: IHistoryParse) => {
   const createHistoryDoc = (item: IParse, siteKey: string) => ({
     type: 3,
     relateId: siteKey,
@@ -417,7 +429,7 @@ const handleParsePlay = async (conf: IHistory) => {
   const { relateSite: site } = conf;
   const player = storePlayer.player;
 
-  const item = { name: conf.videoName, api: conf.videoId, id: conf.videoId };
+  const item = { name: conf.videoName, api: conf.videoId, id: conf.videoId } as IParse;
 
   if (player.type === 'custom') {
     playWithExternalPlayer(item, site);
@@ -440,7 +452,7 @@ const playEvent = async (item: IHistory) => {
       return;
     }
 
-    await handlers?.[item.type]?.(item);
+    await handlers?.[item.type]?.(item as any);
   } catch (error) {
     console.error('Failed to play:', error);
     MessagePlugin.error(`${t('common.error')}: ${(error as Error).message}`);

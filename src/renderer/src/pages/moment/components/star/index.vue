@@ -109,14 +109,25 @@ import DialogDetailView from '@/pages/film/components/DialogDetail.vue';
 import { usePlayerStore } from '@/store';
 import emitter from '@/utils/emitter';
 
-type IStarType = IModels['star']['type'];
-type IStar = IModels['star'] & {
-  relateSite: IStarType extends 1 ? IModels['film'] : IStarType extends 2 ? IModels['iptv'] : IModels['analyze'];
+type IStarBase = IModels['star'];
+type IStarFilm = IStarBase & {
+  type: 1;
+  relateSite: IModels['site'];
 };
+type IStarLive = IStarBase & {
+  type: 2;
+  relateSite: IModels['iptv'];
+};
+type IStarParse = IStarBase & {
+  type: 3;
+  relateSite: IModels['analyze'];
+};
+type IStar = IStarFilm | IStarLive | IStarParse;
+
 interface IParse {
-  api: string;
-  name: string;
-  id: string;
+  api: NonNullable<IStarBase['videoId']>;
+  name: NonNullable<IStarBase['videoName']>;
+  id: NonNullable<IStarBase['videoId']>;
 }
 
 const props = defineProps({
@@ -135,8 +146,8 @@ const storePlayer = usePlayerStore();
 const renderDefaultLazy = () => <LazyBg class="render-icon" />;
 
 const detailFormData = ref({
-  info: {},
-  extra: {},
+  info: {} as ICmsInfo,
+  extra: {} as { active: IModels['site'] },
 });
 
 const starList = ref<IStar[]>([]);
@@ -203,7 +214,7 @@ const loadMore = async ($state: ILoadStateHdandler) => {
   }
 };
 
-const handleFilmPlay = async (conf: IStar) => {
+const handleFilmPlay = async (conf: IStarFilm) => {
   const playWithExternalPlayer = async (item: ICmsInfo, active: IModels['site']) => {
     detailFormData.value = {
       info: item,
@@ -251,7 +262,7 @@ const handleFilmPlay = async (conf: IStar) => {
   }
 };
 
-const handleLivePlay = async (conf: IStar) => {
+const handleLivePlay = async (conf: IStarLive) => {
   const createHistoryDoc = (item: IModels['channel'], siteKey: string) => ({
     type: 2,
     relateId: siteKey,
@@ -310,7 +321,7 @@ const handleLivePlay = async (conf: IStar) => {
   }
 };
 
-const handleParsePlay = async (conf: IStar) => {
+const handleParsePlay = async (conf: IStarParse) => {
   const createHistoryDoc = (item: IParse, siteKey: string) => ({
     type: 3,
     relateId: siteKey,
@@ -367,7 +378,7 @@ const handleParsePlay = async (conf: IStar) => {
   const { relateSite: site } = conf;
   const player = storePlayer.player;
 
-  const item = { name: conf.videoName, api: conf.videoId, id: conf.videoId };
+  const item = { name: conf.videoName, api: conf.videoId, id: conf.videoId } as IParse;
 
   if (player.type === 'custom') {
     playWithExternalPlayer(item, site);
@@ -380,17 +391,16 @@ const playEvent = async (item: IStar) => {
   active.value.loading = true;
 
   try {
+    if (isNil(item.relateSite) || isObjectEmpty(item.relateSite)) {
+      return;
+    }
+
     const handlers = {
       1: handleFilmPlay,
       2: handleLivePlay,
       3: handleParsePlay,
     };
-
-    if (isNil(item.relateSite) || isObjectEmpty(item.relateSite)) {
-      return;
-    }
-
-    await handlers?.[item.type]?.(item);
+    await handlers?.[item.type]?.(item as any);
   } catch (error) {
     console.error('Failed to play:', error);
     MessagePlugin.error(`${t('common.error')}: ${(error as Error).message}`);
