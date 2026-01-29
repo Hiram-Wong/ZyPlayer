@@ -1,24 +1,21 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
-const zlib = require('node:zlib');
 const { execSync } = require('node:child_process');
 const { downloadWithRedirects } = require('./download');
 
 // Base URL for downloading ffmpeg binaries
-const FFMPEG_RELEASE_BASE_URL = 'https://github.com/eugeneware/ffmpeg-static/releases/download';
-const DEFAULT_FFMPEG_VERSION = 'b6.1.1';
+const FFMPEG_RELEASE_BASE_URL = 'https://registry.npmjs.org/@ffmpeg-installer/';
+const DEFAULT_FFMPEG_VERSION = '4.1.x';
 
 // Mapping of platform+arch to binary package name
 const FFMPEG_PACKAGES = {
-  'darwin-arm64': 'ffmpeg-darwin-arm64.gz',
-  'darwin-x64': 'ffmpeg-darwin-x64.gz',
+  'darwin-arm64': 'darwin-arm64-4.1.5.tgz',
+  'darwin-x64': 'darwin-x64-4.1.0.tgz',
   // 'win32-arm64': '', // No arm64 Windows build available
-  // 'win32-ia32': '', // No ia32 Windows build available
-  'win32-x64': 'ffmpeg-win32-x64.gz',
-  'linux-arm64': 'ffmpeg-linux-arm64.gz',
-  'linux-ia32': 'ffmpeg-linux-ia32.gz',
-  'linux-x64': 'ffmpeg-linux-x64.gz',
+  'win32-x64': 'win32-x64-4.1.0.tgz',
+  'linux-arm64': 'linux-arm64-4.1.4.tgz',
+  'linux-x64': 'linux-x64-4.1.0.tgz',
 };
 
 /**
@@ -43,10 +40,10 @@ async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VER
   fs.mkdirSync(binDir, { recursive: true });
 
   // Download URL for the specific binary
-  const downloadUrl = `${FFMPEG_RELEASE_BASE_URL}/${version}/${packageName}`;
+  const downloadUrl = `${FFMPEG_RELEASE_BASE_URL}/${platformKey}/-/${packageName}`;
   const tempdir = os.tmpdir();
-  const tempFilename = path.join(tempdir, packageName);
-  const isGz = packageName.endsWith('.gz');
+  const tempFilename = path.join(tempdir, `ffmpeg-${packageName}`);
+  const isTarGz = packageName.endsWith('.tgz');
 
   try {
     console.log(`Downloading ffmpeg ${version} for ${platformKey}...`);
@@ -56,15 +53,12 @@ async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VER
 
     console.log(`Extracting ${packageName} to ${binDir}...`);
 
-    if (isGz) {
-      // Use zlib command to extract gz files
+    if (isTarGz) {
+      // Use tar command to extract tar.gz files (macOS and Linux)
       const tempExtractDir = path.join(tempdir, `ffmpeg-extract-${Date.now()}`);
       fs.mkdirSync(tempExtractDir, { recursive: true });
 
-      const binaryName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
-      const compressed = fs.readFileSync(tempFilename);
-      const decompressed = zlib.gunzipSync(compressed);
-      fs.writeFileSync(path.join(tempExtractDir, binaryName), decompressed);
+      execSync(`tar -xzf "${tempFilename}" -C "${tempExtractDir}"`, { stdio: 'inherit' });
 
       // Find all files in the extracted directory and move them to binDir
       const findAndMoveFiles = (dir) => {
@@ -74,14 +68,14 @@ async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VER
           if (entry.isDirectory()) {
             findAndMoveFiles(fullPath);
           } else {
+            if (!entry.name.startsWith('ffmpeg')) continue;
+
             const filename = path.basename(entry.name);
             const outputPath = path.join(binDir, filename);
             fs.copyFileSync(fullPath, outputPath);
             console.log(`Extracted ${entry.name} -> ${outputPath}`);
             // Make executable on Unix-like systems
-            if (platform !== 'win32') {
-              fs.chmodSync(outputPath, 0o755);
-            }
+            fs.chmodSync(outputPath, 0o755);
           }
         }
       };

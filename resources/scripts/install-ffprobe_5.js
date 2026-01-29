@@ -1,36 +1,33 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
-const zlib = require('node:zlib');
 const { execSync } = require('node:child_process');
 const { downloadWithRedirects } = require('./download');
 
-// Base URL for downloading ffmpeg binaries
-const FFMPEG_RELEASE_BASE_URL = 'https://github.com/eugeneware/ffmpeg-static/releases/download';
-const DEFAULT_FFMPEG_VERSION = 'b6.1.1';
+// Base URL for downloading ffprobe binaries
+const FFPROBE_RELEASE_BASE_URL = 'https://registry.npmjs.org/@ffprobe-installer/';
+const DEFAULT_FFPROBE_VERSION = '5.x';
 
 // Mapping of platform+arch to binary package name
-const FFMPEG_PACKAGES = {
-  'darwin-arm64': 'ffmpeg-darwin-arm64.gz',
-  'darwin-x64': 'ffmpeg-darwin-x64.gz',
+const FFPROBE_PACKAGES = {
+  'darwin-arm64': 'darwin-arm64-5.0.1.tgz',
+  'darwin-x64': 'darwin-x64-5.1.0.tgz',
   // 'win32-arm64': '', // No arm64 Windows build available
-  // 'win32-ia32': '', // No ia32 Windows build available
-  'win32-x64': 'ffmpeg-win32-x64.gz',
-  'linux-arm64': 'ffmpeg-linux-arm64.gz',
-  'linux-ia32': 'ffmpeg-linux-ia32.gz',
-  'linux-x64': 'ffmpeg-linux-x64.gz',
+  'win32-x64': 'win32-x64-5.1.0.tgz',
+  'linux-arm64': 'linux-arm64-5.2.0.tgz',
+  'linux-x64': 'linux-x64-5.2.0.tgz',
 };
 
 /**
- * Downloads and extracts the ffmpeg binary for the specified platform and architecture
+ * Downloads and extracts the ffprobe binary for the specified platform and architecture
  * @param {string} platform Platform to download for (e.g., 'darwin', 'win32', 'linux')
  * @param {string} arch Architecture to download for (e.g., 'x64', 'arm64')
- * @param {string} version Version of ffmpeg to download
+ * @param {string} version Version of ffprobe to download
  * @param {boolean} isMusl Whether to use MUSL variant for Linux
  */
-async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VERSION, isMusl = false) {
+async function downloadFFprobeBinary(platform, arch, version = DEFAULT_FFPROBE_VERSION, isMusl = false) {
   const platformKey = isMusl ? `${platform}-musl-${arch}` : `${platform}-${arch}`;
-  const packageName = FFMPEG_PACKAGES[platformKey];
+  const packageName = FFPROBE_PACKAGES[platformKey];
 
   if (!packageName) {
     console.error(`No binary available for ${platformKey}`);
@@ -43,28 +40,25 @@ async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VER
   fs.mkdirSync(binDir, { recursive: true });
 
   // Download URL for the specific binary
-  const downloadUrl = `${FFMPEG_RELEASE_BASE_URL}/${version}/${packageName}`;
+  const downloadUrl = `${FFPROBE_RELEASE_BASE_URL}/${platformKey}/-/${packageName}`;
   const tempdir = os.tmpdir();
-  const tempFilename = path.join(tempdir, packageName);
-  const isGz = packageName.endsWith('.gz');
+  const tempFilename = path.join(tempdir, `ffprobe-${packageName}`);
+  const isTarGz = packageName.endsWith('.tgz');
 
   try {
-    console.log(`Downloading ffmpeg ${version} for ${platformKey}...`);
+    console.log(`Downloading ffprobe ${version} for ${platformKey}...`);
     console.log(`URL: ${downloadUrl}`);
 
     await downloadWithRedirects(downloadUrl, tempFilename);
 
     console.log(`Extracting ${packageName} to ${binDir}...`);
 
-    if (isGz) {
-      // Use zlib command to extract gz files
-      const tempExtractDir = path.join(tempdir, `ffmpeg-extract-${Date.now()}`);
+    if (isTarGz) {
+      // Use tar command to extract tar.gz files (macOS and Linux)
+      const tempExtractDir = path.join(tempdir, `ffprobe-extract-${Date.now()}`);
       fs.mkdirSync(tempExtractDir, { recursive: true });
 
-      const binaryName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
-      const compressed = fs.readFileSync(tempFilename);
-      const decompressed = zlib.gunzipSync(compressed);
-      fs.writeFileSync(path.join(tempExtractDir, binaryName), decompressed);
+      execSync(`tar -xzf "${tempFilename}" -C "${tempExtractDir}"`, { stdio: 'inherit' });
 
       // Find all files in the extracted directory and move them to binDir
       const findAndMoveFiles = (dir) => {
@@ -74,14 +68,14 @@ async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VER
           if (entry.isDirectory()) {
             findAndMoveFiles(fullPath);
           } else {
+            if (!entry.name.startsWith('ffprobe')) continue;
+
             const filename = path.basename(entry.name);
             const outputPath = path.join(binDir, filename);
             fs.copyFileSync(fullPath, outputPath);
             console.log(`Extracted ${entry.name} -> ${outputPath}`);
             // Make executable on Unix-like systems
-            if (platform !== 'win32') {
-              fs.chmodSync(outputPath, 0o755);
-            }
+            fs.chmodSync(outputPath, 0o755);
           }
         }
       };
@@ -93,12 +87,12 @@ async function downloadFFmpegBinary(platform, arch, version = DEFAULT_FFMPEG_VER
     }
 
     fs.unlinkSync(tempFilename);
-    console.log(`Successfully installed ffmpeg ${version} for ${platform}-${arch}`);
+    console.log(`Successfully installed ffprobe ${version} for ${platform}-${arch}`);
     return 0;
   } catch (error) {
     let retCode = 103;
 
-    console.error(`Error installing ffmpeg for ${platformKey}: ${error.message}`);
+    console.error(`Error installing ffprobe for ${platformKey}: ${error.message}`);
 
     if (fs.existsSync(tempFilename)) {
       fs.unlinkSync(tempFilename);
@@ -145,22 +139,22 @@ function detectIsMusl() {
 }
 
 /**
- * Main function to install ffmpeg
+ * Main function to install ffprobe
  */
-async function installFFmpeg() {
+async function installFFprobe() {
   // Get the latest version if no specific version is provided
-  const version = DEFAULT_FFMPEG_VERSION;
-  console.log(`Using ffmpeg version: ${version}`);
+  const version = DEFAULT_FFPROBE_VERSION;
+  console.log(`Using ffprobe version: ${version}`);
 
   const { platform, arch, isMusl } = detectPlatformAndArch();
 
-  console.log(`Installing ffmpeg ${version} for ${platform}-${arch}${isMusl ? ' (MUSL)' : ''}...`);
+  console.log(`Installing ffprobe ${version} for ${platform}-${arch}${isMusl ? ' (MUSL)' : ''}...`);
 
-  return await downloadFFmpegBinary(platform, arch, version, isMusl);
+  return await downloadFFprobeBinary(platform, arch, version, isMusl);
 }
 
 // Run the installation
-installFFmpeg()
+installFFprobe()
   .then((retCode) => {
     if (retCode === 0) {
       console.log('Installation successful');

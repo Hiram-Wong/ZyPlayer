@@ -1,21 +1,24 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
+const zlib = require('node:zlib');
 const { execSync } = require('node:child_process');
 const { downloadWithRedirects } = require('./download');
 
 // Base URL for downloading ffprobe binaries
-const FFPROBE_RELEASE_BASE_URL = 'https://registry.npmjs.org/@ffprobe-installer/';
-const DEFAULT_FFPROBE_VERSION = '5.x';
+const FFPROBE_RELEASE_BASE_URL = 'https://github.com/eugeneware/ffmpeg-static/releases/download';
+const DEFAULT_FFPROBE_VERSION = 'b6.1.1';
 
 // Mapping of platform+arch to binary package name
 const FFPROBE_PACKAGES = {
-  'darwin-arm64': 'darwin-arm64-5.0.1.tgz',
-  'darwin-x64': 'darwin-x64-5.1.0.tgz',
+  'darwin-arm64': 'ffprobe-darwin-arm64.gz',
+  'darwin-x64': 'ffprobe-darwin-x64.gz',
   // 'win32-arm64': '', // No arm64 Windows build available
-  'win32-x64': 'win32-x64-5.1.0.tgz',
-  'linux-arm64': 'linux-arm64-5.2.0.tgz',
-  'linux-x64': 'linux-x64-5.2.0.tgz',
+  // 'win32-ia32': '', // No ia32 Windows build available
+  'win32-x64': 'ffprobe-win32-x64.gz',
+  'linux-arm64': 'ffprobe-linux-arm64.gz',
+  'linux-ia32': 'ffprobe-linux-ia32.gz',
+  'linux-x64': 'ffprobe-linux-x64.gz',
 };
 
 /**
@@ -40,10 +43,10 @@ async function downloadFFprobeBinary(platform, arch, version = DEFAULT_FFPROBE_V
   fs.mkdirSync(binDir, { recursive: true });
 
   // Download URL for the specific binary
-  const downloadUrl = `${FFPROBE_RELEASE_BASE_URL}/${platformKey}/-/${packageName}`;
+  const downloadUrl = `${FFPROBE_RELEASE_BASE_URL}/${version}/${packageName}`;
   const tempdir = os.tmpdir();
-  const tempFilename = path.join(tempdir, `ffprobe-${packageName}`);
-  const isTarGz = packageName.endsWith('.tgz');
+  const tempFilename = path.join(tempdir, packageName);
+  const isGz = packageName.endsWith('.gz');
 
   try {
     console.log(`Downloading ffprobe ${version} for ${platformKey}...`);
@@ -53,12 +56,15 @@ async function downloadFFprobeBinary(platform, arch, version = DEFAULT_FFPROBE_V
 
     console.log(`Extracting ${packageName} to ${binDir}...`);
 
-    if (isTarGz) {
-      // Use tar command to extract tar.gz files (macOS and Linux)
+    if (isGz) {
+      // Use zlib command to extract gz files
       const tempExtractDir = path.join(tempdir, `ffprobe-extract-${Date.now()}`);
       fs.mkdirSync(tempExtractDir, { recursive: true });
 
-      execSync(`tar -xzf "${tempFilename}" -C "${tempExtractDir}"`, { stdio: 'inherit' });
+      const binaryName = platform === 'win32' ? 'ffprobe.exe' : 'ffprobe';
+      const compressed = fs.readFileSync(tempFilename);
+      const decompressed = zlib.gunzipSync(compressed);
+      fs.writeFileSync(path.join(tempExtractDir, binaryName), decompressed);
 
       // Find all files in the extracted directory and move them to binDir
       const findAndMoveFiles = (dir) => {
@@ -68,14 +74,14 @@ async function downloadFFprobeBinary(platform, arch, version = DEFAULT_FFPROBE_V
           if (entry.isDirectory()) {
             findAndMoveFiles(fullPath);
           } else {
-            if (!entry.name.startsWith('ffprobe')) continue;
-
             const filename = path.basename(entry.name);
             const outputPath = path.join(binDir, filename);
             fs.copyFileSync(fullPath, outputPath);
             console.log(`Extracted ${entry.name} -> ${outputPath}`);
             // Make executable on Unix-like systems
-            fs.chmodSync(outputPath, 0o755);
+            if (platform !== 'win32') {
+              fs.chmodSync(outputPath, 0o755);
+            }
           }
         }
       };
