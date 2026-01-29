@@ -146,7 +146,7 @@ export class FFmpegService {
         .filter(([_key, value]) => !isNil(value) && !isStrEmpty(String(value)))
         .map(([key, value]) => `${key}: ${value}\r\n`)
         .join('');
-      if (!isStrEmpty(headersArg)) args.push('-headers', `"${headersArg}"`);
+      if (!isStrEmpty(headersArg)) args.push('-headers', `${headersArg}\r\n`);
     }
 
     return args;
@@ -236,7 +236,7 @@ export class FFmpegService {
       const pts = new PassThrough();
       ffmpegFluent(path)
         .inputOptions(['-ss', timestamp, ...probeArgs])
-        .outputOptions(['-an', '-vframes', '1', '-vcodec', 'png'])
+        .outputOptions(['-an', '-vframes', '1', '-vcodec', 'mjpeg'])
         .format('image2pipe')
         .on('start', (cmd) => logger.debug(`Executing command: ${cmd}`))
         .on('stderr', (stderrLine) => logger.silly(stderrLine))
