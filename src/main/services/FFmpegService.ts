@@ -124,14 +124,18 @@ export class FFmpegService {
     const { headers: rawHeaders = {}, timeout: rawTimeout } = options;
     const timeout = getTimeout(rawTimeout, this.options.timeout);
 
-    // s -> μs
+    /**
+     * FFmpeg timeout options (microseconds)
+     *
+     * - stimeout   : RTSP only, connection timeout (legacy but still valid)
+     * - timeout    : legacy option, behavior varies by protocol (not recommended)
+     * - rw_timeout : IO read/write timeout, works for HTTP / RTSP / TCP / UDP
+     *                Available since ffmpeg 4.x, preferred in 5.x+
+     */
     if (isPositiveFiniteNumber(timeout) && timeout > 0) {
-      /**
-       * 4.x stimeout only rtsp
-       * 4.x-5.x timeout
-       * 5.x rw_timeout
-       */
-      timeout < 2.14748e9 / 1000 ? args.push('-timeout', `${timeout * 1000}`) : args.push('-timeout', `${2.14748e9}`);
+      timeout < 2.14748e9 / 1000
+        ? args.push('-rw_timeout', `${timeout * 1000}`)
+        : args.push('-rw_timeout', `${2.14748e9}`);
     }
 
     if (isHttp(path)) {
@@ -140,9 +144,9 @@ export class FFmpegService {
 
       const headersArg = Object.entries(headers)
         .filter(([_key, value]) => !isNil(value) && !isStrEmpty(String(value)))
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('\r\n');
-      if (headersArg) args.push('-headers', `"${headersArg}"`);
+        .map(([key, value]) => `${key}: ${value}\r\n`)
+        .join('');
+      if (!isStrEmpty(headersArg)) args.push('-headers', `"${headersArg}"`);
     }
 
     return args;
@@ -231,9 +235,8 @@ export class FFmpegService {
 
       const pts = new PassThrough();
       ffmpegFluent(path)
-        .seekInput(timestamp)
-        .inputOptions(probeArgs)
-        .outputOptions('-vframes', '1', '-vcodec', 'png')
+        .inputOptions(['-ss', timestamp, ...probeArgs])
+        .outputOptions(['-an', '-vframes', '1', '-vcodec', 'png'])
         .format('image2pipe')
         .on('start', (cmd) => logger.debug(`Executing command: ${cmd}`))
         .on('stderr', (stderrLine) => logger.silly(stderrLine))
