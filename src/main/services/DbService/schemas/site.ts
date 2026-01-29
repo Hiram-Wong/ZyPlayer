@@ -14,7 +14,7 @@ export const site = sqliteTable(
       .$defaultFn(() => randomUUID())
       .unique()
       .notNull(),
-    name: text('name'),
+    name: text('name').notNull(),
     api: text('api'),
     playUrl: text('playUrl'),
     search: integer('search', { mode: 'boolean' }).default(true),

@@ -225,7 +225,7 @@ class PluginService {
 
         const data = {
           name: pkgInfo?.name || plugin,
-          pluginName: pkgInfo?.pluginName || pkgInfo?.name,
+          pluginName: pkgInfo?.pluginName || pkgInfo?.name || plugin,
           type: type === 'ui' ? 1 : type === 'system' ? 2 : 3,
           description: pkgInfo?.description ?? '',
           readme,

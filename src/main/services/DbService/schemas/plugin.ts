@@ -9,7 +9,7 @@ export const plugin = sqliteTable('tbl_plugin', {
     .primaryKey()
     .notNull(),
   type: integer('type').default(2),
-  name: text('name'),
+  name: text('name').notNull(),
   pluginName: text('pluginName').notNull(),
   author: text('author'),
   description: text('description'),

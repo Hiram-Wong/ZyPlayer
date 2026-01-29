@@ -8,7 +8,7 @@ const migrate = async (orm: IOrm, schemas: ISchemas): Promise<void> => {
     CREATE TABLE IF NOT EXISTS tbl_analyze (
       id        TEXT PRIMARY KEY,
       key       TEXT NOT NULL UNIQUE,
-      name      TEXT,
+      name      TEXT NOT NULL,
       api       TEXT NOT NULL,
       type      INTEGER NOT NULL,            -- 1 = web, 2 = json
       flag      TEXT DEFAULT '[]',           -- JSON
@@ -22,7 +22,7 @@ const migrate = async (orm: IOrm, schemas: ISchemas): Promise<void> => {
   await orm.run(sql`
     CREATE TABLE IF NOT EXISTS tbl_channel (
       id        TEXT PRIMARY KEY,
-      name      TEXT,
+      name      TEXT NOT NULL,
       api       TEXT NOT NULL,
       logo      TEXT,
       playback  TEXT,
@@ -54,7 +54,7 @@ const migrate = async (orm: IOrm, schemas: ISchemas): Promise<void> => {
     CREATE TABLE IF NOT EXISTS tbl_iptv (
       id        TEXT PRIMARY KEY,
       key       TEXT NOT NULL UNIQUE,
-      name      TEXT,
+      name      TEXT NOT NULL,
       api       TEXT NOT NULL,
       type      INTEGER NOT NULL,            -- 1 = remote, 2 = local, 3 = manual
       epg       TEXT,
@@ -69,7 +69,7 @@ const migrate = async (orm: IOrm, schemas: ISchemas): Promise<void> => {
     CREATE TABLE IF NOT EXISTS tbl_plugin (
       id          TEXT PRIMARY KEY,
       type        INTEGER DEFAULT 2,         -- 1 = ui, 2 = system, 3 = mix
-      name        TEXT,
+      name        TEXT NOT NULL,
       pluginName  TEXT NOT NULL,
       author      TEXT,
       description TEXT,
@@ -98,7 +98,7 @@ const migrate = async (orm: IOrm, schemas: ISchemas): Promise<void> => {
     CREATE TABLE IF NOT EXISTS tbl_site (
       id         TEXT PRIMARY KEY,
       key        TEXT NOT NULL UNIQUE,
-      name       TEXT,
+      name       TEXT NOT NULL,
       api        TEXT,
       playUrl    TEXT,
       search     INTEGER DEFAULT 1,          -- 1 = true, 0 = false

@@ -14,11 +14,11 @@ export const analyze = sqliteTable(
       .$defaultFn(() => randomUUID())
       .unique()
       .notNull(),
-    name: text('name'),
+    name: text('name').notNull(),
     api: text('api').notNull(),
     type: integer('type').notNull(),
-    flag: text('flag', { mode: 'json' }).default([]),
-    headers: text('headers', { mode: 'json' }).default({}),
+    flag: text('flag', { mode: 'json' }).$type<string[]>().default([]),
+    headers: text('headers', { mode: 'json' }).$type<Record<string, any>>().default({}),
     script: text('script'),
     isActive: integer('isActive', { mode: 'boolean' }).default(true),
     createdAt: integer('createdAt', { mode: 'number' })

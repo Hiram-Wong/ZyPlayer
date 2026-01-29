@@ -8,7 +8,7 @@ export const channel = sqliteTable('tbl_channel', {
     .$defaultFn(() => randomUUID())
     .primaryKey()
     .notNull(),
-  name: text('name'),
+  name: text('name').notNull(),
   api: text('api').notNull(),
   logo: text('logo'),
   playback: text('playback'),

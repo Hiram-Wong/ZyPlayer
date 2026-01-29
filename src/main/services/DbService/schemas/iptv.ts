@@ -14,12 +14,12 @@ export const iptv = sqliteTable(
       .$defaultFn(() => randomUUID())
       .unique()
       .notNull(),
-    name: text('name'),
+    name: text('name').notNull(),
     api: text('api').notNull(),
     type: integer('type').notNull(),
     epg: text('epg'),
     logo: text('logo'),
-    headers: text('headers', { mode: 'json' }).default({}),
+    headers: text('headers', { mode: 'json' }).$type<Record<string, any>>().default({}),
     isActive: integer('isActive', { mode: 'boolean' }).default(true),
     createdAt: integer('createdAt', { mode: 'number' })
       .default(sql`(strftime('%s', 'now') * 1000)`)
