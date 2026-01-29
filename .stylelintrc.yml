@@ -1,0 +1,33 @@
+defaultSeverity: error
+
+extends:
+  - stylelint-config-standard
+
+plugins:
+  - stylelint-order
+
+rules:
+  no-descending-specificity: null
+  import-notation: string
+  no-empty-source: null
+  custom-property-pattern: null
+  selector-class-pattern: null
+
+  selector-pseudo-class-no-unknown:
+    - true
+    - ignorePseudoClasses:
+        - deep
+
+  # 官方说明：以下规则仅适用于原生 CSS，预处理器（Less）应关闭
+  media-query-no-invalid: null
+  declaration-property-value-no-unknown: null
+
+overrides:
+  - files:
+      - '**/*.html'
+      - '**/*.vue'
+    customSyntax: postcss-html
+
+  - files:
+      - '**/*.less'
+    customSyntax: postcss-less

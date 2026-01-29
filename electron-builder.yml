@@ -30,8 +30,8 @@ files:
 
   # Exclusion code quality and formatting tool configurations
   - '!**/{.eslintignore,.eslintrc.js,.eslintrc.json,.eslintrc.cjs,.eslintcache,root.eslint.config.js,eslint.config.js,.eslint.config.mjs}'
-  - '!**/{.prettierignore,.prettierrc.yaml,.prettierrc.js}'
-  - '!**/{.stylelintignore,stylelint.config.js}'
+  - '!**/{.prettierignore,.prettierrc.yaml,.prettierrc.yml,.prettierrc.js}'
+  - '!**/{.stylelintignore,stylelint.config.js,.stylelintrc.yaml,.stylelintrc.yml}'
   - '!commitlintrc.{json,yml,yaml,js,cjs,mjs,ts,mts,cts}'
   - '!commitlint.config.{js,cjs,mjs,ts,mts,cts}'
 
@@ -59,7 +59,7 @@ files:
   - '!**/uv.lock'
 
   # Exclusion version control
-  - '!**/{.git.gitignore,.gitattributes,.hg,.svn,CVS,RCS,SCCS,}'
+  - '!**/{.git.gitignore,.gitattributes,.git-blame-ignore-revs,.hg,.svn,CVS,RCS,SCCS,}'
   - '!**/.DS_Store'
   - '!._*'
 
@@ -72,7 +72,7 @@ files:
   - '!**/*.min.*.map'
   - '!**/*.d.ts'
   - '!*.log'
-  - '!**/{LICENSE,license,LICENSE.*,*.LICENSE.txt,NOTICE.txt,README.md,readme.md,CHANGELOG.md}'
+  - '!**/{LICENSE,LICENSE.txt,ThirdPartyNotices.txt,NOTICE.txt,README.md,RELEASE.md,CHANGELOG.md}'
 asar: true
 asarUnpack:
   - resources/**
