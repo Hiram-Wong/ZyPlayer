@@ -1,11 +1,11 @@
-# case "$(uname -a)" in
-#   *MINGW64*) exit 0 ;;
-# esac
+case "$(uname -a)" in
+  *MINGW64*) exit 0 ;;
+esac
 
-# [ -n "$CI" ] && exit 0
+[ -n "$CI" ] && exit 0
 
-# if [ "$OS" = "Windows_NT" ]; then
-#   exec < /dev/tty && npx.cmd git-cz --hook || true
-# else
-#   exec < /dev/tty && npx git-cz --hook || true
-# fi
+if [ "$OS" = "Windows_NT" ]; then
+  exec < /dev/tty && npx.cmd git-cz --hook || true
+else
+  exec < /dev/tty && npx git-cz --hook || true
+fi
