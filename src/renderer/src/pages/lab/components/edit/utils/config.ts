@@ -151,6 +151,6 @@ export const SITE_DIFF_DEBUG_MAP = {
     api: `${fileManageApi}/py/${DEBUG_PREFIX}.py`,
     ext: '',
   },
-  [SITE_TYPE.T3_CATOPEN]: { type: SITE_TYPE.T3_CATOPEN, api: '', ext: '' },
+  [SITE_TYPE.T3_CATOPEN]: { type: SITE_TYPE.T3_CATOPEN, api: `${fileManageApi}/catopen/${DEBUG_PREFIX}.js`, ext: '' },
   [SITE_TYPE.T3_ALIST]: { type: SITE_TYPE.T3_ALIST, api: '', ext: '' },
 };
