@@ -70,15 +70,11 @@ zyfun是一款免费、极简、全能的跨平台影音管家，一站式管理
 <details>
 <summary>展开查看软件截图</summary>
 
-|                            影视(首页)                            |                            影视(搜索)                            |
-| :--------------------------------------------------------------: | :--------------------------------------------------------------: |
-| ![影视-首页](https://s2.loli.net/2024/07/20/T8diRvA1q2QaJmP.png) | ![影视-搜索](https://s2.loli.net/2024/07/20/utwCUsVG6c7ShRJ.png) |
-|                            影视(播放)                            |                            解析(首页)                            |
-| ![影视播放](https://s2.loli.net/2024/07/20/DNFBu3LphASROVy.png)  | ![解析-首页](https://s2.loli.net/2024/07/20/JZANVebW4EHOU7I.png) |
-|                            直播(首页)                            |                            直播(播放)                            |
-| ![直播-首页](https://s2.loli.net/2024/07/20/ucxSw3nR2EahG59.png) | ![直播-播放](https://s2.loli.net/2024/07/20/jYEFc6NOwtdWJBV.png) |
-|                             历史记录                             |                               设置                               |
-| ![历史记录](https://s2.loli.net/2024/07/20/DiYsx4fbcH3KU6T.png)  |   ![设置](https://s2.loli.net/2024/07/20/QeaDxZ2IYCFoVki.png)    |
+|                    影视                     |                   直播                   |
+| :-----------------------------------------: | :--------------------------------------: |
+|  ![影视](docs/assets/images/app-film.png)   | ![直播](docs/assets/images/app-live.png) |
+|                    历史                     |                   播放                   |
+| ![历史](docs/assets/images/app-history.png) | ![播放](docs/assets/images/app-play.png) |
 
 </details>
 
