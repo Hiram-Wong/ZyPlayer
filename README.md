@@ -73,7 +73,7 @@ zyfun是一款免费、极简、全能的跨平台影音管家，一站式管理
 |                    影视                     |                   直播                   |
 | :-----------------------------------------: | :--------------------------------------: |
 |  ![影视](docs/assets/images/app-film.png)   | ![直播](docs/assets/images/app-live.png) |
-|                    历史                     |                   播放                   |
+|                  **历史**                   |                 **播放**                 |
 | ![历史](docs/assets/images/app-history.png) | ![播放](docs/assets/images/app-play.png) |
 
 </details>
