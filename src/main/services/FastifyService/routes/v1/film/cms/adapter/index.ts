@@ -2,6 +2,7 @@ import T0Adapter from './t0Xml';
 import T1Adapter from './t1Json';
 import T3AlistAdapter from './t3Alist';
 import T3AppYsV2Adapter from './t3AppYsV2';
+import T3CatopenAdapter from './t3Catopen';
 import T3DrpyAdapter from './t3Drpy';
 import T3PyAdapter from './t3Py';
 import T3XbpqAdapter from './t3Xbpq';
@@ -15,6 +16,7 @@ export {
   T1Adapter,
   T3AlistAdapter,
   T3AppYsV2Adapter,
+  T3CatopenAdapter,
   T3DrpyAdapter,
   T3PyAdapter,
   T3XbpqAdapter,

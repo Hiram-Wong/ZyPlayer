@@ -16,7 +16,7 @@ export const SITE_SUFFIX_MAP = {
   [SITE_TYPE.T3_APPYSV2]: '',
   [SITE_TYPE.T3_PY]: 'py',
   [SITE_TYPE.T3_ALIST]: '',
-  [SITE_TYPE.T3_QUICK]: 'js',
+  [SITE_TYPE.T3_CATOPEN]: 'js',
 };
 
 export const SITE_PATH_MAP = {
@@ -31,7 +31,7 @@ export const SITE_PATH_MAP = {
   [SITE_TYPE.T3_APPYSV2]: '',
   [SITE_TYPE.T3_PY]: 'file/py/',
   [SITE_TYPE.T3_ALIST]: '',
-  [SITE_TYPE.T3_QUICK]: 'file/quick/',
+  [SITE_TYPE.T3_CATOPEN]: 'file/catopen/',
 };
 
 const monacoInjectModules = import.meta.glob<{ default?: any }>('./inject/**/suggestions.*', { eager: true });
@@ -116,10 +116,10 @@ export const SITE_MONACO_MAP = {
     suggestions: mapMonacoInject[SITE_TYPE.T3_PY]?.suggestions ?? null,
     extraLib: mapMonacoInject[SITE_TYPE.T3_PY]?.extraLib ?? null,
   },
-  [SITE_TYPE.T3_QUICK]: {
+  [SITE_TYPE.T3_CATOPEN]: {
     language: 'javascript',
-    suggestions: mapMonacoInject[SITE_TYPE.T3_QUICK]?.suggestions ?? null,
-    extraLib: mapMonacoInject[SITE_TYPE.T3_QUICK]?.extraLib ?? null,
+    suggestions: mapMonacoInject[SITE_TYPE.T3_CATOPEN]?.suggestions ?? null,
+    extraLib: mapMonacoInject[SITE_TYPE.T3_CATOPEN]?.extraLib ?? null,
   },
   [SITE_TYPE.T3_ALIST]: {
     language: 'plaintext',
@@ -151,6 +151,6 @@ export const SITE_DIFF_DEBUG_MAP = {
     api: `${fileManageApi}/py/${DEBUG_PREFIX}.py`,
     ext: '',
   },
-  [SITE_TYPE.T3_QUICK]: { type: SITE_TYPE.T3_QUICK, api: '', ext: '' },
+  [SITE_TYPE.T3_CATOPEN]: { type: SITE_TYPE.T3_CATOPEN, api: '', ext: '' },
   [SITE_TYPE.T3_ALIST]: { type: SITE_TYPE.T3_ALIST, api: '', ext: '' },
 };

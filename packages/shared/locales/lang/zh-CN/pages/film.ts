@@ -23,7 +23,7 @@ export default {
       't0-xml': 'T0[xml]',
       't1-json': 'T1[json]',
       't3-js_drpy': 'T3[js_drpy]',
-      't3-js_quick': 'T3[js_quick]',
+      't3-js_catopen': 'T3[js_catopen]',
       't3-csp_xbpq': 'T3[csp_xbpq]',
       't3-csp_xyq': 'T3[csp_xyq]',
       't3-csp_appysv2': 'T3[csp_appysv2]',

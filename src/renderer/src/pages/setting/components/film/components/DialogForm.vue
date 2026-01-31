@@ -134,7 +134,7 @@ const TYPE_OPTIONS = computed(() => [
   { value: SITE_TYPE.T3_DRPY, label: t('pages.film.field.typeMap.t3-js_drpy') },
   { value: SITE_TYPE.T3_XBPQ, label: t('pages.film.field.typeMap.t3-csp_xbpq') },
   { value: SITE_TYPE.T3_XYQ, label: t('pages.film.field.typeMap.t3-csp_xyq') },
-  // { value: SITE_TYPE.T3_QUICK, label: t('pages.film.field.typeMap.t3-js_quick') },
+  { value: SITE_TYPE.T3_CATOPEN, label: t('pages.film.field.typeMap.t3-js_catopen') },
   { value: SITE_TYPE.T3_APPYSV2, label: t('pages.film.field.typeMap.t3-csp_appysv2') },
   { value: SITE_TYPE.T3_PY, label: t('pages.film.field.typeMap.t3-py') },
   { value: SITE_TYPE.T3_ALIST, label: t('pages.film.field.typeMap.t3-alist') },

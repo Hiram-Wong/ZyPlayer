@@ -30,7 +30,7 @@
         <span v-else-if="row.type === SITE_TYPE.T3_XYQ">{{ $t('pages.film.field.typeMap.t3-csp_xyq') }}</span>
         <span v-else-if="row.type === SITE_TYPE.T3_APPYSV2">{{ $t('pages.film.field.typeMap.t3-csp_appysv2') }}</span>
         <span v-else-if="row.type === SITE_TYPE.T3_PY">{{ $t('pages.film.field.typeMap.t3-py') }}</span>
-        <span v-else-if="row.type === SITE_TYPE.T3_QUICK">{{ $t('pages.film.field.typeMap.t3-js_quick') }}</span>
+        <span v-else-if="row.type === SITE_TYPE.T3_CATOPEN">{{ $t('pages.film.field.typeMap.t3-js_catopen') }}</span>
         <span v-else-if="row.type === SITE_TYPE.T3_ALIST">{{ $t('pages.film.field.typeMap.t3-alist') }}</span>
       </template>
       <template #op="slotProps">

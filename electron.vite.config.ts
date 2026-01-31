@@ -46,6 +46,10 @@ export default defineConfig({
             __dirname,
             'src/main/services/FastifyService/routes/v1/film/cms/adapter/t3Drpy/worker.ts',
           ),
+          film_cms_adapter_t3_catopen_worker: resolve(
+            __dirname,
+            'src/main/services/FastifyService/routes/v1/film/cms/adapter/t3Catopen/worker.ts',
+          ),
         },
         onwarn: (warning, defaultHandler) => {
           // TODO: We should resolve these warnings instead of ignoring them

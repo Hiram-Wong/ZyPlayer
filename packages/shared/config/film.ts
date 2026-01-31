@@ -10,7 +10,7 @@ export const SITE_TYPE = {
   T3_APPYSV2: 11,
   T3_PY: 12,
   T3_ALIST: 13,
-  T3_QUICK: 14,
+  T3_CATOPEN: 14,
 } as const;
 import { LOG_MODULE } from './logger';
 
@@ -28,7 +28,7 @@ export const SITE_LOGGER_MAP = {
   [SITE_TYPE.T3_XYQ]: `${LOG_MODULE.FILM_CMS}<t3_xyq>`,
   [SITE_TYPE.T3_APPYSV2]: `${LOG_MODULE.FILM_CMS}<t3_appysv2>`,
   [SITE_TYPE.T3_PY]: `${LOG_MODULE.FILM_CMS}<t3_py>`,
-  [SITE_TYPE.T3_QUICK]: `${LOG_MODULE.FILM_CMS}<t3_quick>`,
+  [SITE_TYPE.T3_CATOPEN]: `${LOG_MODULE.FILM_CMS}<t3_catopen>`,
   [SITE_TYPE.T3_ALIST]: `${LOG_MODULE.FILM_CMS}<t3_alist>`,
 };
 
@@ -44,5 +44,5 @@ export const SITE_API_MAP = {
   [SITE_TYPE.T3_APPYSV2]: 'csp_AppYsV2',
   [SITE_TYPE.T3_PY]: '',
   [SITE_TYPE.T3_ALIST]: 'csp_Alist',
-  [SITE_TYPE.T3_QUICK]: '',
+  [SITE_TYPE.T3_CATOPEN]: '',
 };

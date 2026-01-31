@@ -146,6 +146,7 @@ export default antfu(
       '.yarn/**',
       '.gitignore',
       '!**/.prettierrc.js',
+      'resources/t3Catopen/*.js',
     ]),
   ],
 );

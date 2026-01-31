@@ -13,6 +13,7 @@ import {
   T1Adapter,
   T3AlistAdapter,
   T3AppYsV2Adapter,
+  T3CatopenAdapter,
   T3DrpyAdapter,
   T3PyAdapter,
   T3XbpqAdapter,
@@ -34,6 +35,7 @@ const CMS_ADAPTER_MAP = {
   [SITE_TYPE.T3_APPYSV2]: T3AppYsV2Adapter,
   [SITE_TYPE.T3_PY]: T3PyAdapter,
   [SITE_TYPE.T3_ALIST]: T3AlistAdapter,
+  [SITE_TYPE.T3_CATOPEN]: T3CatopenAdapter,
 };
 
 const CACHE_LIMIT = 10;
