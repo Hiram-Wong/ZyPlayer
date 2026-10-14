@@ -19,6 +19,7 @@ import fastify from 'fastify';
 import JSON5 from 'json5';
 import qs from 'qs';
 
+import { isApiTokenValid, isPublicApiPath, isTrustedCorsOrigin } from './auth';
 import routeModules from './routes';
 import { ResponseErrorSchema, ResponseRedirectSchema, ResponseSuccessSchema } from './schemas/base';
 
@@ -79,7 +80,7 @@ export class FastifyService {
 
       await this.server!.ready(); // Finalize server setup
       if (isDev || configManager.debug) this.server!.swagger(); // swagger documentation
-      await this.server!.listen({ port: this.PORT, host: '0.0.0.0' });
+      await this.server!.listen({ port: this.PORT, host: '127.0.0.1' });
     } catch (error) {
       logger.error(`Fastify Service Start Failed: ${(error as Error).message}`);
     }
@@ -133,6 +134,14 @@ export class FastifyService {
   }
 
   private async registerHooks(): Promise<void> {
+    this.server!.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
+      if (req.method === 'OPTIONS') return;
+      if (isPublicApiPath(req.method, req.url)) return;
+      if (isApiTokenValid(req.headers.authorization)) return;
+
+      return reply.code(401).send({ code: -1, msg: 'Unauthorized', data: null });
+    });
+
     this.server!.addHook('onTimeout', async (req: FastifyRequest, reply: FastifyReply) => {
       req.log.warn(`Fastify Response Timeout: ${req.url}`);
 
@@ -148,7 +157,13 @@ export class FastifyService {
     // Register CORS
     await this.server!.register(fastifyCors, {
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      origin: '*',
+      origin: (origin, callback) => {
+        if (isTrustedCorsOrigin(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(new Error('Origin is not allowed'), false);
+      },
     });
 
     // Register multipart

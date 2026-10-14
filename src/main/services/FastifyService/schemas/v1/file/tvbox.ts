@@ -70,10 +70,9 @@ const TvbosResponseSchema = Type.Partial(TvboxSchema, { description: 'Response s
 export const autoSchema = {
   tags: [API_PREFIX],
   summary: 'Get auto content',
-  description:
-    'Get a file content by path level(three levels), operating system files if the type is system, which is a dangerous operation',
+  description: 'Get file content by path level under the application-managed directory',
   params: Type.Object({
-    type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
+    type: Type.Literal('file', { description: 'managed file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   response: {
@@ -85,10 +84,9 @@ export const autoSchema = {
 export const makeSchema = {
   tags: [API_PREFIX],
   summary: 'Get make content',
-  description:
-    'Get a file content by generate index.json from index.js, operating system files if the type is system, which is a dangerous operation',
+  description: 'Read an existing JSON file under the application-managed directory',
   params: Type.Object({
-    type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
+    type: Type.Literal('file', { description: 'managed file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   response: {

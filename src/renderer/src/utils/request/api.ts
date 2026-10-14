@@ -10,6 +10,8 @@ import { merge } from 'es-toolkit';
 
 import { getTimeout } from '@/utils/tool';
 
+import { getApiAuthorization } from './auth';
+
 // 数据处理，方便区分多种处理方式
 const transform: AxiosTransform = {
   // 处理请求数据。如果数据不是预期格式，可直接抛出错误
@@ -110,7 +112,8 @@ const transform: AxiosTransform = {
 
   // 请求拦截器处理
   requestInterceptors: (config, _options) => {
-    // 请求之前处理config
+    const authorization = getApiAuthorization();
+    if (authorization) config.headers = { ...config.headers, Authorization: authorization };
     return config;
   },
 

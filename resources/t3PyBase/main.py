@@ -7,9 +7,11 @@ import builtins
 from concurrent import futures
 from functools import lru_cache
 import grpc
+import hmac
 import importlib.util
 import inspect
 import json
+import os
 import signal
 import sys
 from typing import Any, Dict, List, Optional
@@ -111,7 +113,14 @@ def deserialize_request(raw: bytes) -> Dict[str, Any]:
 
 
 class SpiderService:
+    def __init__(self, token: str) -> None:
+        self.token = token
+
     def Exec(self, request: Dict[str, Any], context: grpc.ServicerContext) -> Dict[str, Any]:
+        token = str(request.get("token", ""))
+        if not hmac.compare_digest(token, self.token):
+            context.abort(grpc.StatusCode.UNAUTHENTICATED, "Invalid service token")
+
         try:
             code: str = request.get("code", "")
             method_name: str = request.get("type", "")
@@ -134,8 +143,8 @@ class SpiderService:
             return {"error": f"{str(e) or 'Unknown error'}"}
 
 
-def serve(port: int) -> None:
-    service = SpiderService()
+def serve(port: int, token: str) -> None:
+    service = SpiderService(token)
 
     # Key is RPC method name, value defines handler + codec.
     rpc_method_handlers = {
@@ -153,7 +162,7 @@ def serve(port: int) -> None:
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
     server.add_generic_rpc_handlers((generic_handler,))
     # Bind the control endpoint on the configured port.
-    server.add_insecure_port(f'0.0.0.0:{port}')
+    server.add_insecure_port(f'127.0.0.1:{port}')
     server.start()
 
     sys.stdout.write(f"Spider gRPC server started\n")
@@ -168,10 +177,13 @@ def serve(port: int) -> None:
 if __name__ == '__main__':
     cli_args = parse_args()
     PORT = cli_args.port
+    TOKEN = os.environ.get("ZYFUN_T3PY_TOKEN", "")
+    if not TOKEN:
+        raise RuntimeError("Missing service token")
 
     try:
         builtins.print = custom_print
-        serve(PORT)
+        serve(PORT, TOKEN)
 
     except SystemExit:
         sys.stdout.write("Spider gRPC server exited")

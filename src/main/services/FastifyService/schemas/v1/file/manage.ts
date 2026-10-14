@@ -8,9 +8,9 @@ const API_PREFIX = 'file';
 export const addSchema = {
   tags: [API_PREFIX],
   summary: 'Add file',
-  description: 'Add a new file, operating system files if the type is system, which is a dangerous operation',
+  description: 'Add a new file under the application-managed file directory',
   params: Type.Object({
-    type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
+    type: Type.Literal('file', { description: 'managed file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   body: Type.String({ description: 'file content' }),
@@ -31,9 +31,9 @@ export const addSchema = {
 export const deleteSchema = {
   tags: [API_PREFIX],
   summary: 'Delete file',
-  description: 'Delete a file by path, operating system files if the type is system, which is a dangerous operation',
+  description: 'Delete a file under the application-managed file directory',
   params: Type.Object({
-    type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
+    type: Type.Literal('file', { description: 'managed file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   response: {
@@ -53,9 +53,9 @@ export const deleteSchema = {
 export const putSchema = {
   tags: [API_PREFIX],
   summary: 'Update file content',
-  description: 'Update a file by path, operating system files if the type is system, which is a dangerous operation',
+  description: 'Update a file under the application-managed file directory',
   params: Type.Object({
-    type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
+    type: Type.Literal('file', { description: 'managed file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   body: Type.String({ description: 'file content' }),
@@ -76,10 +76,9 @@ export const putSchema = {
 export const getSchema = {
   tags: [API_PREFIX],
   summary: 'Get file content',
-  description:
-    'Get a file content by path, operating system files if the type is system, which is a dangerous operation',
+  description: 'Get a file under the application-managed file directory',
   params: Type.Object({
-    type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
+    type: Type.Literal('file', { description: 'managed file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   response: {

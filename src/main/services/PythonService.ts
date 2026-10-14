@@ -186,6 +186,7 @@ export class PythonService {
       stderrCb?: (data: string) => void;
       errorCb?: (error: Error) => void;
       closeCb?: (code: number | null) => void;
+      env?: NodeJS.ProcessEnv;
     } = {},
   ): void {
     try {
@@ -195,6 +196,7 @@ export class PythonService {
       const child = spawn(this.uvBinaryPath, cmd, {
         cwd: this.projectBasePath,
         detached: false,
+        env: { ...process.env, ...cb.env },
         windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: false,

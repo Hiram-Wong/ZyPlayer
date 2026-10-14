@@ -8,6 +8,7 @@ import AppUpdater from '@main/services/AppUpdater';
 import { binaryService } from '@main/services/BinaryService';
 import { configManager } from '@main/services/ConfigManager';
 import { fastifyService } from '@main/services/FastifyService';
+import { getApiToken, isTrustedRendererUrl } from '@main/services/FastifyService/auth';
 import { fileStorage } from '@main/services/FileStorage';
 import { menuService } from '@main/services/MenuService';
 import NotificationService from '@main/services/NotificationService';
@@ -61,6 +62,11 @@ export function registerIpc(mainWindow: BrowserWindow, app: Electron.App) {
 
   ipcMain.handle(IPC_CHANNEL.API_SERVER_STATUS, () => {
     return fastifyService.status();
+  });
+
+  ipcMain.handle(IPC_CHANNEL.API_SERVER_TOKEN, (event) => {
+    if (!event.senderFrame || !isTrustedRendererUrl(event.senderFrame.url)) throw new Error('Untrusted renderer');
+    return getApiToken();
   });
 
   // app
