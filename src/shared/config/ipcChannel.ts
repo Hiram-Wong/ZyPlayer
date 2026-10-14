@@ -4,6 +4,7 @@ export enum IPC_CHANNEL {
   API_SERVER_STOP = 'api-server:stop',
   API_SERVER_RESTART = 'api-server:restart',
   API_SERVER_STATUS = 'api-server:status',
+  API_SERVER_TOKEN = 'api-server:token',
 
   // app
   APP_GET_CACHE_SIZE = 'app:get-cache-size',

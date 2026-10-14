@@ -1,16 +1,20 @@
 import { Buffer } from 'node:buffer';
-import { join } from 'node:path';
+import { randomBytes } from 'node:crypto';
+import { extname, join } from 'node:path';
 
 import * as grpc from '@grpc/grpc-js';
 import { loggerService } from '@logger';
 import { PythonService } from '@main/services/PythonService';
-import { APP_PUBLIC_PATH } from '@main/utils/path';
-import { request } from '@main/utils/request';
+import { readFile } from '@main/utils/file';
+import { APP_FILE_PATH, APP_PUBLIC_PATH } from '@main/utils/path';
 import { getTimeout } from '@main/utils/tool';
+import { FILE_MANAGE_API } from '@shared/config/env';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { isJson, isJsonStr } from '@shared/modules/validate';
 import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import JSON5 from 'json5';
+
+import { getManagedPathFromUrl, resolveManagedPath } from '../../../file/path';
 
 const logger = loggerService.withContext(SITE_LOGGER_MAP[SITE_TYPE.T3_PY]);
 
@@ -18,6 +22,7 @@ const GRPC_SERVICE_NAME = 't3py.SpiderService';
 
 interface IGrpcRequest {
   code: string;
+  token: string;
   type: string;
   options: any[];
 }
@@ -73,6 +78,7 @@ class ConnectService extends PythonService {
   private stdoutBuffer: string = '';
 
   private readonly port: number = 19979;
+  private readonly token: string = randomBytes(32).toString('base64url');
 
   public static getInstance(): ConnectService {
     if (!ConnectService.instance) {
@@ -88,7 +94,7 @@ class ConnectService extends PythonService {
 
     try {
       const ClientCtor = createGrpcClientCtor();
-      const client = new ClientCtor(`0.0.0.0:${this.port}`, grpc.credentials.createInsecure());
+      const client = new ClientCtor(`127.0.0.1:${this.port}`, grpc.credentials.createInsecure());
       const deadline = new Date(Date.now() + 5 * 1000);
 
       await new Promise<void>((resolve, reject) => {
@@ -155,6 +161,7 @@ class ConnectService extends PythonService {
       if (!pids.length) {
         await new Promise<void>((resolve, reject) => {
           this.runSpawn(['main.py', '--port', String(this.port)], true, {
+            env: { ZYFUN_T3PY_TOKEN: this.token },
             stdoutCb: async (data) => {
               this.handlePythonStdout(data);
 
@@ -210,7 +217,7 @@ class ConnectService extends PythonService {
     if (!this.client) throw new Error('gRPC client is not initialized');
 
     return await new Promise<any>((resolve, reject) => {
-      const payload: IGrpcRequest = { code, type, options };
+      const payload: IGrpcRequest = { code, token: this.token, type, options };
       const deadline = new Date(Date.now() + getTimeout());
 
       this.client!.Exec(payload, { deadline }, (error, response) => {
@@ -256,11 +263,18 @@ export class T3PyAdapter {
   }
 
   async init(): ICmsResultPromise['init'] {
-    let content = '';
-    if (this.api.startsWith('http')) {
-      const { data } = await request.request({ url: this.api, method: 'GET' });
-      content = data;
+    let requestedPath = '';
+    try {
+      requestedPath = getManagedPathFromUrl(this.api, FILE_MANAGE_API);
+    } catch {
+      throw new Error('T3Py sources must be stored in the application-managed file directory');
     }
+
+    const sourcePath = await resolveManagedPath(APP_FILE_PATH, requestedPath);
+    if (extname(sourcePath).toLowerCase() !== '.py') throw new Error('T3Py source must be a Python file');
+
+    const content = await readFile(sourcePath);
+    if (typeof content !== 'string') throw new Error('T3Py source could not be read');
     this.code = content;
 
     const resp = await this.execCtx('init', [this.ext]);

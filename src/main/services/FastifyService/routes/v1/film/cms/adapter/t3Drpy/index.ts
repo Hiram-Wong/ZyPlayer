@@ -2,11 +2,16 @@
 import { join } from 'node:path';
 
 import { loggerService } from '@logger';
+import { readFile } from '@main/utils/file';
+import { APP_FILE_PATH } from '@main/utils/path';
+import { FILE_MANAGE_API } from '@shared/config/env';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { isJson } from '@shared/modules/validate';
 import type { ICmsMethodName, ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import type { Pool } from 'workerpool';
 import workerpool from 'workerpool';
+
+import { getManagedPathFromUrl, resolveManagedPath } from '../../../../file/path';
 
 type ICmsResultCustom = Omit<Awaited<ICmsResultPromise>, 'play'> & {
   play: Awaited<ICmsResultPromise['play']> & {
@@ -65,7 +70,16 @@ class T3DrpyAdapter {
   }
 
   public async init(): ICmsResultPromise['init'] {
-    await this.execCtx('init', this.ext);
+    let ext = this.ext;
+    if (ext.startsWith(FILE_MANAGE_API)) {
+      const requestedPath = getManagedPathFromUrl(ext, FILE_MANAGE_API);
+      const sourcePath = await resolveManagedPath(APP_FILE_PATH, requestedPath);
+      const content = await readFile(sourcePath);
+      if (typeof content !== 'string') throw new Error('DRPY source could not be read');
+      ext = content;
+    }
+
+    await this.execCtx('init', ext);
   }
 
   public async home(): ICmsResultPromise['home'] {

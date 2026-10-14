@@ -192,7 +192,6 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const minLevel = LEVEL_MAP[level];
 
       reply.raw.writeHead(200, {
-        'Access-Control-Allow-Origin': '*',
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         Connection: 'keep-alive',

@@ -1,5 +1,7 @@
 // axios配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
+import { getApiToken, isSameOriginUrl } from '@main/services/FastifyService/auth';
 import { getTimeout, getUserAgent } from '@main/utils/tool';
+import { ORIGIN } from '@shared/config/env';
 import { VAxios } from '@shared/modules/request';
 import type { AxiosTransform, CreateAxiosOptions } from '@shared/modules/request/axios/AxiosTransform';
 import { ContentTypeEnum } from '@shared/modules/request/constants';
@@ -99,6 +101,9 @@ const transform: AxiosTransform = {
       ...(isObject(config.headers) ? config.headers : {}),
       'User-Agent': getUserAgent(config.headers?.['User-Agent']),
     };
+    if (config.url && isSameOriginUrl(config.url, ORIGIN)) {
+      config.headers.Authorization = `Bearer ${getApiToken()}`;
+    }
 
     return config;
   },
